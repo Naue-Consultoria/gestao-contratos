@@ -1,0 +1,27 @@
+<app-login-layout
+    title="Entre na sua conta"
+    primaryBtnText="ENTRAR"
+    (submit)="submit()"
+    [disablePrimaryBtn]="!loginForm.valid"
+>
+    <form [formGroup]="loginForm">
+    <app-login-primary-input
+      formControlName="email"
+      inputName="email"
+      type="email"
+      label="Email"
+      placeholder="Digite seu email (ex: nome@empresa.com)"
+    >
+      <img src="email-icon.svg" alt="email" />
+    </app-login-primary-input>
+    <app-login-primary-input
+      formControlName="password"
+      inputName="password"
+      type="password"
+      label="Senha"
+    >
+      <img src="pwd-icon.svg" alt="password" />
+    </app-login-primary-input>
+    <a class="forgot-pwd-link" routerLink="/esqueceu-senha">Esqueceu sua senha?</a>
+  </form>
+</app-login-layout>
