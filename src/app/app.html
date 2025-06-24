@@ -1,0 +1,6 @@
+<div class="app-container" *ngIf="!isLoading" [@routeAnimations]="getRouteAnimationData()">
+  <router-outlet></router-outlet>
+</div>
+<div class="app-loading" *ngIf="isLoading">
+  <img src="logoNaue.png" alt="Carregando..." class="loading-logo">
+</div>
