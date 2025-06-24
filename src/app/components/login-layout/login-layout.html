@@ -1,14 +1,10 @@
 <main>
   <section class="container">
-    <div class="header">
-      <img src="logoNaue.png" alt="Logo da Naue Consultoria" class="logo" />
-      <div class="title">
-        <h1>Naue Consultoria</h1>
-        <h2>Gestão de Contratos</h2>
-      </div>
-    </div>
+    <header class="header">
+
+    </header>
     
-    <h3 class="page-title" *ngIf="title">{{ title }}</h3>
+    <h3 class="page-title" *ngIf="title && title !== ''">{{ title }}</h3>
     
     <div class="form-wrapper">
       <ng-content></ng-content>
@@ -28,16 +24,8 @@
       {{ primaryBtnText }}
     </button>
     
-    <button 
-      class="btn-secondary" 
-      (click)="navigate()" 
-      *ngIf="secondaryBtnText"
-    >
-      {{ secondaryBtnText }}
-    </button>
-    
-    <div class="footer">
+    <footer class="footer">
       <p>© 2025 Naue Consultoria - Todos os direitos reservados</p>
-    </div>
+    </footer>
   </section>
 </main>

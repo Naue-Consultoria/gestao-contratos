@@ -1,8 +1,23 @@
 :root {
-    --primary-green: #1DD882;
-    --primary-green-dark: #16a860;
+    /* Cores da Identidade Visual Naue Consultoria */
+    --naue-black: #282C2A;
+    --naue-dark-green: #053C2D;
+    --naue-neon-green: #14E79F;
+    
+    /* Cores derivadas */
+    --naue-neon-green-hover: #0db87a;
+    --naue-neon-green-light: rgba(20, 231, 159, 0.15);
+    --naue-dark-green-light: rgba(5, 60, 45, 0.1);
+    --naue-gray-light: #f8f9fa;
+    --naue-gray-border: #e5e7eb;
+    --naue-text-gray: #6b7280;
+    --naue-white: #FFFFFF;
+    
+    /* Manter cores antigas para compatibilidade */
+    --primary-green: #14E79F;
+    --primary-green-dark: #0db87a;
     --primary-green-light: #4de89f;
-    --dark-gray: #1a1d23;
+    --dark-gray: #282C2A;
     --medium-gray: #2C2C2C;
     --light-gray: #f8f9fa;
     --white: #FFFFFF;
@@ -13,6 +28,8 @@
     --warning: #f59e0b;
     --danger: #ef4444;
     --info: #3b82f6;
+    
+    /* Sombras */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -23,4 +40,38 @@
     --dark-card: #1e1e1e;
     --dark-text: #f0f0f0;
     --dark-border: #333333;
+    
+    /* Tipografia - Sistema de fontes */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    --font-secondary: Georgia, 'Times New Roman', serif;
+    
+    /* Tamanhos de fonte */
+    --text-xs: 12px;
+    --text-sm: 14px;
+    --text-base: 16px;
+    --text-lg: 18px;
+    --text-xl: 20px;
+    --text-2xl: 24px;
+    --text-3xl: 32px;
+    --text-4xl: 40px;
+    
+    /* Espaçamentos */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    
+    /* Border radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+    
+    /* Transições */
+    --transition-fast: 0.15s ease-in-out;
+    --transition-base: 0.3s ease;
+    --transition-slow: 0.5s ease;
 }

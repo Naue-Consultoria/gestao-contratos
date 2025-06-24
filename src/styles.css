@@ -1,12 +1,12 @@
 @import 'ngx-toastr/toastr';
 
-/* Font Awesome (já deve estar no index.html) */
+/* Font Awesome */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 
-/* Inter Font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Inter Font - Fonte principal da Naue */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700;800;900&display=swap');
 
-
+/* Reset global */
 * {
     margin: 0;
     padding: 0;
@@ -21,13 +21,16 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #053C2D;
+    color: #282C2A;
 }
 
-/* Transições globais para o tema escuro */
+/* Transições globais suaves */
 body * {
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
+/* Imagens */
 img {
     max-width: 100%;
     height: auto;
@@ -38,19 +41,130 @@ img:not([src]) {
     visibility: hidden;
 }
 
+/* Logo Naue */
 .logo {
-    width: 200px !important;
+    width: 180px !important;
     height: auto !important;
-    max-width: 200px !important;
+    max-width: 180px !important;
 }
 
+/* Container principal da aplicação */
 .app-container {
     min-height: 100vh;
     position: relative;
 }
 
+/* Router outlet - posicionamento absoluto para transições suaves */
 router-outlet ~ * {
     position: absolute;
     width: 100%;
     height: 100%;
+}
+
+/* Garantir visibilidade dos componentes de login */
+app-login-primary-input {
+    display: block !important;
+    width: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+app-login-layout form {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #14E79F;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #0db87a;
+}
+
+/* Focus outline personalizado */
+:focus-visible {
+    outline: 2px solid #14E79F;
+    outline-offset: 2px;
+}
+
+/* Seleção de texto */
+::selection {
+    background-color: rgba(20, 231, 159, 0.3);
+    color: #282C2A;
+}
+
+/* Animação de loading */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Estilo específico para a página de login */
+body.login-page {
+    background: linear-gradient(135deg, #053C2D 0%, #042f24 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+.text-center {
+    text-align: center;
+}
+
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mt-4 { margin-top: 32px; }
+
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+.mb-4 { margin-bottom: 32px; }
+
+/* Toastr customization para Naue */
+.toast-container .ngx-toastr {
+    border-radius: 12px !important;
+    font-family: 'Inter', sans-serif !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.toast-success {
+    background-color: #14E79F !important;
+    color: #282C2A !important;
+}
+
+.toast-error {
+    background-color: #ef4444 !important;
+}
+
+.toast-info {
+    background-color: #053C2D !important;
+}
+
+.toast-warning {
+    background-color: #f59e0b !important;
 }
