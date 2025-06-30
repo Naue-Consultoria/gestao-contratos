@@ -8,7 +8,9 @@ export interface User {
   email: string;
   name: string;
   role: string;
+  role_id: number; // Adicionar role_id
   must_change_password: boolean;
+  permissions?: string[];
 }
 
 export interface LoginResponse {
@@ -104,6 +106,30 @@ export class AuthService {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Verifica se o usuário tem uma role específica
+   */
+  hasRole(role: string): boolean {
+    const user = this.getUser();
+    return user?.role === role;
+  }
+
+  /**
+   * Verifica se o usuário é admin
+   */
+  isAdmin(): boolean {
+    const user = this.getUser();
+    return user?.role === 'admin' || user?.role_id === 1;
+  }
+
+  /**
+   * Verifica se o usuário tem uma permissão específica
+   */
+  hasPermission(permission: string): boolean {
+    const user = this.getUser();
+    return user?.permissions?.includes(permission) || false;
   }
 
   /**

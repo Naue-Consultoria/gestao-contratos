@@ -9,6 +9,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { ContractModalComponent } from '../../components/contract-modal/contract-modal';
 import { CompanyModalComponent } from '../../components/company-modal/company-modal';
 import { UserModalComponent } from '../../components/user-modal/user-modal';
+import { AuthService } from '../../services/auth';
 
 interface Notification {
   id: number;
@@ -23,6 +24,7 @@ interface NavItem {
   text: string;
   active: boolean;
   route?: string;
+  adminOnly?: boolean; // ← Adicionar flag para itens só de admin
 }
 
 interface NavSection {
@@ -68,7 +70,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   isNotificationSuccess = true;
   showNotification = false;
 
-  // Navigation items with routes
+  // Navigation items with routes - FILTRADOS POR ROLE
   navSections: NavSection[] = [
     {
       title: 'Principal',
@@ -88,7 +90,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     {
       title: 'Configurações',
       items: [
-        { id: 'users', icon: 'fas fa-users', text: 'Usuários', active: false, route: '/home/users' },
+        { id: 'users', icon: 'fas fa-users', text: 'Usuários', active: false, route: '/home/users', adminOnly: true }, // ← APENAS ADMIN
         { id: 'settings', icon: 'fas fa-cog', text: 'Configurações', active: false, route: '/home/settings' }
       ]
     },
@@ -129,22 +131,82 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   selectedServices: Set<string> = new Set();
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService // ← Injetar AuthService
+  ) {}
 
   ngOnInit() {
     this.loadThemePreference();
     this.updateUnreadNotificationsCount();
     this.setupKeyboardShortcuts();
     this.updateActiveNavItem();
+    this.filterNavigationByRole(); // ← Filtrar navegação
     
     // Listen to route changes to update active nav item
     this.router.events.subscribe(() => {
       this.updateActiveNavItem();
     });
+
+    // Atualizar dados do usuário do AuthService
+    this.loadUserData();
   }
 
   ngOnDestroy() {
     // Cleanup if needed
+  }
+
+  /**
+   * Carregar dados do usuário do AuthService
+   */
+  private loadUserData() {
+    const user = this.authService.getUser();
+    if (user) {
+      this.userName = user.name;
+      this.userRole = user.role;
+      this.userInitials = this.generateInitials(user.name);
+    }
+  }
+
+  /**
+   * Gerar iniciais do nome
+   */
+  private generateInitials(name: string): string {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  }
+
+  /**
+   * Filtrar itens de navegação baseado na role do usuário
+   */
+  private filterNavigationByRole() {
+    const isAdmin = this.authService.isAdmin();
+    
+    console.log('🔍 Filtering navigation - Is Admin:', isAdmin);
+    console.log('🔍 User role:', this.authService.getUser()?.role);
+    
+    this.navSections = this.navSections.map(section => ({
+      ...section,
+      items: section.items.filter(item => {
+        // Se o item é só para admin e o usuário não é admin, filtrar
+        if (item.adminOnly && !isAdmin) {
+          console.log(`🚫 Hiding ${item.text} - Admin only`);
+          return false;
+        }
+        return true;
+      })
+    }));
+  }
+
+  /**
+   * Verificar se o usuário é admin
+   */
+  isUserAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 
   // Update active navigation item based on current route
@@ -174,6 +236,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // Navigation
   navigateTo(pageId: string) {
+    // Verificar se o usuário tem permissão para acessar a página
+    if (pageId === 'users' && !this.isUserAdmin()) {
+      this.showNotificationMessage('Acesso negado. Apenas administradores podem acessar esta página.', false);
+      return;
+    }
+
     const route = `/home/${pageId}`;
     this.router.navigate([route]);
     
@@ -193,7 +261,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   performSearch() {
     console.log('Searching for:', this.globalSearchTerm);
     // Implement global search logic here
-    // You might want to navigate to a search results page or filter current content
   }
 
   // Notifications
@@ -230,6 +297,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   openUserModal() {
+    // Verificar se é admin antes de abrir o modal
+    if (!this.isUserAdmin()) {
+      this.showNotificationMessage('Acesso negado. Apenas administradores podem gerenciar usuários.', false);
+      return;
+    }
     this.isUserModalOpen = true;
   }
 
@@ -256,7 +328,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.showNotificationMessage('Usuário salvo com sucesso!', true);
   }
 
-  // Export functions (these will be called from child components via service)
+  // Export functions
   exportToPDF() {
     console.log('Exporting to PDF...');
     this.showNotificationMessage('Exportando relatório em PDF...', true);
@@ -302,7 +374,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   logout() {
     this.showNotificationMessage('Saindo do sistema...', false);
     setTimeout(() => {
-      this.router.navigate(['/login']);
+      this.authService.logout().subscribe(() => {
+        this.router.navigate(['/login']);
+      });
     }, 1500);
   }
 }

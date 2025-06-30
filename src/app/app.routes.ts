@@ -12,16 +12,17 @@ import { SettingsPageComponent } from './components/settings-page/settings-page'
 import { HelpPageComponent } from './components/help-page/help-page';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
+import { AdminGuard } from './guards/admin-guard';
 
 export const routes: Routes = [
   {
     path: '',
     redirectTo: '/login',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'login',
-    component: Login
+    component: Login,
   },
 
   // Rota para trocar senha - protegida apenas por autenticação
@@ -29,12 +30,12 @@ export const routes: Routes = [
     path: 'change-password',
     component: ChangePasswordComponent,
     canActivate: [AuthGuard],
-    title: 'Alterar Senha - NAUE Consultoria'
+    title: 'Alterar Senha - NAUE Consultoria',
   },
-// {
-//     path: "esqueceu-senha",
-//     component: ForgotPasswordComponent
-// },
+  // {
+  //     path: "esqueceu-senha",
+  //     component: ForgotPasswordComponent
+  // },
   {
     path: 'home',
     component: HomeComponent,
@@ -44,70 +45,71 @@ export const routes: Routes = [
       {
         path: '',
         redirectTo: 'dashboard',
-        pathMatch: 'full'
+        pathMatch: 'full',
       },
-      
+
       // Dashboard principal
       {
         path: 'dashboard',
         component: DashboardContentComponent,
-        title: 'Dashboard - NAUE Consultoria'
+        title: 'Dashboard - NAUE Consultoria',
       },
-      
+
       // Gestão de contratos
       {
         path: 'contracts',
         component: ContractsTableComponent,
-        title: 'Contratos - NAUE Consultoria'
+        title: 'Contratos - NAUE Consultoria',
       },
-      
+
       // Gestão de empresas
       {
         path: 'companies',
         component: CompaniesTableComponent,
-        title: 'Empresas - NAUE Consultoria'
+        title: 'Empresas - NAUE Consultoria',
       },
-      
+
       // Relatórios
       {
         path: 'reports',
         component: ReportsPage,
-        title: 'Relatórios - NAUE Consultoria'
+        title: 'Relatórios - NAUE Consultoria',
       },
-      
+
       // Analytics e métricas
       {
         path: 'analytics',
         component: AnalyticsPageComponent,
-        title: 'Analytics - NAUE Consultoria'
+        title: 'Analytics - NAUE Consultoria',
       },
-      
+
       // Gestão de usuários
       {
         path: 'users',
         component: UsersPageComponent,
-        title: 'Usuários - NAUE Consultoria'
+        canActivate: [AdminGuard], // Protege a rota para apenas administradores
+        title: 'Usuários - NAUE Consultoria',
       },
-      
+
       // Configurações do sistema
       {
         path: 'settings',
         component: SettingsPageComponent,
-        title: 'Configurações - NAUE Consultoria'
+        title: 'Configurações - NAUE Consultoria',
       },
-      
+
       // Ajuda e suporte
       {
         path: 'help',
         component: HelpPageComponent,
-        title: 'Ajuda - NAUE Consultoria'
-      }
-    ]
+        title: 'Ajuda - NAUE Consultoria',
+      },
+    ],
   },
 
   // Rota wildcard para páginas não encontradas - redireciona para login
   {
     path: '**',
-    redirectTo: '/login'
-  }
+    redirectTo: '/login',
+  },
 ];
