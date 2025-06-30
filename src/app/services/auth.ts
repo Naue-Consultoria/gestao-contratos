@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { Router } from '@angular/router';
 
@@ -8,24 +8,26 @@ export interface User {
   email: string;
   name: string;
   role: string;
-  permissions: string[];
-  must_change_password?: boolean;
-  first_login?: boolean;
-  last_password_change?: string;
+  must_change_password: boolean;
 }
 
 export interface LoginResponse {
-  message: string;
-  must_change_password?: boolean;
-  user: User;
   token: string;
+  user: User;
+  message: string;
+}
+
+export interface ChangePasswordResponse {
+  message: string;
+  token?: string;
+  user?: User;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = '/api/auth';
+  private readonly API_URL = 'http://localhost:3000/api/auth';
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -33,96 +35,160 @@ export class AuthService {
     private http: HttpClient,
     private router: Router
   ) {
-    // Carregar usuário do localStorage se existir
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      this.currentUserSubject.next(JSON.parse(savedUser));
-    }
+    // Verificar se há usuário logado no localStorage ao inicializar
+    this.loadUserFromStorage();
   }
 
+  /**
+   * Realiza login do usuário
+   */
   login(email: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.baseUrl}/login`, { email, password })
-      .pipe(
-        tap(response => {
-          if (response.token) {
-            localStorage.setItem('token', response.token);
-            localStorage.setItem('user', JSON.stringify(response.user));
-            this.currentUserSubject.next(response.user);
-          }
-        })
-      );
-  }
-
-  logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
-  }
-
-  changePassword(currentPassword: string, newPassword: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/change-password`, {
-      current_password: currentPassword,
-      new_password: newPassword
-    });
-  }
-
-  changePasswordFirstLogin(newPassword: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/change-password-first-login`, {
-      new_password: newPassword
+    return this.http.post<LoginResponse>(`${this.API_URL}/login`, {
+      email,
+      password
     }).pipe(
-      tap((response: any) => {
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('user', JSON.stringify(response.user));
-          this.currentUserSubject.next(response.user);
+      tap(response => {
+        if (response.token && response.user) {
+          this.setSession(response.token, response.user);
         }
       })
     );
   }
 
-  forgotPassword(email: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/forgot-password`, { email });
+  /**
+   * Altera a senha do usuário
+   */
+  changePassword(endpoint: string, data: any): Observable<ChangePasswordResponse> {
+    const headers = this.getAuthHeaders();
+    const fullUrl = `http://localhost:3000${endpoint}`;
+    
+    return this.http.post<ChangePasswordResponse>(fullUrl, data, { headers }).pipe(
+      tap(response => {
+        // Se retornou novo token e usuário, atualizar sessão
+        if (response.token && response.user) {
+          this.setSession(response.token, response.user);
+        } else if (response.user) {
+          // Se retornou apenas usuário atualizado, manter token atual
+          this.updateUser(response.user);
+        }
+      })
+    );
   }
 
-  resetPassword(token: string, password: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/reset-password`, { token, password });
+  /**
+   * Realiza logout do usuário
+   */
+  logout(): Observable<any> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.post(`${this.API_URL}/logout`, {}, { headers }).pipe(
+      tap(() => {
+        this.clearSession();
+        this.router.navigate(['/login']);
+      })
+    );
   }
 
-  getMe(): Observable<{ user: User }> {
-    return this.http.get<{ user: User }>(`${this.baseUrl}/me`)
-      .pipe(
-        tap(response => {
-          localStorage.setItem('user', JSON.stringify(response.user));
-          this.currentUserSubject.next(response.user);
-        })
-      );
+  /**
+   * Verifica se o usuário está autenticado
+   */
+  isAuthenticated(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    // Verificar se o token não expirou
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      return payload.exp > currentTime;
+    } catch {
+      return false;
+    }
   }
 
-  isLoggedIn(): boolean {
-    return !!this.getToken();
-  }
-
+  /**
+   * Obtém o token de autenticação
+   */
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
+  /**
+   * Obtém o usuário atual
+   */
   getUser(): User | null {
     return this.currentUserSubject.value;
   }
 
-  hasRole(role: string): boolean {
-    const user = this.getUser();
-    return user?.role === role;
-  }
-
-  hasPermission(permission: string): boolean {
-    const user = this.getUser();
-    return user?.permissions?.includes(permission) || false;
-  }
-
+  /**
+   * Verifica se o usuário precisa trocar a senha
+   */
   mustChangePassword(): boolean {
     const user = this.getUser();
     return user?.must_change_password || false;
+  }
+
+  /**
+   * Atualiza os dados do usuário atual
+   */
+  updateUser(user: User): void {
+    localStorage.setItem('user', JSON.stringify(user));
+    this.currentUserSubject.next(user);
+  }
+
+  /**
+   * Obtém headers com autorização
+   */
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+
+  /**
+   * Define a sessão do usuário
+   */
+  private setSession(token: string, user: User): void {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    this.currentUserSubject.next(user);
+  }
+
+  /**
+   * Limpa a sessão do usuário
+   */
+  private clearSession(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.currentUserSubject.next(null);
+  }
+
+  /**
+   * Carrega o usuário do localStorage
+   */
+  private loadUserFromStorage(): void {
+    const userJson = localStorage.getItem('user');
+    if (userJson && this.isAuthenticated()) {
+      const user = JSON.parse(userJson);
+      this.currentUserSubject.next(user);
+    } else {
+      this.clearSession();
+    }
+  }
+
+  /**
+   * Refresh do token (se o backend suportar)
+   */
+  refreshToken(): Observable<LoginResponse> {
+    const headers = this.getAuthHeaders();
+    return this.http.post<LoginResponse>(`${this.API_URL}/refresh`, {}, { headers }).pipe(
+      tap(response => {
+        if (response.token && response.user) {
+          this.setSession(response.token, response.user);
+        }
+      })
+    );
   }
 }

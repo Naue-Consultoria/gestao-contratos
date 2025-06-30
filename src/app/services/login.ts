@@ -1,36 +1,47 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { LoginResponse } from '../types/login-response';
-import { tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { AuthService, LoginResponse } from './auth';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoginService {
-  // TODO: Trocar URL para o servidor de produção do backend
-  apiUrl = "http://localhost:8080/auth";
+  private readonly API_URL = 'http://localhost:3000/api/auth';
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
-  login(email: string, password: string) {
-    return this.httpClient.post<LoginResponse>(this.apiUrl + "/login" , { email, password }).pipe(
-      tap((value) => {
-        sessionStorage.setItem('auth-token', value.token);
-        sessionStorage.setItem('username', value.name);
-      })
-    );
+  /**
+   * Realiza o login usando o AuthService
+   */
+  login(email: string, password: string): Observable<LoginResponse> {
+    return this.authService.login(email, password);
   }
 
-  forgotPassword(email: string) {
-    return this.httpClient.post(this.apiUrl + "/esqueceu-senha", { email });
+  /**
+   * Solicita recuperação de senha
+   */
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/forgot-password`, { email });
   }
 
-  verifyResetCode(email: string, code: string) {
-    return this.httpClient.post<{ token: string }>(this.apiUrl + "/verificar-codigo", { email, code });
+  /**
+   * Redefine a senha usando token de recuperação
+   */
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/reset-password`, {
+      token,
+      new_password: newPassword
+    });
   }
 
-  resetPassword(token: string, newPassword: string) {
-    return this.httpClient.post(this.apiUrl + "/trocar-senha", { token, password: newPassword });
+  /**
+   * Verifica se o token de recuperação é válido
+   */
+  validateResetToken(token: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/validate-reset-token`, { token });
   }
 }
-

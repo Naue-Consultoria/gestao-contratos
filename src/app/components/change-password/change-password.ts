@@ -1,11 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-change-password',
-  templateUrl: './change-password.html'
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './change-password.html',
+  styleUrls: ['./change-password.css']
 })
 export class ChangePasswordComponent implements OnInit {
   changePasswordForm: FormGroup;
@@ -13,10 +17,15 @@ export class ChangePasswordComponent implements OnInit {
   loading: boolean = false;
   error: string = '';
 
+  // Estados de visibilidade das senhas
+  showCurrentPassword: boolean = false;
+  showNewPassword: boolean = false;
+  showConfirmPassword: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    public router: Router // Tornado público para usar no template
   ) {
     this.changePasswordForm = this.fb.group({
       current_password: [''],
@@ -32,12 +41,52 @@ export class ChangePasswordComponent implements OnInit {
     if (this.isFirstLogin) {
       // Remover campo de senha atual se for primeiro login
       this.changePasswordForm.removeControl('current_password');
+    } else {
+      // Adicionar validação obrigatória para senha atual se não for primeiro login
+      this.changePasswordForm.get('current_password')?.setValidators([Validators.required]);
+      this.changePasswordForm.get('current_password')?.updateValueAndValidity();
     }
   }
 
-  passwordMatchValidator(g: FormGroup) {
-    return g.get('new_password')?.value === g.get('confirm_password')?.value
-      ? null : { mismatch: true };
+  passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+    const newPassword = control.get('new_password')?.value;
+    const confirmPassword = control.get('confirm_password')?.value;
+    
+    return newPassword === confirmPassword ? null : { mismatch: true };
+  }
+
+  togglePasswordVisibility(field: 'current' | 'new' | 'confirm') {
+    switch (field) {
+      case 'current':
+        this.showCurrentPassword = !this.showCurrentPassword;
+        break;
+      case 'new':
+        this.showNewPassword = !this.showNewPassword;
+        break;
+      case 'confirm':
+        this.showConfirmPassword = !this.showConfirmPassword;
+        break;
+    }
+  }
+
+  getErrorMessage(fieldName: string): string {
+    const field = this.changePasswordForm.get(fieldName);
+    
+    if (field?.errors) {
+      if (field.errors['required']) {
+        return 'Este campo é obrigatório';
+      }
+      if (field.errors['minlength']) {
+        return 'A senha deve ter pelo menos 6 caracteres';
+      }
+    }
+
+    // Erro de confirmação de senha
+    if (fieldName === 'confirm_password' && this.changePasswordForm.errors?.['mismatch']) {
+      return 'As senhas não coincidem';
+    }
+
+    return '';
   }
 
   onSubmit() {
@@ -60,13 +109,23 @@ export class ChangePasswordComponent implements OnInit {
             localStorage.setItem('token', response.token);
             localStorage.setItem('user', JSON.stringify(response.user));
           }
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/home/dashboard']);
         },
         error: (error) => {
           this.error = error.error?.error || 'Erro ao trocar senha';
           this.loading = false;
         }
       });
+    } else {
+      // Marcar todos os campos como tocados para mostrar erros
+      this.markFormGroupTouched(this.changePasswordForm);
     }
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.keys(formGroup.controls).forEach(field => {
+      const control = formGroup.get(field);
+      control?.markAsTouched({ onlySelf: true });
+    });
   }
 }
