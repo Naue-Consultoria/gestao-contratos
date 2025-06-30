@@ -8,7 +8,7 @@ import { HeaderComponent } from '../../components/header/header';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { ContractModalComponent } from '../../components/contract-modal/contract-modal';
 import { CompanyModalComponent } from '../../components/company-modal/company-modal';
-import { UserModalComponent } from '../../components/user-modal/user-modal';
+import { UserModal } from '../../components/user-modal/user-modal';
 import { AuthService } from '../../services/auth';
 
 interface Notification {
@@ -43,7 +43,7 @@ interface NavSection {
     SidebarComponent,
     ContractModalComponent,
     CompanyModalComponent,
-    UserModalComponent
+    UserModal
   ],
   templateUrl: './home.html',
   styleUrls: ['./home.css']
@@ -326,6 +326,20 @@ export class HomeComponent implements OnInit, OnDestroy {
     console.log('Saving user...');
     this.closeUserModal();
     this.showNotificationMessage('Usuário salvo com sucesso!', true);
+    
+    // Notificar componente de usuários para atualizar a lista
+    this.refreshUsersPage();
+  }
+
+  /**
+   * Notificar página de usuários para atualizar
+   */
+  private refreshUsersPage() {
+    // Se estiver na página de usuários, recarregar a lista
+    if (this.router.url.includes('/home/users')) {
+      // Emit event ou call method to refresh users
+      window.dispatchEvent(new CustomEvent('refreshUsers'));
+    }
   }
 
   // Export functions

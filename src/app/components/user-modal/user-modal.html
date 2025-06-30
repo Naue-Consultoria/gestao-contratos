@@ -2,53 +2,78 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2 class="modal-title">Novo Usuário</h2>
-        <button class="close-btn" (click)="close.emit()">
+        <button class="close-btn" (click)="onClose()">
           <i class="fas fa-times"></i>
         </button>
       </div>
       
       <div class="form-group">
-        <label class="form-label">Nome Completo</label>
+        <label class="form-label">Nome Completo *</label>
         <input 
           type="text" 
           class="form-control" 
           placeholder="Digite o nome completo"
-          [(ngModel)]="userData.fullName">
+          [(ngModel)]="userData.name"
+          [disabled]="loading">
       </div>
   
       <div class="form-group">
-        <label class="form-label">Email</label>
+        <label class="form-label">Email *</label>
         <input 
           type="email" 
           class="form-control" 
           placeholder="email@naue.com.br"
-          [(ngModel)]="userData.email">
+          [(ngModel)]="userData.email"
+          [disabled]="loading">
       </div>
   
       <div class="form-group">
-        <label class="form-label">Cargo</label>
-        <input 
-          type="text" 
-          class="form-control" 
-          placeholder="Ex: Consultor, Analista"
-          [(ngModel)]="userData.role">
-      </div>
-  
-      <div class="form-group">
-        <label class="form-label">Nível de Permissão</label>
-        <select class="form-control" [(ngModel)]="userData.permission">
-          <option *ngFor="let level of permissionLevels" [value]="level">
-            {{ level }}
+        <label class="form-label">Nível de Acesso *</label>
+        <select class="form-control" [(ngModel)]="userData.role" [disabled]="loading">
+          <option *ngFor="let role of roleOptions" [value]="role.value">
+            {{ role.label }}
           </option>
         </select>
+        <small style="color: var(--text-gray); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+          Administradores têm acesso total ao sistema
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Senha Temporária</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="userData.password"
+            readonly
+            style="flex: 1;">
+          <button 
+            type="button" 
+            class="btn btn-secondary"
+            (click)="generatePassword()"
+            [disabled]="loading"
+            style="flex: none; padding: 0.625rem;">
+            <i class="fas fa-refresh"></i>
+          </button>
+        </div>
+        <small style="color: var(--text-gray); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+          O usuário será obrigado a trocar esta senha no primeiro login
+        </small>
       </div>
   
       <div class="modal-footer">
-        <button class="btn btn-primary" (click)="onSave()">
-          <i class="fas fa-save"></i>
-          Salvar Usuário
+        <button class="btn btn-primary" (click)="onSave()" [disabled]="loading">
+          <span *ngIf="!loading">
+            <i class="fas fa-save"></i>
+            Criar Usuário
+          </span>
+          <span *ngIf="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            Criando...
+          </span>
         </button>
-        <button class="btn btn-secondary" (click)="close.emit()">
+        <button class="btn btn-secondary" (click)="onClose()" [disabled]="loading">
           Cancelar
         </button>
       </div>
