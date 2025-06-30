@@ -1,0 +1,68 @@
+<header class="header">
+    <div class="header-content">
+      <div class="logo" (click)="toggleSidebar.emit()">
+        <div class="logo-icon">N</div>
+        <span class="logo-text">NAUE Consultoria</span>
+      </div>
+      
+      <div class="header-actions">
+        <button class="mobile-menu-btn" (click)="toggleMobileSidebar.emit()">
+          <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="search-box" [class.active]="isSearchActive">
+          <i class="fas fa-search search-icon"></i>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Buscar contratos, empresas..." 
+            [(ngModel)]="globalSearchTerm"
+            (input)="onSearch()">
+        </div>
+        
+        <button class="mobile-search-btn" (click)="toggleSearch()">
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="notification-btn tooltip" (click)="toggleNotifications.emit()">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge" *ngIf="unreadNotificationsCount > 0"></span>
+          <span class="tooltiptext">{{ unreadNotificationsCount }} novas notificações</span>
+        </button>
+        
+        <button class="theme-toggle" (click)="toggleTheme.emit()" title="Alternar tema">
+          <i [class]="isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+        </button>
+        
+        <button class="logout-btn" title="Sair do sistema" (click)="logout.emit()">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+        
+        <div class="user-menu">
+          <div class="user-info">
+            <span class="user-name">{{ userName }}</span>
+            <span class="user-role">{{ userRole }}</span>
+          </div>
+          <div class="user-avatar">{{ userInitials }}</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Notification dropdown -->
+    <div class="notification-dropdown" *ngIf="isNotificationOpen">
+      <div class="notification-header">
+        <h3 class="notification-title">Notificações</h3>
+        <button class="notification-clear" (click)="clearNotifications.emit()">Limpar tudo</button>
+      </div>
+      
+      <div 
+        *ngFor="let notification of notifications" 
+        class="notification-item" 
+        [class.unread]="notification.isUnread">
+        <div class="notification-time">{{ notification.time }}</div>
+        <div class="notification-content">{{ notification.content }}</div>
+      </div>
+      
+      <a href="#" class="notification-show-all">Ver todas as notificações</a>
+    </div>
+  </header>

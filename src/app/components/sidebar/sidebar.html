@@ -1,0 +1,16 @@
+<nav class="sidebar" [class.collapsed]="isSidebarCollapsed" [class.active]="isMobileSidebarOpen">
+    <ul class="nav-menu">
+      <div *ngFor="let section of navSections" class="nav-section">
+        <div class="nav-section-title">{{ section.title }}</div>
+        <a 
+          *ngFor="let item of section.items"
+          href="javascript:void(0)" 
+          class="nav-item" 
+          [class.active]="item.active"
+          (click)="navigateTo.emit(item.id)">
+          <i [class]="item.icon + ' nav-icon'"></i>
+          <span class="nav-text">{{ item.text }}</span>
+        </a>
+      </div>
+    </ul>
+  </nav>

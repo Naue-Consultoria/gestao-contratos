@@ -1,0 +1,121 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Empresas</h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>Empresas</span>
+    </div>
+  </div>
+
+  <div class="dashboard-grid mb-4">
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Total de Empresas</div>
+          <div class="stat-value">{{ stats.total }}</div>
+          <div class="stat-change positive">
+            <i class="fas fa-arrow-up"></i>
+            +5 este mês
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-building"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Empresas Ativas</div>
+          <div class="stat-value">{{ stats.active }}</div>
+          <div class="stat-change positive">
+            <i class="fas fa-check-circle"></i>
+            {{ stats.activePercentage }}% do total
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-handshake"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Novos Prospects</div>
+          <div class="stat-value">{{ stats.newProspects }}</div>
+          <div class="stat-change positive">
+            <i class="fas fa-user-plus"></i>
+            Em negociação
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <h2 class="table-title">Lista de Empresas</h2>
+      <button class="btn btn-primary" (click)="openCompanyModal()">
+        <i class="fas fa-plus"></i>
+        Nova Empresa
+      </button>
+    </div>
+    
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Empresa</th>
+            <th>Funcionários</th>
+            <th>Localização</th>
+            <th>Mercado</th>
+            <th>Contratos</th>
+            <th>Valor Total</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let company of companies">
+            <td>
+              <div class="company-info">
+                <div class="company-avatar" [style.background]="company.gradient">
+                  {{ company.initials }}
+                </div>
+                <div>
+                  <div class="company-name">{{ company.name }}</div>
+                  <div class="company-since">Desde {{ company.since }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ company.employees }}</td>
+            <td>{{ company.location }}</td>
+            <td>
+              <span class="market-badge" [attr.data-market]="company.market">
+                {{ company.market }}
+              </span>
+            </td>
+            <td>
+              <div class="contracts-info">
+                <span class="contracts-count">{{ company.contracts }}</span>
+                <span class="contracts-active">{{ company.activeContracts === 1 ? 'ativo' : 'ativos' }}</span>
+              </div>
+            </td>
+            <td class="total-value">{{ company.totalValue }}</td>
+            <td>
+              <button class="btn btn-secondary" (click)="editCompany(company.id)">
+                <i class="fas fa-edit"></i>
+                Editar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

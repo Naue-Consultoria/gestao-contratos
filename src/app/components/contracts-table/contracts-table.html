@@ -1,0 +1,109 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Gestão de Contratos</h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>Contratos</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div 
+      class="tab" 
+      [class.active]="currentContractTab === 'all'"
+      (click)="showContractTab('all')">
+      Todos os Contratos
+    </div>
+    <div 
+      class="tab" 
+      [class.active]="currentContractTab === 'grandes'"
+      (click)="showContractTab('grandes')">
+      Contratos Grandes
+    </div>
+    <div 
+      class="tab" 
+      [class.active]="currentContractTab === 'pontuais'"
+      (click)="showContractTab('pontuais')">
+      Contratos Pontuais
+    </div>
+    <div 
+      class="tab" 
+      [class.active]="currentContractTab === 'mentorias'"
+      (click)="showContractTab('mentorias')">
+      Mentorias Individuais
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <h2 class="table-title">Lista de Contratos</h2>
+      <div class="table-actions">
+        <button class="btn btn-primary" (click)="openContractModal()">
+          <i class="fas fa-plus"></i>
+          Novo Contrato
+        </button>
+        <button class="btn-icon" (click)="exportToPDF()">
+          <i class="fas fa-file-pdf"></i>
+        </button>
+        <button class="btn-icon" (click)="exportToExcel()">
+          <i class="fas fa-file-excel"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Empresa</th>
+            <th>Tipo</th>
+            <th>Serviços</th>
+            <th>Progresso</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contract of contracts">
+            <td>
+              <div class="company-info">
+                <div class="company-avatar" [style.background]="contract.gradient">
+                  {{ contract.companyInitials }}
+                </div>
+                <div>
+                  <div class="company-name">{{ contract.company }}</div>
+                  <div class="company-type">{{ contract.companyType }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ contract.contractType }}</td>
+            <td>
+              <div class="services-info">
+                <span>{{ contract.services }} serviços</span>
+                <span class="services-active">({{ contract.activeServices }} ativos)</span>
+              </div>
+            </td>
+            <td>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="contract.progress"></div>
+              </div>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + contract.status">
+                <span class="status-dot"></span>
+                {{ contract.status === 'active' ? 'Ativo' : contract.status === 'pending' ? 'Pendente' : 'Concluído' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-secondary" (click)="viewContract(contract.id)">
+                <i class="fas fa-eye"></i>
+                Detalhes
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

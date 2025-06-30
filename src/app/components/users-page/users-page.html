@@ -1,0 +1,76 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Gestão de Usuários</h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>Usuários</span>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <h2 class="table-title">Usuários do Sistema</h2>
+      <button class="btn btn-primary" (click)="openUserModal()">
+        <i class="fas fa-user-plus"></i>
+        Novo Usuário
+      </button>
+    </div>
+    
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Usuário</th>
+            <th>Email</th>
+            <th>Cargo</th>
+            <th>Permissão</th>
+            <th>Último Acesso</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>
+              <div class="user-info">
+                <div class="user-avatar" 
+                     [style.background]="user.avatarGradient || 'linear-gradient(135deg, #1DD882 0%, #16a860 100%)'">
+                  {{ user.initials }}
+                </div>
+                <div>
+                  <div class="user-name">{{ user.name }}</div>
+                  <div class="user-since">Desde {{ user.since }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>
+              <span class="permission-badge" 
+                    [ngStyle]="{
+                      'background-color': getPermissionColor(user.permission) + '1A',
+                      'color': getPermissionColor(user.permission)
+                    }">
+                {{ user.permission }}
+              </span>
+            </td>
+            <td>{{ user.lastAccess }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + user.status">
+                <span class="status-dot"></span>
+                {{ user.status === 'active' ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-secondary" (click)="editUser(user.id)">
+                <i class="fas fa-edit"></i>
+                Editar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

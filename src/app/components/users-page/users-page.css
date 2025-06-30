@@ -1,0 +1,235 @@
+.table-container {
+    background-color: var(--white);
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-gray);
+    overflow: hidden;
+}
+
+:host-context(body.dark-mode) .table-container {
+    background-color: var(--dark-card);
+    border-color: var(--dark-border);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.table-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .table-title {
+    color: var(--dark-text);
+}
+
+/* Table */
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .table-wrapper {
+    border-color: var(--dark-border);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+}
+
+th {
+    background-color: var(--light-gray);
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) th {
+    background-color: #333;
+    color: var(--dark-text);
+    border-bottom: 1px solid #444;
+}
+
+td {
+    border-bottom: 1px solid var(--border-gray);
+    font-size: 0.875rem;
+    color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) td {
+    border-bottom: 1px solid #444;
+    color: var(--dark-text);
+}
+
+tr {
+    transition: background-color 0.3s ease;
+}
+
+tr:hover {
+    background-color: rgba(29, 216, 130, 0.03);
+}
+
+:host-context(body.dark-mode) tr:hover {
+    background-color: rgba(29, 216, 130, 0.05);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* User Info */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.user-name {
+    font-weight: 600;
+}
+
+.user-since {
+    font-size: 0.75rem;
+    color: var(--text-gray);
+}
+
+/* Permission Badge */
+.permission-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* Status Badge */
+.status-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
+.status-active {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.status-inactive {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+    color: var(--white);
+    box-shadow: 0 4px 12px rgba(29, 216, 130, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(29, 216, 130, 0.4);
+}
+
+.btn-secondary {
+    background-color: var(--light-gray);
+    color: var(--text-dark);
+    border: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .btn-secondary {
+    background-color: #333;
+    color: var(--dark-text);
+    border-color: #444;
+}
+
+.btn-secondary:hover {
+    background-color: var(--white);
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+}
+
+:host-context(body.dark-mode) .btn-secondary:hover {
+    background-color: #444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table-wrapper {
+        overflow-x: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+}

@@ -1,0 +1,349 @@
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.mb-4 {
+    margin-bottom: 2rem;
+}
+
+/* Stat Cards */
+.stat-card {
+    background-color: var(--white);
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-gray);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+:host-context(body.dark-mode) .stat-card {
+    background-color: var(--dark-card);
+    border-color: var(--dark-border);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, rgba(29, 216, 130, 0.1) 0%, rgba(29, 216, 130, 0) 100%);
+    border-radius: 50%;
+    transform: translate(30px, -30px);
+}
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, rgba(29, 216, 130, 0.2) 0%, rgba(29, 216, 130, 0.1) 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-green);
+    font-size: 1.25rem;
+}
+
+.stat-label {
+    color: var(--text-gray);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+:host-context(body.dark-mode) .stat-label {
+    color: #aaa;
+}
+
+.stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0.5rem 0;
+}
+
+:host-context(body.dark-mode) .stat-value {
+    color: var(--dark-text);
+}
+
+.stat-change {
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    margin-top: 0.5rem;
+}
+
+.stat-change.positive {
+    color: var(--success);
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+/* Table Container */
+.table-container {
+    background-color: var(--white);
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-gray);
+    overflow: hidden;
+}
+
+:host-context(body.dark-mode) .table-container {
+    background-color: var(--dark-card);
+    border-color: var(--dark-border);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.table-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .table-title {
+    color: var(--dark-text);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+    color: var(--white);
+    box-shadow: 0 4px 12px rgba(29, 216, 130, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(29, 216, 130, 0.4);
+}
+
+.btn-secondary {
+    background-color: var(--light-gray);
+    color: var(--text-dark);
+    border: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .btn-secondary {
+    background-color: #333;
+    color: var(--dark-text);
+    border-color: #444;
+}
+
+.btn-secondary:hover {
+    background-color: var(--white);
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+}
+
+:host-context(body.dark-mode) .btn-secondary:hover {
+    background-color: #444;
+}
+
+/* Table */
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .table-wrapper {
+    border-color: var(--dark-border);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+}
+
+th {
+    background-color: var(--light-gray);
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) th {
+    background-color: #333;
+    color: var(--dark-text);
+    border-bottom: 1px solid #444;
+}
+
+td {
+    border-bottom: 1px solid var(--border-gray);
+    font-size: 0.875rem;
+    color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) td {
+    border-bottom: 1px solid #444;
+    color: var(--dark-text);
+}
+
+tr {
+    transition: background-color 0.3s ease;
+}
+
+tr:hover {
+    background-color: rgba(29, 216, 130, 0.03);
+}
+
+:host-context(body.dark-mode) tr:hover {
+    background-color: rgba(29, 216, 130, 0.05);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Company Info */
+.company-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.company-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+}
+
+.company-name {
+    font-weight: 600;
+}
+
+.company-since {
+    font-size: 0.75rem;
+    color: var(--text-gray);
+}
+
+/* Market Badge */
+.market-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.market-badge[data-market="Tecnologia"] {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+}
+
+.market-badge[data-market="Software"] {
+    background: rgba(236, 72, 153, 0.1);
+    color: #ec4899;
+}
+
+.market-badge[data-market="Fintech"] {
+    background: rgba(251, 146, 60, 0.1);
+    color: #fb923c;
+}
+
+/* Contracts Info */
+.contracts-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contracts-count {
+    font-weight: 600;
+}
+
+.contracts-active {
+    font-size: 0.75rem;
+    color: var(--text-gray);
+}
+
+/* Total Value */
+.total-value {
+    font-weight: 600;
+    color: var(--primary-green);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .table-wrapper {
+        overflow-x: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+}

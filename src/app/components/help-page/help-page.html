@@ -1,0 +1,39 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Suporte e Ajuda</h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>Ajuda</span>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <h2 class="table-title mb-3">Central de Ajuda</h2>
+    
+    <div class="form-group">
+      <label class="form-label">Como podemos ajudar?</label>
+      <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Descreva sua dúvida ou problema"
+        [(ngModel)]="searchQuery">
+    </div>
+    
+    <div class="dashboard-grid mt-4">
+      <div *ngFor="let card of helpCards" class="stat-card help-card">
+        <div class="stat-icon" 
+             [style.background]="card.iconBackground"
+             [style.color]="card.iconColor">
+          <i [class]="card.icon"></i>
+        </div>
+        <h3 class="card-title">{{ card.title }}</h3>
+        <p class="card-description">{{ card.description }}</p>
+        <button class="btn btn-secondary full-width" (click)="onHelpAction(card.title)">
+          <i [class]="card.buttonIcon"></i>
+          {{ card.buttonText }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

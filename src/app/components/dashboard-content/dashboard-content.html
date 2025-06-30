@@ -1,0 +1,51 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>Dashboard</span>
+    </div>
+  </div>
+  
+  <div class="dashboard-grid">
+    <div *ngFor="let stat of statCards; let i = index" class="stat-card" [style.animation-delay]="(i * 0.1) + 's'">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">{{ stat.label }}</div>
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-change" [ngClass]="stat.changeType">
+            <i [class]="stat.changeType === 'positive' ? 'fas fa-arrow-up' : 'fas fa-calendar-alt'"></i>
+            {{ stat.change }}
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i [class]="stat.icon"></i>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="stat.progress"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <h2 class="table-title">Atividades Recentes</h2>
+      <button class="btn btn-secondary">
+        <i class="fas fa-filter"></i>
+        Filtrar
+      </button>
+    </div>
+    
+    <div class="timeline">
+      <div *ngFor="let activity of recentActivities" class="timeline-item">
+        <div class="timeline-content">
+          <div class="timeline-time">{{ activity.time }}</div>
+          <div class="timeline-title">{{ activity.title }}</div>
+          <div class="timeline-description">{{ activity.description }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

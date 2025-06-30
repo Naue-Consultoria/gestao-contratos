@@ -1,0 +1,81 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Relatórios</h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>Relatórios</span>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="stat-card report-card" (click)="onGenerateReport('monthly')">
+      <div class="stat-icon">
+        <i class="fas fa-calendar-alt"></i>
+      </div>
+      <h3 class="report-title">Relatório Mensal</h3>
+      <p class="report-description">Resumo completo das atividades do mês com métricas detalhadas</p>
+      <button class="btn btn-primary full-width">
+        <i class="fas fa-download"></i>
+        Gerar Relatório
+      </button>
+    </div>
+    
+    <div class="stat-card report-card" (click)="onGenerateReport('company')">
+      <div class="stat-icon company-icon">
+        <i class="fas fa-building"></i>
+      </div>
+      <h3 class="report-title">Relatório por Empresa</h3>
+      <p class="report-description">Análise detalhada de desempenho por cliente específico</p>
+      <button class="btn btn-primary full-width">
+        <i class="fas fa-download"></i>
+        Gerar Relatório
+      </button>
+    </div>
+    
+    <div class="stat-card report-card" (click)="onGenerateReport('services')">
+      <div class="stat-icon services-icon">
+        <i class="fas fa-tasks"></i>
+      </div>
+      <h3 class="report-title">Relatório de Serviços</h3>
+      <p class="report-description">Análise de performance dos serviços prestados</p>
+      <button class="btn btn-primary full-width">
+        <i class="fas fa-download"></i>
+        Gerar Relatório
+      </button>
+    </div>
+    
+    <div class="stat-card report-card" (click)="onGenerateReport('financial')">
+      <div class="stat-icon financial-icon">
+        <i class="fas fa-chart-pie"></i>
+      </div>
+      <h3 class="report-title">Relatório Financeiro</h3>
+      <p class="report-description">Análise completa de receitas e projeções financeiras</p>
+      <button class="btn btn-primary full-width">
+        <i class="fas fa-download"></i>
+        Gerar Relatório
+      </button>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-header">
+      <h2 class="chart-title">Performance Anual</h2>
+      <div class="chart-actions">
+        <button 
+          class="chart-action" 
+          [class.active]="currentPerformanceYear === 2024"
+          (click)="onUpdateChart(2024)">2024</button>
+        <button 
+          class="chart-action" 
+          [class.active]="currentPerformanceYear === 2023"
+          (click)="onUpdateChart(2023)">2023</button>
+        <button 
+          class="chart-action" 
+          [class.active]="currentPerformanceYear === 2022"
+          (click)="onUpdateChart(2022)">2022</button>
+      </div>
+    </div>
+    <canvas id="performanceChart" height="100"></canvas>
+  </div>
+</div>

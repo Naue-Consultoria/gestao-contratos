@@ -1,0 +1,73 @@
+<div class="modal" [class.active]="isOpen" (click)="onBackdropClick($event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Nova Empresa</h2>
+        <button class="close-btn" (click)="close.emit()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Nome da Empresa</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Digite o nome da empresa"
+          [(ngModel)]="companyData.name">
+      </div>
+  
+      <div class="form-group">
+        <label class="form-label">Número de Funcionários</label>
+        <input 
+          type="number" 
+          class="form-control" 
+          placeholder="0"
+          [(ngModel)]="companyData.employees">
+      </div>
+  
+      <div class="form-group">
+        <label class="form-label">Data de Fundação</label>
+        <input 
+          type="date" 
+          class="form-control"
+          [(ngModel)]="companyData.foundationDate">
+      </div>
+  
+      <div class="form-group">
+        <label class="form-label">Localidade da Sede</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Cidade, Estado"
+          [(ngModel)]="companyData.headquarters">
+      </div>
+  
+      <div class="form-group">
+        <label class="form-label">Localidades Presentes</label>
+        <textarea 
+          class="form-control" 
+          rows="3" 
+          placeholder="Liste as localidades onde a empresa está presente"
+          [(ngModel)]="companyData.locations"></textarea>
+      </div>
+  
+      <div class="form-group">
+        <label class="form-label">Mercado de Atuação</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Ex: Tecnologia, Varejo, etc."
+          [(ngModel)]="companyData.market">
+      </div>
+  
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="onSave()">
+          <i class="fas fa-save"></i>
+          Salvar Empresa
+        </button>
+        <button class="btn btn-secondary" (click)="close.emit()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>

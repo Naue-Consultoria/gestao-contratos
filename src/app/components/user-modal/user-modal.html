@@ -1,0 +1,56 @@
+<div class="modal" [class.active]="isOpen" (click)="onBackdropClick($event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Novo Usuário</h2>
+        <button class="close-btn" (click)="close.emit()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Nome Completo</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Digite o nome completo"
+          [(ngModel)]="userData.fullName">
+      </div>
+  
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input 
+          type="email" 
+          class="form-control" 
+          placeholder="email@naue.com.br"
+          [(ngModel)]="userData.email">
+      </div>
+  
+      <div class="form-group">
+        <label class="form-label">Cargo</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Ex: Consultor, Analista"
+          [(ngModel)]="userData.role">
+      </div>
+  
+      <div class="form-group">
+        <label class="form-label">Nível de Permissão</label>
+        <select class="form-control" [(ngModel)]="userData.permission">
+          <option *ngFor="let level of permissionLevels" [value]="level">
+            {{ level }}
+          </option>
+        </select>
+      </div>
+  
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="onSave()">
+          <i class="fas fa-save"></i>
+          Salvar Usuário
+        </button>
+        <button class="btn btn-secondary" (click)="close.emit()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>

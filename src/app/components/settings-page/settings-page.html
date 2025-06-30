@@ -1,0 +1,83 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Configurações</h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>Configurações</span>
+    </div>
+  </div>
+
+  <div class="settings-layout">
+    <div class="settings-sidebar">
+      <nav>
+        <a *ngFor="let tab of tabs" 
+           href="javascript:void(0)" 
+           class="nav-item" 
+           [class.active]="activeTab === tab.id"
+           (click)="setActiveTab(tab.id)">
+          <i [class]="tab.icon + ' nav-icon'"></i>
+          <span>{{ tab.label }}</span>
+        </a>
+      </nav>
+    </div>
+    
+    <div class="settings-content">
+      <!-- General Settings -->
+      <div *ngIf="activeTab === 'general'" class="table-container">
+        <h2 class="table-title mb-3">Configurações Gerais</h2>
+        
+        <div class="form-group">
+          <label class="form-label">Nome da Empresa</label>
+          <input type="text" class="form-control" [(ngModel)]="settings.companyName">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Email de Contato</label>
+          <input type="email" class="form-control" [(ngModel)]="settings.contactEmail">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Fuso Horário</label>
+          <select class="form-control" [(ngModel)]="settings.timezone">
+            <option value="America/Sao_Paulo">America/Sao_Paulo (GMT-3)</option>
+            <option value="America/New_York">America/New_York (GMT-5)</option>
+            <option value="Europe/London">Europe/London (GMT+0)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Idioma do Sistema</label>
+          <select class="form-control" [(ngModel)]="settings.language">
+            <option value="pt-BR">Português (Brasil)</option>
+            <option value="en">English</option>
+            <option value="es">Español</option>
+          </select>
+        </div>
+        
+        <button class="btn btn-primary" (click)="saveSettings()">
+          <i class="fas fa-save"></i>
+          Salvar Configurações
+        </button>
+      </div>
+      
+      <!-- Notifications Settings -->
+      <div *ngIf="activeTab === 'notifications'" class="table-container">
+        <h2 class="table-title mb-3">Configurações de Notificações</h2>
+        <p class="text-gray">Configure suas preferências de notificações aqui.</p>
+      </div>
+      
+      <!-- Security Settings -->
+      <div *ngIf="activeTab === 'security'" class="table-container">
+        <h2 class="table-title mb-3">Configurações de Segurança</h2>
+        <p class="text-gray">Gerencie as configurações de segurança da sua conta.</p>
+      </div>
+      
+      <!-- Backup Settings -->
+      <div *ngIf="activeTab === 'backup'" class="table-container">
+        <h2 class="table-title mb-3">Configurações de Backup</h2>
+        <p class="text-gray">Configure backups automáticos do sistema.</p>
+      </div>
+    </div>
+  </div>
+</div>

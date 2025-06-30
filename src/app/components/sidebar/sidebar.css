@@ -1,0 +1,125 @@
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 77px;
+    bottom: 0;
+    width: 260px;
+    background-color: var(--white);
+    border-right: 1px solid var(--border-gray);
+    overflow-y: auto;
+    transition: all 0.3s ease;
+    z-index: 900;
+}
+
+:host-context(body.dark-mode) .sidebar {
+    background-color: var(--dark-card);
+    border-right: 1px solid var(--dark-border);
+}
+
+.sidebar.collapsed {
+    width: 70px;
+}
+
+.nav-menu {
+    padding: 1.5rem 0;
+}
+
+.nav-section {
+    margin-bottom: 2rem;
+}
+
+.nav-section-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-gray);
+    font-weight: 600;
+    padding: 0 1.5rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+:host-context(body.dark-mode) .nav-section-title {
+    color: #aaa;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    color: var(--text-gray);
+    text-decoration: none;
+}
+
+:host-context(body.dark-mode) .nav-item {
+    color: #ccc;
+}
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--primary-green);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.nav-item:hover {
+    color: var(--text-dark);
+    background-color: rgba(29, 216, 130, 0.05);
+}
+
+:host-context(body.dark-mode) .nav-item:hover {
+    color: var(--dark-text);
+    background-color: rgba(29, 216, 130, 0.1);
+}
+
+.nav-item.active {
+    color: var(--primary-green);
+    background-color: rgba(29, 216, 130, 0.1);
+    font-weight: 600;
+}
+
+:host-context(body.dark-mode) .nav-item.active {
+    background-color: rgba(29, 216, 130, 0.15);
+}
+
+.nav-item.active::before {
+    transform: scaleY(1);
+}
+
+.nav-icon {
+    font-size: 1.125rem;
+    width: 1.125rem;
+    text-align: center;
+}
+
+.nav-text {
+    font-size: 0.875rem;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsed .nav-text,
+.sidebar.collapsed .nav-section-title {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        z-index: 999;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}

@@ -1,0 +1,85 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Analytics</h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>Analytics</span>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Taxa de Sucesso</div>
+          <div class="stat-value">{{ successRate }}%</div>
+          <div class="stat-change positive">
+            <i class="fas fa-arrow-up"></i>
+            de satisfação dos clientes
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-chart-pie"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Serviços Mais Procurados</div>
+          <div class="stat-value">{{ topService }}</div>
+          <div class="stat-change positive">
+            <i class="fas fa-check-circle"></i>
+            {{ topServicePercentage }}% dos contratos
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-star"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="analytics-grid">
+    <div class="chart-container">
+      <div class="chart-header">
+        <h2 class="chart-title">Distribuição de Serviços</h2>
+      </div>
+      <div class="services-list">
+        <div *ngFor="let service of services" class="service-item">
+          <div class="service-info">
+            <div class="service-color" [style.background-color]="service.color"></div>
+            <span class="service-name">{{ service.name }}</span>
+          </div>
+          <div class="service-value">{{ service.value }}%</div>
+        </div>
+      </div>
+      <div class="chart-placeholder">
+        <i class="fas fa-chart-pie"></i>
+        <p>Gráfico de distribuição</p>
+      </div>
+    </div>
+    
+    <div class="metrics-container">
+      <h3 class="metrics-title">Métricas Principais</h3>
+      <div class="metric-item">
+        <span class="metric-label">Contratos Ativos</span>
+        <span class="metric-value">18</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Renovação Média</span>
+        <span class="metric-value">85%</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Tempo Médio de Projeto</span>
+        <span class="metric-value">3.5 meses</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">NPS Score</span>
+        <span class="metric-value">78</span>
+      </div>
+    </div>
+  </div>
+</div>
