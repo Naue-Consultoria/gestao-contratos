@@ -44,8 +44,10 @@
   (save)="saveCompany()">
 </app-company-modal>
 
+<!-- User Modal com editingUser -->
 <app-user-modal
   [isOpen]="isUserModalOpen"
+  [editingUser]="editingUser"
   (close)="closeUserModal()"
   (save)="saveUser()">
 </app-user-modal>

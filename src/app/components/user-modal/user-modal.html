@@ -1,7 +1,7 @@
 <div class="modal" [class.active]="isOpen" (click)="onBackdropClick($event)">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">Novo Usuário</h2>
+        <h2 class="modal-title">{{ modalTitle }}</h2>
         <button class="close-btn" (click)="onClose()">
           <i class="fas fa-times"></i>
         </button>
@@ -39,7 +39,8 @@
         </small>
       </div>
 
-      <div class="form-group">
+      <!-- Campo de senha apenas para criação -->
+      <div class="form-group" *ngIf="!isEditMode">
         <label class="form-label">Senha Temporária</label>
         <div style="display: flex; gap: 0.5rem;">
           <input 
@@ -61,16 +62,29 @@
           O usuário será obrigado a trocar esta senha no primeiro login
         </small>
       </div>
+
+      <!-- Aviso para modo de edição -->
+      <div class="form-group" *ngIf="isEditMode">
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 12px;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; color: #3b82f6;">
+            <i class="fas fa-info-circle"></i>
+            <strong>Modo de Edição</strong>
+          </div>
+          <small style="color: var(--text-gray); margin-top: 0.25rem; display: block;">
+            Para alterar a senha, use a opção "Resetar Senha" na lista de usuários
+          </small>
+        </div>
+      </div>
   
       <div class="modal-footer">
         <button class="btn btn-primary" (click)="onSave()" [disabled]="loading">
           <span *ngIf="!loading">
-            <i class="fas fa-save"></i>
-            Criar Usuário
+            <i class="fas" [class.fa-save]="!isEditMode" [class.fa-edit]="isEditMode"></i>
+            {{ saveButtonText }}
           </span>
           <span *ngIf="loading">
             <i class="fas fa-spinner fa-spin"></i>
-            Criando...
+            {{ saveButtonText }}
           </span>
         </button>
         <button class="btn btn-secondary" (click)="onClose()" [disabled]="loading">

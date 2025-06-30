@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../enviroments/environment';
 
 export interface CreateUserRequest {
   email: string;
@@ -25,6 +24,9 @@ export interface ApiUser {
   is_active: boolean;
   created_at: string;
   must_change_password?: boolean;
+  last_login_at?: string | null; // Pode ser string, null ou undefined
+  last_activity_at?: string | null;
+  login_count?: number;
 }
 
 export interface UsersResponse {
@@ -40,7 +42,7 @@ export interface CreateUserResponse {
   providedIn: 'root'
 })
 export class UserService {
-  private readonly API_URL = `${environment.apiUrl}/users`;
+  private readonly API_URL = 'http://localhost:3000/api/users';
 
   constructor(private http: HttpClient) {}
 

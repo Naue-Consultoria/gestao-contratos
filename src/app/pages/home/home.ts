@@ -10,6 +10,7 @@ import { ContractModalComponent } from '../../components/contract-modal/contract
 import { CompanyModalComponent } from '../../components/company-modal/company-modal';
 import { UserModal } from '../../components/user-modal/user-modal';
 import { AuthService } from '../../services/auth';
+import { UserService, ApiUser } from '../../services/user'; // ← Adicionar import
 
 interface Notification {
   id: number;
@@ -66,6 +67,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   isContractModalOpen = false;
   isCompanyModalOpen = false;
   isUserModalOpen = false;
+  editingUser: ApiUser | null = null; // ← Tipar corretamente
   notificationMessage = '';
   isNotificationSuccess = true;
   showNotification = false;
@@ -296,17 +298,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.isCompanyModalOpen = false;
   }
 
-  openUserModal() {
+  openUserModal(userToEdit: ApiUser | null = null) {
     // Verificar se é admin antes de abrir o modal
     if (!this.isUserAdmin()) {
       this.showNotificationMessage('Acesso negado. Apenas administradores podem gerenciar usuários.', false);
       return;
     }
+    
+    console.log('🔍 Opening user modal with:', userToEdit); // Debug
+    this.editingUser = userToEdit; // ← Definir usuário sendo editado
     this.isUserModalOpen = true;
   }
 
   closeUserModal() {
     this.isUserModalOpen = false;
+    this.editingUser = null; // ← Limpar usuário sendo editado
   }
 
   // Save operations
@@ -387,10 +393,26 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Logout
   logout() {
     this.showNotificationMessage('Saindo do sistema...', false);
-    setTimeout(() => {
-      this.authService.logout().subscribe(() => {
+    
+    // Tentar logout via AuthService
+    this.authService.logout().subscribe({
+      next: (response) => {
+        // Redirecionamento já é feito no AuthService
+      },
+      error: (error) => {
+        console.error('❌ Erro no logout via AuthService:', error);
+        // Fallback para logout forçado
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         this.router.navigate(['/login']);
-      });
-    }, 1500);
+      }
+    });
+    
+    // Timeout de segurança - forçar logout após 3 segundos
+    setTimeout(() => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login'; // Forçar redirecionamento
+    }, 3000);
   }
 }

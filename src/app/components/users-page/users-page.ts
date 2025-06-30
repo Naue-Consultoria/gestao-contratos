@@ -11,7 +11,6 @@ interface DisplayUser {
   email: string;
   role: string;
   permission: string;
-  lastAccess: string;
   status: 'active' | 'inactive';
   since: string;
   avatarGradient?: string;
@@ -85,11 +84,10 @@ export class UsersPageComponent implements OnInit, OnDestroy {
       email: user.email,
       role: this.getRoleDisplayName(user.role_name),
       permission: this.getPermissionFromRole(user.role_name),
-      lastAccess: this.generateRandomLastAccess(), // TODO: Implementar no backend
       status: user.is_active ? 'active' : 'inactive',
       since: this.formatDate(user.created_at),
       avatarGradient: this.getAvatarGradient(index),
-      must_change_password: user.must_change_password
+      must_change_password: user.must_change_password || false
     }));
   }
 
@@ -136,17 +134,6 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Gerar último acesso aleatório (temporário)
-   */
-  private generateRandomLastAccess(): string {
-    const options = [
-      'Há 2 horas', 'Há 1 dia', 'Há 3 dias', 
-      'Há 1 semana', 'Há 2 semanas', 'Nunca'
-    ];
-    return options[Math.floor(Math.random() * options.length)];
-  }
-
-  /**
    * Formatar data de criação
    */
   private formatDate(dateString: string): string {
@@ -186,7 +173,6 @@ export class UsersPageComponent implements OnInit, OnDestroy {
         email: 'joao@naue.com.br',
         role: 'Administrador',
         permission: 'Total',
-        lastAccess: 'Há 2 horas',
         status: 'active',
         since: 'Jan 2023'
       },
@@ -197,7 +183,6 @@ export class UsersPageComponent implements OnInit, OnDestroy {
         email: 'maria@naue.com.br',
         role: 'Usuário',
         permission: 'Leitura/Escrita',
-        lastAccess: 'Há 1 dia',
         status: 'active',
         since: 'Mar 2023',
         avatarGradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
@@ -233,13 +218,31 @@ export class UsersPageComponent implements OnInit, OnDestroy {
    */
   editUser(id: number) {
     console.log('🔍 Editando usuário:', id);
-    this.selectedUserId = id;
     
-    // TODO: Implementar modal de edição
-    // Por enquanto, usar o mesmo modal de criação
-    this.homeComponent.openUserModal();
-    
-    // TODO: Pré-popular dados do usuário no modal
+    // Encontrar o usuário na lista
+    const userToEdit = this.users.find(u => u.id === id);
+    if (!userToEdit) {
+      this.toastr.error('Usuário não encontrado');
+      return;
+    }
+
+    console.log('🔍 User to edit found:', userToEdit); // Debug
+
+    // Converter para formato da API
+    const apiUser: ApiUser = {
+      id: userToEdit.id,
+      name: userToEdit.name,
+      email: userToEdit.email,
+      role_name: userToEdit.role === 'Administrador' ? 'admin' : 'user',
+      is_active: userToEdit.status === 'active',
+      created_at: new Date().toISOString(), // Placeholder
+      must_change_password: userToEdit.must_change_password || false
+    };
+
+    console.log('🔍 API User object:', apiUser); // Debug
+
+    // Abrir modal com dados do usuário
+    this.homeComponent.openUserModal(apiUser);
   }
 
   /**
