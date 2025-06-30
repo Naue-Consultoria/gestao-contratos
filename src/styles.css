@@ -1,155 +1,58 @@
-@import 'ngx-toastr/toastr';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "./styles/variables.css";
 
-/* Font Awesome */
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
-
-/* Inter Font - Fonte principal da Naue */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700;800;900&display=swap');
-
-/* CSS Variables */
-:root {
-    --primary-green: #1DD882;
-    --primary-green-dark: #16a860;
-    --primary-green-light: #4de89f;
-    --dark-gray: #1a1d23;
-    --medium-gray: #2C2C2C;
-    --light-gray: #f8f9fa;
-    --white: #FFFFFF;
-    --border-gray: #e5e7eb;
-    --text-gray: #6b7280;
-    --text-dark: #111827;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --info: #3b82f6;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    
-    /* Dark mode variables */
-    --dark-bg: #121212;
-    --dark-card: #1e1e1e;
-    --dark-text: #f0f0f0;
-    --dark-border: #333333;
-}
-
-/* Reset básico */
+/* Reset CSS completo */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Scrollbar global */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--light-gray);
-}
-
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
-
-body.dark-mode ::-webkit-scrollbar-track {
-    background: var(--dark-card);
-}
-
-body.dark-mode ::-webkit-scrollbar-thumb {
-    background: #555;
-}
-
-/* Body styles */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: var(--light-gray);
-    color: var(--text-dark);
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-body.dark-mode {
-    background-color: var(--dark-bg);
-    color: var(--dark-text);
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* Prevenir overflow horizontal em todo o documento */
+html {
+    overflow-x: hidden;
+    width: 100%;
 }
 
 html, body {
     height: 100%;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: white;
+    background-color: #f8f9fa;
     color: #282C2A;
+    line-height: 1.6;
 }
 
-/* Transições globais suaves */
-body * {
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+/* Container principal da aplicação */
+.app-container {
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+    overflow-x: hidden;
 }
 
-/* Imagens */
+/* Router outlet - garantir que o conteúdo não exceda a largura */
+router-outlet + * {
+    display: block;
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Imagens responsivas */
 img {
     max-width: 100%;
     height: auto;
     display: block;
 }
 
-img:not([src]) {
-    visibility: hidden;
-}
-
-/* Logo Naue */
-.logo {
-    width: 180px !important;
-    height: auto !important;
-    max-width: 180px !important;
-}
-
-/* Container principal da aplicação */
-.app-container {
-    min-height: 100vh;
-    position: relative;
-}
-
-/* Router outlet - posicionamento absoluto para transições suaves */
-router-outlet ~ * {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-}
-
-/* Garantir visibilidade dos componentes de login */
-app-login-primary-input {
-    display: block !important;
-    width: 100% !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-app-login-layout form {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
-}
-
-/* Scrollbar personalizada */
+/* Scrollbars personalizadas */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -160,85 +63,45 @@ app-login-layout form {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #14E79F;
+    background: #888;
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #0db87a;
+    background: #555;
 }
 
-/* Focus outline personalizado */
-:focus-visible {
-    outline: 2px solid #14E79F;
-    outline-offset: 2px;
+/* Garantir visibilidade dos componentes */
+app-login-primary-input,
+app-primary-input {
+    display: block !important;
+    width: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
-/* Seleção de texto */
-::selection {
-    background-color: rgba(20, 231, 159, 0.3);
-    color: #282C2A;
+/* Tabelas responsivas */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Animação de loading */
-@keyframes pulse {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
-    100% {
-        opacity: 1;
-    }
+table {
+    width: 100%;
+    min-width: 600px;
 }
 
-.loading {
-    animation: pulse 1.5s ease-in-out infinite;
+/* Loading */
+.app-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
 }
 
-/* Estilo específico para a página de login */
-body.login-page {
-    background: linear-gradient(135deg, #053C2D 0%, #042f24 100%);
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-}
-.text-center {
-    text-align: center;
-}
-
-.mt-1 { margin-top: 8px; }
-.mt-2 { margin-top: 16px; }
-.mt-3 { margin-top: 24px; }
-.mt-4 { margin-top: 32px; }
-
-.mb-1 { margin-bottom: 8px; }
-.mb-2 { margin-bottom: 16px; }
-.mb-3 { margin-bottom: 24px; }
-.mb-4 { margin-bottom: 32px; }
-
-/* Toastr customization para Naue */
-.toast-container .ngx-toastr {
-    border-radius: 12px !important;
-    font-family: 'Inter', sans-serif !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-}
-
-.toast-success {
-    background-color: #14E79F !important;
-    color: #282C2A !important;
-}
-
-.toast-error {
-    background-color: #ef4444 !important;
-}
-
-.toast-info {
-    background-color: #053C2D !important;
-}
-
-.toast-warning {
-    background-color: #f59e0b !important;
-}
+/* Utilitários */
+.w-full { width: 100% !important; }
+.overflow-hidden { overflow: hidden !important; }
+.overflow-x-auto { overflow-x: auto !important; }

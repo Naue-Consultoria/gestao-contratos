@@ -42,7 +42,7 @@ loginForm!: FormGroup<LoginForm>;
     this.loginService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
       next: () => {
         this.toastService.success('Login successful!');
-        this.router.navigate(['/home']);
+        this.router.navigate(['/home/dashboard']);
       },
       error: () => this.toastService.error('Login failed!')
     })

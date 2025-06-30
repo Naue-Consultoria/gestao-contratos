@@ -73,29 +73,29 @@ export class HomeComponent implements OnInit, OnDestroy {
     {
       title: 'Principal',
       items: [
-        { id: 'dashboard', icon: 'fas fa-chart-line', text: 'Dashboard', active: false, route: '/app/dashboard' },
-        { id: 'contracts', icon: 'fas fa-file-contract', text: 'Contratos', active: false, route: '/app/contracts' },
-        { id: 'companies', icon: 'fas fa-building', text: 'Empresas', active: false, route: '/app/companies' }
+        { id: 'dashboard', icon: 'fas fa-chart-line', text: 'Dashboard', active: false, route: '/home/dashboard' },
+        { id: 'contracts', icon: 'fas fa-file-contract', text: 'Contratos', active: false, route: '/home/contracts' },
+        { id: 'companies', icon: 'fas fa-building', text: 'Empresas', active: false, route: '/home/companies' }
       ]
     },
     {
       title: 'Análises',
       items: [
-        { id: 'reports', icon: 'fas fa-chart-bar', text: 'Relatórios', active: false, route: '/app/reports' },
-        { id: 'analytics', icon: 'fas fa-chart-pie', text: 'Analytics', active: false, route: '/app/analytics' }
+        { id: 'reports', icon: 'fas fa-chart-bar', text: 'Relatórios', active: false, route: '/home/reports' },
+        { id: 'analytics', icon: 'fas fa-chart-pie', text: 'Analytics', active: false, route: '/home/analytics' }
       ]
     },
     {
       title: 'Configurações',
       items: [
-        { id: 'users', icon: 'fas fa-users', text: 'Usuários', active: false, route: '/app/users' },
-        { id: 'settings', icon: 'fas fa-cog', text: 'Configurações', active: false, route: '/app/settings' }
+        { id: 'users', icon: 'fas fa-users', text: 'Usuários', active: false, route: '/home/users' },
+        { id: 'settings', icon: 'fas fa-cog', text: 'Configurações', active: false, route: '/home/settings' }
       ]
     },
     {
       title: 'Ajuda',
       items: [
-        { id: 'help', icon: 'fas fa-question-circle', text: 'Suporte', active: false, route: '/app/help' }
+        { id: 'help', icon: 'fas fa-question-circle', text: 'Suporte', active: false, route: '/home/help' }
       ]
     }
   ];
@@ -174,7 +174,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // Navigation
   navigateTo(pageId: string) {
-    const route = `/app/${pageId}`;
+    const route = `/home/${pageId}`;
     this.router.navigate([route]);
     
     // Close mobile sidebar

@@ -25,7 +25,7 @@ export const routes: Routes = [
 //     component: ForgotPasswordComponent
 // },
   {
-    path: 'app',
+    path: 'home',
     component: HomeComponent,
     // TODO - Tirar comentário quando o AuthGuard estiver implementado
     // canActivate: [AuthGuard]
