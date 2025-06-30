@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface CreateCompanyRequest {
@@ -76,6 +76,17 @@ export class CompanyService {
   constructor(private http: HttpClient) {}
 
   /**
+   * Obter headers com autorização
+   */
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+
+  /**
    * Listar empresas
    */
   getCompanies(filters?: CompanyFilters): Observable<CompaniesResponse> {
@@ -93,63 +104,82 @@ export class CompanyService {
       }
     }
 
-    return this.http.get<CompaniesResponse>(this.API_URL, { params });
+    return this.http.get<CompaniesResponse>(this.API_URL, { 
+      params,
+      headers: this.getAuthHeaders() 
+    });
   }
 
   /**
    * Buscar empresa por ID
    */
   getCompany(id: number): Observable<CompanyResponse> {
-    return this.http.get<CompanyResponse>(`${this.API_URL}/${id}`);
+    return this.http.get<CompanyResponse>(`${this.API_URL}/${id}`, {
+      headers: this.getAuthHeaders()
+    });
   }
 
   /**
    * Criar nova empresa
    */
   createCompany(companyData: CreateCompanyRequest): Observable<CreateCompanyResponse> {
-    return this.http.post<CreateCompanyResponse>(this.API_URL, companyData);
+    return this.http.post<CreateCompanyResponse>(this.API_URL, companyData, {
+      headers: this.getAuthHeaders()
+    });
   }
 
   /**
    * Atualizar empresa
    */
   updateCompany(id: number, companyData: UpdateCompanyRequest): Observable<any> {
-    return this.http.put(`${this.API_URL}/${id}`, companyData);
+    return this.http.put(`${this.API_URL}/${id}`, companyData, {
+      headers: this.getAuthHeaders()
+    });
   }
 
   /**
    * Alternar status da empresa
    */
   toggleCompanyStatus(id: number): Observable<any> {
-    return this.http.patch(`${this.API_URL}/${id}/toggle-status`, {});
+    return this.http.patch(`${this.API_URL}/${id}/toggle-status`, {}, {
+      headers: this.getAuthHeaders()
+    });
   }
 
   /**
    * Excluir empresa (soft delete)
    */
   deleteCompany(id: number): Observable<any> {
-    return this.http.delete(`${this.API_URL}/${id}`);
+    return this.http.delete(`${this.API_URL}/${id}`, {
+      headers: this.getAuthHeaders()
+    });
   }
 
   /**
    * Excluir empresa permanentemente (apenas admin)
    */
   deleteCompanyPermanent(id: number): Observable<any> {
-    return this.http.delete(`${this.API_URL}/${id}/permanent`);
+    return this.http.delete(`${this.API_URL}/${id}/permanent`, {
+      headers: this.getAuthHeaders()
+    });
   }
 
   /**
    * Obter setores de mercado
    */
   getMarketSectors(): Observable<{ sectors: string[] }> {
-    return this.http.get<{ sectors: string[] }>(`${this.API_URL}/meta/sectors`);
+    return this.http.get<{ sectors: string[] }>(`${this.API_URL}/meta/sectors`, {
+      headers: this.getAuthHeaders()
+    });
   }
 
   /**
    * Obter estatísticas das empresas
    */
   getCompanyStats(): Observable<{ stats: CompanyStats }> {
-    return this.http.get<{ stats: CompanyStats }>(`${this.API_URL}/meta/stats`);
+    return this.http.get<{ stats: CompanyStats }>(`${this.API_URL}/meta/stats`, {
+      headers: this.getAuthHeaders()
+    });
   }
 
   /**

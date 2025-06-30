@@ -10,7 +10,10 @@ import { ContractModalComponent } from '../../components/contract-modal/contract
 import { CompanyModalComponent } from '../../components/company-modal/company-modal';
 import { UserModal } from '../../components/user-modal/user-modal';
 import { AuthService } from '../../services/auth';
-import { UserService, ApiUser } from '../../services/user'; // ← Adicionar import
+import { UserService, ApiUser } from '../../services/user';
+import { ApiCompany } from '../../services/company';
+import { ModalService } from '../../services/modal.service';
+import { Subscription } from 'rxjs';
 
 interface Notification {
   id: number;
@@ -25,7 +28,7 @@ interface NavItem {
   text: string;
   active: boolean;
   route?: string;
-  adminOnly?: boolean; // ← Adicionar flag para itens só de admin
+  adminOnly?: boolean;
 }
 
 interface NavSection {
@@ -67,7 +70,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   isContractModalOpen = false;
   isCompanyModalOpen = false;
   isUserModalOpen = false;
-  editingUser: ApiUser | null = null; // ← Tipar corretamente
+  editingUser: ApiUser | null = null;
+  editingCompany: ApiCompany | null = null;
   notificationMessage = '';
   isNotificationSuccess = true;
   showNotification = false;
@@ -92,7 +96,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     {
       title: 'Configurações',
       items: [
-        { id: 'users', icon: 'fas fa-users', text: 'Usuários', active: false, route: '/home/users', adminOnly: true }, // ← APENAS ADMIN
+        { id: 'users', icon: 'fas fa-users', text: 'Usuários', active: false, route: '/home/users', adminOnly: true },
         { id: 'settings', icon: 'fas fa-cog', text: 'Configurações', active: false, route: '/home/settings' }
       ]
     },
@@ -133,9 +137,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   selectedServices: Set<string> = new Set();
 
+  // Subscriptions
+  private subscriptions = new Subscription();
+
   constructor(
     private router: Router,
-    private authService: AuthService // ← Injetar AuthService
+    private authService: AuthService,
+    private modalService: ModalService
   ) {}
 
   ngOnInit() {
@@ -143,7 +151,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.updateUnreadNotificationsCount();
     this.setupKeyboardShortcuts();
     this.updateActiveNavItem();
-    this.filterNavigationByRole(); // ← Filtrar navegação
+    this.filterNavigationByRole();
     
     // Listen to route changes to update active nav item
     this.router.events.subscribe(() => {
@@ -152,10 +160,39 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     // Atualizar dados do usuário do AuthService
     this.loadUserData();
+    
+    // Subscrever aos eventos do ModalService
+    this.subscribeToModalEvents();
   }
 
   ngOnDestroy() {
-    // Cleanup if needed
+    this.subscriptions.unsubscribe();
+  }
+
+  /**
+   * Subscrever aos eventos do ModalService
+   */
+  private subscribeToModalEvents() {
+    // Subscrever ao evento de abrir modal de empresa
+    this.subscriptions.add(
+      this.modalService.openCompanyModal$.subscribe((companyOrVoid: ApiCompany | void) => {
+        if (companyOrVoid && typeof companyOrVoid === 'object' && 'id' in companyOrVoid) {
+          // É uma empresa para editar
+          this.editingCompany = companyOrVoid as ApiCompany;
+        } else {
+          // É para criar nova empresa
+          this.editingCompany = null;
+        }
+        this.openCompanyModal();
+      })
+    );
+    
+    // Subscrever ao evento de notificação
+    this.subscriptions.add(
+      this.modalService.showNotification$.subscribe(({ message, isSuccess }) => {
+        this.showNotificationMessage(message, isSuccess);
+      })
+    );
   }
 
   /**
@@ -296,6 +333,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   closeCompanyModal() {
     this.isCompanyModalOpen = false;
+    this.editingCompany = null;
   }
 
   openUserModal(userToEdit: ApiUser | null = null) {
@@ -305,14 +343,14 @@ export class HomeComponent implements OnInit, OnDestroy {
       return;
     }
     
-    console.log('🔍 Opening user modal with:', userToEdit); // Debug
-    this.editingUser = userToEdit; // ← Definir usuário sendo editado
+    console.log('🔍 Opening user modal with:', userToEdit);
+    this.editingUser = userToEdit;
     this.isUserModalOpen = true;
   }
 
   closeUserModal() {
     this.isUserModalOpen = false;
-    this.editingUser = null; // ← Limpar usuário sendo editado
+    this.editingUser = null;
   }
 
   // Save operations
@@ -322,10 +360,25 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.showNotificationMessage('Contrato salvo com sucesso!', true);
   }
 
-  saveCompany() {
-    console.log('Saving company...');
-    this.closeCompanyModal();
-    this.showNotificationMessage('Empresa salva com sucesso!', true);
+  saveCompany(event: any) {
+    console.log('Saving company...', event);
+    
+    // Mostrar mensagem apropriada
+    const message = event?.isNew ? 'Empresa criada com sucesso!' : 'Empresa atualizada com sucesso!';
+    
+    // Notificar componente de empresas para atualizar a lista
+    this.refreshCompaniesPage();
+  }
+
+  /**
+   * Notificar página de empresas para atualizar
+   */
+  private refreshCompaniesPage() {
+    // Se estiver na página de empresas, recarregar a lista
+    if (this.router.url.includes('/home/companies')) {
+      // Emit event para atualizar empresas
+      window.dispatchEvent(new CustomEvent('refreshCompanies'));
+    }
   }
 
   saveUser() {

@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { ApiCompany } from './company';
+import { ApiUser } from './user';
 
 @Injectable({
   providedIn: 'root'
@@ -7,8 +9,8 @@ import { Subject } from 'rxjs';
 export class ModalService {
   // Subjects para controlar a abertura dos modais
   openContractModal$ = new Subject<void>();
-  openCompanyModal$ = new Subject<void>();
-  openUserModal$ = new Subject<void>();
+  openCompanyModal$ = new Subject<ApiCompany | void>();
+  openUserModal$ = new Subject<ApiUser | void>();
   
   // Subjects para notificações
   showNotification$ = new Subject<{ message: string; isSuccess: boolean }>();
@@ -18,12 +20,12 @@ export class ModalService {
     this.openContractModal$.next();
   }
   
-  openCompanyModal() {
-    this.openCompanyModal$.next();
+  openCompanyModal(company?: ApiCompany) {
+    this.openCompanyModal$.next(company);
   }
   
-  openUserModal() {
-    this.openUserModal$.next();
+  openUserModal(user?: ApiUser) {
+    this.openUserModal$.next(user);
   }
   
   // Método para mostrar notificações

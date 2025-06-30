@@ -40,8 +40,9 @@
 
 <app-company-modal
   [isOpen]="isCompanyModalOpen"
+  [editingCompany]="editingCompany"
   (close)="closeCompanyModal()"
-  (save)="saveCompany()">
+  (save)="saveCompany($event); closeCompanyModal(); showNotificationMessage($event?.isNew ? 'Empresa criada com sucesso!' : 'Empresa atualizada com sucesso!', true)">
 </app-company-modal>
 
 <!-- User Modal com editingUser -->
