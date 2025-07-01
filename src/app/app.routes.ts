@@ -1,4 +1,3 @@
-// src/app/app.routes.ts - ATUALIZADO
 import { Routes } from '@angular/router';
 import { Login } from './pages/login/login';
 import { HomeComponent } from './pages/home/home';
@@ -10,6 +9,7 @@ import { NewCompanyPageComponent } from './components/new-company-page/new-compa
 import { ReportsPage } from './components/reports-page/reports-page';
 import { AnalyticsPageComponent } from './components/analytics-page/analytics-page';
 import { UsersPageComponent } from './components/users-page/users-page';
+import { NewUserPageComponent } from './components/new-user-page/new-user-page';
 import { SettingsPageComponent } from './components/settings-page/settings-page';
 import { HelpPageComponent } from './components/help-page/help-page';
 import { AuthGuard } from './guards/auth-guard';
@@ -105,6 +105,22 @@ export const routes: Routes = [
         component: UsersPageComponent,
         canActivate: [AdminGuard], // Protege a rota para apenas administradores
         title: 'Usuários - NAUE Consultoria',
+      },
+      
+      // Novo usuário
+      {
+        path: 'users/new',
+        component: NewUserPageComponent,
+        canActivate: [AdminGuard],
+        title: 'Novo Usuário - NAUE Consultoria',
+      },
+      
+      // Editar usuário
+      {
+        path: 'users/edit/:id',
+        component: NewUserPageComponent,
+        canActivate: [AdminGuard],
+        title: 'Editar Usuário - NAUE Consultoria',
       },
 
       // Configurações do sistema

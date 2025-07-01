@@ -1,125 +1,114 @@
-<div class="page">
-  <div class="page-header">
-    <h1 class="page-title">Gestão de Usuários</h1>
-    <div class="breadcrumb">
-      <span>Home</span>
-      <span class="breadcrumb-separator">/</span>
-      <span>Usuários</span>
-    </div>
+<div class="page-header">
+  <h1 class="page-title">Usuários</h1>
+  <div class="breadcrumb">
+    <span>Home</span>
+    <span class="breadcrumb-separator">/</span>
+    <span>Usuários</span>
   </div>
+</div>
 
-  <div class="table-container">
-    <div class="table-header">
-      <div>
-        <h2 class="table-title">Usuários do Sistema</h2>
-        <p style="color: var(--text-gray); font-size: 0.875rem; margin-top: 0.25rem;">
-          {{ users.length }} usuário{{ users.length !== 1 ? 's' : '' }} cadastrado{{ users.length !== 1 ? 's' : '' }}
-        </p>
-      </div>
-      <div style="display: flex; gap: 0.75rem; align-items: center;">
-        <button class="btn btn-secondary" (click)="refreshUsers()" [disabled]="loading">
-          <i class="fas" [class.fa-sync]="!loading" [class.fa-spinner]="loading" [class.fa-spin]="loading"></i>
-          Atualizar
-        </button>
-        <button class="btn btn-primary" (click)="openUserModal()">
-          <i class="fas fa-user-plus"></i>
-          Novo Usuário
-        </button>
-      </div>
-    </div>
-    
-    <!-- Loading State -->
-    <div *ngIf="loading" style="text-align: center; padding: 3rem; color: var(--text-gray);">
-      <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-      <p>Carregando usuários...</p>
-    </div>
-
-    <!-- Empty State -->
-    <div *ngIf="!loading && users.length === 0" style="text-align: center; padding: 3rem; color: var(--text-gray);">
-      <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
-      <h3>Nenhum usuário encontrado</h3>
-      <p>Clique em "Novo Usuário" para criar o primeiro usuário.</p>
-    </div>
-
-    <!-- Users Table -->
-    <div class="table-wrapper" *ngIf="!loading && users.length > 0">
-      <table>
-        <thead>
-          <tr>
-            <th>Usuário</th>
-            <th>Email</th>
-            <th>Cargo</th>
-            <th>Permissão</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of users; trackBy: trackByUserId">
-            <td>
-              <div class="user-info">
-                <div class="user-avatar" 
-                     [style.background]="user.avatarGradient || 'linear-gradient(135deg, #1DD882 0%, #16a860 100%)'">
-                  {{ user.initials }}
-                </div>
-                <div>
-                  <div class="user-name">
-                    {{ user.name }}
-                    <span *ngIf="user.must_change_password" 
-                          class="password-warning"
-                          title="Usuário precisa trocar a senha">
-                      <i class="fas fa-exclamation-triangle"></i>
-                    </span>
-                  </div>
-                  <div class="user-since">Desde {{ user.since }}</div>
-                </div>
+<div class="table-container">
+  <div class="table-header">
+    <h2 class="table-title">Lista de Usuários</h2>
+    <button class="btn btn-primary" (click)="openNewUserPage()">
+      <i class="fas fa-plus"></i>
+      Novo Usuário
+    </button>
+  </div>
+  
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-container">
+    <i class="fas fa-spinner fa-spin"></i>
+    <span>Carregando usuários...</span>
+  </div>
+  
+  <!-- Users table -->
+  <div class="table-wrapper" *ngIf="!loading">
+    <table class="custom-table" *ngIf="users.length > 0">
+      <thead>
+        <tr>
+          <th>USUÁRIO</th>
+          <th>EMAIL</th>
+          <th>PERMISSÃO</th>
+          <th>STATUS</th>
+          <th>DESDE</th>
+          <th>AÇÕES</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users; trackBy: trackByUserId" class="clickable" (click)="editUser(user.id)">
+          <td>
+            <div class="user-info">
+              <div class="user-avatar" [style.background]="user.avatarGradient">
+                {{ user.initials }}
               </div>
-            </td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.role }}</td>
-            <td>
-              <span class="permission-badge" 
-                    [ngStyle]="{
-                      'background-color': getPermissionColor(user.permission) + '1A',
-                      'color': getPermissionColor(user.permission)
-                    }">
-                {{ user.permission }}
-              </span>
-            </td>
-            <td>
-              <span class="status-badge" [ngClass]="'status-' + user.status">
-                <span class="status-dot"></span>
+              <div class="user-details">
+                <span class="user-name">{{ user.name }}</span>
+                <span class="user-role">{{ user.role }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="user-email">{{ user.email }}</span>
+          </td>
+          <td>
+            <span class="permission-badge" 
+                  [class.admin]="user.permission === 'Admin'">
+              {{ user.permission }}
+            </span>
+          </td>
+          <td>
+            <div class="status-wrapper">
+              <span class="status-badge" 
+                    [class.active]="user.status === 'active'" 
+                    [class.inactive]="user.status === 'inactive'">
+                <i class="fas fa-circle"></i>
                 {{ user.status === 'active' ? 'Ativo' : 'Inativo' }}
               </span>
-            </td>
-            <td>
-              <div class="action-buttons">
-                <button class="btn-icon" 
-                        (click)="editUser(user.id)"
-                        title="Editar usuário">
-                  <i class="fas fa-edit"></i>
-                </button>
-                
-                <button class="btn-icon" 
-                        [class.btn-danger]="user.status === 'active'"
-                        [class.btn-success]="user.status === 'inactive'"
-                        (click)="toggleUserStatus(user)"
-                        [title]="user.status === 'active' ? 'Desativar usuário' : 'Ativar usuário'">
-                  <i class="fas" 
-                     [class.fa-user-slash]="user.status === 'active'"
-                     [class.fa-user-check]="user.status === 'inactive'"></i>
-                </button>
-                
-                <button class="btn-icon btn-warning" 
-                        (click)="resetPassword(user)"
-                        title="Resetar senha">
-                  <i class="fas fa-key"></i>
-                </button>
+              <div *ngIf="user.must_change_password" 
+                   class="warning-icon" 
+                   title="Usuário precisa alterar a senha">
+                <i class="fas fa-exclamation-triangle"></i>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+          </td>
+          <td>
+            <span class="year-text">{{ user.since }}</span>
+          </td>
+          <td>
+            <div class="action-buttons" (click)="$event.stopPropagation()">
+              <button class="action-btn" 
+                      title="Editar" 
+                      (click)="editUser(user.id)">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn" 
+                      title="Resetar Senha" 
+                      (click)="resetPassword(user.id)">
+                <i class="fas fa-key"></i>
+              </button>
+              <button class="action-btn" 
+                      title="{{ user.status === 'active' ? 'Desativar' : 'Ativar' }}" 
+                      (click)="toggleUserStatus(user.id)">
+                <i class="fas" 
+                   [ngClass]="user.status === 'active' ? 'fa-user-slash' : 'fa-user-check'"></i>
+              </button>
+              <button class="action-btn danger" 
+                      title="Excluir" 
+                      (click)="deleteUser(user.id)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <!-- Empty state -->
+    <div *ngIf="users.length === 0" class="empty-state">
+      <i class="fas fa-users empty-icon"></i>
+      <h3>Nenhum usuário cadastrado</h3>
+      <p>Clique no botão "Novo Usuário" para adicionar o primeiro usuário.</p>
     </div>
   </div>
 </div>

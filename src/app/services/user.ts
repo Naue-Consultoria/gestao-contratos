@@ -13,6 +13,7 @@ export interface UpdateUserRequest {
   email?: string;
   name?: string;
   role?: 'admin' | 'user';
+  password?: string;
   is_active?: boolean;
 }
 
@@ -24,7 +25,7 @@ export interface ApiUser {
   is_active: boolean;
   created_at: string;
   must_change_password?: boolean;
-  last_login_at?: string | null; // Pode ser string, null ou undefined
+  last_login_at?: string | null;
   last_activity_at?: string | null;
   login_count?: number;
 }
@@ -72,6 +73,20 @@ export class UserService {
    */
   toggleUserStatus(id: number): Observable<any> {
     return this.http.patch(`${this.API_URL}/${id}/toggle-status`, {});
+  }
+
+  /**
+   * Deletar usuário (apenas admin)
+   */
+  deleteUser(id: number): Observable<any> {
+    return this.http.delete(`${this.API_URL}/${id}`);
+  }
+
+  /**
+   * Resetar senha do usuário (apenas admin)
+   */
+  resetUserPassword(id: number): Observable<any> {
+    return this.http.post(`${this.API_URL}/${id}/reset-password`, {});
   }
 
   /**
