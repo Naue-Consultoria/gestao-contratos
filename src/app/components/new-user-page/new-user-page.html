@@ -1,163 +1,187 @@
-<!-- src/app/components/new-user-page/new-user-page.html -->
 <div class="page-header">
-    <h1 class="page-title">{{ getPageTitle() }}</h1>
-    <div class="breadcrumb">
-      <span>Home</span>
-      <span class="breadcrumb-separator">/</span>
-      <span>Usuários</span>
-      <span class="breadcrumb-separator">/</span>
-      <span>{{ isEditMode ? 'Editar' : 'Novo' }}</span>
-    </div>
+  <h1 class="page-title">{{ isEditMode ? 'Editar Usuário' : 'Novo Usuário' }}</h1>
+  <div class="breadcrumb">
+    <a routerLink="/home">Home</a>
+    <span class="breadcrumb-separator">›</span>
+    <a routerLink="/home/users">Usuários</a>
+    <span class="breadcrumb-separator">›</span>
+    <span>{{ isEditMode ? 'Editar' : 'Novo' }}</span>
   </div>
-  
-  <div class="table-container">
-    <!-- Mensagem de erro geral -->
-    <div *ngIf="errors['general']" class="error-message">
-      <i class="fas fa-exclamation-circle"></i>
-      {{ errors['general'] }}
-    </div>
-  
-    <form class="user-form">
-      <!-- Informações Básicas -->
-      <div class="form-section">
-        <h3 class="section-title">
-          <i class="fas fa-user-circle"></i>
-          Informações Básicas
-        </h3>
-        
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">
-              Nome Completo <span class="required">*</span>
-            </label>
-            <input 
-              type="text" 
-              name="userName"
-              class="form-control" 
-              [class.error]="errors['name']"
-              placeholder="Digite o nome completo"
-              [(ngModel)]="userData.name"
-              [disabled]="isSaving">
-            <span *ngIf="errors['name']" class="field-error">{{ errors['name'] }}</span>
-          </div>
-  
-          <div class="form-group">
-            <label class="form-label">
-              Email <span class="required">*</span>
-            </label>
-            <input 
-              type="email" 
-              name="userEmail"
-              class="form-control" 
-              [class.error]="errors['email']"
-              placeholder="email@exemplo.com"
-              [(ngModel)]="userData.email"
-              [disabled]="isSaving">
-            <span *ngIf="errors['email']" class="field-error">{{ errors['email'] }}</span>
-          </div>
+</div>
+
+<div class="table-container">
+  <!-- Error Message -->
+  <div class="error-message" *ngIf="errorMessage">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <form class="user-form" (ngSubmit)="saveUser()" #userForm="ngForm">
+    <!-- Informações Básicas -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <i class="fas fa-info-circle"></i>
+        Informações Básicas
+      </h2>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">
+            Nome Completo <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="userData.name"
+            name="name"
+            placeholder="Digite o nome completo"
+            [class.error]="errors['name']"
+            required>
+          <span class="field-error" *ngIf="errors['name']">{{ errors['name'] }}</span>
         </div>
-  
+
+        <div class="form-group">
+          <label class="form-label">
+            Email <span class="required">*</span>
+          </label>
+          <input 
+            type="email" 
+            class="form-control" 
+            [(ngModel)]="userData.email"
+            name="email"
+            placeholder="email@exemplo.com"
+            [class.error]="errors['email']"
+            [disabled]="isEditMode"
+            required>
+          <span class="field-error" *ngIf="errors['email']">{{ errors['email'] }}</span>
+        </div>
+      </div>
+
+      <div class="form-grid">
         <div class="form-group">
           <label class="form-label">Perfil de Acesso</label>
           <select 
-            name="userRole"
             class="form-control" 
             [(ngModel)]="userData.role"
-            [disabled]="isSaving">
-            <option *ngFor="let role of availableRoles" [value]="role.value">
-              {{ role.label }}
-            </option>
+            name="role">
+            <option value="" disabled>Selecione um perfil</option>
+            <option value="user">Usuário</option>
+            <option value="admin">Administrador</option>
           </select>
-          <small class="form-hint">{{ getRoleDescription(userData.role) }}</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select 
+            class="form-control" 
+            [(ngModel)]="userData.isActive"
+            name="isActive">
+            <option [ngValue]="true">Ativo</option>
+            <option [ngValue]="false">Inativo</option>
+          </select>
         </div>
       </div>
-  
-      <!-- Segurança -->
-      <div class="form-section">
-        <h3 class="section-title">
-          <i class="fas fa-lock"></i>
-          Segurança
-        </h3>
-        
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">
-              Senha {{ !isEditMode ? '*' : '' }}
-            </label>
-            <div class="password-input-wrapper">
-              <input 
-                [type]="showPassword ? 'text' : 'password'"
-                name="userPassword"
-                class="form-control" 
-                [class.error]="errors['password']"
-                placeholder="{{ isEditMode ? 'Nova senha' : 'Mínimo 6 caracteres' }}"
-                [(ngModel)]="userData.password"
-                [disabled]="isSaving">
-              <button 
-                type="button" 
-                class="password-toggle"
-                (click)="togglePasswordVisibility('password')"
-                tabindex="-1">
-                <i class="fas" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
-              </button>
-            </div>
-            <span *ngIf="errors['password']" class="field-error">{{ errors['password'] }}</span>
+    </div>
+
+    <!-- Segurança -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <i class="fas fa-lock"></i>
+        Segurança
+      </h2>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">
+            Senha <span class="required" *ngIf="!isEditMode">*</span>
+          </label>
+          <div class="password-wrapper">
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              class="form-control" 
+              [(ngModel)]="userData.password"
+              name="password"
+              [placeholder]="isEditMode ? 'Deixe em branco para manter a atual' : 'Mínimo 6 caracteres'"
+              [class.error]="errors['password']"
+              [required]="!isEditMode">
+            <button 
+              type="button" 
+              class="password-toggle"
+              (click)="showPassword = !showPassword">
+              <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
           </div>
-  
-          <div class="form-group">
-            <label class="form-label">
-              Confirmar Senha {{ !isEditMode ? '*' : '' }}
-            </label>
-            <div class="password-input-wrapper">
-              <input 
-                [type]="showConfirmPassword ? 'text' : 'password'"
-                name="confirmPassword"
-                class="form-control" 
-                [class.error]="errors['confirmPassword']"
-                placeholder="Digite a senha novamente"
-                [(ngModel)]="userData.confirmPassword"
-                [disabled]="isSaving">
-              <button 
-                type="button" 
-                class="password-toggle"
-                (click)="togglePasswordVisibility('confirmPassword')"
-                tabindex="-1">
-                <i class="fas" [ngClass]="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
-              </button>
-            </div>
-            <span *ngIf="errors['confirmPassword']" class="field-error">{{ errors['confirmPassword'] }}</span>
+          <span class="field-error" *ngIf="errors['password']">{{ errors['password'] }}</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Confirmar Senha <span class="required" *ngIf="!isEditMode">*</span>
+          </label>
+          <div class="password-wrapper">
+            <input 
+              [type]="showConfirmPassword ? 'text' : 'password'" 
+              class="form-control" 
+              [(ngModel)]="userData.confirmPassword"
+              name="confirmPassword"
+              placeholder="Digite a senha novamente"
+              [class.error]="errors['confirmPassword']"
+              [required]="!isEditMode">
+            <button 
+              type="button" 
+              class="password-toggle"
+              (click)="showConfirmPassword = !showConfirmPassword">
+              <i [class]="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
           </div>
-        </div>
-  
-        <div class="password-requirements" *ngIf="!isEditMode || userData.password">
-          <p class="requirements-title">Requisitos da senha:</p>
-          <ul>
-            <li [class.valid]="userData.password.length >= 6">
-              <i class="fas fa-check-circle"></i>
-              Mínimo de 6 caracteres
-            </li>
-          </ul>
+          <span class="field-error" *ngIf="errors['confirmPassword']">{{ errors['confirmPassword'] }}</span>
         </div>
       </div>
-  
-      <!-- Ações -->
-      <div class="form-actions">
-        <button 
-          type="button" 
-          class="btn btn-secondary" 
-          (click)="onCancel()"
-          [disabled]="isSaving">
-          <i class="fas fa-times"></i>
-          Cancelar
-        </button>
-        <button 
-          type="button" 
-          class="btn btn-primary" 
-          (click)="onSave()"
-          [disabled]="isSaving">
-          <i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i>
-          {{ getButtonText() }}
-        </button>
+
+      <div class="requirements-box">
+        <p>Requisitos da senha:</p>
+        <div class="requirement-item" [class.valid]="userData.password.length >= 6">
+          <i class="fas fa-check-circle"></i>
+          Mínimo de 6 caracteres
+        </div>
       </div>
-    </form>
-  </div>
+    </div>
+
+    <!-- Permissões (opcional) -->
+    <div class="form-section" *ngIf="userData.role === 'admin'">
+      <h2 class="section-title">
+        <i class="fas fa-shield-alt"></i>
+        Permissões Administrativas
+      </h2>
+
+      <div class="info-box">
+        <p>Como administrador, este usuário terá acesso completo a:</p>
+        <ul class="info-list">
+          <li><i class="fas fa-check"></i> Gerenciamento de usuários</li>
+          <li><i class="fas fa-check"></i> Configurações do sistema</li>
+          <li><i class="fas fa-check"></i> Relatórios completos</li>
+          <li><i class="fas fa-check"></i> Todas as funcionalidades do sistema</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button 
+        type="button" 
+        class="btn btn-secondary"
+        (click)="cancel()">
+        <i class="fas fa-times"></i>
+        Cancelar
+      </button>
+      <button 
+        type="submit" 
+        class="btn btn-primary"
+        [disabled]="isLoading">
+        <i class="fas fa-check" *ngIf="!isLoading"></i>
+        <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+        {{ isEditMode ? 'Atualizar' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+</div>

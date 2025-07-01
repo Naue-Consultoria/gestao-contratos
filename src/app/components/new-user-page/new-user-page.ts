@@ -1,57 +1,64 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
-import { UserService, CreateUserRequest, UpdateUserRequest, ApiUser } from '../../services/user';
-import { AuthService } from '../../services/auth';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { UserService } from '../../services/user';
 import { ToastrService } from 'ngx-toastr';
+
+interface UserData {
+  name: string;
+  email: string;
+  role: string;
+  password: string;
+  confirmPassword: string;
+  isActive: boolean;
+}
 
 @Component({
   selector: 'app-new-user-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './new-user-page.html',
   styleUrls: ['./new-user-page.css']
 })
 export class NewUserPageComponent implements OnInit {
-  private userService = inject(UserService);
-  private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private userService = inject(UserService);
   private toastr = inject(ToastrService);
-  
+
   // Form data
-  userData = {
+  userData: UserData = {
     name: '',
     email: '',
-    role: 'user', // Default role
+    role: 'user',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    isActive: true
   };
-  
-  // Estado do formulário
-  isSaving = false;
-  errors: { [key: string]: string } = {};
+
+  // UI states
   isEditMode = false;
   editingUserId: number | null = null;
+  isLoading = false;
+  errorMessage = '';
+  errors: { [key: string]: string } = {};
   showPassword = false;
   showConfirmPassword = false;
-  
-  // Lista de roles disponíveis
-  availableRoles = [
-    { value: 'admin', label: 'Administrador', description: 'Acesso total ao sistema' },
-    { value: 'user', label: 'Usuário', description: 'Acesso limitado' }
-  ];
-  
+
   ngOnInit() {
-    // Verificar se o usuário tem permissão de admin
-    if (!this.authService.isAdmin()) {
-      this.toastr.error('Acesso negado. Apenas administradores podem gerenciar usuários.');
-      this.router.navigate(['/home/dashboard']);
-      return;
+    // Check if admin
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user.role !== 'admin') {
+        this.toastr.error('Apenas administradores podem gerenciar usuários.');
+        this.router.navigate(['/home/dashboard']);
+        return;
+      }
     }
     
-    // Verificar se é modo de edição através dos parâmetros da rota
+    // Check if editing
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.editingUserId = +params['id'];
@@ -59,9 +66,9 @@ export class NewUserPageComponent implements OnInit {
       }
     });
   }
-  
+
   /**
-   * Carregar dados do usuário para edição
+   * Load user data for editing
    */
   private async loadUserData() {
     if (!this.editingUserId) return;
@@ -77,7 +84,8 @@ export class NewUserPageComponent implements OnInit {
           email: user.email || '',
           role: user.role_name || 'user',
           password: '',
-          confirmPassword: ''
+          confirmPassword: '',
+          isActive: user.is_active !== false
         };
       } else {
         this.toastr.error('Usuário não encontrado');
@@ -89,26 +97,75 @@ export class NewUserPageComponent implements OnInit {
       this.router.navigate(['/home/users']);
     }
   }
-  
+
   /**
-   * Validar formulário
+   * Save user
    */
-  validateForm(): boolean {
+  async saveUser() {
+    if (!this.validateForm()) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    try {
+      const payload: any = {
+        name: this.userData.name,
+        email: this.userData.email,
+        role: this.userData.role,
+        is_active: this.userData.isActive
+      };
+
+      // Only include password if provided
+      if (this.userData.password) {
+        payload.password = this.userData.password;
+      }
+
+      if (this.isEditMode && this.editingUserId) {
+        // Update existing user
+        await this.userService.updateUser(this.editingUserId, payload).toPromise();
+        this.toastr.success('Usuário atualizado com sucesso!');
+      } else {
+        // Create new user
+        payload.password = this.userData.password; // Password is required for new users
+        await this.userService.createUser(payload).toPromise();
+        this.toastr.success('Usuário criado com sucesso!');
+      }
+
+      // Dispatch event to refresh users list
+      window.dispatchEvent(new CustomEvent('refreshUsers'));
+      
+      // Navigate back to users page
+      this.router.navigate(['/home/users']);
+    } catch (error: any) {
+      console.error('❌ Erro ao salvar usuário:', error);
+      this.errorMessage = error.error?.message || 'Erro ao salvar usuário. Tente novamente.';
+      this.toastr.error(this.errorMessage);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * Validate form
+   */
+  private validateForm(): boolean {
     this.errors = {};
     
-    // Nome é obrigatório
+    // Name is required
     if (!this.userData.name.trim()) {
       this.errors['name'] = 'Nome é obrigatório';
     }
     
-    // Email é obrigatório e deve ser válido
+    // Email is required and must be valid
     if (!this.userData.email.trim()) {
       this.errors['email'] = 'Email é obrigatório';
     } else if (!this.isValidEmail(this.userData.email)) {
       this.errors['email'] = 'Email inválido';
     }
     
-    // Senha é obrigatória apenas para novos usuários
+    // Password is required only for new users
     if (!this.isEditMode) {
       if (!this.userData.password) {
         this.errors['password'] = 'Senha é obrigatória';
@@ -117,159 +174,43 @@ export class NewUserPageComponent implements OnInit {
       }
       
       if (this.userData.password !== this.userData.confirmPassword) {
-        this.errors['confirmPassword'] = 'Senhas não conferem';
+        this.errors['confirmPassword'] = 'As senhas não conferem';
       }
     }
     
-    // Se estiver editando e forneceu senha, validar
+    // If editing and password provided, validate
     if (this.isEditMode && this.userData.password) {
       if (this.userData.password.length < 6) {
         this.errors['password'] = 'Senha deve ter no mínimo 6 caracteres';
       }
       
       if (this.userData.password !== this.userData.confirmPassword) {
-        this.errors['confirmPassword'] = 'Senhas não conferem';
+        this.errors['confirmPassword'] = 'As senhas não conferem';
       }
     }
     
     return Object.keys(this.errors).length === 0;
   }
-  
+
   /**
-   * Validar email
+   * Validate email format
    */
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
-  
+
   /**
-   * Salvar usuário (criar ou atualizar)
+   * Cancel and go back
    */
-  async onSave() {
-    if (!this.validateForm()) {
-      return;
-    }
-    
-    this.isSaving = true;
-    
-    try {
-      if (this.isEditMode && this.editingUserId) {
-        // Atualizar usuário existente
-        await this.updateUser();
-      } else {
-        // Criar novo usuário
-        await this.createUser();
-      }
-    } catch (error: any) {
-      console.error('❌ Erro ao salvar usuário:', error);
-      this.errors['general'] = error.error?.message || 'Erro ao salvar usuário. Tente novamente.';
-    } finally {
-      this.isSaving = false;
-    }
-  }
-  
-  /**
-   * Criar novo usuário
-   */
-  private async createUser() {
-    const userRequest: CreateUserRequest = {
-      name: this.userData.name.trim(),
-      email: this.userData.email.trim(),
-      password: this.userData.password,
-      role: this.userData.role as "user" | "admin"
-    };
-    
-    this.userService.createUser(userRequest).subscribe({
-      next: (response) => {
-        console.log('✅ Usuário criado:', response);
-        this.toastr.success('Usuário criado com sucesso!');
-        
-        // Disparar evento para atualizar lista
-        window.dispatchEvent(new CustomEvent('refreshUsers'));
-        
-        // Navegar de volta para a lista
-        this.router.navigate(['/home/users']);
-      },
-      error: (error) => {
-        console.error('❌ Erro ao criar usuário:', error);
-        this.errors['general'] = error.error?.message || 'Erro ao criar usuário';
-        this.isSaving = false;
-      }
-    });
-  }
-  
-  /**
-   * Atualizar usuário existente
-   */
-  private async updateUser() {
-    if (!this.editingUserId) return;
-    
-    const updateRequest: UpdateUserRequest = {
-      name: this.userData.name.trim(),
-      email: this.userData.email.trim(),
-      role: this.userData.role as "user" | "admin"
-    };
-    
-    this.userService.updateUser(this.editingUserId, updateRequest).subscribe({
-      next: (response) => {
-        console.log('✅ Usuário atualizado:', response);
-        this.toastr.success('Usuário atualizado com sucesso!');
-        
-        // Disparar evento para atualizar lista
-        window.dispatchEvent(new CustomEvent('refreshUsers'));
-        
-        // Navegar de volta para a lista
-        this.router.navigate(['/home/users']);
-      },
-      error: (error) => {
-        console.error('❌ Erro ao atualizar usuário:', error);
-        this.errors['general'] = error.error?.message || 'Erro ao atualizar usuário';
-        this.isSaving = false;
-      }
-    });
-  }
-  
-  /**
-   * Cancelar e voltar para a lista
-   */
-  onCancel() {
+  cancel() {
     this.router.navigate(['/home/users']);
   }
-  
+
   /**
-   * Obter título da página
+   * Get page title
    */
   getPageTitle(): string {
     return this.isEditMode ? 'Editar Usuário' : 'Novo Usuário';
-  }
-  
-  /**
-   * Obter texto do botão
-   */
-  getButtonText(): string {
-    if (this.isSaving) {
-      return this.isEditMode ? 'Atualizando...' : 'Salvando...';
-    }
-    return this.isEditMode ? 'Atualizar' : 'Salvar';
-  }
-  
-  /**
-   * Toggle para mostrar/ocultar senha
-   */
-  togglePasswordVisibility(field: 'password' | 'confirmPassword') {
-    if (field === 'password') {
-      this.showPassword = !this.showPassword;
-    } else {
-      this.showConfirmPassword = !this.showConfirmPassword;
-    }
-  }
-  
-  /**
-   * Obter descrição do role
-   */
-  getRoleDescription(role: string): string {
-    const roleInfo = this.availableRoles.find(r => r.value === role);
-    return roleInfo?.description || '';
   }
 }
