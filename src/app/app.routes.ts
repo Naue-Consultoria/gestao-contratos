@@ -6,6 +6,8 @@ import { DashboardContentComponent } from './components/dashboard-content/dashbo
 import { ContractsTableComponent } from './components/contracts-table/contracts-table';
 import { CompaniesTableComponent } from './components/companies-table/companies-table';
 import { NewCompanyPageComponent } from './components/new-company-page/new-company-page';
+import { ServicesTableComponent } from './components/services-table/services-table';
+import { ServiceFormComponent } from './components/services-form/services-form';
 import { ReportsPage } from './components/reports-page/reports-page';
 import { AnalyticsPageComponent } from './components/analytics-page/analytics-page';
 import { UsersPageComponent } from './components/users-page/users-page';
@@ -83,6 +85,27 @@ export const routes: Routes = [
         path: 'companies/edit/:id',
         component: NewCompanyPageComponent,
         title: 'Editar Empresa - NAUE Consultoria',
+      },
+
+      // Gestão de serviços
+      {
+        path: 'services',
+        component: ServicesTableComponent,
+        title: 'Serviços - NAUE Consultoria',
+      },
+      
+      // Novo serviço
+      {
+        path: 'services/new',
+        component: ServiceFormComponent,
+        title: 'Novo Serviço - NAUE Consultoria',
+      },
+      
+      // Editar serviço
+      {
+        path: 'services/edit/:id',
+        component: ServiceFormComponent,
+        title: 'Editar Serviço - NAUE Consultoria',
       },
 
       // Relatórios

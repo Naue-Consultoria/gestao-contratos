@@ -1,0 +1,192 @@
+<!-- src/app/components/service-form/service-form.html -->
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEditMode ? 'Editar Serviço' : 'Novo Serviço' }}</h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span class="clickable" (click)="cancel()">Serviços</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>{{ isEditMode ? 'Editar' : 'Novo' }}</span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <i class="fas fa-spinner fa-spin"></i>
+    Carregando dados do serviço...
+  </div>
+
+  <!-- Form -->
+  <div class="form-container" *ngIf="!isLoading">
+    <form (ngSubmit)="save()">
+      <div class="form-grid">
+        <!-- Basic Information Section -->
+        <div class="form-section">
+          <h2 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            Informações Básicas
+          </h2>
+          
+          <div class="form-group">
+            <label class="form-label required">Nome do Serviço</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              [(ngModel)]="formData.name"
+              name="name"
+              placeholder="Ex: Consultoria Estratégica"
+              [class.error]="errors.name"
+              maxlength="255">
+            <span class="error-message" *ngIf="errors.name">{{ errors.name }}</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Categoria</label>
+            <select 
+              class="form-control" 
+              [(ngModel)]="formData.category"
+              name="category">
+              <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Descrição</label>
+            <textarea 
+              class="form-control" 
+              [(ngModel)]="formData.description"
+              name="description"
+              rows="4"
+              placeholder="Descreva o serviço detalhadamente..."
+              [class.error]="errors.description"
+              maxlength="1000"></textarea>
+            <div class="char-count">
+              {{ formData.description.length }}/1000 caracteres
+            </div>
+            <span class="error-message" *ngIf="errors.description">{{ errors.description }}</span>
+          </div>
+        </div>
+
+        <!-- Duration and Value Section -->
+        <div class="form-section">
+          <h2 class="section-title">
+            <i class="fas fa-clock"></i>
+            Duração e Valor
+          </h2>
+
+          <div class="form-group">
+            <label class="form-label required">Duração</label>
+            <div class="duration-selector">
+              <div class="preset-buttons">
+                <button 
+                  type="button"
+                  *ngFor="let preset of durationPresets"
+                  class="preset-btn"
+                  [class.active]="!showDurationCustom && formData.duration === preset.value && preset.value !== 0"
+                  (click)="onDurationPresetChange(preset.value)">
+                  {{ preset.label }}
+                </button>
+              </div>
+              
+              <div class="custom-duration" *ngIf="showDurationCustom">
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  [(ngModel)]="formData.duration"
+                  name="duration"
+                  min="1"
+                  max="1440"
+                  [class.error]="errors.duration">
+                <span class="duration-unit">minutos</span>
+              </div>
+            </div>
+            <div class="duration-preview">
+              <i class="fas fa-info-circle"></i>
+              Duração: {{ getFormattedDuration() }}
+            </div>
+            <span class="error-message" *ngIf="errors.duration">{{ errors.duration }}</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label required">Valor</label>
+            <div class="value-input-wrapper">
+              <span class="currency-symbol">R$</span>
+              <input 
+                type="text" 
+                class="form-control value-input" 
+                [value]="formatValueForDisplay(formData.value)"
+                (input)="formatCurrency($event)"
+                name="value"
+                placeholder="0,00"
+                [class.error]="errors.value">
+            </div>
+            <span class="error-message" *ngIf="errors.value">{{ errors.value }}</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <div class="status-toggle-group">
+              <label class="toggle-switch">
+                <input 
+                  type="checkbox" 
+                  [(ngModel)]="formData.is_active"
+                  name="is_active">
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">{{ formData.is_active ? 'Ativo' : 'Inativo' }}</span>
+              </label>
+              <p class="help-text">
+                Serviços inativos não aparecem para seleção em novos contratos
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Card -->
+      <div class="preview-card">
+        <h3 class="preview-title">
+          <i class="fas fa-eye"></i>
+          Pré-visualização
+        </h3>
+        <div class="preview-content">
+          <div class="preview-item">
+            <strong>Serviço:</strong> {{ formData.name || 'Nome do serviço' }}
+          </div>
+          <div class="preview-item">
+            <strong>Categoria:</strong> 
+            <span class="category-badge" [attr.data-category]="formData.category">
+              {{ formData.category }}
+            </span>
+          </div>
+          <div class="preview-item">
+            <strong>Duração:</strong> {{ getFormattedDuration() }}
+          </div>
+          <div class="preview-item">
+            <strong>Valor:</strong> 
+            <span class="value-preview">{{ getFormattedValue() }}</span>
+          </div>
+          <div class="preview-item">
+            <strong>Status:</strong> 
+            <span class="status-badge" [class.active]="formData.is_active" [class.inactive]="!formData.is_active">
+              {{ formData.is_active ? 'Ativo' : 'Inativo' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+          <i class="fas fa-save" *ngIf="!isSaving"></i>
+          <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+          {{ isEditMode ? 'Atualizar' : 'Criar' }} Serviço
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

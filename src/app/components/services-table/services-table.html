@@ -1,0 +1,148 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Serviços</h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>Serviços</span>
+    </div>
+  </div>
+
+  <div class="dashboard-grid mb-4">
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Total de Serviços</div>
+          <div class="stat-value">{{ stats.total }}</div>
+          <div class="stat-change positive" *ngIf="stats.active > 0">
+            <i class="fas fa-check-circle"></i>
+            {{ stats.active }} ativos
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-briefcase"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Valor Total</div>
+          <div class="stat-value">{{ formatTotalValue() }}</div>
+          <div class="stat-change positive">
+            <i class="fas fa-coins"></i>
+            Soma de todos os serviços
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-dollar-sign"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Duração Média</div>
+          <div class="stat-value">{{ formatAverageDuration() }}</div>
+          <div class="stat-change positive">
+            <i class="fas fa-clock"></i>
+            Por serviço
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-hourglass-half"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <h2 class="table-title">Lista de Serviços</h2>
+      <button class="btn btn-primary" (click)="openNewServicePage()">
+        <i class="fas fa-plus"></i>
+        Novo Serviço
+      </button>
+    </div>
+    
+    <!-- Mensagem de erro -->
+    <div *ngIf="error" class="error-message">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ error }}
+    </div>
+    
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-container">
+      <i class="fas fa-spinner fa-spin"></i>
+      Carregando serviços...
+    </div>
+    
+    <!-- Tabela -->
+    <div class="table-wrapper" *ngIf="!isLoading">
+      <!-- Mensagem quando não há serviços -->
+      <div *ngIf="services.length === 0 && !error" class="empty-state">
+        <i class="fas fa-briefcase empty-icon"></i>
+        <h3>Nenhum serviço cadastrado</h3>
+        <p>Clique no botão "Novo Serviço" para adicionar o primeiro serviço.</p>
+      </div>
+      
+      <!-- Tabela de serviços -->
+      <table class="custom-table" *ngIf="services.length > 0">
+        <thead>
+          <tr>
+            <th>Nome do Serviço</th>
+            <th>Categoria</th>
+            <th>Duração</th>
+            <th>Valor</th>
+            <th>Descrição</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let service of services" class="clickable" (click)="editService(service.id)">
+            <td>
+              <div class="service-info">
+                <div class="service-icon" [class.inactive]="!service.is_active">
+                  <i class="fas fa-cog"></i>
+                </div>
+                <span class="service-name" [class.inactive]="!service.is_active">{{ service.name }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="category-badge" [attr.data-category]="service.category">
+                {{ service.category }}
+              </span>
+            </td>
+            <td>
+              <div class="duration-info">
+                <i class="fas fa-clock"></i>
+                {{ service.duration }}
+              </div>
+            </td>
+            <td>
+              <span class="value-amount">{{ service.value }}</span>
+            </td>
+            <td>
+              <span class="description-text">{{ service.description || 'Sem descrição' }}</span>
+            </td>
+            <td>
+              <div class="status-toggle" (click)="toggleServiceStatus(service.id, $event)">
+                <span class="status-badge" [class.active]="service.is_active" [class.inactive]="!service.is_active">
+                  {{ service.is_active ? 'Ativo' : 'Inativo' }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <button class="action-btn" (click)="editService(service.id); $event.stopPropagation()">
+                <i class="fas fa-edit"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -9,7 +9,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { ContractModalComponent } from '../../components/contract-modal/contract-modal';
 import { UserModal } from '../../components/user-modal/user-modal';
 import { AuthService } from '../../services/auth';
-import { UserService, ApiUser } from '../../services/user';
+import { ApiUser } from '../../services/user';
 import { ApiCompany } from '../../services/company';
 import { ModalService } from '../../services/modal.service';
 import { Subscription } from 'rxjs';
@@ -81,7 +81,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       items: [
         { id: 'dashboard', icon: 'fas fa-chart-line', text: 'Dashboard', active: false, route: '/home/dashboard' },
         { id: 'contracts', icon: 'fas fa-file-contract', text: 'Contratos', active: false, route: '/home/contracts' },
-        { id: 'companies', icon: 'fas fa-building', text: 'Empresas', active: false, route: '/home/companies' }
+        { id: 'companies', icon: 'fas fa-building', text: 'Empresas', active: false, route: '/home/companies' },
+        { id: 'services', icon: 'fas fa-briefcase', text: 'Serviços', active: false, route: '/home/services' }
       ]
     },
     {
