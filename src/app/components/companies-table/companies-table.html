@@ -61,7 +61,7 @@
   <div class="table-container">
     <div class="table-header">
       <h2 class="table-title">Lista de Empresas</h2>
-      <button class="btn btn-primary" (click)="openCompanyModal()">
+      <button class="btn btn-primary" (click)="openNewCompanyPage()">
         <i class="fas fa-plus"></i>
         Nova Empresa
       </button>
@@ -88,52 +88,44 @@
         <p>Clique no botão "Nova Empresa" para adicionar a primeira empresa.</p>
       </div>
       
-      <!-- Tabela com empresas -->
-      <table *ngIf="companies.length > 0">
+      <!-- Tabela de empresas -->
+      <table class="custom-table" *ngIf="companies.length > 0">
         <thead>
           <tr>
             <th>Empresa</th>
             <th>Funcionários</th>
-            <th>Localização</th>
-            <th>Mercado</th>
+            <th>Localidade</th>
+            <th>Setor</th>
             <th>Contratos</th>
             <th>Valor Total</th>
+            <th>Desde</th>
             <th>Ações</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let company of companies">
+          <tr *ngFor="let company of companies" class="clickable" (click)="editCompany(company.id)">
             <td>
               <div class="company-info">
                 <div class="company-avatar" [style.background]="company.gradient">
                   {{ company.initials }}
                 </div>
-                <div>
-                  <div class="company-name">{{ company.name }}</div>
-                  <div class="company-since">Desde {{ company.since }}</div>
-                </div>
+                <span class="company-name">{{ company.name }}</span>
               </div>
             </td>
             <td>{{ formatEmployees(company.employees) }}</td>
             <td>{{ company.location }}</td>
-            <td>
-              <span class="market-badge" [attr.data-market]="company.market">
-                {{ company.market }}
-              </span>
-            </td>
+            <td>{{ company.market }}</td>
             <td>
               <div class="contracts-info">
-                <span class="contracts-count">{{ company.contracts }}</span>
-                <span class="contracts-active">
-                  {{ company.activeContracts === 1 ? 'ativo' : 'ativos' }}
-                </span>
+                <span class="total">{{ company.contracts }}</span>
+                <span class="active" *ngIf="company.activeContracts > 0">({{ company.activeContracts }} ativos)</span>
               </div>
             </td>
-            <td class="total-value">{{ company.totalValue }}</td>
+            <td>{{ company.totalValue }}</td>
+            <td>{{ company.since }}</td>
             <td>
-              <button class="btn btn-secondary" (click)="editCompany(company.id)">
+              <button class="action-btn" (click)="editCompany(company.id); $event.stopPropagation()">
                 <i class="fas fa-edit"></i>
-                Editar
               </button>
             </td>
           </tr>

@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { CompanyService, ApiCompany } from '../../services/company';
 import { Subscription } from 'rxjs';
@@ -28,6 +29,7 @@ interface Company {
 export class CompaniesTableComponent implements OnInit, OnDestroy {
   private modalService = inject(ModalService);
   private companyService = inject(CompanyService);
+  private router = inject(Router);
   private subscriptions = new Subscription();
 
   // Stats
@@ -180,30 +182,17 @@ export class CompaniesTableComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Abrir modal de empresa
+   * Navegar para página de nova empresa
    */
-  openCompanyModal() {
-    this.modalService.openCompanyModal$.next();
+  openNewCompanyPage() {
+    this.router.navigate(['/home/companies/new']);
   }
 
   /**
-   * Editar empresa
+   * Navegar para página de edição de empresa
    */
-  async editCompany(id: number) {
-    console.log('Editing company:', id);
-    
-    try {
-      // Buscar dados completos da empresa
-      const response = await this.companyService.getCompany(id).toPromise();
-      
-      if (response && response.company) {
-        // Emitir evento para abrir modal com dados da empresa
-        this.modalService.openCompanyModal$.next(response.company);
-      }
-    } catch (error) {
-      console.error('❌ Erro ao buscar empresa:', error);
-      this.modalService.showNotification('Erro ao carregar dados da empresa', false);
-    }
+  editCompany(id: number) {
+    this.router.navigate(['/home/companies/edit', id]);
   }
 
   /**

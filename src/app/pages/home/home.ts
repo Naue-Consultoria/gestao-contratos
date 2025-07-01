@@ -7,7 +7,6 @@ import { RouterModule, Router } from '@angular/router';
 import { HeaderComponent } from '../../components/header/header';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { ContractModalComponent } from '../../components/contract-modal/contract-modal';
-import { CompanyModalComponent } from '../../components/company-modal/company-modal';
 import { UserModal } from '../../components/user-modal/user-modal';
 import { AuthService } from '../../services/auth';
 import { UserService, ApiUser } from '../../services/user';
@@ -46,7 +45,6 @@ interface NavSection {
     HeaderComponent,
     SidebarComponent,
     ContractModalComponent,
-    CompanyModalComponent,
     UserModal
   ],
   templateUrl: './home.html',

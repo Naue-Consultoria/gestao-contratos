@@ -1,23 +1,22 @@
-import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CompanyService, CreateCompanyRequest, UpdateCompanyRequest, ApiCompany } from '../../services/company';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
-  selector: 'app-company-modal',
+  selector: 'app-new-company-page',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './company-modal.html',
-  styleUrls: ['./company-modal.css']
+  templateUrl: './new-company-page.html',
+  styleUrls: ['./new-company-page.css']
 })
-export class CompanyModalComponent implements OnChanges {
-  @Input() isOpen = false;
-  @Input() editingCompany: ApiCompany | null = null;
-  
-  @Output() close = new EventEmitter<void>();
-  @Output() save = new EventEmitter<any>();
-  
+export class NewCompanyPageComponent implements OnInit {
   private companyService = inject(CompanyService);
+  private modalService = inject(ModalService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
   
   // Form data
   companyData = {
@@ -33,6 +32,7 @@ export class CompanyModalComponent implements OnChanges {
   isSaving = false;
   errors: { [key: string]: string } = {};
   isEditMode = false;
+  editingCompanyId: number | null = null;
   
   // Lista de setores predefinidos
   marketSectors = [
@@ -51,38 +51,43 @@ export class CompanyModalComponent implements OnChanges {
     'Outro'
   ];
   
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['editingCompany'] && this.editingCompany) {
-      this.loadCompanyData();
-    } else if (changes['isOpen'] && this.isOpen && !this.editingCompany) {
-      this.resetForm();
-    }
+  ngOnInit() {
+    // Verificar se é modo de edição através dos parâmetros da rota
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.editingCompanyId = +params['id'];
+        this.loadCompanyData();
+      }
+    });
   }
   
   /**
    * Carregar dados da empresa para edição
    */
-  private loadCompanyData() {
-    if (this.editingCompany) {
-      this.isEditMode = true;
-      this.companyData = {
-        name: this.editingCompany.name || '',
-        employees: this.editingCompany.employee_count,
-        foundationDate: this.editingCompany.founded_date ? 
-          new Date(this.editingCompany.founded_date).toISOString().split('T')[0] : '',
-        headquarters: this.editingCompany.headquarters || '',
-        locations: this.editingCompany.locations ? this.editingCompany.locations.join(', ') : '',
-        market: this.editingCompany.market_sector || ''
-      };
-    }
-  }
-  
-  /**
-   * Lidar com clique no backdrop
-   */
-  onBackdropClick(event: MouseEvent) {
-    if ((event.target as HTMLElement).classList.contains('modal')) {
-      this.closeModal();
+  private async loadCompanyData() {
+    if (!this.editingCompanyId) return;
+    
+    try {
+      const response = await this.companyService.getCompany(this.editingCompanyId).toPromise();
+      
+      if (response && response.company) {
+        this.isEditMode = true;
+        const company = response.company;
+        
+        this.companyData = {
+          name: company.name || '',
+          employees: company.employee_count,
+          foundationDate: company.founded_date ? 
+            new Date(company.founded_date).toISOString().split('T')[0] : '',
+          headquarters: company.headquarters || '',
+          locations: company.locations ? company.locations.join(', ') : '',
+          market: company.market_sector || ''
+        };
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar empresa:', error);
+      this.modalService.showNotification('Erro ao carregar dados da empresa', false);
+      this.router.navigate(['/home/companies']);
     }
   }
   
@@ -116,7 +121,7 @@ export class CompanyModalComponent implements OnChanges {
     this.isSaving = true;
     
     try {
-      if (this.isEditMode && this.editingCompany) {
+      if (this.isEditMode && this.editingCompanyId) {
         // Atualizar empresa existente
         await this.updateCompany();
       } else {
@@ -150,22 +155,21 @@ export class CompanyModalComponent implements OnChanges {
     
     console.log('✅ Empresa criada:', response);
     
-    // Emitir evento de sucesso com a empresa criada
-    if (response && response.company) {
-      this.save.emit({ company: response.company, isNew: true });
-    } else {
-      this.save.emit({ company: response, isNew: true });
-    }
+    // Mostrar notificação de sucesso
+    this.modalService.showNotification('Empresa criada com sucesso!', true);
     
-    // Limpar formulário
-    this.resetForm();
+    // Disparar evento para atualizar lista
+    window.dispatchEvent(new CustomEvent('refreshCompanies'));
+    
+    // Navegar de volta para a lista
+    this.router.navigate(['/home/companies']);
   }
   
   /**
    * Atualizar empresa existente
    */
   private async updateCompany() {
-    if (!this.editingCompany) return;
+    if (!this.editingCompanyId) return;
     
     const updateRequest: UpdateCompanyRequest = {
       name: this.companyData.name.trim(),
@@ -179,51 +183,33 @@ export class CompanyModalComponent implements OnChanges {
     };
     
     const response = await this.companyService.updateCompany(
-      this.editingCompany.id, 
+      this.editingCompanyId, 
       updateRequest
     ).toPromise();
     
     console.log('✅ Empresa atualizada:', response);
     
-    // Emitir evento de sucesso com a empresa atualizada
-    if (response && response.company) {
-      this.save.emit({ company: response.company, isNew: false });
-    } else {
-      this.save.emit({ company: response, isNew: false });
-    }
+    // Mostrar notificação de sucesso
+    this.modalService.showNotification('Empresa atualizada com sucesso!', true);
     
-    // Limpar formulário
-    this.resetForm();
+    // Disparar evento para atualizar lista
+    window.dispatchEvent(new CustomEvent('refreshCompanies'));
+    
+    // Navegar de volta para a lista
+    this.router.navigate(['/home/companies']);
   }
   
   /**
-   * Limpar formulário
+   * Cancelar e voltar para a lista
    */
-  resetForm() {
-    this.companyData = {
-      name: '',
-      employees: null,
-      foundationDate: '',
-      headquarters: '',
-      locations: '',
-      market: ''
-    };
-    this.errors = {};
-    this.isEditMode = false;
+  onCancel() {
+    this.router.navigate(['/home/companies']);
   }
   
   /**
-   * Fechar modal e limpar formulário
+   * Obter título da página
    */
-  closeModal() {
-    this.resetForm();
-    this.close.emit();
-  }
-  
-  /**
-   * Obter título do modal
-   */
-  getModalTitle(): string {
+  getPageTitle(): string {
     return this.isEditMode ? 'Editar Empresa' : 'Nova Empresa';
   }
   
@@ -234,6 +220,6 @@ export class CompanyModalComponent implements OnChanges {
     if (this.isSaving) {
       return this.isEditMode ? 'Atualizando...' : 'Salvando...';
     }
-    return this.isEditMode ? 'Atualizar Empresa' : 'Salvar Empresa';
+    return this.isEditMode ? 'Atualizar' : 'Salvar';
   }
 }

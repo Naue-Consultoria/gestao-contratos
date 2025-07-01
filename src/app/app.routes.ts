@@ -1,3 +1,4 @@
+// src/app/app.routes.ts - ATUALIZADO
 import { Routes } from '@angular/router';
 import { Login } from './pages/login/login';
 import { HomeComponent } from './pages/home/home';
@@ -5,6 +6,7 @@ import { ChangePasswordComponent } from './components/change-password/change-pas
 import { DashboardContentComponent } from './components/dashboard-content/dashboard-content';
 import { ContractsTableComponent } from './components/contracts-table/contracts-table';
 import { CompaniesTableComponent } from './components/companies-table/companies-table';
+import { NewCompanyPageComponent } from './components/new-company-page/new-company-page';
 import { ReportsPage } from './components/reports-page/reports-page';
 import { AnalyticsPageComponent } from './components/analytics-page/analytics-page';
 import { UsersPageComponent } from './components/users-page/users-page';
@@ -67,6 +69,20 @@ export const routes: Routes = [
         path: 'companies',
         component: CompaniesTableComponent,
         title: 'Empresas - NAUE Consultoria',
+      },
+      
+      // Nova empresa
+      {
+        path: 'companies/new',
+        component: NewCompanyPageComponent,
+        title: 'Nova Empresa - NAUE Consultoria',
+      },
+      
+      // Editar empresa
+      {
+        path: 'companies/edit/:id',
+        component: NewCompanyPageComponent,
+        title: 'Editar Empresa - NAUE Consultoria',
       },
 
       // Relatórios
