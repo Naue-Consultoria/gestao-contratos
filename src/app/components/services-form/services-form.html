@@ -1,4 +1,3 @@
-<!-- src/app/components/service-form/service-form.html -->
 <div class="page">
   <div class="page-header">
     <h1 class="page-title">{{ isEditMode ? 'Editar Serviço' : 'Novo Serviço' }}</h1>
@@ -76,31 +75,16 @@
           </h2>
 
           <div class="form-group">
-            <label class="form-label required">Duração</label>
-            <div class="duration-selector">
-              <div class="preset-buttons">
-                <button 
-                  type="button"
-                  *ngFor="let preset of durationPresets"
-                  class="preset-btn"
-                  [class.active]="!showDurationCustom && formData.duration === preset.value && preset.value !== 0"
-                  (click)="onDurationPresetChange(preset.value)">
-                  {{ preset.label }}
-                </button>
-              </div>
-              
-              <div class="custom-duration" *ngIf="showDurationCustom">
-                <input 
-                  type="number" 
-                  class="form-control" 
-                  [(ngModel)]="formData.duration"
-                  name="duration"
-                  min="1"
-                  max="1440"
-                  [class.error]="errors.duration">
-                <span class="duration-unit">minutos</span>
-              </div>
-            </div>
+            <label class="form-label required">Duração (em dias)</label>
+            <input 
+              type="number" 
+              class="form-control" 
+              [(ngModel)]="formData.duration"
+              name="duration"
+              min="1"
+              max="365"
+              placeholder="Ex: 30"
+              [class.error]="errors.duration">
             <div class="duration-preview">
               <i class="fas fa-info-circle"></i>
               Duração: {{ getFormattedDuration() }}

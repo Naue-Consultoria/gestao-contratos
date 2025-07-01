@@ -3,7 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ServiceService, ApiService, CreateServiceRequest, UpdateServiceRequest } from '../../services/service';
+import { ServiceService, CreateServiceRequest, UpdateServiceRequest } from '../../services/service';
 import { ModalService } from '../../services/modal.service';
 
 @Component({
@@ -22,8 +22,8 @@ export class ServiceFormComponent implements OnInit {
   // Form data
   formData = {
     name: '',
-    duration: 60, // Default 60 minutos
-    value: 0,
+    duration: 1, // Default 1 dia
+    value: 0, // em reais (será convertido para centavos ao salvar)
     category: 'Geral',
     description: '',
     is_active: true
@@ -41,22 +41,11 @@ export class ServiceFormComponent implements OnInit {
     'Estratégia'
   ];
 
-  // Duration presets
-  durationPresets = [
-    { label: '30 min', value: 30 },
-    { label: '1 hora', value: 60 },
-    { label: '2 horas', value: 120 },
-    { label: '4 horas', value: 240 },
-    { label: '8 horas', value: 480 },
-    { label: 'Personalizado', value: 0 }
-  ];
-
   // UI state
   isLoading = false;
   isSaving = false;
   isEditMode = false;
   serviceId: number | null = null;
-  showDurationCustom = false;
   errors: any = {};
 
   ngOnInit() {
@@ -83,14 +72,11 @@ export class ServiceFormComponent implements OnInit {
         this.formData = {
           name: service.name,
           duration: service.duration,
-          value: service.value,
+          value: this.serviceService.convertToReais(service.value), // converter de centavos para reais
           category: service.category || 'Geral',
           description: service.description || '',
           is_active: service.is_active
         };
-        
-        // Check if duration is custom
-        this.checkCustomDuration();
       }
     } catch (error) {
       console.error('❌ Error loading service:', error);
@@ -102,37 +88,17 @@ export class ServiceFormComponent implements OnInit {
   }
 
   /**
-   * Check if duration is custom value
-   */
-  checkCustomDuration() {
-    const isPreset = this.durationPresets.some(preset => 
-      preset.value === this.formData.duration && preset.value !== 0
-    );
-    this.showDurationCustom = !isPreset;
-  }
-
-  /**
-   * Handle duration preset change
-   */
-  onDurationPresetChange(value: number) {
-    if (value === 0) {
-      this.showDurationCustom = true;
-      this.formData.duration = 60; // Default custom value
-    } else {
-      this.showDurationCustom = false;
-      this.formData.duration = value;
-    }
-  }
-
-  /**
    * Format currency input
    */
   formatCurrency(event: any) {
     let value = event.target.value.replace(/\D/g, '');
     if (value) {
-      value = (parseInt(value) / 100).toFixed(2);
-      this.formData.value = parseFloat(value);
-      event.target.value = this.formatValueForDisplay(this.formData.value);
+      const numericValue = parseInt(value) / 100;
+      this.formData.value = numericValue;
+      event.target.value = this.formatValueForDisplay(numericValue);
+    } else {
+      this.formData.value = 0;
+      event.target.value = '';
     }
   }
 
@@ -156,8 +122,8 @@ export class ServiceFormComponent implements OnInit {
       this.errors.name = 'Nome deve ter pelo menos 2 caracteres';
     }
     
-    if (this.formData.duration < 1 || this.formData.duration > 1440) {
-      this.errors.duration = 'Duração deve estar entre 1 minuto e 24 horas';
+    if (this.formData.duration < 1 || this.formData.duration > 365) {
+      this.errors.duration = 'Duração deve estar entre 1 e 365 dias';
     }
     
     if (this.formData.value <= 0) {
@@ -188,7 +154,7 @@ export class ServiceFormComponent implements OnInit {
         const updateData: UpdateServiceRequest = {
           name: this.formData.name,
           duration: this.formData.duration,
-          value: this.formData.value,
+          value: this.serviceService.convertToCents(this.formData.value), // converter para centavos
           category: this.formData.category,
           description: this.formData.description || null,
           is_active: this.formData.is_active
@@ -201,7 +167,7 @@ export class ServiceFormComponent implements OnInit {
         const createData: CreateServiceRequest = {
           name: this.formData.name,
           duration: this.formData.duration,
-          value: this.formData.value,
+          value: this.serviceService.convertToCents(this.formData.value), // converter para centavos
           category: this.formData.category,
           description: this.formData.description || null,
           is_active: this.formData.is_active
@@ -243,6 +209,7 @@ export class ServiceFormComponent implements OnInit {
    * Get formatted value for display
    */
   getFormattedValue(): string {
-    return this.serviceService.formatValue(this.formData.value);
+    // formData.value está em reais, mas formatValue espera centavos
+    return this.serviceService.formatValue(this.serviceService.convertToCents(this.formData.value));
   }
 }

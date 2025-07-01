@@ -1,3 +1,4 @@
+// src/app/components/services-table/services-table.ts
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -95,7 +96,7 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
       id: apiService.id,
       name: apiService.name,
       duration: this.serviceService.formatDuration(apiService.duration),
-      value: this.serviceService.formatValue(apiService.value),
+      value: this.serviceService.formatValue(apiService.value), // value já está em centavos
       category: apiService.category || 'Geral',
       description: apiService.description || '',
       is_active: apiService.is_active
@@ -110,6 +111,7 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     this.stats.active = services.filter(s => s.is_active).length;
     
     if (services.length > 0) {
+      // value está em centavos, somar diretamente
       this.stats.totalValue = services.reduce((sum, s) => sum + s.value, 0);
       this.stats.averageDuration = Math.round(
         services.reduce((sum, s) => sum + s.duration, 0) / services.length
@@ -154,6 +156,7 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
    * Formatar valor total das estatísticas
    */
   formatTotalValue(): string {
+    // totalValue já está em centavos
     return this.serviceService.formatValue(this.stats.totalValue);
   }
 

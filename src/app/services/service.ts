@@ -1,11 +1,12 @@
+// src/app/services/service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface CreateServiceRequest {
   name: string;
-  duration: number; // em minutos
-  value: number; // em reais
+  duration: number; // em dias
+  value: number; // em centavos
   description?: string | null;
   category?: string | null;
   is_active?: boolean;
@@ -13,8 +14,8 @@ export interface CreateServiceRequest {
 
 export interface UpdateServiceRequest {
   name?: string;
-  duration?: number;
-  value?: number;
+  duration?: number; // em dias
+  value?: number; // em centavos
   description?: string | null;
   category?: string | null;
   is_active?: boolean;
@@ -24,7 +25,7 @@ export interface ApiService {
   id: number;
   name: string;
   duration: number;
-  value: number;
+  value: number; // em centavos
   description: string | null;
   category: string | null;
   is_active: boolean;
@@ -125,28 +126,35 @@ export class ServiceService {
   /**
    * Formatar duração para exibição
    */
-  formatDuration(minutes: number): string {
-    if (minutes < 60) {
-      return `${minutes} min`;
+  formatDuration(days: number): string {
+    if (days === 1) {
+      return '1 dia';
     }
-    
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    
-    if (mins === 0) {
-      return `${hours}h`;
-    }
-    
-    return `${hours}h ${mins}min`;
+    return `${days} dias`;
   }
 
   /**
-   * Formatar valor para exibição
+   * Formatar valor para exibição (de centavos para reais)
    */
-  formatValue(value: number): string {
+  formatValue(valueInCents: number): string {
+    const valueInReais = valueInCents / 100;
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(value);
+    }).format(valueInReais);
+  }
+
+  /**
+   * Converter valor de reais para centavos
+   */
+  convertToCents(valueInReais: number): number {
+    return Math.round(valueInReais * 100);
+  }
+
+  /**
+   * Converter valor de centavos para reais
+   */
+  convertToReais(valueInCents: number): number {
+    return valueInCents / 100;
   }
 }
