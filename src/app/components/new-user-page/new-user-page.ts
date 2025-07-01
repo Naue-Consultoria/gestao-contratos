@@ -63,6 +63,9 @@ export class NewUserPageComponent implements OnInit {
       if (params['id']) {
         this.editingUserId = +params['id'];
         this.loadUserData();
+      } else {
+        // Se estiver criando novo usuário, gerar senha automaticamente
+        this.generateRandomPassword();
       }
     });
   }
@@ -117,18 +120,13 @@ export class NewUserPageComponent implements OnInit {
         is_active: this.userData.isActive
       };
 
-      // Only include password if provided
-      if (this.userData.password) {
-        payload.password = this.userData.password;
-      }
-
       if (this.isEditMode && this.editingUserId) {
-        // Update existing user
+        // Update existing user (without password)
         await this.userService.updateUser(this.editingUserId, payload).toPromise();
         this.toastr.success('Usuário atualizado com sucesso!');
       } else {
-        // Create new user
-        payload.password = this.userData.password; // Password is required for new users
+        // Create new user (password is required)
+        payload.password = this.userData.password;
         await this.userService.createUser(payload).toPromise();
         this.toastr.success('Usuário criado com sucesso!');
       }
@@ -178,17 +176,6 @@ export class NewUserPageComponent implements OnInit {
       }
     }
     
-    // If editing and password provided, validate
-    if (this.isEditMode && this.userData.password) {
-      if (this.userData.password.length < 6) {
-        this.errors['password'] = 'Senha deve ter no mínimo 6 caracteres';
-      }
-      
-      if (this.userData.password !== this.userData.confirmPassword) {
-        this.errors['confirmPassword'] = 'As senhas não conferem';
-      }
-    }
-    
     return Object.keys(this.errors).length === 0;
   }
 
@@ -212,5 +199,89 @@ export class NewUserPageComponent implements OnInit {
    */
   getPageTitle(): string {
     return this.isEditMode ? 'Editar Usuário' : 'Novo Usuário';
+  }
+
+  /**
+   * Generate random password
+   */
+  generateRandomPassword() {
+    const length = 12;
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    let password = '';
+    
+    // Garantir que a senha tenha pelo menos:
+    // - 1 letra minúscula
+    // - 1 letra maiúscula
+    // - 1 número
+    // - 1 caractere especial
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const special = '!@#$%^&*';
+    
+    // Adicionar um de cada tipo obrigatório
+    password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+    password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+    password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    password += special.charAt(Math.floor(Math.random() * special.length));
+    
+    // Preencher o resto com caracteres aleatórios
+    for (let i = password.length; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    
+    // Embaralhar a senha
+    password = password.split('').sort(() => Math.random() - 0.5).join('');
+    
+    // Atualizar os campos
+    this.userData.password = password;
+    this.userData.confirmPassword = password;
+    
+    // Mostrar a senha temporariamente
+    this.showPassword = true;
+    this.showConfirmPassword = true;
+    
+    // Limpar erros de senha se existirem
+    delete this.errors['password'];
+    delete this.errors['confirmPassword'];
+    
+    // Mostrar notificação apenas se foi clicado manualmente
+    if (this.userData.name || this.userData.email) {
+      this.toastr.info('Senha aleatória gerada! Certifique-se de salvá-la ou enviá-la ao usuário.');
+    }
+  }
+
+  /**
+   * Calculate password strength percentage
+   */
+  getPasswordStrength(): number {
+    const password = this.userData.password;
+    if (!password) return 0;
+    
+    let strength = 0;
+    
+    // Length
+    if (password.length >= 6) strength += 20;
+    if (password.length >= 8) strength += 20;
+    if (password.length >= 12) strength += 20;
+    
+    // Character types
+    if (/[a-z]/.test(password)) strength += 10;
+    if (/[A-Z]/.test(password)) strength += 10;
+    if (/[0-9]/.test(password)) strength += 10;
+    if (/[^a-zA-Z0-9]/.test(password)) strength += 10;
+    
+    return Math.min(strength, 100);
+  }
+
+  /**
+   * Get password strength text
+   */
+  getPasswordStrengthText(): string {
+    const strength = this.getPasswordStrength();
+    
+    if (strength <= 33) return 'Fraca';
+    if (strength <= 66) return 'Média';
+    return 'Forte';
   }
 }

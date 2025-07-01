@@ -84,7 +84,7 @@
     </div>
 
     <!-- Segurança -->
-    <div class="form-section">
+    <div class="form-section" *ngIf="!isEditMode">
       <h2 class="section-title">
         <i class="fas fa-lock"></i>
         Segurança
@@ -93,7 +93,7 @@
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">
-            Senha <span class="required" *ngIf="!isEditMode">*</span>
+            Senha <span class="required">*</span>
           </label>
           <div class="password-wrapper">
             <input 
@@ -101,9 +101,9 @@
               class="form-control" 
               [(ngModel)]="userData.password"
               name="password"
-              [placeholder]="isEditMode ? 'Deixe em branco para manter a atual' : 'Mínimo 6 caracteres'"
+              placeholder="Mínimo 6 caracteres"
               [class.error]="errors['password']"
-              [required]="!isEditMode">
+              required>
             <button 
               type="button" 
               class="password-toggle"
@@ -112,11 +112,18 @@
             </button>
           </div>
           <span class="field-error" *ngIf="errors['password']">{{ errors['password'] }}</span>
+          <button 
+            type="button" 
+            class="btn-generate-password"
+            (click)="generateRandomPassword()">
+            <i class="fas fa-dice"></i>
+            Gerar senha aleatória
+          </button>
         </div>
 
         <div class="form-group">
           <label class="form-label">
-            Confirmar Senha <span class="required" *ngIf="!isEditMode">*</span>
+            Confirmar Senha <span class="required">*</span>
           </label>
           <div class="password-wrapper">
             <input 
@@ -126,7 +133,7 @@
               name="confirmPassword"
               placeholder="Digite a senha novamente"
               [class.error]="errors['confirmPassword']"
-              [required]="!isEditMode">
+              required>
             <button 
               type="button" 
               class="password-toggle"
