@@ -83,7 +83,9 @@ export class UsersPageComponent implements OnInit, OnDestroy {
    */
   private mapApiUserToTableUser(apiUser: any): User {
     const initials = this.getInitials(apiUser.name || apiUser.email);
-    const since = apiUser.created_at ? new Date(apiUser.created_at).getFullYear().toString() : new Date().getFullYear().toString();
+    const since = apiUser.created_at 
+    ? new Date(apiUser.created_at).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
+    : new Date().toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
     
     return {
       id: apiUser.id,
