@@ -1,6 +1,8 @@
-// src/app/components/dashboard-content/dashboard-content.component.ts
-import { Component } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 interface StatCard {
   label: string;
@@ -9,12 +11,23 @@ interface StatCard {
   changeType: 'positive' | 'negative';
   icon: string;
   progress: number;
+  color: string;
+  bgColor: string;
 }
 
 interface Activity {
   time: string;
   title: string;
   description: string;
+  type: 'diagnostic' | 'okr' | 'mentoring' | 'hr' | 'other';
+  status: 'completed' | 'in-progress' | 'scheduled';
+}
+
+interface QuickAction {
+  icon: string;
+  label: string;
+  color: string;
+  action: string;
 }
 
 @Component({
@@ -24,8 +37,8 @@ interface Activity {
   templateUrl: './dashboard-content.html',
   styleUrls: ['./dashboard-content.css']
 })
-export class DashboardContentComponent {
-  // Dados movidos do HomeComponent
+export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestroy {
+  // Stat Cards
   statCards: StatCard[] = [
     {
       label: 'Total de Contratos',
@@ -33,23 +46,29 @@ export class DashboardContentComponent {
       change: '+12% este mês',
       changeType: 'positive',
       icon: 'fas fa-file-contract',
-      progress: 75
+      progress: 75,
+      color: '#1DD882',
+      bgColor: 'rgba(29, 216, 130, 0.15)'
     },
     {
       label: 'Contratos Ativos',
       value: 18,
       change: '75% do total',
       changeType: 'positive',
-      icon: 'fas fa-clipboard-check',
-      progress: 75
+      icon: 'fas fa-check-circle',
+      progress: 75,
+      color: '#1DD882',
+      bgColor: 'rgba(29, 216, 130, 0.15)'
     },
     {
       label: 'Serviços em Andamento',
       value: 42,
       change: 'Em 18 contratos',
       changeType: 'positive',
-      icon: 'fas fa-spinner',
-      progress: 60
+      icon: 'fas fa-list-check',
+      progress: 65,
+      color: '#1DD882',
+      bgColor: 'rgba(29, 216, 130, 0.15)'
     },
     {
       label: 'Próximas Atividades',
@@ -57,25 +76,261 @@ export class DashboardContentComponent {
       change: '3 urgentes',
       changeType: 'negative',
       icon: 'fas fa-clock',
-      progress: 40
+      progress: 40,
+      color: '#1DD882',
+      bgColor: 'rgba(29, 216, 130, 0.15)'
     }
   ];
 
+  // Atividades recentes
   recentActivities: Activity[] = [
     { 
       time: 'Há 2 horas', 
       title: 'Diagnóstico Organizacional - Empresa ABC', 
-      description: 'Reunião inicial realizada com sucesso' 
+      description: 'Reunião inicial realizada com sucesso',
+      type: 'diagnostic',
+      status: 'completed'
     },
     { 
       time: 'Há 5 horas', 
       title: 'OKR - Tech Solutions', 
-      description: 'Workshop de definição de objetivos concluído' 
+      description: 'Workshop de definição de objetivos concluído',
+      type: 'okr',
+      status: 'completed'
     },
     { 
       time: 'Ontem', 
       title: 'Mentoria Individual - Startup XYZ', 
-      description: 'Sessão agendada para próxima semana' 
+      description: 'Sessão agendada para próxima semana',
+      type: 'mentoring',
+      status: 'scheduled'
+    },
+    {
+      time: 'Há 2 dias',
+      title: 'Consultoria RH - Inovação Corp',
+      description: 'Análise de clima organizacional em andamento',
+      type: 'hr',
+      status: 'in-progress'
+    },
+    {
+      time: 'Há 3 dias',
+      title: 'Workshop de Liderança - GlobalTech',
+      description: 'Treinamento para gestores finalizado',
+      type: 'mentoring',
+      status: 'completed'
+    },
+    {
+      time: 'Há 4 dias',
+      title: 'Análise de Processos - FinanceHub',
+      description: 'Mapeamento de processos em fase final',
+      type: 'diagnostic',
+      status: 'in-progress'
     }
   ];
+
+  // Ações rápidas
+  quickActions: QuickAction[] = [
+    { icon: 'fas fa-building', label: 'Nova Empresa', color: '#1DD882', action: 'newCompany' },
+    { icon: 'fas fa-briefcase', label: 'Novo Serviço', color: '#1DD882', action: 'newService' },
+    { icon: 'fas fa-plus', label: 'Novo Contrato', color: '#1DD882', action: 'newContract' },
+    { icon: 'fas fa-chart-bar', label: 'Gerar Relatório', color: '#1DD882', action: 'generateReport' }
+  ];
+
+  // Dados para gráficos
+  monthlyContractsData = {
+    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+    datasets: [{
+      label: 'Contratos',
+      data: [12, 15, 18, 22, 20, 24],
+      borderColor: '#1DD882',
+      backgroundColor: 'rgba(29, 216, 130, 0.1)',
+      fill: true
+    }]
+  };
+
+  // Charts
+  contractsChart: Chart | null = null;
+
+  // Filtros
+  activityFilter: 'all' | 'completed' | 'in-progress' | 'scheduled' = 'all';
+
+  constructor() {}
+
+  ngOnInit() {
+    this.loadDashboardData();
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.initCharts();
+    }, 100);
+  }
+
+  ngOnDestroy() {
+    if (this.contractsChart) {
+      this.contractsChart.destroy();
+    }
+  }
+
+  private loadDashboardData() {
+    console.log('Carregando dados do dashboard...');
+  }
+
+  private initCharts() {
+    this.initContractsChart();
+  }
+
+  private initContractsChart() {
+    const canvas = document.getElementById('contractsChart') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const textColor = isDarkMode ? '#e5e7eb' : '#374151';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+
+    this.contractsChart = new Chart(ctx, {
+      type: 'line',
+      data: this.monthlyContractsData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: isDarkMode ? '#374151' : '#fff',
+            titleColor: textColor,
+            bodyColor: textColor,
+            borderColor: isDarkMode ? '#4b5563' : '#e5e7eb',
+            borderWidth: 1,
+            padding: 12,
+            displayColors: false,
+            callbacks: {
+              label: (context) => {
+                return `Contratos: ${context.parsed.y}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              color: gridColor,
+              display: false
+            },
+            ticks: {
+              color: textColor,
+              font: {
+                size: 12
+              }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: gridColor,
+              display: true
+            },
+            ticks: {
+              color: textColor,
+              font: {
+                size: 12
+              },
+              stepSize: 5
+            }
+          }
+        },
+        elements: {
+          line: {
+            tension: 0.4,
+            borderWidth: 3
+          },
+          point: {
+            radius: 5,
+            hoverRadius: 7,
+            backgroundColor: '#fff',
+            borderWidth: 3,
+            borderColor: '#1DD882'
+          }
+        }
+      }
+    });
+  }
+
+  filterActivities(filter: 'all' | 'completed' | 'in-progress' | 'scheduled') {
+    this.activityFilter = filter;
+  }
+
+  get filteredActivities(): Activity[] {
+    if (this.activityFilter === 'all') {
+      return this.recentActivities;
+    }
+    return this.recentActivities.filter(activity => activity.status === this.activityFilter);
+  }
+
+  executeQuickAction(action: string) {
+    console.log('Executando ação:', action);
+    switch(action) {
+      case 'newContract':
+        // Navegar para novo contrato
+        break;
+      case 'newCompany':
+        // Navegar para nova empresa
+        break;
+      case 'newService':
+        // Navegar para novo serviço
+        break;
+      case 'generateReport':
+        // Navegar para relatórios
+        break;
+    }
+  }
+
+  getActivityIcon(type: string): string {
+    const icons: { [key: string]: string } = {
+      'diagnostic': 'fas fa-stethoscope',
+      'okr': 'fas fa-bullseye',
+      'mentoring': 'fas fa-user-tie',
+      'hr': 'fas fa-users',
+      'other': 'fas fa-ellipsis-h'
+    };
+    return icons[type] || 'fas fa-circle';
+  }
+
+  getActivityColor(type: string): string {
+    const colors: { [key: string]: string } = {
+      'diagnostic': '#1DD882',
+      'okr': '#6366f1',
+      'mentoring': '#ec4899',
+      'hr': '#fb923c',
+      'other': '#94a3b8'
+    };
+    return colors[type] || '#94a3b8';
+  }
+
+  getStatusClass(status: string): string {
+    const classes: { [key: string]: string } = {
+      'completed': 'status-completed',
+      'in-progress': 'status-progress',
+      'scheduled': 'status-scheduled'
+    };
+    return classes[status] || '';
+  }
+
+  getStatusText(status: string): string {
+    const texts: { [key: string]: string } = {
+      'completed': 'Concluído',
+      'in-progress': 'Em andamento',
+      'scheduled': 'Agendado'
+    };
+    return texts[status] || status;
+  }
 }

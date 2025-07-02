@@ -1,51 +1,147 @@
-<div class="page">
-  <div class="page-header">
-    <h1 class="page-title">Dashboard</h1>
-    <div class="breadcrumb">
-      <span>Home</span>
-      <span class="breadcrumb-separator">/</span>
-      <span>Dashboard</span>
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="page">
+    <div class="page-header">
+      <h1 class="page-title">Dashboard</h1>
+      <div class="breadcrumb">
+        <span>Home</span>
+        <span class="breadcrumb-separator">/</span>
+        <span>Dashboard</span>
+      </div>
     </div>
-  </div>
-  
-  <div class="dashboard-grid">
-    <div *ngFor="let stat of statCards; let i = index" class="stat-card" [style.animation-delay]="(i * 0.1) + 's'">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">{{ stat.label }}</div>
-          <div class="stat-value">{{ stat.value }}</div>
-          <div class="stat-change" [ngClass]="stat.changeType">
-            <i [class]="stat.changeType === 'positive' ? 'fas fa-arrow-up' : 'fas fa-calendar-alt'"></i>
-            {{ stat.change }}
-          </div>
-        </div>
-        <div class="stat-icon">
-          <i [class]="stat.icon"></i>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let card of statCards">
+      <div class="stat-card-header">
+        <span class="stat-label">{{ card.label }}</span>
+        <div class="stat-icon-wrapper" [style.background-color]="card.bgColor">
+          <i [class]="card.icon" [style.color]="card.color"></i>
         </div>
       </div>
-      <div class="progress-bar">
-        <div class="progress-fill" [style.width.%]="stat.progress"></div>
+      <div class="stat-value">{{ card.value }}</div>
+      <div class="stat-footer">
+        <div class="stat-change" [ngClass]="card.changeType">
+          <i class="fas" [ngClass]="card.changeType === 'positive' ? 'fa-arrow-up' : 'fa-calendar-xmark'"></i>
+          <span>{{ card.change }}</span>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div 
+              class="progress-fill" 
+              [style.width.%]="card.progress"
+              [style.background-color]="card.color">
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="table-container">
-    <div class="table-header">
-      <h2 class="table-title">Atividades Recentes</h2>
-      <button class="btn btn-secondary">
-        <i class="fas fa-filter"></i>
-        Filtrar
+  <!-- Quick Actions -->
+  <div class="quick-actions-section">
+    <div class="quick-actions-grid">
+      <button 
+        class="quick-action-btn"
+        *ngFor="let action of quickActions"
+        (click)="executeQuickAction(action.action)">
+        <i [class]="action.icon"></i>
+        <span>{{ action.label }}</span>
       </button>
     </div>
-    
-    <div class="timeline">
-      <div *ngFor="let activity of recentActivities" class="timeline-item">
-        <div class="timeline-content">
-          <div class="timeline-time">{{ activity.time }}</div>
-          <div class="timeline-title">{{ activity.title }}</div>
-          <div class="timeline-description">{{ activity.description }}</div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="main-content-grid">
+    <!-- Chart Section -->
+    <div class="chart-container">
+      <div class="section-header">
+        <h2 class="section-title">Evolução de Contratos</h2>
+        <div class="section-actions">
+          <button class="icon-btn" title="Expandir">
+            <i class="fas fa-expand"></i>
+          </button>
+          <button class="icon-btn" title="Download">
+            <i class="fas fa-download"></i>
+          </button>
+        </div>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="contractsChart"></canvas>
+      </div>
+      <div class="chart-insights">
+        <div class="insight-item">
+          <span class="insight-label">Crescimento</span>
+          <span class="insight-value positive">+33%</span>
+        </div>
+        <div class="insight-divider"></div>
+        <div class="insight-item">
+          <span class="insight-label">Média Mensal</span>
+          <span class="insight-value">18</span>
+        </div>
+        <div class="insight-divider"></div>
+        <div class="insight-item">
+          <span class="insight-label">Projeção Próx. Mês</span>
+          <span class="insight-value">28</span>
         </div>
       </div>
     </div>
+
+    <!-- Activities Section -->
+    <div class="activities-container">
+      <div class="section-header">
+        <h2 class="section-title">Atividades Recentes</h2>
+        <div class="activity-tabs">
+          <button 
+            class="tab-btn" 
+            [class.active]="activityFilter === 'all'"
+            (click)="filterActivities('all')">
+            Todas
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="activityFilter === 'completed'"
+            (click)="filterActivities('completed')">
+            Concluídas
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="activityFilter === 'in-progress'"
+            (click)="filterActivities('in-progress')">
+            Em andamento
+          </button>
+        </div>
+      </div>
+
+      <div class="activities-list">
+        <div class="activity-card" *ngFor="let activity of filteredActivities">
+          <div 
+            class="activity-icon"
+            [style.background-color]="getActivityColor(activity.type) + '20'"
+            [style.color]="getActivityColor(activity.type)">
+            <i [class]="getActivityIcon(activity.type)"></i>
+          </div>
+          <div class="activity-content">
+            <h4 class="activity-title">{{ activity.title }}</h4>
+            <p class="activity-description">{{ activity.description }}</p>
+            <div class="activity-meta">
+              <span class="activity-time">
+                <i class="far fa-clock"></i>
+                {{ activity.time }}
+              </span>
+              <span class="activity-status" [ngClass]="'status-' + activity.status">
+                {{ getStatusText(activity.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="view-all-btn">
+        Ver todas as atividades
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
   </div>
 </div>
