@@ -8,6 +8,32 @@
     </div>
   </div>
 
+  <!-- Seletor de Empresa -->
+  <div class="company-selector-container">
+    <div class="company-selector">
+      <label class="selector-label">
+        <i class="fas fa-building"></i>
+        Selecione a empresa para os relatórios
+      </label>
+      <div class="selector-wrapper">
+        <select 
+          class="company-select" 
+          [(ngModel)]="selectedCompanyId"
+          [disabled]="isLoadingCompanies">
+          <option [value]="null">Todas as empresas</option>
+          <option *ngFor="let company of companies" [value]="company.id">
+            {{ company.name }}
+          </option>
+        </select>
+        <i class="fas fa-chevron-down select-icon"></i>
+      </div>
+      <p class="selector-hint">
+        Alguns relatórios podem ser gerados para empresas específicas ou para todas.
+      </p>
+    </div>
+  </div>
+
+  <!-- Cards de Relatórios -->
   <div class="dashboard-grid">
     <div class="stat-card report-card" (click)="onGenerateReport('monthly')">
       <div class="stat-icon">
@@ -15,18 +41,28 @@
       </div>
       <h3 class="report-title">Relatório Mensal</h3>
       <p class="report-description">Resumo completo das atividades do mês com métricas detalhadas</p>
+      <div class="report-scope">
+        <i class="fas fa-globe"></i>
+        <span>Geral</span>
+      </div>
       <button class="btn btn-primary full-width">
         <i class="fas fa-download"></i>
         Gerar Relatório
       </button>
     </div>
     
-    <div class="stat-card report-card" (click)="onGenerateReport('company')">
+    <div class="stat-card report-card" 
+         [class.needs-selection]="needsCompanySelection('company') && !selectedCompanyId"
+         (click)="onGenerateReport('company')">
       <div class="stat-icon company-icon">
         <i class="fas fa-building"></i>
       </div>
       <h3 class="report-title">Relatório por Empresa</h3>
       <p class="report-description">Análise detalhada de desempenho por cliente específico</p>
+      <div class="report-scope">
+        <i class="fas fa-filter"></i>
+        <span>{{ selectedCompanyId ? 'Empresa selecionada' : 'Selecione uma empresa' }}</span>
+      </div>
       <button class="btn btn-primary full-width">
         <i class="fas fa-download"></i>
         Gerar Relatório
@@ -38,19 +74,29 @@
         <i class="fas fa-tasks"></i>
       </div>
       <h3 class="report-title">Relatório de Serviços</h3>
-      <p class="report-description">Análise de performance dos serviços prestados</p>
+      <p class="report-description">Análise detalhada de performance dos serviços prestados</p>
+      <div class="report-scope">
+        <i class="fas fa-globe"></i>
+        <span>Geral</span>
+      </div>
       <button class="btn btn-primary full-width">
         <i class="fas fa-download"></i>
         Gerar Relatório
       </button>
     </div>
     
-    <div class="stat-card report-card" (click)="onGenerateReport('financial')">
+    <div class="stat-card report-card" 
+         [class.needs-selection]="needsCompanySelection('financial') && !selectedCompanyId"
+         (click)="onGenerateReport('financial')">
       <div class="stat-icon financial-icon">
         <i class="fas fa-chart-pie"></i>
       </div>
       <h3 class="report-title">Relatório Financeiro</h3>
       <p class="report-description">Análise completa de receitas e projeções financeiras</p>
+      <div class="report-scope">
+        <i class="fas fa-filter"></i>
+        <span>{{ selectedCompanyId ? 'Empresa selecionada' : 'Selecione uma empresa' }}</span>
+      </div>
       <button class="btn btn-primary full-width">
         <i class="fas fa-download"></i>
         Gerar Relatório
@@ -58,6 +104,7 @@
     </div>
   </div>
 
+  <!-- Gráfico de Performance Anual -->
   <div class="chart-container">
     <div class="chart-header">
       <h2 class="chart-title">Performance Anual</h2>
@@ -76,6 +123,8 @@
           (click)="onUpdateChart(2022)">2022</button>
       </div>
     </div>
-    <canvas id="performanceChart" height="100"></canvas>
+    <div class="chart-wrapper">
+      <canvas id="performanceChart"></canvas>
+    </div>
   </div>
 </div>

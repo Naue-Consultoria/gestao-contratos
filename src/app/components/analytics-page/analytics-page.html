@@ -8,77 +8,196 @@
     </div>
   </div>
 
-  <div class="dashboard-grid">
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Taxa de Sucesso</div>
-          <div class="stat-value">{{ successRate }}%</div>
-          <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            de satisfação dos clientes
+  <!-- Seletor de Período -->
+  <div class="period-selector">
+    <label class="period-label">
+      <i class="fas fa-calendar-alt"></i>
+      Período de análise
+    </label>
+    <div class="period-buttons">
+      <button 
+        class="period-btn" 
+        [class.active]="selectedPeriod === 'week'"
+        (click)="selectedPeriod = 'week'; onPeriodChange()">
+        Semana
+      </button>
+      <button 
+        class="period-btn" 
+        [class.active]="selectedPeriod === 'month'"
+        (click)="selectedPeriod = 'month'; onPeriodChange()">
+        Mês
+      </button>
+      <button 
+        class="period-btn" 
+        [class.active]="selectedPeriod === 'quarter'"
+        (click)="selectedPeriod = 'quarter'; onPeriodChange()">
+        Trimestre
+      </button>
+      <button 
+        class="period-btn" 
+        [class.active]="selectedPeriod === 'year'"
+        (click)="selectedPeriod = 'year'; onPeriodChange()">
+        Ano
+      </button>
+    </div>
+  </div>
+
+  <!-- Cards de Destaque -->
+  <div class="highlight-grid">
+    <div class="highlight-card success-card">
+      <div class="highlight-content">
+        <div class="highlight-header">
+          <h3 class="highlight-title">Taxa de Sucesso</h3>
+          <div class="highlight-icon">
+            <i class="fas fa-chart-pie"></i>
           </div>
         </div>
-        <div class="stat-icon">
-          <i class="fas fa-chart-pie"></i>
+        <div class="highlight-value">{{ successRate }}%</div>
+        <div class="highlight-description">
+          <i class="fas fa-arrow-up"></i>
+          de satisfação dos clientes
+        </div>
+        <div class="satisfaction-gauge">
+          <canvas id="satisfactionChart"></canvas>
+          <div class="gauge-center">
+            <span class="gauge-value">{{ successRate }}%</span>
+            <span class="gauge-label">Satisfação</span>
+          </div>
         </div>
       </div>
     </div>
     
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Serviços Mais Procurados</div>
-          <div class="stat-value">{{ topService }}</div>
-          <div class="stat-change positive">
-            <i class="fas fa-check-circle"></i>
-            {{ topServicePercentage }}% dos contratos
+    <div class="highlight-card service-card">
+      <div class="highlight-content">
+        <div class="highlight-header">
+          <h3 class="highlight-title">Serviço Mais Procurado</h3>
+          <div class="highlight-icon">
+            <i class="fas fa-star"></i>
           </div>
         </div>
-        <div class="stat-icon">
-          <i class="fas fa-star"></i>
+        <div class="highlight-value">{{ topService }}</div>
+        <div class="highlight-description">
+          <i class="fas fa-check-circle"></i>
+          {{ topServicePercentage }}% dos contratos
+        </div>
+        <div class="service-stats">
+          <div class="stat-item">
+            <span class="stat-number">5</span>
+            <span class="stat-text">Contratos ativos</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">12</span>
+            <span class="stat-text">Projetos concluídos</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="analytics-grid">
+  <!-- Métricas Principais -->
+  <div class="metrics-grid">
+    <div class="metric-card" *ngFor="let metric of metrics">
+      <div class="metric-icon" [style.background-color]="metric.color + '20'">
+        <i [class]="metric.icon" [style.color]="metric.color"></i>
+      </div>
+      <div class="metric-content">
+        <div class="metric-label">{{ metric.label }}</div>
+        <div class="metric-value">{{ formatMetricValue(metric) }}</div>
+        <div class="metric-trend" [ngClass]="getTrendClass(metric.trend)" *ngIf="metric.trend">
+          <i [class]="getTrendIcon(metric.trend)"></i>
+          {{ metric.trend > 0 ? metric.trend : -metric.trend }}%
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos Principais -->
+  <div class="charts-grid">
+    <!-- Distribuição de Serviços -->
     <div class="chart-container">
       <div class="chart-header">
         <h2 class="chart-title">Distribuição de Serviços</h2>
+        <button class="chart-action">
+          <i class="fas fa-download"></i>
+        </button>
       </div>
-      <div class="services-list">
-        <div *ngFor="let service of services" class="service-item">
-          <div class="service-info">
-            <div class="service-color" [style.background-color]="service.color"></div>
-            <span class="service-name">{{ service.name }}</span>
+      <div class="services-chart-wrapper">
+        <div class="chart-area">
+          <canvas id="servicesChart"></canvas>
+        </div>
+        <div class="services-legend">
+          <div *ngFor="let service of services" class="legend-item">
+            <div class="legend-color" [style.background-color]="service.color"></div>
+            <div class="legend-info">
+              <div class="legend-header">
+                <i [class]="service.icon"></i>
+                <span class="legend-name">{{ service.name }}</span>
+              </div>
+              <div class="legend-stats">
+                <span class="legend-value">{{ service.value }}%</span>
+                <span class="legend-contracts">{{ service.contracts }} contratos</span>
+              </div>
+            </div>
           </div>
-          <div class="service-value">{{ service.value }}%</div>
         </div>
       </div>
-      <div class="chart-placeholder">
-        <i class="fas fa-chart-pie"></i>
-        <p>Gráfico de distribuição</p>
+    </div>
+
+    <!-- Evolução Temporal -->
+    <div class="chart-container">
+      <div class="chart-header">
+        <h2 class="chart-title">Evolução Temporal</h2>
+        <div class="chart-actions">
+          <button class="chart-action">
+            <i class="fas fa-expand"></i>
+          </button>
+          <button class="chart-action">
+            <i class="fas fa-download"></i>
+          </button>
+        </div>
+      </div>
+      <div class="evolution-chart-wrapper">
+        <canvas id="evolutionChart"></canvas>
       </div>
     </div>
-    
-    <div class="metrics-container">
-      <h3 class="metrics-title">Métricas Principais</h3>
-      <div class="metric-item">
-        <span class="metric-label">Contratos Ativos</span>
-        <span class="metric-value">18</span>
+  </div>
+
+  <!-- Insights e Recomendações -->
+  <div class="insights-section">
+    <h2 class="section-title">
+      <i class="fas fa-lightbulb"></i>
+      Insights e Recomendações
+    </h2>
+    <div class="insights-grid">
+      <div class="insight-card positive">
+        <div class="insight-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="insight-content">
+          <h4>Crescimento Consistente</h4>
+          <p>Os serviços de OKR apresentaram crescimento de 35% este trimestre. Considere expandir a equipe especializada.</p>
+        </div>
       </div>
-      <div class="metric-item">
-        <span class="metric-label">Renovação Média</span>
-        <span class="metric-value">85%</span>
+      
+      <div class="insight-card warning">
+        <div class="insight-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="insight-content">
+          <h4>Atenção ao Tempo de Projeto</h4>
+          <p>O tempo médio aumentou 8%. Analise os processos para identificar possíveis gargalos.</p>
+        </div>
       </div>
-      <div class="metric-item">
-        <span class="metric-label">Tempo Médio de Projeto</span>
-        <span class="metric-value">3.5 meses</span>
-      </div>
-      <div class="metric-item">
-        <span class="metric-label">NPS Score</span>
-        <span class="metric-value">78</span>
+      
+      <div class="insight-card info">
+        <div class="insight-icon">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="insight-content">
+          <h4>Oportunidade de Mercado</h4>
+          <p>Diagnósticos Organizacionais têm alta demanda. Considere criar pacotes promocionais.</p>
+        </div>
       </div>
     </div>
   </div>
