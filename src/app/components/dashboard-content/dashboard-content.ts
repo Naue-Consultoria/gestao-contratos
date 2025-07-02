@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
+import { Router } from '@angular/router';
 
 Chart.register(...registerables);
 
@@ -154,7 +155,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   // Filtros
   activityFilter: 'all' | 'completed' | 'in-progress' | 'scheduled' = 'all';
 
-  constructor() {}
+  constructor(private router: Router) {}
 
   ngOnInit() {
     this.loadDashboardData();
@@ -280,16 +281,19 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     console.log('Executando ação:', action);
     switch(action) {
       case 'newContract':
-        // Navegar para novo contrato
+        
         break;
       case 'newCompany':
         // Navegar para nova empresa
+        this.router.navigate(['/home/companies/new']);
         break;
       case 'newService':
         // Navegar para novo serviço
+        this.router.navigate(['/home/services/new']);
         break;
       case 'generateReport':
         // Navegar para relatórios
+        this.router.navigate(['/home/reports']);
         break;
     }
   }
