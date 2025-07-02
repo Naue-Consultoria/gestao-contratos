@@ -311,13 +311,13 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
   getActivityColor(type: string): string {
     const colors: { [key: string]: string } = {
-      'diagnostic': '#1DD882',
-      'okr': '#6366f1',
-      'mentoring': '#ec4899',
-      'hr': '#fb923c',
-      'other': '#94a3b8'
+      'diagnostic': '#17915a',
+      'okr': '#17915a',
+      'mentoring': '#17915a',
+      'hr': '#17915a',
+      'other': '#17915a'
     };
-    return colors[type] || '#94a3b8';
+    return colors[type] || '#17915a';
   }
 
   getStatusClass(status: string): string {
