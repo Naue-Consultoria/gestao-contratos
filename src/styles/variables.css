@@ -1,22 +1,21 @@
 :root {
-    /* Cores da Identidade Visual Naue Consultoria */
     --naue-black: #282C2A;
     --naue-dark-green: #053C2D;
-    --naue-neon-green: #14E79F;
+    --naue-neon-green: #053C2D;
     
     /* Cores derivadas */
-    --naue-neon-green-hover: #043326;
-    --naue-neon-green-light: rgba(20, 231, 159, 0.15);
-    --naue-dark-green-light: ;
+    --naue-neon-green-hover: #042a20; /* Tom mais escuro do verde escuro */
+    --naue-neon-green-light: rgba(5, 60, 45, 0.15); /* Alterado de rgba(20, 231, 159, 0.15) */
+    --naue-dark-green-light: rgba(5, 60, 45, 0.1); /* Adicionado valor que estava faltando */
     --naue-gray-light: #f8f9fa;
     --naue-gray-border: #e5e7eb;
     --naue-text-gray: #6b7280;
     --naue-white: #FFFFFF;
     
     /* Manter cores antigas para compatibilidade */
-    --primary-green: #14E79F;
-    --primary-green-dark: #0db87a;
-    --primary-green-light: #4de89f;
+    --primary-green: #053C2D; /* Alterado de #14E79F */
+    --primary-green-dark: #083f31; /* Tom mais escuro */
+    --primary-green-light: #076b50; /* Tom mais claro do verde escuro */
     --dark-gray: #282C2A;
     --medium-gray: #2C2C2C;
     --light-gray: #f8f9fa;

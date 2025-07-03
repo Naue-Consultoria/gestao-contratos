@@ -43,7 +43,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     { 
       name: 'Diagnóstico Organizacional', 
       value: 25, 
-      color: '#1DD882',
+      color: '#053C2D',
       icon: 'fas fa-stethoscope',
       contracts: 6
     },
@@ -83,7 +83,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       label: 'Contratos Ativos',
       value: 18,
       icon: 'fas fa-file-contract',
-      color: '#1DD882',
+      color: '#053C2D',
       trend: 12
     },
     {
@@ -118,7 +118,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       {
         label: 'Novos Contratos',
         data: [3, 5, 4, 7, 6, 8],
-        borderColor: '#1DD882',
+        borderColor: '#053C2D',
         backgroundColor: 'rgba(29, 216, 130, 0.1)'
       },
       {
@@ -341,7 +341,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       data: {
         datasets: [{
           data: [this.successRate, 100 - this.successRate],
-          backgroundColor: ['#1DD882', isDarkMode ? '#374151' : '#e5e7eb'],
+          backgroundColor: ['#053C2D', isDarkMode ? '#374151' : '#e5e7eb'],
           borderWidth: 0
         }]
       },
