@@ -63,8 +63,8 @@
 .input-content input:focus {
   border-color: var(--naue-neon-green);
   box-shadow: 
-    0 0 0 4px rgba(20, 231, 159, 0.15),
-    0 4px 16px rgba(20, 231, 159, 0.1);
+    0 0 0 4px rgba(10, 128, 96, 0.15),
+    0 4px 16px rgba(10, 128, 96, 0.1);
   background-color: rgba(255, 255, 255, 0.08);
   transform: translateY(-1px);
 }

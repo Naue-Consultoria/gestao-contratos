@@ -29,7 +29,7 @@ app-login-primary-input {
   align-self: flex-end;
   font-size: 14px;
   font-weight: 500;
-  color: rgba(20, 231, 159, 0.8);
+  color: rgba(10, 128, 96, 0.8);
   text-decoration: none;
   margin-top: -8px;
   margin-bottom: 24px;
@@ -48,7 +48,7 @@ app-login-primary-input {
   left: 0;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--naue-neon-green), rgba(20, 231, 159, 0.5));
+  background: linear-gradient(90deg, var(--naue-neon-green), rgba(10, 128, 96, 0.5));
   transition: width 0.3s ease;
 }
 

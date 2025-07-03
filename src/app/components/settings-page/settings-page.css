@@ -28,12 +28,12 @@
 }
 
 .nav-item:hover {
-    background-color: rgba(29, 216, 130, 0.05);
+    background-color: rgba(14, 155, 113, 0.05);
 }
 
 .nav-item.active {
     color: var(--primary-green);
-    background-color: rgba(29, 216, 130, 0.1);
+    background-color: rgba(14, 155, 113, 0.1);
     font-weight: 600;
 }
 

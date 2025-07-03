@@ -117,7 +117,7 @@
     outline: none;
     border-color: var(--primary-green);
     background-color: var(--white);
-    box-shadow: 0 0 0 3px rgba(29, 216, 130, 0.1);
+    box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
 }
 
 :host-context(body.dark-mode) .search-input:focus {
@@ -411,7 +411,7 @@
 }
 
 .notification-item.unread {
-    background-color: rgba(29, 216, 130, 0.05);
+    background-color: rgba(14, 155, 113, 0.05);
 }
 
 .notification-time {

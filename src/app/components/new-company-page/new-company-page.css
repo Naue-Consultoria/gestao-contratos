@@ -139,7 +139,7 @@
 .form-control:focus {
   outline: none;
   border-color: var(--naue-green);
-  box-shadow: 0 0 0 3px rgba(20, 231, 159, 0.1);
+  box-shadow: 0 0 0 3px rgba(10, 128, 96, 0.1);
 }
 
 .form-control:disabled {
@@ -225,7 +225,7 @@ textarea.form-control {
 .btn-primary:hover:not(:disabled) {
   background-color: #13c99d;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(20, 231, 159, 0.3);
+  box-shadow: 0 4px 12px rgba(10, 128, 96, 0.3);
 }
 
 .btn-secondary {

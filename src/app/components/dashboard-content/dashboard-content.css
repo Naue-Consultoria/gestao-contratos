@@ -36,7 +36,7 @@
 }
 
 .breadcrumb-item:hover {
-  color: #053C2D;
+  color: #0A8060;
 }
 
 .breadcrumb-item.active {
@@ -185,12 +185,12 @@
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 6px -1px rgba(29, 216, 130, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(14, 155, 113, 0.2);
 }
 
 .quick-action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(29, 216, 130, 0.3);
+  box-shadow: 0 10px 15px -3px rgba(14, 155, 113, 0.3);
   background: #1da869;
 }
 
@@ -520,7 +520,7 @@
 .view-all-btn {
   background: none;
   border: none;
-  color: #053C2D;
+  color: #0A8060;
   font-weight: 500;
   cursor: pointer;
   display: flex;
@@ -535,7 +535,7 @@
 }
 
 .view-all-btn:hover {
-  background: rgba(29, 216, 130, 0.1);
+  background: rgba(14, 155, 113, 0.1);
 }
 
 /* Widgets Grid */
@@ -608,13 +608,13 @@
 }
 
 .widget-info-btn:hover {
-  color: #053C2D;
+  color: #0A8060;
 }
 
 .widget-view-all {
   background: none;
   border: none;
-  color: #053C2D;
+  color: #0A8060;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -624,7 +624,7 @@
 }
 
 .widget-view-all:hover {
-  background: rgba(29, 216, 130, 0.1);
+  background: rgba(14, 155, 113, 0.1);
 }
 
 /* Metrics Grid */
@@ -855,7 +855,7 @@
   display: block;
   font-size: 1.125rem;
   font-weight: 700;
-  color: #053C2D;
+  color: #0A8060;
 }
 
 .consultant-label {

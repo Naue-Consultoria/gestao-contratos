@@ -48,8 +48,8 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
       changeType: 'positive',
       icon: 'fas fa-file-contract',
       progress: 75,
-      color: '#053C2D',
-      bgColor: 'rgba(29, 216, 130, 0.15)'
+      color: '#0A8060',
+      bgColor: 'rgba(14, 155, 113, 0.15)'
     },
     {
       label: 'Contratos Ativos',
@@ -58,8 +58,8 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
       changeType: 'positive',
       icon: 'fas fa-check-circle',
       progress: 75,
-      color: '#053C2D',
-      bgColor: 'rgba(29, 216, 130, 0.15)'
+      color: '#0A8060',
+      bgColor: 'rgba(14, 155, 113, 0.15)'
     },
     {
       label: 'Serviços em Andamento',
@@ -68,8 +68,8 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
       changeType: 'positive',
       icon: 'fas fa-list-check',
       progress: 65,
-      color: '#053C2D',
-      bgColor: 'rgba(29, 216, 130, 0.15)'
+      color: '#0A8060',
+      bgColor: 'rgba(14, 155, 113, 0.15)'
     },
     {
       label: 'Próximas Atividades',
@@ -78,8 +78,8 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
       changeType: 'negative',
       icon: 'fas fa-clock',
       progress: 40,
-      color: '#053C2D',
-      bgColor: 'rgba(29, 216, 130, 0.15)'
+      color: '#0A8060',
+      bgColor: 'rgba(14, 155, 113, 0.15)'
     }
   ];
 
@@ -131,10 +131,10 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
   // Ações rápidas
   quickActions: QuickAction[] = [
-    { icon: 'fas fa-building', label: 'Nova Empresa', color: '#053C2D', action: 'newCompany' },
-    { icon: 'fas fa-briefcase', label: 'Novo Serviço', color: '#053C2D', action: 'newService' },
-    { icon: 'fas fa-plus', label: 'Novo Contrato', color: '#053C2D', action: 'newContract' },
-    { icon: 'fas fa-chart-bar', label: 'Gerar Relatório', color: '#053C2D', action: 'generateReport' }
+    { icon: 'fas fa-building', label: 'Nova Empresa', color: '#0A8060', action: 'newCompany' },
+    { icon: 'fas fa-briefcase', label: 'Novo Serviço', color: '#0A8060', action: 'newService' },
+    { icon: 'fas fa-plus', label: 'Novo Contrato', color: '#0A8060', action: 'newContract' },
+    { icon: 'fas fa-chart-bar', label: 'Gerar Relatório', color: '#0A8060', action: 'generateReport' }
   ];
 
   // Dados para gráficos
@@ -143,8 +143,8 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     datasets: [{
       label: 'Contratos',
       data: [12, 15, 18, 22, 20, 24],
-      borderColor: '#053C2D',
-      backgroundColor: 'rgba(29, 216, 130, 0.1)',
+      borderColor: '#0A8060',
+      backgroundColor: 'rgba(14, 155, 113, 0.1)',
       fill: true
     }]
   };
@@ -259,7 +259,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
             hoverRadius: 7,
             backgroundColor: '#fff',
             borderWidth: 3,
-            borderColor: '#053C2D'
+            borderColor: '#0A8060'
           }
         }
       }

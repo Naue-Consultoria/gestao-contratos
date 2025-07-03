@@ -118,7 +118,7 @@
 .form-control:focus {
     outline: none;
     border-color: var(--primary-green);
-    box-shadow: 0 0 0 3px rgba(29, 216, 130, 0.1);
+    box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
 }
 
 .form-control::placeholder {
