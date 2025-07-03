@@ -1,130 +1,296 @@
-<div class="page">
-  <div class="page-header">
-    <h1 class="page-title">Relatórios</h1>
-    <div class="breadcrumb">
-      <span>Home</span>
-      <span class="breadcrumb-separator">/</span>
-      <span>Relatórios</span>
-    </div>
+<!-- reports-page.component.html -->
+<!-- Header -->
+<div class="page-header">
+  <h1 class="page-title">Relatórios</h1>
+  <div class="breadcrumb">
+    <span>Home</span>
+    <span class="breadcrumb-separator">/</span>
+    <span>Relatórios</span>
   </div>
+</div>
 
-  <!-- Seletor de Empresa -->
-  <div class="company-selector-container">
-    <div class="company-selector">
-      <label class="selector-label">
+<!-- Configurações de Relatório -->
+<div class="filter-container">
+  <div class="filter-header">
+    <h2 class="filter-title">Configurações de Relatório</h2>
+  </div>
+  
+  <div class="filter-grid">
+    <div class="filter-item">
+      <label class="filter-label">
         <i class="fas fa-building"></i>
-        Selecione a empresa para os relatórios
+        Empresa
       </label>
-      <div class="selector-wrapper">
-        <select 
-          class="company-select" 
-          [(ngModel)]="selectedCompanyId"
-          [disabled]="isLoadingCompanies">
-          <option [value]="null">Todas as empresas</option>
-          <option *ngFor="let company of companies" [value]="company.id">
-            {{ company.name }}
-          </option>
-        </select>
-        <i class="fas fa-chevron-down select-icon"></i>
+      <select 
+        class="form-control" 
+        [(ngModel)]="selectedCompanyId"
+        (change)="onCompanyChange()">
+        <option [value]="null">Todas as empresas</option>
+        <option *ngFor="let company of companies" [value]="company.id">
+          {{ company.name }}
+        </option>
+      </select>
+    </div>
+    
+    <div class="filter-item">
+      <label class="filter-label">
+        <i class="fas fa-calendar"></i>
+        Período
+      </label>
+      <div class="date-range">
+        <input 
+          type="date" 
+          class="form-control" 
+          [(ngModel)]="startDate"
+          [max]="endDate">
+        <span class="date-separator">até</span>
+        <input 
+          type="date" 
+          class="form-control" 
+          [(ngModel)]="endDate"
+          [min]="startDate">
       </div>
-      <p class="selector-hint">
-        Alguns relatórios podem ser gerados para empresas específicas ou para todas.
-      </p>
+    </div>
+    
+    <div class="filter-item">
+      <label class="filter-label">
+        <i class="fas fa-filter"></i>
+        Tipo
+      </label>
+      <select class="form-control" [(ngModel)]="selectedReportType">
+        <option value="all">Todos os tipos</option>
+        <option value="monthly">Mensal</option>
+        <option value="quarterly">Trimestral</option>
+        <option value="annual">Anual</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Tipos de Relatórios -->
+<h2 class="section-title">Tipos de Relatórios</h2>
+
+<div class="reports-grid">
+  <!-- Relatório Mensal -->
+  <div class="report-type-card" [class.generating]="generatingReport === 'monthly'">
+    <div class="report-icon monthly">
+      <i class="fas fa-calendar-alt"></i>
+    </div>
+    <h3 class="report-name">Relatório Mensal</h3>
+    <p class="report-description">
+      Análise completa das atividades e métricas do mês
+    </p>
+    <div class="report-tags">
+      <span class="tag">
+        <i class="fas fa-check"></i>
+        Completo
+      </span>
+      <span class="tag">
+        <i class="fas fa-chart-line"></i>
+        Métricas
+      </span>
+    </div>
+    <div class="report-actions">
+      <button 
+        class="btn btn-primary"
+        (click)="generateReport('monthly', 'pdf')"
+        [disabled]="generatingReport === 'monthly'">
+        <i class="fas fa-file-pdf"></i>
+        Gerar PDF
+      </button>
+      <button 
+        class="btn btn-success"
+        (click)="generateReport('monthly', 'excel')"
+        [disabled]="generatingReport === 'monthly'">
+        <i class="fas fa-file-excel"></i>
+        Gerar Excel
+      </button>
     </div>
   </div>
 
-  <!-- Cards de Relatórios -->
-  <div class="dashboard-grid">
-    <div class="stat-card report-card" (click)="onGenerateReport('monthly')">
-      <div class="stat-icon">
-        <i class="fas fa-calendar-alt"></i>
-      </div>
-      <h3 class="report-title">Relatório Mensal</h3>
-      <p class="report-description">Resumo completo das atividades do mês com métricas detalhadas</p>
-      <div class="report-scope">
-        <i class="fas fa-globe"></i>
-        <span>Geral</span>
-      </div>
-      <button class="btn btn-primary full-width">
-        <i class="fas fa-download"></i>
-        Gerar Relatório
+  <!-- Relatório por Empresa -->
+  <div class="report-type-card" [class.generating]="generatingReport === 'company'">
+    <div class="report-icon company">
+      <i class="fas fa-building"></i>
+    </div>
+    <h3 class="report-name">Por Empresa</h3>
+    <p class="report-description">
+      Desempenho detalhado de uma empresa específica
+    </p>
+    <div class="report-tags">
+      <span class="tag warning" *ngIf="!selectedCompanyId">
+        <i class="fas fa-exclamation-triangle"></i>
+        Selecione empresa
+      </span>
+      <span class="tag" *ngIf="selectedCompanyId">
+        <i class="fas fa-check"></i>
+        Personalizado
+      </span>
+    </div>
+    <div class="report-actions">
+      <button 
+        class="btn btn-primary"
+        (click)="generateReport('company', 'pdf')"
+        [disabled]="!selectedCompanyId || generatingReport === 'company'">
+        <i class="fas fa-file-pdf"></i>
+        Gerar PDF
+      </button>
+      <button 
+        class="btn btn-success"
+        (click)="generateReport('company', 'excel')"
+        [disabled]="!selectedCompanyId || generatingReport === 'company'">
+        <i class="fas fa-file-excel"></i>
+        Gerar Excel
       </button>
     </div>
-    
-    <div class="stat-card report-card" 
-         [class.needs-selection]="needsCompanySelection('company') && !selectedCompanyId"
-         (click)="onGenerateReport('company')">
-      <div class="stat-icon company-icon">
-        <i class="fas fa-building"></i>
-      </div>
-      <h3 class="report-title">Relatório por Empresa</h3>
-      <p class="report-description">Análise detalhada de desempenho por cliente específico</p>
-      <div class="report-scope">
-        <i class="fas fa-filter"></i>
-        <span>{{ selectedCompanyId ? 'Empresa selecionada' : 'Selecione uma empresa' }}</span>
-      </div>
-      <button class="btn btn-primary full-width">
-        <i class="fas fa-download"></i>
-        Gerar Relatório
-      </button>
+  </div>
+
+  <!-- Relatório de Serviços -->
+  <div class="report-type-card" [class.generating]="generatingReport === 'services'">
+    <div class="report-icon services">
+      <i class="fas fa-tasks"></i>
     </div>
-    
-    <div class="stat-card report-card" (click)="onGenerateReport('services')">
-      <div class="stat-icon services-icon">
-        <i class="fas fa-tasks"></i>
-      </div>
-      <h3 class="report-title">Relatório de Serviços</h3>
-      <p class="report-description">Análise detalhada de performance dos serviços prestados</p>
-      <div class="report-scope">
-        <i class="fas fa-globe"></i>
-        <span>Geral</span>
-      </div>
-      <button class="btn btn-primary full-width">
-        <i class="fas fa-download"></i>
-        Gerar Relatório
-      </button>
-    </div>
-    
-    <div class="stat-card report-card" 
-         [class.needs-selection]="needsCompanySelection('financial') && !selectedCompanyId"
-         (click)="onGenerateReport('financial')">
-      <div class="stat-icon financial-icon">
+    <h3 class="report-name">Serviços</h3>
+    <p class="report-description">
+      Performance e análise dos serviços prestados
+    </p>
+    <div class="report-tags">
+      <span class="tag">
         <i class="fas fa-chart-pie"></i>
-      </div>
-      <h3 class="report-title">Relatório Financeiro</h3>
-      <p class="report-description">Análise completa de receitas e projeções financeiras</p>
-      <div class="report-scope">
-        <i class="fas fa-filter"></i>
-        <span>{{ selectedCompanyId ? 'Empresa selecionada' : 'Selecione uma empresa' }}</span>
-      </div>
-      <button class="btn btn-primary full-width">
-        <i class="fas fa-download"></i>
-        Gerar Relatório
+        Análises
+      </span>
+      <span class="tag">
+        <i class="fas fa-trophy"></i>
+        Performance
+      </span>
+    </div>
+    <div class="report-actions">
+      <button 
+        class="btn btn-primary"
+        (click)="generateReport('services', 'pdf')"
+        [disabled]="generatingReport === 'services'">
+        <i class="fas fa-file-pdf"></i>
+        Gerar PDF
+      </button>
+      <button 
+        class="btn btn-success"
+        (click)="generateReport('services', 'excel')"
+        [disabled]="generatingReport === 'services'">
+        <i class="fas fa-file-excel"></i>
+        Gerar Excel
       </button>
     </div>
   </div>
 
-  <!-- Gráfico de Performance Anual -->
-  <div class="chart-container">
-    <div class="chart-header">
-      <h2 class="chart-title">Performance Anual</h2>
-      <div class="chart-actions">
-        <button 
-          class="chart-action" 
-          [class.active]="currentPerformanceYear === 2024"
-          (click)="onUpdateChart(2024)">2024</button>
-        <button 
-          class="chart-action" 
-          [class.active]="currentPerformanceYear === 2023"
-          (click)="onUpdateChart(2023)">2023</button>
-        <button 
-          class="chart-action" 
-          [class.active]="currentPerformanceYear === 2022"
-          (click)="onUpdateChart(2022)">2022</button>
-      </div>
+  <!-- Relatório Financeiro -->
+  <div class="report-type-card" [class.generating]="generatingReport === 'financial'">
+    <div class="report-icon financial">
+      <i class="fas fa-chart-pie"></i>
     </div>
-    <div class="chart-wrapper">
-      <canvas id="performanceChart"></canvas>
+    <h3 class="report-name">Financeiro</h3>
+    <p class="report-description">
+      Receitas, custos e projeções financeiras
+    </p>
+    <div class="report-tags">
+      <span class="tag">
+        <i class="fas fa-dollar-sign"></i>
+        Receitas
+      </span>
+    </div>
+    <div class="report-actions">
+      <button 
+        class="btn btn-primary"
+        (click)="generateReport('financial', 'pdf')"
+        [disabled]="generatingReport === 'financial'">
+        <i class="fas fa-file-pdf"></i>
+        Gerar PDF
+      </button>
+      <button 
+        class="btn btn-success"
+        (click)="generateReport('financial', 'excel')"
+        [disabled]="generatingReport === 'financial'">
+        <i class="fas fa-file-excel"></i>
+        Gerar Excel
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Histórico de Relatórios -->
+<div class="table-container">
+  <div class="table-header">
+    <h2 class="table-title">Histórico de Relatórios</h2>
+  </div>
+  
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Data/Hora</th>
+          <th>Tipo</th>
+          <th>Empresa</th>
+          <th>Formato</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let report of reportHistory">
+          <td>{{ report.date | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <span class="badge" [ngClass]="'badge-' + report.type">
+              {{ getReportTypeName(report.type) }}
+            </span>
+          </td>
+          <td>{{ report.company || 'Todas' }}</td>
+          <td>
+            <span class="format-badge" [ngClass]="report.format">
+              <i class="fas" [ngClass]="report.format === 'pdf' ? 'fa-file-pdf' : 'fa-file-excel'"></i>
+              {{ report.format.toUpperCase() }}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="'status-' + report.status">
+              <span class="status-dot"></span>
+              {{ getStatusName(report.status) }}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button 
+                class="btn-icon"
+                (click)="downloadReport(report)"
+                [disabled]="report.status !== 'completed'"
+                title="Baixar">
+                <i class="fas fa-download"></i>
+              </button>
+              <button 
+                class="btn-icon"
+                (click)="regenerateReport(report)"
+                title="Gerar novamente">
+                <i class="fas fa-redo"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal" *ngIf="generatingReport" (click)="onModalBackdropClick($event)">
+  <div class="modal-content loading-modal">
+    <div class="loading-animation">
+      <div class="loading-spinner"></div>
+    </div>
+    <h3 class="loading-title">Gerando Relatório</h3>
+    <p class="loading-message">{{ loadingMessage }}</p>
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="loadingProgress"></div>
+      </div>
+      <span class="progress-text">{{ loadingProgress }}%</span>
     </div>
   </div>
 </div>

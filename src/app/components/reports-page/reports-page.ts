@@ -1,10 +1,19 @@
-import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+// reports-page.component.ts
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Chart, registerables } from 'chart.js';
-import { CompanyService, ApiCompany } from '../../services/company';
 import { FormsModule } from '@angular/forms';
+import { CompanyService, ApiCompany } from '../../services/company';
+import { Subject, takeUntil } from 'rxjs';
 
-Chart.register(...registerables);
+interface ReportHistory {
+  id: number;
+  date: Date;
+  type: string;
+  company: string | null;
+  format: 'pdf' | 'excel';
+  status: 'completed' | 'processing' | 'error';
+  downloadUrl?: string;
+}
 
 @Component({
   selector: 'app-reports-page',
@@ -13,251 +22,337 @@ Chart.register(...registerables);
   templateUrl: './reports-page.html',
   styleUrls: ['./reports-page.css']
 })
-export class ReportsPage implements OnInit, AfterViewInit, OnDestroy {
+export class ReportsPage implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
   // Estado das empresas
   companies: ApiCompany[] = [];
   selectedCompanyId: number | null = null;
   isLoadingCompanies = false;
-
-  // Estado do gráfico
-  currentPerformanceYear = 2024;
-  performanceChart: Chart | null = null;
-
-  // Dados de performance (simulados por enquanto)
-  performanceData = {
-    2024: {
-      labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-      data: [45, 52, 48, 65, 70, 68, 75, 80, 78, 82, 85, 88]
+  
+  // Filtros
+  startDate: string = this.getDefaultStartDate();
+  endDate: string = this.getDefaultEndDate();
+  selectedReportType: string = 'all';
+  hasActiveFilters = false;
+  
+  // Stats
+  totalReportsGenerated = 127;
+  lastReportDate = '02/01/2025';
+  averageGenerationTime = 45;
+  
+  // Estado da geração
+  generatingReport: string | null = null;
+  loadingMessage = 'Preparando relatório...';
+  loadingProgress = 0;
+  
+  // Histórico
+  reportHistory: ReportHistory[] = [
+    {
+      id: 1,
+      date: new Date('2025-01-02T14:30:00'),
+      type: 'monthly',
+      company: 'Tech Solutions',
+      format: 'pdf',
+      status: 'completed'
     },
-    2023: {
-      labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-      data: [30, 35, 38, 42, 45, 48, 52, 55, 58, 60, 63, 65]
+    {
+      id: 2,
+      date: new Date('2025-01-02T10:15:00'),
+      type: 'financial',
+      company: 'Startup XYZ',
+      format: 'excel',
+      status: 'completed'
     },
-    2022: {
-      labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-      data: [20, 22, 25, 28, 30, 32, 35, 38, 40, 42, 44, 45]
+    {
+      id: 3,
+      date: new Date('2025-01-01T16:45:00'),
+      type: 'services',
+      company: null,
+      format: 'pdf',
+      status: 'completed'
+    },
+    {
+      id: 4,
+      date: new Date('2025-01-01T09:20:00'),
+      type: 'company',
+      company: 'Empresa ABC',
+      format: 'excel',
+      status: 'error'
     }
-  };
+  ];
 
   constructor(private companyService: CompanyService) {}
 
   ngOnInit() {
     this.loadCompanies();
-  }
-
-  ngAfterViewInit() {
-    // Pequeno delay para garantir que o canvas está renderizado
-    setTimeout(() => {
-      this.initPerformanceChart();
-    }, 100);
-  }
-
-  ngOnDestroy() {
-    if (this.performanceChart) {
-      this.performanceChart.destroy();
-    }
+    this.checkActiveFilters();
   }
 
   /**
    * Carregar lista de empresas
    */
-  async loadCompanies() {
+  private loadCompanies() {
     this.isLoadingCompanies = true;
-    try {
-      const response = await this.companyService.getCompanies({ is_active: true }).toPromise();
-      this.companies = response?.companies || [];
-      
-      // Se não há empresa selecionada e temos empresas, selecionar a primeira
-      if (!this.selectedCompanyId && this.companies.length > 0) {
-        this.selectedCompanyId = this.companies[0].id;
-      }
-    } catch (error) {
-      console.error('Erro ao carregar empresas:', error);
-      this.companies = [];
-    } finally {
-      this.isLoadingCompanies = false;
-    }
+    
+    this.companyService.getCompanies({ is_active: true })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.companies = response.companies || [];
+          this.isLoadingCompanies = false;
+        },
+        error: (error) => {
+          console.error('Erro ao carregar empresas:', error);
+          this.companies = [];
+          this.isLoadingCompanies = false;
+        }
+      });
   }
 
   /**
-   * Gerar relatório
+   * Gerar relatório com animação de loading
    */
-  onGenerateReport(type: string) {
-    if (!this.selectedCompanyId && (type === 'company' || type === 'financial')) {
-      alert('Por favor, selecione uma empresa primeiro.');
+  async generateReport(type: string, format: 'pdf' | 'excel') {
+    // Validar se precisa de empresa selecionada
+    if ((type === 'company' || type === 'financial') && !this.selectedCompanyId) {
+      alert('Por favor, selecione uma empresa para este tipo de relatório.');
       return;
     }
-
-    const selectedCompany = this.companies.find(c => c.id === this.selectedCompanyId);
-    const companyName = selectedCompany ? selectedCompany.name : 'Todas';
-
-    console.log(`Gerando relatório ${type} para empresa: ${companyName}`);
     
-    // TODO: Implementar geração real de relatórios
-    switch(type) {
-      case 'monthly':
-        this.generateMonthlyReport();
-        break;
-      case 'company':
-        this.generateCompanyReport(this.selectedCompanyId!);
-        break;
-      case 'services':
-        this.generateServicesReport();
-        break;
-      case 'financial':
-        this.generateFinancialReport(this.selectedCompanyId!);
-        break;
-    }
-  }
-
-  /**
-   * Atualizar gráfico ao mudar o ano
-   */
-  onUpdateChart(year: number) {
-    this.currentPerformanceYear = year;
-    this.updatePerformanceChart();
-  }
-
-  /**
-   * Inicializar gráfico de performance
-   */
-  private initPerformanceChart() {
-    const canvas = document.getElementById('performanceChart') as HTMLCanvasElement;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Destruir gráfico existente se houver
-    if (this.performanceChart) {
-      this.performanceChart.destroy();
-    }
-
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    const textColor = isDarkMode ? '#e5e7eb' : '#374151';
-    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-
-    const currentData = this.performanceData[this.currentPerformanceYear as keyof typeof this.performanceData];
-
-    this.performanceChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: currentData.labels,
-        datasets: [{
-          label: 'Performance',
-          data: currentData.data,
-          borderColor: '#1dd882',
-          backgroundColor: 'rgba(29, 216, 130, 0.1)',
-          borderWidth: 3,
-          tension: 0.4,
-          pointRadius: 6,
-          pointHoverRadius: 8,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#1dd882',
-          pointBorderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
-        plugins: {
-          legend: {
-            display: false
-          },
-          tooltip: {
-            backgroundColor: isDarkMode ? '#374151' : '#fff',
-            titleColor: textColor,
-            bodyColor: textColor,
-            borderColor: isDarkMode ? '#4b5563' : '#e5e7eb',
-            borderWidth: 1,
-            padding: 12,
-            displayColors: false,
-            callbacks: {
-              label: (context) => {
-                return `Performance: ${context.parsed.y}%`;
-              }
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              color: gridColor,
-              display: true
-            },
-            ticks: {
-              color: textColor,
-              font: {
-                size: 12
-              }
-            }
-          },
-          y: {
-            beginAtZero: true,
-            max: 100,
-            grid: {
-              color: gridColor,
-              display: true
-            },
-            ticks: {
-              color: textColor,
-              font: {
-                size: 12
-              },
-              callback: function(value) {
-                return value + '%';
-              }
-            }
-          }
-        }
+    // Iniciar loading
+    this.generatingReport = type;
+    this.loadingProgress = 0;
+    this.updateLoadingMessage(type, format);
+    
+    // Simular progresso de geração
+    const progressInterval = setInterval(() => {
+      if (this.loadingProgress < 90) {
+        this.loadingProgress += Math.random() * 15;
       }
+    }, 300);
+    
+    try {
+      // Aqui viria a chamada real para o backend
+      await this.simulateReportGeneration(type, format);
+      
+      // Completar progresso
+      this.loadingProgress = 100;
+      
+      setTimeout(() => {
+        clearInterval(progressInterval);
+        this.generatingReport = null;
+        
+        // Adicionar ao histórico
+        this.addToHistory(type, format);
+        
+      }, 500);
+      
+    } catch (error) {
+      clearInterval(progressInterval);
+      this.generatingReport = null;
+      console.error('Erro ao gerar relatório:', error);
+      alert('Erro ao gerar relatório. Por favor, tente novamente.');
+    }
+  }
+
+  /**
+   * Simular geração de relatório (substituir por chamada real)
+   */
+  private simulateReportGeneration(type: string, format: string): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, 2000 + Math.random() * 2000);
     });
   }
 
   /**
-   * Atualizar dados do gráfico
+   * Atualizar mensagem de loading baseado no tipo
    */
-  private updatePerformanceChart() {
-    if (!this.performanceChart) return;
-
-    const currentData = this.performanceData[this.currentPerformanceYear as keyof typeof this.performanceData];
+  private updateLoadingMessage(type: string, format: string) {
+    const messages = {
+      monthly: 'Coletando dados do mês...',
+      company: 'Analisando dados da empresa...',
+      services: 'Processando informações de serviços...',
+      financial: 'Calculando métricas financeiras...'
+    };
     
-    this.performanceChart.data.labels = currentData.labels;
-    this.performanceChart.data.datasets[0].data = currentData.data;
-    this.performanceChart.update();
+    this.loadingMessage = messages[type as keyof typeof messages] || 'Preparando relatório...';
+    
+    setTimeout(() => {
+      this.loadingMessage = format === 'pdf' 
+        ? 'Gerando PDF otimizado...' 
+        : 'Criando planilha Excel...';
+    }, 1000);
   }
 
   /**
-   * Métodos de geração de relatórios (placeholder)
+   * Adicionar relatório ao histórico
    */
-  private generateMonthlyReport() {
-    console.log('Gerando relatório mensal...');
-    // TODO: Implementar geração real
-  }
-
-  private generateCompanyReport(companyId: number) {
-    console.log(`Gerando relatório da empresa ${companyId}...`);
-    // TODO: Implementar geração real
-  }
-
-  private generateServicesReport() {
-    console.log('Gerando relatório de serviços...');
-    // TODO: Implementar geração real
-  }
-
-  private generateFinancialReport(companyId: number) {
-    console.log(`Gerando relatório financeiro da empresa ${companyId}...`);
-    // TODO: Implementar geração real
+  private addToHistory(type: string, format: 'pdf' | 'excel') {
+    const company = this.selectedCompanyId 
+      ? this.companies.find(c => c.id === this.selectedCompanyId)?.name || null
+      : null;
+    
+    const newReport: ReportHistory = {
+      id: Date.now(),
+      date: new Date(),
+      type,
+      company,
+      format,
+      status: 'completed'
+    };
+    
+    this.reportHistory.unshift(newReport);
+    this.totalReportsGenerated++;
+    this.lastReportDate = new Date().toLocaleDateString('pt-BR');
   }
 
   /**
-   * Verificar se o relatório precisa de seleção de empresa
+   * Download de relatório do histórico
    */
-  needsCompanySelection(reportType: string): boolean {
-    return reportType === 'company' || reportType === 'financial';
+  downloadReport(report: ReportHistory) {
+    if (report.status !== 'completed') return;
+    
+    // Aqui viria a lógica real de download
+    console.log('Baixando relatório:', report);
+    alert(`Baixando ${this.getReportTypeName(report.type)} em ${report.format.toUpperCase()}`);
+  }
+
+  /**
+   * Regenerar relatório
+   */
+  regenerateReport(report: ReportHistory) {
+    const type = report.type;
+    const format = report.format;
+    
+    // Se o relatório original tinha empresa, selecionar a mesma
+    if (report.company) {
+      const company = this.companies.find(c => c.name === report.company);
+      if (company) {
+        this.selectedCompanyId = company.id;
+      }
+    }
+    
+    this.generateReport(type, format);
+  }
+
+  /**
+   * Eventos de mudança
+   */
+  onCompanyChange() {
+    this.checkActiveFilters();
+  }
+
+  /**
+   * Verificar se há filtros ativos
+   */
+  private checkActiveFilters() {
+    this.hasActiveFilters = 
+      this.selectedCompanyId !== null ||
+      this.selectedReportType !== 'all' ||
+      this.startDate !== this.getDefaultStartDate() ||
+      this.endDate !== this.getDefaultEndDate();
+  }
+
+  /**
+   * Resetar filtros
+   */
+  resetFilters() {
+    this.selectedCompanyId = null;
+    this.selectedReportType = 'all';
+    this.startDate = this.getDefaultStartDate();
+    this.endDate = this.getDefaultEndDate();
+    this.checkActiveFilters();
+  }
+
+  /**
+   * Helpers para nomes legíveis
+   */
+  getReportTypeName(type: string): string {
+    const names: { [key: string]: string } = {
+      monthly: 'Relatório Mensal',
+      company: 'Relatório por Empresa',
+      services: 'Relatório de Serviços',
+      financial: 'Relatório Financeiro'
+    };
+    return names[type] || type;
+  }
+
+  getStatusName(status: string): string {
+    const names: { [key: string]: string } = {
+      completed: 'Concluído',
+      processing: 'Processando',
+      error: 'Erro'
+    };
+    return names[status] || status;
+  }
+
+  /**
+   * Obter datas padrão
+   */
+  private getDefaultStartDate(): string {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1);
+    return date.toISOString().split('T')[0];
+  }
+
+  private getDefaultEndDate(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  /**
+   * Exportar relatório real (integração com backend)
+   */
+  private async exportReport(type: string, format: 'pdf' | 'excel'): Promise<void> {
+    // TODO: Implementar chamada real ao backend
+    // Exemplo de estrutura:
+    /*
+    const params = {
+      type,
+      format,
+      companyId: this.selectedCompanyId,
+      startDate: this.startDate,
+      endDate: this.endDate,
+      reportType: this.selectedReportType
+    };
+    
+    try {
+      const response = await this.reportService.generateReport(params).toPromise();
+      
+      // Download do arquivo
+      const blob = new Blob([response.data], { 
+        type: format === 'pdf' ? 'application/pdf' : 'application/vnd.ms-excel' 
+      });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `relatorio_${type}_${new Date().getTime()}.${format}`;
+      link.click();
+      
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      throw error;
+    }
+    */
+  }
+
+  /**
+   * Lifecycle - limpar recursos ao destruir componente
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Fechar modal ao clicar no backdrop
+   */
+  onModalBackdropClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (target.classList.contains('modal')) {
+      // Não fechar se estiver gerando relatório
+      if (this.generatingReport) return;
+    }
   }
 }
