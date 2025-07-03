@@ -6,7 +6,6 @@
   [notifications]="notifications"
   [unreadNotificationsCount]="unreadNotificationsCount"
   [isNotificationOpen]="isNotificationOpen"
-  (toggleSidebar)="toggleSidebar()"
   (toggleMobileSidebar)="toggleMobileSidebar()"
   (toggleTheme)="toggleTheme()"
   (toggleNotifications)="toggleNotifications()"
@@ -15,16 +14,17 @@
   (logout)="logout()">
 </app-header>
 
-<!-- Sidebar -->
+<!-- Sidebar - Adicionado evento sidebarToggled -->
 <app-sidebar
   [navSections]="navSections"
   [isSidebarCollapsed]="isSidebarCollapsed"
   [isMobileSidebarOpen]="isMobileSidebarOpen"
-  (navigateTo)="navigateTo($event)">
+  (navigateTo)="navigateTo($event)"
+  (sidebarToggled)="toggleSidebar()">
 </app-sidebar>
 
 <!-- Main Content -->
-<main class="main-content">
+<main class="main-content" [class.sidebar-collapsed]="isSidebarCollapsed">
   <!-- IMPORTANTE: Apenas o router-outlet, sem os componentes individuais -->
   <router-outlet></router-outlet>
 </main>

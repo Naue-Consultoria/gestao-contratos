@@ -1,3 +1,4 @@
+// sidebar.ts
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -19,23 +20,7 @@ interface NavSection {
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  template: `
-    <nav class="sidebar" [class.collapsed]="isSidebarCollapsed" [class.active]="isMobileSidebarOpen">
-      <ul class="nav-menu">
-        <div *ngFor="let section of navSections" class="nav-section">
-          <div class="nav-section-title">{{ section.title }}</div>
-          <a 
-            *ngFor="let item of section.items"
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            class="nav-item">
-            <i [class]="item.icon + ' nav-icon'"></i>
-            <span class="nav-text">{{ item.text }}</span>
-          </a>
-        </div>
-      </ul>
-    </nav>
-  `,
+  templateUrl: './sidebar.html', // Mudança: usar arquivo separado
   styleUrls: ['./sidebar.css']
 })
 export class SidebarComponent {
@@ -44,4 +29,9 @@ export class SidebarComponent {
   @Input() isMobileSidebarOpen = false;
   
   @Output() navigateTo = new EventEmitter<string>();
+  @Output() sidebarToggled = new EventEmitter<void>(); // Novo evento
+  
+  toggleSidebar(): void {
+    this.sidebarToggled.emit();
+  }
 }

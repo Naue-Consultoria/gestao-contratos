@@ -1,68 +1,126 @@
-<header class="header">
-    <div class="header-content">
-      <div class="logo" (click)="toggleSidebar.emit()">
-        <div class="logo-icon">N</div>
-        <span class="logo-text">NAUE Consultoria</span>
-      </div>
-      
-      <div class="header-actions">
-        <button class="mobile-menu-btn" (click)="toggleMobileSidebar.emit()">
-          <i class="fas fa-bars"></i>
-        </button>
-        
-        <div class="search-box" [class.active]="isSearchActive">
-          <i class="fas fa-search search-icon"></i>
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="Buscar contratos, empresas..." 
-            [(ngModel)]="globalSearchTerm"
-            (input)="onSearch()">
-        </div>
-        
-        <button class="mobile-search-btn" (click)="toggleSearch()">
-          <i class="fas fa-search"></i>
-        </button>
-        
-        <button class="notification-btn tooltip" (click)="toggleNotifications.emit()">
-          <i class="fas fa-bell"></i>
-          <span class="notification-badge" *ngIf="unreadNotificationsCount > 0"></span>
-          <span class="tooltiptext">{{ unreadNotificationsCount }} novas notificações</span>
-        </button>
-        
-        <button class="theme-toggle" (click)="toggleTheme.emit()" title="Alternar tema">
-          <i [class]="isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
-        </button>
-        
-        <button class="logout-btn" title="Sair do sistema" (click)="logout.emit()">
-          <i class="fas fa-sign-out-alt"></i>
-        </button>
-        
-        <div class="user-menu">
-          <div class="user-info">
-            <span class="user-name">{{ userName }}</span>
-            <span class="user-role">{{ userRole }}</span>
-          </div>
-          <div class="user-avatar">{{ userInitials }}</div>
-        </div>
-      </div>
+<!-- header.html -->
+<header class="header" [class.search-open]="isSearchActive">
+  <div class="header-content">
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" (click)="toggleMobileSidebar.emit()">
+      <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Logo - NAVEGAÇÃO ao invés de toggle -->
+    <a class="logo" routerLink="/home/dashboard">
+      <div class="logo-icon">N</div>
+      <span class="logo-text">NAUE Consultoria</span>
+    </a>
+    
+    <!-- Desktop Search Box -->
+    <div class="search-box desktop-search" [class.active]="isSearchActive">
+      <i class="fas fa-search search-icon"></i>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Buscar contratos, empresas..." 
+        [(ngModel)]="globalSearchTerm"
+        (input)="onSearch()">
     </div>
     
-    <!-- Notification dropdown -->
-    <div class="notification-dropdown" *ngIf="isNotificationOpen">
-      <div class="notification-header">
-        <h3 class="notification-title">Notificações</h3>
-        <button class="notification-clear" (click)="clearNotifications.emit()">Limpar tudo</button>
-      </div>
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <!-- Mobile Search Button -->
+      <button class="mobile-search-btn" (click)="toggleSearch()">
+        <i class="fas fa-search"></i>
+      </button>
       
+      <!-- Notifications -->
+      <button class="notification-btn tooltip" (click)="toggleNotifications.emit()">
+        <i class="fas fa-bell"></i>
+        <span class="notification-badge" *ngIf="unreadNotificationsCount > 0">{{unreadNotificationsCount}}</span>
+        <span class="tooltiptext">{{ unreadNotificationsCount }} novas notificações</span>
+      </button>
+      
+      <!-- Theme Toggle -->
+      <button class="theme-toggle" (click)="toggleTheme.emit()" title="Alternar tema">
+        <i [class]="isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+      </button>
+      
+      <!-- Logout Button (desktop only) -->
+      <button class="logout-btn desktop-only" title="Sair do sistema" (click)="logout.emit()">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+      
+      <!-- User Menu -->
+      <div class="user-menu" (click)="toggleUserMenu()">
+        <div class="user-info">
+          <span class="user-name">{{ userName }}</span>
+          <span class="user-role">{{ userRole }}</span>
+        </div>
+        <div class="user-avatar">{{ userInitials }}</div>
+        <i class="fas fa-chevron-down user-menu-arrow"></i>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Mobile Search Bar -->
+  <div class="mobile-search-bar" *ngIf="isSearchActive">
+    <div class="search-box">
+      <i class="fas fa-search search-icon"></i>
+      <input 
+        #mobileSearchInput
+        type="text" 
+        class="search-input" 
+        placeholder="Buscar contratos, empresas..." 
+        [(ngModel)]="globalSearchTerm"
+        (input)="onSearch()">
+      <button class="search-close" (click)="closeSearch()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Notification dropdown -->
+  <div class="notification-dropdown" *ngIf="isNotificationOpen">
+    <div class="notification-header">
+      <h3 class="notification-title">Notificações</h3>
+      <button class="notification-clear" (click)="clearNotifications.emit()">Limpar tudo</button>
+    </div>
+    
+    <div class="notification-list">
       <div 
         *ngFor="let notification of notifications" 
         class="notification-item" 
-        [class.unread]="notification.isUnread">
+        [class.unread]="notification.isUnread"
+        (click)="markAsRead(notification)">
         <div class="notification-time">{{ notification.time }}</div>
         <div class="notification-content">{{ notification.content }}</div>
       </div>
-      
-      <a href="#" class="notification-show-all">Ver todas as notificações</a>
     </div>
-  </header>
+    
+    <a href="#" class="notification-show-all" (click)="viewAllNotifications($event)">Ver todas as notificações</a>
+  </div>
+  
+  <!-- User Menu Dropdown -->
+  <div class="user-dropdown" *ngIf="isUserMenuOpen">
+    <div class="user-dropdown-header">
+      <div class="user-avatar-large">{{ userInitials }}</div>
+      <div class="user-dropdown-info">
+        <span class="user-name">{{ userName }}</span>
+        <span class="user-role">{{ userRole }}</span>
+      </div>
+    </div>
+    
+    <div class="user-dropdown-menu">
+      <a href="#" class="dropdown-item" (click)="navigateToProfile($event)">
+        <i class="fas fa-user"></i>
+        <span>Meu Perfil</span>
+      </a>
+      <a href="#" class="dropdown-item" (click)="navigateToSettings($event)">
+        <i class="fas fa-cog"></i>
+        <span>Configurações</span>
+      </a>
+      <div class="dropdown-divider"></div>
+      <a href="#" class="dropdown-item" (click)="handleLogout($event)">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Sair</span>
+      </a>
+    </div>
+  </div>
+</header>

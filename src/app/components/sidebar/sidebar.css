@@ -1,7 +1,7 @@
 .sidebar {
     position: fixed;
     left: 0;
-    top: 77px;
+    top: 77px; /* Altura do header */
     bottom: 0;
     width: 260px;
     background-color: var(--white);
@@ -11,23 +11,61 @@
     z-index: 900;
 }
 
-:host-context(body.dark-mode) .sidebar {
-    background-color: var(--dark-card);
-    border-right: 1px solid var(--dark-border);
+/* Botão Toggle Compacto */
+.sidebar-toggle-compact {
+    position: absolute;
+    right: 10px;
+    top: 10px; /* Próximo ao topo */
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid var(--border-gray);
+    color: var(--text-gray);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    z-index: 10;
+    opacity: 0.6;
 }
 
-.sidebar.collapsed {
-    width: 70px;
+:host-context(body.dark-mode) .sidebar-toggle-compact {
+    border-color: #444;
+    color: #888;
 }
 
+/* Hover state */
+.sidebar-toggle-compact:hover {
+    opacity: 1;
+    background: var(--light-gray);
+    color: var(--primary-green);
+    border-color: var(--primary-green);
+}
+
+:host-context(body.dark-mode) .sidebar-toggle-compact:hover {
+    background: #333;
+}
+
+/* Quando sidebar está colapsada */
+.sidebar.collapsed .sidebar-toggle-compact {
+    right: 50%;
+    transform: translateX(50%);
+}
+
+/* Nav menu - começar direto do topo */
 .nav-menu {
-    padding: 1.5rem 0;
+    padding: 1.5rem 0; /* Padding normal, sem espaço extra */
 }
 
-.nav-section {
-    margin-bottom: 2rem;
+/* Primeira seção sem margin extra */
+.nav-section:first-child {
+    margin-top: 0;
 }
 
+/* Ajuste do título da seção para não conflitar com o botão */
 .nav-section-title {
     font-size: 0.75rem;
     text-transform: uppercase;
@@ -36,90 +74,78 @@
     padding: 0 1.5rem;
     margin-bottom: 0.5rem;
     letter-spacing: 0.5px;
-}
-
-:host-context(body.dark-mode) .nav-section-title {
-    color: #aaa;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    padding: 0.875rem 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
     position: relative;
-    color: var(--text-gray);
-    text-decoration: none;
 }
 
-:host-context(body.dark-mode) .nav-item {
-    color: #ccc;
+/* Garantir que o botão não sobreponha o conteúdo */
+.nav-section:first-child .nav-section-title {
+    padding-right: 3rem; /* Espaço para o botão */
 }
 
-.nav-item::before {
-    content: '';
+/* Alternativa: Botão integrado à linha da seção */
+.sidebar-toggle-inline {
     position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background-color: var(--primary-green);
-    transform: scaleY(0);
-    transition: transform 0.3s ease;
+    right: 1rem;
+    top: 1.25rem;
+    background: none;
+    border: none;
+    color: var(--text-gray);
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 0.75rem;
+    opacity: 0.5;
+    transition: all 0.3s ease;
 }
 
-.nav-item:hover {
-    color: var(--text-dark);
-    background-color: rgba(29, 216, 130, 0.05);
-}
-
-:host-context(body.dark-mode) .nav-item:hover {
-    color: var(--dark-text);
-    background-color: rgba(29, 216, 130, 0.1);
-}
-
-.nav-item.active {
+.sidebar-toggle-inline:hover {
+    opacity: 1;
     color: var(--primary-green);
-    background-color: rgba(29, 216, 130, 0.1);
-    font-weight: 600;
 }
 
-:host-context(body.dark-mode) .nav-item.active {
-    background-color: rgba(29, 216, 130, 0.15);
+/* Tooltip melhorado para itens colapsados */
+.sidebar.collapsed .nav-item {
+    position: relative;
 }
 
-.nav-item.active::before {
-    transform: scaleY(1);
-}
-
-.nav-icon {
-    font-size: 1.125rem;
-    width: 1.125rem;
-    text-align: center;
-}
-
-.nav-text {
+.sidebar.collapsed .nav-item::after {
+    content: attr(title);
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-5px);
+    padding: 0.5rem 0.75rem;
+    background: var(--dark-gray);
+    color: white;
+    border-radius: 8px;
     font-size: 0.875rem;
-    transition: opacity 0.3s ease;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar.collapsed .nav-item:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+/* Mobile - esconder toggle */
+@media (max-width: 768px) {
+    .sidebar-toggle-compact,
+    .sidebar-toggle-inline {
+        display: none;
+    }
+}
+
+/* Garantir que sidebar colapsada funcione bem */
+.sidebar.collapsed {
+    width: 70px;
 }
 
 .sidebar.collapsed .nav-text,
 .sidebar.collapsed .nav-section-title {
     opacity: 0;
     visibility: hidden;
-}
-
-/* Mobile styles */
-@media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-        z-index: 999;
-        box-shadow: var(--shadow-xl);
-    }
-
-    .sidebar.active {
-        transform: translateX(0);
-    }
 }

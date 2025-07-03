@@ -1,6 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+// header.ts
+import { Component, Output, EventEmitter, Input, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router'; // Adicionar para navegação
 
 interface Notification {
   id: number;
@@ -12,7 +14,7 @@ interface Notification {
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule], // Adicionar RouterModule
   templateUrl: './header.html',
   styleUrls: ['./header.css']
 })
@@ -25,7 +27,7 @@ export class HeaderComponent {
   @Input() unreadNotificationsCount = 0;
   @Input() isNotificationOpen = false;
   
-  @Output() toggleSidebar = new EventEmitter<void>();
+  // Remover toggleSidebar já que o logo não fará mais isso
   @Output() toggleMobileSidebar = new EventEmitter<void>();
   @Output() toggleTheme = new EventEmitter<void>();
   @Output() toggleNotifications = new EventEmitter<void>();
@@ -33,14 +35,69 @@ export class HeaderComponent {
   @Output() performSearch = new EventEmitter<string>();
   @Output() logout = new EventEmitter<void>();
   
-  isSearchActive = false;
-  globalSearchTerm = '';
+  @ViewChild('mobileSearchInput') mobileSearchInput!: ElementRef;
   
-  toggleSearch() {
+  globalSearchTerm = '';
+  isSearchActive = false;
+  isUserMenuOpen = false;
+  
+  toggleSearch(): void {
     this.isSearchActive = !this.isSearchActive;
+    if (this.isSearchActive) {
+      this.isUserMenuOpen = false;
+      
+      setTimeout(() => {
+        this.mobileSearchInput?.nativeElement?.focus();
+      }, 100);
+    }
   }
   
-  onSearch() {
+  closeSearch(): void {
+    this.isSearchActive = false;
+    this.globalSearchTerm = '';
+    this.onSearch();
+  }
+  
+  onSearch(): void {
     this.performSearch.emit(this.globalSearchTerm);
+  }
+  
+  toggleUserMenu(): void {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+    this.isSearchActive = false;
+  }
+  
+  closeUserMenu(): void {
+    this.isUserMenuOpen = false;
+  }
+  
+  navigateToProfile(event: Event): void {
+    event.preventDefault();
+    console.log('Navegar para perfil');
+    this.closeUserMenu();
+  }
+  
+  navigateToSettings(event: Event): void {
+    event.preventDefault();
+    console.log('Navegar para configurações');
+    this.closeUserMenu();
+  }
+  
+  handleLogout(event: Event): void {
+    event.preventDefault();
+    this.logout.emit();
+    this.closeUserMenu();
+  }
+  
+  viewAllNotifications(event: Event): void {
+    event.preventDefault();
+    console.log('Ver todas as notificações');
+  }
+  
+  markAsRead(notification: Notification): void {
+    if (notification.isUnread) {
+      notification.isUnread = false;
+      this.toggleNotifications.emit();
+    }
   }
 }

@@ -1755,3 +1755,163 @@ input[type="radio"] {
     display: none;
 }
 
+
+/* Adicione estas regras ao seu home.css existente */
+
+/* Main Content - Atualização para responsividade com sidebar */
+.main-content {
+    margin-left: 260px;
+    margin-top: 77px;
+    padding: 2rem;
+    transition: all 0.3s ease; /* Mudança de margin-left para all */
+    min-height: calc(100vh - 77px);
+    width: calc(100% - 260px); /* Adicionar largura responsiva */
+}
+
+/* Quando a sidebar está colapsada - NOVA REGRA */
+.main-content.sidebar-collapsed {
+    margin-left: 70px;
+    width: calc(100% - 70px);
+}
+
+/* Dashboard Grid - Melhor responsividade */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); /* Reduzir minimo de 280px para 260px */
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+/* Breakpoints específicos para quando a sidebar está expandida */
+@media (min-width: 1600px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    /* Com sidebar colapsada - mais espaço */
+    .main-content.sidebar-collapsed .dashboard-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 1599px) and (min-width: 1400px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .main-content.sidebar-collapsed .dashboard-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 1399px) and (min-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .main-content.sidebar-collapsed .dashboard-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 1199px) and (min-width: 992px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .main-content.sidebar-collapsed .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Ajustes para containers de gráficos e tabelas */
+.chart-container,
+.table-container {
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+/* Melhor espaçamento quando sidebar está colapsada */
+.main-content.sidebar-collapsed {
+    padding: 2rem 2.5rem;
+}
+
+@media (min-width: 1600px) {
+    .main-content.sidebar-collapsed {
+        padding: 2rem 3rem;
+    }
+}
+
+/* Ajuste da animação dos cards quando o layout muda */
+.stat-card {
+    transition: all 0.3s ease;
+}
+
+/* Garantir que tabelas sejam responsivas */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Activities section responsiva */
+.activities-section {
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+/* Para tablets - sidebar sempre colapsada */
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 70px;
+        width: calc(100% - 70px);
+    }
+    
+    .main-content.sidebar-collapsed {
+        margin-left: 70px;
+        width: calc(100% - 70px);
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Mobile - sem sidebar */
+@media (max-width: 768px) {
+    .main-content,
+    .main-content.sidebar-collapsed {
+        margin-left: 0;
+        width: 100%;
+        padding: 1rem;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* Animações suaves para todos os elementos afetados */
+.page-header,
+.stat-card,
+.chart-container,
+.table-container,
+.activities-section {
+    transition: all 0.3s ease;
+}
+
+/* Melhoria na transição dos elementos internos */
+.stat-value,
+.chart-title,
+.table-title {
+    transition: font-size 0.3s ease;
+}
+
+/* Ajuste fino para conteúdo muito largo */
+.content-wrapper {
+    max-width: 100%;
+    overflow: hidden;
+}
