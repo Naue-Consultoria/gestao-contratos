@@ -281,7 +281,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     console.log('Executando ação:', action);
     switch(action) {
       case 'newContract':
-        
+        this.router.navigate(['/home/contracts/new']);
         break;
       case 'newCompany':
         // Navegar para nova empresa

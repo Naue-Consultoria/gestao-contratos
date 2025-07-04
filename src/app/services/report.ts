@@ -1,0 +1,64 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface ReportRequest {
+  companyId: string;
+  format: 'pdf' | 'excel';
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ReportService {
+  private apiUrl = 'http://localhost:3000/api/reports';
+
+  constructor(private http: HttpClient) {}
+
+  generateMonthlyReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/monthly`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
+  generateCompanyReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/by-company`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
+  generateServicesReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/services`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
+  generateFinancialReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/financial`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
+  // Método auxiliar para download do arquivo
+  downloadFile(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+  }
+}
