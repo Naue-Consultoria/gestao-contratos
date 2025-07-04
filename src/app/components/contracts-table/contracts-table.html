@@ -8,98 +8,261 @@
     </div>
   </div>
 
-  <div class="tabs">
-    <div 
-      class="tab" 
-      [class.active]="currentContractTab === 'all'"
-      (click)="showContractTab('all')">
-      Todos os Contratos
+  <!-- Statistics Cards -->
+  <div class="dashboard-grid mb-4">
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Total de Contratos</div>
+          <div class="stat-value">{{ stats.total }}</div>
+          <div class="stat-change positive" *ngIf="stats.active > 0">
+            <i class="fas fa-check-circle"></i>
+            {{ stats.active }} ativos
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-file-contract"></i>
+        </div>
+      </div>
     </div>
-    <div 
-      class="tab" 
-      [class.active]="currentContractTab === 'grandes'"
-      (click)="showContractTab('grandes')">
-      Contratos Grandes
+    
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Valor Total</div>
+          <div class="stat-value">{{ formatTotalValue() }}</div>
+          <div class="stat-change positive">
+            <i class="fas fa-chart-line"></i>
+            Contratos ativos: {{ formatActiveValue() }}
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-dollar-sign"></i>
+        </div>
+      </div>
     </div>
-    <div 
-      class="tab" 
-      [class.active]="currentContractTab === 'pontuais'"
-      (click)="showContractTab('pontuais')">
-      Contratos Pontuais
+    
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Por Tipo</div>
+          <div class="stat-value">{{ stats.typeStats.Grande + stats.typeStats.Pontual + stats.typeStats.Individual }}</div>
+          <div class="type-breakdown">
+            <span class="type-item">
+              <i class="fas fa-building"></i> {{ stats.typeStats.Grande }} Grandes
+            </span>
+            <span class="type-item">
+              <i class="fas fa-calendar-check"></i> {{ stats.typeStats.Pontual }} Pontuais
+            </span>
+            <span class="type-item">
+              <i class="fas fa-user"></i> {{ stats.typeStats.Individual }} Individuais
+            </span>
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-chart-pie"></i>
+        </div>
+      </div>
     </div>
-    <div 
-      class="tab" 
-      [class.active]="currentContractTab === 'mentorias'"
-      (click)="showContractTab('mentorias')">
-      Mentorias Individuais
+    
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Duração Média</div>
+          <div class="stat-value">{{ stats.averageDuration }} dias</div>
+          <div class="stat-change positive">
+            <i class="fas fa-clock"></i>
+            Contratos ativos
+          </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-hourglass-half"></i>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab" [class.active]="currentTab === 'all'" (click)="changeTab('all')">
+      Todos os Contratos
+      <span class="tab-count">{{ contracts.length }}</span>
+    </div>
+    <div class="tab" [class.active]="currentTab === 'Grande'" (click)="changeTab('Grande')">
+      Contratos Grandes
+      <span class="tab-count">{{ stats.typeStats.Grande }}</span>
+    </div>
+    <div class="tab" [class.active]="currentTab === 'Pontual'" (click)="changeTab('Pontual')">
+      Contratos Pontuais
+      <span class="tab-count">{{ stats.typeStats.Pontual }}</span>
+    </div>
+    <div class="tab" [class.active]="currentTab === 'Individual'" (click)="changeTab('Individual')">
+      Mentorias Individuais
+      <span class="tab-count">{{ stats.typeStats.Individual }}</span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
   <div class="table-container">
+    <!-- Filters and Actions -->
     <div class="table-header">
-      <h2 class="table-title">Lista de Contratos</h2>
-      <div class="table-actions">
-        <button class="btn btn-primary" (click)="openContractModal()">
+      <div class="filters-section">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Buscar por número ou empresa..."
+            [(ngModel)]="filters.search"
+            (input)="applyFilters()">
+        </div>
+        
+        <select class="filter-select" [(ngModel)]="filters.status" (change)="applyFilters()">
+          <option value="">Todos os status</option>
+          <option value="active">Ativo</option>
+          <option value="completed">Concluído</option>
+          <option value="cancelled">Cancelado</option>
+          <option value="suspended">Suspenso</option>
+        </select>
+        
+        <select class="filter-select" [(ngModel)]="filters.company_id" (change)="applyFilters()">
+          <option [value]="null">Todas as empresas</option>
+          <option *ngFor="let company of companies" [value]="company.id">{{ company.name }}</option>
+        </select>
+        
+        <button class="btn btn-secondary" (click)="clearFilters()" *ngIf="filters.search || filters.status || filters.company_id">
+          <i class="fas fa-times"></i>
+          Limpar filtros
+        </button>
+      </div>
+      
+      <div class="action-buttons">
+        <button class="btn btn-secondary" (click)="exportToPDF()">
+          <i class="fas fa-file-pdf"></i>
+          PDF
+        </button>
+        <button class="btn btn-secondary" (click)="exportToExcel()">
+          <i class="fas fa-file-excel"></i>
+          Excel
+        </button>
+        <button class="btn btn-primary" (click)="openNewContractPage()">
           <i class="fas fa-plus"></i>
           Novo Contrato
-        </button>
-        <button class="btn-icon" (click)="exportToPDF()">
-          <i class="fas fa-file-pdf"></i>
-        </button>
-        <button class="btn-icon" (click)="exportToExcel()">
-          <i class="fas fa-file-excel"></i>
         </button>
       </div>
     </div>
     
-    <div class="table-wrapper">
-      <table>
+    <!-- Error Message -->
+    <div *ngIf="error" class="error-message">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ error }}
+    </div>
+    
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-container">
+      <i class="fas fa-spinner fa-spin"></i>
+      Carregando contratos...
+    </div>
+    
+    <!-- Table -->
+    <div class="table-wrapper" *ngIf="!isLoading">
+      <!-- Empty State -->
+      <div *ngIf="filteredContracts.length === 0 && !error" class="empty-state">
+        <i class="fas fa-file-contract empty-icon"></i>
+        <h3>Nenhum contrato encontrado</h3>
+        <p *ngIf="filters.search || filters.status || filters.company_id">
+          Tente ajustar os filtros de busca
+        </p>
+        <p *ngIf="!filters.search && !filters.status && !filters.company_id">
+          Clique no botão "Novo Contrato" para criar o primeiro contrato
+        </p>
+      </div>
+      
+      <!-- Contracts Table -->
+      <table class="contracts-table" *ngIf="filteredContracts.length > 0">
         <thead>
           <tr>
+            <th>Número</th>
             <th>Empresa</th>
             <th>Tipo</th>
+            <th>Início</th>
+            <th>Término</th>
+            <th>Duração</th>
             <th>Serviços</th>
-            <th>Progresso</th>
+            <th>Valor</th>
             <th>Status</th>
             <th>Ações</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let contract of contracts">
+          <tr *ngFor="let contract of filteredContracts" class="clickable" (click)="viewContract(contract.id)">
+            <td>
+              <div class="contract-number">
+                {{ contract.contractNumber }}
+              </div>
+            </td>
             <td>
               <div class="company-info">
-                <div class="company-avatar" [style.background]="contract.gradient">
-                  {{ contract.companyInitials }}
-                </div>
-                <div>
-                  <div class="company-name">{{ contract.company }}</div>
-                  <div class="company-type">{{ contract.companyType }}</div>
-                </div>
-              </div>
-            </td>
-            <td>{{ contract.contractType }}</td>
-            <td>
-              <div class="services-info">
-                <span>{{ contract.services }} serviços</span>
-                <span class="services-active">({{ contract.activeServices }} ativos)</span>
+                <i class="fas fa-building"></i>
+                {{ contract.companyName }}
               </div>
             </td>
             <td>
-              <div class="progress-bar">
-                <div class="progress-fill" [style.width.%]="contract.progress"></div>
+              <div class="contract-type">
+                <i [class]="getTypeIcon(contract.type)"></i>
+                <span class="type-badge" [attr.data-type]="contract.type">
+                  {{ contract.type }}
+                </span>
               </div>
             </td>
             <td>
-              <span class="status-badge" [ngClass]="'status-' + contract.status">
-                <span class="status-dot"></span>
-                {{ contract.status === 'active' ? 'Ativo' : contract.status === 'pending' ? 'Pendente' : 'Concluído' }}
-              </span>
+              <div class="date-info">
+                <i class="fas fa-calendar-alt"></i>
+                {{ contract.startDate }}
+              </div>
             </td>
             <td>
-              <button class="btn btn-secondary" (click)="viewContract(contract.id)">
-                <i class="fas fa-eye"></i>
-                Detalhes
-              </button>
+              <div class="date-info">
+                <i class="fas fa-calendar-check"></i>
+                {{ contract.endDate }}
+              </div>
+            </td>
+            <td>
+              <div class="duration-info">
+                <i class="fas fa-clock"></i>
+                {{ contract.duration }}
+              </div>
+            </td>
+            <td>
+              <div class="services-count">
+                <span class="services-badge">
+                  {{ contract.servicesCount }} serviço{{ contract.servicesCount !== 1 ? 's' : '' }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <span class="value-amount">{{ contract.totalValue }}</span>
+            </td>
+            <td>
+              <div class="status-container" (click)="updateContractStatus(contract.id, contract.raw.status, $event)">
+                <span class="status-badge" [style.background-color]="contract.statusColor + '20'" [style.color]="contract.statusColor">
+                  <span class="status-dot" [style.background-color]="contract.statusColor"></span>
+                  {{ contract.status }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <div class="action-buttons-cell">
+                <button class="action-btn" (click)="viewContract(contract.id); $event.stopPropagation()" title="Visualizar">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="action-btn" (click)="editContract(contract.id); $event.stopPropagation()" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn delete" (click)="deleteContract(contract.id, $event)" title="Excluir">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

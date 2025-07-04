@@ -1,93 +1,319 @@
-// src/app/components/contracts-table/contracts-table.component.ts
-import { Component, inject } from '@angular/core';
+// src/app/components/contracts-table/contracts-table.ts
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ModalService } from '../../services/modal.service';
+import { ContractService, ApiContract, ContractStats } from '../../services/contract';
+import { CompanyService } from '../../services/company';
+import { Subscription } from 'rxjs';
 
-interface Contract {
+interface ContractDisplay {
   id: number;
-  company: string;
-  companyInitials: string;
-  companyType: string;
-  contractType: string;
-  services: number;
-  activeServices: number;
-  progress: number;
-  status: 'active' | 'pending' | 'completed';
-  gradient: string;
+  contractNumber: string;
+  companyName: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+  duration: string;
+  totalValue: string;
+  status: string;
+  statusColor: string;
+  servicesCount: number;
+  raw: ApiContract;
 }
 
 @Component({
   selector: 'app-contracts-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './contracts-table.html',
   styleUrls: ['./contracts-table.css']
 })
-export class ContractsTableComponent {
+export class ContractsTableComponent implements OnInit, OnDestroy {
   private modalService = inject(ModalService);
-  
-  currentContractTab = 'all';
-  
-  contracts: Contract[] = [
-    {
-      id: 1,
-      company: 'Empresa ABC',
-      companyInitials: 'EA',
-      companyType: 'Tecnologia',
-      contractType: 'Contrato Grande',
-      services: 5,
-      activeServices: 3,
-      progress: 60,
-      status: 'active',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  private contractService = inject(ContractService);
+  private companyService = inject(CompanyService);
+  private router = inject(Router);
+  private subscriptions = new Subscription();
+
+  // Stats
+  stats: ContractStats = {
+    total: 0,
+    active: 0,
+    completed: 0,
+    cancelled: 0,
+    suspended: 0,
+    totalValueActive: 0,
+    totalValueAll: 0,
+    typeStats: {
+      Grande: 0,
+      Pontual: 0,
+      Individual: 0
     },
-    {
-      id: 2,
-      company: 'Tech Solutions',
-      companyInitials: 'TS',
-      companyType: 'Software',
-      contractType: 'Contrato Pontual',
-      services: 2,
-      activeServices: 1,
-      progress: 80,
-      status: 'active',
-      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
-    },
-    {
-      id: 3,
-      company: 'Startup XYZ',
-      companyInitials: 'SX',
-      companyType: 'Fintech',
-      contractType: 'Mentoria Individual',
-      services: 1,
-      activeServices: 0,
-      progress: 25,
-      status: 'pending',
-      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+    averageDuration: 0
+  };
+
+  // Contracts data
+  contracts: ContractDisplay[] = [];
+  filteredContracts: ContractDisplay[] = [];
+  
+  // Filters
+  filters = {
+    search: '',
+    status: '',
+    type: '',
+    company_id: null as number | null
+  };
+
+  // Companies for filter
+  companies: any[] = [];
+  
+  // Loading state
+  isLoading = false;
+  error = '';
+
+  // Tabs
+  currentTab: 'all' | 'Grande' | 'Pontual' | 'Individual' = 'all';
+
+  ngOnInit() {
+    this.loadContracts();
+    this.loadCompanies();
+    this.subscribeToRefreshEvents();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+  }
+
+  /**
+   * Subscribe to refresh events
+   */
+  private subscribeToRefreshEvents() {
+    // Listen for contract refresh events
+    window.addEventListener('refreshContracts', () => {
+      this.loadContracts();
+    });
+  }
+
+  /**
+   * Load contracts from server
+   */
+  async loadContracts() {
+    this.isLoading = true;
+    this.error = '';
+
+    try {
+      // Load stats
+      const statsResponse = await this.contractService.getStats().toPromise();
+      if (statsResponse) {
+        this.stats = statsResponse.stats;
+      }
+
+      // Load contracts
+      const response = await this.contractService.getContracts(this.filters).toPromise();
+      
+      if (response && response.contracts) {
+        // Map contracts to display format
+        this.contracts = response.contracts.map(contract => this.mapContractToDisplay(contract));
+        this.applyFilters();
+      }
+    } catch (error: any) {
+      console.error('❌ Error loading contracts:', error);
+      this.error = 'Erro ao carregar contratos. Tente novamente.';
+    } finally {
+      this.isLoading = false;
     }
-  ];
-  
-  openContractModal() {
-    this.modalService.openContractModal$.next();
   }
-  
+
+  /**
+   * Load companies for filter
+   */
+  async loadCompanies() {
+    try {
+      const response = await this.companyService.getCompanies({ is_active: true }).toPromise();
+      if (response && response.companies) {
+        this.companies = response.companies;
+      }
+    } catch (error) {
+      console.error('❌ Error loading companies:', error);
+    }
+  }
+
+  /**
+   * Map API contract to display format
+   */
+  private mapContractToDisplay(contract: ApiContract): ContractDisplay {
+    return {
+      id: contract.id,
+      contractNumber: contract.contract_number,
+      companyName: contract.company.name,
+      type: contract.type,
+      startDate: this.contractService.formatDate(contract.start_date),
+      endDate: this.contractService.formatDate(contract.end_date || ''),
+      duration: `${this.contractService.calculateDuration(contract.start_date, contract.end_date)} dias`,
+      totalValue: this.contractService.formatValue(contract.total_value),
+      status: this.contractService.getStatusText(contract.status),
+      statusColor: this.contractService.getStatusColor(contract.status),
+      servicesCount: contract.contract_services?.length || 0,
+      raw: contract
+    };
+  }
+
+  /**
+   * Apply filters to contracts
+   */
+  applyFilters() {
+    let filtered = [...this.contracts];
+
+    // Filter by tab
+    if (this.currentTab !== 'all') {
+      filtered = filtered.filter(c => c.type === this.currentTab);
+    }
+
+    // Filter by search
+    if (this.filters.search) {
+      const search = this.filters.search.toLowerCase();
+      filtered = filtered.filter(c => 
+        c.contractNumber.toLowerCase().includes(search) ||
+        c.companyName.toLowerCase().includes(search)
+      );
+    }
+
+    // Filter by status
+    if (this.filters.status) {
+      filtered = filtered.filter(c => c.raw.status === this.filters.status);
+    }
+
+    // Filter by company
+    if (this.filters.company_id) {
+      filtered = filtered.filter(c => c.raw.company.id === this.filters.company_id);
+    }
+
+    this.filteredContracts = filtered;
+  }
+
+  /**
+   * Change tab
+   */
+  changeTab(tab: 'all' | 'Grande' | 'Pontual' | 'Individual') {
+    this.currentTab = tab;
+    this.applyFilters();
+  }
+
+  /**
+   * Clear filters
+   */
+  clearFilters() {
+    this.filters = {
+      search: '',
+      status: '',
+      type: '',
+      company_id: null
+    };
+    this.currentTab = 'all';
+    this.applyFilters();
+  }
+
+  /**
+   * Navigate to new contract page
+   */
+  openNewContractPage() {
+    this.router.navigate(['/home/contracts/new']);
+  }
+
+  /**
+   * Navigate to edit contract page
+   */
+  editContract(id: number) {
+    this.router.navigate(['/home/contracts/edit', id]);
+  }
+
+  /**
+   * View contract details
+   */
   viewContract(id: number) {
-    console.log('Viewing contract:', id);
-    this.modalService.openContractModal$.next();
+    this.router.navigate(['/home/contracts/view', id]);
   }
-  
-  showContractTab(tab: string) {
-    this.currentContractTab = tab;
-    // Aqui você pode filtrar os contratos baseado na tab
+
+  /**
+   * Update contract status
+   */
+  async updateContractStatus(id: number, currentStatus: string, event: Event) {
+    event.stopPropagation();
+    
+    // Definir próximo status baseado no atual
+    const nextStatus: { [key: string]: string } = {
+      'active': 'completed',
+      'completed': 'active',
+      'cancelled': 'active',
+      'suspended': 'active'
+    };
+
+    const newStatus = nextStatus[currentStatus] || 'active';
+    
+    try {
+      await this.contractService.updateContractStatus(id, newStatus).toPromise();
+      this.loadContracts();
+      this.modalService.showNotification('Status do contrato atualizado!', true);
+    } catch (error) {
+      console.error('❌ Error updating status:', error);
+      this.modalService.showNotification('Erro ao alterar status do contrato', false);
+    }
   }
-  
+
+  /**
+   * Format total value of all contracts
+   */
+  formatTotalValue(): string {
+    return this.contractService.formatValue(this.stats.totalValueAll);
+  }
+
+  /**
+   * Format active contracts value
+   */
+  formatActiveValue(): string {
+    return this.contractService.formatValue(this.stats.totalValueActive);
+  }
+
+  /**
+   * Get type icon
+   */
+  getTypeIcon(type: string): string {
+    return this.contractService.getTypeIcon(type);
+  }
+
+  /**
+   * Delete contract
+   */
+  async deleteContract(id: number, event: Event) {
+    event.stopPropagation();
+    
+    if (confirm('Tem certeza que deseja excluir este contrato?')) {
+      try {
+        await this.contractService.deleteContract(id).toPromise();
+        this.loadContracts();
+        this.modalService.showNotification('Contrato excluído com sucesso!', true);
+      } catch (error) {
+        console.error('❌ Error deleting contract:', error);
+        this.modalService.showNotification('Erro ao excluir contrato', false);
+      }
+    }
+  }
+
+  /**
+   * Export contracts to PDF
+   */
   exportToPDF() {
-    console.log('Exporting to PDF...');
-    // Implementar exportação
+    // TODO: Implementar exportação para PDF
+    this.modalService.showNotification('Exportando contratos para PDF...', true);
   }
-  
+
+  /**
+   * Export contracts to Excel
+   */
   exportToExcel() {
-    console.log('Exporting to Excel...');
-    // Implementar exportação
+    // TODO: Implementar exportação para Excel
+    this.modalService.showNotification('Exportando contratos para Excel...', true);
   }
 }

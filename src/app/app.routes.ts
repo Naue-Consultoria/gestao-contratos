@@ -4,6 +4,7 @@ import { HomeComponent } from './pages/home/home';
 import { ChangePasswordComponent } from './components/change-password/change-password';
 import { DashboardContentComponent } from './components/dashboard-content/dashboard-content';
 import { ContractsTableComponent } from './components/contracts-table/contracts-table';
+import { ContractFormComponent } from './components/contract-form/contract-form';
 import { CompaniesTableComponent } from './components/companies-table/companies-table';
 import { NewCompanyPageComponent } from './components/new-company-page/new-company-page';
 import { ServicesTableComponent } from './components/services-table/services-table';
@@ -64,6 +65,27 @@ export const routes: Routes = [
         path: 'contracts',
         component: ContractsTableComponent,
         title: 'Contratos - NAUE Consultoria',
+      },
+      
+      // Novo contrato
+      {
+        path: 'contracts/new',
+        component: ContractFormComponent,
+        title: 'Novo Contrato - NAUE Consultoria',
+      },
+      
+      // Visualizar contrato
+      {
+        path: 'contracts/view/:id',
+        component: ContractFormComponent,
+        title: 'Visualizar Contrato - NAUE Consultoria',
+      },
+      
+      // Editar contrato
+      {
+        path: 'contracts/edit/:id',
+        component: ContractFormComponent,
+        title: 'Editar Contrato - NAUE Consultoria',
       },
 
       // Gestão de empresas

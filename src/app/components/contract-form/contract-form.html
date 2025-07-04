@@ -1,0 +1,365 @@
+<!-- src/app/components/contract-form/contract-form.html -->
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">
+      {{ isViewMode ? 'Visualizar Contrato' : (isEditMode ? 'Editar Contrato' : 'Novo Contrato') }}
+    </h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span class="clickable" (click)="cancel()">Contratos</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>{{ isViewMode ? 'Visualizar' : (isEditMode ? 'Editar' : 'Novo') }}</span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <i class="fas fa-spinner fa-spin"></i>
+    Carregando dados do contrato...
+  </div>
+
+  <!-- Form -->
+  <div class="form-container" *ngIf="!isLoading">
+    <form (ngSubmit)="save()" *ngIf="!isViewMode">
+      <div class="form-grid">
+        <!-- Basic Information Section -->
+        <div class="form-section">
+          <h2 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            Informações Básicas
+          </h2>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">Número do Contrato</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="formData.contract_number"
+                name="contract_number"
+                [class.error]="errors.contract_number"
+                [readonly]="!isEditMode">
+              <span class="error-message" *ngIf="errors.contract_number">{{ errors.contract_number }}</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label required">Tipo de Contrato</label>
+              <select 
+                class="form-control" 
+                [(ngModel)]="formData.type"
+                name="type">
+                <option *ngFor="let type of contractTypes" [value]="type">{{ type }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label required">Empresa</label>
+            <select 
+              class="form-control" 
+              [(ngModel)]="formData.company_id"
+              name="company_id"
+              [class.error]="errors.company_id">
+              <option [value]="null" disabled>Selecione uma empresa</option>
+              <option *ngFor="let company of companies" [value]="company.id">{{ company.name }}</option>
+            </select>
+            <span class="error-message" *ngIf="errors.company_id">{{ errors.company_id }}</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">Data de Início</label>
+              <input 
+                type="date" 
+                class="form-control" 
+                [(ngModel)]="formData.start_date"
+                name="start_date"
+                [class.error]="errors.start_date">
+              <span class="error-message" *ngIf="errors.start_date">{{ errors.start_date }}</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Data de Término</label>
+              <input 
+                type="date" 
+                class="form-control" 
+                [(ngModel)]="formData.end_date"
+                name="end_date"
+                [min]="formData.start_date"
+                [class.error]="errors.end_date">
+              <span class="error-message" *ngIf="errors.end_date">{{ errors.end_date }}</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Observações</label>
+            <textarea 
+              class="form-control" 
+              [(ngModel)]="formData.notes"
+              name="notes"
+              rows="3"
+              placeholder="Observações adicionais sobre o contrato..."
+              maxlength="2000"></textarea>
+            <div class="char-count">
+              {{ formData.notes ? formData.notes.length : 0 }}/2000 caracteres
+            </div>
+          </div>
+        </div>
+
+        <!-- Services Section -->
+        <div class="form-section">
+          <h2 class="section-title">
+            <i class="fas fa-briefcase"></i>
+            Serviços do Contrato
+          </h2>
+
+          <div class="services-header">
+            <p class="services-info">Adicione os serviços que fazem parte deste contrato</p>
+            <button type="button" class="btn btn-primary" (click)="openServiceModal()">
+              <i class="fas fa-plus"></i>
+              Adicionar Serviço
+            </button>
+          </div>
+
+          <div class="error-message" *ngIf="errors.services">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ errors.services }}
+          </div>
+
+          <!-- Selected Services List -->
+          <div class="selected-services" *ngIf="selectedServices.length > 0">
+            <div class="service-item" *ngFor="let service of selectedServices; let i = index">
+              <div class="service-info">
+                <h4 class="service-name">{{ service.name }}</h4>
+                <div class="service-details">
+                  <span class="service-category">
+                    <i class="fas fa-tag"></i>
+                    {{ service.category }}
+                  </span>
+                  <span class="service-duration">
+                    <i class="fas fa-clock"></i>
+                    {{ service.duration }} dias
+                  </span>
+                  <span class="service-unit-value">
+                    <i class="fas fa-dollar-sign"></i>
+                    {{ formatCurrency(service.unit_value) }} /unidade
+                  </span>
+                </div>
+              </div>
+              
+              <div class="service-controls">
+                <div class="quantity-control">
+                  <label>Quantidade:</label>
+                  <input 
+                    type="number" 
+                    class="quantity-input" 
+                    [(ngModel)]="service.quantity"
+                    [name]="'quantity_' + i"
+                    min="1"
+                    (change)="updateServiceQuantity(i, service.quantity)">
+                </div>
+                
+                <div class="service-total">
+                  <label>Total:</label>
+                  <span class="total-value">{{ formatCurrency(service.total_value) }}</span>
+                </div>
+                
+                <button type="button" class="remove-btn" (click)="removeService(i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-services" *ngIf="selectedServices.length === 0">
+            <i class="fas fa-briefcase"></i>
+            <p>Nenhum serviço adicionado</p>
+            <p class="help-text">Clique no botão acima para adicionar serviços ao contrato</p>
+          </div>
+
+          <!-- Contract Summary -->
+          <div class="contract-summary" *ngIf="selectedServices.length > 0">
+            <div class="summary-item">
+              <span class="summary-label">Total de Serviços:</span>
+              <span class="summary-value">{{ selectedServices.length }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Duração Total:</span>
+              <span class="summary-value">{{ getTotalDuration() }} dias</span>
+            </div>
+            <div class="summary-item total">
+              <span class="summary-label">Valor Total do Contrato:</span>
+              <span class="summary-value">{{ getFormattedTotalValue() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+          <i class="fas fa-save" *ngIf="!isSaving"></i>
+          <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+          {{ isEditMode ? 'Atualizar' : 'Criar' }} Contrato
+        </button>
+      </div>
+    </form>
+
+    <!-- View Mode -->
+    <div class="view-mode" *ngIf="isViewMode">
+      <div class="view-grid">
+        <!-- Contract Details -->
+        <div class="view-section">
+          <h2 class="section-title">
+            <i class="fas fa-file-contract"></i>
+            Detalhes do Contrato
+          </h2>
+          
+          <div class="detail-item">
+            <span class="detail-label">Número do Contrato:</span>
+            <span class="detail-value">{{ formData.contract_number }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Tipo:</span>
+            <span class="type-badge" [attr.data-type]="formData.type">{{ formData.type }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Empresa:</span>
+            <span class="detail-value">
+              {{ getCompanyName(formData.company_id) }}
+            </span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Data de Início:</span>
+            <span class="detail-value">{{ formatDate(formData.start_date) }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Data de Término:</span>
+            <span class="detail-value">{{ formData.end_date ? formatDate(formData.end_date) : 'Indeterminado' }}</span>
+          </div>
+          
+          <div class="detail-item" *ngIf="formData.notes">
+            <span class="detail-label">Observações:</span>
+            <p class="detail-value notes">{{ formData.notes }}</p>
+          </div>
+        </div>
+
+        <!-- Services List -->
+        <div class="view-section">
+          <h2 class="section-title">
+            <i class="fas fa-briefcase"></i>
+            Serviços Contratados
+          </h2>
+          
+          <div class="services-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Serviço</th>
+                  <th>Categoria</th>
+                  <th>Duração</th>
+                  <th>Quantidade</th>
+                  <th>Valor Unit.</th>
+                  <th>Valor Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let service of selectedServices">
+                  <td>{{ service.name }}</td>
+                  <td>
+                    <span class="category-badge">{{ service.category }}</span>
+                  </td>
+                  <td>{{ service.duration }} dias</td>
+                  <td>{{ service.quantity }}</td>
+                  <td>{{ formatCurrency(service.unit_value) }}</td>
+                  <td class="value-highlight">{{ formatCurrency(service.total_value) }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="5" class="text-right">
+                    <strong>Valor Total do Contrato:</strong>
+                  </td>
+                  <td class="total-value">
+                    <strong>{{ getFormattedTotalValue() }}</strong>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- View Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">
+          <i class="fas fa-arrow-left"></i>
+          Voltar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="enableEdit()">
+          <i class="fas fa-edit"></i>
+          Editar Contrato
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Service Selection Modal -->
+<div class="modal" [class.active]="showServiceModal" (click)="closeServiceModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">Adicionar Serviço</h3>
+      <button class="close-btn" (click)="closeServiceModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="modal-search">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          class="modal-search-input" 
+          placeholder="Buscar serviço..."
+          [(ngModel)]="serviceSearchTerm">
+      </div>
+      
+      <div class="services-list">
+        <div 
+          class="service-option" 
+          *ngFor="let service of filteredServices"
+          (click)="addService(service)"
+          [class.disabled]="isServiceSelected(service.id)">
+          <div class="service-option-info">
+            <h4>{{ service.name }}</h4>
+            <div class="service-option-details">
+              <span><i class="fas fa-tag"></i> {{ service.category }}</span>
+              <span><i class="fas fa-clock"></i> {{ service.duration }} dias</span>
+              <span class="service-value">{{ formatCurrency(service.value) }}</span>
+            </div>
+          </div>
+          <div class="service-option-action">
+            <i class="fas fa-plus-circle" *ngIf="!isServiceSelected(service.id)"></i>
+            <i class="fas fa-check-circle" *ngIf="isServiceSelected(service.id)"></i>
+          </div>
+        </div>
+        
+        <div class="empty-state" *ngIf="filteredServices.length === 0">
+          <i class="fas fa-search"></i>
+          <p>Nenhum serviço encontrado</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
