@@ -461,10 +461,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
     
     // Timeout de segurança - forçar logout após 3 segundos
-    setTimeout(() => {
+  /*  setTimeout(() => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login'; // Forçar redirecionamento
-    }, 3000);
+    }, 3000);*/
   }
 }
