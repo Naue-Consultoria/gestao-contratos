@@ -37,7 +37,7 @@ export class ContractFormComponent implements OnInit {
   formData = {
     contract_number: '',
     company_id: null as number | null,
-    type: 'Grande' as 'Grande' | 'Pontual' | 'Individual',
+    type: 'Full' as 'Full' | 'Pontual' | 'Individual',
     start_date: '',
     end_date: '',
     notes: ''
@@ -51,7 +51,7 @@ export class ContractFormComponent implements OnInit {
   companies: ApiCompany[] = [];
   
   // Contract types
-  contractTypes = ['Grande', 'Pontual', 'Individual'];
+  contractTypes = ['Full', 'Pontual', 'Individual'];
   
   // UI state
   isLoading = false;

@@ -46,10 +46,10 @@
       <div class="stat-header">
         <div>
           <div class="stat-label">Por Tipo</div>
-          <div class="stat-value">{{ stats.typeStats.Grande + stats.typeStats.Pontual + stats.typeStats.Individual }}</div>
+          <div class="stat-value">{{ stats.typeStats.Full + stats.typeStats.Pontual + stats.typeStats.Individual }}</div>
           <div class="type-breakdown">
             <span class="type-item">
-              <i class="fas fa-building"></i> {{ stats.typeStats.Grande }} Grandes
+              <i class="fas fa-building"></i> {{ stats.typeStats.Full }} Full
             </span>
             <span class="type-item">
               <i class="fas fa-calendar-check"></i> {{ stats.typeStats.Pontual }} Pontuais
@@ -88,9 +88,9 @@
       Todos os Contratos
       <span class="tab-count">{{ contracts.length }}</span>
     </div>
-    <div class="tab" [class.active]="currentTab === 'Grande'" (click)="changeTab('Grande')">
-      Contratos Grandes
-      <span class="tab-count">{{ stats.typeStats.Grande }}</span>
+    <div class="tab" [class.active]="currentTab === 'Full'" (click)="changeTab('Full')">
+      Contratos Full
+      <span class="tab-count">{{ stats.typeStats.Full }}</span>
     </div>
     <div class="tab" [class.active]="currentTab === 'Pontual'" (click)="changeTab('Pontual')">
       Contratos Pontuais

@@ -46,7 +46,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     totalValueActive: 0,
     totalValueAll: 0,
     typeStats: {
-      Grande: 0,
+      Full: 0,
       Pontual: 0,
       Individual: 0
     },
@@ -73,7 +73,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   error = '';
 
   // Tabs
-  currentTab: 'all' | 'Grande' | 'Pontual' | 'Individual' = 'all';
+  currentTab: 'all' | 'Full' | 'Pontual' | 'Individual' = 'all';
 
   ngOnInit() {
     console.log('🚀 ContractsTableComponent initialized');
@@ -224,7 +224,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   /**
    * Change tab
    */
-  changeTab(tab: 'all' | 'Grande' | 'Pontual' | 'Individual') {
+  changeTab(tab: 'all' | 'Full' | 'Pontual' | 'Individual') {
     this.currentTab = tab;
     this.applyFilters();
   }

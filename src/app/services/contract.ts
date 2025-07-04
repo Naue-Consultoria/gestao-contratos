@@ -12,7 +12,7 @@ export interface ContractServiceItem {
 export interface CreateContractRequest {
   contract_number?: string;
   company_id: number;
-  type: 'Grande' | 'Pontual' | 'Individual';
+  type: 'Full' | 'Pontual' | 'Individual';
   start_date: string;
   end_date?: string | null;
   services: ContractServiceItem[];
@@ -22,7 +22,7 @@ export interface CreateContractRequest {
 export interface UpdateContractRequest {
   contract_number?: string;
   company_id?: number;
-  type?: 'Grande' | 'Pontual' | 'Individual';
+  type?: 'Full' | 'Pontual' | 'Individual';
   start_date?: string;
   end_date?: string | null;
   status?: 'active' | 'completed' | 'cancelled' | 'suspended';
@@ -46,7 +46,7 @@ export interface ApiContractService {
 export interface ApiContract {
   id: number;
   contract_number: string;
-  type: 'Grande' | 'Pontual' | 'Individual';
+  type: 'Full' | 'Pontual' | 'Individual';
   start_date: string;
   end_date: string | null;
   status: 'active' | 'completed' | 'cancelled' | 'suspended';
@@ -87,7 +87,7 @@ export interface ContractStats {
   totalValueActive: number;
   totalValueAll: number;
   typeStats: {
-    Grande: number;
+    Full: number;
     Pontual: number;
     Individual: number;
   };
@@ -293,7 +293,7 @@ export class ContractService {
    */
   getTypeIcon(type: string): string {
     const icons: { [key: string]: string } = {
-      'Grande': 'fas fa-building',
+      'Full': 'fas fa-building',
       'Pontual': 'fas fa-calendar-check',
       'Individual': 'fas fa-user'
     };

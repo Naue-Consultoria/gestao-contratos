@@ -457,7 +457,7 @@
     font-weight: 600;
 }
 
-.type-badge[data-type="Grande"] {
+.type-badge[data-type="Full"] {
     background: rgba(59, 130, 246, 0.1);
     color: #3b82f6;
 }
