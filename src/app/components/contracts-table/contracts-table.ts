@@ -1,4 +1,3 @@
-// src/app/components/contracts-table/contracts-table.ts
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -77,6 +76,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   currentTab: 'all' | 'Grande' | 'Pontual' | 'Individual' = 'all';
 
   ngOnInit() {
+    console.log('🚀 ContractsTableComponent initialized');
     this.loadContracts();
     this.loadCompanies();
     this.subscribeToRefreshEvents();
@@ -105,22 +105,50 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
     try {
       // Load stats
-      const statsResponse = await this.contractService.getStats().toPromise();
-      if (statsResponse) {
-        this.stats = statsResponse.stats;
+      try {
+        const statsResponse = await this.contractService.getStats().toPromise();
+        if (statsResponse && statsResponse.stats) {
+          this.stats = statsResponse.stats;
+        }
+      } catch (statsError) {
+        console.warn('⚠️ Error loading stats:', statsError);
+        // Continue loading contracts even if stats fail
       }
 
+      // Build clean filters
+      const cleanFilters: any = {};
+      if (this.filters.search) cleanFilters.search = this.filters.search;
+      if (this.filters.status) cleanFilters.status = this.filters.status;
+      if (this.filters.type) cleanFilters.type = this.filters.type;
+      if (this.filters.company_id) cleanFilters.company_id = this.filters.company_id;
+
       // Load contracts
-      const response = await this.contractService.getContracts(this.filters).toPromise();
+      const response = await this.contractService.getContracts(cleanFilters).toPromise();
       
       if (response && response.contracts) {
         // Map contracts to display format
         this.contracts = response.contracts.map(contract => this.mapContractToDisplay(contract));
         this.applyFilters();
+      } else {
+        // If no contracts, ensure empty array
+        this.contracts = [];
+        this.filteredContracts = [];
       }
     } catch (error: any) {
       console.error('❌ Error loading contracts:', error);
-      this.error = 'Erro ao carregar contratos. Tente novamente.';
+      
+      // Check if it's a network error
+      if (!error.status) {
+        this.error = 'Erro de conexão. Verifique se o servidor está rodando.';
+      } else if (error.status === 401) {
+        this.error = 'Sessão expirada. Faça login novamente.';
+      } else if (error.status === 404) {
+        this.error = 'Endpoint não encontrado. Verifique se as rotas estão configuradas.';
+      } else if (error.status === 500) {
+        this.error = 'Erro no servidor. Tente novamente mais tarde.';
+      } else {
+        this.error = error?.error?.error || 'Erro ao carregar contratos. Tente novamente.';
+      }
     } finally {
       this.isLoading = false;
     }
@@ -147,12 +175,12 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     return {
       id: contract.id,
       contractNumber: contract.contract_number,
-      companyName: contract.company.name,
+      companyName: contract.company?.name || 'N/A',
       type: contract.type,
       startDate: this.contractService.formatDate(contract.start_date),
       endDate: this.contractService.formatDate(contract.end_date || ''),
       duration: `${this.contractService.calculateDuration(contract.start_date, contract.end_date)} dias`,
-      totalValue: this.contractService.formatValue(contract.total_value),
+      totalValue: this.contractService.formatValue(contract.total_value || 0),
       status: this.contractService.getStatusText(contract.status),
       statusColor: this.contractService.getStatusColor(contract.status),
       servicesCount: contract.contract_services?.length || 0,

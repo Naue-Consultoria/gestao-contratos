@@ -1,3 +1,4 @@
+// src/app/services/contract.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -116,8 +117,22 @@ export class ContractService {
    * Listar contratos
    */
   getContracts(filters?: any): Observable<ContractsResponse> {
+    // Clean up filters before sending
+    const cleanFilters: any = {};
+    
+    if (filters) {
+      if (filters.search) cleanFilters.search = filters.search;
+      if (filters.status) cleanFilters.status = filters.status;
+      if (filters.type) cleanFilters.type = filters.type;
+      if (filters.company_id && filters.company_id !== null && filters.company_id !== 'null') {
+        cleanFilters.company_id = filters.company_id;
+      }
+      if (filters.start_date) cleanFilters.start_date = filters.start_date;
+      if (filters.end_date) cleanFilters.end_date = filters.end_date;
+    }
+    
     return this.http.get<ContractsResponse>(this.API_URL, { 
-      params: filters || {},
+      params: cleanFilters,
       headers: this.getAuthHeaders() 
     });
   }
