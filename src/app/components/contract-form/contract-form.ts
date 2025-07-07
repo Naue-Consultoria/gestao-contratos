@@ -65,6 +65,7 @@ export class ContractFormComponent implements OnInit {
   showServiceModal = false;
   serviceSearchTerm = '';
 
+
   ngOnInit() {
     // Check mode from route
     const id = this.route.snapshot.paramMap.get('id');

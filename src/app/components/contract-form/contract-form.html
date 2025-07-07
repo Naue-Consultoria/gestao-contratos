@@ -38,6 +38,7 @@
                 class="form-control" 
                 [(ngModel)]="formData.contract_number"
                 name="contract_number"
+                [readonly]="!isEditMode"
                 [class.error]="errors.contract_number">
               <span class="error-message" *ngIf="errors.contract_number">{{ errors.contract_number }}</span>
             </div>
