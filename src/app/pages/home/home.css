@@ -234,47 +234,8 @@
     border-color: var(--dark-card);
 }
 
-.user-menu {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 1rem;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.user-menu:hover {
-    background-color: var(--light-gray);
-}
-
 :host-context(body.dark-mode) .user-menu:hover {
     background-color: var(--dark-card);
-}
-
-.user-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-.user-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.user-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-dark);
 }
 
 :host-context(body.dark-mode) .user-name {
@@ -1915,3 +1876,28 @@ input[type="radio"] {
     max-width: 100%;
     overflow: hidden;
 }
+
+.notification-dropdown-wrapper {
+    position: fixed;
+    top: 77px;
+    right: 120px; /* Ajustar conforme a posição do botão de notificações */
+    z-index: 1000;
+  }
+  
+  @media (max-width: 768px) {
+    .notification-dropdown-wrapper {
+      right: 60px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .notification-dropdown-wrapper {
+      right: 10px;
+      left: 10px;
+      width: auto;
+    }
+    
+    .notification-dropdown-wrapper app-notification-dropdown {
+      width: 100%;
+    }
+  }

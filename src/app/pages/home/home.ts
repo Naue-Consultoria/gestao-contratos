@@ -3,15 +3,19 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 
-// Import only the components used in this template
+// Components
 import { HeaderComponent } from '../../components/header/header';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { ContractModalComponent } from '../../components/contract-modal/contract-modal';
 import { UserModal } from '../../components/user-modal/user-modal';
+import { NotificationDropdownComponent } from '../../components/notification-dropdown/notification-dropdown';
+
+// Services
 import { AuthService } from '../../services/auth';
 import { ApiUser } from '../../services/user';
 import { ApiCompany } from '../../services/company';
 import { ModalService } from '../../services/modal.service';
+import { NotificationService } from '../../services/notification.service';
 import { Subscription } from 'rxjs';
 
 interface Notification {
@@ -45,7 +49,8 @@ interface NavSection {
     HeaderComponent,
     SidebarComponent,
     ContractModalComponent,
-    UserModal
+    UserModal,
+    NotificationDropdownComponent
   ],
   templateUrl: './home.html',
   styleUrls: ['./home.css']
@@ -70,11 +75,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   isUserModalOpen = false;
   editingUser: ApiUser | null = null;
   editingCompany: ApiCompany | null = null;
-  notificationMessage = '';
-  isNotificationSuccess = true;
-  showNotification = false;
 
-  // Navigation items with routes - FILTRADOS POR ROLE
+  // Notifications - mantendo compatibilidade com o header original
+  notifications: Notification[] = [];
+  unreadNotificationsCount = 0;
+
+  // Navigation items with routes
   navSections: NavSection[] = [
     {
       title: 'Principal',
@@ -107,15 +113,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   ];
 
-  // Notifications
-  notifications: Notification[] = [
-    { id: 1, time: 'Há 2 horas', content: 'Novo contrato assinado com a Empresa ABC', isUnread: true },
-    { id: 2, time: 'Hoje cedo', content: 'Reunião agendada para amanhã às 10:00', isUnread: true },
-    { id: 3, time: 'Ontem', content: 'Relatório mensal disponível para download', isUnread: false }
-  ];
-
-  unreadNotificationsCount = 0;
-
   // Services list (for contract modal)
   servicesList = [
     { id: 'diag-org', name: 'Diagnóstico Organizacional' },
@@ -142,12 +139,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
     this.loadThemePreference();
-    this.updateUnreadNotificationsCount();
     this.setupKeyboardShortcuts();
     this.updateActiveNavItem();
     this.filterNavigationByRole();
@@ -162,6 +159,23 @@ export class HomeComponent implements OnInit, OnDestroy {
     
     // Subscrever aos eventos do ModalService
     this.subscribeToModalEvents();
+    
+    // Subscrever ao contador de notificações
+    this.subscriptions.add(
+      this.notificationService.unreadCount$.subscribe(count => {
+        this.unreadNotificationsCount = count;
+      })
+    );
+    
+    // Mostrar notificação de boas-vindas
+    const user = this.authService.getUser();
+    if (user) {
+      this.notificationService.success(
+        `Bem-vindo de volta, ${user.name}!`,
+        'Login Realizado',
+        { duration: 3000 }
+      );
+    }
   }
 
   ngOnDestroy() {
@@ -176,20 +190,22 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.modalService.openCompanyModal$.subscribe((companyOrVoid: ApiCompany | void) => {
         if (companyOrVoid && typeof companyOrVoid === 'object' && 'id' in companyOrVoid) {
-          // É uma empresa para editar
           this.editingCompany = companyOrVoid as ApiCompany;
         } else {
-          // É para criar nova empresa
           this.editingCompany = null;
         }
         this.openCompanyModal();
       })
     );
     
-    // Subscrever ao evento de notificação
+    // Bridge entre o sistema antigo e o novo de notificações
     this.subscriptions.add(
       this.modalService.showNotification$.subscribe(({ message, isSuccess }) => {
-        this.showNotificationMessage(message, isSuccess);
+        if (isSuccess) {
+          this.notificationService.success(message);
+        } else {
+          this.notificationService.error(message);
+        }
       })
     );
   }
@@ -201,7 +217,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const user = this.authService.getUser();
     if (user) {
       this.userName = user.name;
-      this.userRole = user.role;
+      this.userRole = user.role === 'admin' ? 'Administrador' : 'Usuário';
       this.userInitials = this.generateInitials(user.name);
     }
   }
@@ -224,15 +240,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   private filterNavigationByRole() {
     const isAdmin = this.authService.isAdmin();
     
-    console.log('🔍 Filtering navigation - Is Admin:', isAdmin);
-    console.log('🔍 User role:', this.authService.getUser()?.role);
-    
     this.navSections = this.navSections.map(section => ({
       ...section,
       items: section.items.filter(item => {
-        // Se o item é só para admin e o usuário não é admin, filtrar
         if (item.adminOnly && !isAdmin) {
-          console.log(`🚫 Hiding ${item.text} - Admin only`);
           return false;
         }
         return true;
@@ -276,7 +287,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   navigateTo(pageId: string) {
     // Verificar se o usuário tem permissão para acessar a página
     if (pageId === 'users' && !this.isUserAdmin()) {
-      this.showNotificationMessage('Acesso negado. Apenas administradores podem acessar esta página.', false);
+      this.notificationService.error(
+        'Acesso negado. Apenas administradores podem acessar esta página.',
+        'Permissão Negada'
+      );
       return;
     }
 
@@ -306,14 +320,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.isNotificationOpen = !this.isNotificationOpen;
   }
 
-  updateUnreadNotificationsCount() {
-    this.unreadNotificationsCount = this.notifications.filter(n => n.isUnread).length;
-  }
-
   clearNotifications() {
-    this.notifications.forEach(n => n.isUnread = false);
-    this.updateUnreadNotificationsCount();
-    this.showNotificationMessage('Notificações limpas com sucesso!', true);
+    this.notificationService.clearHistory();
+    this.notificationService.info('Notificações limpas com sucesso!', 'Sucesso');
   }
 
   // Modal management
@@ -338,11 +347,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   openUserModal(userToEdit: ApiUser | null = null) {
     // Verificar se é admin antes de abrir o modal
     if (!this.isUserAdmin()) {
-      this.showNotificationMessage('Acesso negado. Apenas administradores podem gerenciar usuários.', false);
+      this.notificationService.error(
+        'Acesso negado. Apenas administradores podem gerenciar usuários.',
+        'Permissão Negada'
+      );
       return;
     }
     
-    console.log('🔍 Opening user modal with:', userToEdit);
     this.editingUser = userToEdit;
     this.isUserModalOpen = true;
   }
@@ -356,7 +367,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   saveContract() {
     console.log('Saving contract...');
     this.closeContractModal();
-    this.showNotificationMessage('Contrato salvo com sucesso!', true);
+    this.notificationService.success('Contrato salvo com sucesso!', 'Sucesso');
   }
 
   saveCompany(event: any) {
@@ -364,6 +375,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     
     // Mostrar mensagem apropriada
     const message = event?.isNew ? 'Empresa criada com sucesso!' : 'Empresa atualizada com sucesso!';
+    this.notificationService.success(message, 'Sucesso');
     
     // Notificar componente de empresas para atualizar a lista
     this.refreshCompaniesPage();
@@ -373,9 +385,7 @@ export class HomeComponent implements OnInit, OnDestroy {
    * Notificar página de empresas para atualizar
    */
   private refreshCompaniesPage() {
-    // Se estiver na página de empresas, recarregar a lista
     if (this.router.url.includes('/home/companies')) {
-      // Emit event para atualizar empresas
       window.dispatchEvent(new CustomEvent('refreshCompanies'));
     }
   }
@@ -383,7 +393,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   saveUser() {
     console.log('Saving user...');
     this.closeUserModal();
-    this.showNotificationMessage('Usuário salvo com sucesso!', true);
+    this.notificationService.success('Usuário salvo com sucesso!', 'Sucesso');
     
     // Notificar componente de usuários para atualizar a lista
     this.refreshUsersPage();
@@ -393,9 +403,7 @@ export class HomeComponent implements OnInit, OnDestroy {
    * Notificar página de usuários para atualizar
    */
   private refreshUsersPage() {
-    // Se estiver na página de usuários, recarregar a lista
     if (this.router.url.includes('/home/users')) {
-      // Emit event ou call method to refresh users
       window.dispatchEvent(new CustomEvent('refreshUsers'));
     }
   }
@@ -403,23 +411,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Export functions
   exportToPDF() {
     console.log('Exporting to PDF...');
-    this.showNotificationMessage('Exportando relatório em PDF...', true);
+    this.notificationService.info('Exportando relatório em PDF...', 'Exportando');
   }
 
   exportToExcel() {
     console.log('Exporting to Excel...');
-    this.showNotificationMessage('Exportando relatório em Excel...', true);
-  }
-
-  // Notification system
-  showNotificationMessage(message: string, isSuccess: boolean) {
-    this.notificationMessage = message;
-    this.isNotificationSuccess = isSuccess;
-    this.showNotification = true;
-
-    setTimeout(() => {
-      this.showNotification = false;
-    }, 3000);
+    this.notificationService.info('Exportando relatório em Excel...', 'Exportando');
   }
 
   // Keyboard shortcuts
@@ -444,7 +441,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // Logout
   logout() {
-    this.showNotificationMessage('Saindo do sistema...', false);
+    this.notificationService.info('Saindo do sistema...', 'Logout');
     
     // Tentar logout via AuthService
     this.authService.logout().subscribe({
@@ -452,19 +449,12 @@ export class HomeComponent implements OnInit, OnDestroy {
         // Redirecionamento já é feito no AuthService
       },
       error: (error) => {
-        console.error('❌ Erro no logout via AuthService:', error);
+        console.error('❌ Erro no logout:', error);
         // Fallback para logout forçado
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         this.router.navigate(['/login']);
       }
     });
-    
-    // Timeout de segurança - forçar logout após 3 segundos
-  /*  setTimeout(() => {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login'; // Forçar redirecionamento
-    }, 3000);*/
   }
 }

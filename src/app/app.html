@@ -1,6 +1,18 @@
-<div class="app-container" *ngIf="!isLoading" [@routeAnimations]="getRouteAnimationData()">
+<div class="app-container" [@routeAnimations]="getRouteAnimationData()">
+  <!-- Loading Screen -->
+  <div class="loading-screen" *ngIf="isLoading">
+    <div class="loading-content">
+      <div class="loading-logo">
+        <div class="logo-icon">N</div>
+      </div>
+      <div class="loading-text">NAUE Consultoria</div>
+      <div class="loading-spinner"></div>
+    </div>
+  </div>
+
+  <!-- Main Application -->
   <router-outlet></router-outlet>
-</div>
-<div class="app-loading" *ngIf="isLoading">
-  <img src="logoNaue.png" alt="Carregando..." class="loading-logo">
+  
+  <!-- Global Notification Toast System -->
+  <app-notification-toast></app-notification-toast>
 </div>

@@ -1,4 +1,3 @@
-// src/app/components/contract-form/contract-form.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -25,6 +24,7 @@ interface SelectedService {
   templateUrl: './contract-form.html',
   styleUrls: ['./contract-form.css']
 })
+
 export class ContractFormComponent implements OnInit {
   private contractService = inject(ContractService);
   private companyService = inject(CompanyService);
@@ -67,7 +67,6 @@ export class ContractFormComponent implements OnInit {
 
 
   ngOnInit() {
-    // Check mode from route
     const id = this.route.snapshot.paramMap.get('id');
     const isView = this.route.snapshot.url.some(segment => segment.path === 'view');
     
@@ -300,12 +299,15 @@ export class ContractFormComponent implements OnInit {
     return Object.keys(this.errors).length === 0;
   }
 
-  /**
+   /**
    * Save contract
    */
-  async save() {
+   async save() {
     if (!this.validateForm()) {
-      this.modalService.showNotification('Por favor, corrija os erros no formulário', false);
+      this.modalService.showWarning(
+        'Por favor, corrija os erros no formulário antes de continuar',
+        'Formulário Inválido'
+      );
       return;
     }
 
@@ -332,7 +334,18 @@ export class ContractFormComponent implements OnInit {
         };
         
         await this.contractService.updateContract(this.contractId, updateData).toPromise();
-        this.modalService.showNotification('Contrato atualizado com sucesso!', true);
+        
+        this.modalService.showSuccess(
+          `Contrato ${this.formData.contract_number} atualizado com sucesso!`,
+          'Contrato Atualizado',
+          {
+            persistent: true,
+            action: {
+              label: 'Visualizar',
+              callback: () => this.router.navigate(['/home/contracts/view', this.contractId])
+            }
+          }
+        );
       } else {
         // Create new contract
         const createData: CreateContractRequest = {
@@ -345,19 +358,35 @@ export class ContractFormComponent implements OnInit {
           notes: this.formData.notes || null
         };
         
-        await this.contractService.createContract(createData).toPromise();
-        this.modalService.showNotification('Contrato criado com sucesso!', true);
+        const response = await this.contractService.createContract(createData).toPromise();
+        
+        if (response && response.contract) {
+          this.modalService.showSuccess(
+            `Contrato ${this.formData.contract_number} criado com sucesso!`,
+            'Novo Contrato',
+            {
+              persistent: true,
+              duration: 7000,
+              action: {
+                label: 'Visualizar',
+                callback: () => this.router.navigate(['/home/contracts/view', response.contract.id])
+              }
+            }
+          );
+        }
       }
       
-      // Dispatch event to refresh contracts list
-      window.dispatchEvent(new CustomEvent('refreshContracts'));
-      
-      // Navigate back to contracts list
+      // Navigate back to list
       this.router.navigate(['/home/contracts']);
+      
     } catch (error: any) {
-      console.error('❌ Error saving contract:', error);
-      const errorMessage = error?.error?.error || 'Erro ao salvar contrato';
-      this.modalService.showNotification(errorMessage, false);
+      console.error('Erro ao salvar contrato:', error);
+      
+      this.modalService.showError(
+        error.error?.message || 'Erro ao salvar contrato. Verifique os dados e tente novamente.',
+        'Erro',
+        { duration: 8000 }
+      );
     } finally {
       this.isSaving = false;
     }

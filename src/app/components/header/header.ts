@@ -1,8 +1,8 @@
-// header.ts
-import { Component, Output, EventEmitter, Input, ViewChild, ElementRef } from '@angular/core';
+// src/app/components/header/header.ts
+import { Component, Output, EventEmitter, Input, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router'; // Adicionar para navegação
+import { RouterModule } from '@angular/router';
 
 interface Notification {
   id: number;
@@ -14,7 +14,7 @@ interface Notification {
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule], // Adicionar RouterModule
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './header.html',
   styleUrls: ['./header.css']
 })
@@ -27,7 +27,6 @@ export class HeaderComponent {
   @Input() unreadNotificationsCount = 0;
   @Input() isNotificationOpen = false;
   
-  // Remover toggleSidebar já que o logo não fará mais isso
   @Output() toggleMobileSidebar = new EventEmitter<void>();
   @Output() toggleTheme = new EventEmitter<void>();
   @Output() toggleNotifications = new EventEmitter<void>();
@@ -40,6 +39,18 @@ export class HeaderComponent {
   globalSearchTerm = '';
   isSearchActive = false;
   isUserMenuOpen = false;
+  
+  // Fechar dropdown ao clicar fora
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const userInfo = document.querySelector('.user-info');
+    const userDropdown = document.querySelector('.user-dropdown');
+    
+    if (userInfo && !userInfo.contains(event.target as Node) && 
+        userDropdown && !userDropdown.contains(event.target as Node)) {
+      this.isUserMenuOpen = false;
+    }
+  }
   
   toggleSearch(): void {
     this.isSearchActive = !this.isSearchActive;

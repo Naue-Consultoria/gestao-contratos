@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { NotificationService } from './notification.service';
 
 export interface User {
   id: number;
@@ -35,9 +36,9 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {
-    // Verificar se há usuário logado no localStorage ao inicializar
     this.loadUserFromStorage();
   }
 
@@ -52,7 +53,30 @@ export class AuthService {
       tap(response => {
         if (response.token && response.user) {
           this.setSession(response.token, response.user);
+          
+          // Notificação de sucesso removida daqui
+          // Será mostrada no HomeComponent
         }
+      }),
+      catchError(error => {
+        // Notificação de erro
+        if (error.status === 401) {
+          this.notificationService.error(
+            'Email ou senha incorretos',
+            'Erro de Login'
+          );
+        } else if (error.status === 0) {
+          this.notificationService.error(
+            'Não foi possível conectar ao servidor. Verifique sua conexão.',
+            'Erro de Conexão'
+          );
+        } else {
+          this.notificationService.error(
+            'Erro ao realizar login. Tente novamente.',
+            'Erro'
+          );
+        }
+        return throwError(() => error);
       })
     );
   }
@@ -77,20 +101,26 @@ export class AuthService {
     );
   }
 
-  /**
+   /**
    * Realiza logout do usuário
    */
-  logout(): Observable<any> {
+   logout(): Observable<any> {
     const headers = this.getAuthHeaders();
     
     return this.http.post(`${this.API_URL}/logout`, {}, { headers }).pipe(
       tap(() => {
+        this.notificationService.info('Você foi desconectado', 'Logout');
         this.clearSession();
         this.router.navigate(['/login']);
+      }),
+      catchError(error => {
+        // Em caso de erro, fazer logout local mesmo assim
+        this.clearSession();
+        this.router.navigate(['/login']);
+        return throwError(() => error);
       })
     );
   }
-
   /**
    * Verifica se o usuário está autenticado
    */

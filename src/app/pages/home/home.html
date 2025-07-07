@@ -14,7 +14,16 @@
   (logout)="logout()">
 </app-header>
 
-<!-- Sidebar - Adicionado evento sidebarToggled -->
+<!-- Dropdown de Notificações -->
+<div class="notification-dropdown-wrapper" *ngIf="isNotificationOpen">
+  <app-notification-dropdown
+    [isOpen]="isNotificationOpen"
+    (close)="isNotificationOpen = false"
+    (viewAllClick)="isNotificationOpen = false">
+  </app-notification-dropdown>
+</div>
+
+<!-- Sidebar -->
 <app-sidebar
   [navSections]="navSections"
   [isSidebarCollapsed]="isSidebarCollapsed"
@@ -25,7 +34,6 @@
 
 <!-- Main Content -->
 <main class="main-content" [class.sidebar-collapsed]="isSidebarCollapsed">
-  <!-- IMPORTANTE: Apenas o router-outlet, sem os componentes individuais -->
   <router-outlet></router-outlet>
 </main>
 
@@ -38,19 +46,10 @@
   (save)="saveContract()">
 </app-contract-modal>
 
-<!-- User Modal com editingUser -->
+<!-- User Modal -->
 <app-user-modal
   [isOpen]="isUserModalOpen"
   [editingUser]="editingUser"
   (close)="closeUserModal()"
   (save)="saveUser()">
 </app-user-modal>
-
-<!-- Success Notification -->
-<div class="notification-toast" [class.show]="showNotification" [class.success]="isNotificationSuccess" [class.error]="!isNotificationSuccess">
-  <i [class]="isNotificationSuccess ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
-  <div>
-    <div class="notification-toast-title">{{ isNotificationSuccess ? 'Sucesso!' : 'Erro!' }}</div>
-    <div class="notification-toast-message">{{ notificationMessage }}</div>
-  </div>
-</div>
