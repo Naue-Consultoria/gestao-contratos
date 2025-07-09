@@ -1,4 +1,3 @@
-// src/app/pages/login/login.component.ts
 import { Component } from '@angular/core';
 import { LoginLayout } from '../../components/login-layout/login-layout';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -22,7 +21,7 @@ interface LoginForm {
   styleUrl: './login.css'
 })
 export class Login {
-loginForm!: FormGroup<LoginForm>;
+  loginForm!: FormGroup<LoginForm>;
 
   constructor(
     private router: Router,
@@ -39,13 +38,27 @@ loginForm!: FormGroup<LoginForm>;
   }
 
   submit() {
-    this.loginService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
-      next: () => {
-        this.toastService.success('Login successful!');
-        this.router.navigate(['/home/dashboard']);
-      },
-      error: () => this.toastService.error('Login failed!')
-    })
+    if (this.loginForm.valid) {
+      this.loginService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
+        next: () => {
+          this.toastService.success('Login successful!');
+          this.router.navigate(['/home/dashboard']);
+        },
+        error: () => this.toastService.error('Login failed!')
+      });
+    }
+  }
+
+  onFormSubmit(event: Event) {
+    event.preventDefault();
+    this.submit();
+  }
+
+  onKeyPress(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.submit();
+    }
   }
 
   navigate() {
