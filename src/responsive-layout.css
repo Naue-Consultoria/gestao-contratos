@@ -1,0 +1,409 @@
+:root {
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 70px;
+    --header-height: 77px;
+    --transition-speed: 0.3s;
+    --content-padding: 2rem;
+    --content-padding-mobile: 1rem;
+  }
+  
+  /* ==========================================
+     LAYOUT PRINCIPAL - CONTAINER RESPONSIVO
+     ========================================== */
+  
+  /* Container principal que envolve todo o conteúdo */
+  .page-container,
+  .page {
+    width: 100%;
+    min-height: calc(100vh - var(--header-height));
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Content wrapper principal */
+  .main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--header-height);
+    padding: var(--content-padding);
+    width: calc(100% - var(--sidebar-width));
+    min-height: calc(100vh - var(--header-height));
+    transition: all var(--transition-speed) ease;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  /* Quando sidebar está colapsada */
+  .main-content.sidebar-collapsed,
+  body.sidebar-collapsed .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+    width: calc(100% - var(--sidebar-collapsed-width));
+  }
+  
+  /* ==========================================
+     GRIDS RESPONSIVOS - DASHBOARD E CARDS
+     ========================================== */
+  
+  /* Grid principal para cards de estatísticas */
+  .dashboard-grid,
+  .stats-grid,
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    transition: all var(--transition-speed) ease;
+  }
+  
+  /* Grids específicos para diferentes seções */
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    transition: all var(--transition-speed) ease;
+  }
+  
+  /* ==========================================
+     CONTAINERS DE CONTEÚDO
+     ========================================== */
+  
+  /* Containers de tabelas e formulários */
+  .table-container,
+  .form-container,
+  .content-section {
+    background-color: var(--white);
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-gray);
+    width: 100%;
+    overflow: hidden;
+    transition: all var(--transition-speed) ease;
+  }
+  
+  /* Table wrapper para scroll horizontal quando necessário */
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+  
+  /* Garantir que tabelas sejam responsivas */
+  table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+  }
+  
+  /* ==========================================
+     STAT CARDS RESPONSIVOS
+     ========================================== */
+  
+  .stat-card {
+    background-color: var(--white);
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-gray);
+    transition: all var(--transition-speed) ease;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* ==========================================
+     BREAKPOINTS ESPECÍFICOS PARA SIDEBAR
+     ========================================== */
+  
+  /* Desktop Grande - 1600px+ */
+  @media (min-width: 1600px) {
+    .dashboard-grid,
+    .stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .main-content.sidebar-collapsed .dashboard-grid,
+    body.sidebar-collapsed .main-content .dashboard-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    
+    .main-content.sidebar-collapsed,
+    body.sidebar-collapsed .main-content {
+      padding: var(--content-padding) 3rem;
+    }
+  }
+  
+  /* Desktop Médio - 1400px a 1599px */
+  @media (max-width: 1599px) and (min-width: 1400px) {
+    .dashboard-grid,
+    .stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .main-content.sidebar-collapsed .dashboard-grid,
+    body.sidebar-collapsed .main-content .dashboard-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  /* Desktop - 1200px a 1399px */
+  @media (max-width: 1399px) and (min-width: 1200px) {
+    .dashboard-grid,
+    .stats-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .main-content.sidebar-collapsed .dashboard-grid,
+    body.sidebar-collapsed .main-content .dashboard-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  /* Desktop Pequeno - 992px a 1199px */
+  @media (max-width: 1199px) and (min-width: 992px) {
+    .dashboard-grid,
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .main-content.sidebar-collapsed .dashboard-grid,
+    body.sidebar-collapsed .main-content .dashboard-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  /* Tablet - 768px a 991px */
+  @media (max-width: 991px) and (min-width: 768px) {
+    .main-content {
+      margin-left: var(--sidebar-collapsed-width);
+      width: calc(100% - var(--sidebar-collapsed-width));
+    }
+    
+    .dashboard-grid,
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .reports-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  /* Mobile - até 767px */
+  @media (max-width: 767px) {
+    .main-content,
+    .main-content.sidebar-collapsed,
+    body.sidebar-collapsed .main-content {
+      margin-left: 0;
+      width: 100%;
+      padding: var(--content-padding-mobile);
+      margin-top: var(--header-height);
+    }
+    
+    .dashboard-grid,
+    .stats-grid,
+    .reports-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .table-container,
+    .form-container,
+    .content-section {
+      padding: 1rem;
+      border-radius: 12px;
+    }
+    
+    .stat-card {
+      padding: 1.25rem;
+    }
+  }
+  
+  /* ==========================================
+     AJUSTES ESPECÍFICOS PARA PÁGINAS
+     ========================================== */
+  
+  /* Contracts Table */
+  .contracts-table-container {
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Companies Table */
+  .companies-list {
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Services Page */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    transition: all var(--transition-speed) ease;
+  }
+  
+  /* Reports Page */
+  .report-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+  }
+  
+  /* ==========================================
+     ELEMENTOS DE INTERFACE RESPONSIVOS
+     ========================================== */
+  
+  /* Headers e títulos */
+  .page-header {
+    margin-bottom: 2rem;
+    width: 100%;
+    transition: all var(--transition-speed) ease;
+  }
+  
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  
+  /* Filters */
+  .filters-section {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+  }
+  
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border-gray);
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* ==========================================
+     ANIMAÇÕES E TRANSIÇÕES
+     ========================================== */
+  
+  /* Animação suave para todos elementos afetados */
+  .page-header,
+  .stat-card,
+  .chart-container,
+  .table-container,
+  .content-section,
+  .dashboard-grid > *,
+  .reports-grid > * {
+    transition: all var(--transition-speed) ease;
+  }
+  
+  /* ==========================================
+     DARK MODE
+     ========================================== */
+  
+  :host-context(body.dark-mode) .table-container,
+  :host-context(body.dark-mode) .form-container,
+  :host-context(body.dark-mode) .content-section,
+  :host-context(body.dark-mode) .stat-card {
+    background-color: var(--dark-card);
+    border-color: var(--dark-border);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* ==========================================
+     UTILITÁRIOS RESPONSIVOS
+     ========================================== */
+  
+  /* Prevenir overflow horizontal */
+  .overflow-hidden {
+    overflow: hidden !important;
+  }
+  
+  .overflow-x-auto {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Largura total */
+  .w-full {
+    width: 100% !important;
+  }
+  
+  /* Flex utilities */
+  .flex-wrap {
+    flex-wrap: wrap !important;
+  }
+  
+  .flex-1 {
+    flex: 1 !important;
+  }
+  
+  /* ==========================================
+     FIXES ESPECÍFICOS
+     ========================================== */
+  
+  /* Garantir que conteúdo não exceda container */
+  * {
+    max-width: 100%;
+  }
+  
+  /* Prevenir scroll horizontal indesejado */
+  .page,
+  .page-container,
+  .main-content {
+    overflow-x: hidden;
+  }
+  
+  /* Ajuste para elementos que podem causar overflow */
+  .stat-value,
+  .table-title,
+  .page-title {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* ==========================================
+     SUPORTE PARA DIFERENTES DENSIDADES
+     ========================================== */
+  
+  /* Ajustes para telas de alta densidade */
+  @media (-webkit-min-device-pixel-ratio: 2),
+         (min-resolution: 192dpi) {
+    .stat-card,
+    .table-container {
+      box-shadow: var(--shadow-sm);
+    }
+  }
+  
+  /* ==========================================
+     PRINT STYLES
+     ========================================== */
+  
+  @media print {
+    .main-content,
+    .main-content.sidebar-collapsed {
+      margin-left: 0;
+      width: 100%;
+      padding: 0;
+    }
+    
+    .dashboard-grid,
+    .stats-grid,
+    .reports-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
