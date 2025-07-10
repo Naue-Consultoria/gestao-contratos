@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { NotificationService } from './notification.service';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 
 export interface User {
   id: number;
