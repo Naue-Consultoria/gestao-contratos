@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { NotificationService } from './notification.service';
+import { environment } from '../environments/environment';
 
 export interface User {
   id: number;
@@ -30,7 +31,7 @@ export interface ChangePasswordResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:3000/api/auth';
+  private readonly API_URL = `${environment.authUrl}`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -86,7 +87,7 @@ export class AuthService {
    */
   changePassword(endpoint: string, data: any): Observable<ChangePasswordResponse> {
     const headers = this.getAuthHeaders();
-    const fullUrl = `http://localhost:3000${endpoint}`;
+    const fullUrl = `${this.API_URL}/${endpoint}`;
     
     return this.http.post<ChangePasswordResponse>(fullUrl, data, { headers }).pipe(
       tap(response => {

@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface CreateServiceRequest {
   name: string;
@@ -53,7 +54,7 @@ export interface CreateServiceResponse {
   providedIn: 'root'
 })
 export class ServiceService {
-  private readonly API_URL = 'http://localhost:3000/api/services';
+  private readonly API_URL = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

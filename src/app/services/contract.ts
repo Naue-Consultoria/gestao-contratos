@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 export interface ContractServiceItem {
   service_id: number;
@@ -98,7 +99,7 @@ export interface ContractStats {
   providedIn: 'root'
 })
 export class ContractService {
-  private readonly API_URL = 'http://localhost:3000/api/contracts';
+  private readonly API_URL = `${environment.apiUrl}/contracts`;
 
   constructor(private http: HttpClient) {}
 
