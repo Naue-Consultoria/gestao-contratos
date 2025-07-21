@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { Login } from './pages/login/login';
 import { HomeComponent } from './pages/home/home';
 import { ChangePasswordComponent } from './components/change-password/change-password';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password';
+import { ResetPasswordComponent } from './components/reset-password/reset-password';
 import { DashboardContentComponent } from './components/dashboard-content/dashboard-content';
 import { ContractsTableComponent } from './components/contracts-table/contracts-table';
 import { ContractFormComponent } from './components/contract-form/contract-form';
@@ -30,6 +32,18 @@ export const routes: Routes = [
     component: Login,
   },
 
+  // Rotas de recuperação de senha - públicas
+  {
+    path: 'forgot-password',
+    component: ForgotPasswordComponent,
+    title: 'Esqueci minha senha - NAUE Consultoria',
+  },
+  {
+    path: 'reset-password',
+    component: ResetPasswordComponent,
+    title: 'Nova senha - NAUE Consultoria',
+  },
+
   // Rota para trocar senha - protegida apenas por autenticação
   {
     path: 'change-password',
@@ -37,10 +51,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     title: 'Alterar Senha - NAUE Consultoria',
   },
-  // {
-  //     path: "esqueceu-senha",
-  //     component: ForgotPasswordComponent
-  // },
   {
     path: 'home',
     component: HomeComponent,

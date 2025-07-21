@@ -10,7 +10,7 @@ export interface User {
   email: string;
   name: string;
   role: string;
-  role_id: number; // Adicionar role_id
+  role_id: number;
   must_change_password: boolean;
   permissions?: string[];
 }
@@ -25,6 +25,16 @@ export interface ChangePasswordResponse {
   message: string;
   token?: string;
   user?: User;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  success?: boolean;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+  success?: boolean;
 }
 
 @Injectable({
@@ -102,10 +112,58 @@ export class AuthService {
     );
   }
 
-   /**
+  /**
+   * Solicita recuperação de senha
+   */
+  forgotPassword(email: string): Observable<ForgotPasswordResponse> {
+    return this.http.post<ForgotPasswordResponse>(`${this.API_URL}/forgot-password`, { email }).pipe(
+      tap(response => {
+        console.log('✅ Solicitação de recuperação enviada');
+      }),
+      catchError(error => {
+        console.error('❌ Erro ao solicitar recuperação:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Reseta a senha usando o código
+   */
+  resetPassword(code: string, password: string): Observable<ResetPasswordResponse> {
+    return this.http.post<ResetPasswordResponse>(`${this.API_URL}/reset-password`, {
+      token: code,
+      password
+    }).pipe(
+      tap(response => {
+        console.log('✅ Senha resetada com sucesso');
+      }),
+      catchError(error => {
+        console.error('❌ Erro ao resetar senha:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Valida se um código de recuperação é válido
+   */
+  validateResetCode(code: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/validate-reset-code`, { token: code }).pipe(
+      tap(response => {
+        console.log('✅ Código validado');
+      }),
+      catchError(error => {
+        console.error('❌ Código inválido:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
    * Realiza logout do usuário
    */
-   logout(): Observable<any> {
+  logout(): Observable<any> {
     const headers = this.getAuthHeaders();
     
     return this.http.post(`${this.API_URL}/logout`, {}, { headers }).pipe(
@@ -122,6 +180,7 @@ export class AuthService {
       })
     );
   }
+
   /**
    * Verifica se o usuário está autenticado
    */
