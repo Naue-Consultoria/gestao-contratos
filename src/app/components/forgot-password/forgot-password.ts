@@ -1,6 +1,8 @@
+// src/app/components/forgot-password/forgot-password.ts
+
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Import for *ngIf
-import { FormsModule } from '@angular/forms';   // Import for ngModel and ngForm
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth';
@@ -13,7 +15,7 @@ import { LoginPrimaryInput } from '../login-primary-input/login-primary-input';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     RouterLink,
     LoginLayout,
     LoginPrimaryInput
@@ -22,52 +24,50 @@ import { LoginPrimaryInput } from '../login-primary-input/login-primary-input';
   styleUrls: ['./forgot-password.css']
 })
 export class ForgotPasswordComponent {
-  // --- Define all properties here ---
   formStage: 'request' | 'validate' = 'request';
-  email: string = '';
-  isLoading: boolean = false;
+  isLoading = false;
+  error = '';
   
-  // Properties for the second stage
-  code: string = '';
-  newPassword: string = '';
+  requestForm: FormGroup;
 
   constructor(
+    private fb: FormBuilder,
     private authService: AuthService,
     private notificationService: NotificationService,
     private router: Router
-  ) {}
+  ) {
+    this.requestForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]]
+    });
+  }
 
   async requestReset() {
-    if (!this.email) {
-      this.notificationService.warning('Por favor, informe seu e-mail.');
+    if (this.requestForm.invalid) {
+      this.notificationService.warning('Por favor, informe um e-mail válido.');
       return;
     }
     this.isLoading = true;
+    this.error = '';
+
     try {
-      await firstValueFrom(this.authService.forgotPassword(this.email));
-      this.notificationService.success('Um código de recuperação foi enviado para seu e-mail.', 'Verifique sua caixa de entrada');
+      const email = this.requestForm.value.email;
+      await firstValueFrom(this.authService.forgotPassword(email));
+      
+      // This is the key change: switch to the next stage
       this.formStage = 'validate';
+      
     } catch (error: any) {
-      this.notificationService.error(error.error?.message || 'Falha ao enviar e-mail de recuperação.');
+      // For security, even on error, we show the success message
+      // so we don't reveal which emails are registered.
+      this.formStage = 'validate';
     } finally {
       this.isLoading = false;
     }
   }
 
-  async resetPassword() {
-    if (!this.code || !this.newPassword) {
-      this.notificationService.warning('Por favor, preencha o código e a nova senha.');
-      return;
-    }
-    this.isLoading = true;
-    try {
-      await firstValueFrom(this.authService.resetPassword(this.code, this.newPassword));
-      this.notificationService.success('Sua senha foi alterada com sucesso!');
-      this.router.navigate(['/login']);
-    } catch (error: any) {
-      this.notificationService.error(error.error?.message || 'Código inválido ou expirado.');
-    } finally {
-      this.isLoading = false;
-    }
+  // Navigate to the page where the user will input the code and new password
+  goToResetPasswordPage() {
+    const email = this.requestForm.value.email;
+    this.router.navigate(['/reset-password'], { queryParams: { email: email } });
   }
 }
