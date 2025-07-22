@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { UserService } from '../../services/user';
 import { ToastrService } from 'ngx-toastr';
+import { firstValueFrom } from 'rxjs';
 
 interface UserData {
   name: string;
@@ -113,21 +114,23 @@ export class NewUserPageComponent implements OnInit {
     this.errorMessage = '';
 
     try {
+      // The payload is an object that will be sent to the API.
+      // We are only including the fields the API expects.
       const payload: any = {
         name: this.userData.name,
         email: this.userData.email,
         role: this.userData.role,
-        is_active: this.userData.isActive
+        // The "is_active" field has been removed from here.
       };
 
       if (this.isEditMode && this.editingUserId) {
-        // Update existing user (without password)
+        payload.is_active = this.userData.isActive;
+        
         await this.userService.updateUser(this.editingUserId, payload).toPromise();
         this.toastr.success('Usuário atualizado com sucesso!');
       } else {
-        // Create new user (password is required)
         payload.password = this.userData.password;
-        await this.userService.createUser(payload).toPromise();
+        await firstValueFrom(this.userService.createUser(payload));
         this.toastr.success('Usuário criado com sucesso!');
       }
 
