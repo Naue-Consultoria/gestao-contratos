@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user';
 import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 interface User {
   id: number;
@@ -226,18 +226,16 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   /**
    * Deletar usuário
    */
-  async deleteUser(user: User) {
-    const confirmMessage = `Tem certeza que deseja deletar o usuário ${user.name}? Esta ação não pode ser desfeita.`;
-    
-    if (confirm(confirmMessage)) {
+  async deleteUser(userId: number) {
+    if (confirm('Tem certeza que deseja excluir este usuário permanentemente? Esta ação não pode ser desfeita.')) {
       try {
-        await this.userService.deleteUser(user.id).toPromise();
-        
-        this.toastr.success('Usuário deletado com sucesso!');
-        this.loadUsers();
-      } catch (error) {
-        console.error('❌ Erro ao deletar usuário:', error);
-        this.toastr.error('Erro ao deletar usuário');
+        // Change this to call the new endpoint
+        await firstValueFrom(this.userService.deleteUserPermanent(userId));
+        this.toastr.success('Usuário excluído com sucesso!');
+        this.loadUsers(); // Refresh the user list
+      } catch (error: any) {
+        console.error('Erro ao excluir usuário:', error);
+        this.toastr.error(error.error?.message || 'Falha ao excluir usuário');
       }
     }
   }
