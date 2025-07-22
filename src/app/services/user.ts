@@ -80,8 +80,7 @@ export class UserService {
    * Deletar usuário (apenas admin)
    */
   deleteUserPermanent(userId: number): Observable<any> {
-    // This is the new hard delete
-    return this.http.delete(`${this.API_URL}/users/${userId}/permanent`);
+    return this.http.delete(`${this.API_URL}/${userId}/permanent`);
   }
 
   /**
