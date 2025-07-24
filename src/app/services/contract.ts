@@ -1,4 +1,3 @@
-// src/app/services/contract.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -18,6 +17,7 @@ export interface CreateContractRequest {
   end_date?: string | null;
   services: ContractServiceItem[];
   notes?: string | null;
+  assigned_users?: number[]; // Added for creation
 }
 
 export interface UpdateContractRequest {
@@ -29,6 +29,7 @@ export interface UpdateContractRequest {
   status?: 'active' | 'completed' | 'cancelled' | 'suspended';
   services?: ContractServiceItem[];
   notes?: string | null;
+  assigned_users?: number[]; // <-- ADD THIS LINE
 }
 
 export interface ApiContractService {
@@ -63,6 +64,7 @@ export interface ApiContract {
   contract_services: ApiContractService[];
   created_by_user?: { name: string };
   updated_by_user?: { name: string };
+  assigned_users?: { user: { id: number; name: string } }[];
 }
 
 export interface ContractsResponse {
@@ -103,9 +105,6 @@ export class ContractService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Obter headers com autorização
-   */
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     return new HttpHeaders({
@@ -114,189 +113,119 @@ export class ContractService {
     });
   }
 
-  /**
-   * Listar contratos
-   */
   getContracts(filters?: any): Observable<ContractsResponse> {
-    // Clean up filters before sending
     const cleanFilters: any = {};
-    
     if (filters) {
-      if (filters.search) cleanFilters.search = filters.search;
-      if (filters.status) cleanFilters.status = filters.status;
-      if (filters.type) cleanFilters.type = filters.type;
-      if (filters.company_id && filters.company_id !== null && filters.company_id !== 'null') {
-        cleanFilters.company_id = filters.company_id;
-      }
-      if (filters.start_date) cleanFilters.start_date = filters.start_date;
-      if (filters.end_date) cleanFilters.end_date = filters.end_date;
+      Object.keys(filters).forEach(key => {
+        if (filters[key] !== null && filters[key] !== '' && filters[key] !== 'null') {
+          cleanFilters[key] = filters[key];
+        }
+      });
     }
-    
     return this.http.get<ContractsResponse>(this.API_URL, { 
       params: cleanFilters,
       headers: this.getAuthHeaders() 
     });
   }
 
-  /**
-   * Buscar contrato por ID
-   */
   getContract(id: number): Observable<ContractResponse> {
     return this.http.get<ContractResponse>(`${this.API_URL}/${id}`, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Criar novo contrato
-   */
   createContract(contractData: CreateContractRequest): Observable<CreateContractResponse> {
     return this.http.post<CreateContractResponse>(this.API_URL, contractData, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Atualizar contrato
-   */
   updateContract(id: number, contractData: UpdateContractRequest): Observable<any> {
     return this.http.put(`${this.API_URL}/${id}`, contractData, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Alterar status do contrato
-   */
   updateContractStatus(id: number, status: string): Observable<any> {
     return this.http.patch(`${this.API_URL}/${id}/status`, { status }, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Gerar próximo número de contrato
-   */
   generateContractNumber(): Observable<{ contractNumber: string }> {
     return this.http.get<{ contractNumber: string }>(`${this.API_URL}/meta/generate-number`, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Obter tipos de contratos
-   */
-  getContractTypes(): Observable<{ types: string[] }> {
-    return this.http.get<{ types: string[] }>(`${this.API_URL}/meta/types`, {
+  getContractTypes(): Observable<{ types: { value: string, label: string }[] }> {
+    return this.http.get<{ types: { value: string, label: string }[] }>(`${this.API_URL}/meta/types`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+  
+  getContractStatuses(): Observable<{ statuses: { value: string, label: string }[] }> {
+    return this.http.get<{ statuses: { value: string, label: string }[] }>(`${this.API_URL}/meta/statuses`, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Obter status de contratos
-   */
-  getContractStatuses(): Observable<{ statuses: string[] }> {
-    return this.http.get<{ statuses: string[] }>(`${this.API_URL}/meta/statuses`, {
-      headers: this.getAuthHeaders()
-    });
-  }
-
-  /**
-   * Obter estatísticas
-   */
   getStats(): Observable<{ stats: ContractStats }> {
     return this.http.get<{ stats: ContractStats }>(`${this.API_URL}/meta/stats`, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Excluir contrato
-   */
   deleteContract(id: number): Observable<any> {
     return this.http.delete(`${this.API_URL}/${id}`, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Formatar valor para exibição (de centavos para reais)
-   */
   formatValue(valueInCents: number): string {
-    const valueInReais = valueInCents / 100;
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valueInReais);
+    const valueInReais = (valueInCents || 0) / 100;
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valueInReais);
   }
 
-  /**
-   * Converter valor de reais para centavos
-   */
   convertToCents(valueInReais: number): number {
-    return Math.round(valueInReais * 100);
+    return Math.round((valueInReais || 0) * 100);
   }
 
-  /**
-   * Converter valor de centavos para reais
-   */
   convertToReais(valueInCents: number): number {
-    return valueInCents / 100;
+    return (valueInCents || 0) / 100;
   }
 
-  /**
-   * Formatar data para exibição
-   */
-  formatDate(date: string): string {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('pt-BR');
+  formatDate(date: string | null): string {
+    if (!date) return 'Indeterminado';
+    // Adiciona T00:00:00 para garantir que a data seja interpretada como local
+    return new Date(`${date}T00:00:00`).toLocaleDateString('pt-BR');
   }
 
-  /**
-   * Calcular duração do contrato em dias
-   */
   calculateDuration(startDate: string, endDate?: string | null): number {
+    if (!startDate || !endDate) return 0;
     const start = new Date(startDate);
-    const end = endDate ? new Date(endDate) : new Date();
+    const end = new Date(endDate);
     const diffTime = Math.abs(end.getTime() - start.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
 
-  /**
-   * Obter cor do status
-   */
   getStatusColor(status: string): string {
     const colors: { [key: string]: string } = {
-      'active': '#10b981',
-      'completed': '#3b82f6',
-      'cancelled': '#ef4444',
-      'suspended': '#f59e0b'
+      'active': '#10b981', 'completed': '#3b82f6', 'cancelled': '#ef4444', 'suspended': '#f59e0b'
     };
     return colors[status] || '#6b7280';
   }
 
-  /**
-   * Obter texto do status em português
-   */
   getStatusText(status: string): string {
     const texts: { [key: string]: string } = {
-      'active': 'Ativo',
-      'completed': 'Concluído',
-      'cancelled': 'Cancelado',
-      'suspended': 'Suspenso'
+      'active': 'Ativo', 'completed': 'Concluído', 'cancelled': 'Cancelado', 'suspended': 'Suspenso'
     };
     return texts[status] || status;
   }
 
-  /**
-   * Obter ícone do tipo de contrato
-   */
   getTypeIcon(type: string): string {
     const icons: { [key: string]: string } = {
-      'Full': 'fas fa-building',
-      'Pontual': 'fas fa-calendar-check',
-      'Individual': 'fas fa-user'
+      'Full': 'fas fa-building', 'Pontual': 'fas fa-calendar-check', 'Individual': 'fas fa-user'
     };
     return icons[type] || 'fas fa-file-contract';
   }

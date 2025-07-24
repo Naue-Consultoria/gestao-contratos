@@ -2,10 +2,19 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ContractService, CreateContractRequest, UpdateContractRequest, ApiContract, ContractServiceItem } from '../../services/contract';
+import { firstValueFrom } from 'rxjs';
+import {
+  ContractService,
+  CreateContractRequest,
+  UpdateContractRequest,
+  ContractServiceItem,
+} from '../../services/contract';
 import { CompanyService, ApiCompany } from '../../services/company';
 import { ServiceService, ApiService } from '../../services/service';
 import { ModalService } from '../../services/modal.service';
+import { UserService } from '../../services/user';
+import { AuthService } from '../../services/auth';
+import { UserSelectionModalComponent } from '../user-selection-modal/user-selection-modal';
 
 interface SelectedService {
   service_id: number;
@@ -17,14 +26,19 @@ interface SelectedService {
   category: string;
 }
 
+interface AssignableUser {
+  id: number;
+  name: string;
+  email: string;
+}
+
 @Component({
   selector: 'app-contract-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UserSelectionModalComponent],
   templateUrl: './contract-form.html',
-  styleUrls: ['./contract-form.css']
+  styleUrls: ['./contract-form.css'],
 })
-
 export class ContractFormComponent implements OnInit {
   private contractService = inject(ContractService);
   private companyService = inject(CompanyService);
@@ -32,64 +46,81 @@ export class ContractFormComponent implements OnInit {
   private modalService = inject(ModalService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private userService = inject(UserService);
+  private authService = inject(AuthService);
 
-  // Form data
   formData = {
     contract_number: '',
     company_id: null as number | null,
     type: 'Full' as 'Full' | 'Pontual' | 'Individual',
     start_date: '',
     end_date: '',
-    notes: ''
+    notes: '',
+    assigned_users: [] as number[],
   };
 
-  // Services
   availableServices: ApiService[] = [];
   selectedServices: SelectedService[] = [];
-  
-  // Companies
   companies: ApiCompany[] = [];
-  
-  // Contract types
   contractTypes = ['Full', 'Pontual', 'Individual'];
-  
-  // UI state
+
+  allUsers: AssignableUser[] = [];
+  currentUserId: number | null = null;
+
   isLoading = false;
   isSaving = false;
   isEditMode = false;
   isViewMode = false;
+  isUserModalOpen = false;
   contractId: number | null = null;
   errors: any = {};
-  
-  // Service selection
+
   showServiceModal = false;
   serviceSearchTerm = '';
 
-
   ngOnInit() {
+    this.currentUserId = this.authService.getUser()?.id ?? null;
     const id = this.route.snapshot.paramMap.get('id');
-    const isView = this.route.snapshot.url.some(segment => segment.path === 'view');
-    
+    const isView = this.route.snapshot.url.some(
+      (segment) => segment.path === 'view'
+    );
+
     if (id) {
       this.contractId = parseInt(id);
       this.isEditMode = !isView;
       this.isViewMode = isView;
       this.loadContract();
     } else {
-      // Generate contract number for new contracts
       this.generateContractNumber();
     }
-    
-    this.loadCompanies();
-    this.loadServices();
+
+    this.loadInitialData();
   }
 
-  /**
-   * Generate contract number
-   */
+  loadInitialData() {
+    this.loadCompanies();
+    this.loadServices();
+    this.loadUsersForAssignment();
+  }
+
+  async loadUsersForAssignment() {
+    try {
+      const response = await firstValueFrom(this.userService.getUsers());
+      if (response && response.users) {
+        this.allUsers = response.users
+          .filter((user) => user.id !== this.currentUserId)
+          .map((user) => ({ id: user.id, name: user.name, email: user.email }));
+      }
+    } catch (error) {
+      console.error('❌ Error loading users:', error);
+    }
+  }
+
   async generateContractNumber() {
     try {
-      const response = await this.contractService.generateContractNumber().toPromise();
+      const response = await firstValueFrom(
+        this.contractService.generateContractNumber()
+      );
       if (response) {
         this.formData.contract_number = response.contractNumber;
       }
@@ -98,231 +129,216 @@ export class ContractFormComponent implements OnInit {
     }
   }
 
-  /**
-   * Load contract data for editing/viewing
-   */
   async loadContract() {
     if (!this.contractId) return;
-
     this.isLoading = true;
     try {
-      const response = await this.contractService.getContract(this.contractId).toPromise();
+      const response = await firstValueFrom(
+        this.contractService.getContract(this.contractId)
+      );
       if (response && response.contract) {
-        const contract = response.contract;
-        
-        // Fill form data
+        const contract = response.contract as any;
         this.formData = {
           contract_number: contract.contract_number,
           company_id: contract.company.id,
           type: contract.type,
-          start_date: contract.start_date.split('T')[0], // Format for date input
+          start_date: contract.start_date.split('T')[0],
           end_date: contract.end_date ? contract.end_date.split('T')[0] : '',
-          notes: contract.notes || ''
+          notes: contract.notes || '',
+          assigned_users:
+            contract.assigned_users?.map((u: any) => u.user.id) || [],
         };
-        
-        // Map services
-        this.selectedServices = contract.contract_services.map(cs => ({
+        this.selectedServices = contract.contract_services.map((cs: any) => ({
           service_id: cs.service.id,
           name: cs.service.name,
           quantity: cs.quantity,
           unit_value: cs.unit_value,
           total_value: cs.total_value,
           duration: cs.service.duration,
-          category: cs.service.category
+          category: cs.service.category,
         }));
       }
     } catch (error) {
-      console.error('❌ Error loading contract:', error);
-      this.modalService.showNotification('Erro ao carregar contrato', false);
+      this.modalService.showError('Erro ao carregar contrato');
       this.router.navigate(['/home/contracts']);
     } finally {
       this.isLoading = false;
     }
   }
 
-  /**
-   * Load companies
-   */
   async loadCompanies() {
     try {
-      const response = await this.companyService.getCompanies({ is_active: true }).toPromise();
-      if (response && response.companies) {
-        this.companies = response.companies;
-      }
+      const response = await firstValueFrom(
+        this.companyService.getCompanies({ is_active: true })
+      );
+      if (response && response.companies) this.companies = response.companies;
     } catch (error) {
       console.error('❌ Error loading companies:', error);
     }
   }
 
-  /**
-   * Load services
-   */
   async loadServices() {
     try {
-      const response = await this.serviceService.getServices({ is_active: true }).toPromise();
-      if (response && response.services) {
+      const response = await firstValueFrom(
+        this.serviceService.getServices({ is_active: true })
+      );
+      if (response && response.services)
         this.availableServices = response.services;
-      }
     } catch (error) {
       console.error('❌ Error loading services:', error);
     }
   }
 
-  /**
-   * Get filtered services for modal
-   */
-  get filteredServices(): ApiService[] {
-    if (!this.serviceSearchTerm) {
-      return this.availableServices;
+  onUserCheckboxChange(event: Event, userId: number) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+
+    if (isChecked) {
+      // Add the user ID to the array if it's not already there
+      if (!this.formData.assigned_users.includes(userId)) {
+        this.formData.assigned_users.push(userId);
+      }
+    } else {
+      // Remove the user ID from the array
+      const index = this.formData.assigned_users.indexOf(userId);
+      if (index > -1) {
+        this.formData.assigned_users.splice(index, 1);
+      }
     }
-    
+  }
+
+  // ADD THIS METHOD to check if a user's checkbox should be checked
+  isUserAssigned(userId: number): boolean {
+    return this.formData.assigned_users.includes(userId);
+  }
+
+  get filteredServices(): ApiService[] {
+    if (!this.serviceSearchTerm) return this.availableServices;
     const search = this.serviceSearchTerm.toLowerCase();
-    return this.availableServices.filter(service => 
-      service.name.toLowerCase().includes(search) ||
-      (service.category && service.category.toLowerCase().includes(search))
+    return this.availableServices.filter(
+      (s) =>
+        s.name.toLowerCase().includes(search) ||
+        s.category?.toLowerCase().includes(search)
     );
   }
 
   formatDate(dateString: string): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    return date.toLocaleDateString('pt-BR');
+    return this.contractService.formatDate(dateString);
   }
 
-  /**
-   * Open service selection modal
-   */
   openServiceModal() {
     this.showServiceModal = true;
     this.serviceSearchTerm = '';
   }
-
-  /**
-   * Close service selection modal
-   */
   closeServiceModal() {
     this.showServiceModal = false;
     this.serviceSearchTerm = '';
   }
 
-  /**
-   * Add service to contract
-   */
   addService(service: ApiService) {
-    // Check if already added
-    if (this.selectedServices.find(s => s.service_id === service.id)) {
-      this.modalService.showNotification('Serviço já adicionado ao contrato', false);
+    if (this.isServiceSelected(service.id)) {
+      this.modalService.showWarning('Serviço já adicionado');
       return;
     }
-    
-    // Add service
     this.selectedServices.push({
       service_id: service.id,
       name: service.name,
       quantity: 1,
-      unit_value: service.value, // já em centavos
+      unit_value: service.value,
       total_value: service.value,
       duration: service.duration,
-      category: service.category || 'Geral'
+      category: service.category || 'Geral',
     });
-    
     this.closeServiceModal();
   }
 
-  /**
-   * Remove service from contract
-   */
   removeService(index: number) {
     this.selectedServices.splice(index, 1);
   }
 
-  /**
-   * Update service quantity
-   */
   updateServiceQuantity(index: number, quantity: number) {
-    if (quantity < 1) return;
-    
+    if (quantity < 1) {
+      this.selectedServices[index].quantity = 1;
+    }
     const service = this.selectedServices[index];
-    service.quantity = quantity;
-    service.total_value = service.unit_value * quantity;
+    service.quantity = Math.floor(quantity);
+    service.total_value = service.unit_value * service.quantity;
   }
 
-  /**
-   * Calculate total contract value
-   */
   getTotalValue(): number {
-    return this.selectedServices.reduce((sum, service) => sum + service.total_value, 0);
+    return this.selectedServices.reduce((sum, s) => sum + s.total_value, 0);
   }
-
-  /**
-   * Get formatted total value
-   */
   getFormattedTotalValue(): string {
     return this.contractService.formatValue(this.getTotalValue());
   }
-
-  /**
-   * Calculate total duration
-   */
   getTotalDuration(): number {
-    if (this.selectedServices.length === 0) return 0;
-    return Math.max(...this.selectedServices.map(s => s.duration));
+    return this.selectedServices.length > 0
+      ? Math.max(...this.selectedServices.map((s) => s.duration))
+      : 0;
   }
 
-  /**
-   * Validate form
-   */
+  openUserModal(): void {
+    this.isUserModalOpen = true;
+  }
+  
+  closeUserModal(): void {
+    this.isUserModalOpen = false;
+  }
+
+  // This method will be called when the modal's 'selectionConfirmed' event is emitted
+  updateAssignedUsers(selectedIds: number[]): void {
+    this.formData.assigned_users = selectedIds;
+  }
+
+  // Helper to display the names of selected users
+  getSelectedUserNames(): string {
+    if (this.formData.assigned_users.length === 0) {
+      return 'Nenhum usuário selecionado';
+    }
+    return this.formData.assigned_users
+      .map(id => this.allUsers.find(user => user.id === id)?.name)
+      .filter(name => name) // Filter out any undefined names
+      .join(', ');
+  }
+
   validateForm(): boolean {
     this.errors = {};
-    
-    if (!this.formData.contract_number) {
+    if (!this.formData.contract_number)
       this.errors.contract_number = 'Número do contrato é obrigatório';
-    }
-    
-    if (!this.formData.company_id) {
+    if (!this.formData.company_id)
       this.errors.company_id = 'Empresa é obrigatória';
-    }
-    
-    if (!this.formData.start_date) {
+    if (!this.formData.start_date)
       this.errors.start_date = 'Data de início é obrigatória';
-    }
-    
-    if (this.formData.end_date && this.formData.end_date < this.formData.start_date) {
-      this.errors.end_date = 'Data de término deve ser posterior à data de início';
-    }
-    
-    if (this.selectedServices.length === 0) {
-      this.errors.services = 'Pelo menos um serviço deve ser adicionado ao contrato';
-    }
-    
+    if (
+      this.formData.end_date &&
+      this.formData.end_date < this.formData.start_date
+    )
+      this.errors.end_date = 'Data de término deve ser posterior à de início';
+    if (this.selectedServices.length === 0)
+      this.errors.services = 'Pelo menos um serviço deve ser adicionado';
     return Object.keys(this.errors).length === 0;
   }
 
-   /**
-   * Save contract
-   */
-   async save() {
+  async save() {
     if (!this.validateForm()) {
       this.modalService.showWarning(
-        'Por favor, corrija os erros no formulário antes de continuar',
+        'Por favor, corrija os erros no formulário',
         'Formulário Inválido'
       );
       return;
     }
-
     this.isSaving = true;
-    
+
     try {
-      // Prepare services data
-      const services: ContractServiceItem[] = this.selectedServices.map(s => ({
-        service_id: s.service_id,
-        quantity: s.quantity,
-        unit_value: s.unit_value
-      }));
+      const services: ContractServiceItem[] = this.selectedServices.map(
+        (s) => ({
+          service_id: s.service_id,
+          quantity: s.quantity,
+          unit_value: s.unit_value,
+        })
+      );
 
       if (this.isEditMode && this.contractId) {
-        // Update existing contract
+        // Correctly build the update payload to match the interface
         const updateData: UpdateContractRequest = {
           contract_number: this.formData.contract_number,
           company_id: this.formData.company_id!,
@@ -330,103 +346,57 @@ export class ContractFormComponent implements OnInit {
           start_date: this.formData.start_date,
           end_date: this.formData.end_date || null,
           services: services,
-          notes: this.formData.notes || null
+          notes: this.formData.notes || null,
+          assigned_users: this.formData.assigned_users,
         };
-        
-        await this.contractService.updateContract(this.contractId, updateData).toPromise();
-        
+        await firstValueFrom(
+          this.contractService.updateContract(this.contractId, updateData)
+        );
         this.modalService.showSuccess(
-          `Contrato ${this.formData.contract_number} atualizado com sucesso!`,
-          'Contrato Atualizado',
-          {
-            persistent: true,
-            action: {
-              label: 'Visualizar',
-              callback: () => this.router.navigate(['/home/contracts/view', this.contractId])
-            }
-          }
+          'Contrato atualizado com sucesso!',
+          'Sucesso'
         );
       } else {
-        // Create new contract
         const createData: CreateContractRequest = {
-          contract_number: this.formData.contract_number,
+          ...this.formData,
           company_id: this.formData.company_id!,
-          type: this.formData.type,
-          start_date: this.formData.start_date,
           end_date: this.formData.end_date || null,
-          services: services,
-          notes: this.formData.notes || null
+          notes: this.formData.notes || null,
+          services,
+          assigned_users: this.formData.assigned_users,
         };
-        
-        const response = await this.contractService.createContract(createData).toPromise();
-        
-        if (response && response.contract) {
-          this.modalService.showSuccess(
-            `Contrato ${this.formData.contract_number} criado com sucesso!`,
-            'Novo Contrato',
-            {
-              persistent: true,
-              duration: 7000,
-              action: {
-                label: 'Visualizar',
-                callback: () => this.router.navigate(['/home/contracts/view', response.contract.id])
-              }
-            }
-          );
-        }
+        await firstValueFrom(this.contractService.createContract(createData));
+        this.modalService.showSuccess(
+          'Contrato criado com sucesso!',
+          'Sucesso'
+        );
       }
-      
-      // Navigate back to list
       this.router.navigate(['/home/contracts']);
-      
     } catch (error: any) {
-      console.error('Erro ao salvar contrato:', error);
-      
       this.modalService.showError(
-        error.error?.message || 'Erro ao salvar contrato. Verifique os dados e tente novamente.',
-        'Erro',
-        { duration: 8000 }
+        error.error?.message || 'Erro ao salvar o contrato.',
+        'Erro'
       );
     } finally {
       this.isSaving = false;
     }
   }
 
-  /**
-   * Cancel and go back
-   */
   cancel() {
     this.router.navigate(['/home/contracts']);
   }
-
-  /**
-   * Enable edit mode (from view mode)
-   */
   enableEdit() {
     this.isViewMode = false;
     this.isEditMode = true;
   }
-
-  /**
-   * Format currency for display
-   */
   formatCurrency(value: number): string {
     return this.contractService.formatValue(value);
   }
-
-  /**
-   * Get company name by ID
-   */
   getCompanyName(companyId: number | null): string {
-    if (!companyId) return '-';
-    const company = this.companies.find(c => c.id === companyId);
+    const company = this.companies.find((c) => c.id === companyId);
     return company ? company.name : '-';
   }
-
-    /**
-     * Check if service is already selected
-     */
-    isServiceSelected(serviceId: number): boolean {
-      return this.selectedServices.some(s => s.service_id === serviceId);
-    }
+  isServiceSelected(serviceId: number): boolean {
+    return this.selectedServices.some((s) => s.service_id === serviceId);
   }
+}

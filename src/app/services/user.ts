@@ -31,6 +31,12 @@ export interface ApiUser {
   login_count?: number;
 }
 
+export interface AssignableUser {
+  id: number;
+  name: string;
+  email: string;
+}
+
 export interface UsersResponse {
   users: ApiUser[];
 }
@@ -88,6 +94,13 @@ export class UserService {
    */
   resetUserPassword(id: number): Observable<any> {
     return this.http.post(`${this.API_URL}/${id}/reset-password`, {});
+  }
+  
+  /**
+   * Listar usuários para atribuição de contrato
+   */
+  getUsersForAssignment(): Observable<AssignableUser[]> {
+    return this.http.get<AssignableUser[]>(`${this.API_URL}/list-for-assignment`);
   }
 
   /**

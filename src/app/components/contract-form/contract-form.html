@@ -1,4 +1,3 @@
-<!-- src/app/components/contract-form/contract-form.html -->
 <div class="page">
   <div class="page-header">
     <h1 class="page-title">
@@ -13,17 +12,14 @@
     </div>
   </div>
 
-  <!-- Loading -->
   <div *ngIf="isLoading" class="loading-container">
     <i class="fas fa-spinner fa-spin"></i>
     Carregando dados do contrato...
   </div>
 
-  <!-- Form -->
   <div class="form-container" *ngIf="!isLoading">
     <form (ngSubmit)="save()" *ngIf="!isViewMode">
       <div class="form-grid">
-        <!-- Basic Information Section -->
         <div class="form-section">
           <h2 class="section-title">
             <i class="fas fa-info-circle"></i>
@@ -38,7 +34,7 @@
                 class="form-control" 
                 [(ngModel)]="formData.contract_number"
                 name="contract_number"
-                [readonly]="!isEditMode"
+                [readonly]="isEditMode"
                 [class.error]="errors.contract_number">
               <span class="error-message" *ngIf="errors.contract_number">{{ errors.contract_number }}</span>
             </div>
@@ -93,6 +89,29 @@
           </div>
 
           <div class="form-group">
+            <label class="form-label">Atribuir Usuários</label>
+            <p class="help-text">Selecione outros usuários para visualizar este contrato. Você será atribuído como proprietário automaticamente.</p>
+            
+            <div class="user-assignment-box">
+              <div class="selected-users-display">
+                <i class="fas fa-users"></i>
+                <span>{{ getSelectedUserNames() }}</span>
+              </div>
+              <button type="button" class="btn btn-secondary" (click)="openUserModal()">
+                <i class="fas fa-edit"></i>
+                Atribuir Colaborador
+              </button>
+            </div>
+          </div>
+          <app-user-selection-modal
+            [isOpen]="isUserModalOpen"
+            [allUsers]="allUsers"
+            [initialSelectedIds]="formData.assigned_users"
+            (close)="closeUserModal()"
+            (selectionConfirmed)="updateAssignedUsers($event)">
+          </app-user-selection-modal>
+          
+          <div class="form-group">
             <label class="form-label">Observações</label>
             <textarea 
               class="form-control" 
@@ -107,7 +126,6 @@
           </div>
         </div>
 
-        <!-- Services Section -->
         <div class="form-section">
           <h2 class="section-title">
             <i class="fas fa-briefcase"></i>
@@ -127,7 +145,6 @@
             {{ errors.services }}
           </div>
 
-          <!-- Selected Services List -->
           <div class="selected-services" *ngIf="selectedServices.length > 0">
             <div class="service-item" *ngFor="let service of selectedServices; let i = index">
               <div class="service-info">
@@ -172,14 +189,12 @@
             </div>
           </div>
 
-          <!-- Empty State -->
           <div class="empty-services" *ngIf="selectedServices.length === 0">
             <i class="fas fa-briefcase"></i>
             <p>Nenhum serviço adicionado</p>
             <p class="help-text">Clique no botão acima para adicionar serviços ao contrato</p>
           </div>
 
-          <!-- Contract Summary -->
           <div class="contract-summary" *ngIf="selectedServices.length > 0">
             <div class="summary-item">
               <span class="summary-label">Total de Serviços:</span>
@@ -197,7 +212,6 @@
         </div>
       </div>
 
-      <!-- Form Actions -->
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="cancel()">
           <i class="fas fa-times"></i>
@@ -211,10 +225,8 @@
       </div>
     </form>
 
-    <!-- View Mode -->
     <div class="view-mode" *ngIf="isViewMode">
       <div class="view-grid">
-        <!-- Contract Details -->
         <div class="view-section">
           <h2 class="section-title">
             <i class="fas fa-file-contract"></i>
@@ -254,7 +266,6 @@
           </div>
         </div>
 
-        <!-- Services List -->
         <div class="view-section">
           <h2 class="section-title">
             <i class="fas fa-briefcase"></i>
@@ -300,7 +311,6 @@
         </div>
       </div>
 
-      <!-- View Actions -->
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="cancel()">
           <i class="fas fa-arrow-left"></i>
@@ -315,7 +325,6 @@
   </div>
 </div>
 
-<!-- Service Selection Modal -->
 <div class="modal" [class.active]="showServiceModal" (click)="closeServiceModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -332,7 +341,8 @@
           type="text" 
           class="modal-search-input" 
           placeholder="Buscar serviço..."
-          [(ngModel)]="serviceSearchTerm">
+          [(ngModel)]="serviceSearchTerm"
+          name="serviceSearch">
       </div>
       
       <div class="services-list">
