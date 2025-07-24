@@ -7,7 +7,7 @@ Chart.register(...registerables);
 
 interface StatCard {
   label: string;
-  value: number;
+  value: number | string;
   change: string;
   changeType: 'positive' | 'negative';
   icon: string;
@@ -39,121 +39,34 @@ interface QuickAction {
   styleUrls: ['./dashboard-content.css']
 })
 export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestroy {
-  // Stat Cards
   statCards: StatCard[] = [
-    {
-      label: 'Total de Contratos',
-      value: 24,
-      change: '+12% este mês',
-      changeType: 'positive',
-      icon: 'fas fa-file-contract',
-      progress: 75,
-      color: '#0A8060',
-      bgColor: 'rgba(14, 155, 113, 0.15)'
-    },
-    {
-      label: 'Contratos Ativos',
-      value: 18,
-      change: '75% do total',
-      changeType: 'positive',
-      icon: 'fas fa-check-circle',
-      progress: 75,
-      color: '#0A8060',
-      bgColor: 'rgba(14, 155, 113, 0.15)'
-    },
-    {
-      label: 'Serviços em Andamento',
-      value: 42,
-      change: 'Em 18 contratos',
-      changeType: 'positive',
-      icon: 'fas fa-list-check',
-      progress: 65,
-      color: '#0A8060',
-      bgColor: 'rgba(14, 155, 113, 0.15)'
-    },
-    {
-      label: 'Próximas Atividades',
-      value: 8,
-      change: '3 urgentes',
-      changeType: 'negative',
-      icon: 'fas fa-clock',
-      progress: 40,
-      color: '#0A8060',
-      bgColor: 'rgba(14, 155, 113, 0.15)'
-    }
+    { label: 'Total de Contratos', value: 24, change: '+12% este mês', changeType: 'positive', icon: 'fas fa-file-contract', progress: 75, color: '#0A8060', bgColor: 'rgba(14, 155, 113, 0.15)' },
+    { label: 'Contratos Ativos', value: 18, change: '75% do total', changeType: 'positive', icon: 'fas fa-check-circle', progress: 75, color: '#0A8060', bgColor: 'rgba(14, 155, 113, 0.15)' },
+    { label: 'Serviços em Andamento', value: 42, change: 'Em 18 contratos', changeType: 'positive', icon: 'fas fa-list-check', progress: 65, color: '#0A8060', bgColor: 'rgba(14, 155, 113, 0.15)' },
+    { label: 'Próximas Atividades', value: 8, change: '3 urgentes', changeType: 'negative', icon: 'fas fa-clock', progress: 40, color: '#0A8060', bgColor: 'rgba(14, 155, 113, 0.15)' }
   ];
-
-  // Atividades recentes
   recentActivities: Activity[] = [
-    { 
-      time: 'Há 2 horas', 
-      title: 'Diagnóstico Organizacional - Empresa ABC', 
-      description: 'Reunião inicial realizada com sucesso',
-      type: 'diagnostic',
-      status: 'completed'
-    },
-    { 
-      time: 'Há 5 horas', 
-      title: 'OKR - Tech Solutions', 
-      description: 'Workshop de definição de objetivos concluído',
-      type: 'okr',
-      status: 'completed'
-    },
-    { 
-      time: 'Ontem', 
-      title: 'Mentoria Individual - Startup XYZ', 
-      description: 'Sessão agendada para próxima semana',
-      type: 'mentoring',
-      status: 'scheduled'
-    },
-    {
-      time: 'Há 2 dias',
-      title: 'Consultoria RH - Inovação Corp',
-      description: 'Análise de clima organizacional em andamento',
-      type: 'hr',
-      status: 'in-progress'
-    },
-    {
-      time: 'Há 3 dias',
-      title: 'Workshop de Liderança - GlobalTech',
-      description: 'Treinamento para gestores finalizado',
-      type: 'mentoring',
-      status: 'completed'
-    },
-    {
-      time: 'Há 4 dias',
-      title: 'Análise de Processos - FinanceHub',
-      description: 'Mapeamento de processos em fase final',
-      type: 'diagnostic',
-      status: 'in-progress'
-    }
+    { time: 'Há 2 horas', title: 'Diagnóstico Organizacional - Empresa ABC', description: 'Reunião inicial realizada com sucesso', type: 'diagnostic', status: 'completed' },
+    { time: 'Há 5 horas', title: 'OKR - Tech Solutions', description: 'Workshop de definição de objetivos concluído', type: 'okr', status: 'completed' },
+    { time: 'Ontem', title: 'Mentoria Individual - Startup XYZ', description: 'Sessão agendada para próxima semana', type: 'mentoring', status: 'scheduled' },
+    { time: 'Há 2 dias', title: 'Consultoria RH - Inovação Corp', description: 'Análise de clima organizacional em andamento', type: 'hr', status: 'in-progress' }
   ];
-
-  // Ações rápidas
   quickActions: QuickAction[] = [
     { icon: 'fas fa-building', label: 'Nova Empresa', color: '#0A8060', action: 'newCompany' },
     { icon: 'fas fa-briefcase', label: 'Novo Serviço', color: '#0A8060', action: 'newService' },
     { icon: 'fas fa-plus', label: 'Novo Contrato', color: '#0A8060', action: 'newContract' },
     { icon: 'fas fa-chart-bar', label: 'Gerar Relatório', color: '#0A8060', action: 'generateReport' }
   ];
-
-  // Dados para gráficos
   monthlyContractsData = {
     labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
     datasets: [{
-      label: 'Contratos',
-      data: [12, 15, 18, 22, 20, 24],
-      borderColor: '#0A8060',
-      backgroundColor: 'rgba(14, 155, 113, 0.1)',
-      fill: true
+      label: 'Contratos', data: [12, 15, 18, 22, 20, 24], borderColor: '#0A8060', backgroundColor: 'rgba(14, 155, 113, 0.1)', fill: true
     }]
   };
-
-  // Charts
   contractsChart: Chart | null = null;
-
-  // Filtros
   activityFilter: 'all' | 'completed' | 'in-progress' | 'scheduled' = 'all';
+
+  private themeObserver!: MutationObserver;
 
   constructor(private router: Router) {}
 
@@ -162,12 +75,23 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   ngAfterViewInit() {
-    setTimeout(() => {
-      this.initCharts();
-    }, 100);
+    this.initCharts();
+
+    this.themeObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          this.initCharts();
+        }
+      });
+    });
+
+    this.themeObserver.observe(document.body, { attributes: true });
   }
 
   ngOnDestroy() {
+    if (this.themeObserver) {
+      this.themeObserver.disconnect();
+    }
     if (this.contractsChart) {
       this.contractsChart.destroy();
     }
@@ -178,6 +102,9 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   private initCharts() {
+    if (this.contractsChart) {
+      this.contractsChart.destroy();
+    }
     this.initContractsChart();
   }
 
@@ -198,14 +125,9 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
+        interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: {
-            display: false
-          },
+          legend: { display: false },
           tooltip: {
             backgroundColor: isDarkMode ? '#374151' : '#fff',
             titleColor: textColor,
@@ -215,52 +137,24 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
             padding: 12,
             displayColors: false,
             callbacks: {
-              label: (context) => {
-                return `Contratos: ${context.parsed.y}`;
-              }
+              label: (context) => `Contratos: ${context.parsed.y}`
             }
           }
         },
         scales: {
           x: {
-            grid: {
-              color: gridColor,
-              display: false
-            },
-            ticks: {
-              color: textColor,
-              font: {
-                size: 12
-              }
-            }
+            grid: { color: gridColor, display: false },
+            ticks: { color: textColor, font: { size: 12 } }
           },
           y: {
             beginAtZero: true,
-            grid: {
-              color: gridColor,
-              display: true
-            },
-            ticks: {
-              color: textColor,
-              font: {
-                size: 12
-              },
-              stepSize: 5
-            }
+            grid: { color: gridColor, display: true },
+            ticks: { color: textColor, font: { size: 12 }, stepSize: 5 }
           }
         },
         elements: {
-          line: {
-            tension: 0.4,
-            borderWidth: 3
-          },
-          point: {
-            radius: 5,
-            hoverRadius: 7,
-            backgroundColor: '#fff',
-            borderWidth: 3,
-            borderColor: '#0A8060'
-          }
+          line: { tension: 0.4, borderWidth: 3 },
+          point: { radius: 5, hoverRadius: 7, backgroundColor: '#fff', borderWidth: 3, borderColor: '#0A8060' }
         }
       }
     });
@@ -271,70 +165,32 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   get filteredActivities(): Activity[] {
-    if (this.activityFilter === 'all') {
-      return this.recentActivities;
-    }
+    if (this.activityFilter === 'all') return this.recentActivities;
     return this.recentActivities.filter(activity => activity.status === this.activityFilter);
   }
 
   executeQuickAction(action: string) {
-    console.log('Executando ação:', action);
-    switch(action) {
-      case 'newContract':
-        this.router.navigate(['/home/contracts/new']);
-        break;
-      case 'newCompany':
-        // Navegar para nova empresa
-        this.router.navigate(['/home/companies/new']);
-        break;
-      case 'newService':
-        // Navegar para novo serviço
-        this.router.navigate(['/home/services/new']);
-        break;
-      case 'generateReport':
-        // Navegar para relatórios
-        this.router.navigate(['/home/reports']);
-        break;
-    }
+    const routes: { [key: string]: string } = {
+      'newContract': '/home/contracts/new',
+      'newCompany': '/home/companies/new',
+      'newService': '/home/services/new',
+      'generateReport': '/home/reports'
+    };
+    if (routes[action]) this.router.navigate([routes[action]]);
   }
 
   getActivityIcon(type: string): string {
-    const icons: { [key: string]: string } = {
-      'diagnostic': 'fas fa-stethoscope',
-      'okr': 'fas fa-bullseye',
-      'mentoring': 'fas fa-user-tie',
-      'hr': 'fas fa-users',
-      'other': 'fas fa-ellipsis-h'
-    };
+    const icons: { [key: string]: string } = { 'diagnostic': 'fas fa-stethoscope', 'okr': 'fas fa-bullseye', 'mentoring': 'fas fa-user-tie', 'hr': 'fas fa-users', 'other': 'fas fa-ellipsis-h' };
     return icons[type] || 'fas fa-circle';
   }
 
   getActivityColor(type: string): string {
-    const colors: { [key: string]: string } = {
-      'diagnostic': '#17915a',
-      'okr': '#17915a',
-      'mentoring': '#17915a',
-      'hr': '#17915a',
-      'other': '#17915a'
-    };
+    const colors: { [key: string]: string } = { 'diagnostic': '#17915a', 'okr': '#17915a', 'mentoring': '#17915a', 'hr': '#17915a', 'other': '#17915a' };
     return colors[type] || '#17915a';
   }
-
-  getStatusClass(status: string): string {
-    const classes: { [key: string]: string } = {
-      'completed': 'status-completed',
-      'in-progress': 'status-progress',
-      'scheduled': 'status-scheduled'
-    };
-    return classes[status] || '';
-  }
-
+  
   getStatusText(status: string): string {
-    const texts: { [key: string]: string } = {
-      'completed': 'Concluído',
-      'in-progress': 'Em andamento',
-      'scheduled': 'Agendado'
-    };
+    const texts: { [key: string]: string } = { 'completed': 'Concluído', 'in-progress': 'Em andamento', 'scheduled': 'Agendado' };
     return texts[status] || status;
   }
 }
