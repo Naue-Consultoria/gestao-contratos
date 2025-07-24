@@ -15,6 +15,21 @@ export interface User {
   permissions?: string[];
 }
 
+export interface ApiUserResponse {
+  user: {
+    id: number;
+    email: string;
+    name: string;
+    role: string;
+    permissions: string[];
+    must_change_password: boolean;
+    last_password_change: string | null;
+    first_login_at: string | null;
+    last_login_at?: string | null;
+    created_at?: string;
+  }
+}
+
 export interface LoginResponse {
   token: string;
   user: User;
@@ -158,6 +173,11 @@ export class AuthService {
         return throwError(() => error);
       })
     );
+  }
+
+  getMe(): Observable<ApiUserResponse> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<ApiUserResponse>(`${this.API_URL}/me`, { headers });
   }
 
   /**
