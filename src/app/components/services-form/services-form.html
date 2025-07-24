@@ -94,17 +94,14 @@
 
           <div class="form-group">
             <label class="form-label required">Valor</label>
-            <div class="value-input-wrapper">
-              <span class="currency-symbol">R$</span>
-              <input 
-                type="text" 
-                class="form-control value-input" 
-                [value]="formatValueForDisplay(formData.value)"
-                (input)="formatCurrency($event)"
-                name="value"
-                placeholder="0,00"
-                [class.error]="errors.value">
-            </div>
+            <input 
+              type="text" 
+              class="form-control value-input" 
+              [value]="formatValueForDisplay(formData.value)"
+              (input)="formatCurrency($event)"
+              name="value"
+              placeholder="0,00"
+              [class.error]="errors.value">
             <span class="error-message" *ngIf="errors.value">{{ errors.value }}</span>
           </div>
 

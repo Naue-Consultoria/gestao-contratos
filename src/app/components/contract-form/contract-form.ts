@@ -256,11 +256,18 @@ export class ContractFormComponent implements OnInit {
   }
 
   updateServiceQuantity(index: number, quantity: number) {
-    if (quantity < 1) {
-      this.selectedServices[index].quantity = 1;
-    }
+    if (quantity < 1) return;
+    
     const service = this.selectedServices[index];
-    service.quantity = Math.floor(quantity);
+    service.quantity = quantity;
+    service.total_value = service.unit_value * quantity;
+  }
+
+  updateServicePrice(index: number, priceInReais: number) {
+    if (priceInReais < 0) return;
+
+    const service = this.selectedServices[index];
+    service.unit_value = Math.round(priceInReais * 100);
     service.total_value = service.unit_value * service.quantity;
   }
 

@@ -209,23 +209,12 @@ textarea.form-control {
   font-size: 14px;
 }
 
-/* Value input wrapper */
-.value-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
 .currency-symbol {
   position: absolute;
   left: 14px;
   color: #6c737f;
   font-size: 14px;
   font-weight: 500;
-}
-
-.value-input {
-  padding-left: 35px !important;
 }
 
 /* Status toggle */
