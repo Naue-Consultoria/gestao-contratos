@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ModalService } from '../../services/modal.service';
 import { ContractService, ApiContract, ContractStats } from '../../services/contract';
 import { CompanyService } from '../../services/company';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 interface ContractDisplay {
   id: number;
@@ -36,7 +36,6 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private subscriptions = new Subscription();
 
-  // Stats
   stats: ContractStats = {
     total: 0,
     active: 0,
@@ -45,38 +44,19 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     suspended: 0,
     totalValueActive: 0,
     totalValueAll: 0,
-    typeStats: {
-      Full: 0,
-      Pontual: 0,
-      Individual: 0
-    },
+    typeStats: { Full: 0, Pontual: 0, Individual: 0 },
     averageDuration: 0
   };
 
-  // Contracts data
   contracts: ContractDisplay[] = [];
   filteredContracts: ContractDisplay[] = [];
-  
-  // Filters
-  filters = {
-    search: '',
-    status: '',
-    type: '',
-    company_id: null as number | null
-  };
-
-  // Companies for filter
+  filters = { search: '', status: '', type: '', company_id: null as number | null };
   companies: any[] = [];
-  
-  // Loading state
   isLoading = false;
   error = '';
-
-  // Tabs
   currentTab: 'all' | 'Full' | 'Pontual' | 'Individual' = 'all';
 
   ngOnInit() {
-    console.log('🚀 ContractsTableComponent initialized');
     this.loadContracts();
     this.loadCompanies();
     this.subscribeToRefreshEvents();
@@ -84,83 +64,45 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+    window.removeEventListener('refreshContracts', this.loadContracts);
   }
 
-  /**
-   * Subscribe to refresh events
-   */
   private subscribeToRefreshEvents() {
-    // Listen for contract refresh events
-    window.addEventListener('refreshContracts', () => {
-      this.loadContracts();
-    });
+    window.addEventListener('refreshContracts', this.loadContracts.bind(this));
   }
 
-  /**
-   * Load contracts from server
-   */
   async loadContracts() {
     this.isLoading = true;
     this.error = '';
-
     try {
-      // Load stats
-      try {
-        const statsResponse = await this.contractService.getStats().toPromise();
-        if (statsResponse && statsResponse.stats) {
-          this.stats = statsResponse.stats;
-        }
-      } catch (statsError) {
-        console.warn('⚠️ Error loading stats:', statsError);
-        // Continue loading contracts even if stats fail
+      const statsResponse = await firstValueFrom(this.contractService.getStats());
+      if (statsResponse?.stats) {
+        this.stats = statsResponse.stats;
       }
 
-      // Build clean filters
       const cleanFilters: any = {};
       if (this.filters.search) cleanFilters.search = this.filters.search;
       if (this.filters.status) cleanFilters.status = this.filters.status;
       if (this.filters.type) cleanFilters.type = this.filters.type;
       if (this.filters.company_id) cleanFilters.company_id = this.filters.company_id;
 
-      // Load contracts
-      const response = await this.contractService.getContracts(cleanFilters).toPromise();
+      const response = await firstValueFrom(this.contractService.getContracts(cleanFilters));
       
-      if (response && response.contracts) {
-        // Map contracts to display format
-        this.contracts = response.contracts.map(contract => this.mapContractToDisplay(contract));
-        this.applyFilters();
-      } else {
-        // If no contracts, ensure empty array
-        this.contracts = [];
-        this.filteredContracts = [];
-      }
+      this.contracts = response.contracts.map(contract => this.mapContractToDisplay(contract));
+      this.applyFilters();
+
     } catch (error: any) {
+      this.error = 'Não foi possível carregar os contratos. Tente novamente mais tarde.';
       console.error('❌ Error loading contracts:', error);
-      
-      // Check if it's a network error
-      if (!error.status) {
-        this.error = 'Erro de conexão. Verifique se o servidor está rodando.';
-      } else if (error.status === 401) {
-        this.error = 'Sessão expirada. Faça login novamente.';
-      } else if (error.status === 404) {
-        this.error = 'Endpoint não encontrado. Verifique se as rotas estão configuradas.';
-      } else if (error.status === 500) {
-        this.error = 'Erro no servidor. Tente novamente mais tarde.';
-      } else {
-        this.error = error?.error?.error || 'Erro ao carregar contratos. Tente novamente.';
-      }
     } finally {
       this.isLoading = false;
     }
   }
 
-  /**
-   * Load companies for filter
-   */
   async loadCompanies() {
     try {
-      const response = await this.companyService.getCompanies({ is_active: true }).toPromise();
-      if (response && response.companies) {
+      const response = await firstValueFrom(this.companyService.getCompanies({ is_active: true }));
+      if (response?.companies) {
         this.companies = response.companies;
       }
     } catch (error) {
@@ -168,9 +110,6 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Map API contract to display format
-   */
   private mapContractToDisplay(contract: ApiContract): ContractDisplay {
     return {
       id: contract.id,
@@ -178,7 +117,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       companyName: contract.company?.name || 'N/A',
       type: contract.type,
       startDate: this.contractService.formatDate(contract.start_date),
-      endDate: this.contractService.formatDate(contract.end_date || ''),
+      endDate: this.contractService.formatDate(contract.end_date || null),
       duration: `${this.contractService.calculateDuration(contract.start_date, contract.end_date)} dias`,
       totalValue: this.contractService.formatValue(contract.total_value || 0),
       status: this.contractService.getStatusText(contract.status),
@@ -188,160 +127,101 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     };
   }
 
-  /**
-   * Apply filters to contracts
-   */
   applyFilters() {
     let filtered = [...this.contracts];
-
-    // Filter by tab
     if (this.currentTab !== 'all') {
       filtered = filtered.filter(c => c.type === this.currentTab);
     }
-
-    // Filter by search
     if (this.filters.search) {
       const search = this.filters.search.toLowerCase();
-      filtered = filtered.filter(c => 
-        c.contractNumber.toLowerCase().includes(search) ||
-        c.companyName.toLowerCase().includes(search)
-      );
+      filtered = filtered.filter(c => c.contractNumber.toLowerCase().includes(search) || c.companyName.toLowerCase().includes(search));
     }
-
-    // Filter by status
     if (this.filters.status) {
       filtered = filtered.filter(c => c.raw.status === this.filters.status);
     }
-
-    // Filter by company
     if (this.filters.company_id) {
       filtered = filtered.filter(c => c.raw.company.id === this.filters.company_id);
     }
-
     this.filteredContracts = filtered;
   }
 
-  /**
-   * Change tab
-   */
   changeTab(tab: 'all' | 'Full' | 'Pontual' | 'Individual') {
     this.currentTab = tab;
     this.applyFilters();
   }
 
-  /**
-   * Clear filters
-   */
   clearFilters() {
-    this.filters = {
-      search: '',
-      status: '',
-      type: '',
-      company_id: null
-    };
+    this.filters = { search: '', status: '', type: '', company_id: null };
     this.currentTab = 'all';
     this.applyFilters();
   }
 
-  /**
-   * Navigate to new contract page
-   */
   openNewContractPage() {
     this.router.navigate(['/home/contracts/new']);
   }
 
-  /**
-   * Navigate to edit contract page
-   */
-  editContract(id: number) {
+  editContract(id: number, event: MouseEvent) {
+    event.stopPropagation();
     this.router.navigate(['/home/contracts/edit', id]);
   }
 
-  /**
-   * View contract details
-   */
   viewContract(id: number) {
     this.router.navigate(['/home/contracts/view', id]);
   }
 
-  /**
-   * Update contract status
-   */
   async updateContractStatus(id: number, currentStatus: string, event: Event) {
     event.stopPropagation();
-    
-    // Definir próximo status baseado no atual
-    const nextStatus: { [key: string]: string } = {
-      'active': 'completed',
-      'completed': 'active',
-      'cancelled': 'active',
-      'suspended': 'active'
+    const nextStatusMap: { [key: string]: string } = {
+      'active': 'completed', 'completed': 'active', 'cancelled': 'active', 'suspended': 'active'
     };
-
-    const newStatus = nextStatus[currentStatus] || 'active';
-    
+    const newStatus = nextStatusMap[currentStatus] || 'active';
     try {
-      await this.contractService.updateContractStatus(id, newStatus).toPromise();
+      await firstValueFrom(this.contractService.updateContractStatus(id, newStatus));
       this.loadContracts();
       this.modalService.showNotification('Status do contrato atualizado!', true);
     } catch (error) {
-      console.error('❌ Error updating status:', error);
       this.modalService.showNotification('Erro ao alterar status do contrato', false);
     }
   }
 
-  /**
-   * Format total value of all contracts
-   */
   formatTotalValue(): string {
     return this.contractService.formatValue(this.stats.totalValueAll);
   }
 
-  /**
-   * Format active contracts value
-   */
   formatActiveValue(): string {
     return this.contractService.formatValue(this.stats.totalValueActive);
   }
 
-  /**
-   * Get type icon
-   */
   getTypeIcon(type: string): string {
     return this.contractService.getTypeIcon(type);
   }
 
-  /**
-   * Delete contract
-   */
-  async deleteContract(id: number, event: Event) {
+  async deleteContract(contractId: number, event: MouseEvent) {
     event.stopPropagation();
+    const contractToDelete = this.contracts.find(c => c.id === contractId);
+    if (!contractToDelete) return;
     
-    if (confirm('Tem certeza que deseja excluir este contrato?')) {
+    // Using a simple browser confirm pop-up for simplicity
+    const confirmed = confirm(`Você tem certeza que deseja excluir o contrato ${contractToDelete.contractNumber} permanentemente?`);
+    
+    if (confirmed) {
       try {
-        await this.contractService.deleteContract(id).toPromise();
-        this.loadContracts();
-        this.modalService.showNotification('Contrato excluído com sucesso!', true);
+        await firstValueFrom(this.contractService.deleteContractPermanent(contractId));
+        this.modalService.showSuccess('Contrato excluído com sucesso!');
+        this.contracts = this.contracts.filter(c => c.id !== contractId);
+        this.applyFilters(); // Re-apply filters to update the view
       } catch (error) {
         console.error('❌ Error deleting contract:', error);
-        this.modalService.showNotification('Erro ao excluir contrato', false);
+        this.modalService.showError('Não foi possível excluir o contrato.');
       }
     }
   }
 
-  /**
-   * Export contracts to PDF
-   */
   exportToPDF() {
-    // TODO: Implementar exportação para PDF
     this.modalService.showNotification('Exportando contratos para PDF...', true);
   }
 
-  /**
-   * Export contracts to Excel
-   */
   exportToExcel() {
-    // TODO: Implementar exportação para Excel
     this.modalService.showNotification('Exportando contratos para Excel...', true);
   }
 }

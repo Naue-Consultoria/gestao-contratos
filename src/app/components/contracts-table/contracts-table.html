@@ -256,8 +256,8 @@
                 <button class="action-btn" (click)="viewContract(contract.id); $event.stopPropagation()" title="Visualizar">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button class="action-btn" (click)="editContract(contract.id); $event.stopPropagation()" title="Editar">
-                  <i class="fas fa-edit"></i>
+                <button class="action-btn edit" (click)="editContract(contract.id, $event)" title="Editar">
+                    <i class="fas fa-edit"></i>
                 </button>
                 <button class="action-btn delete" (click)="deleteContract(contract.id, $event)" title="Excluir">
                   <i class="fas fa-trash"></i>

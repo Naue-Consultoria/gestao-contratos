@@ -176,10 +176,9 @@ export class ContractService {
     });
   }
 
-  deleteContract(id: number): Observable<any> {
-    return this.http.delete(`${this.API_URL}/${id}`, {
-      headers: this.getAuthHeaders()
-    });
+  deleteContractPermanent(id: number): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.delete(`${this.API_URL}/${id}/permanent`, { headers });
   }
 
   formatValue(valueInCents: number): string {
