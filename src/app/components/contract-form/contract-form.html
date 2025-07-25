@@ -1,225 +1,167 @@
 <div class="page">
   <div class="page-header">
-    <h1 class="page-title">
-      {{ isViewMode ? 'Visualizar Contrato' : (isEditMode ? 'Editar Contrato' : 'Novo Contrato') }}
-    </h1>
+    <h1 class="page-title">{{ isViewMode ? 'Visualizar Contrato' : (isEditMode ? 'Editar Contrato' : 'Novo Contrato') }}</h1>
     <div class="breadcrumb">
-      <span>Home</span>
-      <span class="breadcrumb-separator">/</span>
-      <span class="clickable" (click)="cancel()">Contratos</span>
-      <span class="breadcrumb-separator">/</span>
+      <span>Home</span><span class="breadcrumb-separator">/</span>
+      <span class="clickable" (click)="cancel()">Contratos</span><span class="breadcrumb-separator">/</span>
       <span>{{ isViewMode ? 'Visualizar' : (isEditMode ? 'Editar' : 'Novo') }}</span>
     </div>
   </div>
 
   <div *ngIf="isLoading" class="loading-container">
-    <i class="fas fa-spinner fa-spin"></i>
-    Carregando dados do contrato...
+    <i class="fas fa-spinner fa-spin"></i>Carregando...
   </div>
 
   <div class="form-container" *ngIf="!isLoading">
     <form (ngSubmit)="save()" *ngIf="!isViewMode">
       <div class="form-grid">
         <div class="form-section">
-          <h2 class="section-title">
-            <i class="fas fa-info-circle"></i>
-            Informações Básicas
-          </h2>
-          
+          <h2 class="section-title"><i class="fas fa-info-circle"></i>Informações Básicas</h2>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label required">Número do Contrato</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                [(ngModel)]="formData.contract_number"
-                name="contract_number"
-                [readonly]="isEditMode"
-                [class.error]="errors.contract_number">
+              <label class="form-label required">Número</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.contract_number" name="contract_number" [readonly]="isEditMode" [class.error]="errors.contract_number">
               <span class="error-message" *ngIf="errors.contract_number">{{ errors.contract_number }}</span>
             </div>
-
             <div class="form-group">
-              <label class="form-label required">Tipo de Contrato</label>
-              <select 
-                class="form-control" 
-                [(ngModel)]="formData.type"
-                name="type">
+              <label class="form-label required">Tipo</label>
+              <select class="form-control" [(ngModel)]="formData.type" name="type">
                 <option *ngFor="let type of contractTypes" [value]="type">{{ type }}</option>
               </select>
             </div>
           </div>
-
           <div class="form-group">
             <label class="form-label required">Empresa</label>
-            <select 
-              class="form-control" 
-              [(ngModel)]="formData.company_id"
-              name="company_id"
-              [class.error]="errors.company_id">
-              <option [value]="null" disabled>Selecione uma empresa</option>
+            <select class="form-control" [(ngModel)]="formData.company_id" name="company_id" [class.error]="errors.company_id">
+              <option [value]="null" disabled>Selecione</option>
               <option *ngFor="let company of companies" [value]="company.id">{{ company.name }}</option>
             </select>
             <span class="error-message" *ngIf="errors.company_id">{{ errors.company_id }}</span>
           </div>
-
           <div class="form-row">
             <div class="form-group">
               <label class="form-label required">Data de Início</label>
-              <input 
-                type="date" 
-                class="form-control" 
-                [(ngModel)]="formData.start_date"
-                name="start_date"
-                [class.error]="errors.start_date">
+              <input type="date" class="form-control" [(ngModel)]="formData.start_date" name="start_date" [class.error]="errors.start_date">
               <span class="error-message" *ngIf="errors.start_date">{{ errors.start_date }}</span>
             </div>
-
             <div class="form-group">
               <label class="form-label">Data de Término</label>
-              <input 
-                type="date" 
-                class="form-control" 
-                [(ngModel)]="formData.end_date"
-                name="end_date"
-                [min]="formData.start_date"
-                [class.error]="errors.end_date">
-              <span class="error-message" *ngIf="errors.end_date">{{ errors.end_date }}</span>
+              <input type="date" class="form-control" [(ngModel)]="formData.end_date" name="end_date" [min]="formData.start_date">
             </div>
           </div>
-          
           <div class="form-group">
             <label class="form-label">Atribuir Usuários</label>
-            <p class="help-text">Selecione outros usuários para visualizar este contrato. Você será atribuído como proprietário automaticamente.</p>
             <div class="user-assignment-box">
               <div class="selected-users-display">
                 <i class="fas fa-users"></i>
                 <span>{{ getSelectedUserNames() }}</span>
               </div>
-              <button type="button" class="btn btn-secondary" (click)="openUserModal()">
-                <i class="fas fa-edit"></i>
-                Selecionar
-              </button>
+              <button type="button" class="btn btn-secondary" (click)="openUserModal()"><i class="fas fa-edit"></i>Selecionar</button>
             </div>
           </div>
-
           <div class="form-group">
             <label class="form-label">Observações</label>
-            <textarea 
-              class="form-control" 
-              [(ngModel)]="formData.notes"
-              name="notes"
-              rows="3"
-              placeholder="Observações adicionais sobre o contrato..."
-              maxlength="2000"></textarea>
-            <div class="char-count">
-              {{ formData.notes ? formData.notes.length : 0 }}/2000 caracteres
-            </div>
+            <textarea class="form-control" [(ngModel)]="formData.notes" name="notes" rows="3" placeholder="..."></textarea>
           </div>
         </div>
-
         <div class="form-section">
-          <h2 class="section-title">
-            <i class="fas fa-briefcase"></i>
-            Serviços do Contrato
-          </h2>
-
+          <h2 class="section-title"><i class="fas fa-briefcase"></i>Serviços do Contrato</h2>
           <div class="services-header">
-            <p class="services-info">Adicione os serviços que fazem parte deste contrato</p>
-            <button type="button" class="btn btn-primary" (click)="openServiceModal()">
-              <i class="fas fa-plus"></i>
-              Adicionar Serviço
-            </button>
+            <button type="button" class="btn btn-primary" (click)="openServiceModal()"><i class="fas fa-plus"></i>Adicionar Serviço</button>
           </div>
-
-          <div class="error-message" *ngIf="errors.services">
-            <i class="fas fa-exclamation-circle"></i>
-            {{ errors.services }}
-          </div>
-
+          <span class="error-message" *ngIf="errors.services">{{ errors.services }}</span>
           <div class="selected-services" *ngIf="selectedServices.length > 0">
             <div class="service-item" *ngFor="let service of selectedServices; let i = index">
               <div class="service-info">
                 <h4 class="service-name">{{ service.name }}</h4>
-                <div class="service-details">
-                  <span class="service-unit-value">
-                    <i class="fas fa-tag"></i>
-                    Preço Padrão: {{ formatCurrency(service.unit_value) }}
-                  </span>
-                </div>
               </div>
-              
               <div class="service-controls">
                 <div class="price-control">
-                  <label>Valor Unitário:</label>
+                  <label>Valor Unit.:</label>
                   <div class="input-with-prefix">
                     <span>R$</span>
-                    <input 
-                      type="number" 
-                      class="price-input" 
-                      [ngModel]="service.unit_value / 100"
-                      (ngModelChange)="updateServicePrice(i, $event)"
-                      [name]="'price_' + i"
-                      min="0"
-                      step="0.01">
+                    <input type="number" class="price-input" [ngModel]="service.unit_value / 100" (ngModelChange)="updateServicePrice(i, $event)" [name]="'price_' + i">
                   </div>
                 </div>
                 <div class="quantity-control">
-                  <label>Quantidade:</label>
-                  <input 
-                    type="number" 
-                    class="quantity-input" 
-                    [(ngModel)]="service.quantity"
-                    [name]="'quantity_' + i"
-                    min="1"
-                    (ngModelChange)="updateServiceQuantity(i, service.quantity)">
+                  <label>Qtd.:</label>
+                  <input type="number" class="quantity-input" [(ngModel)]="service.quantity" [name]="'quantity_' + i" (ngModelChange)="updateServiceQuantity(i, service.quantity)">
                 </div>
                 <div class="service-total">
                   <label>Total:</label>
                   <span class="total-value">{{ formatCurrency(service.total_value) }}</span>
                 </div>
-                <button type="button" class="remove-btn" (click)="removeService(i)">
-                  <i class="fas fa-trash"></i>
-                </button>
+                <button type="button" class="remove-btn" (click)="removeService(i)"><i class="fas fa-trash"></i></button>
               </div>
             </div>
           </div>
-
-          <div class="empty-services" *ngIf="selectedServices.length === 0">
-            <i class="fas fa-briefcase"></i>
-            <p>Nenhum serviço adicionado</p>
-            <p class="help-text">Clique no botão acima para adicionar serviços ao contrato</p>
-          </div>
-
           <div class="contract-summary" *ngIf="selectedServices.length > 0">
             <div class="summary-item total">
-              <span class="summary-label">Valor Total do Contrato:</span>
+              <span class="summary-label">Valor Total:</span>
               <span class="summary-value">{{ getFormattedTotalValue() }}</span>
             </div>
           </div>
         </div>
       </div>
-
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="cancel()">
-          <i class="fas fa-times"></i>
-          Cancelar
-        </button>
-        <button type="submit" class="btn btn-primary" [disabled]="isSaving">
-          <i class="fas fa-save" *ngIf="!isSaving"></i>
-          <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
-          {{ isEditMode ? 'Atualizar' : 'Criar' }} Contrato
-        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving"><i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i>{{ isEditMode ? 'Atualizar' : 'Criar' }}</button>
       </div>
     </form>
 
     <div class="view-mode" *ngIf="isViewMode">
+          </div>
+      </div>
+    </div>
+
+  <div class="modal" [class.active]="showServiceModal" (click)="closeServiceModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Adicionar Serviço</h3>
+        <button class="close-btn" (click)="closeServiceModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="modal-search">
+          <i class="fas fa-search"></i>
+          <input 
+            type="text" 
+            class="modal-search-input" 
+            placeholder="Buscar serviço..."
+            [(ngModel)]="serviceSearchTerm"
+            name="serviceSearch">
         </div>
+        
+        <div class="services-list">
+          <div 
+            class="service-option" 
+            *ngFor="let service of filteredServices"
+            (click)="addService(service)"
+            [class.disabled]="isServiceSelected(service.id)">
+            <div class="service-option-info">
+              <h4>{{ service.name }}</h4>
+              <div class="service-option-details">
+                <span><i class="fas fa-tag"></i> {{ service.category }}</span>
+                <span><i class="fas fa-clock"></i> {{ service.duration }} dias</span>
+                <span class="service-value">{{ formatCurrency(service.value) }}</span>
+              </div>
+            </div>
+            <div class="service-option-action">
+              <i class="fas fa-plus-circle" *ngIf="!isServiceSelected(service.id)"></i>
+              <i class="fas fa-check-circle" *ngIf="isServiceSelected(service.id)"></i>
+            </div>
+          </div>
+          
+          <div class="empty-state" *ngIf="filteredServices.length === 0">
+            <i class="fas fa-search"></i>
+            <p>Nenhum serviço encontrado</p>
+          </div>
+        </div>
+      </div>
   </div>
 </div>
-
-<div class="modal" [class.active]="showServiceModal" (click)="closeServiceModal()">
-    </div>
 
 <app-user-selection-modal
   [isOpen]="isUserModalOpen"

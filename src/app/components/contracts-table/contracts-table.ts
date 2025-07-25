@@ -44,69 +44,56 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     suspended: 0,
     totalValueActive: 0,
     totalValueAll: 0,
+    averageValue: 0,
     typeStats: { Full: 0, Pontual: 0, Individual: 0 },
     averageDuration: 0
   };
 
   contracts: ContractDisplay[] = [];
   filteredContracts: ContractDisplay[] = [];
-  filters = { search: '', status: '', type: '', company_id: null as number | null };
+  filters = { search: '', status: '', company_id: null as number | null };
   companies: any[] = [];
   isLoading = false;
   error = '';
   currentTab: 'all' | 'Full' | 'Pontual' | 'Individual' = 'all';
 
+  private handleRefresh = () => this.loadInitialData();
+
   ngOnInit() {
-    this.loadContracts();
-    this.loadCompanies();
+    this.loadInitialData();
     this.subscribeToRefreshEvents();
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
-    window.removeEventListener('refreshContracts', this.loadContracts);
+    window.removeEventListener('refreshContracts', this.handleRefresh);
   }
 
   private subscribeToRefreshEvents() {
-    window.addEventListener('refreshContracts', this.loadContracts.bind(this));
+    window.addEventListener('refreshContracts', this.handleRefresh);
   }
 
-  async loadContracts() {
+  async loadInitialData() {
     this.isLoading = true;
     this.error = '';
     try {
-      const statsResponse = await firstValueFrom(this.contractService.getStats());
-      if (statsResponse?.stats) {
-        this.stats = statsResponse.stats;
-      }
+      const [statsResponse, contractsResponse, companiesResponse] = await Promise.all([
+        firstValueFrom(this.contractService.getStats()),
+        firstValueFrom(this.contractService.getContracts()),
+        firstValueFrom(this.companyService.getCompanies({ is_active: true }))
+      ]);
 
-      const cleanFilters: any = {};
-      if (this.filters.search) cleanFilters.search = this.filters.search;
-      if (this.filters.status) cleanFilters.status = this.filters.status;
-      if (this.filters.type) cleanFilters.type = this.filters.type;
-      if (this.filters.company_id) cleanFilters.company_id = this.filters.company_id;
-
-      const response = await firstValueFrom(this.contractService.getContracts(cleanFilters));
+      if (statsResponse?.stats) this.stats = statsResponse.stats;
+      if (companiesResponse?.companies) this.companies = companiesResponse.companies;
       
-      this.contracts = response.contracts.map(contract => this.mapContractToDisplay(contract));
+      this.contracts = contractsResponse.contracts.map(contract => this.mapContractToDisplay(contract));
       this.applyFilters();
 
     } catch (error: any) {
-      this.error = 'Não foi possível carregar os contratos. Tente novamente mais tarde.';
-      console.error('❌ Error loading contracts:', error);
+      this.error = 'Não foi possível carregar os dados. Tente novamente mais tarde.';
+      console.error('❌ Error loading initial data:', error);
     } finally {
       this.isLoading = false;
-    }
-  }
-
-  async loadCompanies() {
-    try {
-      const response = await firstValueFrom(this.companyService.getCompanies({ is_active: true }));
-      if (response?.companies) {
-        this.companies = response.companies;
-      }
-    } catch (error) {
-      console.error('❌ Error loading companies:', error);
     }
   }
 
@@ -128,21 +115,25 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   applyFilters() {
-    let filtered = [...this.contracts];
+    let filteredData = [...this.contracts];
+
     if (this.currentTab !== 'all') {
-      filtered = filtered.filter(c => c.type === this.currentTab);
-    }
-    if (this.filters.search) {
-      const search = this.filters.search.toLowerCase();
-      filtered = filtered.filter(c => c.contractNumber.toLowerCase().includes(search) || c.companyName.toLowerCase().includes(search));
+      filteredData = filteredData.filter(c => c.type === this.currentTab);
     }
     if (this.filters.status) {
-      filtered = filtered.filter(c => c.raw.status === this.filters.status);
+      filteredData = filteredData.filter(c => c.raw.status === this.filters.status);
     }
     if (this.filters.company_id) {
-      filtered = filtered.filter(c => c.raw.company.id === this.filters.company_id);
+      filteredData = filteredData.filter(c => c.raw.company.id === this.filters.company_id);
     }
-    this.filteredContracts = filtered;
+    if (this.filters.search) {
+      const searchTerm = this.filters.search.toLowerCase();
+      filteredData = filteredData.filter(c =>
+        c.contractNumber.toLowerCase().includes(searchTerm) ||
+        c.companyName.toLowerCase().includes(searchTerm)
+      );
+    }
+    this.filteredContracts = filteredData;
   }
 
   changeTab(tab: 'all' | 'Full' | 'Pontual' | 'Individual') {
@@ -151,7 +142,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   clearFilters() {
-    this.filters = { search: '', status: '', type: '', company_id: null };
+    this.filters = { search: '', status: '', company_id: null };
     this.currentTab = 'all';
     this.applyFilters();
   }
@@ -177,8 +168,8 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     const newStatus = nextStatusMap[currentStatus] || 'active';
     try {
       await firstValueFrom(this.contractService.updateContractStatus(id, newStatus));
-      this.loadContracts();
       this.modalService.showNotification('Status do contrato atualizado!', true);
+      this.loadInitialData(); // Reload data to reflect changes
     } catch (error) {
       this.modalService.showNotification('Erro ao alterar status do contrato', false);
     }
@@ -192,24 +183,35 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     return this.contractService.formatValue(this.stats.totalValueActive);
   }
 
+  formatAverageValue(): string {
+    return this.contractService.formatValue(this.stats.averageValue);
+  }
+
   getTypeIcon(type: string): string {
     return this.contractService.getTypeIcon(type);
+  }
+
+  get typeStatsAsArray() {
+    if (!this.stats || !this.stats.typeStats) {
+      return [];
+    }
+    return [
+      { name: 'Full', count: this.stats.typeStats.Full, color: '#3b82f6' },
+      { name: 'Pontual', count: this.stats.typeStats.Pontual, color: '#8b5cf6' },
+      { name: 'Individual', count: this.stats.typeStats.Individual, color: '#10b981' }
+    ];
   }
 
   async deleteContract(contractId: number, event: MouseEvent) {
     event.stopPropagation();
     const contractToDelete = this.contracts.find(c => c.id === contractId);
     if (!contractToDelete) return;
-    
-    // Using a simple browser confirm pop-up for simplicity
-    const confirmed = confirm(`Você tem certeza que deseja excluir o contrato ${contractToDelete.contractNumber} permanentemente?`);
-    
-    if (confirmed) {
+
+    if (confirm(`Você tem certeza que deseja excluir o contrato ${contractToDelete.contractNumber} permanentemente?`)) {
       try {
         await firstValueFrom(this.contractService.deleteContractPermanent(contractId));
         this.modalService.showSuccess('Contrato excluído com sucesso!');
-        this.contracts = this.contracts.filter(c => c.id !== contractId);
-        this.applyFilters(); // Re-apply filters to update the view
+        this.loadInitialData(); // Reload data to reflect changes
       } catch (error) {
         console.error('❌ Error deleting contract:', error);
         this.modalService.showError('Não foi possível excluir o contrato.');

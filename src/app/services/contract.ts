@@ -89,6 +89,7 @@ export interface ContractStats {
   suspended: number;
   totalValueActive: number;
   totalValueAll: number;
+  averageValue: number;
   typeStats: {
     Full: number;
     Pontual: number;

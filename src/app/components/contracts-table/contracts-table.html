@@ -45,38 +45,43 @@
     <div class="stat-card">
       <div class="stat-header">
         <div>
-          <div class="stat-label">Por Tipo</div>
-          <div class="stat-value">{{ stats.typeStats.Full + stats.typeStats.Pontual + stats.typeStats.Individual }}</div>
-          <div class="type-breakdown">
-            <span class="type-item">
-              <i class="fas fa-building"></i> {{ stats.typeStats.Full }} Full
-            </span>
-            <span class="type-item">
-              <i class="fas fa-calendar-check"></i> {{ stats.typeStats.Pontual }} Pontuais
-            </span>
-            <span class="type-item">
-              <i class="fas fa-user"></i> {{ stats.typeStats.Individual }} Individuais
-            </span>
+          <div class="stat-label">Valor Médio</div>
+          <div class="stat-value">{{ formatAverageValue() }}</div>
+          <div class="stat-change positive">
+            <i class="fas fa-balance-scale"></i>
+            Média por contrato
           </div>
+        </div>
+        <div class="stat-icon">
+          <i class="fas fa-receipt"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <div>
+          <div class="stat-label">Contratos por Tipo</div>
         </div>
         <div class="stat-icon">
           <i class="fas fa-chart-pie"></i>
         </div>
       </div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Duração Média</div>
-          <div class="stat-value">{{ stats.averageDuration }} dias</div>
-          <div class="stat-change positive">
-            <i class="fas fa-clock"></i>
-            Contratos ativos
-          </div>
+
+      <div class="type-progress-bar">
+        <div *ngFor="let type of typeStatsAsArray"
+            class="progress-segment"
+            [style.width.%]="(type.count / stats.total) * 100"
+            [style.background-color]="type.color"
+            [title]="type.name + ': ' + type.count">
         </div>
-        <div class="stat-icon">
-          <i class="fas fa-hourglass-half"></i>
+      </div>
+
+      <div class="type-legend">
+        <div *ngFor="let type of typeStatsAsArray" class="legend-item">
+          <span class="legend-dot" [style.background-color]="type.color"></span>
+          <span class="legend-name">{{ type.name }}</span>
+          <span class="legend-count">{{ type.count }}</span>
         </div>
       </div>
     </div>

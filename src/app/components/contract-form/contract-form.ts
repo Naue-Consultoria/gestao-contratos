@@ -3,12 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import {
-  ContractService,
-  CreateContractRequest,
-  UpdateContractRequest,
-  ContractServiceItem,
-} from '../../services/contract';
+import { ContractService, CreateContractRequest, UpdateContractRequest, ContractServiceItem } from '../../services/contract';
 import { CompanyService, ApiCompany } from '../../services/company';
 import { ServiceService, ApiService } from '../../services/service';
 import { ModalService } from '../../services/modal.service';
@@ -67,7 +62,7 @@ export class ContractFormComponent implements OnInit {
   allUsers: AssignableUser[] = [];
   currentUserId: number | null = null;
 
-  isLoading = false;
+  isLoading = true;
   isSaving = false;
   isEditMode = false;
   isViewMode = false;
@@ -92,6 +87,7 @@ export class ContractFormComponent implements OnInit {
       this.loadContract();
     } else {
       this.generateContractNumber();
+      this.isLoading = false;
     }
 
     this.loadInitialData();
@@ -130,7 +126,10 @@ export class ContractFormComponent implements OnInit {
   }
 
   async loadContract() {
-    if (!this.contractId) return;
+    if (!this.contractId) {
+        this.isLoading = false;
+        return;
+    }
     this.isLoading = true;
     try {
       const response = await firstValueFrom(
@@ -189,28 +188,6 @@ export class ContractFormComponent implements OnInit {
     }
   }
 
-  onUserCheckboxChange(event: Event, userId: number) {
-    const isChecked = (event.target as HTMLInputElement).checked;
-
-    if (isChecked) {
-      // Add the user ID to the array if it's not already there
-      if (!this.formData.assigned_users.includes(userId)) {
-        this.formData.assigned_users.push(userId);
-      }
-    } else {
-      // Remove the user ID from the array
-      const index = this.formData.assigned_users.indexOf(userId);
-      if (index > -1) {
-        this.formData.assigned_users.splice(index, 1);
-      }
-    }
-  }
-
-  // ADD THIS METHOD to check if a user's checkbox should be checked
-  isUserAssigned(userId: number): boolean {
-    return this.formData.assigned_users.includes(userId);
-  }
-
   get filteredServices(): ApiService[] {
     if (!this.serviceSearchTerm) return this.availableServices;
     const search = this.serviceSearchTerm.toLowerCase();
@@ -256,17 +233,18 @@ export class ContractFormComponent implements OnInit {
   }
 
   updateServiceQuantity(index: number, quantity: number) {
-    if (quantity < 1) return;
-    
     const service = this.selectedServices[index];
-    service.quantity = quantity;
-    service.total_value = service.unit_value * quantity;
+    if (quantity < 1) {
+      service.quantity = 1;
+    }
+    service.total_value = service.unit_value * service.quantity;
   }
 
   updateServicePrice(index: number, priceInReais: number) {
-    if (priceInReais < 0) return;
-
     const service = this.selectedServices[index];
+    if (priceInReais < 0) {
+        priceInReais = service.unit_value / 100;
+    }
     service.unit_value = Math.round(priceInReais * 100);
     service.total_value = service.unit_value * service.quantity;
   }
@@ -277,11 +255,6 @@ export class ContractFormComponent implements OnInit {
   getFormattedTotalValue(): string {
     return this.contractService.formatValue(this.getTotalValue());
   }
-  getTotalDuration(): number {
-    return this.selectedServices.length > 0
-      ? Math.max(...this.selectedServices.map((s) => s.duration))
-      : 0;
-  }
 
   openUserModal(): void {
     this.isUserModalOpen = true;
@@ -291,19 +264,17 @@ export class ContractFormComponent implements OnInit {
     this.isUserModalOpen = false;
   }
 
-  // This method will be called when the modal's 'selectionConfirmed' event is emitted
   updateAssignedUsers(selectedIds: number[]): void {
     this.formData.assigned_users = selectedIds;
   }
 
-  // Helper to display the names of selected users
   getSelectedUserNames(): string {
     if (this.formData.assigned_users.length === 0) {
       return 'Nenhum usuário selecionado';
     }
     return this.formData.assigned_users
       .map(id => this.allUsers.find(user => user.id === id)?.name)
-      .filter(name => name) // Filter out any undefined names
+      .filter(name => name)
       .join(', ');
   }
 
@@ -315,11 +286,6 @@ export class ContractFormComponent implements OnInit {
       this.errors.company_id = 'Empresa é obrigatória';
     if (!this.formData.start_date)
       this.errors.start_date = 'Data de início é obrigatória';
-    if (
-      this.formData.end_date &&
-      this.formData.end_date < this.formData.start_date
-    )
-      this.errors.end_date = 'Data de término deve ser posterior à de início';
     if (this.selectedServices.length === 0)
       this.errors.services = 'Pelo menos um serviço deve ser adicionado';
     return Object.keys(this.errors).length === 0;
@@ -327,10 +293,7 @@ export class ContractFormComponent implements OnInit {
 
   async save() {
     if (!this.validateForm()) {
-      this.modalService.showWarning(
-        'Por favor, corrija os erros no formulário',
-        'Formulário Inválido'
-      );
+      this.modalService.showWarning('Por favor, corrija os erros no formulário', 'Formulário Inválido');
       return;
     }
     this.isSaving = true;
@@ -345,7 +308,6 @@ export class ContractFormComponent implements OnInit {
       );
 
       if (this.isEditMode && this.contractId) {
-        // Correctly build the update payload to match the interface
         const updateData: UpdateContractRequest = {
           contract_number: this.formData.contract_number,
           company_id: this.formData.company_id!,
@@ -359,10 +321,7 @@ export class ContractFormComponent implements OnInit {
         await firstValueFrom(
           this.contractService.updateContract(this.contractId, updateData)
         );
-        this.modalService.showSuccess(
-          'Contrato atualizado com sucesso!',
-          'Sucesso'
-        );
+        this.modalService.showSuccess('Contrato atualizado com sucesso!', 'Sucesso');
       } else {
         const createData: CreateContractRequest = {
           ...this.formData,
@@ -370,20 +329,13 @@ export class ContractFormComponent implements OnInit {
           end_date: this.formData.end_date || null,
           notes: this.formData.notes || null,
           services,
-          assigned_users: this.formData.assigned_users,
         };
         await firstValueFrom(this.contractService.createContract(createData));
-        this.modalService.showSuccess(
-          'Contrato criado com sucesso!',
-          'Sucesso'
-        );
+        this.modalService.showSuccess('Contrato criado com sucesso!', 'Sucesso');
       }
       this.router.navigate(['/home/contracts']);
     } catch (error: any) {
-      this.modalService.showError(
-        error.error?.message || 'Erro ao salvar o contrato.',
-        'Erro'
-      );
+      this.modalService.showError(error.error?.message || 'Erro ao salvar o contrato.', 'Erro');
     } finally {
       this.isSaving = false;
     }
