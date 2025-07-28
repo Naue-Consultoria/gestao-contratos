@@ -1,4 +1,3 @@
-// src/app/components/service-form/service-form.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -19,17 +18,15 @@ export class ServiceFormComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  // Form data
   formData = {
     name: '',
     duration: 1, // Default 1 dia
-    value: 0, // em reais (será convertido para centavos ao salvar)
+    value: 0,
     category: 'Geral',
     description: '',
     is_active: true
   };
 
-  // Categories
   categories = [
     'Geral',
     'Consultoria',
@@ -41,7 +38,6 @@ export class ServiceFormComponent implements OnInit {
     'Estratégia'
   ];
 
-  // UI state
   isLoading = false;
   isSaving = false;
   isEditMode = false;
@@ -49,7 +45,6 @@ export class ServiceFormComponent implements OnInit {
   errors: any = {};
 
   ngOnInit() {
-    // Check if we're in edit mode
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode = true;
@@ -58,9 +53,6 @@ export class ServiceFormComponent implements OnInit {
     }
   }
 
-  /**
-   * Load service data for editing
-   */
   async loadService() {
     if (!this.serviceId) return;
 
@@ -72,7 +64,7 @@ export class ServiceFormComponent implements OnInit {
         this.formData = {
           name: service.name,
           duration: service.duration,
-          value: this.serviceService.convertToReais(service.value), // converter de centavos para reais
+          value: this.serviceService.convertToReais(service.value),
           category: service.category || 'Geral',
           description: service.description || '',
           is_active: service.is_active
@@ -87,9 +79,6 @@ export class ServiceFormComponent implements OnInit {
     }
   }
 
-  /**
-   * Format currency input
-   */
   formatCurrency(event: any) {
     let value = event.target.value.replace(/\D/g, '');
     if (value) {
@@ -102,9 +91,6 @@ export class ServiceFormComponent implements OnInit {
     }
   }
 
-  /**
-   * Format value for display
-   */
   formatValueForDisplay(value: number): string {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -112,9 +98,6 @@ export class ServiceFormComponent implements OnInit {
     }).format(value);
   }
 
-  /**
-   * Validate form
-   */
   validateForm(): boolean {
     this.errors = {};
     
@@ -137,9 +120,6 @@ export class ServiceFormComponent implements OnInit {
     return Object.keys(this.errors).length === 0;
   }
 
-  /**
-   * Save service
-   */
   async save() {
     if (!this.validateForm()) {
       this.modalService.showNotification('Por favor, corrija os erros no formulário', false);
@@ -150,11 +130,10 @@ export class ServiceFormComponent implements OnInit {
     
     try {
       if (this.isEditMode && this.serviceId) {
-        // Update existing service
         const updateData: UpdateServiceRequest = {
           name: this.formData.name,
           duration: this.formData.duration,
-          value: this.serviceService.convertToCents(this.formData.value), // converter para centavos
+          value: this.serviceService.convertToCents(this.formData.value),
           category: this.formData.category,
           description: this.formData.description || null,
           is_active: this.formData.is_active
@@ -163,24 +142,20 @@ export class ServiceFormComponent implements OnInit {
         await this.serviceService.updateService(this.serviceId, updateData).toPromise();
         this.modalService.showNotification('Serviço atualizado com sucesso!', true);
       } else {
-        // Create new service
         const createData: CreateServiceRequest = {
           name: this.formData.name,
           duration: this.formData.duration,
           value: this.serviceService.convertToCents(this.formData.value), // converter para centavos
           category: this.formData.category,
-          description: this.formData.description || null,
-          is_active: this.formData.is_active
+          description: this.formData.description || null
         };
         
         await this.serviceService.createService(createData).toPromise();
         this.modalService.showNotification('Serviço criado com sucesso!', true);
       }
       
-      // Dispatch event to refresh services list
       window.dispatchEvent(new CustomEvent('refreshServices'));
       
-      // Navigate back to services list
       this.router.navigate(['/home/services']);
     } catch (error: any) {
       console.error('❌ Error saving service:', error);
@@ -191,25 +166,15 @@ export class ServiceFormComponent implements OnInit {
     }
   }
 
-  /**
-   * Cancel and go back
-   */
   cancel() {
     this.router.navigate(['/home/services']);
   }
 
-  /**
-   * Get formatted duration for display
-   */
   getFormattedDuration(): string {
     return this.serviceService.formatDuration(this.formData.duration);
   }
 
-  /**
-   * Get formatted value for display
-   */
   getFormattedValue(): string {
-    // formData.value está em reais, mas formatValue espera centavos
     return this.serviceService.formatValue(this.serviceService.convertToCents(this.formData.value));
   }
 }
