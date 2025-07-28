@@ -220,10 +220,10 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   exportToPDF() {
-    this.modalService.showNotification('Exportando contratos para PDF...', true);
+    this.modalService.showInfo('A funcionalidade de exportar para PDF será implementada em breve.', 'Em Desenvolvimento');
   }
 
   exportToExcel() {
-    this.modalService.showNotification('Exportando contratos para Excel...', true);
+    this.modalService.showInfo('A funcionalidade de exportar para Excel será implementada em breve.', 'Em Desenvolvimento');
   }
 }
