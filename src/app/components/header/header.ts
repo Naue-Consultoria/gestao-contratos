@@ -1,8 +1,7 @@
-// src/app/components/header/header.ts
 import { Component, Output, EventEmitter, Input, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 
 interface Notification {
   id: number;
@@ -39,15 +38,13 @@ export class HeaderComponent {
   globalSearchTerm = '';
   isSearchActive = false;
   isUserMenuOpen = false;
+
+  constructor(private router: Router) {}
   
-  // Fechar dropdown ao clicar fora
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const userInfo = document.querySelector('.user-info');
-    const userDropdown = document.querySelector('.user-dropdown');
-    
-    if (userInfo && !userInfo.contains(event.target as Node) && 
-        userDropdown && !userDropdown.contains(event.target as Node)) {
+    if (userInfo && !userInfo.contains(event.target as Node)) {
       this.isUserMenuOpen = false;
     }
   }
@@ -82,15 +79,15 @@ export class HeaderComponent {
     this.isUserMenuOpen = false;
   }
   
-  navigateToProfile(event: Event): void {
-    event.preventDefault();
-    console.log('Navegar para perfil');
-    this.closeUserMenu();
-  }
+  // navigateToProfile(event: Event): void {
+  //   event.preventDefault();
+  //   this.router.navigate(['/home/settings']);
+  //   this.closeUserMenu();
+  // }
   
   navigateToSettings(event: Event): void {
     event.preventDefault();
-    console.log('Navegar para configurações');
+    this.router.navigate(['/home/settings']);
     this.closeUserMenu();
   }
   

@@ -5,107 +5,112 @@
     <button class="mobile-menu-btn" (click)="toggleMobileSidebar.emit()">
       <i class="fas fa-bars"></i>
     </button>
-    
+
     <!-- Logo -->
     <a class="logo" routerLink="/home/dashboard">
       <div class="logo-icon">N</div>
       <span class="logo-text">NAUE Consultoria</span>
     </a>
-    
+
     <!-- Desktop Search Box -->
     <div class="search-box desktop-search" [class.active]="isSearchActive">
       <i class="fas fa-search search-icon"></i>
-      <input 
-        type="text" 
-        class="search-input" 
-        placeholder="Buscar contratos, empresas..." 
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar contratos, empresas..."
         [(ngModel)]="globalSearchTerm"
-        (input)="onSearch()">
+        (input)="onSearch()"
+      />
     </div>
-    
+
     <!-- Header Actions -->
     <div class="header-actions">
       <!-- Mobile Search Button -->
       <button class="mobile-search-btn" (click)="toggleSearch()">
         <i class="fas fa-search"></i>
       </button>
-      
+
       <!-- Notifications Button with Badge -->
-      <button 
-        class="notification-btn tooltip" 
+      <button
+        class="notification-btn tooltip"
         (click)="toggleNotifications.emit()"
-        [class.has-notifications]="unreadNotificationsCount > 0">
+        [class.has-notifications]="unreadNotificationsCount > 0"
+      >
         <i class="fas fa-bell"></i>
         <span class="notification-badge" *ngIf="unreadNotificationsCount > 0">
           {{ unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount }}
         </span>
         <span class="tooltiptext">
-          {{ unreadNotificationsCount > 0 ? unreadNotificationsCount + ' notificações não lidas' : 'Notificações' }}
+          {{ unreadNotificationsCount > 0 ? unreadNotificationsCount + '
+          notificações não lidas' : 'Notificações' }}
         </span>
       </button>
-      
+
       <!-- Theme Toggle -->
-      <button class="theme-toggle" (click)="toggleTheme.emit()" title="Alternar tema">
+      <button
+        class="theme-toggle"
+        (click)="toggleTheme.emit()"
+        title="Alternar tema"
+      >
         <i [class]="isDarkMode ? 'fas fa-moon' : 'fas fa-sun'"></i>
       </button>
-      
+
       <!-- User Menu com Wrapper -->
-      <div class="user-menu-wrapper">
-        <div class="user-info" (click)="toggleUserMenu()">
-          <div class="user-details desktop-only">
-            <div class="user-name">{{ userName }}</div>
-            <div class="user-role">{{ userRole }}</div>
+      <div class="header-actions">
+        <div class="user-menu-wrapper">
+          <div class="user-info" (click)="toggleUserMenu()" [class.open]="isUserMenuOpen">
+            <div class="user-avatar">{{ userInitials }}</div>
           </div>
-          <div class="user-avatar">{{ userInitials }}</div>
-        </div>
-        
-        <!-- User Dropdown Menu - DENTRO DO WRAPPER -->
-        <div class="user-dropdown" *ngIf="isUserMenuOpen" (click)="$event.stopPropagation()">
-          <div class="user-dropdown-header">
-            <div class="user-avatar-large">{{ userInitials }}</div>
-            <div class="user-dropdown-info">
-              <div class="user-dropdown-name">{{ userName }}</div>
-              <div class="user-dropdown-role">{{ userRole }}</div>
+          
+          <div class="user-dropdown" *ngIf="isUserMenuOpen">
+            <div class="user-dropdown-header">
+              <div class="user-avatar-large">{{ userInitials }}</div>
+              <div class="user-dropdown-info">
+                <div class="user-dropdown-name">{{ userName }}</div>
+                <div class="user-dropdown-role">{{ userRole }}</div>
+              </div>
             </div>
+            <ul class="user-dropdown-menu">
+              <!-- <li>
+                <a href="#" (click)="navigateToProfile($event)">
+                  <i class="fas fa-user"></i>
+                  Meu Perfil
+                </a>
+              </li> -->
+              <li>
+                <a routerLink="/home/settings" (click)="closeUserMenu()">
+                  <i class="fas fa-cog"></i>
+                  Configurações
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <a href="#" (click)="handleLogout($event)" class="logout-link">
+                  <i class="fas fa-sign-out-alt"></i>
+                  Sair
+                </a>
+              </li>
+            </ul>
           </div>
-          <ul class="user-dropdown-menu">
-            <li>
-              <a href="#" (click)="navigateToProfile($event)">
-                <i class="fas fa-user"></i>
-                Meu Perfil
-              </a>
-            </li>
-            <li>
-              <a href="#" (click)="navigateToSettings($event)">
-                <i class="fas fa-cog"></i>
-                Configurações
-              </a>
-            </li>
-            <li class="divider"></li>
-            <li>
-              <a href="#" (click)="handleLogout($event)" class="logout-link">
-                <i class="fas fa-sign-out-alt"></i>
-                Sair
-              </a>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
-  </div>
-  
-  <!-- Mobile Search Box -->
-  <div class="mobile-search-box" *ngIf="isSearchActive">
-    <input 
-      #mobileSearchInput
-      type="text" 
-      class="mobile-search-input" 
-      placeholder="Buscar..." 
-      [(ngModel)]="globalSearchTerm"
-      (input)="onSearch()"
-      (blur)="closeSearch()">
-    <button class="mobile-search-close" (click)="closeSearch()">
-      <i class="fas fa-times"></i>
-    </button>
+
+    <!-- Mobile Search Box -->
+    <div class="mobile-search-box" *ngIf="isSearchActive">
+      <input
+        #mobileSearchInput
+        type="text"
+        class="mobile-search-input"
+        placeholder="Buscar..."
+        [(ngModel)]="globalSearchTerm"
+        (input)="onSearch()"
+        (blur)="closeSearch()"
+      />
+      <button class="mobile-search-close" (click)="closeSearch()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
   </div>
 </header>
