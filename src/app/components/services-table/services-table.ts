@@ -53,9 +53,6 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  /**
-   * Inscrever-se em eventos de atualização
-   */
   private subscribeToRefreshEvents() {
     // Escutar evento de atualização de serviços
     window.addEventListener('refreshServices', () => {
@@ -63,9 +60,19 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Carregar serviços do servidor
-   */
+  getCategoryIcon(category: string): string {
+    const iconMap: { [key: string]: string } = {
+      'Consultoria': 'fas fa-comments',
+      'Treinamento': 'fas fa-chalkboard-teacher',
+      'Mentoria': 'fas fa-user-tie',
+      'Diagnóstico': 'fas fa-stethoscope',
+      'Desenvolvimento': 'fas fa-code',
+      'Gestão': 'fas fa-tasks',
+      'Estratégia': 'fas fa-bullseye'
+    };
+    return iconMap[category] || 'fas fa-concierge-bell'; // Default icon
+  }
+
   async loadServices() {
     this.isLoading = true;
     this.error = '';

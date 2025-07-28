@@ -106,7 +106,7 @@
             <td>
               <div class="service-info">
                 <div class="service-icon" [class.inactive]="!service.is_active">
-                  <i class="fas fa-cog"></i>
+                  <i [class]="getCategoryIcon(service.category)"></i>
                 </div>
                 <span class="service-name" [class.inactive]="!service.is_active">{{ service.name }}</span>
               </div>
