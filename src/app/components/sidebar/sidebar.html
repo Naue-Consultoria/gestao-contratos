@@ -1,20 +1,18 @@
-<!-- sidebar.html - Toggle compacto -->
-<nav class="sidebar" [class.collapsed]="isSidebarCollapsed" [class.active]="isMobileSidebarOpen">
-  <!-- Botão de Toggle Compacto no canto -->
+<nav class="sidebar" [class.collapsed]="isCollapsed" [class.active]="isMobileSidebarOpen">
   <button class="sidebar-toggle-compact" (click)="toggleSidebar()" title="Recolher/Expandir menu">
-    <i class="fas fa-chevron-left" *ngIf="!isSidebarCollapsed"></i>
-    <i class="fas fa-chevron-right" *ngIf="isSidebarCollapsed"></i>
+    <i class="fas fa-chevron-left" *ngIf="!isCollapsed"></i>
+    <i class="fas fa-chevron-right" *ngIf="isCollapsed"></i>
   </button>
   
   <ul class="nav-menu">
-    <div *ngFor="let section of navSections" class="nav-section">
+    <div *ngFor="let section of filteredNavSections" class="nav-section">
       <div class="nav-section-title">{{ section.title }}</div>
       <a 
         *ngFor="let item of section.items"
         [routerLink]="item.route"
-        routerLinkActive="active"
         class="nav-item"
-        [title]="isSidebarCollapsed ? item.text : ''">
+        [class.active]="isRouteActive(item.route)"
+        [title]="isCollapsed ? item.text : ''">
         <i [class]="item.icon + ' nav-icon'"></i>
         <span class="nav-text">{{ item.text }}</span>
       </a>
