@@ -6,6 +6,8 @@ import { ModalService } from '../../services/modal.service';
 import { ContractService, ApiContract, ContractStats } from '../../services/contract';
 import { CompanyService } from '../../services/company';
 import { Subscription, firstValueFrom } from 'rxjs';
+import { SearchService } from '../../services/search.service'; // Import the new service
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 interface ContractDisplay {
   id: number;
@@ -34,6 +36,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   private contractService = inject(ContractService);
   private companyService = inject(CompanyService);
   private router = inject(Router);
+  private searchService = inject(SearchService);
   private subscriptions = new Subscription();
 
   stats: ContractStats = {
@@ -51,7 +54,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
   contracts: ContractDisplay[] = [];
   filteredContracts: ContractDisplay[] = [];
-  filters = { search: '', status: '', company_id: null as number | null };
+  filters = { search: '', status: '', company_id: null as number | null, type: '' };
   companies: any[] = [];
   isLoading = false;
   error = '';
@@ -61,6 +64,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadInitialData();
+    this.subscribeToSearch();
     this.subscribeToRefreshEvents();
   }
 
@@ -73,25 +77,70 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     window.addEventListener('refreshContracts', this.handleRefresh);
   }
 
+  private subscribeToSearch() {
+    const searchSubscription = this.searchService.searchTerm$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+      .subscribe(term => {
+        this.filters.search = term;
+        this.loadContracts();
+      });
+    this.subscriptions.add(searchSubscription);
+  }
+
+  async loadPageData() {
+    this.isLoading = true;
+    try {
+      const [statsResponse, companiesResponse] = await Promise.all([
+        firstValueFrom(this.contractService.getStats()),
+        firstValueFrom(this.companyService.getCompanies({ is_active: true }))
+      ]);
+      if (statsResponse?.stats) this.stats = statsResponse.stats;
+      if (companiesResponse?.companies) this.companies = companiesResponse.companies;
+    } catch (e) {
+      this.error = 'Não foi possível carregar os dados da página.';
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   async loadInitialData() {
     this.isLoading = true;
     this.error = '';
     try {
-      const [statsResponse, contractsResponse, companiesResponse] = await Promise.all([
+      const [statsResponse, companiesResponse] = await Promise.all([
         firstValueFrom(this.contractService.getStats()),
-        firstValueFrom(this.contractService.getContracts()),
         firstValueFrom(this.companyService.getCompanies({ is_active: true }))
       ]);
-
       if (statsResponse?.stats) this.stats = statsResponse.stats;
       if (companiesResponse?.companies) this.companies = companiesResponse.companies;
-      
-      this.contracts = contractsResponse.contracts.map(contract => this.mapContractToDisplay(contract));
-      this.applyFilters();
-
     } catch (error: any) {
-      this.error = 'Não foi possível carregar os dados. Tente novamente mais tarde.';
+      this.error = 'Não foi possível carregar os dados da página.';
       console.error('❌ Error loading initial data:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async loadContracts() {
+    this.isLoading = true;
+    this.error = '';
+    try {
+      const cleanFilters: any = {
+        search: this.filters.search,
+        status: this.filters.status,
+        company_id: this.filters.company_id,
+        type: this.currentTab === 'all' ? '' : this.currentTab
+      };
+
+      const response = await firstValueFrom(this.contractService.getContracts(cleanFilters));
+      this.contracts = response.contracts.map(contract => this.mapContractToDisplay(contract));
+      this.filteredContracts = this.contracts;
+    } catch (error: any) {
+      this.error = 'Não foi possível carregar os contratos.';
+      console.error('❌ Error loading contracts:', error);
     } finally {
       this.isLoading = false;
     }
@@ -115,25 +164,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   applyFilters() {
-    let filteredData = [...this.contracts];
-
-    if (this.currentTab !== 'all') {
-      filteredData = filteredData.filter(c => c.type === this.currentTab);
-    }
-    if (this.filters.status) {
-      filteredData = filteredData.filter(c => c.raw.status === this.filters.status);
-    }
-    if (this.filters.company_id) {
-      filteredData = filteredData.filter(c => c.raw.company.id === this.filters.company_id);
-    }
-    if (this.filters.search) {
-      const searchTerm = this.filters.search.toLowerCase();
-      filteredData = filteredData.filter(c =>
-        c.contractNumber.toLowerCase().includes(searchTerm) ||
-        c.companyName.toLowerCase().includes(searchTerm)
-      );
-    }
-    this.filteredContracts = filteredData;
+    this.loadContracts(); // Simply reload contracts with the new filters
   }
 
   changeTab(tab: 'all' | 'Full' | 'Pontual' | 'Individual') {
@@ -142,7 +173,8 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   clearFilters() {
-    this.filters = { search: '', status: '', company_id: null };
+    this.filters = { search: '', status: '', company_id: null, type: '' };
+    this.searchService.setSearchTerm(''); // Also clear the global search
     this.currentTab = 'all';
     this.applyFilters();
   }
@@ -169,7 +201,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     try {
       await firstValueFrom(this.contractService.updateContractStatus(id, newStatus));
       this.modalService.showNotification('Status do contrato atualizado!', true);
-      this.loadInitialData(); // Reload data to reflect changes
+      this.loadContracts();
     } catch (error) {
       this.modalService.showNotification('Erro ao alterar status do contrato', false);
     }
@@ -211,7 +243,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       try {
         await firstValueFrom(this.contractService.deleteContractPermanent(contractId));
         this.modalService.showSuccess('Contrato excluído com sucesso!');
-        this.loadInitialData(); // Reload data to reflect changes
+        this.loadContracts();
       } catch (error) {
         console.error('❌ Error deleting contract:', error);
         this.modalService.showError('Não foi possível excluir o contrato.');

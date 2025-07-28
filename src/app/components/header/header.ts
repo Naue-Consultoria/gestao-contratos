@@ -1,7 +1,8 @@
-import { Component, Output, EventEmitter, Input, ViewChild, ElementRef, HostListener } from '@angular/core';
+import { Component, Output, EventEmitter, Input, ViewChild, ElementRef, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
+import { SearchService } from '../../services/search.service';
 
 interface Notification {
   id: number;
@@ -30,7 +31,6 @@ export class HeaderComponent {
   @Output() toggleTheme = new EventEmitter<void>();
   @Output() toggleNotifications = new EventEmitter<void>();
   @Output() clearNotifications = new EventEmitter<void>();
-  @Output() performSearch = new EventEmitter<string>();
   @Output() logout = new EventEmitter<void>();
   
   @ViewChild('mobileSearchInput') mobileSearchInput!: ElementRef;
@@ -39,12 +39,16 @@ export class HeaderComponent {
   isSearchActive = false;
   isUserMenuOpen = false;
 
-  constructor(private router: Router) {}
-  
+  private router = inject(Router);
+  private searchService = inject(SearchService);
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const userInfo = document.querySelector('.user-info');
-    if (userInfo && !userInfo.contains(event.target as Node)) {
+    const userDropdown = document.querySelector('.user-dropdown');
+    
+    if (userInfo && !userInfo.contains(event.target as Node) && 
+        userDropdown && !userDropdown.contains(event.target as Node)) {
       this.isUserMenuOpen = false;
     }
   }
@@ -67,7 +71,7 @@ export class HeaderComponent {
   }
   
   onSearch(): void {
-    this.performSearch.emit(this.globalSearchTerm);
+    this.searchService.setSearchTerm(this.globalSearchTerm);
   }
   
   toggleUserMenu(): void {
