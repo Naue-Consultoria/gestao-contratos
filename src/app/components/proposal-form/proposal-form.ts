@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
@@ -13,7 +14,18 @@ import { ServiceService, ApiService } from '../../services/service';
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './proposal-form.html',
-  styleUrls: ['./proposal-form.css']
+  styleUrls: ['./proposal-form.css'],
+  animations: [
+    trigger('slideInOut', [
+      transition(':enter', [
+        style({ transform: 'translateY(-10px)', opacity: 0 }),
+        animate('200ms ease-out', style({ transform: 'translateY(0)', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ transform: 'translateY(-10px)', opacity: 0 }))
+      ])
+    ])
+  ]
 })
 export class ProposalFormComponent implements OnInit, OnDestroy {
   @Input() proposalId?: number;
