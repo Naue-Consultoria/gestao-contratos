@@ -18,6 +18,7 @@ interface SelectedService {
   unit_value: number;
   total_value: number;
   duration: number;
+  duration_unit: string; // Added this property
   category: string;
 }
 
@@ -202,6 +203,10 @@ export class ContractFormComponent implements OnInit {
     return this.contractService.formatDate(dateString);
   }
 
+  formatServiceDuration(service: ApiService): string {
+    return this.serviceService.formatDuration(service.duration_amount, service.duration_unit);
+  }
+
   openServiceModal() {
     this.showServiceModal = true;
     this.serviceSearchTerm = '';
@@ -222,7 +227,8 @@ export class ContractFormComponent implements OnInit {
       quantity: 1,
       unit_value: service.value,
       total_value: service.value,
-      duration: service.duration,
+      duration: service.duration_amount,
+      duration_unit: service.duration_unit,
       category: service.category || 'Geral',
     });
     this.closeServiceModal();

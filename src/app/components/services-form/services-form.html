@@ -74,22 +74,30 @@
             Duração e Valor
           </h2>
 
-          <div class="form-group">
-            <label class="form-label required">Duração (em dias)</label>
-            <input 
-              type="number" 
-              class="form-control" 
-              [(ngModel)]="formData.duration"
-              name="duration"
-              min="1"
-              max="365"
-              placeholder="Ex: 30"
-              [class.error]="errors.duration">
-            <div class="duration-preview">
-              <i class="fas fa-info-circle"></i>
-              Duração: {{ getFormattedDuration() }}
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">Duração</label>
+              <input 
+                type="number" 
+                class="form-control" 
+                [(ngModel)]="formData.duration_amount"
+                name="duration_amount"
+                min="1"
+                placeholder="Ex: 30">
             </div>
-            <span class="error-message" *ngIf="errors.duration">{{ errors.duration }}</span>
+
+            <div class="form-group">
+              <label class="form-label required">Unidade</label>
+              <select 
+                class="form-control" 
+                [(ngModel)]="formData.duration_unit"
+                name="duration_unit">
+                <option value="dias">Dias</option>
+                <option value="semanas">Semanas</option>
+                <option value="meses">Meses</option>
+                <option value="reuniões">Reuniões</option>
+              </select>
+            </div>
           </div>
 
           <div class="form-group">

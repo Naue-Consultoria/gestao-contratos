@@ -13,10 +13,10 @@
       <div class="stat-header">
         <div>
           <div class="stat-label">Total de Serviços</div>
-          <div class="stat-value">{{ stats.total }}</div>
-          <div class="stat-change positive" *ngIf="stats.active > 0">
+          <div class="stat-value">{{ stats?.total || 0 }}</div>
+          <div class="stat-change positive" *ngIf="stats?.active ?? 0 > 0">
             <i class="fas fa-check-circle"></i>
-            {{ stats.active }} ativos
+            {{ stats?.active }} ativos
           </div>
         </div>
         <div class="stat-icon">
@@ -24,7 +24,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="stat-card">
       <div class="stat-header">
         <div>
@@ -40,7 +40,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="stat-card">
       <div class="stat-header">
         <div>
@@ -66,19 +66,19 @@
         Novo Serviço
       </button>
     </div>
-    
+
     <!-- Mensagem de erro -->
     <div *ngIf="error" class="error-message">
       <i class="fas fa-exclamation-circle"></i>
       {{ error }}
     </div>
-    
+
     <!-- Loading -->
     <div *ngIf="isLoading" class="loading-container">
       <i class="fas fa-spinner fa-spin"></i>
       Carregando serviços...
     </div>
-    
+
     <!-- Tabela -->
     <div class="table-wrapper" *ngIf="!isLoading">
       <!-- Mensagem quando não há serviços -->
@@ -87,7 +87,7 @@
         <h3>Nenhum serviço cadastrado</h3>
         <p>Clique no botão "Novo Serviço" para adicionar o primeiro serviço.</p>
       </div>
-      
+
       <!-- Tabela de serviços -->
       <table class="custom-table" *ngIf="services.length > 0">
         <thead>
@@ -102,17 +102,26 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let service of services" class="clickable" (click)="editService(service.id)">
+          <tr
+            *ngFor="let service of services"
+            class="clickable"
+            (click)="editService(service.id)"
+          >
             <td>
               <div class="service-info">
-                <div class="service-icon" [class.inactive]="!service.is_active">
+                <div class="service-icon" [class.inactive]="!service.isActive">
                   <i [class]="getCategoryIcon(service.category)"></i>
                 </div>
-                <span class="service-name" [class.inactive]="!service.is_active">{{ service.name }}</span>
+                <span class="service-name" [class.inactive]="!service.isActive"
+                  >{{ service.name }}</span
+                >
               </div>
             </td>
             <td>
-              <span class="category-badge" [attr.data-category]="service.category">
+              <span
+                class="category-badge"
+                [attr.data-category]="service.category"
+              >
                 {{ service.category }}
               </span>
             </td>
@@ -126,17 +135,29 @@
               <span class="value-amount">{{ service.value }}</span>
             </td>
             <td>
-              <span class="description-text">{{ service.description || 'Sem descrição' }}</span>
+              <span class="description-text"
+                >{{ service.description || 'Sem descrição' }}</span
+              >
             </td>
             <td>
-              <div class="status-toggle" (click)="toggleServiceStatus(service.id, $event)">
-                <span class="status-badge" [class.active]="service.is_active" [class.inactive]="!service.is_active">
-                  {{ service.is_active ? 'Ativo' : 'Inativo' }}
+              <div
+                class="status-toggle"
+                (click)="toggleServiceStatus(service, $event)"
+              >
+                <span
+                  class="status-badge"
+                  [class.active]="service.isActive"
+                  [class.inactive]="!service.isActive"
+                >
+                  {{ service.isActive ? 'Ativo' : 'Inativo' }}
                 </span>
               </div>
             </td>
             <td>
-              <button class="action-btn" (click)="editService(service.id); $event.stopPropagation()">
+              <button
+                class="action-btn"
+                (click)="editService(service.id); $event.stopPropagation()"
+              >
                 <i class="fas fa-edit"></i>
               </button>
             </td>

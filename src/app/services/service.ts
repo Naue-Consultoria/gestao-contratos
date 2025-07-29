@@ -1,4 +1,3 @@
-// src/app/services/service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -6,7 +5,8 @@ import { environment } from '../../environments/environment';
 
 export interface CreateServiceRequest {
   name: string;
-  duration: number; // em dias
+  duration_amount: number;
+  duration_unit: 'dias' | 'semanas' | 'meses' | 'encontros';
   value: number; // em centavos
   description?: string | null;
   category?: string | null;
@@ -15,7 +15,8 @@ export interface CreateServiceRequest {
 
 export interface UpdateServiceRequest {
   name?: string;
-  duration?: number; // em dias
+  duration_amount?: number;
+  duration_unit?: 'dias' | 'semanas' | 'meses' | 'encontros';
   value?: number; // em centavos
   description?: string | null;
   category?: string | null;
@@ -25,7 +26,8 @@ export interface UpdateServiceRequest {
 export interface ApiService {
   id: number;
   name: string;
-  duration: number;
+  duration_amount: number;
+  duration_unit: string;
   value: number; // em centavos
   description: string | null;
   category: string | null;
@@ -34,6 +36,15 @@ export interface ApiService {
   updated_at: string;
   created_by_user?: { name: string };
   updated_by_user?: { name: string };
+}
+
+export interface ServiceStats {
+  total: number;
+  active: number;
+  inactive: number;
+  totalValue: number;
+  averageDuration: number;
+  categoryStats: { [key: string]: number };
 }
 
 export interface ServicesResponse {
@@ -58,9 +69,6 @@ export class ServiceService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Obter headers com autorização
-   */
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     return new HttpHeaders({
@@ -69,9 +77,6 @@ export class ServiceService {
     });
   }
 
-  /**
-   * Listar serviços
-   */
   getServices(filters?: any): Observable<ServicesResponse> {
     return this.http.get<ServicesResponse>(this.API_URL, { 
       params: filters || {},
@@ -79,64 +84,45 @@ export class ServiceService {
     });
   }
 
-  /**
-   * Buscar serviço por ID
-   */
   getService(id: number): Observable<ServiceResponse> {
     return this.http.get<ServiceResponse>(`${this.API_URL}/${id}`, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Criar novo serviço
-   */
   createService(serviceData: CreateServiceRequest): Observable<CreateServiceResponse> {
     return this.http.post<CreateServiceResponse>(this.API_URL, serviceData, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Atualizar serviço
-   */
   updateService(id: number, serviceData: UpdateServiceRequest): Observable<any> {
     return this.http.put(`${this.API_URL}/${id}`, serviceData, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Alternar status do serviço
-   */
   toggleServiceStatus(id: number): Observable<any> {
     return this.http.patch(`${this.API_URL}/${id}/toggle-status`, {}, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Excluir serviço
-   */
   deleteService(id: number): Observable<any> {
     return this.http.delete(`${this.API_URL}/${id}`, {
       headers: this.getAuthHeaders()
     });
   }
 
-  /**
-   * Formatar duração para exibição
-   */
-  formatDuration(days: number): string {
-    if (days === 1) {
-      return '1 dia';
+  formatDuration(amount: number, unit: string): string {
+    if (!amount || !unit) return 'N/A';
+    if (amount === 1) {
+      const singularUnit = unit.endsWith('es') ? unit.slice(0, -2) : (unit.endsWith('s') ? unit.slice(0, -1) : unit);
+      return `${amount} ${singularUnit}`;
     }
-    return `${days} dias`;
+    return `${amount} ${unit}`;
   }
 
-  /**
-   * Formatar valor para exibição (de centavos para reais)
-   */
   formatValue(valueInCents: number): string {
     const valueInReais = valueInCents / 100;
     return new Intl.NumberFormat('pt-BR', {
@@ -145,17 +131,17 @@ export class ServiceService {
     }).format(valueInReais);
   }
 
-  /**
-   * Converter valor de reais para centavos
-   */
   convertToCents(valueInReais: number): number {
     return Math.round(valueInReais * 100);
   }
 
-  /**
-   * Converter valor de centavos para reais
-   */
   convertToReais(valueInCents: number): number {
     return valueInCents / 100;
+  }
+
+  getStats(): Observable<{ stats: ServiceStats }> {
+    return this.http.get<{ stats: ServiceStats }>(`${this.API_URL}/meta/stats`, {
+      headers: this.getAuthHeaders()
+    });
   }
 }

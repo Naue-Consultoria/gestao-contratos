@@ -322,7 +322,7 @@
             <div class="service-option-details">
               <span><i class="fas fa-tag"></i> {{ service.category }}</span>
               <span
-                ><i class="fas fa-clock"></i> {{ service.duration }} dias</span
+                ><i class="fas fa-clock"></i> {{ formatServiceDuration(service) }}</span
               >
               <span class="service-value"
                 >{{ formatCurrency(service.value) }}</span
