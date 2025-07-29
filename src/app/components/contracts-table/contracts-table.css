@@ -724,6 +724,38 @@
   color: var(--dark-text);
 }
 
+.stat-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.stat-change {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 20px;
+}
+
+.stat-change.positive {
+  color: var(--success);
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.stat-change.neutral {
+  color: var(--secondary-text); /* Or a gray color like #6b7280 */
+  background-color: rgba(107, 114, 128, 0.1);
+}
+
+.stat-change.warning {
+  color: var(--warning);
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
 @keyframes fa-spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
