@@ -1,14 +1,14 @@
-// sidebar.ts
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../services/auth';
 
 interface NavItem {
   id: string;
   icon: string;
   text: string;
-  active: boolean;
-  route?: string;
+  route: string;
+  adminOnly?: boolean;
 }
 
 interface NavSection {
@@ -20,17 +20,70 @@ interface NavSection {
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './sidebar.html', // Mudança: usar arquivo separado
+  templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.css']
 })
 export class SidebarComponent {
-  @Input() navSections: NavSection[] = [];
-  @Input() isSidebarCollapsed = false;
+  // CORRECTED: Each property has its own @Input() decorator
+  @Input() isCollapsed = false;
   @Input() isMobileSidebarOpen = false;
+  @Output() sidebarToggled = new EventEmitter<void>();
+
+  navSections: NavSection[] = [
+    {
+      title: 'PRINCIPAL',
+      items: [
+        { id: 'dashboard', icon: 'fas fa-chart-line', text: 'Dashboard', route: '/home/dashboard' },
+        { id: 'contracts', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contracts' },
+        { id: 'companies', icon: 'fas fa-building', text: 'Empresas', route: '/home/companies' },
+        { id: 'services', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/services' }
+      ]
+    },
+    {
+      title: 'ANÁLISES',
+      items: [
+        { id: 'reports', icon: 'fas fa-chart-bar', text: 'Relatórios', route: '/home/reports' },
+        { id: 'analytics', icon: 'fas fa-chart-pie', text: 'Analytics', route: '/home/analytics' }
+      ]
+    },
+    {
+      title: 'CONFIGURAÇÕES',
+      items: [
+        { id: 'users', icon: 'fas fa-users', text: 'Usuários', route: '/home/users', adminOnly: true },
+        { id: 'settings', icon: 'fas fa-cog', text: 'Configurações', route: '/home/settings' }
+      ]
+    },
+    {
+      title: 'AJUDA',
+      items: [
+        { id: 'help', icon: 'fas fa-question-circle', text: 'Suporte', route: '/home/help' }
+      ]
+    }
+  ];
   
-  @Output() navigateTo = new EventEmitter<string>();
-  @Output() sidebarToggled = new EventEmitter<void>(); // Novo evento
-  
+  filteredNavSections: NavSection[] = [];
+
+  constructor(private router: Router, private authService: AuthService) {
+    this.filterNavigationByRole();
+  }
+
+  isRouteActive(route: string): boolean {
+    return this.router.isActive(route, { 
+      paths: 'subset', 
+      queryParams: 'subset', 
+      fragment: 'ignored', 
+      matrixParams: 'ignored' 
+    });
+  }
+
+  private filterNavigationByRole() {
+    const isAdmin = this.authService.isAdmin();
+    this.filteredNavSections = this.navSections.map(section => ({
+      ...section,
+      items: section.items.filter(item => !item.adminOnly || isAdmin)
+    })).filter(section => section.items.length > 0);
+  }
+
   toggleSidebar(): void {
     this.sidebarToggled.emit();
   }

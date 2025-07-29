@@ -10,11 +10,9 @@
   (toggleTheme)="toggleTheme()"
   (toggleNotifications)="toggleNotifications()"
   (clearNotifications)="clearNotifications()"
-  (performSearch)="globalSearchTerm = $event; performSearch()"
   (logout)="logout()">
 </app-header>
 
-<!-- Dropdown de Notificações -->
 <div class="notification-dropdown-wrapper" *ngIf="isNotificationOpen">
   <app-notification-dropdown
     [isOpen]="isNotificationOpen"
@@ -23,21 +21,15 @@
   </app-notification-dropdown>
 </div>
 
-<!-- Sidebar -->
 <app-sidebar
-  [navSections]="navSections"
-  [isSidebarCollapsed]="isSidebarCollapsed"
-  [isMobileSidebarOpen]="isMobileSidebarOpen"
-  (navigateTo)="navigateTo($event)"
+  [isCollapsed]="isSidebarCollapsed" [isMobileSidebarOpen]="isMobileSidebarOpen"
   (sidebarToggled)="toggleSidebar()">
 </app-sidebar>
 
-<!-- Main Content -->
 <main class="main-content" [class.sidebar-collapsed]="isSidebarCollapsed">
   <router-outlet></router-outlet>
 </main>
 
-<!-- Modals -->
 <app-contract-modal
   [isOpen]="isContractModalOpen"
   [servicesList]="servicesList"
@@ -46,7 +38,6 @@
   (save)="saveContract()">
 </app-contract-modal>
 
-<!-- User Modal -->
 <app-user-modal
   [isOpen]="isUserModalOpen"
   [editingUser]="editingUser"
