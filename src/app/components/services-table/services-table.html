@@ -8,56 +8,6 @@
     </div>
   </div>
 
-  <div class="dashboard-grid mb-4">
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Total de Serviços</div>
-          <div class="stat-value">{{ stats?.total || 0 }}</div>
-          <div class="stat-change positive" *ngIf="stats?.active ?? 0 > 0">
-            <i class="fas fa-check-circle"></i>
-            {{ stats?.active }} ativos
-          </div>
-        </div>
-        <div class="stat-icon">
-          <i class="fas fa-briefcase"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Valor Total</div>
-          <div class="stat-value">{{ formatTotalValue() }}</div>
-          <div class="stat-change positive">
-            <i class="fas fa-coins"></i>
-            Soma de todos os serviços
-          </div>
-        </div>
-        <div class="stat-icon">
-          <i class="fas fa-dollar-sign"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Duração Média</div>
-          <div class="stat-value">{{ formatAverageDuration() }}</div>
-          <div class="stat-change positive">
-            <i class="fas fa-clock"></i>
-            Por serviço
-          </div>
-        </div>
-        <div class="stat-icon">
-          <i class="fas fa-hourglass-half"></i>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="table-container">
     <div class="table-header">
       <h2 class="table-title">Lista de Serviços</h2>

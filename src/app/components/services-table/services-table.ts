@@ -29,7 +29,6 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private subscriptions = new Subscription();
 
-  stats: ServiceStats | null = null;
   services: ServiceDisplay[] = [];
   isLoading = true;
   error = '';
@@ -48,12 +47,7 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = '';
     try {
-      const [statsResponse, servicesResponse] = await Promise.all([
-        firstValueFrom(this.serviceService.getStats()),
-        firstValueFrom(this.serviceService.getServices())
-      ]);
-
-      this.stats = statsResponse.stats;
+      const servicesResponse = await firstValueFrom(this.serviceService.getServices());
       this.services = servicesResponse.services.map(apiService => this.mapApiServiceToTableService(apiService));
 
     } catch (error) {
@@ -98,17 +92,6 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
         this.modalService.showError(`Não foi possível ${action} o serviço.`);
       }
     }
-  }
-
-  formatTotalValue(): string {
-    if (!this.stats) return 'R$ 0,00';
-    return this.serviceService.formatValue(this.stats.totalValue);
-  }
-
-  formatAverageDuration(): string {
-    if (!this.stats) return '0 dias';
-    // The average duration from stats is always in days
-    return this.serviceService.formatDuration(this.stats.averageDuration, 'dias');
   }
 
   getCategoryIcon(category: string): string {
