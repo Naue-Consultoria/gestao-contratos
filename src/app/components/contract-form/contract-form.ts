@@ -49,11 +49,19 @@ export class ContractFormComponent implements OnInit {
     contract_number: '',
     company_id: null as number | null,
     type: 'Full' as 'Full' | 'Pontual' | 'Individual',
+    status: 'active' as 'active' | 'completed' | 'cancelled' | 'suspended',
     start_date: '',
     end_date: '',
     notes: '',
     assigned_users: [] as number[],
   };
+
+  contractStatuses = [
+    { value: 'active', label: 'Ativo' },
+    { value: 'completed', label: 'Concluído' },
+    { value: 'suspended', label: 'Suspenso' },
+    { value: 'cancelled', label: 'Cancelado' }
+  ];
 
   availableServices: ApiService[] = [];
   selectedServices: SelectedService[] = [];
@@ -142,6 +150,7 @@ export class ContractFormComponent implements OnInit {
           contract_number: contract.contract_number,
           company_id: contract.company.id,
           type: contract.type,
+          status: contract.status,
           start_date: contract.start_date.split('T')[0],
           end_date: contract.end_date ? contract.end_date.split('T')[0] : '',
           notes: contract.notes || '',
@@ -322,6 +331,7 @@ export class ContractFormComponent implements OnInit {
           end_date: this.formData.end_date || null,
           services: services,
           notes: this.formData.notes || null,
+          status: this.formData.status,
           assigned_users: this.formData.assigned_users,
         };
         await firstValueFrom(
@@ -360,6 +370,10 @@ export class ContractFormComponent implements OnInit {
   getCompanyName(companyId: number | null): string {
     const company = this.companies.find((c) => c.id === companyId);
     return company ? company.name : '-';
+  }
+  getStatusText(status: string): string {
+    if (!status) return '';
+    return this.contractService.getStatusText(status);
   }
   isServiceSelected(serviceId: number): boolean {
     return this.selectedServices.some((s) => s.service_id === serviceId);

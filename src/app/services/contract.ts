@@ -15,9 +15,10 @@ export interface CreateContractRequest {
   type: 'Full' | 'Pontual' | 'Individual';
   start_date: string;
   end_date?: string | null;
+  status?: 'active' | 'completed' | 'cancelled' | 'suspended';
   services: ContractServiceItem[];
   notes?: string | null;
-  assigned_users?: number[]; // Added for creation
+  assigned_users?: number[];
 }
 
 export interface UpdateContractRequest {

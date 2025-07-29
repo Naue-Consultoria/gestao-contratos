@@ -40,13 +40,17 @@
             </div>
             <div class="form-group">
               <label class="form-label required">Tipo</label>
-              <select
-                class="form-control"
-                [(ngModel)]="formData.type"
-                name="type"
-              >
+              <select class="form-control" [(ngModel)]="formData.type" name="type">
                 <option *ngFor="let type of contractTypes" [value]="type">
                   {{ type }}
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Status</label>
+              <select class="form-control" [(ngModel)]="formData.status" name="status">
+                <option *ngFor="let status of contractStatuses" [value]="status.value">
+                  {{ status.label }}
                 </option>
               </select>
             </div>
@@ -112,6 +116,21 @@
               rows="3"
               placeholder="..."
             ></textarea>
+          </div>
+        </div>
+
+        <div class="view-mode" *ngIf="isViewMode">
+          <div class="view-grid">
+            <div class="view-section">
+              <div class="detail-item">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value">
+                  <span class="status-badge" [ngClass]="'status-' + formData.status">
+                    {{ getStatusText(formData.status) }}
+                  </span>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -322,7 +341,8 @@
             <div class="service-option-details">
               <span><i class="fas fa-tag"></i> {{ service.category }}</span>
               <span
-                ><i class="fas fa-clock"></i> {{ formatServiceDuration(service) }}</span
+                ><i class="fas fa-clock"></i> {{ formatServiceDuration(service)
+                }}</span
               >
               <span class="service-value"
                 >{{ formatCurrency(service.value) }}</span

@@ -1079,6 +1079,38 @@ textarea.form-control {
   text-align: right;
 }
 
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Modifier classes for each status */
+.status-badge.status-active {
+  color: #10B981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.status-badge.status-completed {
+  color: #6B7280;
+  background-color: rgba(107, 114, 128, 0.1);
+}
+
+.status-badge.status-suspended {
+  color: #F59E0B;
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+.status-badge.status-cancelled {
+  color: #EF4444;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
 /* Dark Mode Styles for View Mode */
 :host-context(body.dark-mode) .view-section .section-title {
   border-color: var(--dark-border);

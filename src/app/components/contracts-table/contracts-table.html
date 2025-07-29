@@ -259,7 +259,7 @@
               <span class="value-amount">{{ contract.totalValue }}</span>
             </td>
             <td>
-              <div class="status-container" (click)="updateContractStatus(contract.id, contract.raw.status, $event)">
+              <div class="status-container">
                 <span class="status-badge" [style.background-color]="contract.statusColor + '20'" [style.color]="contract.statusColor">
                   <span class="status-dot" [style.background-color]="contract.statusColor"></span>
                   {{ contract.status }}

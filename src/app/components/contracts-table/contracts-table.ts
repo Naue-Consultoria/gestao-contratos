@@ -235,32 +235,6 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     this.router.navigate(['/home/contracts/view', id]);
   }
 
-  async updateContractStatus(id: number, currentStatus: string, event: Event) {
-    event.stopPropagation();
-    const nextStatusMap: { [key: string]: string } = {
-      active: 'completed',
-      completed: 'active',
-      cancelled: 'active',
-      suspended: 'active',
-    };
-    const newStatus = nextStatusMap[currentStatus] || 'active';
-    try {
-      await firstValueFrom(
-        this.contractService.updateContractStatus(id, newStatus)
-      );
-      this.modalService.showNotification(
-        'Status do contrato atualizado!',
-        true
-      );
-      this.loadContracts();
-    } catch (error) {
-      this.modalService.showNotification(
-        'Erro ao alterar status do contrato',
-        false
-      );
-    }
-  }
-
   formatTotalValue(): string {
     return this.contractService.formatValue(this.stats.totalValueAll);
   }
