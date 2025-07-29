@@ -1,0 +1,135 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Propostas</h1>
+    <div class="breadcrumb">
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>Propostas</span>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <h2 class="table-title">Lista de Propostas</h2>
+      <button class="btn btn-primary" (click)="openNewProposalPage()">
+        <i class="fas fa-plus"></i>
+        Nova Proposta
+      </button>
+    </div>
+
+    <!-- Mensagem de erro -->
+    <div *ngIf="error" class="error-message">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ error }}
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-container">
+      <i class="fas fa-spinner fa-spin"></i>
+      Carregando propostas...
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-wrapper" *ngIf="!isLoading">
+      <!-- Mensagem quando não há propostas -->
+      <div *ngIf="proposals.length === 0 && !error" class="empty-state">
+        <i class="fas fa-file-alt empty-icon"></i>
+        <h3>Nenhuma proposta cadastrada</h3>
+        <p>Clique no botão "Nova Proposta" para adicionar a primeira proposta.</p>
+      </div>
+
+      <!-- Tabela de propostas -->
+      <table class="custom-table" *ngIf="proposals.length > 0">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Empresa</th>
+            <th>Status</th>
+            <th>Valor Total</th>
+            <th>Validade</th>
+            <th>Criada em</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let proposal of proposals"
+            class="clickable"
+            [class.expired]="proposal.isExpired"
+            (click)="editProposal(proposal.id)"
+          >
+            <td>
+              <div class="proposal-info">
+                <div class="proposal-icon" [class.expired]="proposal.isExpired">
+                  <i class="fas fa-file-alt"></i>
+                </div>
+                <span class="proposal-title" [class.expired]="proposal.isExpired">
+                  {{ proposal.title }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <span class="company-name">{{ proposal.companyName }}</span>
+            </td>
+            <td>
+              <span
+                class="status-badge"
+                [style.background-color]="getStatusColor(proposal.status)"
+              >
+                {{ proposal.statusText }}
+              </span>
+            </td>
+            <td>
+              <span class="value-amount">{{ proposal.totalValue }}</span>
+            </td>
+            <td>
+              <span class="validity-date">{{ proposal.validUntil }}</span>
+            </td>
+            <td>
+              <span class="created-date">{{ proposal.createdAt }}</span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button
+                  class="action-btn"
+                  (click)="viewProposal(proposal.id); $event.stopPropagation()"
+                  title="Visualizar"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button
+                  class="action-btn"
+                  (click)="editProposal(proposal.id); $event.stopPropagation()"
+                  title="Editar"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  class="action-btn"
+                  (click)="duplicateProposal(proposal, $event)"
+                  title="Duplicar"
+                >
+                  <i class="fas fa-copy"></i>
+                </button>
+                <button
+                  class="action-btn"
+                  (click)="generatePDF(proposal, $event)"
+                  title="Gerar PDF"
+                >
+                  <i class="fas fa-file-pdf"></i>
+                </button>
+                <button
+                  class="action-btn delete-btn"
+                  (click)="deleteProposal(proposal, $event)"
+                  title="Excluir"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -43,6 +43,7 @@ export interface ApiCompany {
 export interface CompaniesResponse {
   companies: ApiCompany[];
   total: number;
+  filters?: any;
 }
 
 export interface CompanyResponse {

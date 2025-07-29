@@ -11,6 +11,8 @@ import { CompaniesTableComponent } from './components/companies-table/companies-
 import { NewCompanyPageComponent } from './components/new-company-page/new-company-page';
 import { ServicesTableComponent } from './components/services-table/services-table';
 import { ServiceFormComponent } from './components/services-form/services-form';
+import { ProposalsPageComponent } from './components/proposals-page/proposals-page';
+import { ProposalFormComponent } from './components/proposal-form/proposal-form';
 import { ReportsPage } from './components/reports-page/reports-page';
 import { AnalyticsPageComponent } from './components/analytics-page/analytics-page';
 import { UsersPageComponent } from './components/users-page/users-page';
@@ -138,6 +140,34 @@ export const routes: Routes = [
         path: 'services/edit/:id',
         component: ServiceFormComponent,
         title: 'Editar Serviço - NAUE Consultoria',
+      },
+
+      // Gestão de propostas
+      {
+        path: 'proposals',
+        component: ProposalsPageComponent,
+        title: 'Propostas - NAUE Consultoria',
+      },
+      
+      // Nova proposta
+      {
+        path: 'proposals/new',
+        component: ProposalFormComponent,
+        title: 'Nova Proposta - NAUE Consultoria',
+      },
+      
+      // Visualizar proposta
+      {
+        path: 'proposals/view/:id',
+        component: ProposalFormComponent,
+        title: 'Visualizar Proposta - NAUE Consultoria',
+      },
+      
+      // Editar proposta
+      {
+        path: 'proposals/edit/:id',
+        component: ProposalFormComponent,
+        title: 'Editar Proposta - NAUE Consultoria',
       },
 
       // Relatórios

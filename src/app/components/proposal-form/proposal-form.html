@@ -1,0 +1,180 @@
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">{{ isEditMode ? 'Editar Proposta' : 'Nova Proposta' }}</h1>
+    <div class="breadcrumb">
+      <a routerLink="/home" class="breadcrumb-link">Home</a>
+      <span class="breadcrumb-separator">/</span>
+      <a routerLink="/proposals" class="breadcrumb-link" (click)="cancel()">Propostas</a>
+      <span class="breadcrumb-separator">/</span>
+      <span class="breadcrumb-current">{{ isEditMode ? 'Editar' : 'Nova' }}</span>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <i class="fas fa-spinner fa-spin"></i>
+    <span>Carregando dados...</span>
+  </div>
+
+  <!-- Form Container -->
+  <div class="form-container" *ngIf="!isLoading">
+    <form [formGroup]="proposalForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Company Section -->
+      <div class="form-section">
+        <h2 class="section-title"><i class="fas fa-building"></i>Empresa</h2>
+        <div class="form-group">
+          <label for="company_id" class="form-label required">Empresa</label>
+          <div class="input-group">
+            <select id="company_id" formControlName="company_id" class="form-control" [class.error]="isFieldInvalid('company_id')">
+              <option value="" disabled>Selecione uma empresa</option>
+              <option *ngFor="let company of companies" [value]="company.id">
+                {{ company.name }} <span *ngIf="company.headquarters" class="company-details">- {{ company.headquarters }}</span>
+              </option>
+            </select>
+            <button type="button" class="btn btn-outline btn-sm" (click)="toggleNewCompanyForm()">
+              <i class="fas fa-plus"></i> Nova Empresa
+            </button>
+          </div>
+          <div *ngIf="isFieldInvalid('company_id')" class="error-message">A seleção da empresa é obrigatória.</div>
+        </div>
+
+        <!-- New Company Sub-Form -->
+        <div *ngIf="showNewCompanyForm" class="sub-form" @slideInOut>
+          <h3 class="sub-form-title">Cadastrar Nova Empresa</h3>
+          <div [formGroup]="newCompanyForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="company_name" class="form-label required">Nome</label>
+                <input id="company_name" type="text" formControlName="name" class="form-control" placeholder="Nome da empresa">
+              </div>
+              <div class="form-group">
+                <label for="company_headquarters" class="form-label">Sede</label>
+                <input id="company_headquarters" type="text" formControlName="headquarters" class="form-control" placeholder="Cidade/Estado">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="company_sector" class="form-label">Setor</label>
+              <input id="company_sector" type="text" formControlName="market_sector" class="form-control" placeholder="Setor de mercado">
+            </div>
+            <div class="sub-form-actions">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="toggleNewCompanyForm()">Cancelar</button>
+              <button type="button" class="btn btn-primary btn-sm" (click)="createNewCompany()" [disabled]="newCompanyForm.invalid">
+                <i class="fas fa-save"></i> Salvar Empresa
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proposal Details Section -->
+      <div class="form-section">
+        <h2 class="section-title"><i class="fas fa-file-alt"></i>Dados da Proposta</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="title" class="form-label required">Título</label>
+            <input id="title" type="text" formControlName="title" class="form-control" [class.error]="isFieldInvalid('title')" placeholder="Ex: Proposta de Consultoria em RH">
+            <div *ngIf="isFieldInvalid('title')" class="error-message">Título é obrigatório (mínimo 3 caracteres).</div>
+          </div>
+          <div class="form-group">
+            <label for="valid_until" class="form-label">Válida Até</label>
+            <input id="valid_until" type="date" formControlName="valid_until" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="description" class="form-label">Descrição</label>
+          <textarea id="description" formControlName="description" class="form-control" rows="3" placeholder="Descreva o escopo e os objetivos da proposta."></textarea>
+        </div>
+      </div>
+
+      <!-- Services Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title no-border"><i class="fas fa-briefcase"></i>Serviços da Proposta</h2>
+          <button type="button" class="btn btn-primary" (click)="addService()">
+            <i class="fas fa-plus"></i> Adicionar Serviço
+          </button>
+        </div>
+        <div formArrayName="services" class="services-list">
+          <div *ngFor="let service of servicesArray.controls; let i = index" [formGroupName]="i" class="service-card" @slideInOut>
+            <div class="service-card-header">
+              <h3 class="service-title">Serviço #{{ i + 1 }}</h3>
+              <button *ngIf="servicesArray.length > 1" type="button" class="btn-remove" (click)="removeService(i)" title="Remover Serviço">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+            <div class="service-card-body">
+              <div class="form-group full-width">
+                <label [for]="'service_id_' + i" class="form-label required">Serviço</label>
+                <select [id]="'service_id_' + i" formControlName="service_id" class="form-control" [class.error]="isServiceFieldInvalid(i, 'service_id')" (change)="onServiceChange(i)">
+                  <option value="" disabled>Selecione um serviço da lista</option>
+                  <option *ngFor="let s of services" [value]="s.id">
+                    {{ s.name }} ({{ formatCurrency(s.value) }})
+                  </option>
+                </select>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label [for]="'quantity_' + i" class="form-label required">Quantidade</label>
+                  <input [id]="'quantity_' + i" type="number" formControlName="quantity" class="form-control" [class.error]="isServiceFieldInvalid(i, 'quantity')" min="1">
+                </div>
+                <div class="form-group">
+                  <label [for]="'custom_value_' + i" class="form-label">Valor Personalizado (Unitário)</label>
+                  <input [id]="'custom_value_' + i" type="number" formControlName="custom_value" class="form-control" placeholder="Opcional. Ex: 1500.00">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="servicesArray.length === 0" class="empty-state">
+          <i class="fas fa-box-open"></i>
+          <p>Nenhum serviço adicionado.</p>
+          <span>Clique em "Adicionar Serviço" para começar a montar a proposta.</span>
+        </div>
+      </div>
+
+      <!-- Observations Section -->
+      <div class="form-section">
+        <h2 class="section-title"><i class="fas fa-sticky-note"></i>Observações e Termos</h2>
+        <div class="form-group">
+          <label for="observations" class="form-label">Termos e Condições</label>
+          <textarea id="observations" formControlName="observations" class="form-control" rows="4" placeholder="Inclua informações sobre pagamento, prazos, ou outras condições importantes."></textarea>
+        </div>
+      </div>
+
+      <!-- Preview Card -->
+      <div class="preview-card">
+        <h3 class="preview-title"><i class="fas fa-receipt"></i>Resumo da Proposta</h3>
+        <div class="preview-content">
+          <div *ngFor="let service of servicesArray.controls; let i = index" class="summary-item">
+            <div class="item-details">
+              <span class="item-name">{{ getServiceById(service.get('service_id')?.value)?.name || 'Serviço não selecionado' }}</span>
+              <span class="item-calculation">{{ formatCurrency(getServiceValue(i)) }} x {{ service.get('quantity')?.value || 1 }}</span>
+            </div>
+            <span class="item-total">{{ formatCurrency(getServiceTotal(i)) }}</span>
+          </div>
+          <div *ngIf="servicesArray.length === 0" class="summary-empty">
+            <p>O resumo aparecerá aqui.</p>
+          </div>
+        </div>
+        <div class="summary-total">
+          <span class="total-label">Valor Total da Proposta</span>
+          <span class="total-amount">{{ formatCurrency(getTotalValue()) }}</span>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isSubmitting">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="proposalForm.invalid || isSubmitting">
+          <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+          <i *ngIf="!isSubmitting" class="fas fa-paper-plane"></i>
+          <span>{{ isEditMode ? 'Atualizar Proposta' : 'Enviar Proposta' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
