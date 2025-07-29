@@ -35,6 +35,7 @@ export class SidebarComponent {
       items: [
         { id: 'dashboard', icon: 'fas fa-chart-line', text: 'Dashboard', route: '/home/dashboard' },
         { id: 'contracts', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contracts' },
+        { id: 'proposals', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/proposals' },
         { id: 'companies', icon: 'fas fa-building', text: 'Empresas', route: '/home/companies' },
         { id: 'services', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/services' }
       ]

@@ -1,346 +1,194 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { ModalService } from '../../services/modal.service';
+import { ProposalService, Proposal } from '../../services/proposal';
+import { Subscription, firstValueFrom } from 'rxjs';
 
-import { ProposalService, Proposal, ProposalFilters } from '../../services/proposal';
-import { CompanyService, ApiCompany } from '../../services/company';
+interface ProposalDisplay {
+  id: number;
+  title: string;
+  companyName: string;
+  status: string;
+  statusText: string;
+  totalValue: string;
+  validUntil: string;
+  createdAt: string;
+  isExpired: boolean;
+  raw: Proposal;
+}
 
 @Component({
   selector: 'app-proposals-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   templateUrl: './proposals-page.html',
   styleUrls: ['./proposals-page.css']
 })
 export class ProposalsPageComponent implements OnInit, OnDestroy {
-  proposals: Proposal[] = [];
-  companies: ApiCompany[] = [];
-  isLoading = false;
-  
-  // Filtros
-  filters: ProposalFilters = {
-    is_active: true,
-    status: '',
-    company_id: undefined,
-    search: '',
-    expired_only: false
-  };
+  private modalService = inject(ModalService);
+  private proposalService = inject(ProposalService);
+  private router = inject(Router);
+  private subscriptions = new Subscription();
 
-  // Ordenação
-  sortField = 'created_at';
-  sortDirection: 'asc' | 'desc' = 'desc';
+  proposals: ProposalDisplay[] = [];
+  isLoading = true;
+  error = '';
 
-  // Paginação
-  currentPage = 1;
-  pageSize = 10;
-  totalItems = 0;
-
-  private destroy$ = new Subject<void>();
-
-  constructor(
-    private proposalService: ProposalService,
-    private companyService: CompanyService,
-    private router: Router,
-    private toastr: ToastrService
-  ) {}
-
-  ngOnInit(): void {
-    this.loadCompanies();
-    this.loadProposals();
+  ngOnInit() {
+    this.loadData();
+    window.addEventListener('refreshProposals', this.loadData.bind(this));
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+    window.removeEventListener('refreshProposals', this.loadData.bind(this));
   }
 
-  private loadCompanies(): void {
-    this.companyService.getCompanies({ is_active: true })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.companies = response.companies || [];
-        },
-        error: (error) => {
-          console.error('Erro ao carregar empresas:', error);
-        }
-      });
-  }
-
-  loadProposals(): void {
+  async loadData() {
     this.isLoading = true;
-    
-    const cleanFilters = { ...this.filters };
-    Object.keys(cleanFilters).forEach(key => {
-      if (cleanFilters[key as keyof ProposalFilters] === '' || 
-          cleanFilters[key as keyof ProposalFilters] === undefined) {
-        delete cleanFilters[key as keyof ProposalFilters];
+    this.error = '';
+    try {
+      const proposalsResponse = await firstValueFrom(this.proposalService.getProposals());
+      if (proposalsResponse && proposalsResponse.success) {
+        this.proposals = (proposalsResponse.data || []).map((apiProposal: Proposal) => this.mapApiProposalToTableProposal(apiProposal));
+      } else {
+        // Se não há dados ou falha na resposta, deixa array vazio
+        this.proposals = [];
       }
-    });
-
-    this.proposalService.getProposals(cleanFilters)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.proposals = this.sortProposals(response.data || []);
-            this.totalItems = response.total || 0;
-          }
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Erro ao carregar propostas:', error);
-          this.toastr.error('Erro ao carregar propostas');
-          this.isLoading = false;
-        }
-      });
-  }
-
-  private sortProposals(proposals: Proposal[]): Proposal[] {
-    return proposals.sort((a, b) => {
-      let aValue: any = a[this.sortField as keyof Proposal];
-      let bValue: any = b[this.sortField as keyof Proposal];
-
-      // Tratamento especial para campos aninhados
-      if (this.sortField === 'company_name') {
-        aValue = a.company?.name || '';
-        bValue = b.company?.name || '';
+    } catch (error: any) {
+      console.error('❌ Error loading proposals data:', error);
+      
+      // Se é erro 500 ou endpoint não existe, mostra que funcionalidade não está disponível
+      if (error?.status === 500 || error?.status === 404) {
+        this.error = 'A funcionalidade de propostas ainda não está implementada no backend.';
+      } else {
+        this.error = 'Não foi possível carregar os dados das propostas.';
       }
-
-      if (aValue < bValue) {
-        return this.sortDirection === 'asc' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return this.sortDirection === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
-  }
-
-  onSort(field: string): void {
-    if (this.sortField === field) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortField = field;
-      this.sortDirection = 'asc';
+      
+      // Define array vazio para não quebrar a UI
+      this.proposals = [];
+    } finally {
+      this.isLoading = false;
     }
-    this.proposals = this.sortProposals(this.proposals);
   }
 
-  onFilterChange(): void {
-    this.currentPage = 1;
-    this.loadProposals();
-  }
-
-  clearFilters(): void {
-    this.filters = {
-      is_active: true,
-      status: '',
-      company_id: undefined,
-      search: '',
-      expired_only: false
+  private mapApiProposalToTableProposal(apiProposal: Proposal): ProposalDisplay {
+    return {
+      id: apiProposal.id,
+      title: apiProposal.title,
+      companyName: apiProposal.company?.name || 'N/A',
+      status: apiProposal.status,
+      statusText: this.proposalService.getStatusText(apiProposal.status),
+      totalValue: this.proposalService.formatCurrency(apiProposal.total_value || 0),
+      validUntil: apiProposal.valid_until ? this.formatDate(apiProposal.valid_until) : 'Sem prazo',
+      createdAt: this.formatDate(apiProposal.created_at),
+      isExpired: this.proposalService.isProposalExpired(apiProposal),
+      raw: apiProposal
     };
-    this.loadProposals();
   }
 
-  createProposal(): void {
+  openNewProposalPage() {
+    // Verifica se há erro de backend antes de navegar
+    if (this.error && this.error.includes('ainda não está implementada no backend')) {
+      this.modalService.showError('A funcionalidade de criar propostas ainda não está implementada no backend.');
+      return;
+    }
     this.router.navigate(['/home/proposals/new']);
   }
 
-  editProposal(proposal: Proposal): void {
-    this.router.navigate(['/home/proposals/edit', proposal.id]);
+  editProposal(id: number) {
+    if (this.error && this.error.includes('ainda não está implementada no backend')) {
+      this.modalService.showError('A funcionalidade de editar propostas ainda não está implementada no backend.');
+      return;
+    }
+    this.router.navigate(['/home/proposals/edit', id]);
   }
 
-  viewProposal(proposal: Proposal): void {
-    this.router.navigate(['/home/proposals/view', proposal.id]);
+  viewProposal(id: number) {
+    if (this.error && this.error.includes('ainda não está implementada no backend')) {
+      this.modalService.showError('A funcionalidade de visualizar propostas ainda não está implementada no backend.');
+      return;
+    }
+    this.router.navigate(['/home/proposals/view', id]);
   }
 
-  duplicateProposal(proposal: Proposal): void {
-    if (confirm('Deseja duplicar esta proposta?')) {
-      this.proposalService.duplicateProposal(proposal.id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            if (response.success) {
-              this.toastr.success('Proposta duplicada com sucesso');
-              this.loadProposals();
-            }
-          },
-          error: (error) => {
-            console.error('Erro ao duplicar proposta:', error);
-            this.toastr.error('Erro ao duplicar proposta');
-          }
-        });
+  async duplicateProposal(proposal: ProposalDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    
+    if (confirm(`Deseja duplicar a proposta "${proposal.title}"?`)) {
+      try {
+        const response = await firstValueFrom(this.proposalService.duplicateProposal(proposal.id));
+        if (response && response.success) {
+          this.modalService.showSuccess('Proposta duplicada com sucesso!');
+          this.loadData();
+        }
+      } catch (error: any) {
+        console.error('❌ Error duplicating proposal:', error);
+        if (error?.status === 500 || error?.status === 404) {
+          this.modalService.showError('Funcionalidade de duplicar propostas ainda não implementada no backend.');
+        } else {
+          this.modalService.showError('Não foi possível duplicar a proposta.');
+        }
+      }
     }
   }
 
-  deleteProposal(proposal: Proposal): void {
+  async deleteProposal(proposal: ProposalDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    
     if (confirm(`Deseja excluir a proposta "${proposal.title}"?`)) {
-      this.proposalService.deleteProposal(proposal.id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            if (response.success) {
-              this.toastr.success('Proposta excluída com sucesso');
-              this.loadProposals();
-            }
-          },
-          error: (error) => {
-            console.error('Erro ao excluir proposta:', error);
-            this.toastr.error('Erro ao excluir proposta');
-          }
-        });
+      try {
+        await firstValueFrom(this.proposalService.deleteProposal(proposal.id));
+        this.modalService.showSuccess('Proposta excluída com sucesso!');
+        this.loadData();
+      } catch (error: any) {
+        console.error('❌ Error deleting proposal:', error);
+        if (error?.status === 500 || error?.status === 404) {
+          this.modalService.showError('Funcionalidade de excluir propostas ainda não implementada no backend.');
+        } else {
+          this.modalService.showError('Não foi possível excluir a proposta.');
+        }
+      }
     }
   }
 
-  updateStatus(proposal: Proposal, newStatus: string): void {
-    this.proposalService.updateProposalStatus(proposal.id, newStatus)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.toastr.success('Status atualizado com sucesso');
-            this.loadProposals();
-          }
-        },
-        error: (error) => {
-          console.error('Erro ao atualizar status:', error);
-          this.toastr.error('Erro ao atualizar status');
-        }
-      });
-  }
-
-  sendProposal(proposal: Proposal): void {
-    // Implementar modal de envio de email
-    const email = prompt('Digite o email para envio da proposta:');
-    if (email) {
-      this.proposalService.sendProposal(proposal.id, { email })
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            if (response.success) {
-              this.toastr.success('Proposta enviada com sucesso');
-              this.loadProposals();
-            }
-          },
-          error: (error) => {
-            console.error('Erro ao enviar proposta:', error);
-            this.toastr.error('Erro ao enviar proposta');
-          }
-        });
+  async generatePDF(proposal: ProposalDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    
+    try {
+      const blob = await firstValueFrom(this.proposalService.generateProposalPDF(proposal.id));
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `proposta-${proposal.title.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      console.error('❌ Error generating PDF:', error);
+      if (error?.status === 500 || error?.status === 404) {
+        this.modalService.showError('Funcionalidade de gerar PDF de propostas ainda não implementada no backend.');
+      } else {
+        this.modalService.showError('Não foi possível gerar o PDF.');
+      }
     }
-  }
-
-  generatePDF(proposal: Proposal): void {
-    this.proposalService.generateProposalPDF(proposal.id)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `proposta-${proposal.title.replace(/\s+/g, '-').toLowerCase()}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
-        },
-        error: (error) => {
-          console.error('Erro ao gerar PDF:', error);
-          this.toastr.error('Erro ao gerar PDF');
-        }
-      });
-  }
-
-  formatCurrency(value: number | null | undefined): string {
-    return this.proposalService.formatCurrency(value || 0);
   }
 
   getStatusColor(status: string): string {
-    return this.proposalService.getStatusColor(status);
+    const statusColors: { [key: string]: string } = {
+      'draft': '#6c757d',
+      'sent': '#007bff',
+      'accepted': '#28a745',
+      'rejected': '#dc3545',
+      'expired': '#fd7e14'
+    };
+    return statusColors[status] || '#6c757d';
   }
 
-  getStatusText(status: string): string {
-    return this.proposalService.getStatusText(status);
-  }
-
-  canEditProposal(proposal: Proposal): boolean {
-    return this.proposalService.canEditProposal(proposal);
-  }
-
-  canSendProposal(proposal: Proposal): boolean {
-    return this.proposalService.canSendProposal(proposal);
-  }
-
-  isProposalExpired(proposal: Proposal): boolean {
-    return this.proposalService.isProposalExpired(proposal);
-  }
-
-  getDaysUntilExpiration(proposal: Proposal): number | null {
-    return this.proposalService.getDaysUntilExpiration(proposal);
-  }
-
-  formatDate(dateString: string | null | undefined): string {
+  private formatDate(dateString: string | null | undefined): string {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('pt-BR');
-  }
-
-  // Paginação
-  get paginatedProposals(): Proposal[] {
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    return this.proposals.slice(startIndex, endIndex);
-  }
-
-  get totalPages(): number {
-    return Math.ceil(this.totalItems / this.pageSize);
-  }
-
-  changePage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-    }
-  }
-
-  get pageNumbers(): number[] {
-    const pages: number[] = [];
-    const maxVisible = 5;
-    const startPage = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
-    const endPage = Math.min(this.totalPages, startPage + maxVisible - 1);
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    return pages;
-  }
-
-  // TrackBy function for better performance
-  trackByProposalId(index: number, proposal: Proposal): number {
-    return proposal.id;
-  }
-
-  // Getter for pagination display
-  get displayedItemsEnd(): number {
-    return Math.min(this.currentPage * this.pageSize, this.totalItems);
-  }
-
-  // Handle status change
-  onStatusChange(event: Event, proposal: Proposal): void {
-    const target = event.target as HTMLSelectElement;
-    if (target && target.value) {
-      this.updateStatus(proposal, target.value);
-    }
-  }
-
-  // Handle include inactive change
-  onIncludeInactiveChange(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    if (target) {
-      this.filters.is_active = !target.checked;
-      this.onFilterChange();
-    }
   }
 }
