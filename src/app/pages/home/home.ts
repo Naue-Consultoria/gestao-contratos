@@ -87,6 +87,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       items: [
         { id: 'dashboard', icon: 'fas fa-chart-line', text: 'Dashboard', active: false, route: '/home/dashboard' },
         { id: 'contracts', icon: 'fas fa-file-contract', text: 'Contratos', active: false, route: '/home/contracts' },
+        { id: 'proposals', icon: 'fas fa-file-invoice', text: 'Propostas', active: false, route: '/home/proposals' },
         { id: 'companies', icon: 'fas fa-building', text: 'Empresas', active: false, route: '/home/companies' },
         { id: 'services', icon: 'fas fa-briefcase', text: 'Serviços', active: false, route: '/home/services' }
       ]

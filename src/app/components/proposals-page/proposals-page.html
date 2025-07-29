@@ -1,0 +1,267 @@
+<div class="proposals-page">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Propostas Comerciais</h1>
+      <button class="btn-primary" (click)="createProposal()">
+        <i class="icon">+</i> Nova Proposta
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label for="search">Busca</label>
+        <input 
+          id="search"
+          type="text" 
+          [(ngModel)]="filters.search" 
+          (input)="onFilterChange()"
+          placeholder="Título ou descrição..."
+          class="form-control">
+      </div>
+
+      <div class="filter-group">
+        <label for="company">Empresa</label>
+        <select 
+          id="company"
+          [(ngModel)]="filters.company_id" 
+          (change)="onFilterChange()"
+          class="form-control">
+          <option value="">Todas as empresas</option>
+          <option *ngFor="let company of companies" [value]="company.id">
+            {{ company.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="status">Status</label>
+        <select 
+          id="status"
+          [(ngModel)]="filters.status" 
+          (change)="onFilterChange()"
+          class="form-control">
+          <option value="">Todos os status</option>
+          <option value="draft">Rascunho</option>
+          <option value="sent">Enviada</option>
+          <option value="accepted">Aceita</option>
+          <option value="rejected">Rejeitada</option>
+          <option value="expired">Expirada</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="expired">Filtros Especiais</label>
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="filters.expired_only" 
+              (change)="onFilterChange()">
+            Apenas expiradas
+          </label>
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              [ngModel]="!filters.is_active" 
+              (change)="onIncludeInactiveChange($event)">
+            Incluir inativas
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-secondary" (click)="clearFilters()">
+          Limpar Filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela de Propostas -->
+  <div class="table-section">
+    <div class="table-container">
+      <table class="proposals-table">
+        <thead>
+          <tr>
+            <th (click)="onSort('title')" class="sortable">
+              Título
+              <span class="sort-indicator" 
+                    [class.active]="sortField === 'title'"
+                    [class.desc]="sortField === 'title' && sortDirection === 'desc'">
+                ↕
+              </span>
+            </th>
+            <th (click)="onSort('company_name')" class="sortable">
+              Empresa
+              <span class="sort-indicator" 
+                    [class.active]="sortField === 'company_name'"
+                    [class.desc]="sortField === 'company_name' && sortDirection === 'desc'">
+                ↕
+              </span>
+            </th>
+            <th (click)="onSort('status')" class="sortable">
+              Status
+              <span class="sort-indicator" 
+                    [class.active]="sortField === 'status'"
+                    [class.desc]="sortField === 'status' && sortDirection === 'desc'">
+                ↕
+              </span>
+            </th>
+            <th (click)="onSort('total_value')" class="sortable text-right">
+              Valor Total
+              <span class="sort-indicator" 
+                    [class.active]="sortField === 'total_value'"
+                    [class.desc]="sortField === 'total_value' && sortDirection === 'desc'">
+                ↕
+              </span>
+            </th>
+            <th>Validade</th>
+            <th (click)="onSort('created_at')" class="sortable">
+              Criada em
+              <span class="sort-indicator" 
+                    [class.active]="sortField === 'created_at'"
+                    [class.desc]="sortField === 'created_at' && sortDirection === 'desc'">
+                ↕
+              </span>
+            </th>
+            <th class="actions-column">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="isLoading">
+            <td colspan="7" class="loading-row">
+              <div class="loading">Carregando...</div>
+            </td>
+          </tr>
+          <tr *ngIf="!isLoading && paginatedProposals.length === 0">
+            <td colspan="7" class="empty-row">
+              <div class="empty-state">
+                <p>Nenhuma proposta encontrada</p>
+                <button class="btn-primary" (click)="createProposal()">
+                  Criar primeira proposta
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngFor="let proposal of paginatedProposals; trackBy: trackByProposalId" 
+              class="proposal-row"
+              [class.expired]="isProposalExpired(proposal)">
+            <td class="proposal-title">
+              <div class="title-content">
+                <strong>{{ proposal.title }}</strong>
+                <div *ngIf="proposal.description" class="description">
+                  {{ proposal.description }}
+                </div>
+                <div *ngIf="isProposalExpired(proposal)" class="expiry-warning">
+                  ⚠️ Proposta expirada
+                </div>
+                <div *ngIf="!isProposalExpired(proposal) && getDaysUntilExpiration(proposal) !== null && getDaysUntilExpiration(proposal)! <= 7" 
+                     class="expiry-soon">
+                  ⏰ Expira em {{ getDaysUntilExpiration(proposal) }} dias
+                </div>
+              </div>
+            </td>
+            <td class="company-info">
+              <div class="company-name">{{ proposal.company?.name }}</div>
+              <div *ngIf="proposal.company?.headquarters" class="company-location">
+                {{ proposal.company?.headquarters }}
+              </div>
+            </td>
+            <td class="status-cell">
+              <span class="status-badge" 
+                    [style.background-color]="getStatusColor(proposal.status)">
+                {{ getStatusText(proposal.status) }}
+              </span>
+              
+              <select *ngIf="proposal.status === 'draft' || proposal.status === 'sent'"
+                      class="status-select"
+                      [value]="proposal.status"
+                      (change)="onStatusChange($event, proposal)">
+                <option value="draft">Rascunho</option>
+                <option value="sent">Enviada</option>
+                <option value="accepted">Aceita</option>
+                <option value="rejected">Rejeitada</option>
+                <option value="expired">Expirada</option>
+              </select>
+            </td>
+            <td class="value-cell text-right">
+              <strong>{{ formatCurrency(proposal.total_value) }}</strong>
+            </td>
+            <td class="validity-cell">
+              <div *ngIf="proposal.valid_until">
+                {{ formatDate(proposal.valid_until) }}
+              </div>
+              <div *ngIf="!proposal.valid_until" class="no-expiry">
+                Sem prazo
+              </div>
+            </td>
+            <td class="date-cell">
+              {{ formatDate(proposal.created_at) }}
+            </td>
+            <td class="actions-cell">
+              <div class="actions-dropdown">
+                <button class="btn-actions">⋮</button>
+                <div class="dropdown-menu">
+                  <button (click)="viewProposal(proposal)">
+                    👁️ Visualizar
+                  </button>
+                  <button *ngIf="canEditProposal(proposal)" (click)="editProposal(proposal)">
+                    ✏️ Editar
+                  </button>
+                  <button (click)="duplicateProposal(proposal)">
+                    📄 Duplicar
+                  </button>
+                  <button *ngIf="canSendProposal(proposal)" (click)="sendProposal(proposal)">
+                    📧 Enviar
+                  </button>
+                  <button (click)="generatePDF(proposal)">
+                    📄 PDF
+                  </button>
+                  <hr>
+                  <button (click)="deleteProposal(proposal)" class="delete-action">
+                    🗑️ Excluir
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Paginação -->
+  <div *ngIf="totalPages > 1" class="pagination-section">
+    <div class="pagination-info">
+      Exibindo {{ (currentPage - 1) * pageSize + 1 }} a {{ displayedItemsEnd }} 
+      de {{ totalItems }} propostas
+    </div>
+    
+    <div class="pagination-controls">
+      <button 
+        class="btn-pagination" 
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)">
+        Anterior
+      </button>
+      
+      <button 
+        *ngFor="let page of pageNumbers" 
+        class="btn-pagination"
+        [class.active]="page === currentPage"
+        (click)="changePage(page)">
+        {{ page }}
+      </button>
+      
+      <button 
+        class="btn-pagination" 
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)">
+        Próxima
+      </button>
+    </div>
+  </div>
+</div>
