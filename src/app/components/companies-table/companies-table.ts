@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { CompanyService, ApiCompany } from '../../services/company';
-import { Subscription } from 'rxjs';
+import { ContractService, ApiContract } from '../../services/contract';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 interface Company {
   id: number;
@@ -29,6 +30,7 @@ interface Company {
 export class CompaniesTableComponent implements OnInit, OnDestroy {
   private modalService = inject(ModalService);
   private companyService = inject(CompanyService);
+  private contractService = inject(ContractService);
   private router = inject(Router);
   private subscriptions = new Subscription();
 
@@ -56,9 +58,6 @@ export class CompaniesTableComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  /**
-   * Inscrever-se em eventos de atualização
-   */
   private subscribeToRefreshEvents() {
     // Escutar evento de atualização de empresas
     window.addEventListener('refreshCompanies', () => {
@@ -66,35 +65,60 @@ export class CompaniesTableComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Carregar empresas do servidor
-   */
   async loadCompanies() {
     this.isLoading = true;
     this.error = '';
 
     try {
-      const response = await this.companyService.getCompanies().toPromise();
+      // Fetch both companies and all contracts in parallel
+      const [companyResponse, contractResponse] = await Promise.all([
+        firstValueFrom(this.companyService.getCompanies()),
+        firstValueFrom(this.contractService.getContracts())
+      ]);
       
-      if (response && response.companies) {
-        // Mapear empresas da API para o formato da tabela
-        this.companies = response.companies.map(apiCompany => this.mapApiCompanyToTableCompany(apiCompany));
+      if (companyResponse && companyResponse.companies) {
+        // Aggregate contract data by company ID
+        const contractAggregates = this.aggregateContractsByCompany(contractResponse.contracts);
         
-        // Atualizar estatísticas
-        this.updateStats(response.companies);
+        // Map companies, passing the aggregated data to the mapper function
+        this.companies = companyResponse.companies.map(apiCompany => 
+          this.mapApiCompanyToTableCompany(apiCompany, contractAggregates[apiCompany.id])
+        );
+        
+        // Update stats
+        this.updateStats(companyResponse.companies);
       }
     } catch (error: any) {
-      console.error('❌ Erro ao carregar empresas:', error);
-      this.error = 'Erro ao carregar empresas. Tente novamente.';
+      console.error('❌ Erro ao carregar dados:', error);
+      this.error = 'Erro ao carregar dados das empresas e contratos. Tente novamente.';
     } finally {
       this.isLoading = false;
     }
   }
 
+  private aggregateContractsByCompany(contracts: ApiContract[]): { [companyId: number]: { totalCount: number, activeCount: number, totalValue: number } } {
+    const aggregates: { [companyId: number]: { totalCount: number, activeCount: number, totalValue: number } } = {};
+    
+    if (!contracts) return aggregates;
+
+    for (const contract of contracts) {
+      const companyId = contract.company.id;
+      if (!aggregates[companyId]) {
+        aggregates[companyId] = { totalCount: 0, activeCount: 0, totalValue: 0 };
+      }
+      aggregates[companyId].totalCount++;
+      aggregates[companyId].totalValue += contract.total_value;
+      if (contract.status === 'active') {
+        aggregates[companyId].activeCount++;
+      }
+    }
+    return aggregates;
+  }
+
   /**
    * Mapear empresa da API para formato da tabela
    */
-  private mapApiCompanyToTableCompany(apiCompany: ApiCompany): Company {
+  private mapApiCompanyToTableCompany(apiCompany: ApiCompany, aggregates?: { totalCount: number, activeCount: number, totalValue: number }): Company {
     const initials = this.getInitials(apiCompany.name);
     const since = apiCompany.founded_date ? new Date(apiCompany.founded_date).getFullYear().toString() : 'N/A';
     
@@ -105,9 +129,9 @@ export class CompaniesTableComponent implements OnInit, OnDestroy {
       employees: apiCompany.employee_count || 0,
       location: apiCompany.headquarters || 'Não informado',
       market: apiCompany.market_sector || 'Não informado',
-      contracts: 0, // TODO: Implementar quando tivermos contratos
-      activeContracts: 0, // TODO: Implementar quando tivermos contratos
-      totalValue: 'R$ 0', // TODO: Implementar quando tivermos contratos
+      contracts: aggregates?.totalCount || 0,
+      activeContracts: aggregates?.activeCount || 0,
+      totalValue: this.contractService.formatValue(aggregates?.totalValue || 0),
       since: since,
       gradient: this.generateGradient(apiCompany.name)
     };
