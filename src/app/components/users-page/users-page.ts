@@ -33,6 +33,7 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   users: User[] = [];
   loading = false;
   error = '';
+  currentFilter: 'active' | 'inactive' | 'all' = 'active';
 
   ngOnInit() {
     this.loadUsers();
@@ -44,11 +45,7 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     window.removeEventListener('refreshUsers', this.handleRefreshUsers);
   }
 
-  /**
-   * Inscrever-se em eventos de atualização
-   */
   private subscribeToRefreshEvents() {
-    // Escutar evento de atualização de usuários
     window.addEventListener('refreshUsers', this.handleRefreshUsers);
   }
 
@@ -56,15 +53,22 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     this.loadUsers();
   }
 
-  /**
-   * Carregar usuários do servidor
-   */
+  setFilter(filter: 'active' | 'inactive' | 'all') {
+    this.currentFilter = filter;
+    this.loadUsers();
+  }
+
   async loadUsers() {
     this.loading = true;
     this.error = '';
 
+    const params: { is_active?: boolean } = {};
+    if (this.currentFilter !== 'all') {
+      params.is_active = this.currentFilter === 'active';
+    }
+
     try {
-      const response = await this.userService.getUsers().toPromise();
+      const response = await firstValueFrom(this.userService.getUsers(params));
       
       if (response && response.users) {
         this.users = response.users.map(user => this.mapApiUserToTableUser(user));
@@ -78,9 +82,6 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Mapear usuário da API para formato da tabela
-   */
   private mapApiUserToTableUser(apiUser: any): User {
     const initials = this.getInitials(apiUser.name || apiUser.email);
     const since = apiUser.created_at 
@@ -100,9 +101,6 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     };
   }
 
-  /**
-   * Obter display do cargo
-   */
   private getRoleDisplay(roleName: string): string {
     const roleMap: { [key: string]: string } = {
       'admin': 'Administrador',
@@ -112,9 +110,6 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     return roleMap[roleName] || 'Usuário';
   }
 
-  /**
-   * Obter display da permissão
-   */
   private getPermissionDisplay(roleName: string): string {
     const permissionMap: { [key: string]: string } = {
       'admin': 'Admin',
@@ -124,9 +119,6 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     return permissionMap[roleName] || 'Colaborador';
   }
 
-  /**
-   * Gerar iniciais do nome
-   */
   private getInitials(name: string): string {
     if (!name) return 'NN';
     
@@ -138,9 +130,6 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     return (words[0][0] + words[1][0]).toUpperCase();
   }
 
-  /**
-   * Gerar gradiente baseado no nome
-   */
   private generateGradient(name: string): string {
     const gradients = [
       'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -162,30 +151,18 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     return gradients[Math.abs(hash) % gradients.length];
   }
 
-  /**
-   * Abrir página de novo usuário
-   */
   openNewUserPage() {
     this.router.navigate(['/home/users/new']);
   }
 
-  /**
-   * Editar usuário
-   */
   editUser(userId: number) {
     this.router.navigate(['/home/users/edit', userId]);
   }
 
-  /**
-   * Track by para otimização
-   */
   trackByUserId(index: number, user: User): number {
     return user.id;
   }
 
-  /**
-   * Alternar status do usuário (ativar/desativar)
-   */
   async toggleUserStatus(user: User) {
     const action = user.status === 'active' ? 'desativar' : 'ativar';
     const confirmMessage = `Tem certeza que deseja ${action} o usuário ${user.name}?`;
@@ -204,9 +181,6 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Resetar senha do usuário
-   */
   async resetPassword(user: User) {
     const confirmMessage = `Tem certeza que deseja resetar a senha do usuário ${user.name}? Uma nova senha temporária será enviada por email.`;
     
@@ -223,19 +197,39 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Deletar usuário
-   */
-  async deleteUser(userId: number) {
-    if (confirm('Tem certeza que deseja excluir este usuário permanentemente? Esta ação não pode ser desfeita.')) {
+  async deleteUser(userId: number, userName: string) {
+    // First, ask for a permanent delete
+    const hardDeleteConfirmation = confirm(`Você deseja EXCLUIR PERMANENTEMENTE o usuário "${userName}"?
+
+⚠️ Esta ação é irreversível e o usuário não poderá ser recuperado.
+
+Clique em "OK" para a exclusão permanente.`);
+
+    if (hardDeleteConfirmation) {
       try {
-        // Change this to call the new endpoint
-        await firstValueFrom(this.userService.deleteUserPermanent(userId));
-        this.toastr.success('Usuário excluído com sucesso!');
-        this.loadUsers(); // Refresh the user list
+        await firstValueFrom(this.userService.hardDeleteUser(userId));
+        this.toastr.success('Usuário excluído permanentemente!');
+        this.loadUsers(); // Refresh list
       } catch (error: any) {
-        console.error('Erro ao excluir usuário:', error);
-        this.toastr.error(error.error?.message || 'Falha ao excluir usuário');
+        this.toastr.error(error.error?.error || 'Erro ao excluir permanentemente o usuário.');
+      }
+      return; // End the function here
+    }
+
+    // If the user cancelled the hard delete, ask for a soft delete
+    const softDeleteConfirmation = confirm(`Você deseja DESATIVAR e ANONIMIZAR o usuário "${userName}"?
+
+Esta ação manterá o histórico do usuário, mas impedirá seu acesso ao sistema.
+
+Clique em "OK" para desativar e anonimizar.`);
+
+    if (softDeleteConfirmation) {
+      try {
+        await firstValueFrom(this.userService.softDeleteUser(userId));
+        this.toastr.info('Usuário desativado e anonimizado.');
+        this.loadUsers();
+      } catch (error: any) {
+        this.toastr.error(error.error?.error || 'Erro ao desativar o usuário.');
       }
     }
   }

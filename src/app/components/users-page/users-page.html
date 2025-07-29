@@ -16,6 +16,18 @@
       Novo Usuário
     </button>
   </div>
+
+  <div class="tabs">
+    <button class="tab" [class.active]="currentFilter === 'active'" (click)="setFilter('active')">
+      Ativos
+    </button>
+    <button class="tab" [class.active]="currentFilter === 'inactive'" (click)="setFilter('inactive')">
+      Inativos
+    </button>
+    <button class="tab" [class.active]="currentFilter === 'all'" (click)="setFilter('all')">
+      Todos
+    </button>
+  </div>
   
   <!-- Loading state -->
   <div *ngIf="loading" class="loading-container">
@@ -98,9 +110,7 @@
                       (click)="resetPassword(user); $event.stopPropagation()">
                 <i class="fas fa-key"></i>
               </button>
-              <button class="action-btn action-btn-danger" 
-                      title="Deletar Usuário"
-                      (click)="deleteUser(user.id); $event.stopPropagation()">
+              <button class="action-btn delete" (click)="deleteUser(user.id, user.name)" title="Excluir Usuário">
                 <i class="fas fa-trash"></i>
               </button>
             </div>

@@ -54,58 +54,38 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Listar todos os usuários (apenas admin)
-   */
-  getUsers(): Observable<UsersResponse> {
-    return this.http.get<UsersResponse>(this.API_URL);
+  getUsers(params?: { is_active?: boolean }): Observable<UsersResponse> {
+    return this.http.get<UsersResponse>(this.API_URL, { params });
   }
 
-  /**
-   * Criar novo usuário (apenas admin)
-   */
   createUser(userData: CreateUserRequest): Observable<CreateUserResponse> {
     return this.http.post<CreateUserResponse>(this.API_URL, userData);
   }
 
-  /**
-   * Atualizar usuário (apenas admin)
-   */
   updateUser(id: number, userData: UpdateUserRequest): Observable<any> {
     return this.http.put(`${this.API_URL}/${id}`, userData);
   }
 
-  /**
-   * Ativar/Desativar usuário (apenas admin)
-   */
   toggleUserStatus(id: number): Observable<any> {
     return this.http.patch(`${this.API_URL}/${id}/toggle-status`, {});
   }
 
-  /**
-   * Deletar usuário (apenas admin)
-   */
-  deleteUserPermanent(userId: number): Observable<any> {
-    return this.http.delete(`${this.API_URL}/${userId}/permanent`);
+  softDeleteUser(id: number): Observable<any> {
+    return this.http.delete(`${this.API_URL}/${id}/soft-delete`);
   }
 
-  /**
-   * Resetar senha do usuário (apenas admin)
-   */
+  hardDeleteUser(id: number): Observable<any> {
+    return this.http.delete(`${this.API_URL}/${id}/hard-delete`);
+  }
+
   resetUserPassword(id: number): Observable<any> {
     return this.http.post(`${this.API_URL}/${id}/reset-password`, {});
   }
-  
-  /**
-   * Listar usuários para atribuição de contrato
-   */
+
   getUsersForAssignment(): Observable<AssignableUser[]> {
     return this.http.get<AssignableUser[]>(`${this.API_URL}/list-for-assignment`);
   }
 
-  /**
-   * Gerar senha temporária
-   */
   generateTempPassword(): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let password = '';
