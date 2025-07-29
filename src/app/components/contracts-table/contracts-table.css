@@ -377,6 +377,7 @@
 .contracts-table td {
     padding: 1rem;
     text-align: left;
+    vertical-align: middle;
 }
 
 .contracts-table th {
@@ -754,6 +755,10 @@
 .stat-change.warning {
   color: var(--warning);
   background-color: rgba(245, 158, 11, 0.1);
+}
+
+.contracts-table .text-center {
+  text-align: center;
 }
 
 @keyframes fa-spin {
