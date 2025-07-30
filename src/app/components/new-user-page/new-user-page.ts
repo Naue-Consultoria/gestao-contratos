@@ -173,10 +173,6 @@ export class NewUserPageComponent implements OnInit {
       } else if (this.userData.password.length < 6) {
         this.errors['password'] = 'Senha deve ter no mínimo 6 caracteres';
       }
-      
-      if (this.userData.password !== this.userData.confirmPassword) {
-        this.errors['confirmPassword'] = 'As senhas não conferem';
-      }
     }
     
     return Object.keys(this.errors).length === 0;

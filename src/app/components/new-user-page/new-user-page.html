@@ -82,11 +82,11 @@
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">
-            Senha <span class="required">*</span>
+            Senha Temporária <span class="required">*</span>
           </label>
           <div class="password-wrapper">
             <input 
-              [type]="showPassword ? 'text' : 'password'" 
+              [type]="showPassword ? 'password' : 'text'" 
               class="form-control" 
               [(ngModel)]="userData.password"
               name="password"
@@ -108,29 +108,6 @@
             <i class="fas fa-dice"></i>
             Gerar senha aleatória
           </button>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">
-            Confirmar Senha <span class="required">*</span>
-          </label>
-          <div class="password-wrapper">
-            <input 
-              [type]="showConfirmPassword ? 'text' : 'password'" 
-              class="form-control" 
-              [(ngModel)]="userData.confirmPassword"
-              name="confirmPassword"
-              placeholder="Digite a senha novamente"
-              [class.error]="errors['confirmPassword']"
-              required>
-            <button 
-              type="button" 
-              class="password-toggle"
-              (click)="showConfirmPassword = !showConfirmPassword">
-              <i [class]="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-            </button>
-          </div>
-          <span class="field-error" *ngIf="errors['confirmPassword']">{{ errors['confirmPassword'] }}</span>
         </div>
       </div>
 
