@@ -464,14 +464,15 @@
 }
 
 .type-badge[data-type="Pontual"] {
-    background: rgba(251, 146, 60, 0.1);
-    color: #fb923c;
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
 }
 
 .type-badge[data-type="Individual"] {
-    background: rgba(168, 85, 247, 0.1);
-    color: #a855f7;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
 }
+
 
 /* Date Info */
 .date-info {
