@@ -1,4 +1,64 @@
 /* src/app/components/proposals-page/proposals-page.css */
+
+/* Novos estilos para os botões de ação */
+.send-btn {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+.send-btn:hover {
+    background-color: #218838 !important;
+}
+
+.generate-link-btn {
+    background-color: #6f42c1 !important;
+    color: white !important;
+}
+
+.generate-link-btn:hover {
+    background-color: #5a32a0 !important;
+}
+
+.link-btn {
+    background-color: #17a2b8 !important;
+    color: white !important;
+}
+
+.link-btn:hover {
+    background-color: #138496 !important;
+}
+
+/* Estilos para os modais customizados */
+.client-data-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.client-data-form label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.client-data-form .form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.send-confirmation {
+    line-height: 1.5;
+}
+
+.send-confirmation p {
+    margin-bottom: 0.75rem;
+}
+
+.send-confirmation strong {
+    color: var(--primary-color);
+}
 .page {
     animation: fadeInUp 0.5s ease;
 }

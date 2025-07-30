@@ -2,7 +2,8 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
-import { ProposalService, Proposal } from '../../services/proposal';
+import { ProposalService, Proposal, PrepareProposalData } from '../../services/proposal';
+import { SendProposalModalComponent } from '../send-proposal-modal/send-proposal-modal';
 import { Subscription, firstValueFrom } from 'rxjs';
 
 interface ProposalDisplay {
@@ -21,7 +22,7 @@ interface ProposalDisplay {
 @Component({
   selector: 'app-proposals-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SendProposalModalComponent],
   templateUrl: './proposals-page.html',
   styleUrls: ['./proposals-page.css']
 })
@@ -34,6 +35,10 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   proposals: ProposalDisplay[] = [];
   isLoading = true;
   error = '';
+  
+  // Send Proposal Modal
+  showSendModal = false;
+  selectedProposalForSending: Proposal | null = null;
 
   ngOnInit() {
     this.loadData();
@@ -191,4 +196,101 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('pt-BR');
   }
+
+  openSendProposalModal(proposal: ProposalDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    
+    // Verificar se a proposta pode ser preparada para envio
+    if (!this.proposalService.canPrepareForSending(proposal.raw)) {
+      this.modalService.showError('Esta proposta não pode ser preparada para envio no momento.');
+      return;
+    }
+
+    this.selectedProposalForSending = proposal.raw;
+    this.showSendModal = true;
+  }
+
+  onSendModalClose() {
+    this.showSendModal = false;
+    this.selectedProposalForSending = null;
+  }
+
+  onProposalSent(proposal: Proposal) {
+    this.modalService.showSuccess('Proposta enviada com sucesso!');
+    this.showSendModal = false;
+    this.selectedProposalForSending = null;
+    this.loadData(); // Recarregar a lista de propostas
+  }
+
+  async generatePublicLink(proposal: ProposalDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    
+    try {
+      // Preparar dados mínimos do cliente para gerar token
+      const minimalClientData = {
+        client_name: 'Cliente',
+        client_email: 'cliente@exemplo.com'
+      };
+      
+      const response = await firstValueFrom(
+        this.proposalService.prepareProposalForSending(proposal.id, minimalClientData)
+      );
+      
+      if (response && response.success) {
+        const publicUrl = this.proposalService.getPublicProposalUrl(response.data);
+        
+        if (publicUrl) {
+          // Copiar automaticamente para a área de transferência
+          try {
+            await navigator.clipboard.writeText(publicUrl);
+            this.modalService.showSuccess(`Link público gerado e copiado para a área de transferência!\n\n${publicUrl}`);
+          } catch (error) {
+            // Fallback para navegadores antigos
+            const textArea = document.createElement('textarea');
+            textArea.value = publicUrl;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            this.modalService.showSuccess(`Link público gerado e copiado!\n\n${publicUrl}`);
+          }
+          
+          // Recarregar a lista para mostrar o novo status
+          this.loadData();
+        } else {
+          this.modalService.showError('Erro ao gerar link público.');
+        }
+      } else {
+        this.modalService.showError(response?.message || 'Erro ao gerar link público.');
+      }
+    } catch (error: any) {
+      console.error('❌ Error generating public link:', error);
+      this.modalService.showError('Não foi possível gerar o link público.');
+    }
+  }
+
+  async copyPublicLink(proposal: ProposalDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    
+    const publicUrl = this.proposalService.getPublicProposalUrl(proposal.raw);
+    if (!publicUrl) {
+      this.modalService.showError('Esta proposta não possui um link público.');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      this.modalService.showSuccess('Link copiado para a área de transferência!');
+    } catch (error) {
+      // Fallback para navegadores antigos
+      const textArea = document.createElement('textarea');
+      textArea.value = publicUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      this.modalService.showSuccess('Link copiado para a área de transferência!');
+    }
+  }
+
 }
