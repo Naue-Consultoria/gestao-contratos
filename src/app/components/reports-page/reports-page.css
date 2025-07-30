@@ -25,7 +25,7 @@
   }
   
   .breadcrumb-separator {
-    color: var(--text-gray);
+    color: var(--border-gray);
   }
   
   /* Filter Container */
