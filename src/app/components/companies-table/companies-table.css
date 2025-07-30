@@ -9,6 +9,28 @@
     margin-bottom: 2rem;
 }
 
+.action-btn {
+    background: none;
+    border: 1px solid var(--border-gray);
+    color: var(--text-gray);
+    padding: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 8px;
+}
+
+:host-context(body.dark-mode) .action-btn {
+    border-color: #444;
+    color: #ccc;
+}
+
+.action-btn:hover {
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+    background-color: rgba(14, 155, 113, 0.05);
+}
+
 /* Stat Cards */
 .stat-card {
     background-color: var(--white);
