@@ -379,6 +379,7 @@ tr:last-child td {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
+    margin-left: 8px;
 }
 
 :host-context(body.dark-mode) .action-btn {
@@ -391,6 +392,13 @@ tr:last-child td {
     color: var(--primary-green);
     background-color: rgba(14, 155, 113, 0.05);
 }
+
+.action-btn.action-btn-danger:hover {
+  background-color: #fee2e2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
 
 /* Loading State */
 .loading-container {

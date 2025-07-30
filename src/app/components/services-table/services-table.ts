@@ -47,7 +47,7 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = '';
     try {
-      const servicesResponse = await firstValueFrom(this.serviceService.getServices());
+      const servicesResponse = await firstValueFrom(this.serviceService.getServices({ is_active: true }));
       this.services = servicesResponse.services.map(apiService => this.mapApiServiceToTableService(apiService));
 
     } catch (error) {
@@ -90,6 +90,21 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
       } catch (error) {
         console.error(`❌ Error toggling service status:`, error);
         this.modalService.showError(`Não foi possível ${action} o serviço.`);
+      }
+    }
+  }
+
+  async deleteService(service: ServiceDisplay, event: MouseEvent) {
+    event.stopPropagation();
+
+    if (confirm(`Tem certeza que deseja excluir o serviço "${service.name}"?`)) {
+      try {
+        await firstValueFrom(this.serviceService.deleteService(service.id));
+        this.modalService.showSuccess('Serviço excluído com sucesso!');
+        this.loadData();
+      } catch (error) {
+        console.error(`❌ Error deleting service:`, error);
+        this.modalService.showError('Não foi possível excluir o serviço.');
       }
     }
   }
