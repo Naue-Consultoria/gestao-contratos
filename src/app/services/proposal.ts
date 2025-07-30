@@ -31,6 +31,16 @@ export interface Proposal {
   created_at: string;
   updated_at: string;
   sent_at?: string;
+  client_name?: string;
+  client_email?: string;
+  client_phone?: string;
+  client_document?: string;
+  signature_data?: string;
+  signed_at?: string;
+  signed_ip?: string;
+  accepted_value?: number;
+  client_observations?: string;
+  public_token?: string;
   company?: {
     id: number;
     name: string;
@@ -77,6 +87,19 @@ export interface ProposalStats {
   acceptedValue: number;
   expired: number;
   conversionRate: string;
+}
+
+export interface PrepareProposalData {
+  client_name: string;
+  client_email: string;
+  client_phone?: string;
+  client_document?: string;
+}
+
+export interface SendProposalData {
+  email: string;
+  subject?: string;
+  message?: string;
 }
 
 @Injectable({
@@ -165,16 +188,7 @@ export class ProposalService {
     return this.http.get<any>(`${this.apiUrl}/stats`);
   }
 
-  /**
-   * Enviar proposta por email
-   */
-  sendProposal(id: number, emailData: {
-    email: string;
-    subject?: string;
-    message?: string;
-  }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${id}/send`, emailData);
-  }
+  
 
   /**
    * Gerar PDF da proposta
@@ -333,4 +347,67 @@ export class ProposalService {
     const diffTime = validDate.getTime() - today.getTime();
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
+
+  /**
+   * Preparar proposta para envio (adicionar dados do cliente)
+   */
+  prepareProposalForSending(proposalId: number, clientData: PrepareProposalData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${proposalId}/prepare-sending`, clientData);
+  }
+
+  /**
+   * Enviar proposta por email
+   */
+  sendProposal(proposalId: number, emailData: SendProposalData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${proposalId}/send`, emailData);
+  }
+
+  /**
+   * Regenerar token público da proposta
+   */
+  regeneratePublicToken(proposalId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${proposalId}/regenerate-token`, {});
+  }
+
+  /**
+   * Verificar se proposta pode ser preparada para envio
+   */
+  canPrepareForSending(proposal: Proposal): boolean {
+    return proposal.status === 'draft' && proposal.services.length > 0;
+  }
+
+  /**
+   * Verificar se proposta já foi enviada
+   */
+  isProposalSent(proposal: Proposal): boolean {
+    return ['sent', 'accepted', 'rejected'].includes(proposal.status);
+  }
+
+  /**
+   * Obter URL pública da proposta
+   */
+  getPublicProposalUrl(proposal: Proposal): string | null {
+    if (!proposal.public_token) return null;
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/public/proposal/${proposal.public_token}`;
+  }
+
+  /**
+   * Buscar propostas aceitas (para conversão em contratos)
+   */
+  getAcceptedProposals(filters?: any): Observable<any> {
+    let params = new HttpParams();
+    params = params.set('status', 'accepted');
+    
+    if (filters) {
+      Object.keys(filters).forEach(key => {
+        if (filters[key] !== undefined && filters[key] !== null) {
+          params = params.set(key, filters[key].toString());
+        }
+      });
+    }
+
+    return this.http.get(`${this.apiUrl}`, { params });
+  }
+
 }

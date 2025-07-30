@@ -112,6 +112,30 @@
                   <i class="fas fa-copy"></i>
                 </button>
                 <button
+                  *ngIf="proposal.raw.status === 'draft'"
+                  class="action-btn generate-link-btn"
+                  (click)="generatePublicLink(proposal, $event)"
+                  title="Gerar Link Público"
+                >
+                  <i class="fas fa-external-link-alt"></i>
+                </button>
+                <button
+                  *ngIf="proposal.raw.status === 'draft'"
+                  class="action-btn send-btn"
+                  (click)="openSendProposalModal(proposal, $event)"
+                  title="Enviar Proposta"
+                >
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+                <button
+                  *ngIf="proposal.raw.status === 'sent' || proposal.raw.status === 'accepted' || proposal.raw.status === 'rejected'"
+                  class="action-btn link-btn"
+                  (click)="copyPublicLink(proposal, $event)"
+                  title="Copiar Link Público"
+                >
+                  <i class="fas fa-link"></i>
+                </button>
+                <button
                   class="action-btn"
                   (click)="generatePDF(proposal, $event)"
                   title="Gerar PDF"
@@ -133,3 +157,11 @@
     </div>
   </div>
 </div>
+
+<!-- Send Proposal Modal -->
+<app-send-proposal-modal
+  [proposal]="selectedProposalForSending"
+  [isVisible]="showSendModal"
+  (onClose)="onSendModalClose()"
+  (onProposalSent)="onProposalSent($event)">
+</app-send-proposal-modal>

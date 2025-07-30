@@ -1,9 +1,11 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { Router, ActivatedRoute } from '@angular/router';
 
 import { ProposalService, CreateProposalData, Proposal } from '../../services/proposal';
 import { CompanyService, ApiCompany, CreateCompanyRequest } from '../../services/company';
@@ -12,7 +14,7 @@ import { ServiceService, ApiService } from '../../services/service';
 @Component({
   selector: 'app-proposal-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, CurrencyMaskDirective],
   templateUrl: './proposal-form.html',
   styleUrls: ['./proposal-form.css'],
   animations: [
@@ -49,7 +51,9 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     private proposalService: ProposalService,
     private companyService: CompanyService,
     private serviceService: ServiceService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.initializeForms();
   }
@@ -57,7 +61,10 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadInitialData();
     
-    if (this.proposalId) {
+    // Verificar se há ID na rota (para edit/view mode)
+    const routeId = this.route.snapshot.paramMap.get('id');
+    if (routeId || this.proposalId) {
+      this.proposalId = this.proposalId || parseInt(routeId!, 10);
       this.isEditMode = true;
       this.loadProposal();
     }
@@ -141,7 +148,12 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     // Limpar serviços e adicionar os da proposta
     this.servicesArray.clear();
     proposal.services.forEach(service => {
-      this.addService(service);
+      this.addService({
+        service_id: service.service_id,
+        quantity: service.quantity,
+        // Converter valor personalizado de centavos para reais
+        custom_value: service.custom_value ? service.custom_value / 100 : null
+      });
     });
   }
 
@@ -153,7 +165,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     const serviceForm = this.fb.group({
       service_id: [serviceData?.service_id || '', Validators.required],
       quantity: [serviceData?.quantity || 1, [Validators.required, Validators.min(1)]],
-      custom_value: [serviceData?.custom_value || null]
+      custom_value: [serviceData?.custom_value || null, [Validators.min(0)]]
     });
 
     this.servicesArray.push(serviceForm);
@@ -173,9 +185,13 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     const serviceForm = this.servicesArray.at(index);
     const serviceId = serviceForm.get('service_id')?.value;
     const customValue = serviceForm.get('custom_value')?.value;
+
+    // Se tem valor personalizado, usa ele (já está em reais vindos da diretiva)
+    if (customValue !== null && customValue !== undefined && customValue > 0) {
+        return customValue * 100; // Converter para centavos para exibição
+    }
     
-    if (customValue) return customValue;
-    
+    // Caso contrário, usa o valor do serviço (já está em centavos)
     const service = this.getServiceById(serviceId);
     return service?.value || 0;
   }
@@ -274,9 +290,22 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
     this.isSubmitting = true;
     
+    // Mostrar feedback de salvamento no banco
+    const loadingToast = this.toastr.info('Salvando proposta no banco de dados...', 'Processando', {
+      disableTimeOut: true,
+      closeButton: false
+    });
+    
     const formData: CreateProposalData = {
       ...this.proposalForm.value,
-      services: this.servicesArray.value.filter((s: any) => s.service_id)
+      services: this.servicesArray.value
+        .filter((s: any) => s.service_id)
+        .map((s: any) => ({
+          service_id: s.service_id,
+          quantity: s.quantity,
+          // Se tem valor personalizado, converte para centavos
+          custom_value: s.custom_value ? Math.round(s.custom_value * 100) : undefined
+        }))
     };
 
     const operation = this.isEditMode 
@@ -285,19 +314,40 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
     operation.pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
+        // Limpar toast de loading
+        this.toastr.clear(loadingToast.toastId);
+        
         if (response.success) {
-          this.toastr.success(
-            this.isEditMode ? 'Proposta atualizada com sucesso' : 'Proposta criada com sucesso'
-          );
+          const successMessage = this.isEditMode ? 'Proposta atualizada com sucesso' : 'Proposta criada com sucesso';
+          
+          // Sempre mostrar sucesso primeiro
+          this.toastr.success(successMessage);
+          
+          // Se não está editando, redirecionar para a lista
+          if (!this.isEditMode) {
+            // Redirecionar para a lista de propostas após um delay
+            setTimeout(() => {
+              if (!this.isModal) {
+                this.router.navigate(['/home/proposals']);
+              }
+            }, 1500);
+          }
+          
+          // Emitir evento de salvamento
           this.onSave.emit(response.data);
           
-          if (!this.isModal) {
+          // Reset form apenas se é modal e está editando
+          if (!this.isModal && this.isEditMode) {
             this.resetForm();
           }
+        } else {
+          this.toastr.error(response.message || 'Erro ao salvar proposta');
         }
         this.isSubmitting = false;
       },
       error: (error) => {
+        // Limpar toast de loading
+        this.toastr.clear(loadingToast.toastId);
         console.error('Erro ao salvar proposta:', error);
         this.toastr.error('Erro ao salvar proposta');
         this.isSubmitting = false;
@@ -330,7 +380,12 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   cancel(): void {
-    this.onCancel.emit();
+    if (this.isModal) {
+      this.onCancel.emit();
+    } else {
+      // Se não é modal, redirecionar para a lista de propostas
+      this.router.navigate(['/home/proposals']);
+    }
   }
 
   isFieldInvalid(fieldName: string): boolean {
@@ -343,4 +398,5 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     const field = serviceForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
+
 }
