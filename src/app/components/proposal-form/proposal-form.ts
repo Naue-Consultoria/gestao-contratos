@@ -82,7 +82,12 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       description: [''],
       services: this.fb.array([]),
       valid_until: [''],
-      observations: ['']
+      observations: [''],
+      // Campos do cliente (opcionais - só validam se não estiverem vazios)
+      client_name: [''],
+      client_email: [''],
+      client_phone: [''],
+      client_document: ['']
     });
 
     this.newCompanyForm = this.fb.group({
@@ -297,16 +302,26 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     });
     
     const formData: CreateProposalData = {
-      ...this.proposalForm.value,
+      company_id: parseInt(this.proposalForm.value.company_id) || 0,
+      title: this.proposalForm.value.title?.trim() || '',
+      description: this.proposalForm.value.description?.trim() || '',
+      valid_until: this.proposalForm.value.valid_until || null,
+      observations: this.proposalForm.value.observations?.trim() || '',
+      // Converter strings vazias para null para campos opcionais
+      client_name: this.proposalForm.value.client_name?.trim() || null,
+      client_email: this.proposalForm.value.client_email?.trim() || null,
+      client_phone: this.proposalForm.value.client_phone?.trim() || null,
+      client_document: this.proposalForm.value.client_document?.trim() || null,
       services: this.servicesArray.value
         .filter((s: any) => s.service_id)
         .map((s: any) => ({
-          service_id: s.service_id,
-          quantity: s.quantity,
-          // Se tem valor personalizado, converte para centavos
-          custom_value: s.custom_value ? Math.round(s.custom_value * 100) : undefined
+          service_id: parseInt(s.service_id) || 0,
+          quantity: parseInt(s.quantity) || 1,
+          custom_value: s.custom_value ? Math.round(parseFloat(s.custom_value) * 100) : null
         }))
     };
+
+    console.log('📤 Dados enviados para backend:', JSON.stringify(formData, null, 2));
 
     const operation = this.isEditMode 
       ? this.proposalService.updateProposal(this.proposalId!, formData)

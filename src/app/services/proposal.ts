@@ -64,6 +64,11 @@ export interface CreateProposalData {
   }[];
   valid_until?: string;
   observations?: string;
+  // Dados do cliente (opcionais)
+  client_name?: string;
+  client_email?: string;
+  client_phone?: string;
+  client_document?: string;
 }
 
 export interface ProposalFilters {

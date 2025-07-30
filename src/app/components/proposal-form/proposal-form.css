@@ -8,6 +8,14 @@
   background-color: #fafbfc; /* Cor de fundo padrão do sistema */
 }
 
+/* Section Description */
+.section-description {
+  font-size: 14px;
+  color: #6c737f;
+  margin-bottom: 24px;
+  font-style: italic;
+}
+
 
 
 /* Page Header */
