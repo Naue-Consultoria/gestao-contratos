@@ -1,6 +1,3 @@
-/* src/app/components/users-page/users-page.component.css */
-
-/* Importar variáveis do projeto */
 @import "../../../styles/variables.css";
 
 /* Host styles */
@@ -57,6 +54,37 @@
   color: #2d3748;
 }
 
+/* Tabs for filtering */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+  padding: 0 2rem; /* Align tabs with table content */
+}
+
+.tab {
+  padding: 0.75rem 0.25rem; /* Adjust padding for a cleaner look */
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #718096;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: #2d3748;
+}
+
+.tab.active {
+  color: var(--naue-primary);
+  border-bottom-color: var(--naue-primary);
+}
+
+
 /* Loading & Error States */
 .loading-container,
 .error-container {
@@ -76,7 +104,7 @@
   width: 24px;
   height: 24px;
   border: 3px solid #e2e8f0;
-  border-top-color: #48bb78;
+  border-top-color: var(--naue-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -107,12 +135,11 @@
 
 .users-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: collapse; /* Removes space between cells */
 }
 
 .users-table thead {
   background-color: #f7fafc;
-  border-bottom: 2px solid #e2e8f0;
 }
 
 .users-table th {
@@ -123,6 +150,7 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .users-table td {
@@ -132,7 +160,10 @@
 
 .users-table tbody tr {
   transition: background-color 0.2s;
-  cursor: pointer;
+}
+
+.users-table tbody tr:last-child td {
+  border-bottom: none; /* Cleaner look for the last item */
 }
 
 .users-table tbody tr:hover {
@@ -268,6 +299,12 @@
   color: #4a5568;
 }
 
+.action-btn.action-btn-danger:hover {
+  background-color: #fee2e2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
 .action-btn i {
   font-size: 14px;
 }
@@ -297,34 +334,6 @@
 .empty-state p {
   color: #718096;
   font-size: 0.875rem;
-}
-
-.tabs {
-  display: flex;
-  gap: 0.5rem;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 1.5rem;
-}
-
-.tab {
-  padding: 0.75rem 1.25rem;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #718096;
-  transition: all 0.2s;
-}
-
-.tab:hover {
-  color: #2d3748;
-}
-
-.tab.active {
-  color: var(--primary-green);
-  border-bottom-color: var(--primary-green);
 }
 
 /* Responsive */
