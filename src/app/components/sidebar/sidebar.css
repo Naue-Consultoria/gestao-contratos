@@ -82,6 +82,37 @@
     padding-right: 3rem; /* Espaço para o botão */
 }
 
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    color: var(--text-gray);
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.nav-item:focus-visible {
+  outline: none; /* Remove the default browser outline */
+  box-shadow: 0 0 0 3px rgba(10, 128, 96, 0.5); /* Add a custom 'glow' effect */
+}
+
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--primary-green);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
 /* Alternativa: Botão integrado à linha da seção */
 .sidebar-toggle-inline {
     position: absolute;
