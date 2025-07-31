@@ -426,11 +426,6 @@
     max-height: 300px;
 }
 
-/* Insights Section */
-.insights-section {
-    margin-top: 3rem;
-}
-
 .section-title {
     font-size: 1.25rem;
     font-weight: 600;
@@ -449,87 +444,8 @@
     color: var(--primary-green);
 }
 
-.insights-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-.insight-card {
-    background-color: var(--white);
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border-gray);
-    border-left: 4px solid;
-    display: flex;
-    gap: 1rem;
-    transition: all 0.3s ease;
-}
-
-:host-context(body.dark-mode) .insight-card {
-    background-color: var(--dark-card);
-    border-color: var(--dark-border);
-}
-
-.insight-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.insight-card.positive {
-    border-left-color: #22c55e;
-}
-
-.insight-card.warning {
-    border-left-color: #22c55e;
-}
-
-.insight-card.info {
-    border-left-color: #22c55e;
-}
-
-.insight-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.insight-card.positive .insight-icon {
-    background-color: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-}
-
-.insight-card.warning .insight-icon {
-    background-color: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-}
-
-.insight-card.info .insight-icon {
-    background-color: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-}
-
-.insight-content h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-dark);
-    margin: 0 0 0.5rem 0;
-}
-
 :host-context(body.dark-mode) .insight-content h4 {
     color: var(--dark-text);
-}
-
-.insight-content p {
-    font-size: 0.875rem;
-    color: var(--text-gray);
-    margin: 0;
-    line-height: 1.5;
 }
 
 /* Responsive */
@@ -559,9 +475,5 @@
     .period-buttons {
         width: 100%;
         justify-content: space-between;
-    }
-    
-    .insights-grid {
-        grid-template-columns: 1fr;
     }
 }
