@@ -78,16 +78,18 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   private initializeForms(): void {
     this.proposalForm = this.fb.group({
       company_id: ['', Validators.required],
-      title: ['', [Validators.required, Validators.minLength(3)]],
-      description: [''],
-      services: this.fb.array([]),
-      valid_until: [''],
-      observations: [''],
-      // Campos do cliente (opcionais - só validam se não estiverem vazios)
-      client_name: [''],
-      client_email: [''],
+      client_name: ['', [Validators.required, Validators.minLength(3)]],
+      client_document: ['', [Validators.required, Validators.minLength(5)]],
+      client_email: ['', [Validators.required, Validators.email]],
       client_phone: [''],
-      client_document: ['']
+      client_street: ['', Validators.required],
+      client_number: ['', Validators.required],
+      client_complement: [''],
+      client_neighborhood: ['', Validators.required],
+      client_city: ['', Validators.required],
+      client_zipcode: ['', [Validators.required, Validators.minLength(8)]],
+      end_date: [''],
+      services: this.fb.array([]),
     });
 
     this.newCompanyForm = this.fb.group({
@@ -105,8 +107,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     
     forkJoin({
-      companies: this.companyService.getCompanies({ is_active: true }),
-      services: this.serviceService.getServices({ is_active: true })
+      companies: this.companyService.getCompanies({}),
+      services: this.serviceService.getServices({})
     }).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
@@ -144,10 +146,19 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   private populateForm(proposal: Proposal): void {
     this.proposalForm.patchValue({
       company_id: proposal.company_id,
-      title: proposal.title,
-      description: proposal.description,
-      valid_until: proposal.valid_until ? proposal.valid_until.split('T')[0] : '',
-      observations: proposal.observations
+      proposal_type: proposal.proposal_type,
+      client_name: proposal.client_name,
+      client_document: proposal.client_document,
+      client_email: proposal.client_email,
+      client_phone: proposal.client_phone,
+      client_street: proposal.client_street,
+      client_number: proposal.client_number,
+      client_complement: proposal.client_complement,
+      client_neighborhood: proposal.client_neighborhood,
+      client_city: proposal.client_city,
+      client_zipcode: proposal.client_zipcode,
+      end_date: proposal.end_date ? proposal.end_date.split('T')[0] : '',
+      validity_days: proposal.validity_days,
     });
 
     // Limpar serviços e adicionar os da proposta
@@ -156,8 +167,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       this.addService({
         service_id: service.service_id,
         quantity: service.quantity,
-        // Converter valor personalizado de centavos para reais
-        custom_value: service.custom_value ? service.custom_value / 100 : null
+        unit_value: service.unit_value / 100, // Convert cents to reais for display
+        total_value: service.total_value / 100 // Convert cents to reais for display
       });
     });
   }
@@ -170,7 +181,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     const serviceForm = this.fb.group({
       service_id: [serviceData?.service_id || '', Validators.required],
       quantity: [serviceData?.quantity || 1, [Validators.required, Validators.min(1)]],
-      custom_value: [serviceData?.custom_value || null, [Validators.min(0)]]
+      unit_value: [serviceData?.unit_value || null, [Validators.min(0)]],
+      total_value: [serviceData?.total_value || null, [Validators.min(0)]]
     });
 
     this.servicesArray.push(serviceForm);
@@ -188,15 +200,15 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
   getServiceValue(index: number): number {
     const serviceForm = this.servicesArray.at(index);
-    const serviceId = serviceForm.get('service_id')?.value;
-    const customValue = serviceForm.get('custom_value')?.value;
-
-    // Se tem valor personalizado, usa ele (já está em reais vindos da diretiva)
-    if (customValue !== null && customValue !== undefined && customValue > 0) {
-        return customValue * 100; // Converter para centavos para exibição
+    const unitValue = serviceForm.get('unit_value')?.value;
+    
+    // If unit_value is provided, use it (it's already in reais from the directive)
+    if (unitValue !== null && unitValue !== undefined && unitValue > 0) {
+        return unitValue * 100; // Convert to cents for internal calculation
     }
     
-    // Caso contrário, usa o valor do serviço (já está em centavos)
+    // Otherwise, use the default service value (which is already in cents)
+    const serviceId = serviceForm.get('service_id')?.value;
     const service = this.getServiceById(serviceId);
     return service?.value || 0;
   }
@@ -204,8 +216,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   getServiceTotal(index: number): number {
     const serviceForm = this.servicesArray.at(index);
     const quantity = serviceForm.get('quantity')?.value || 1;
-    const value = this.getServiceValue(index);
-    return value * quantity;
+    const unitValue = this.getServiceValue(index); // This returns value in cents
+    return unitValue * quantity;
   }
 
   getTotalValue(): number {
@@ -228,7 +240,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       const service = this.getServiceById(serviceId);
       if (service) {
         // Limpar valor personalizado quando mudar o serviço
-        serviceForm.get('custom_value')?.setValue(null);
+        serviceForm.get('unit_value')?.setValue(null);
       }
     }
   }
@@ -303,21 +315,26 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     
     const formData: CreateProposalData = {
       company_id: parseInt(this.proposalForm.value.company_id) || 0,
-      title: this.proposalForm.value.title?.trim() || '',
-      description: this.proposalForm.value.description?.trim() || '',
-      valid_until: this.proposalForm.value.valid_until || null,
-      observations: this.proposalForm.value.observations?.trim() || '',
-      // Converter strings vazias para null para campos opcionais
-      client_name: this.proposalForm.value.client_name?.trim() || null,
-      client_email: this.proposalForm.value.client_email?.trim() || null,
+      proposal_type: 'prestacao_servicos', // Valor padrão já que removemos a seleção
+      client_name: this.proposalForm.value.client_name?.trim() || '',
+      client_document: this.proposalForm.value.client_document?.trim() || '',
+      client_email: this.proposalForm.value.client_email?.trim() || '',
       client_phone: this.proposalForm.value.client_phone?.trim() || null,
-      client_document: this.proposalForm.value.client_document?.trim() || null,
+      client_street: this.proposalForm.value.client_street?.trim() || '',
+      client_number: this.proposalForm.value.client_number?.trim() || '',
+      client_complement: this.proposalForm.value.client_complement?.trim() || null,
+      client_neighborhood: this.proposalForm.value.client_neighborhood?.trim() || '',
+      client_city: this.proposalForm.value.client_city?.trim() || '',
+      client_zipcode: this.proposalForm.value.client_zipcode?.trim() || '',
+      end_date: this.proposalForm.value.end_date || null,
+      validity_days: 30, // Valor padrão já que removemos o campo
       services: this.servicesArray.value
         .filter((s: any) => s.service_id)
         .map((s: any) => ({
           service_id: parseInt(s.service_id) || 0,
           quantity: parseInt(s.quantity) || 1,
-          custom_value: s.custom_value ? Math.round(parseFloat(s.custom_value) * 100) : null
+          unit_value: Math.round(parseFloat(s.unit_value) * 100), // Convert to cents
+          total_value: Math.round(parseFloat(s.unit_value) * 100 * parseInt(s.quantity) || 1) // Calculate total in cents
         }))
     };
 

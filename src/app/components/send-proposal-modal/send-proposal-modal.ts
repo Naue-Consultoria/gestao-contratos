@@ -65,8 +65,17 @@ export class SendProposalModalComponent implements OnInit {
 
     this.emailForm.patchValue({
       email: this.proposal.client_email,
-      subject: `Proposta Comercial - ${this.proposal.title}`,
-      message: `Olá ${this.proposal.client_name},\n\nSegue em anexo sua proposta comercial personalizada.\n\nVocê pode visualizar, selecionar os serviços desejados e assinar digitalmente através do link abaixo.\n\nQualquer dúvida, estamos à disposição!\n\nAtenciosamente,\nEquipe NAUE Consultoria`
+      subject: `Proposta Comercial - ${this.proposal.proposal_number}`,
+      message: `Olá ${this.proposal.client_name},
+
+Segue em anexo sua proposta comercial personalizada.
+
+Você pode visualizar, selecionar os serviços desejados e assinar digitalmente através do link abaixo.
+
+Qualquer dúvida, estamos à disposição!
+
+Atenciosamente,
+Equipe NAUE Consultoria`
     });
   }
 
@@ -82,7 +91,7 @@ export class SendProposalModalComponent implements OnInit {
     this.isLoading = true;
     const clientData: PrepareProposalData = this.clientForm.value;
 
-    this.proposalService.prepareProposalForSending(this.proposal.id, clientData)
+    this.proposalService.prepareProposalForSending(this.proposal.id)
       .subscribe({
         next: (response) => {
           if (response.success) {
@@ -109,8 +118,19 @@ export class SendProposalModalComponent implements OnInit {
 
     this.emailForm.patchValue({
       email: this.proposal.client_email,
-      subject: `Proposta Comercial - ${this.proposal.title}`,
-      message: `Olá ${this.proposal.client_name},\n\nSegue sua proposta comercial personalizada.\n\nVocê pode visualizar, selecionar os serviços desejados e assinar digitalmente através do link abaixo:\n\n${this.publicUrl}\n\nQualquer dúvida, estamos à disposição!\n\nAtenciosamente,\nEquipe NAUE Consultoria`
+      subject: `Proposta Comercial - ${this.proposal.proposal_number}`,
+      message: `Olá ${this.proposal.client_name},
+
+Segue sua proposta comercial personalizada.
+
+Você pode visualizar, selecionar os serviços desejados e assinar digitalmente através do link abaixo:
+
+${this.publicUrl}
+
+Qualquer dúvida, estamos à disposição!
+
+Atenciosamente,
+Equipe NAUE Consultoria`
     });
   }
 
@@ -164,7 +184,7 @@ export class SendProposalModalComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (response.success) {
-            this.proposal!.public_token = response.data.public_token;
+            this.proposal!.unique_link = response.data.unique_link;
             this.publicUrl = this.proposal ? this.proposalService.getPublicProposalUrl(this.proposal) || '' : '';
             this.populateEmailForm();
             this.toastr.success('Novo link gerado com sucesso');

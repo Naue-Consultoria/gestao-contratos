@@ -4,43 +4,47 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface ProposalServiceItem {
-  id: number;
-  service_id: number;
+  id?: number;
+  proposal_id?: number;
+  service_id: number; // Added service_id
+  service_name?: string;
+  service_description?: string;
   quantity: number;
-  custom_value?: number;
-  service?: {
-    id: number;
-    name: string;
-    value: number;
-    duration: number;
-    category: string;
-    description?: string;
-  };
+  unit_value: number;
+  total_value: number;
+  created_at?: string;
 }
 
 export interface Proposal {
   id: number;
+  proposal_number: string;
   company_id: number;
-  title: string;
-  description?: string;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
+  proposal_type: 'consultoria_corporativa' | 'mentoria' | 'prestacao_servicos' | 'r_s';
+  client_name: string;
+  client_document: string;
+  client_email: string;
+  client_phone?: string;
+  client_street: string;
+  client_number: string;
+  client_complement?: string;
+  client_neighborhood: string;
+  client_city: string;
+  client_zipcode: string;
+  end_date?: string; // Corresponds to 'end_date' in DB, previously 'valid_until'
+  validity_days?: number;
   total_value: number;
-  valid_until?: string;
-  observations?: string;
-  is_active: boolean;
+  unique_link?: string; // Corresponds to 'unique_link' in DB, previously 'public_token'
+  link_expires_at?: string;
+  signed_at?: string;
+  signature_data?: string;
+  client_ip?: string;
+  status: 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted';
+  converted_to_contract_id?: number;
+  converted_at?: string;
   created_at: string;
   updated_at: string;
-  sent_at?: string;
-  client_name?: string;
-  client_email?: string;
-  client_phone?: string;
-  client_document?: string;
-  signature_data?: string;
-  signed_at?: string;
-  signed_ip?: string;
-  accepted_value?: number;
-  client_observations?: string;
-  public_token?: string;
+  created_by: number;
+  updated_by?: number;
   company?: {
     id: number;
     name: string;
@@ -55,24 +59,28 @@ export interface Proposal {
 
 export interface CreateProposalData {
   company_id: number;
-  title: string;
-  description?: string;
+  proposal_type: 'consultoria_corporativa' | 'mentoria' | 'prestacao_servicos' | 'r_s';
+  client_name: string;
+  client_document: string;
+  client_email: string;
+  client_phone?: string;
+  client_street: string;
+  client_number: string;
+  client_complement?: string;
+  client_neighborhood: string;
+  client_city: string;
+  client_zipcode: string;
+  end_date?: string;
+  validity_days?: number;
   services: {
     service_id: number;
     quantity: number;
-    custom_value?: number;
+    unit_value: number; // Add unit_value as per proposal_services table
+    total_value: number; // Add total_value as per proposal_services table
   }[];
-  valid_until?: string;
-  observations?: string;
-  // Dados do cliente (opcionais)
-  client_name?: string;
-  client_email?: string;
-  client_phone?: string;
-  client_document?: string;
 }
 
 export interface ProposalFilters {
-  is_active?: boolean;
   status?: string;
   company_id?: number;
   search?: string;
@@ -95,10 +103,7 @@ export interface ProposalStats {
 }
 
 export interface PrepareProposalData {
-  client_name: string;
-  client_email: string;
-  client_phone?: string;
-  client_document?: string;
+  // No longer needed as client data is part of Proposal itself
 }
 
 export interface SendProposalData {
@@ -124,9 +129,6 @@ export class ProposalService {
     let params = new HttpParams();
     
     if (filters) {
-      if (filters.is_active !== undefined) {
-        params = params.set('is_active', filters.is_active.toString());
-      }
       if (filters.status) {
         params = params.set('status', filters.status);
       }
@@ -244,9 +246,7 @@ export class ProposalService {
    */
   calculateServicesTotal(services: ProposalServiceItem[]): number {
     return services.reduce((total, service) => {
-      const value = service.custom_value || service.service?.value || 0;
-      const quantity = service.quantity || 1;
-      return total + (value * quantity);
+      return total + (service.total_value || 0);
     }, 0);
   }
 
@@ -260,8 +260,40 @@ export class ProposalService {
       errors.push('Empresa é obrigatória');
     }
 
-    if (!proposalData.title || proposalData.title.trim().length < 3) {
-      errors.push('Título deve ter pelo menos 3 caracteres');
+    if (!proposalData.client_name || proposalData.client_name.trim().length < 3) {
+      errors.push('Nome do cliente deve ter pelo menos 3 caracteres');
+    }
+
+    if (!proposalData.client_document || proposalData.client_document.trim().length < 5) {
+      errors.push('Documento do cliente é obrigatório e deve ter pelo menos 5 caracteres');
+    }
+
+    if (!proposalData.client_email || !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(proposalData.client_email)) {
+      errors.push('Email do cliente inválido');
+    }
+
+    if (!proposalData.client_street || proposalData.client_street.trim().length < 3) {
+      errors.push('Rua do cliente é obrigatória');
+    }
+
+    if (!proposalData.client_number || proposalData.client_number.trim().length < 1) {
+      errors.push('Número do cliente é obrigatório');
+    }
+
+    if (!proposalData.client_neighborhood || proposalData.client_neighborhood.trim().length < 3) {
+      errors.push('Bairro do cliente é obrigatório');
+    }
+
+    if (!proposalData.client_city || proposalData.client_city.trim().length < 3) {
+      errors.push('Cidade do cliente é obrigatória');
+    }
+
+    if (!proposalData.client_zipcode || proposalData.client_zipcode.trim().length < 8) {
+      errors.push('CEP do cliente é obrigatório e deve ter pelo menos 8 caracteres');
+    }
+
+    if (!proposalData.proposal_type) {
+      errors.push('Tipo de proposta é obrigatório');
     }
 
     if (!proposalData.services || proposalData.services.length === 0) {
@@ -276,14 +308,17 @@ export class ProposalService {
         if (service.quantity && service.quantity < 1) {
           errors.push(`Serviço ${index + 1}: Quantidade deve ser maior que zero`);
         }
-        if (service.custom_value && service.custom_value < 0) {
-          errors.push(`Serviço ${index + 1}: Valor personalizado não pode ser negativo`);
+        if (service.unit_value && service.unit_value < 0) {
+          errors.push(`Serviço ${index + 1}: Valor unitário não pode ser negativo`);
+        }
+        if (service.total_value && service.total_value < 0) {
+          errors.push(`Serviço ${index + 1}: Valor total do serviço não pode ser negativo`);
         }
       });
     }
 
-    if (proposalData.valid_until) {
-      const validDate = new Date(proposalData.valid_until);
+    if (proposalData.end_date) {
+      const validDate = new Date(proposalData.end_date);
       if (validDate <= new Date()) {
         errors.push('Data de validade deve ser futura');
       }
@@ -299,9 +334,10 @@ export class ProposalService {
     const colors: { [key: string]: string } = {
       'draft': '#6b7280', // Cinza
       'sent': '#3b82f6', // Azul
-      'accepted': '#10b981', // Verde
+      'signed': '#10b981', // Verde (novo status)
       'rejected': '#ef4444', // Vermelho
-      'expired': '#f59e0b' // Amarelo
+      'expired': '#f59e0b', // Amarelo
+      'converted': '#6366f1' // Roxo (novo status)
     };
     return colors[status] || '#6b7280';
   }
@@ -313,9 +349,10 @@ export class ProposalService {
     const texts: { [key: string]: string } = {
       'draft': 'Rascunho',
       'sent': 'Enviada',
-      'accepted': 'Aceita',
+      'signed': 'Assinada',
       'rejected': 'Rejeitada',
-      'expired': 'Expirada'
+      'expired': 'Expirada',
+      'converted': 'Convertida'
     };
     return texts[status] || status;
   }
@@ -338,16 +375,16 @@ export class ProposalService {
    * Verificar se proposta está expirada
    */
   isProposalExpired(proposal: Proposal): boolean {
-    if (!proposal.valid_until) return false;
-    return new Date(proposal.valid_until) < new Date();
+    if (!proposal.end_date) return false;
+    return new Date(proposal.end_date) < new Date();
   }
 
   /**
    * Calcular dias restantes para expiração
    */
   getDaysUntilExpiration(proposal: Proposal): number | null {
-    if (!proposal.valid_until) return null;
-    const validDate = new Date(proposal.valid_until);
+    if (!proposal.end_date) return null;
+    const validDate = new Date(proposal.end_date);
     const today = new Date();
     const diffTime = validDate.getTime() - today.getTime();
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -356,8 +393,8 @@ export class ProposalService {
   /**
    * Preparar proposta para envio (adicionar dados do cliente)
    */
-  prepareProposalForSending(proposalId: number, clientData: PrepareProposalData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${proposalId}/prepare-sending`, clientData);
+  prepareProposalForSending(proposalId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${proposalId}/prepare-sending`, {});
   }
 
   /**
@@ -392,9 +429,9 @@ export class ProposalService {
    * Obter URL pública da proposta
    */
   getPublicProposalUrl(proposal: Proposal): string | null {
-    if (!proposal.public_token) return null;
+    if (!proposal.unique_link) return null;
     const baseUrl = window.location.origin;
-    return `${baseUrl}/public/proposal/${proposal.public_token}`;
+    return `${baseUrl}/public/proposal/${proposal.unique_link}`;
   }
 
   /**
