@@ -22,6 +22,8 @@ export class ChangePasswordComponent implements OnInit {
   showNewPassword: boolean = false;
   showConfirmPassword: boolean = false;
 
+  passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -29,7 +31,7 @@ export class ChangePasswordComponent implements OnInit {
   ) {
     this.changePasswordForm = this.fb.group({
       current_password: [''],
-      new_password: ['', [Validators.required, Validators.minLength(6)]],
+      new_password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(this.passwordRegex)]],
       confirm_password: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
   }
@@ -77,11 +79,13 @@ export class ChangePasswordComponent implements OnInit {
         return 'Este campo é obrigatório';
       }
       if (field.errors['minlength']) {
-        return 'A senha deve ter pelo menos 6 caracteres';
+        return 'A senha deve ter no mínimo 8 caracteres';
+      }
+      if (field.errors['pattern']) {
+        return 'A senha deve incluir letra maiúscula, minúscula, número e caractere especial (@$!%*?&)';
       }
     }
 
-    // Erro de confirmação de senha
     if (fieldName === 'confirm_password' && this.changePasswordForm.errors?.['mismatch']) {
       return 'As senhas não coincidem';
     }
@@ -95,8 +99,8 @@ export class ChangePasswordComponent implements OnInit {
       this.error = '';
 
       const endpoint = this.isFirstLogin 
-        ? '/api/auth/change-password-first-login'
-        : '/api/auth/change-password';
+        ? 'change-password-first-login'
+        : 'change-password';
 
       const data = this.isFirstLogin 
         ? { new_password: this.changePasswordForm.value.new_password }
@@ -105,7 +109,6 @@ export class ChangePasswordComponent implements OnInit {
       this.authService.changePassword(endpoint, data).subscribe({
         next: (response) => {
           if (response.token) {
-            // Atualizar token se vier novo
             localStorage.setItem('token', response.token);
             localStorage.setItem('user', JSON.stringify(response.user));
           }
@@ -117,7 +120,6 @@ export class ChangePasswordComponent implements OnInit {
         }
       });
     } else {
-      // Marcar todos os campos como tocados para mostrar erros
       this.markFormGroupTouched(this.changePasswordForm);
     }
   }
