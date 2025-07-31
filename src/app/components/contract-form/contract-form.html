@@ -202,6 +202,30 @@
             </div>
           </div>
         </div>
+        <div class="form-section" *ngIf="isEditMode && assignedUsers.length > 0">
+          <h2 class="section-title">
+              <i class="fas fa-users-cog"></i>Gerenciar Acessos
+          </h2>
+          <div class="assigned-users-management">
+            <div *ngFor="let assignedUser of assignedUsers" class="user-management-row">
+              <div class="user-details">
+                  <span class="user-name">{{ assignedUser.user.name }}</span>
+                  <span class="user-email">{{ assignedUser.user.email }}</span>
+              </div>
+              <div class="role-selector">
+                <select 
+                  class="form-control"
+                  [ngModel]="assignedUser.role"
+                  (ngModelChange)="onRoleChange(assignedUser, $event)"
+                  [name]="'role_' + assignedUser.user.id">
+                  <option *ngFor="let role of availableRoles" [value]="role.value">
+                    {{ role.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="cancel()">
@@ -291,6 +315,17 @@
                 </tr>
               </tfoot>
             </table>
+          </div>
+        </div>
+        <div class="view-section" *ngIf="isViewMode && assignedUsers.length > 0">
+          <h2 class="section-title">
+              <i class="fas fa-users"></i>Usuários Atribuídos
+          </h2>
+          <div class="assigned-users-list">
+            <div *ngFor="let assignedUser of assignedUsers" class="user-item">
+              <span class="user-name">{{ assignedUser.user.name }}</span>
+              <span class="user-role-badge">{{ getRoleLabel(assignedUser.role) }}</span>
+            </div>
           </div>
         </div>
       </div>

@@ -148,6 +148,12 @@ export class ContractService {
     });
   }
 
+  updateUserRole(contractId: number, userId: number, role: string): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.patch(`${this.API_URL}/${contractId}/assign/${userId}`, { role }, { headers });
+  }
+
+
   updateContractStatus(id: number, status: string): Observable<any> {
     return this.http.patch(`${this.API_URL}/${id}/status`, { status }, {
       headers: this.getAuthHeaders()

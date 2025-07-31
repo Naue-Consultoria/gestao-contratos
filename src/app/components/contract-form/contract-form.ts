@@ -28,6 +28,16 @@ interface AssignableUser {
   email: string;
 }
 
+interface AssignedUser {
+  id: number;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  role: 'owner' | 'editor' | 'viewer';
+}
+
 @Component({
   selector: 'app-contract-form',
   standalone: true,
@@ -67,6 +77,14 @@ export class ContractFormComponent implements OnInit {
   selectedServices: SelectedService[] = [];
   companies: ApiCompany[] = [];
   contractTypes = ['Full', 'Pontual', 'Individual'];
+  assignedUsers: AssignedUser[] = [];
+  
+  // ADDED: Available roles for the dropdown
+  availableRoles = [
+    { value: 'owner', label: 'Proprietário' },
+    { value: 'editor', label: 'Editor' },
+    { value: 'viewer', label: 'Visualizador' }
+  ];
 
   allUsers: AssignableUser[] = [];
   currentUserId: number | null = null;
@@ -166,6 +184,7 @@ export class ContractFormComponent implements OnInit {
           duration: cs.service.duration,
           category: cs.service.category,
         }));
+        this.assignedUsers = contract.assigned_users || [];
       }
     } catch (error) {
       this.modalService.showError('Erro ao carregar contrato');
@@ -196,6 +215,24 @@ export class ContractFormComponent implements OnInit {
     } catch (error) {
       console.error('❌ Error loading services:', error);
     }
+  }
+
+  async onRoleChange(assignedUser: AssignedUser, newRole: string) {
+    if (!this.contractId) return;
+
+    try {
+      await firstValueFrom(this.contractService.updateUserRole(this.contractId, assignedUser.user.id, newRole));
+      this.modalService.showSuccess(`Permissão de ${assignedUser.user.name} alterada para ${this.getRoleLabel(newRole)}.`);
+      assignedUser.role = newRole as 'owner' | 'editor' | 'viewer';
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      this.modalService.showError('Não foi possível alterar a permissão do usuário.');
+      this.loadContract(); 
+    }
+  }
+
+  getRoleLabel(roleValue: string): string {
+    return this.availableRoles.find(r => r.value === roleValue)?.label || roleValue;
   }
 
   get filteredServices(): ApiService[] {
