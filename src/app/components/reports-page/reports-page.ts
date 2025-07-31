@@ -1,16 +1,20 @@
-// src/app/components/reports-page/reports-page.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ReportService } from '../../services/report';
+import { ReportService, ReportRequest } from '../../services/report';
+import { ServiceService } from '../../services/service';
 import { CompanyService } from '../../services/company';
 import { ToastrService } from 'ngx-toastr';
+import { Observable } from 'rxjs';
 
 interface ReportConfig {
-  companyId: string;
+  companyId?: string;
+  serviceId?: string;
   format: 'pdf' | 'excel';
   isLoading: boolean;
 }
+
+type GeneralReportConfig = Omit<ReportConfig, 'companyId'> & { companyId?: string };
 
 @Component({
   selector: 'app-reports-page',
@@ -20,36 +24,18 @@ interface ReportConfig {
   styleUrls: ['./reports-page.css']
 })
 export class ReportsPage implements OnInit {
-  companies: any[] = []; // Usando any[] para evitar problemas de tipo
+  companies: any[] = [];
+  services: any[] = [];
   
-  // Configuração individual para cada tipo de relatório
-  monthlyReport: ReportConfig = {
-    companyId: '',
-    format: 'pdf',
-    isLoading: false
-  };
-
-  companyReport: ReportConfig = {
-    companyId: '',
-    format: 'pdf',
-    isLoading: false
-  };
-
-  servicesReport: ReportConfig = {
-    companyId: '',
-    format: 'pdf',
-    isLoading: false
-  };
-
-  financialReport: ReportConfig = {
-    companyId: '',
-    format: 'pdf',
-    isLoading: false
-  };
+  monthlyReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
+  financialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
+  companyReport: ReportConfig = { companyId: '', format: 'pdf', isLoading: false };
+  servicesReport: ReportConfig = { companyId: '', serviceId: '', format: 'pdf', isLoading: false };
 
   constructor(
     private reportService: ReportService,
     private companyService: CompanyService,
+    private serviceService: ServiceService,
     private toastr: ToastrService
   ) {}
 
@@ -57,17 +43,15 @@ export class ReportsPage implements OnInit {
     this.loadCompanies();
   }
 
+  loadInitialData() {
+    this.loadCompanies();
+    this.loadServices();
+  }
+
   loadCompanies() {
     this.companyService.getCompanies().subscribe({
       next: (response: any) => {
-        // Verificar se a resposta tem a propriedade companies
-        if (response && response.companies) {
-          this.companies = response.companies;
-        } else if (Array.isArray(response)) {
-          this.companies = response;
-        } else {
-          this.companies = [];
-        }
+        this.companies = response?.companies || [];
       },
       error: (error) => {
         console.error('Erro ao carregar empresas:', error);
@@ -76,107 +60,64 @@ export class ReportsPage implements OnInit {
     });
   }
 
-  // Métodos de geração de relatórios
-  generateMonthlyReport() {
-    if (!this.monthlyReport.companyId) {
-      this.toastr.warning('Selecione uma empresa');
-      return;
-    }
-
-    this.monthlyReport.isLoading = true;
-    
-    this.reportService.generateMonthlyReport({
-      companyId: this.monthlyReport.companyId,
-      format: this.monthlyReport.format
-    }).subscribe({
-      next: (blob) => {
-        const filename = `relatorio_mensal_${new Date().toISOString().split('T')[0]}.${this.monthlyReport.format === 'pdf' ? 'pdf' : 'xlsx'}`;
-        this.reportService.downloadFile(blob, filename);
-        this.toastr.success('Relatório gerado com sucesso!');
-        this.monthlyReport.isLoading = false;
+  loadServices() {
+    this.serviceService.getServices({ is_active: true }).subscribe({
+      next: (response: any) => {
+        this.services = response?.services || [];
       },
       error: (error) => {
-        console.error('Erro ao gerar relatório:', error);
-        this.toastr.error('Erro ao gerar relatório');
-        this.monthlyReport.isLoading = false;
+        console.error('Erro ao carregar serviços:', error);
+        this.toastr.error('Erro ao carregar lista de serviços');
       }
     });
   }
 
-  generateCompanyReport() {
-    if (!this.companyReport.companyId) {
-      this.toastr.warning('Selecione uma empresa');
+  generateReport(reportType: 'monthly' | 'company' | 'services' | 'financial', config: ReportConfig) {
+    // Validation logic for reports that require a company
+    if ((reportType === 'company' || reportType === 'services') && !config.companyId) {
+      this.toastr.warning('Por favor, selecione uma empresa.');
+      return;
+    }
+    // Validation for the services report
+    if (reportType === 'services' && !config.serviceId) {
+      this.toastr.warning('Por favor, selecione um serviço.');
       return;
     }
 
-    this.companyReport.isLoading = true;
-    
-    this.reportService.generateCompanyReport({
-      companyId: this.companyReport.companyId,
-      format: this.companyReport.format
-    }).subscribe({
-      next: (blob) => {
-        const filename = `relatorio_empresa_${new Date().toISOString().split('T')[0]}.${this.companyReport.format === 'pdf' ? 'pdf' : 'xlsx'}`;
-        this.reportService.downloadFile(blob, filename);
-        this.toastr.success('Relatório gerado com sucesso!');
-        this.companyReport.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Erro ao gerar relatório:', error);
-        this.toastr.error('Erro ao gerar relatório');
-        this.companyReport.isLoading = false;
-      }
-    });
-  }
+    config.isLoading = true;
+    const requestData: ReportRequest = {
+      companyId: config.companyId,
+      serviceId: config.serviceId,
+      format: config.format
+    };
 
-  generateServicesReport() {
-    if (!this.servicesReport.companyId) {
-      this.toastr.warning('Selecione uma empresa');
-      return;
+    let reportObservable: Observable<Blob>;
+    let fileName = `relatorio_${reportType}_${new Date().toISOString().split('T')[0]}`;
+
+    switch (reportType) {
+      case 'monthly':
+        reportObservable = this.reportService.generateMonthlyReport(requestData);
+        break;
+      case 'company':
+        reportObservable = this.reportService.generateCompanyReport(requestData);
+        break;
+      case 'services':
+        reportObservable = this.reportService.generateServicesReport(requestData);
+        break;
+      case 'financial':
+        reportObservable = this.reportService.generateFinancialReport(requestData);
+        break;
     }
 
-    this.servicesReport.isLoading = true;
-    
-    this.reportService.generateServicesReport({
-      companyId: this.servicesReport.companyId,
-      format: this.servicesReport.format
-    }).subscribe({
-      next: (blob) => {
-        const filename = `relatorio_servicos_${new Date().toISOString().split('T')[0]}.${this.servicesReport.format === 'pdf' ? 'pdf' : 'xlsx'}`;
-        this.reportService.downloadFile(blob, filename);
+    reportObservable.subscribe({
+      next: (blob: Blob) => {
+        this.reportService.downloadFile(blob, `${fileName}.${config.format === 'pdf' ? 'pdf' : 'xlsx'}`);
         this.toastr.success('Relatório gerado com sucesso!');
-        this.servicesReport.isLoading = false;
+        config.isLoading = false;
       },
-      error: (error) => {
-        console.error('Erro ao gerar relatório:', error);
-        this.toastr.error('Erro ao gerar relatório');
-        this.servicesReport.isLoading = false;
-      }
-    });
-  }
-
-  generateFinancialReport() {
-    if (!this.financialReport.companyId) {
-      this.toastr.warning('Selecione uma empresa');
-      return;
-    }
-
-    this.financialReport.isLoading = true;
-    
-    this.reportService.generateFinancialReport({
-      companyId: this.financialReport.companyId,
-      format: this.financialReport.format
-    }).subscribe({
-      next: (blob) => {
-        const filename = `relatorio_financeiro_${new Date().toISOString().split('T')[0]}.${this.financialReport.format === 'pdf' ? 'pdf' : 'xlsx'}`;
-        this.reportService.downloadFile(blob, filename);
-        this.toastr.success('Relatório gerado com sucesso!');
-        this.financialReport.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Erro ao gerar relatório:', error);
-        this.toastr.error('Erro ao gerar relatório');
-        this.financialReport.isLoading = false;
+      error: (error: any) => {
+        this.toastr.error('Ocorreu um erro ao gerar o relatório.');
+        config.isLoading = false;
       }
     });
   }
