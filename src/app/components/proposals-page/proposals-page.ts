@@ -8,7 +8,8 @@ import { Subscription, firstValueFrom } from 'rxjs';
 
 interface ProposalDisplay {
   id: number;
-  title: string;
+  proposalNumber: string;
+  clientName: string;
   companyName: string;
   status: string;
   statusText: string;
@@ -81,12 +82,13 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   private mapApiProposalToTableProposal(apiProposal: Proposal): ProposalDisplay {
     return {
       id: apiProposal.id,
-      title: apiProposal.title,
+      proposalNumber: apiProposal.proposal_number,
+      clientName: apiProposal.client_name,
       companyName: apiProposal.company?.name || 'N/A',
       status: apiProposal.status,
       statusText: this.proposalService.getStatusText(apiProposal.status),
       totalValue: this.proposalService.formatCurrency(apiProposal.total_value || 0),
-      validUntil: apiProposal.valid_until ? this.formatDate(apiProposal.valid_until) : 'Sem prazo',
+      validUntil: apiProposal.end_date ? this.formatDate(apiProposal.end_date) : 'Sem prazo',
       createdAt: this.formatDate(apiProposal.created_at),
       isExpired: this.proposalService.isProposalExpired(apiProposal),
       raw: apiProposal
@@ -121,7 +123,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   async duplicateProposal(proposal: ProposalDisplay, event: MouseEvent) {
     event.stopPropagation();
     
-    if (confirm(`Deseja duplicar a proposta "${proposal.title}"?`)) {
+    if (confirm(`Deseja duplicar a proposta de "${proposal.clientName}" (${proposal.proposalNumber})?`)) {
       try {
         const response = await firstValueFrom(this.proposalService.duplicateProposal(proposal.id));
         if (response && response.success) {
@@ -142,7 +144,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   async deleteProposal(proposal: ProposalDisplay, event: MouseEvent) {
     event.stopPropagation();
     
-    if (confirm(`Deseja excluir a proposta "${proposal.title}"?`)) {
+    if (confirm(`Deseja excluir a proposta de "${proposal.clientName}" (${proposal.proposalNumber})?`)) {
       try {
         await firstValueFrom(this.proposalService.deleteProposal(proposal.id));
         this.modalService.showSuccess('Proposta excluída com sucesso!');
@@ -166,7 +168,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `proposta-${proposal.title.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+      a.download = `proposta-${proposal.proposalNumber.replace(/\s+/g, '-').toLowerCase()}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -226,14 +228,8 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     
     try {
-      // Preparar dados mínimos do cliente para gerar token
-      const minimalClientData = {
-        client_name: 'Cliente',
-        client_email: 'cliente@exemplo.com'
-      };
-      
       const response = await firstValueFrom(
-        this.proposalService.prepareProposalForSending(proposal.id, minimalClientData)
+        this.proposalService.prepareProposalForSending(proposal.id)
       );
       
       if (response && response.success) {

@@ -42,7 +42,8 @@
       <table class="custom-table" *ngIf="proposals.length > 0">
         <thead>
           <tr>
-            <th>Título</th>
+            <th>Número da Proposta</th>
+            <th>Cliente</th>
             <th>Empresa</th>
             <th>Status</th>
             <th>Valor Total</th>
@@ -63,10 +64,13 @@
                 <div class="proposal-icon" [class.expired]="proposal.isExpired">
                   <i class="fas fa-file-alt"></i>
                 </div>
-                <span class="proposal-title" [class.expired]="proposal.isExpired">
-                  {{ proposal.title }}
+                <span class="proposal-number" [class.expired]="proposal.isExpired">
+                  {{ proposal.proposalNumber }}
                 </span>
               </div>
+            </td>
+            <td>
+              <span class="client-name">{{ proposal.clientName }}</span>
             </td>
             <td>
               <span class="company-name">{{ proposal.companyName }}</span>
@@ -128,7 +132,7 @@
                   <i class="fas fa-paper-plane"></i>
                 </button>
                 <button
-                  *ngIf="proposal.raw.status === 'sent' || proposal.raw.status === 'accepted' || proposal.raw.status === 'rejected'"
+                  *ngIf="proposal.raw.status === 'sent' || proposal.raw.status === 'signed' || proposal.raw.status === 'rejected' || proposal.raw.status === 'converted'"
                   class="action-btn link-btn"
                   (click)="copyPublicLink(proposal, $event)"
                   title="Copiar Link Público"

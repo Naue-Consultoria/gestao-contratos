@@ -23,12 +23,14 @@
         <p class="section-description">Dados da pessoa ou empresa que receberá a proposta.</p>
         <div class="form-grid">
           <div class="form-group">
-            <label for="client_name" class="form-label">Nome / Razão Social</label>
-            <input id="client_name" type="text" formControlName="client_name" class="form-control" placeholder="Nome completo ou razão social">
+            <label for="client_name" class="form-label required">Nome / Razão Social</label>
+            <input id="client_name" type="text" formControlName="client_name" class="form-control" placeholder="Nome completo ou razão social" [class.error]="isFieldInvalid('client_name')">
+            <div *ngIf="isFieldInvalid('client_name')" class="error-message">Nome é obrigatório (mínimo 3 caracteres).</div>
           </div>
           <div class="form-group">
-            <label for="client_email" class="form-label">Email</label>
-            <input id="client_email" type="email" formControlName="client_email" class="form-control" placeholder="email@exemplo.com">
+            <label for="client_email" class="form-label required">Email</label>
+            <input id="client_email" type="email" formControlName="client_email" class="form-control" placeholder="email@exemplo.com" [class.error]="isFieldInvalid('client_email')">
+            <div *ngIf="isFieldInvalid('client_email')" class="error-message">Email válido é obrigatório.</div>
           </div>
         </div>
         <div class="form-grid">
@@ -37,14 +39,56 @@
             <input id="client_phone" type="tel" formControlName="client_phone" class="form-control" placeholder="(11) 99999-9999">
           </div>
           <div class="form-group">
-            <label for="client_document" class="form-label">CPF / CNPJ</label>
-            <input id="client_document" type="text" formControlName="client_document" class="form-control" placeholder="000.000.000-00 ou 00.000.000/0001-00">
+            <label for="client_document" class="form-label required">CPF / CNPJ</label>
+            <input id="client_document" type="text" formControlName="client_document" class="form-control" placeholder="000.000.000-00 ou 00.000.000/0001-00" [class.error]="isFieldInvalid('client_document')">
+            <div *ngIf="isFieldInvalid('client_document')" class="error-message">Documento é obrigatório.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Client Address Section -->
+      <div class="form-section">
+        <h2 class="section-title"><i class="fas fa-map-marker-alt"></i>Endereço do Cliente</h2>
+        <p class="section-description">Endereço completo para correspondência e contrato.</p>
+        <div class="form-grid">
+          <div class="form-group col-3">
+            <label for="client_street" class="form-label required">Logradouro</label>
+            <input id="client_street" type="text" formControlName="client_street" class="form-control" placeholder="Rua, Avenida, etc." [class.error]="isFieldInvalid('client_street')">
+            <div *ngIf="isFieldInvalid('client_street')" class="error-message">Logradouro é obrigatório.</div>
+          </div>
+          <div class="form-group col-1">
+            <label for="client_number" class="form-label required">Número</label>
+            <input id="client_number" type="text" formControlName="client_number" class="form-control" placeholder="123" [class.error]="isFieldInvalid('client_number')">
+            <div *ngIf="isFieldInvalid('client_number')" class="error-message">Número é obrigatório.</div>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="client_complement" class="form-label">Complemento</label>
+            <input id="client_complement" type="text" formControlName="client_complement" class="form-control" placeholder="Apto, Sala, etc.">
+          </div>
+          <div class="form-group">
+            <label for="client_neighborhood" class="form-label required">Bairro</label>
+            <input id="client_neighborhood" type="text" formControlName="client_neighborhood" class="form-control" placeholder="Nome do bairro" [class.error]="isFieldInvalid('client_neighborhood')">
+            <div *ngIf="isFieldInvalid('client_neighborhood')" class="error-message">Bairro é obrigatório.</div>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="client_city" class="form-label required">Cidade</label>
+            <input id="client_city" type="text" formControlName="client_city" class="form-control" placeholder="Nome da cidade" [class.error]="isFieldInvalid('client_city')">
+            <div *ngIf="isFieldInvalid('client_city')" class="error-message">Cidade é obrigatória.</div>
+          </div>
+          <div class="form-group">
+            <label for="client_zipcode" class="form-label required">CEP</label>
+            <input id="client_zipcode" type="text" formControlName="client_zipcode" class="form-control" placeholder="00000-000" [class.error]="isFieldInvalid('client_zipcode')">
+            <div *ngIf="isFieldInvalid('client_zipcode')" class="error-message">CEP é obrigatório (mínimo 8 caracteres).</div>
           </div>
         </div>
       </div>
 
       <div class="form-section">
-        <h2 class="section-title"><i class="fas fa-building"></i>Empresa Prestadora</h2>
+        <h2 class="section-title"><i class="fas fa-building"></i>Empresa</h2>
         <div class="form-group">
           <label for="company_id" class="form-label required">Empresa</label>
           <div class="input-group">
@@ -86,25 +130,11 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Proposal Details Section -->
-      <div class="form-section">
-        <h2 class="section-title"><i class="fas fa-file-alt"></i>Dados da Proposta</h2>
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="title" class="form-label required">Título</label>
-            <input id="title" type="text" formControlName="title" class="form-control" [class.error]="isFieldInvalid('title')" placeholder="Ex: Proposta de Consultoria em RH">
-            <div *ngIf="isFieldInvalid('title')" class="error-message">Título é obrigatório (mínimo 3 caracteres).</div>
-          </div>
-          <div class="form-group">
-            <label for="valid_until" class="form-label">Válida Até</label>
-            <input id="valid_until" type="date" formControlName="valid_until" class="form-control">
-          </div>
-        </div>
+        
+        <!-- Validity Fields -->
         <div class="form-group">
-          <label for="description" class="form-label">Descrição</label>
-          <textarea id="description" formControlName="description" class="form-control" rows="3" placeholder="Descreva o escopo e os objetivos da proposta."></textarea>
+          <label for="end_date" class="form-label">Válida Até</label>
+          <input id="end_date" type="date" formControlName="end_date" class="form-control">
         </div>
       </div>
 
@@ -140,8 +170,8 @@
                   <input [id]="'quantity_' + i" type="number" formControlName="quantity" class="form-control" [class.error]="isServiceFieldInvalid(i, 'quantity')" min="1">
                 </div>
                 <div class="form-group">
-                  <label [for]="'custom_value_' + i" class="form-label">Valor Personalizado (Unitário)</label>
-                  <input [id]="'custom_value_' + i" type="text" formControlName="custom_value" class="form-control" placeholder="Opcional. Ex: 1.500,00" appCurrencyMask>
+                  <label [for]="'unit_value_' + i" class="form-label">Valor Unitário</label>
+                  <input [id]="'unit_value_' + i" type="text" formControlName="unit_value" class="form-control" placeholder="Ex: 1.500,00" appCurrencyMask>
                 </div>
               </div>
             </div>
