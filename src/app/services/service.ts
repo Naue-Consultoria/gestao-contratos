@@ -90,6 +90,12 @@ export class ServiceService {
     });
   }
 
+  getServiceStats(): Observable<{ stats: ServiceStats }> {
+    return this.http.get<{ stats: ServiceStats }>(`${this.API_URL}/meta/stats`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
   createService(serviceData: CreateServiceRequest): Observable<CreateServiceResponse> {
     return this.http.post<CreateServiceResponse>(this.API_URL, serviceData, {
       headers: this.getAuthHeaders()
@@ -139,9 +145,10 @@ export class ServiceService {
     return valueInCents / 100;
   }
 
-  getStats(): Observable<{ stats: ServiceStats }> {
+  getStats(filters?: any): Observable<{ stats: ServiceStats }> {
     return this.http.get<{ stats: ServiceStats }>(`${this.API_URL}/meta/stats`, {
-      headers: this.getAuthHeaders()
+      headers: this.getAuthHeaders(),
+      params: filters
     });
   }
 }

@@ -178,9 +178,10 @@ export class ContractService {
     });
   }
 
-  getStats(): Observable<{ stats: ContractStats }> {
+  getStats(filters?: any): Observable<{ stats: ContractStats }> {
     return this.http.get<{ stats: ContractStats }>(`${this.API_URL}/meta/stats`, {
-      headers: this.getAuthHeaders()
+      headers: this.getAuthHeaders(),
+      params: filters
     });
   }
 
