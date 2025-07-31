@@ -76,6 +76,43 @@ app-login-layout {
   animation: fadeIn 0.6s ease-out 0.05s;
   animation-fill-mode: both;
 }
+
+.btn-primary {
+  width: 100%;
+  padding: 16px 24px;
+  background-color: var(--naue-primary);
+  color: var(--naue-white);
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  box-shadow: 0 4px 12px rgba(10, 128, 96, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--naue-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(10, 128, 96, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.btn-primary i {
+  font-size: 14px;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
