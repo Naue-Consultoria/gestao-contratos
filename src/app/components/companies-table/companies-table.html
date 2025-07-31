@@ -124,9 +124,23 @@
             <td>{{ company.totalValue }}</td>
             <td>{{ company.since }}</td>
             <td>
-              <button class="action-btn" (click)="editCompany(company.id); $event.stopPropagation()">
-                <i class="fas fa-edit"></i>
-              </button>
+              <div class="actions-cell">
+                <button class="action-btn" (click)="editCompany(company.id); $event.stopPropagation()">
+                  <i class="fas fa-edit"></i>
+                </button>
+                
+                <button class="action-btn" (click)="softDeleteCompany(company, $event)" title="Desativar">
+                  <i class="fas fa-archive"></i>
+                </button>
+
+                <button 
+                  *ngIf="authService.isAdmin()"
+                  class="action-btn action-btn-danger" 
+                  (click)="hardDeleteCompany(company, $event)"
+                  title="Excluir Permanentemente">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

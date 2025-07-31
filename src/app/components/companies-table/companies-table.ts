@@ -5,8 +5,9 @@ import { ModalService } from '../../services/modal.service';
 import { CompanyService, ApiCompany } from '../../services/company';
 import { ContractService, ApiContract } from '../../services/contract';
 import { Subscription, firstValueFrom } from 'rxjs';
+import { AuthService } from '../../services/auth';
 
-interface Company {
+interface CompanyDisplay {
   id: number;
   name: string;
   initials: string;
@@ -18,6 +19,8 @@ interface Company {
   totalValue: string;
   since: string;
   gradient: string;
+  actionMenuOpen: boolean;
+  raw: ApiCompany;
 }
 
 @Component({
@@ -28,13 +31,14 @@ interface Company {
   styleUrls: ['./companies-table.css']
 })
 export class CompaniesTableComponent implements OnInit, OnDestroy {
+  public authService = inject(AuthService);
   private modalService = inject(ModalService);
   private companyService = inject(CompanyService);
   private contractService = inject(ContractService);
   private router = inject(Router);
+
   private subscriptions = new Subscription();
 
-  // Stats
   stats = {
     total: 0,
     active: 0,
@@ -42,83 +46,75 @@ export class CompaniesTableComponent implements OnInit, OnDestroy {
     newProspects: 0
   };
 
-  // Companies data
-  companies: Company[] = [];
-  
-  // Loading state
-  isLoading = false;
+  companies: CompanyDisplay[] = [];
+  isLoading = true;
   error = '';
 
   ngOnInit() {
-    this.loadCompanies();
-    this.subscribeToRefreshEvents();
+    this.loadData();
+    window.addEventListener('refreshCompanies', this.loadData.bind(this));
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+    window.removeEventListener('refreshCompanies', this.loadData.bind(this));
   }
 
-  private subscribeToRefreshEvents() {
-    // Escutar evento de atualização de empresas
-    window.addEventListener('refreshCompanies', () => {
-      this.loadCompanies();
-    });
-  }
-
-  async loadCompanies() {
+  async loadData() {
     this.isLoading = true;
     this.error = '';
-
     try {
-      // Fetch both companies and all contracts in parallel
-      const [companyResponse, contractResponse] = await Promise.all([
-        firstValueFrom(this.companyService.getCompanies()),
-        firstValueFrom(this.contractService.getContracts())
-      ]);
+      const companiesResponse = await firstValueFrom(this.companyService.getCompanies({ is_active: true }));
+      const contractsResponse = await firstValueFrom(this.contractService.getContracts());
       
-      if (companyResponse && companyResponse.companies) {
-        // Aggregate contract data by company ID
-        const contractAggregates = this.aggregateContractsByCompany(contractResponse.contracts);
-        
-        // Map companies, passing the aggregated data to the mapper function
-        this.companies = companyResponse.companies.map(apiCompany => 
-          this.mapApiCompanyToTableCompany(apiCompany, contractAggregates[apiCompany.id])
-        );
-        
-        // Update stats
-        this.updateStats(companyResponse.companies);
-      }
-    } catch (error: any) {
-      console.error('❌ Erro ao carregar dados:', error);
-      this.error = 'Erro ao carregar dados das empresas e contratos. Tente novamente.';
+      this.companies = companiesResponse.companies.map(apiCompany => {
+        const companyContracts = contractsResponse.contracts.filter(c => c.company.id === apiCompany.id);
+        const aggregates = {
+          totalCount: companyContracts.length,
+          activeCount: companyContracts.filter(c => c.status === 'active').length,
+          totalValue: companyContracts.reduce((sum, c) => sum + c.total_value, 0)
+        };
+        return this.mapApiCompanyToTableCompany(apiCompany, aggregates);
+      });
+
+    } catch (err) {
+      console.error('❌ Error loading company data:', err);
+      this.error = 'Não foi possível carregar os dados das empresas.';
     } finally {
       this.isLoading = false;
     }
   }
 
-  private aggregateContractsByCompany(contracts: ApiContract[]): { [companyId: number]: { totalCount: number, activeCount: number, totalValue: number } } {
-    const aggregates: { [companyId: number]: { totalCount: number, activeCount: number, totalValue: number } } = {};
-    
-    if (!contracts) return aggregates;
-
-    for (const contract of contracts) {
-      const companyId = contract.company.id;
-      if (!aggregates[companyId]) {
-        aggregates[companyId] = { totalCount: 0, activeCount: 0, totalValue: 0 };
-      }
-      aggregates[companyId].totalCount++;
-      aggregates[companyId].totalValue += contract.total_value;
-      if (contract.status === 'active') {
-        aggregates[companyId].activeCount++;
+  async softDeleteCompany(company: CompanyDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    if (confirm(`Tem certeza que deseja DESATIVAR a empresa "${company.name}"? A empresa sairá da lista principal, mas o histórico será mantido.`)) {
+      try {
+        await firstValueFrom(this.companyService.deleteCompany(company.id));
+        this.modalService.showSuccess('Empresa desativada com sucesso!');
+        this.loadData();
+      } catch (error) {
+        this.modalService.showError('Não foi possível desativar a empresa.');
       }
     }
-    return aggregates;
   }
 
-  /**
-   * Mapear empresa da API para formato da tabela
-   */
-  private mapApiCompanyToTableCompany(apiCompany: ApiCompany, aggregates?: { totalCount: number, activeCount: number, totalValue: number }): Company {
+  async hardDeleteCompany(company: CompanyDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    const confirmation = prompt(`Esta ação é irreversível e excluirá PERMANENTEMENTE a empresa "${company.name}" e todos os dados associados. Para confirmar, digite o nome da empresa:`);
+    if (confirmation === company.name) {
+      try {
+        await firstValueFrom(this.companyService.deleteCompanyPermanent(company.id));
+        this.modalService.showSuccess('Empresa excluída permanentemente!');
+        this.loadData();
+      } catch (error) {
+        this.modalService.showError('Não foi possível excluir a empresa permanentemente.');
+      }
+    } else if (confirmation !== null) {
+      this.modalService.showWarning('O nome digitado não confere. A exclusão foi cancelada.');
+    }
+  }
+
+  private mapApiCompanyToTableCompany(apiCompany: ApiCompany, aggregates?: { totalCount: number, activeCount: number, totalValue: number }): CompanyDisplay {
     const initials = this.getInitials(apiCompany.name);
     const since = apiCompany.founded_date ? new Date(apiCompany.founded_date).getFullYear().toString() : 'N/A';
     
@@ -133,26 +129,21 @@ export class CompaniesTableComponent implements OnInit, OnDestroy {
       activeContracts: aggregates?.activeCount || 0,
       totalValue: this.contractService.formatValue(aggregates?.totalValue || 0),
       since: since,
-      gradient: this.generateGradient(apiCompany.name)
+      gradient: this.generateGradient(apiCompany.name),
+      actionMenuOpen: false, // Initialize as closed
+      raw: apiCompany
     };
   }
 
-  /**
-   * Gerar iniciais do nome da empresa
-   */
   private getInitials(name: string): string {
     const words = name.split(' ').filter(word => word.length > 0);
     
     if (words.length === 0) return 'NN';
     if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
     
-    // Pegar primeira letra das duas primeiras palavras
     return (words[0][0] + words[1][0]).toUpperCase();
   }
 
-  /**
-   * Gerar gradiente baseado no nome
-   */
   private generateGradient(name: string): string {
     const gradients = [
       'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -165,7 +156,6 @@ export class CompaniesTableComponent implements OnInit, OnDestroy {
       'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
     ];
     
-    // Usar hash do nome para selecionar gradiente consistente
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
       hash = ((hash << 5) - hash) + name.charCodeAt(i);
@@ -175,29 +165,6 @@ export class CompaniesTableComponent implements OnInit, OnDestroy {
     return gradients[Math.abs(hash) % gradients.length];
   }
 
-  /**
-   * Atualizar estatísticas
-   */
-  private updateStats(companies: ApiCompany[]) {
-    this.stats.total = companies.length;
-    this.stats.active = companies.filter(c => c.is_active).length;
-    this.stats.activePercentage = this.stats.total > 0 
-      ? Math.round((this.stats.active / this.stats.total) * 100) 
-      : 0;
-    
-    // Calcular novos prospects (empresas criadas nos últimos 30 dias)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    this.stats.newProspects = companies.filter(c => {
-      const createdAt = new Date(c.created_at);
-      return createdAt > thirtyDaysAgo;
-    }).length;
-  }
-
-  /**
-   * Formatar número de funcionários
-   */
   formatEmployees(count: number): string {
     if (count === 0) return 'Não informado';
     if (count < 1000) return count.toString();
@@ -205,25 +172,21 @@ export class CompaniesTableComponent implements OnInit, OnDestroy {
     return (count / 1000000).toFixed(1) + 'M';
   }
 
-  /**
-   * Navegar para página de nova empresa
-   */
   openNewCompanyPage() {
     this.router.navigate(['/home/companies/new']);
   }
 
-  /**
-   * Navegar para página de edição de empresa
-   */
   editCompany(id: number) {
     this.router.navigate(['/home/companies/edit', id]);
   }
 
-  /**
-   * Atualizar lista após criar/editar empresa
-   */
+  toggleActionMenu(company: CompanyDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    this.companies.forEach(c => c.actionMenuOpen = (c.id === company.id) ? !c.actionMenuOpen : false);
+  }
+
   onCompanySaved() {
-    this.loadCompanies();
+    this.loadData();
     this.modalService.showNotification('Empresa salva com sucesso!', true);
   }
 }
