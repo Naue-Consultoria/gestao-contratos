@@ -52,32 +52,22 @@
     <div class="report-actions">
       <button 
         class="btn btn-primary"
-        (click)="generateMonthlyReport()"
-        [disabled]="!monthlyReport.clientId || monthlyReport.isLoading">
+        (click)="generateReport('monthly', monthlyReport)"
+        [disabled]="monthlyReport.isLoading">
         <i class="fas" [class.fa-download]="!monthlyReport.isLoading" [class.fa-spinner]="monthlyReport.isLoading" [class.fa-spin]="monthlyReport.isLoading"></i>
         {{ monthlyReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}
       </button>
     </div>
   </div>
 
-<<<<<<< HEAD
   <!-- Relatório por Cliente -->
   <div class="report-type-card" [class.generating]="clientReport.isLoading">
     <div class="report-icon client">
       <i class="fas fa-users"></i>
-=======
-  <div class="report-type-card" [class.generating]="companyReport.isLoading">
-    <div class="report-icon company">
-      <i class="fas fa-building"></i>
->>>>>>> 785427a94bbc659c286c9e6d3218b749013d13db
     </div>
     <h3 class="report-name">Relatório por Cliente</h3>
     <p class="report-description">
-<<<<<<< HEAD
-      Análise detalhada do desempenho e contratos de um cliente
-=======
-      Análise detalhada do desempenho e contratos de uma empresa.
->>>>>>> 785427a94bbc659c286c9e6d3218b749013d13db
+      Análise detalhada do desempenho e contratos de um cliente específico.
     </p>
     
     <div class="report-controls">
@@ -115,17 +105,10 @@
     <div class="report-actions">
       <button 
         class="btn btn-primary"
-<<<<<<< HEAD
-        (click)="generateClientReport()"
+        (click)="generateReport('client', clientReport)"
         [disabled]="!clientReport.clientId || clientReport.isLoading">
         <i class="fas" [class.fa-download]="!clientReport.isLoading" [class.fa-spinner]="clientReport.isLoading" [class.fa-spin]="clientReport.isLoading"></i>
         {{ clientReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}
-=======
-        (click)="generateReport('company', companyReport)"
-        [disabled]="!companyReport.companyId || companyReport.isLoading">
-        <i class="fas" [class.fa-download]="!companyReport.isLoading" [class.fa-spinner]="companyReport.isLoading" [class.fa-spin]="companyReport.isLoading"></i>
-        {{ companyReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}
->>>>>>> 785427a94bbc659c286c9e6d3218b749013d13db
       </button>
     </div>
   </div>
@@ -136,13 +119,12 @@
     </div>
     <h3 class="report-name">Relatório de Serviços</h3>
     <p class="report-description">
-      Performance e análise dos serviços prestados para a empresa.
+      Performance e análise dos serviços prestados para o cliente.
     </p>
     
     <div class="report-controls">
       <div class="form-group">
         <label class="filter-label">
-<<<<<<< HEAD
           <i class="fas fa-users"></i>
           Cliente
         </label>
@@ -153,8 +135,13 @@
           <option value="">Selecione um cliente</option>
           <option *ngFor="let client of clients" [value]="client.id">
             {{ client.name }}
-=======
-          <i class="fas fa-building"></i>
+          </option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="filter-label">
+          <i class="fas fa-cog"></i>
           Serviço
         </label>
         <select 
@@ -164,7 +151,6 @@
           <option value="">Selecione um serviço</option>
           <option *ngFor="let service of services" [value]="service.id">
             {{ service.name }}
->>>>>>> 785427a94bbc659c286c9e6d3218b749013d13db
           </option>
         </select>
       </div>
@@ -187,13 +173,8 @@
     <div class="report-actions">
       <button 
         class="btn btn-primary"
-<<<<<<< HEAD
-        (click)="generateServicesReport()"
-        [disabled]="!servicesReport.clientId || servicesReport.isLoading">
-=======
         (click)="generateReport('services', servicesReport)"
-        [disabled]="!servicesReport.companyId || servicesReport.isLoading">
->>>>>>> 785427a94bbc659c286c9e6d3218b749013d13db
+        [disabled]="!servicesReport.clientId || servicesReport.isLoading">
         <i class="fas" [class.fa-download]="!servicesReport.isLoading" [class.fa-spinner]="servicesReport.isLoading" [class.fa-spin]="servicesReport.isLoading"></i>
         {{ servicesReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}
       </button>
@@ -206,13 +187,12 @@
     </div>
     <h3 class="report-name">Relatório Financeiro</h3>
     <p class="report-description">
-      Análise financeira completa com receitas e projeções da empresa.
+      Análise financeira completa com receitas e projeções do cliente.
     </p>
     
     <div class="report-controls">
       <div class="form-group">
         <label class="filter-label">
-<<<<<<< HEAD
           <i class="fas fa-users"></i>
           Cliente
         </label>
@@ -229,8 +209,6 @@
       
       <div class="form-group">
         <label class="filter-label">
-=======
->>>>>>> 785427a94bbc659c286c9e6d3218b749013d13db
           <i class="fas fa-file-alt"></i>
           Formato
         </label>
@@ -247,13 +225,8 @@
     <div class="report-actions">
       <button 
         class="btn btn-primary"
-<<<<<<< HEAD
-        (click)="generateFinancialReport()"
-        [disabled]="!financialReport.clientId || financialReport.isLoading">
-=======
         (click)="generateReport('financial', financialReport)"
         [disabled]="financialReport.isLoading">
->>>>>>> 785427a94bbc659c286c9e6d3218b749013d13db
         <i class="fas" [class.fa-download]="!financialReport.isLoading" [class.fa-spinner]="financialReport.isLoading" [class.fa-spin]="financialReport.isLoading"></i>
         {{ financialReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}
       </button>

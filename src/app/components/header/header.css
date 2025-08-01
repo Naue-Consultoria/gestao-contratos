@@ -15,6 +15,7 @@
 :host-context(body.dark-mode) .header {
     background-color: var(--dark-card);
     border-bottom-color: var(--dark-border);
+    border-bottom-left-radius: 15px; /* Mantém o arredondamento no dark mode */
 }
 
 .header-content {

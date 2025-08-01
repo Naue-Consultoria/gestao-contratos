@@ -30,6 +30,9 @@
     transition: all var(--transition-speed) ease;
     position: relative;
     overflow-x: hidden;
+    background-color: #fafbfc;
+    border: 3px solid #003b2b;
+    border-radius: 20px 0 0 0;
   }
   
   /* Quando sidebar está colapsada */
@@ -201,6 +204,9 @@
       width: 100%;
       padding: var(--content-padding-mobile);
       margin-top: var(--header-height);
+      border: none;
+      border-radius: 0;
+      background-color: #f8f9fa;
     }
     
     .dashboard-grid,

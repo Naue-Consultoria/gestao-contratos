@@ -6,6 +6,7 @@
     width: 260px;
     background-color: #003b2b;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-top-right-radius: 15px; /* Arredondamento da quina superior direita */
     overflow-y: auto;
     overflow-x: hidden;
     transition: all 0.3s ease;
@@ -206,6 +207,7 @@
 :host-context(body.dark-mode) .sidebar {
     background-color: #064c3f;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-top-right-radius: 15px; /* Mantém o arredondamento no dark mode */
 }
 :host-context(body.dark-mode) .sidebar-toggle-compact {
     border-color: #444;

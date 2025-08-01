@@ -1,18 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ReportService } from '../../services/report';
+import { ReportService, ReportRequest } from '../../services/report';
 import { ClientService } from '../../services/client';
+import { ServiceService } from '../../services/service';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
 
 interface ReportConfig {
   clientId: string;
+  serviceId?: string;
   format: 'pdf' | 'excel';
   isLoading: boolean;
 }
 
-type GeneralReportConfig = Omit<ReportConfig, 'companyId'> & { companyId?: string };
+type GeneralReportConfig = Omit<ReportConfig, 'clientId'> & { clientId?: string };
 
 @Component({
   selector: 'app-reports-page',
@@ -22,36 +24,36 @@ type GeneralReportConfig = Omit<ReportConfig, 'companyId'> & { companyId?: strin
   styleUrls: ['./reports-page.css']
 })
 export class ReportsPage implements OnInit {
-  companies: any[] = [];
+  clients: any[] = [];
   services: any[] = [];
   
   monthlyReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
   financialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
-  companyReport: ReportConfig = { companyId: '', format: 'pdf', isLoading: false };
-  servicesReport: ReportConfig = { companyId: '', serviceId: '', format: 'pdf', isLoading: false };
+  clientReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
+  servicesReport: ReportConfig = { clientId: '', serviceId: '', format: 'pdf', isLoading: false };
 
   constructor(
     private reportService: ReportService,
-    private companyService: CompanyService,
+    private clientService: ClientService,
     private serviceService: ServiceService,
     private toastr: ToastrService
   ) {}
 
   ngOnInit() {
-    this.loadClients();
+    this.loadInitialData();
   }
 
   loadInitialData() {
-    this.loadCompanies();
+    this.loadClients();
     this.loadServices();
   }
 
-  loadCompanies() {
-    this.companyService.getCompanies().subscribe({
+  loadClients() {
+    this.clientService.getClients().subscribe({
       next: (response: any) => {
-        this.companies = response?.companies || [];
+        this.clients = response?.clients || [];
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Erro ao carregar clientes:', error);
         this.toastr.error('Erro ao carregar lista de clientes');
       }
@@ -63,17 +65,17 @@ export class ReportsPage implements OnInit {
       next: (response: any) => {
         this.services = response?.services || [];
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Erro ao carregar serviços:', error);
         this.toastr.error('Erro ao carregar lista de serviços');
       }
     });
   }
 
-  generateReport(reportType: 'monthly' | 'company' | 'services' | 'financial', config: ReportConfig) {
-    // Validation logic for reports that require a company
-    if ((reportType === 'company' || reportType === 'services') && !config.companyId) {
-      this.toastr.warning('Por favor, selecione uma empresa.');
+  generateReport(reportType: 'monthly' | 'client' | 'services' | 'financial', config: ReportConfig | GeneralReportConfig) {
+    // Validation logic for reports that require a client
+    if ((reportType === 'client' || reportType === 'services') && !config.clientId) {
+      this.toastr.warning('Por favor, selecione um cliente.');
       return;
     }
     // Validation for the services report
@@ -84,7 +86,7 @@ export class ReportsPage implements OnInit {
 
     config.isLoading = true;
     const requestData: ReportRequest = {
-      companyId: config.companyId,
+      clientId: config.clientId || '',
       serviceId: config.serviceId,
       format: config.format
     };
@@ -96,8 +98,8 @@ export class ReportsPage implements OnInit {
       case 'monthly':
         reportObservable = this.reportService.generateMonthlyReport(requestData);
         break;
-      case 'company':
-        reportObservable = this.reportService.generateCompanyReport(requestData);
+      case 'client':
+        reportObservable = this.reportService.generateClientReport(requestData);
         break;
       case 'services':
         reportObservable = this.reportService.generateServicesReport(requestData);
