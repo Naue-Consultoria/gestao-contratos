@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, Input, ViewChild, ElementRef, HostListener, inject } from '@angular/core';
+import { Component, Output, EventEmitter, Input, ViewChild, ElementRef, HostListener, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -18,7 +18,7 @@ interface Notification {
   templateUrl: './header.html',
   styleUrls: ['./header.css']
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit, OnDestroy {
   @Input() userName = '';
   @Input() userRole = '';
   @Input() userInitials = '';
@@ -38,9 +38,52 @@ export class HeaderComponent {
   globalSearchTerm = '';
   isSearchActive = false;
   isUserMenuOpen = false;
+  
+  // Date and time properties
+  currentDayName = '';
+  currentDate = '';
+  currentYear = '';
+  currentTime = '';
+  private timeInterval: any;
 
   private router = inject(Router);
   private searchService = inject(SearchService);
+
+  ngOnInit(): void {
+    this.updateDateTime();
+    this.timeInterval = setInterval(() => {
+      this.updateDateTime();
+    }, 60000); // Atualiza a cada minuto
+  }
+
+  ngOnDestroy(): void {
+    if (this.timeInterval) {
+      clearInterval(this.timeInterval);
+    }
+  }
+
+  private updateDateTime(): void {
+    const now = new Date();
+    
+    // Dia da semana em português
+    const dayNames = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+    this.currentDayName = dayNames[now.getDay()];
+    
+    // Data formatada (dia de mês)
+    const day = now.getDate();
+    const monthNames = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 
+                       'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+    const month = monthNames[now.getMonth()];
+    this.currentDate = `${day} de ${month}`;
+    
+    // Ano
+    this.currentYear = now.getFullYear().toString();
+    
+    // Horário formatado (sem segundos)
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    this.currentTime = `${hours}:${minutes}`;
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {

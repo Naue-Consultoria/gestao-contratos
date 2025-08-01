@@ -303,14 +303,14 @@ tr:last-child td {
     border-bottom: none;
 }
 
-/* Company Info */
-.company-info {
+/* Client Info */
+.client-info {
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
-.company-avatar {
+.client-avatar {
     width: 40px;
     height: 40px;
     border-radius: 10px;
@@ -321,11 +321,11 @@ tr:last-child td {
     font-weight: 600;
 }
 
-.company-name {
+.client-name {
     font-weight: 600;
 }
 
-.company-since {
+.client-since {
     font-size: 0.75rem;
     color: var(--text-gray);
 }
@@ -360,18 +360,31 @@ tr:last-child td {
     gap: 0.5rem;
 }
 
-.contracts-count {
+.contracts-info .total {
     font-weight: 600;
 }
 
-.contracts-active {
+.contracts-info .active {
     font-size: 0.75rem;
     color: var(--text-gray);
 }
 
-/* Total Value */
-.total-value {
+/* Badge Styles */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-info {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+}
+
+.badge-primary {
+    background: rgba(14, 155, 113, 0.1);
     color: var(--primary-green);
 }
 

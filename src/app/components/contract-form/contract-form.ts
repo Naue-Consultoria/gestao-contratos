@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ContractService, CreateContractRequest, UpdateContractRequest, ContractServiceItem } from '../../services/contract';
-import { CompanyService, ApiCompany } from '../../services/company';
+import { ClientService, ApiClient } from '../../services/client';
 import { ServiceService, ApiService } from '../../services/service';
 import { ModalService } from '../../services/modal.service';
 import { UserService } from '../../services/user';
@@ -47,7 +47,7 @@ interface AssignedUser {
 })
 export class ContractFormComponent implements OnInit {
   private contractService = inject(ContractService);
-  private companyService = inject(CompanyService);
+  private clientService = inject(ClientService);
   private serviceService = inject(ServiceService);
   private modalService = inject(ModalService);
   private router = inject(Router);
@@ -57,7 +57,7 @@ export class ContractFormComponent implements OnInit {
 
   formData = {
     contract_number: '',
-    company_id: null as number | null,
+    client_id: null as number | null,
     type: 'Full' as 'Full' | 'Pontual' | 'Individual',
     status: 'active' as 'active' | 'completed' | 'cancelled' | 'suspended',
     start_date: '',
@@ -75,7 +75,7 @@ export class ContractFormComponent implements OnInit {
 
   availableServices: ApiService[] = [];
   selectedServices: SelectedService[] = [];
-  companies: ApiCompany[] = [];
+  clients: ApiClient[] = [];
   contractTypes = ['Full', 'Pontual', 'Individual'];
   assignedUsers: AssignedUser[] = [];
   
@@ -121,7 +121,7 @@ export class ContractFormComponent implements OnInit {
   }
 
   loadInitialData() {
-    this.loadCompanies();
+    this.loadClients();
     this.loadServices();
     this.loadUsersForAssignment();
   }
@@ -166,7 +166,7 @@ export class ContractFormComponent implements OnInit {
         const contract = response.contract as any;
         this.formData = {
           contract_number: contract.contract_number,
-          company_id: contract.company.id,
+          client_id: contract.client.id,
           type: contract.type,
           status: contract.status,
           start_date: contract.start_date.split('T')[0],
@@ -194,14 +194,14 @@ export class ContractFormComponent implements OnInit {
     }
   }
 
-  async loadCompanies() {
+  async loadClients() {
     try {
       const response = await firstValueFrom(
-        this.companyService.getCompanies({ is_active: true })
+        this.clientService.getClients({ is_active: true })
       );
-      if (response && response.companies) this.companies = response.companies;
+      if (response && response.clients) this.clients = response.clients;
     } catch (error) {
-      console.error('❌ Error loading companies:', error);
+      console.error('❌ Error loading clients:', error);
     }
   }
 
@@ -334,8 +334,8 @@ export class ContractFormComponent implements OnInit {
     this.errors = {};
     if (!this.formData.contract_number)
       this.errors.contract_number = 'Número do contrato é obrigatório';
-    if (!this.formData.company_id)
-      this.errors.company_id = 'Empresa é obrigatória';
+    if (!this.formData.client_id)
+      this.errors.client_id = 'Cliente é obrigatório';
     if (!this.formData.start_date)
       this.errors.start_date = 'Data de início é obrigatória';
     if (this.selectedServices.length === 0)
@@ -362,7 +362,7 @@ export class ContractFormComponent implements OnInit {
       if (this.isEditMode && this.contractId) {
         const updateData: UpdateContractRequest = {
           contract_number: this.formData.contract_number,
-          company_id: this.formData.company_id!,
+          client_id: this.formData.client_id!,
           type: this.formData.type,
           start_date: this.formData.start_date,
           end_date: this.formData.end_date || null,
@@ -378,7 +378,7 @@ export class ContractFormComponent implements OnInit {
       } else {
         const createData: CreateContractRequest = {
           ...this.formData,
-          company_id: this.formData.company_id!,
+          client_id: this.formData.client_id!,
           end_date: this.formData.end_date || null,
           notes: this.formData.notes || null,
           services,
@@ -404,9 +404,9 @@ export class ContractFormComponent implements OnInit {
   formatCurrency(value: number): string {
     return this.contractService.formatValue(value);
   }
-  getCompanyName(companyId: number | null): string {
-    const company = this.companies.find((c) => c.id === companyId);
-    return company ? company.name : '-';
+  getClientName(clientId: number | null): string {
+    const client = this.clients.find((c) => c.id === clientId);
+    return client ? client.name : '-';
   }
   getStatusText(status: string): string {
     if (!status) return '';

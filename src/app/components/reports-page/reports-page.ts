@@ -3,11 +3,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReportService } from '../../services/report';
-import { CompanyService } from '../../services/company';
+import { ClientService } from '../../services/client';
 import { ToastrService } from 'ngx-toastr';
 
 interface ReportConfig {
-  companyId: string;
+  clientId: string;
   format: 'pdf' | 'excel';
   isLoading: boolean;
 }
@@ -20,73 +20,73 @@ interface ReportConfig {
   styleUrls: ['./reports-page.css']
 })
 export class ReportsPage implements OnInit {
-  companies: any[] = []; // Usando any[] para evitar problemas de tipo
+  clients: any[] = []; // Usando any[] para evitar problemas de tipo
   
   // Configuração individual para cada tipo de relatório
   monthlyReport: ReportConfig = {
-    companyId: '',
+    clientId: '',
     format: 'pdf',
     isLoading: false
   };
 
-  companyReport: ReportConfig = {
-    companyId: '',
+  clientReport: ReportConfig = {
+    clientId: '',
     format: 'pdf',
     isLoading: false
   };
 
   servicesReport: ReportConfig = {
-    companyId: '',
+    clientId: '',
     format: 'pdf',
     isLoading: false
   };
 
   financialReport: ReportConfig = {
-    companyId: '',
+    clientId: '',
     format: 'pdf',
     isLoading: false
   };
 
   constructor(
     private reportService: ReportService,
-    private companyService: CompanyService,
+    private clientService: ClientService,
     private toastr: ToastrService
   ) {}
 
   ngOnInit() {
-    this.loadCompanies();
+    this.loadClients();
   }
 
-  loadCompanies() {
-    this.companyService.getCompanies().subscribe({
+  loadClients() {
+    this.clientService.getClients().subscribe({
       next: (response: any) => {
-        // Verificar se a resposta tem a propriedade companies
-        if (response && response.companies) {
-          this.companies = response.companies;
+        // Verificar se a resposta tem a propriedade clients
+        if (response && response.clients) {
+          this.clients = response.clients;
         } else if (Array.isArray(response)) {
-          this.companies = response;
+          this.clients = response;
         } else {
-          this.companies = [];
+          this.clients = [];
         }
       },
       error: (error) => {
-        console.error('Erro ao carregar empresas:', error);
-        this.toastr.error('Erro ao carregar lista de empresas');
+        console.error('Erro ao carregar clientes:', error);
+        this.toastr.error('Erro ao carregar lista de clientes');
       }
     });
   }
 
   // Métodos de geração de relatórios
   generateMonthlyReport() {
-    if (!this.monthlyReport.companyId) {
-      this.toastr.warning('Selecione uma empresa');
+    if (!this.monthlyReport.clientId) {
+      this.toastr.warning('Selecione um cliente');
       return;
     }
 
     this.monthlyReport.isLoading = true;
     
     this.reportService.generateMonthlyReport({
-      companyId: this.monthlyReport.companyId,
+      clientId: this.monthlyReport.clientId,
       format: this.monthlyReport.format
     }).subscribe({
       next: (blob) => {
@@ -103,42 +103,42 @@ export class ReportsPage implements OnInit {
     });
   }
 
-  generateCompanyReport() {
-    if (!this.companyReport.companyId) {
-      this.toastr.warning('Selecione uma empresa');
+  generateClientReport() {
+    if (!this.clientReport.clientId) {
+      this.toastr.warning('Selecione um cliente');
       return;
     }
 
-    this.companyReport.isLoading = true;
+    this.clientReport.isLoading = true;
     
-    this.reportService.generateCompanyReport({
-      companyId: this.companyReport.companyId,
-      format: this.companyReport.format
+    this.reportService.generateClientReport({
+      clientId: this.clientReport.clientId,
+      format: this.clientReport.format
     }).subscribe({
       next: (blob) => {
-        const filename = `relatorio_empresa_${new Date().toISOString().split('T')[0]}.${this.companyReport.format === 'pdf' ? 'pdf' : 'xlsx'}`;
+        const filename = `relatorio_cliente_${new Date().toISOString().split('T')[0]}.${this.clientReport.format === 'pdf' ? 'pdf' : 'xlsx'}`;
         this.reportService.downloadFile(blob, filename);
         this.toastr.success('Relatório gerado com sucesso!');
-        this.companyReport.isLoading = false;
+        this.clientReport.isLoading = false;
       },
       error: (error) => {
         console.error('Erro ao gerar relatório:', error);
         this.toastr.error('Erro ao gerar relatório');
-        this.companyReport.isLoading = false;
+        this.clientReport.isLoading = false;
       }
     });
   }
 
   generateServicesReport() {
-    if (!this.servicesReport.companyId) {
-      this.toastr.warning('Selecione uma empresa');
+    if (!this.servicesReport.clientId) {
+      this.toastr.warning('Selecione um cliente');
       return;
     }
 
     this.servicesReport.isLoading = true;
     
     this.reportService.generateServicesReport({
-      companyId: this.servicesReport.companyId,
+      clientId: this.servicesReport.clientId,
       format: this.servicesReport.format
     }).subscribe({
       next: (blob) => {
@@ -156,15 +156,15 @@ export class ReportsPage implements OnInit {
   }
 
   generateFinancialReport() {
-    if (!this.financialReport.companyId) {
-      this.toastr.warning('Selecione uma empresa');
+    if (!this.financialReport.clientId) {
+      this.toastr.warning('Selecione um cliente');
       return;
     }
 
     this.financialReport.isLoading = true;
     
     this.reportService.generateFinancialReport({
-      companyId: this.financialReport.companyId,
+      clientId: this.financialReport.clientId,
       format: this.financialReport.format
     }).subscribe({
       next: (blob) => {

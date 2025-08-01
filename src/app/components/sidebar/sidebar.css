@@ -4,12 +4,14 @@
     top: 77px; /* Altura do header */
     bottom: 0;
     width: 260px;
-    background-color: var(--white);
-    border-right: 1px solid var(--border-gray);
+    background-color: #003b2b;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
     overflow-y: auto;
+    overflow-x: hidden;
     transition: all 0.3s ease;
     z-index: 900;
 }
+
 
 /* Botão Toggle Compacto */
 .sidebar-toggle-compact {
@@ -20,8 +22,8 @@
     height: 28px;
     border-radius: 6px;
     background: transparent;
-    border: 1px solid var(--border-gray);
-    color: var(--text-gray);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -40,9 +42,9 @@
 /* Hover state */
 .sidebar-toggle-compact:hover {
     opacity: 1;
-    background: var(--light-gray);
-    color: var(--primary-green);
-    border-color: var(--primary-green);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 :host-context(body.dark-mode) .sidebar-toggle-compact:hover {
@@ -69,7 +71,7 @@
 .nav-section-title {
     font-size: 0.75rem;
     text-transform: uppercase;
-    color: var(--text-gray);
+    color: rgba(255, 255, 255, 0.6);
     font-weight: 600;
     padding: 0 1.5rem;
     margin-bottom: 0.5rem;
@@ -90,7 +92,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
-    color: var(--text-gray);
+    color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
     border-radius: 8px;
 }
@@ -101,6 +103,21 @@
 }
 
 
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-item.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.nav-item.active:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
 .nav-item::before {
     content: '';
     position: absolute;
@@ -108,9 +125,13 @@
     top: 0;
     bottom: 0;
     width: 3px;
-    background-color: var(--primary-green);
+    background-color: white;
     transform: scaleY(0);
     transition: transform 0.3s ease;
+}
+
+.nav-item.active::before {
+    transform: scaleY(1);
 }
 
 /* Alternativa: Botão integrado à linha da seção */
@@ -183,8 +204,8 @@
 
 /* Dark mode adjustments */
 :host-context(body.dark-mode) .sidebar {
-    background-color: #1a1a1a;
-    border-right: 1px solid #333;
+    background-color: #064c3f;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 :host-context(body.dark-mode) .sidebar-toggle-compact {
     border-color: #444;

@@ -23,7 +23,7 @@ export interface PublicProposal {
   signed_at?: string;
   accepted_value?: number;
   client_observations?: string;
-  company: {
+  client: {
     id: number;
     name: string;
     headquarters?: string;

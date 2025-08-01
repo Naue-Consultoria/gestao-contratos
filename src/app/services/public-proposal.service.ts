@@ -33,7 +33,7 @@ export interface PublicProposal {
   client_email?: string;
   signed_at?: string;
   accepted_value?: number;
-  company: {
+  client: {
     name: string;
     headquarters?: string;
     market_sector?: string;

@@ -18,7 +18,8 @@ export interface ProposalServiceItem {
 export interface Proposal {
   id: number;
   proposal_number: string;
-  company_id: number;
+  client_id: number;
+  client_type?: 'pf' | 'pj' | '';
   proposal_type: 'consultoria_corporativa' | 'mentoria' | 'prestacao_servicos' | 'r_s';
   client_name: string;
   client_document: string;
@@ -45,7 +46,7 @@ export interface Proposal {
   updated_at: string;
   created_by: number;
   updated_by?: number;
-  company?: {
+  client?: {
     id: number;
     name: string;
     headquarters?: string;
@@ -58,7 +59,8 @@ export interface Proposal {
 }
 
 export interface CreateProposalData {
-  company_id: number;
+  client_id: number;
+  client_type: 'pf' | 'pj' | '';
   proposal_type: 'consultoria_corporativa' | 'mentoria' | 'prestacao_servicos' | 'r_s';
   client_name: string;
   client_document: string;
@@ -82,7 +84,7 @@ export interface CreateProposalData {
 
 export interface ProposalFilters {
   status?: string;
-  company_id?: number;
+  client_id?: number;
   search?: string;
   expired_only?: boolean;
 }
@@ -132,8 +134,8 @@ export class ProposalService {
       if (filters.status) {
         params = params.set('status', filters.status);
       }
-      if (filters.company_id) {
-        params = params.set('company_id', filters.company_id.toString());
+      if (filters.client_id) {
+        params = params.set('client_id', filters.client_id.toString());
       }
       if (filters.search) {
         params = params.set('search', filters.search);
@@ -256,7 +258,7 @@ export class ProposalService {
   validateProposalData(proposalData: CreateProposalData): string[] {
     const errors: string[] = [];
 
-    if (!proposalData.company_id) {
+    if (!proposalData.client_id) {
       errors.push('Empresa é obrigatória');
     }
 

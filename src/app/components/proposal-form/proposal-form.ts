@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
+import { DocumentMaskDirective } from '../../directives/document-mask.directive';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
@@ -8,13 +9,13 @@ import { ToastrService } from 'ngx-toastr';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { ProposalService, CreateProposalData, Proposal } from '../../services/proposal';
-import { CompanyService, ApiCompany, CreateCompanyRequest } from '../../services/company';
+import { ClientService, ApiClient, CreateClientRequest } from '../../services/client';
 import { ServiceService, ApiService } from '../../services/service';
 
 @Component({
   selector: 'app-proposal-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, CurrencyMaskDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, CurrencyMaskDirective, DocumentMaskDirective],
   templateUrl: './proposal-form.html',
   styleUrls: ['./proposal-form.css'],
   animations: [
@@ -36,20 +37,20 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   @Output() onCancel = new EventEmitter<void>();
 
   proposalForm!: FormGroup;
-  companies: ApiCompany[] = [];
+  clients: ApiClient[] = [];
   services: ApiService[] = [];
   isLoading = false;
   isSubmitting = false;
   isEditMode = false;
-  showNewCompanyForm = false;
-  newCompanyForm!: FormGroup;
+  showNewClientForm = false;
+  newClientForm!: FormGroup;
 
   private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
     private proposalService: ProposalService,
-    private companyService: CompanyService,
+    private clientService: ClientService,
     private serviceService: ServiceService,
     private toastr: ToastrService,
     private router: Router,
@@ -77,23 +78,26 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
   private initializeForms(): void {
     this.proposalForm = this.fb.group({
-      company_id: ['', Validators.required],
-      client_name: ['', [Validators.required, Validators.minLength(3)]],
-      client_document: ['', [Validators.required, Validators.minLength(5)]],
-      client_email: ['', [Validators.required, Validators.email]],
-      client_phone: [''],
-      client_street: ['', Validators.required],
-      client_number: ['', Validators.required],
-      client_complement: [''],
-      client_neighborhood: ['', Validators.required],
-      client_city: ['', Validators.required],
-      client_zipcode: ['', [Validators.required, Validators.minLength(8)]],
+      client_id: ['', Validators.required],
       end_date: [''],
       services: this.fb.array([]),
     });
 
-    this.newCompanyForm = this.fb.group({
+    this.newClientForm = this.fb.group({
+      client_type: ['', Validators.required],
       name: ['', [Validators.required, Validators.minLength(2)]],
+      document: ['', [Validators.required, Validators.minLength(5)]],
+      rg: [''],
+      trade_name: [''],
+      email: ['', [Validators.required, Validators.email]],
+      phone: [''],
+      street: ['', Validators.required],
+      number: ['', Validators.required],
+      complement: [''],
+      neighborhood: ['', Validators.required],
+      city: ['', Validators.required],
+      state: ['', Validators.required],
+      zipcode: ['', [Validators.required, Validators.minLength(8)]],
       headquarters: [''],
       market_sector: [''],
       description: ['']
@@ -107,14 +111,15 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     
     forkJoin({
-      companies: this.companyService.getCompanies({}),
-      services: this.serviceService.getServices({})
+      clients: this.clientService.getClients({}),
+      services: this.serviceService.getServices({ is_active: true })
     }).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: (data) => {
-        this.companies = data.companies.companies || [];
-        this.services = data.services.services || [];
+        this.clients = data.clients.clients || [];
+        // Filtrar apenas serviços ativos
+        this.services = (data.services.services || []).filter(service => service.is_active);
         this.isLoading = false;
       },
       error: (error) => {
@@ -145,20 +150,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
   private populateForm(proposal: Proposal): void {
     this.proposalForm.patchValue({
-      company_id: proposal.company_id,
-      proposal_type: proposal.proposal_type,
-      client_name: proposal.client_name,
-      client_document: proposal.client_document,
-      client_email: proposal.client_email,
-      client_phone: proposal.client_phone,
-      client_street: proposal.client_street,
-      client_number: proposal.client_number,
-      client_complement: proposal.client_complement,
-      client_neighborhood: proposal.client_neighborhood,
-      client_city: proposal.client_city,
-      client_zipcode: proposal.client_zipcode,
+      client_id: proposal.client_id,
       end_date: proposal.end_date ? proposal.end_date.split('T')[0] : '',
-      validity_days: proposal.validity_days,
     });
 
     // Limpar serviços e adicionar os da proposta
@@ -202,15 +195,19 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     const serviceForm = this.servicesArray.at(index);
     const unitValue = serviceForm.get('unit_value')?.value;
     
-    // If unit_value is provided, use it (it's already in reais from the directive)
+    // If unit_value is provided and greater than 0, use it (convert from reais to cents)
     if (unitValue !== null && unitValue !== undefined && unitValue > 0) {
         return unitValue * 100; // Convert to cents for internal calculation
     }
     
-    // Otherwise, use the default service value (which is already in cents)
+    // If no unit_value, try to get from selected service
     const serviceId = serviceForm.get('service_id')?.value;
-    const service = this.getServiceById(serviceId);
-    return service?.value || 0;
+    if (serviceId) {
+      const service = this.getServiceById(serviceId);
+      return service?.value || 0; // Service value is already in cents
+    }
+    
+    return 0;
   }
 
   getServiceTotal(index: number): number {
@@ -239,40 +236,70 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     if (serviceId) {
       const service = this.getServiceById(serviceId);
       if (service) {
-        // Limpar valor personalizado quando mudar o serviço
-        serviceForm.get('unit_value')?.setValue(null);
+        // Preencher automaticamente com o valor do serviço (convertendo de centavos para reais)
+        const valueInReais = service.value / 100;
+        serviceForm.get('unit_value')?.setValue(valueInReais);
       }
+    } else {
+      // Limpar valor quando nenhum serviço está selecionado
+      serviceForm.get('unit_value')?.setValue(null);
     }
   }
 
-  toggleNewCompanyForm(): void {
-    this.showNewCompanyForm = !this.showNewCompanyForm;
-    if (!this.showNewCompanyForm) {
-      this.newCompanyForm.reset();
+  toggleNewClientForm(): void {
+    this.showNewClientForm = !this.showNewClientForm;
+    if (!this.showNewClientForm) {
+      this.newClientForm.reset();
     }
   }
 
-  createNewCompany(): void {
-    if (this.newCompanyForm.invalid) {
-      this.toastr.error('Preencha os campos obrigatórios da nova empresa');
+  createNewClient(): void {
+    if (this.newClientForm.invalid) {
+      this.toastr.error('Preencha os campos obrigatórios do novo cliente');
       return;
     }
 
-    const companyData: CreateCompanyRequest = this.newCompanyForm.value;
+    const formValue = this.newClientForm.value;
+    const clientType = formValue.client_type;
     
-    this.companyService.createCompany(companyData)
+    // Build client data according to the expected API format
+    const clientData: CreateClientRequest = {
+      type: clientType === 'pf' ? 'PF' : 'PJ',
+      email: formValue.email || '',
+      phone: formValue.phone || undefined,
+      street: formValue.street || '',
+      number: formValue.number || '',
+      complement: formValue.complement || undefined,
+      neighborhood: formValue.neighborhood || '',
+      city: formValue.city || '',
+      state: formValue.state || '',
+      zipcode: formValue.zipcode || ''
+    };
+
+    // Add type-specific fields
+    if (clientType === 'pf') {
+      clientData.cpf = formValue.document || '';
+      clientData.full_name = formValue.name || '';
+      clientData.rg = formValue.rg || undefined;
+    } else {
+      clientData.cnpj = formValue.document || '';
+      clientData.company_name = formValue.name || '';
+      clientData.trade_name = formValue.trade_name || undefined;
+    }
+    
+    this.clientService.createClient(clientData)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.companies.push(response.company);
-          this.proposalForm.get('company_id')?.setValue(response.company.id);
-          this.showNewCompanyForm = false;
-          this.newCompanyForm.reset();
-          this.toastr.success(response.message || 'Empresa criada com sucesso');
+          this.clients.push(response.client);
+          this.proposalForm.get('client_id')?.setValue(response.client.id);
+          this.showNewClientForm = false;
+          this.newClientForm.reset();
+          this.toastr.success(response.message || 'Cliente criado com sucesso');
         },
         error: (error) => {
-          console.error('Erro ao criar empresa:', error);
-          this.toastr.error('Erro ao criar empresa');
+          console.error('Erro ao criar cliente:', error);
+          this.toastr.error('Erro ao criar cliente');
         }
       });
   }
@@ -313,21 +340,35 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       closeButton: false
     });
     
+    // Obter dados do cliente selecionado
+    const clientId = parseInt(this.proposalForm.value.client_id) || 0;
+    const selectedClient = this.clients.find(c => c.id === clientId);
+    
+    if (!selectedClient) {
+      this.toastr.error('Cliente selecionado não encontrado');
+      this.isSubmitting = false;
+      return;
+    }
+
+    // Determinar tipo do cliente baseado no documento
+    const clientType = this.detectClientType(selectedClient.cpf || selectedClient.cnpj || '');
+    
     const formData: CreateProposalData = {
-      company_id: parseInt(this.proposalForm.value.company_id) || 0,
-      proposal_type: 'prestacao_servicos', // Valor padrão já que removemos a seleção
-      client_name: this.proposalForm.value.client_name?.trim() || '',
-      client_document: this.proposalForm.value.client_document?.trim() || '',
-      client_email: this.proposalForm.value.client_email?.trim() || '',
-      client_phone: this.proposalForm.value.client_phone?.trim() || null,
-      client_street: this.proposalForm.value.client_street?.trim() || '',
-      client_number: this.proposalForm.value.client_number?.trim() || '',
-      client_complement: this.proposalForm.value.client_complement?.trim() || null,
-      client_neighborhood: this.proposalForm.value.client_neighborhood?.trim() || '',
-      client_city: this.proposalForm.value.client_city?.trim() || '',
-      client_zipcode: this.proposalForm.value.client_zipcode?.trim() || '',
+      client_id: clientId,
+      client_type: clientType,
+      proposal_type: 'prestacao_servicos', // Valor padrão
+      client_name: selectedClient.full_name || selectedClient.company_name || '',
+      client_document: selectedClient.cpf || selectedClient.cnpj || '',
+      client_email: selectedClient.email || '',
+      client_phone: selectedClient.phone || undefined,
+      client_street: selectedClient.street || '',
+      client_number: selectedClient.number || '',
+      client_complement: selectedClient.complement || undefined,
+      client_neighborhood: selectedClient.neighborhood || '',
+      client_city: selectedClient.city || '',
+      client_zipcode: selectedClient.zipcode || '',
       end_date: this.proposalForm.value.end_date || null,
-      validity_days: 30, // Valor padrão já que removemos o campo
+      validity_days: 30, // Valor padrão
       services: this.servicesArray.value
         .filter((s: any) => s.service_id)
         .map((s: any) => ({
@@ -347,7 +388,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     operation.pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         // Limpar toast de loading
-        this.toastr.clear(loadingToast.toastId);
+        this.toastr.clear();
         
         if (response.success) {
           const successMessage = this.isEditMode ? 'Proposta atualizada com sucesso' : 'Proposta criada com sucesso';
@@ -379,7 +420,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         // Limpar toast de loading
-        this.toastr.clear(loadingToast.toastId);
+        this.toastr.clear();
         console.error('Erro ao salvar proposta:', error);
         this.toastr.error('Erro ao salvar proposta');
         this.isSubmitting = false;
@@ -408,7 +449,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     this.proposalForm.reset();
     this.servicesArray.clear();
     this.addService();
-    this.proposalForm.get('company_id')?.setValue('');
+    this.proposalForm.get('client_id')?.setValue('');
   }
 
   cancel(): void {
@@ -429,6 +470,48 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     const serviceForm = this.servicesArray.at(index);
     const field = serviceForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+
+  getNewClientNamePlaceholder(): string {
+    const clientType = this.newClientForm.get('client_type')?.value;
+    if (clientType === 'pf') {
+      return 'Nome completo da pessoa';
+    } else if (clientType === 'pj') {
+      return 'Razão social da empresa';
+    }
+    return 'Nome completo ou razão social';
+  }
+
+  getNewClientDocumentPlaceholder(): string {
+    const clientType = this.newClientForm.get('client_type')?.value;
+    if (clientType === 'pf') {
+      return '000.000.000-00';
+    } else if (clientType === 'pj') {
+      return '00.000.000/0001-00';
+    }
+    return '000.000.000-00 ou 00.000.000/0001-00';
+  }
+
+  isNewClientFieldInvalid(fieldName: string): boolean {
+    const field = this.newClientForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  private detectClientType(document: string): 'pf' | 'pj' | '' {
+    if (!document) return '';
+    
+    // Remove all non-numeric characters
+    const cleanDocument = document.replace(/\D/g, '');
+    
+    // CPF has 11 digits, CNPJ has 14 digits
+    if (cleanDocument.length === 11) {
+      return 'pf';
+    } else if (cleanDocument.length === 14) {
+      return 'pj';
+    }
+    
+    return '';
   }
 
 }

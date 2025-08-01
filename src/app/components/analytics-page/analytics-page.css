@@ -88,12 +88,12 @@
 }
 
 .success-card {
-    background: linear-gradient(135deg, #0A8060 0%,#085A44 70%);
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 70%);
     color: white;
 }
 
 .service-card {
-    background: linear-gradient(135deg, #0A8060 0%, #085A44 100%);
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
     color: white;
 }
 
@@ -268,7 +268,7 @@
 }
 
 .metric-trend.positive {
-    color: #0A8060;
+    color: #003b2b;
 }
 
 .metric-trend.negative {

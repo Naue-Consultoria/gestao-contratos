@@ -25,7 +25,7 @@
 
 .loading-spinner i {
   font-size: 3rem;
-  color: #0e9b71;
+  color: #003b2b;
   margin-bottom: 1rem;
 }
 
@@ -44,7 +44,7 @@
 
 /* Header */
 .proposal-header {
-  background: linear-gradient(135deg, #0e9b71 0%, #047857 100%);
+  background: linear-gradient(135deg, #003b2b 0%, #047857 100%);
   color: white;
   padding: 2rem;
   display: flex;
@@ -53,13 +53,13 @@
   gap: 2rem;
 }
 
-.company-info h1 {
+.client-info h1 {
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
 }
 
-.company-details {
+.client-details {
   font-size: 1rem;
   opacity: 0.9;
   margin: 0;
@@ -133,7 +133,7 @@
 }
 
 .meta-item i {
-  color: #0e9b71;
+  color: #003b2b;
 }
 
 /* Step Indicator */
@@ -180,7 +180,7 @@
 }
 
 .step.active .step-number {
-  background-color: #0e9b71;
+  background-color: #003b2b;
   color: white;
 }
 
@@ -197,7 +197,7 @@
 }
 
 .step.active .step-label {
-  color: #0e9b71;
+  color: #003b2b;
   font-weight: 600;
 }
 
@@ -239,7 +239,7 @@
 .total-selected {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0e9b71;
+  color: #003b2b;
   margin: 0;
 }
 
@@ -259,7 +259,7 @@
 }
 
 .section-title i {
-  color: #0e9b71;
+  color: #003b2b;
 }
 
 .section-subtitle {
@@ -289,12 +289,12 @@
 }
 
 .service-card.selectable:hover {
-  border-color: #0e9b71;
+  border-color: #003b2b;
   box-shadow: 0 4px 6px -1px rgba(14, 155, 113, 0.1);
 }
 
 .service-card.selected {
-  border-color: #0e9b71;
+  border-color: #003b2b;
   background-color: #f0fdf4;
 }
 
@@ -330,12 +330,12 @@
 }
 
 .checkbox-container:hover .checkmark {
-  border-color: #0e9b71;
+  border-color: #003b2b;
 }
 
 .checkbox-container input:checked ~ .checkmark {
-  background-color: #0e9b71;
-  border-color: #0e9b71;
+  background-color: #003b2b;
+  border-color: #003b2b;
 }
 
 .checkmark:after {
@@ -384,7 +384,7 @@
 
 .total-price {
   font-weight: 600;
-  color: #0e9b71;
+  color: #003b2b;
 }
 
 .service-description {
@@ -408,7 +408,7 @@
 }
 
 .service-meta i {
-  color: #0e9b71;
+  color: #003b2b;
 }
 
 /* Service Notes */
@@ -437,7 +437,7 @@
 
 .service-notes textarea:focus {
   outline: none;
-  border-color: #0e9b71;
+  border-color: #003b2b;
   box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
 }
 
@@ -446,7 +446,7 @@
   padding: 0.75rem;
   background-color: #f8fafc;
   border-radius: 8px;
-  border-left: 4px solid #0e9b71;
+  border-left: 4px solid #003b2b;
 }
 
 .existing-notes strong {
@@ -531,7 +531,7 @@
 
 .selecting-notes textarea:focus {
   outline: none;
-  border-color: #0e9b71;
+  border-color: #003b2b;
   box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
 }
 
@@ -575,7 +575,7 @@
 
 .form-control:focus {
   outline: none;
-  border-color: #0e9b71;
+  border-color: #003b2b;
   box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
 }
 
@@ -686,7 +686,7 @@
 
 .service-value {
   font-weight: 600;
-  color: #0e9b71;
+  color: #003b2b;
 }
 
 .final-total {
@@ -768,7 +768,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #0e9b71 0%, #047857 100%);
+  background: linear-gradient(135deg, #003b2b 0%, #047857 100%);
   color: white;
   box-shadow: 0 4px 12px rgba(14, 155, 113, 0.3);
 }

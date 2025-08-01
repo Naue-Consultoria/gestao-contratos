@@ -433,14 +433,14 @@
     color: var(--primary-green);
 }
 
-/* Company Info */
-.company-info {
+/* Client Info */
+.client-info {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.company-info i {
+.client-info i {
     color: var(--text-gray);
 }
 

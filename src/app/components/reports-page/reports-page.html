@@ -24,16 +24,16 @@
     <div class="report-controls">
       <div class="form-group">
         <label class="filter-label">
-          <i class="fas fa-building"></i>
-          Empresa
+          <i class="fas fa-users"></i>
+          Cliente
         </label>
         <select 
           class="form-control" 
-          [(ngModel)]="monthlyReport.companyId"
+          [(ngModel)]="monthlyReport.clientId"
           [disabled]="monthlyReport.isLoading">
-          <option value="">Selecione uma empresa</option>
-          <option *ngFor="let company of companies" [ngValue]="company.id.toString()">
-            {{ company.name }}
+          <option value="">Selecione um cliente</option>
+          <option *ngFor="let client of clients" [ngValue]="client.id.toString()">
+            {{ client.name }}
           </option>
         </select>
       </div>
@@ -57,36 +57,36 @@
       <button 
         class="btn btn-primary"
         (click)="generateMonthlyReport()"
-        [disabled]="!monthlyReport.companyId || monthlyReport.isLoading">
+        [disabled]="!monthlyReport.clientId || monthlyReport.isLoading">
         <i class="fas" [class.fa-download]="!monthlyReport.isLoading" [class.fa-spinner]="monthlyReport.isLoading" [class.fa-spin]="monthlyReport.isLoading"></i>
         {{ monthlyReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}
       </button>
     </div>
   </div>
 
-  <!-- Relatório por Empresa -->
-  <div class="report-type-card" [class.generating]="companyReport.isLoading">
-    <div class="report-icon company">
-      <i class="fas fa-building"></i>
+  <!-- Relatório por Cliente -->
+  <div class="report-type-card" [class.generating]="clientReport.isLoading">
+    <div class="report-icon client">
+      <i class="fas fa-users"></i>
     </div>
-    <h3 class="report-name">Relatório por Empresa</h3>
+    <h3 class="report-name">Relatório por Cliente</h3>
     <p class="report-description">
-      Análise detalhada do desempenho e contratos de uma empresa
+      Análise detalhada do desempenho e contratos de um cliente
     </p>
     
     <div class="report-controls">
       <div class="form-group">
         <label class="filter-label">
-          <i class="fas fa-building"></i>
-          Empresa
+          <i class="fas fa-users"></i>
+          Cliente
         </label>
         <select 
           class="form-control" 
-          [(ngModel)]="companyReport.companyId"
-          [disabled]="companyReport.isLoading">
-          <option value="">Selecione uma empresa</option>
-          <option *ngFor="let company of companies" [value]="company.id">
-            {{ company.name }}
+          [(ngModel)]="clientReport.clientId"
+          [disabled]="clientReport.isLoading">
+          <option value="">Selecione um cliente</option>
+          <option *ngFor="let client of clients" [value]="client.id">
+            {{ client.name }}
           </option>
         </select>
       </div>
@@ -98,8 +98,8 @@
         </label>
         <select 
           class="form-control" 
-          [(ngModel)]="companyReport.format"
-          [disabled]="companyReport.isLoading">
+          [(ngModel)]="clientReport.format"
+          [disabled]="clientReport.isLoading">
           <option value="pdf">PDF</option>
           <option value="excel">Excel</option>
         </select>
@@ -109,10 +109,10 @@
     <div class="report-actions">
       <button 
         class="btn btn-primary"
-        (click)="generateCompanyReport()"
-        [disabled]="!companyReport.companyId || companyReport.isLoading">
-        <i class="fas" [class.fa-download]="!companyReport.isLoading" [class.fa-spinner]="companyReport.isLoading" [class.fa-spin]="companyReport.isLoading"></i>
-        {{ companyReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}
+        (click)="generateClientReport()"
+        [disabled]="!clientReport.clientId || clientReport.isLoading">
+        <i class="fas" [class.fa-download]="!clientReport.isLoading" [class.fa-spinner]="clientReport.isLoading" [class.fa-spin]="clientReport.isLoading"></i>
+        {{ clientReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}
       </button>
     </div>
   </div>
@@ -130,16 +130,16 @@
     <div class="report-controls">
       <div class="form-group">
         <label class="filter-label">
-          <i class="fas fa-building"></i>
-          Empresa
+          <i class="fas fa-users"></i>
+          Cliente
         </label>
         <select 
           class="form-control" 
-          [(ngModel)]="servicesReport.companyId"
+          [(ngModel)]="servicesReport.clientId"
           [disabled]="servicesReport.isLoading">
-          <option value="">Selecione uma empresa</option>
-          <option *ngFor="let company of companies" [value]="company.id">
-            {{ company.name }}
+          <option value="">Selecione um cliente</option>
+          <option *ngFor="let client of clients" [value]="client.id">
+            {{ client.name }}
           </option>
         </select>
       </div>
@@ -163,7 +163,7 @@
       <button 
         class="btn btn-primary"
         (click)="generateServicesReport()"
-        [disabled]="!servicesReport.companyId || servicesReport.isLoading">
+        [disabled]="!servicesReport.clientId || servicesReport.isLoading">
         <i class="fas" [class.fa-download]="!servicesReport.isLoading" [class.fa-spinner]="servicesReport.isLoading" [class.fa-spin]="servicesReport.isLoading"></i>
         {{ servicesReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}
       </button>
@@ -183,16 +183,16 @@
     <div class="report-controls">
       <div class="form-group">
         <label class="filter-label">
-          <i class="fas fa-building"></i>
-          Empresa
+          <i class="fas fa-users"></i>
+          Cliente
         </label>
         <select 
           class="form-control" 
-          [(ngModel)]="financialReport.companyId"
+          [(ngModel)]="financialReport.clientId"
           [disabled]="financialReport.isLoading">
-          <option value="">Selecione uma empresa</option>
-          <option *ngFor="let company of companies" [value]="company.id">
-            {{ company.name }}
+          <option value="">Selecione um cliente</option>
+          <option *ngFor="let client of clients" [value]="client.id">
+            {{ client.name }}
           </option>
         </select>
       </div>
@@ -216,7 +216,7 @@
       <button 
         class="btn btn-primary"
         (click)="generateFinancialReport()"
-        [disabled]="!financialReport.companyId || financialReport.isLoading">
+        [disabled]="!financialReport.clientId || financialReport.isLoading">
         <i class="fas" [class.fa-download]="!financialReport.isLoading" [class.fa-spinner]="financialReport.isLoading" [class.fa-spin]="financialReport.isLoading"></i>
         {{ financialReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}
       </button>

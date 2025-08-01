@@ -1,4 +1,4 @@
-/* src/app/components/new-company-page/new-company-page.css */
+/* src/app/components/new-client-page/new-client-page.css */
 @import "../../../styles/variables.css";
 
 /* O componente não tem mais wrapper .page, os estilos são aplicados diretamente */
@@ -63,8 +63,56 @@
 }
 
 /* Formulário */
-.company-form {
+.client-form {
   width: 100%;
+}
+
+/* Seletor de tipo de cliente */
+.client-type-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid #e1e4e8;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.radio-option:hover {
+  border-color: #d0d5dd;
+}
+
+.radio-option input[type="radio"] {
+  display: none;
+}
+
+.radio-option input[type="radio"]:checked + .radio-label {
+  color: var(--naue-green);
+}
+
+.radio-option:has(input[type="radio"]:checked),
+.radio-option.selected {
+  border-color: var(--naue-green);
+  background-color: rgba(10, 128, 96, 0.05);
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: #344054;
+}
+
+.radio-label i {
+  font-size: 1.25rem;
 }
 
 /* Seções do formulário */

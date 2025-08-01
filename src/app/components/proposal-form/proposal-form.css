@@ -46,7 +46,7 @@
 }
 
 .breadcrumb-link:hover {
-  color: var(--naue-primary, #0A8060);
+  color: var(--primary-green, #003b2b);
   text-decoration: underline;
 }
 
@@ -75,7 +75,7 @@
 
 .loading-container i {
   font-size: 24px;
-  color: var(--naue-primary, #0A8060);
+  color: var(--primary-green, #003b2b);
 }
 
 /* Form Container */
@@ -112,7 +112,7 @@ form {
 }
 
 .section-title i {
-  color: var(--naue-primary, #0A8060);
+  color: var(--primary-green, #003b2b);
   font-size: 16px;
 }
 
@@ -164,7 +164,7 @@ form {
 
 .form-control:focus {
   outline: none;
-  border-color: var(--naue-primary, #0A8060);
+  border-color: var(--primary-green, #003b2b);
   box-shadow: 0 0 0 3px rgba(10, 128, 96, 0.1);
 }
 
@@ -197,7 +197,7 @@ textarea.form-control {
   flex: 1;
 }
 
-.company-details {
+.client-details {
   color: #6c737f;
 }
 
@@ -325,7 +325,7 @@ textarea.form-control {
 }
 
 .preview-title i {
-  color: var(--naue-primary, #0A8060);
+  color: var(--primary-green, #003b2b);
 }
 
 .preview-content {
@@ -393,7 +393,7 @@ textarea.form-control {
 .total-amount {
   font-size: 20px;
   font-weight: 700;
-  color: var(--naue-primary, #0A8060);
+  color: var(--primary-green, #003b2b);
 }
 
 /* Form Actions */
@@ -427,12 +427,12 @@ textarea.form-control {
 }
 
 .btn-primary {
-  background-color: var(--naue-primary, #0A8060);
+  background-color: var(--primary-green, #003b2b);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--naue-primary-hover, #085A44);
+  background-color: var(--primary-green-dark, #002419);
 }
 
 .btn-secondary {
@@ -447,8 +447,8 @@ textarea.form-control {
 
 .btn-outline {
   background-color: transparent;
-  color: var(--naue-primary, #0A8060);
-  border-color: var(--naue-primary, #0A8060);
+  color: var(--primary-green, #003b2b);
+  border-color: var(--primary-green, #003b2b);
 }
 
 .btn-outline:hover:not(:disabled) {

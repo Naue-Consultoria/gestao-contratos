@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface ReportRequest {
-  companyId: string;
+  clientId: string;
   format: 'pdf' | 'excel';
 }
 
@@ -23,8 +23,8 @@ export class ReportService {
     });
   }
 
-  generateCompanyReport(data: ReportRequest): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/by-company`, data, {
+  generateClientReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/by-client`, data, {
       responseType: 'blob',
       headers: this.getHeaders()
     });

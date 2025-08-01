@@ -91,13 +91,13 @@
   transition: all 0.2s ease;
 }
 .user-option:hover {
-  border-color: #0a8060;
+  border-color: #003b2b;
   background-color: #f7fafc;
 }
 .user-option.selected {
-  border-color: #0a8060;
+  border-color: #003b2b;
   background-color: #e8f5f1;
-  box-shadow: 0 0 0 2px #0a806040;
+  box-shadow: 0 0 0 2px #003b2b40;
 }
 .user-info {
   flex: 1;
@@ -118,7 +118,7 @@
   color: #d1d5db;
 }
 .user-option.selected .user-option-action {
-  color: #0a8060;
+  color: #003b2b;
 }
 .modal-footer {
   padding: 1.5rem;
@@ -140,7 +140,7 @@
   border: none;
 }
 .btn-primary {
-  background-color: #0a8060;
+  background-color: #003b2b;
   color: white;
   border: none;
 }

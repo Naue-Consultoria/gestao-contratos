@@ -11,7 +11,7 @@ export interface ContractServiceItem {
 
 export interface CreateContractRequest {
   contract_number?: string;
-  company_id: number;
+  client_id: number;
   type: 'Full' | 'Pontual' | 'Individual';
   start_date: string;
   end_date?: string | null;
@@ -23,7 +23,7 @@ export interface CreateContractRequest {
 
 export interface UpdateContractRequest {
   contract_number?: string;
-  company_id?: number;
+  client_id?: number;
   type?: 'Full' | 'Pontual' | 'Individual';
   start_date?: string;
   end_date?: string | null;
@@ -58,7 +58,7 @@ export interface ApiContract {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  company: {
+  client: {
     id: number;
     name: string;
   };

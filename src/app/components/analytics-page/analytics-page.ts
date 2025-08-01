@@ -43,7 +43,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     { 
       name: 'Diagnóstico Organizacional', 
       value: 25, 
-      color: '#0A8060',
+      color: '#003b2b',
       icon: 'fas fa-stethoscope',
       contracts: 6
     },
@@ -83,14 +83,14 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       label: 'Contratos Ativos',
       value: 18,
       icon: 'fas fa-file-contract',
-      color: '#0A8060',
+      color: '#003b2b',
       trend: 12
     },
     {
       label: 'Renovação Média',
       value: 85,
       icon: 'fas fa-sync',
-      color: '#0A8060',
+      color: '#003b2b',
       trend: 5,
       suffix: '%'
     },
@@ -98,7 +98,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       label: 'Tempo Médio de Projeto',
       value: '3.5',
       icon: 'fas fa-clock',
-      color: '#0A8060',
+      color: '#003b2b',
       trend: -8,
       suffix: ' meses'
     },
@@ -106,7 +106,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       label: 'NPS Score',
       value: 78,
       icon: 'fas fa-smile',
-      color: '#0A8060',
+      color: '#003b2b',
       trend: 15
     }
   ];
@@ -118,7 +118,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       {
         label: 'Novos Contratos',
         data: [3, 5, 4, 7, 6, 8],
-        borderColor: '#0A8060',
+        borderColor: '#003b2b',
         backgroundColor: 'rgba(14, 155, 113, 0.1)'
       },
       {
@@ -341,7 +341,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       data: {
         datasets: [{
           data: [this.successRate, 100 - this.successRate],
-          backgroundColor: ['#0A8060', isDarkMode ? '#374151' : '#e5e7eb'],
+          backgroundColor: ['#003b2b', isDarkMode ? '#374151' : '#e5e7eb'],
           borderWidth: 0
         }]
       },

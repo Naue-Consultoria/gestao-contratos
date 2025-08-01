@@ -7,8 +7,8 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
 import { DashboardContentComponent } from './components/dashboard-content/dashboard-content';
 import { ContractsTableComponent } from './components/contracts-table/contracts-table';
 import { ContractFormComponent } from './components/contract-form/contract-form';
-import { CompaniesTableComponent } from './components/companies-table/companies-table';
-import { NewCompanyPageComponent } from './components/new-company-page/new-company-page';
+import { ClientsTableComponent } from './components/clients-table/clients-table';
+import { NewClientPageComponent } from './components/new-client-page/new-client-page';
 import { ServicesTableComponent } from './components/services-table/services-table';
 import { ServiceFormComponent } from './components/services-form/services-form';
 import { ProposalsPageComponent } from './components/proposals-page/proposals-page';
@@ -108,25 +108,25 @@ export const routes: Routes = [
         title: 'Editar Contrato - NAUE Consultoria',
       },
 
-      // Gestão de empresas
+      // Gestão de clientes
       {
-        path: 'companies',
-        component: CompaniesTableComponent,
-        title: 'Empresas - NAUE Consultoria',
+        path: 'clients',
+        component: ClientsTableComponent,
+        title: 'Clientes - NAUE Consultoria',
       },
       
-      // Nova empresa
+      // Novo cliente
       {
-        path: 'companies/new',
-        component: NewCompanyPageComponent,
-        title: 'Nova Empresa - NAUE Consultoria',
+        path: 'clients/new',
+        component: NewClientPageComponent,
+        title: 'Novo Cliente - NAUE Consultoria',
       },
       
-      // Editar empresa
+      // Editar cliente
       {
-        path: 'companies/edit/:id',
-        component: NewCompanyPageComponent,
-        title: 'Editar Empresa - NAUE Consultoria',
+        path: 'clients/edit/:id',
+        component: NewClientPageComponent,
+        title: 'Editar Cliente - NAUE Consultoria',
       },
 
       // Gestão de serviços

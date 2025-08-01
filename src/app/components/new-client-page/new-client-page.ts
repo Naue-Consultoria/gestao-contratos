@@ -1,0 +1,131 @@
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { ClientService, CreateClientRequest, UpdateClientRequest, ApiClient } from '../../services/client';
+import { ModalService } from '../../services/modal.service';
+import { DocumentMaskDirective } from '../../directives/document-mask.directive';
+import { firstValueFrom } from 'rxjs';
+
+@Component({
+  selector: 'app-new-client-page',
+  standalone: true,
+  imports: [CommonModule, FormsModule, DocumentMaskDirective],
+  templateUrl: './new-client-page.html',
+  styleUrls: ['./new-client-page.css']
+})
+export class NewClientPageComponent implements OnInit {
+  private clientService = inject(ClientService);
+  private modalService = inject(ModalService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  
+  // Form data
+  formData: CreateClientRequest = {
+    type: 'PF',
+    email: '',
+    phone: '',
+    street: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    city: '',
+    state: '',
+    zipcode: '',
+    // PF fields
+    cpf: '',
+    rg: '',
+    full_name: '',
+    // PJ fields
+    cnpj: '',
+    company_name: '',
+    trade_name: ''
+  };
+  
+  isLoading = false;
+  isEditing = false;
+  editingId: number | null = null;
+  
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditing = true;
+      this.editingId = parseInt(id);
+      this.loadClient();
+    }
+  }
+
+  async loadClient() {
+    if (!this.editingId) return;
+    
+    try {
+      this.isLoading = true;
+      const response = await firstValueFrom(this.clientService.getClient(this.editingId));
+      const client = response.client;
+      
+      // Map client data to form
+      this.formData = {
+        type: client.type,
+        email: client.email,
+        phone: client.phone || '',
+        street: client.street,
+        number: client.number,
+        complement: client.complement || '',
+        neighborhood: client.neighborhood,
+        city: client.city,
+        state: client.state,
+        zipcode: client.zipcode,
+        // PF fields
+        cpf: client.cpf || '',
+        rg: client.rg || '',
+        full_name: client.full_name || '',
+        // PJ fields
+        cnpj: client.cnpj || '',
+        company_name: client.company_name || '',
+        trade_name: client.trade_name || ''
+      };
+    } catch (error) {
+      console.error('Erro ao carregar cliente:', error);
+      this.modalService.showError('Erro ao carregar dados do cliente');
+      this.goBack();
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async onSubmit() {
+    if (this.isLoading) return;
+    
+    try {
+      this.isLoading = true;
+      
+      if (this.isEditing && this.editingId) {
+        await firstValueFrom(this.clientService.updateClient(this.editingId, this.formData));
+        this.modalService.showSuccess('Cliente atualizado com sucesso!');
+      } else {
+        await firstValueFrom(this.clientService.createClient(this.formData));
+        this.modalService.showSuccess('Cliente criado com sucesso!');
+      }
+      
+      this.goBack();
+    } catch (error: any) {
+      console.error('Erro ao salvar cliente:', error);
+      
+      if (error.status === 400) {
+        this.modalService.showError(error.error?.message || 'Dados inválidos');
+      } else {
+        this.modalService.showError('Erro ao salvar cliente');
+      }
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  goBack() {
+    this.router.navigate(['/home/clients']);
+  }
+
+  getPageTitle(): string {
+    return this.isEditing ? 'Editar Cliente' : 'Novo Cliente';
+  }
+}

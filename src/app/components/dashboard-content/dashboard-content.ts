@@ -40,10 +40,10 @@ interface QuickAction {
 })
 export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestroy {
   statCards: StatCard[] = [
-    { label: 'Total de Contratos', value: 24, change: '+12% este mês', changeType: 'positive', icon: 'fas fa-file-contract', progress: 75, color: '#0A8060', bgColor: 'rgba(14, 155, 113, 0.15)' },
-    { label: 'Contratos Ativos', value: 18, change: '75% do total', changeType: 'positive', icon: 'fas fa-check-circle', progress: 75, color: '#0A8060', bgColor: 'rgba(14, 155, 113, 0.15)' },
-    { label: 'Serviços em Andamento', value: 42, change: 'Em 18 contratos', changeType: 'positive', icon: 'fas fa-list-check', progress: 65, color: '#0A8060', bgColor: 'rgba(14, 155, 113, 0.15)' },
-    { label: 'Próximas Atividades', value: 8, change: '3 urgentes', changeType: 'negative', icon: 'fas fa-clock', progress: 40, color: '#0A8060', bgColor: 'rgba(14, 155, 113, 0.15)' }
+    { label: 'Total de Contratos', value: 24, change: '+12% este mês', changeType: 'positive', icon: 'fas fa-file-contract', progress: 75, color: '#003b2b', bgColor: 'rgba(14, 155, 113, 0.15)' },
+    { label: 'Contratos Ativos', value: 18, change: '75% do total', changeType: 'positive', icon: 'fas fa-check-circle', progress: 75, color: '#003b2b', bgColor: 'rgba(14, 155, 113, 0.15)' },
+    { label: 'Serviços em Andamento', value: 42, change: 'Em 18 contratos', changeType: 'positive', icon: 'fas fa-list-check', progress: 65, color: '#003b2b', bgColor: 'rgba(14, 155, 113, 0.15)' },
+    { label: 'Próximas Atividades', value: 8, change: '3 urgentes', changeType: 'negative', icon: 'fas fa-clock', progress: 40, color: '#003b2b', bgColor: 'rgba(14, 155, 113, 0.15)' }
   ];
   recentActivities: Activity[] = [
     { time: 'Há 2 horas', title: 'Diagnóstico Organizacional - Empresa ABC', description: 'Reunião inicial realizada com sucesso', type: 'diagnostic', status: 'completed' },
@@ -52,15 +52,16 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     { time: 'Há 2 dias', title: 'Consultoria RH - Inovação Corp', description: 'Análise de clima organizacional em andamento', type: 'hr', status: 'in-progress' }
   ];
   quickActions: QuickAction[] = [
-    { icon: 'fas fa-building', label: 'Nova Empresa', color: '#0A8060', action: 'newCompany' },
-    { icon: 'fas fa-briefcase', label: 'Novo Serviço', color: '#0A8060', action: 'newService' },
-    { icon: 'fas fa-plus', label: 'Novo Contrato', color: '#0A8060', action: 'newContract' },
-    { icon: 'fas fa-chart-bar', label: 'Gerar Relatório', color: '#0A8060', action: 'generateReport' }
+    { icon: 'fas fa-file-alt', label: 'Nova Proposta', color: '#003b2b', action: 'newProposal' },
+    { icon: 'fas fa-users', label: 'Novo Cliente', color: '#003b2b', action: 'newClient' },
+    { icon: 'fas fa-briefcase', label: 'Novo Serviço', color: '#003b2b', action: 'newService' },
+    { icon: 'fas fa-plus', label: 'Novo Contrato', color: '#003b2b', action: 'newContract' },
+    { icon: 'fas fa-chart-bar', label: 'Gerar Relatório', color: '#003b2b', action: 'generateReport' }
   ];
   monthlyContractsData = {
     labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
     datasets: [{
-      label: 'Contratos', data: [12, 15, 18, 22, 20, 24], borderColor: '#0A8060', backgroundColor: 'rgba(14, 155, 113, 0.1)', fill: true
+      label: 'Contratos', data: [12, 15, 18, 22, 20, 24], borderColor: '#003b2b', backgroundColor: 'rgba(14, 155, 113, 0.1)', fill: true
     }]
   };
   contractsChart: Chart | null = null;
@@ -154,7 +155,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
         },
         elements: {
           line: { tension: 0.4, borderWidth: 3 },
-          point: { radius: 5, hoverRadius: 7, backgroundColor: '#fff', borderWidth: 3, borderColor: '#0A8060' }
+          point: { radius: 5, hoverRadius: 7, backgroundColor: '#fff', borderWidth: 3, borderColor: '#003b2b' }
         }
       }
     });
@@ -171,8 +172,9 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
   executeQuickAction(action: string) {
     const routes: { [key: string]: string } = {
+      'newProposal': '/home/proposals/new',
       'newContract': '/home/contracts/new',
-      'newCompany': '/home/companies/new',
+      'newClient': '/home/clients/new',
       'newService': '/home/services/new',
       'generateReport': '/home/reports'
     };

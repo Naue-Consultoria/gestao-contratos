@@ -4,12 +4,13 @@
     left: 0;
     right: 0;
     height: 77px;
-    background-color: var(--white);
-    border-bottom: 1px solid var(--border-gray);
+    background-color: #003b2b;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 1000;
     transition: all 0.3s ease;
     overflow: visible; /* Garantir que não corte o dropdown */
 }
+
 
 :host-context(body.dark-mode) .header {
     background-color: var(--dark-card);
@@ -32,7 +33,7 @@
     background: none;
     border: none;
     font-size: 1.5rem;
-    color: var(--text-gray);
+    color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
     padding: 0.5rem;
     margin-right: 1rem;
@@ -45,8 +46,8 @@
 }
 
 .mobile-menu-btn:hover {
-    background-color: var(--light-gray);
-    color: var(--text-dark);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 1);
 }
 
 :host-context(body.dark-mode) .mobile-menu-btn:hover {
@@ -62,7 +63,7 @@
     text-decoration: none;
     color: inherit;
     flex-shrink: 0;
-    border-radius: 12px;
+    border-radius: 2px;
     transition: all 0.2s ease;
 }
 
@@ -75,23 +76,17 @@
     opacity: 0.9;
 }
 
-.logo-icon {
-    width: 42px;
-    height: 42px;
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    font-weight: 700;
-    font-size: 1.25rem;
+.logo-image {
+    height: 80px;
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
 }
 
 .logo-text {
     font-size: 1.125rem;
     font-weight: 600;
-    color: var(--text-dark);
+    color: rgba(255, 255, 255, 0.9);
     white-space: nowrap;
 }
 
@@ -113,10 +108,11 @@
 .search-input {
     width: 100%;
     padding: 0.75rem 1rem 0.75rem 2.75rem;
-    border: 1px solid var(--border-gray);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 10px;
     font-size: 0.875rem;
-    background-color: var(--light-gray);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
     transition: all 0.3s ease;
 }
 
@@ -128,9 +124,89 @@
 
 .search-input:focus {
     outline: none;
-    border-color: var(--primary-green);
-    background-color: var(--white);
-    box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* Date and Time Display */
+.datetime-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    max-width: 350px;
+    margin: 0 auto;
+    padding: 0.375rem 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.datetime-display:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.date-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.date-line {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.2px;
+}
+
+.day-name {
+    text-transform: capitalize;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.date-separator {
+    opacity: 0.5;
+    font-size: 0.7rem;
+    margin: 0 0.125rem;
+}
+
+.month-day {
+    font-weight: 400;
+}
+
+.year {
+    font-weight: 300;
+    opacity: 0.6;
+    font-size: 0.75rem;
+}
+
+.time-info {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+}
+
+.time-icon {
+    font-size: 0.65rem;
+    opacity: 0.5;
+}
+
+.time-text {
+    letter-spacing: 0.3px;
 }
 
 :host-context(body.dark-mode) .search-input:focus {
@@ -142,7 +218,7 @@
     left: 0.875rem;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-gray);
+    color: rgba(255, 255, 255, 0.6);
     font-size: 0.875rem;
 }
 
@@ -161,7 +237,7 @@
     background: none;
     border: none;
     font-size: 1.25rem;
-    color: var(--text-gray);
+    color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 10px;
@@ -173,8 +249,8 @@
 }
 
 .mobile-search-btn:hover {
-    background-color: var(--light-gray);
-    color: var(--text-dark);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 1);
 }
 
 :host-context(body.dark-mode) .mobile-search-btn:hover {
@@ -188,7 +264,7 @@
     background: none;
     border: none;
     font-size: 1.25rem;
-    color: var(--text-gray);
+    color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 10px;
@@ -200,8 +276,8 @@
 }
 
 .notification-btn:hover {
-    background-color: var(--light-gray);
-    color: var(--text-dark);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 1);
 }
 
 :host-context(body.dark-mode) .notification-btn:hover {
@@ -243,7 +319,7 @@
     border: none;
     cursor: pointer;
     font-size: 1.25rem;
-    color: var(--text-gray);
+    color: rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;
 }
 
@@ -252,8 +328,8 @@
 }
 
 .theme-toggle:hover {
-    background: var(--light-gray);
-    color: var(--text-dark);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 1);
 }
 
 :host-context(body.dark-mode) .theme-toggle:hover {
@@ -278,7 +354,7 @@
 }
 
 .user-info:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 :host-context(body.dark-mode) .user-info:hover {
@@ -301,7 +377,7 @@
 .user-name {
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--text-dark);
+    color: rgba(255, 255, 255, 0.9);
     max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -314,7 +390,7 @@
 
 .user-role {
     font-size: 0.75rem;
-    color: var(--text-gray);
+    color: rgba(255, 255, 255, 0.6);
     font-weight: 400;
 }
 

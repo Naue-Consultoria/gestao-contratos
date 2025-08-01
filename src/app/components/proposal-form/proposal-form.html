@@ -17,115 +17,175 @@
   <div class="form-container" *ngIf="!isLoading">
     <form [formGroup]="proposalForm" (ngSubmit)="onSubmit()">
       
-      <!-- Client Information Section - FIRST -->
-      <div class="form-section">
-        <h2 class="section-title"><i class="fas fa-user-tie"></i>Informações do Cliente</h2>
-        <p class="section-description">Dados da pessoa ou empresa que receberá a proposta.</p>
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="client_name" class="form-label required">Nome / Razão Social</label>
-            <input id="client_name" type="text" formControlName="client_name" class="form-control" placeholder="Nome completo ou razão social" [class.error]="isFieldInvalid('client_name')">
-            <div *ngIf="isFieldInvalid('client_name')" class="error-message">Nome é obrigatório (mínimo 3 caracteres).</div>
-          </div>
-          <div class="form-group">
-            <label for="client_email" class="form-label required">Email</label>
-            <input id="client_email" type="email" formControlName="client_email" class="form-control" placeholder="email@exemplo.com" [class.error]="isFieldInvalid('client_email')">
-            <div *ngIf="isFieldInvalid('client_email')" class="error-message">Email válido é obrigatório.</div>
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="client_phone" class="form-label">Telefone</label>
-            <input id="client_phone" type="tel" formControlName="client_phone" class="form-control" placeholder="(11) 99999-9999">
-          </div>
-          <div class="form-group">
-            <label for="client_document" class="form-label required">CPF / CNPJ</label>
-            <input id="client_document" type="text" formControlName="client_document" class="form-control" placeholder="000.000.000-00 ou 00.000.000/0001-00" [class.error]="isFieldInvalid('client_document')">
-            <div *ngIf="isFieldInvalid('client_document')" class="error-message">Documento é obrigatório.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Client Address Section -->
-      <div class="form-section">
-        <h2 class="section-title"><i class="fas fa-map-marker-alt"></i>Endereço do Cliente</h2>
-        <p class="section-description">Endereço completo para correspondência e contrato.</p>
-        <div class="form-grid">
-          <div class="form-group col-3">
-            <label for="client_street" class="form-label required">Logradouro</label>
-            <input id="client_street" type="text" formControlName="client_street" class="form-control" placeholder="Rua, Avenida, etc." [class.error]="isFieldInvalid('client_street')">
-            <div *ngIf="isFieldInvalid('client_street')" class="error-message">Logradouro é obrigatório.</div>
-          </div>
-          <div class="form-group col-1">
-            <label for="client_number" class="form-label required">Número</label>
-            <input id="client_number" type="text" formControlName="client_number" class="form-control" placeholder="123" [class.error]="isFieldInvalid('client_number')">
-            <div *ngIf="isFieldInvalid('client_number')" class="error-message">Número é obrigatório.</div>
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="client_complement" class="form-label">Complemento</label>
-            <input id="client_complement" type="text" formControlName="client_complement" class="form-control" placeholder="Apto, Sala, etc.">
-          </div>
-          <div class="form-group">
-            <label for="client_neighborhood" class="form-label required">Bairro</label>
-            <input id="client_neighborhood" type="text" formControlName="client_neighborhood" class="form-control" placeholder="Nome do bairro" [class.error]="isFieldInvalid('client_neighborhood')">
-            <div *ngIf="isFieldInvalid('client_neighborhood')" class="error-message">Bairro é obrigatório.</div>
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="client_city" class="form-label required">Cidade</label>
-            <input id="client_city" type="text" formControlName="client_city" class="form-control" placeholder="Nome da cidade" [class.error]="isFieldInvalid('client_city')">
-            <div *ngIf="isFieldInvalid('client_city')" class="error-message">Cidade é obrigatória.</div>
-          </div>
-          <div class="form-group">
-            <label for="client_zipcode" class="form-label required">CEP</label>
-            <input id="client_zipcode" type="text" formControlName="client_zipcode" class="form-control" placeholder="00000-000" [class.error]="isFieldInvalid('client_zipcode')">
-            <div *ngIf="isFieldInvalid('client_zipcode')" class="error-message">CEP é obrigatório (mínimo 8 caracteres).</div>
-          </div>
-        </div>
-      </div>
 
       <div class="form-section">
-        <h2 class="section-title"><i class="fas fa-building"></i>Empresa</h2>
+        <h2 class="section-title"><i class="fas fa-users"></i>Cliente</h2>
         <div class="form-group">
-          <label for="company_id" class="form-label required">Empresa</label>
+          <label for="client_id" class="form-label required">Cliente</label>
           <div class="input-group">
-            <select id="company_id" formControlName="company_id" class="form-control" [class.error]="isFieldInvalid('company_id')">
-              <option value="" disabled>Selecione uma empresa</option>
-              <option *ngFor="let company of companies" [value]="company.id">
-                {{ company.name }} <span *ngIf="company.headquarters" class="company-details">- {{ company.headquarters }}</span>
+            <select id="client_id" formControlName="client_id" class="form-control" [class.error]="isFieldInvalid('client_id')">
+              <option value="" disabled>Selecione um cliente</option>
+              <option *ngFor="let client of clients" [value]="client.id">
+                {{ client.name }} <span *ngIf="client.headquarters" class="client-details">- {{ client.headquarters }}</span>
               </option>
             </select>
-            <button type="button" class="btn btn-outline btn-sm" (click)="toggleNewCompanyForm()">
-              <i class="fas fa-plus"></i> Nova Empresa
+            <button type="button" class="btn btn-outline btn-sm" (click)="toggleNewClientForm()">
+              <i class="fas fa-plus"></i> Novo Cliente
             </button>
           </div>
-          <div *ngIf="isFieldInvalid('company_id')" class="error-message">A seleção da empresa é obrigatória.</div>
+          <div *ngIf="isFieldInvalid('client_id')" class="error-message">A seleção do cliente é obrigatória.</div>
         </div>
 
-        <div *ngIf="showNewCompanyForm" class="sub-form" @slideInOut>
-          <h3 class="sub-form-title">Cadastrar Nova Empresa</h3>
-          <div [formGroup]="newCompanyForm">
+        <div *ngIf="showNewClientForm" class="sub-form" @slideInOut>
+          <h3 class="sub-form-title">Cadastrar Novo Cliente</h3>
+          <div [formGroup]="newClientForm">
             <div class="form-grid">
               <div class="form-group">
-                <label for="company_name" class="form-label required">Nome</label>
-                <input id="company_name" type="text" formControlName="name" class="form-control" placeholder="Nome da empresa">
+                <label for="new_client_type" class="form-label required">Tipo de Cliente</label>
+                <select id="new_client_type" formControlName="client_type" class="form-control" [class.error]="isNewClientFieldInvalid('client_type')">
+                  <option value="" disabled>Selecione o tipo</option>
+                  <option value="pf">Pessoa Física</option>
+                  <option value="pj">Pessoa Jurídica</option>
+                </select>
+                <div *ngIf="isNewClientFieldInvalid('client_type')" class="error-message">Tipo de cliente é obrigatório.</div>
               </div>
               <div class="form-group">
-                <label for="company_headquarters" class="form-label">Sede</label>
-                <input id="company_headquarters" type="text" formControlName="headquarters" class="form-control" placeholder="Cidade/Estado">
+                <label for="new_client_name" class="form-label required">
+                  <span *ngIf="newClientForm.get('client_type')?.value === 'pf'">Nome Completo</span>
+                  <span *ngIf="newClientForm.get('client_type')?.value === 'pj'">Razão Social</span>
+                  <span *ngIf="!newClientForm.get('client_type')?.value">Nome / Razão Social</span>
+                </label>
+                <input id="new_client_name" type="text" formControlName="name" class="form-control" 
+                       [placeholder]="getNewClientNamePlaceholder()" 
+                       [class.error]="isNewClientFieldInvalid('name')">
+                <div *ngIf="isNewClientFieldInvalid('name')" class="error-message">Nome é obrigatório.</div>
               </div>
             </div>
-            <div class="form-group">
-              <label for="company_sector" class="form-label">Setor</label>
-              <input id="company_sector" type="text" formControlName="market_sector" class="form-control" placeholder="Setor de mercado">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="new_client_document" class="form-label required">
+                  <span *ngIf="newClientForm.get('client_type')?.value === 'pf'">CPF</span>
+                  <span *ngIf="newClientForm.get('client_type')?.value === 'pj'">CNPJ</span>
+                  <span *ngIf="!newClientForm.get('client_type')?.value">CPF / CNPJ</span>
+                </label>
+                <input id="new_client_document" type="text" formControlName="document" class="form-control" 
+                       [placeholder]="getNewClientDocumentPlaceholder()" 
+                       [class.error]="isNewClientFieldInvalid('document')"
+                       [appDocumentMask]="newClientForm.get('client_type')?.value === 'pf' ? 'cpf' : 'cnpj'">
+                <div *ngIf="isNewClientFieldInvalid('document')" class="error-message">Documento é obrigatório.</div>
+              </div>
+              <div class="form-group" *ngIf="newClientForm.get('client_type')?.value === 'pf'">
+                <label for="new_client_rg" class="form-label">RG</label>
+                <input id="new_client_rg" type="text" formControlName="rg" class="form-control" 
+                       placeholder="00.000.000-0"
+                       appDocumentMask="rg">
+              </div>
+              <div class="form-group" *ngIf="newClientForm.get('client_type')?.value === 'pj'">
+                <label for="new_client_trade_name" class="form-label">Nome Fantasia</label>
+                <input id="new_client_trade_name" type="text" formControlName="trade_name" class="form-control" 
+                       placeholder="Digite o nome fantasia">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="new_client_email" class="form-label required">Email</label>
+                <input id="new_client_email" type="email" formControlName="email" class="form-control" 
+                       placeholder="email@exemplo.com" 
+                       [class.error]="isNewClientFieldInvalid('email')">
+                <div *ngIf="isNewClientFieldInvalid('email')" class="error-message">Email válido é obrigatório.</div>
+              </div>
+              <div class="form-group">
+                <label for="new_client_phone" class="form-label">Telefone</label>
+                <input id="new_client_phone" type="tel" formControlName="phone" class="form-control" placeholder="(11) 99999-9999"
+                       appDocumentMask="phone">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="new_client_zipcode" class="form-label required">CEP</label>
+                <input id="new_client_zipcode" type="text" formControlName="zipcode" class="form-control" 
+                       placeholder="00000-000" 
+                       [class.error]="isNewClientFieldInvalid('zipcode')"
+                       appDocumentMask="cep">
+                <div *ngIf="isNewClientFieldInvalid('zipcode')" class="error-message">CEP é obrigatório.</div>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group col-3">
+                <label for="new_client_street" class="form-label required">Logradouro</label>
+                <input id="new_client_street" type="text" formControlName="street" class="form-control" 
+                       placeholder="Rua, Avenida, etc." 
+                       [class.error]="isNewClientFieldInvalid('street')">
+                <div *ngIf="isNewClientFieldInvalid('street')" class="error-message">Logradouro é obrigatório.</div>
+              </div>
+              <div class="form-group col-1">
+                <label for="new_client_number" class="form-label required">Número</label>
+                <input id="new_client_number" type="text" formControlName="number" class="form-control" 
+                       placeholder="123" 
+                       [class.error]="isNewClientFieldInvalid('number')">
+                <div *ngIf="isNewClientFieldInvalid('number')" class="error-message">Número é obrigatório.</div>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="new_client_neighborhood" class="form-label required">Setor</label>
+                <input id="new_client_neighborhood" type="text" formControlName="neighborhood" class="form-control" 
+                       placeholder="Nome do setor" 
+                       [class.error]="isNewClientFieldInvalid('neighborhood')">
+                <div *ngIf="isNewClientFieldInvalid('neighborhood')" class="error-message">Setor é obrigatório.</div>
+              </div>
+              <div class="form-group">
+                <label for="new_client_complement" class="form-label">Complemento</label>
+                <input id="new_client_complement" type="text" formControlName="complement" class="form-control" placeholder="Apto, Sala, etc.">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="new_client_city" class="form-label required">Cidade</label>
+                <input id="new_client_city" type="text" formControlName="city" class="form-control" 
+                       placeholder="Nome da cidade" 
+                       [class.error]="isNewClientFieldInvalid('city')">
+                <div *ngIf="isNewClientFieldInvalid('city')" class="error-message">Cidade é obrigatória.</div>
+              </div>
+              <div class="form-group">
+                <label for="new_client_state" class="form-label required">Estado</label>
+                <select id="new_client_state" formControlName="state" class="form-control" [class.error]="isNewClientFieldInvalid('state')">
+                  <option value="">Selecione...</option>
+                  <option value="AC">Acre</option>
+                  <option value="AL">Alagoas</option>
+                  <option value="AP">Amapá</option>
+                  <option value="AM">Amazonas</option>
+                  <option value="BA">Bahia</option>
+                  <option value="CE">Ceará</option>
+                  <option value="DF">Distrito Federal</option>
+                  <option value="ES">Espírito Santo</option>
+                  <option value="GO">Goiás</option>
+                  <option value="MA">Maranhão</option>
+                  <option value="MT">Mato Grosso</option>
+                  <option value="MS">Mato Grosso do Sul</option>
+                  <option value="MG">Minas Gerais</option>
+                  <option value="PA">Pará</option>
+                  <option value="PB">Paraíba</option>
+                  <option value="PR">Paraná</option>
+                  <option value="PE">Pernambuco</option>
+                  <option value="PI">Piauí</option>
+                  <option value="RJ">Rio de Janeiro</option>
+                  <option value="RN">Rio Grande do Norte</option>
+                  <option value="RS">Rio Grande do Sul</option>
+                  <option value="RO">Rondônia</option>
+                  <option value="RR">Roraima</option>
+                  <option value="SC">Santa Catarina</option>
+                  <option value="SP">São Paulo</option>
+                  <option value="SE">Sergipe</option>
+                  <option value="TO">Tocantins</option>
+                </select>
+                <div *ngIf="isNewClientFieldInvalid('state')" class="error-message">Estado é obrigatório.</div>
+              </div>
             </div>
             <div class="sub-form-actions">
-              <button type="button" class="btn btn-secondary btn-sm" (click)="toggleNewCompanyForm()">Cancelar</button>
-              <button type="button" class="btn btn-primary btn-sm" (click)="createNewCompany()" [disabled]="newCompanyForm.invalid">
-                <i class="fas fa-save"></i> Salvar Empresa
+              <button type="button" class="btn btn-secondary btn-sm" (click)="toggleNewClientForm()">Cancelar</button>
+              <button type="button" class="btn btn-primary btn-sm" (click)="createNewClient()" [disabled]="newClientForm.invalid">
+                <i class="fas fa-save"></i> Salvar Cliente
               </button>
             </div>
           </div>
@@ -160,7 +220,7 @@
                 <select [id]="'service_id_' + i" formControlName="service_id" class="form-control" [class.error]="isServiceFieldInvalid(i, 'service_id')" (change)="onServiceChange(i)">
                   <option value="" disabled>Selecione um serviço da lista</option>
                   <option *ngFor="let s of services" [value]="s.id">
-                    {{ s.name }} ({{ formatCurrency(s.value) }})
+                    {{ s.name }}
                   </option>
                 </select>
               </div>

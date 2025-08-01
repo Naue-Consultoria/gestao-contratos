@@ -8,7 +8,7 @@ import {
   ApiContract,
   ContractStats,
 } from '../../services/contract';
-import { CompanyService } from '../../services/company';
+import { ClientService } from '../../services/client';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { SearchService } from '../../services/search.service'; // Import the new service
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -16,7 +16,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 interface ContractDisplay {
   id: number;
   contractNumber: string;
-  companyName: string;
+  clientName: string;
   type: string;
   startDate: string;
   endDate: string;
@@ -38,7 +38,7 @@ interface ContractDisplay {
 export class ContractsTableComponent implements OnInit, OnDestroy {
   private modalService = inject(ModalService);
   private contractService = inject(ContractService);
-  private companyService = inject(CompanyService);
+  private clientService = inject(ClientService);
   private router = inject(Router);
   private searchService = inject(SearchService);
   private subscriptions = new Subscription();
@@ -61,10 +61,10 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   filters = {
     search: '',
     status: '',
-    company_id: null as number | null,
+    client_id: null as number | null,
     type: '',
   };
-  companies: any[] = [];
+  clients: any[] = [];
   isLoading = false;
   error = '';
   currentTab: 'all' | 'Full' | 'Pontual' | 'Individual' = 'all';
@@ -99,13 +99,13 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   async loadPageData() {
     this.isLoading = true;
     try {
-      const [statsResponse, companiesResponse] = await Promise.all([
+      const [statsResponse, clientsResponse] = await Promise.all([
         firstValueFrom(this.contractService.getStats()),
-        firstValueFrom(this.companyService.getCompanies({ is_active: true })),
+        firstValueFrom(this.clientService.getClients({ is_active: true })),
       ]);
       if (statsResponse?.stats) this.stats = statsResponse.stats;
-      if (companiesResponse?.companies)
-        this.companies = companiesResponse.companies;
+      if (clientsResponse?.clients)
+        this.clients = clientsResponse.clients;
     } catch (e) {
       this.error = 'Não foi possível carregar os dados da página.';
     } finally {
@@ -117,13 +117,13 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = '';
     try {
-      const [statsResponse, companiesResponse] = await Promise.all([
+      const [statsResponse, clientsResponse] = await Promise.all([
         firstValueFrom(this.contractService.getStats()),
-        firstValueFrom(this.companyService.getCompanies({ is_active: true })),
+        firstValueFrom(this.clientService.getClients({ is_active: true })),
       ]);
       if (statsResponse?.stats) this.stats = statsResponse.stats;
-      if (companiesResponse?.companies)
-        this.companies = companiesResponse.companies;
+      if (clientsResponse?.clients)
+        this.clients = clientsResponse.clients;
     } catch (error: any) {
       this.error = 'Não foi possível carregar os dados da página.';
       console.error('❌ Error loading initial data:', error);
@@ -139,7 +139,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       const cleanFilters: any = {
         search: this.filters.search,
         status: this.filters.status,
-        company_id: this.filters.company_id,
+        client_id: this.filters.client_id,
         type: this.currentTab === 'all' ? '' : this.currentTab,
       };
 
@@ -190,7 +190,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     return {
       id: contract.id,
       contractNumber: contract.contract_number,
-      companyName: contract.company?.name || 'N/A',
+      clientName: contract.client?.name || 'N/A',
       type: contract.type,
       startDate: this.contractService.formatDate(contract.start_date),
       endDate: this.contractService.formatDate(contract.end_date || null),
@@ -216,7 +216,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   clearFilters() {
-    this.filters = { search: '', status: '', company_id: null, type: '' };
+    this.filters = { search: '', status: '', client_id: null, type: '' };
     this.searchService.setSearchTerm(''); // Also clear the global search
     this.currentTab = 'all';
     this.applyFilters();

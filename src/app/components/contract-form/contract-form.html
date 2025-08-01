@@ -56,16 +56,16 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label required">Empresa</label>
+            <label class="form-label required">Cliente</label>
             <select
               class="form-control"
-              [(ngModel)]="formData.company_id"
-              name="company_id"
-              [class.error]="errors.company_id"
+              [(ngModel)]="formData.client_id"
+              name="client_id"
+              [class.error]="errors.client_id"
             >
               <option [value]="null" disabled>Selecione</option>
-              <option *ngFor="let company of companies" [value]="company.id">
-                {{ company.name }}
+              <option *ngFor="let client of clients" [value]="client.id">
+                {{ client.name }}
               </option>
             </select>
           </div>
@@ -258,9 +258,9 @@
             >
           </div>
           <div class="detail-item">
-            <span class="detail-label">Empresa:</span
+            <span class="detail-label">Cliente:</span
             ><span class="detail-value"
-              >{{ getCompanyName(formData.company_id) }}</span
+              >{{ getClientName(formData.client_id) }}</span
             >
           </div>
           <div class="detail-item">

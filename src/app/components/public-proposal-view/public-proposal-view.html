@@ -17,10 +17,10 @@
   <div *ngIf="proposal && !isLoading && !error" class="proposal-content">
     <!-- Header -->
     <div class="proposal-header">
-      <div class="company-info">
-        <h1>{{ proposal.company.name }}</h1>
-        <p *ngIf="proposal.company.headquarters" class="company-details">{{ proposal.company.headquarters }}</p>
-        <p *ngIf="proposal.company.market_sector" class="company-details">{{ proposal.company.market_sector }}</p>
+      <div class="client-info">
+        <h1>{{ proposal.client.name }}</h1>
+        <p *ngIf="proposal.client.headquarters" class="client-details">{{ proposal.client.headquarters }}</p>
+        <p *ngIf="proposal.client.market_sector" class="client-details">{{ proposal.client.market_sector }}</p>
       </div>
       <div class="proposal-meta">
         <div class="proposal-number">

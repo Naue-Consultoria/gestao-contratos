@@ -8,28 +8,27 @@
 
     <!-- Logo -->
     <a class="logo" routerLink="/home/dashboard">
-      <div class="logo-icon">N</div>
-      <span class="logo-text">NAUE Consultoria</span>
+        <img src="logoNaueNeg.png" alt="NAUE Consultoria" class="logo-image">
     </a>
 
-    <!-- Desktop Search Box -->
-    <div class="search-box desktop-search" [class.active]="isSearchActive">
-      <i class="fas fa-search search-icon"></i>
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Buscar contratos, empresas..."
-        [(ngModel)]="globalSearchTerm"
-        (input)="onSearch()"
-      />
+    <!-- Date and Time Display -->
+    <div class="datetime-display">
+      <div class="date-info">
+        <div class="date-line">
+          <span class="day-name">{{ currentDayName }}</span>
+          <span class="date-separator">•</span>
+          <span class="month-day">{{ currentDate }}</span>
+          <span class="year">{{ currentYear }}</span>
+        </div>
+      </div>
+      <div class="time-info">
+        <i class="fas fa-clock time-icon"></i>
+        <span class="time-text">{{ currentTime }}</span>
+      </div>
     </div>
 
     <!-- Header Actions -->
     <div class="header-actions">
-      <!-- Mobile Search Button -->
-      <button class="mobile-search-btn" (click)="toggleSearch()">
-        <i class="fas fa-search"></i>
-      </button>
 
       <!-- Notifications Button with Badge -->
       <button
@@ -97,20 +96,5 @@
       </div>
     </div>
 
-    <!-- Mobile Search Box -->
-    <div class="mobile-search-box" *ngIf="isSearchActive">
-      <input
-        #mobileSearchInput
-        type="text"
-        class="mobile-search-input"
-        placeholder="Buscar..."
-        [(ngModel)]="globalSearchTerm"
-        (input)="onSearch()"
-        (blur)="closeSearch()"
-      />
-      <button class="mobile-search-close" (click)="closeSearch()">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
   </div>
 </header>

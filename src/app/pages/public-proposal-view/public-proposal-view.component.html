@@ -12,11 +12,11 @@
     
     <!-- Header -->
     <div class="proposal-header">
-      <div class="company-info">
-        <h1 class="company-name">{{ proposal.company.name }}</h1>
-        <p class="company-details">
-          <span *ngIf="proposal.company.headquarters">{{ proposal.company.headquarters }}</span>
-          <span *ngIf="proposal.company.market_sector"> • {{ proposal.company.market_sector }}</span>
+      <div class="client-info">
+        <h1 class="client-name">{{ proposal.client.name }}</h1>
+        <p class="client-details">
+          <span *ngIf="proposal.client.headquarters">{{ proposal.client.headquarters }}</span>
+          <span *ngIf="proposal.client.market_sector"> • {{ proposal.client.market_sector }}</span>
         </p>
       </div>
       

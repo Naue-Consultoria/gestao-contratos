@@ -84,7 +84,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       id: apiProposal.id,
       proposalNumber: apiProposal.proposal_number,
       clientName: apiProposal.client_name,
-      companyName: apiProposal.company?.name || 'N/A',
+      companyName: apiProposal.client?.name || 'N/A',
       status: apiProposal.status,
       statusText: this.proposalService.getStatusText(apiProposal.status),
       totalValue: this.proposalService.formatCurrency(apiProposal.total_value || 0),
