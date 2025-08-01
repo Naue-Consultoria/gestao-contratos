@@ -50,6 +50,18 @@ export class ChangePasswordComponent implements OnInit {
     }
   }
 
+  hasUppercase(value: string): boolean {
+    return value ? /[A-Z]/.test(value) : false;
+  }
+
+  hasNumber(value: string): boolean {
+    return value ? /[0-9]/.test(value) : false;
+  }
+
+  hasSpecialChar(value: string): boolean {
+    return value ? /[@$!%*?&]/.test(value) : false;
+  }
+
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const newPassword = control.get('new_password')?.value;
     const confirmPassword = control.get('confirm_password')?.value;
