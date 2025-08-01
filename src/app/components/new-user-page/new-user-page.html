@@ -10,14 +10,12 @@
 </div>
 
 <div class="table-container">
-  <!-- Error Message -->
   <div class="error-message" *ngIf="errorMessage">
     <i class="fas fa-exclamation-circle"></i>
     <span>{{ errorMessage }}</span>
   </div>
 
   <form class="user-form" (ngSubmit)="saveUser()" #userForm="ngForm">
-    <!-- Informações Básicas -->
     <div class="form-section">
       <h2 class="section-title">
         <i class="fas fa-info-circle"></i>
@@ -70,75 +68,12 @@
           </select>
         </div>
       </div>
-    </div>
 
-    <!-- Segurança -->
-    <div class="form-section" *ngIf="!isEditMode">
-      <h2 class="section-title">
-        <i class="fas fa-lock"></i>
-        Segurança
-      </h2>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">
-            Senha Temporária <span class="required">*</span>
-          </label>
-          <div class="password-wrapper">
-            <input 
-              [type]="showPassword ? 'password' : 'text'" 
-              class="form-control" 
-              [(ngModel)]="userData.password"
-              name="password"
-              placeholder="Mínimo 6 caracteres"
-              [class.error]="errors['password']"
-              required>
-            <button 
-              type="button" 
-              class="password-toggle"
-              (click)="showPassword = !showPassword">
-              <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-            </button>
-          </div>
-          <span class="field-error" *ngIf="errors['password']">{{ errors['password'] }}</span>
-          <button 
-            type="button" 
-            class="btn-generate-password"
-            (click)="generateRandomPassword()">
-            <i class="fas fa-dice"></i>
-            Gerar senha aleatória
-          </button>
-        </div>
-      </div>
-
-      <div class="requirements-box">
-        <p>Requisitos da senha:</p>
-        <div class="requirement-item" [class.valid]="userData.password.length >= 6">
-          <i class="fas fa-check-circle"></i>
-          Mínimo de 6 caracteres
-        </div>
+      <div class="info-box" *ngIf="!isEditMode">
+          <p>Ao criar um novo usuário, uma senha temporária segura será gerada e enviada para o e-mail cadastrado. O usuário será solicitado a criar uma nova senha em seu primeiro login.</p>
       </div>
     </div>
-
-    <!-- Permissões (opcional) -->
-    <div class="form-section" *ngIf="userData.role === 'admin'">
-      <h2 class="section-title">
-        <i class="fas fa-shield-alt"></i>
-        Permissões Administrativas
-      </h2>
-
-      <div class="info-box">
-        <p>Como administrador, este usuário terá acesso completo a:</p>
-        <ul class="info-list">
-          <li><i class="fas fa-check"></i> Gerenciamento de usuários</li>
-          <li><i class="fas fa-check"></i> Configurações do sistema</li>
-          <li><i class="fas fa-check"></i> Relatórios completos</li>
-          <li><i class="fas fa-check"></i> Todas as funcionalidades do sistema</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Form Actions -->
+    
     <div class="form-actions">
       <button 
         type="button" 

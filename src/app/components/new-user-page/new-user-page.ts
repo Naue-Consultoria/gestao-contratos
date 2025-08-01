@@ -10,8 +10,6 @@ interface UserData {
   name: string;
   email: string;
   role: string;
-  password: string;
-  confirmPassword: string;
   isActive: boolean;
 }
 
@@ -33,8 +31,6 @@ export class NewUserPageComponent implements OnInit {
     name: '',
     email: '',
     role: 'user',
-    password: '',
-    confirmPassword: '',
     isActive: true
   };
 
@@ -48,7 +44,6 @@ export class NewUserPageComponent implements OnInit {
   showConfirmPassword = false;
 
   ngOnInit() {
-    // Check if admin
     const userStr = localStorage.getItem('user');
     if (userStr) {
       const user = JSON.parse(userStr);
@@ -64,9 +59,6 @@ export class NewUserPageComponent implements OnInit {
       if (params['id']) {
         this.editingUserId = +params['id'];
         this.loadUserData();
-      } else {
-        // Se estiver criando novo usuário, gerar senha automaticamente
-        this.generateRandomPassword();
       }
     });
   }
@@ -87,8 +79,6 @@ export class NewUserPageComponent implements OnInit {
           name: user.name || '',
           email: user.email || '',
           role: user.role_name || 'user',
-          password: '',
-          confirmPassword: '',
           isActive: user.is_active !== false
         };
       } else {
@@ -114,13 +104,10 @@ export class NewUserPageComponent implements OnInit {
     this.errorMessage = '';
 
     try {
-      // The payload is an object that will be sent to the API.
-      // We are only including the fields the API expects.
       const payload: any = {
         name: this.userData.name,
         email: this.userData.email,
         role: this.userData.role,
-        // The "is_active" field has been removed from here.
       };
 
       if (this.isEditMode && this.editingUserId) {
@@ -129,15 +116,11 @@ export class NewUserPageComponent implements OnInit {
         await this.userService.updateUser(this.editingUserId, payload).toPromise();
         this.toastr.success('Usuário atualizado com sucesso!');
       } else {
-        payload.password = this.userData.password;
         await firstValueFrom(this.userService.createUser(payload));
-        this.toastr.success('Usuário criado com sucesso!');
+        this.toastr.success('Usuário criado com sucesso! Uma senha temporária foi enviada por e-mail.');
       }
 
-      // Dispatch event to refresh users list
       window.dispatchEvent(new CustomEvent('refreshUsers'));
-      
-      // Navigate back to users page
       this.router.navigate(['/home/users']);
     } catch (error: any) {
       console.error('❌ Erro ao salvar usuário:', error);
@@ -148,139 +131,24 @@ export class NewUserPageComponent implements OnInit {
     }
   }
 
-  /**
-   * Validate form
-   */
   private validateForm(): boolean {
     this.errors = {};
-    
-    // Name is required
     if (!this.userData.name.trim()) {
       this.errors['name'] = 'Nome é obrigatório';
     }
-    
-    // Email is required and must be valid
     if (!this.userData.email.trim()) {
       this.errors['email'] = 'Email é obrigatório';
-    } else if (!this.isValidEmail(this.userData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.userData.email)) {
       this.errors['email'] = 'Email inválido';
     }
-    
-    // Password is required only for new users
-    if (!this.isEditMode) {
-      if (!this.userData.password) {
-        this.errors['password'] = 'Senha é obrigatória';
-      } else if (this.userData.password.length < 6) {
-        this.errors['password'] = 'Senha deve ter no mínimo 6 caracteres';
-      }
-    }
-    
     return Object.keys(this.errors).length === 0;
   }
 
-  /**
-   * Validate email format
-   */
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
-  /**
-   * Cancel and go back
-   */
   cancel() {
     this.router.navigate(['/home/users']);
   }
 
-  /**
-   * Get page title
-   */
   getPageTitle(): string {
     return this.isEditMode ? 'Editar Usuário' : 'Novo Usuário';
-  }
-
-  /**
-   * Generate random password
-   */
-  generateRandomPassword() {
-    const length = 12;
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-    let password = '';
-    
-    // Garantir que a senha tenha pelo menos:
-    // - 1 letra minúscula
-    // - 1 letra maiúscula
-    // - 1 número
-    // - 1 caractere especial
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const numbers = '0123456789';
-    const special = '!@#$%^&*';
-    
-    // Adicionar um de cada tipo obrigatório
-    password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
-    password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
-    password += numbers.charAt(Math.floor(Math.random() * numbers.length));
-    password += special.charAt(Math.floor(Math.random() * special.length));
-    
-    // Preencher o resto com caracteres aleatórios
-    for (let i = password.length; i < length; i++) {
-      password += charset.charAt(Math.floor(Math.random() * charset.length));
-    }
-    
-    // Embaralhar a senha
-    password = password.split('').sort(() => Math.random() - 0.5).join('');
-    
-    // Atualizar os campos
-    this.userData.password = password;
-    this.userData.confirmPassword = password;
-    
-    // Mostrar a senha temporariamente
-    this.showPassword = true;
-    this.showConfirmPassword = true;
-    
-    // Limpar erros de senha se existirem
-    delete this.errors['password'];
-    delete this.errors['confirmPassword'];
-    
-    // Mostrar notificação apenas se foi clicado manualmente
-    if (this.userData.name || this.userData.email) {
-      this.toastr.info('Senha aleatória gerada! Certifique-se de salvá-la ou enviá-la ao usuário.');
-    }
-  }
-
-  /**
-   * Calculate password strength percentage
-   */
-  getPasswordStrength(): number {
-    const password = this.userData.password;
-    if (!password) return 0;
-    
-    let strength = 0;
-    
-    // Length
-    if (password.length >= 6) strength += 20;
-    if (password.length >= 8) strength += 20;
-    if (password.length >= 12) strength += 20;
-    
-    // Character types
-    if (/[a-z]/.test(password)) strength += 10;
-    if (/[A-Z]/.test(password)) strength += 10;
-    if (/[0-9]/.test(password)) strength += 10;
-    if (/[^a-zA-Z0-9]/.test(password)) strength += 10;
-    
-    return Math.min(strength, 100);
-  }
-
-  /**
-   * Get password strength text
-   */
-  getPasswordStrengthText(): string {
-    const strength = this.getPasswordStrength();
-    
-    if (strength <= 33) return 'Fraca';
-    if (strength <= 66) return 'Média';
-    return 'Forte';
   }
 }
