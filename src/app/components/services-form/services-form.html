@@ -71,11 +71,11 @@
         <div class="form-section">
           <h2 class="section-title">
             <i class="fas fa-clock"></i>
-            Duração e Valor
+            Duração
           </h2>
 
           <div class="form-row">
-            <div class="form-group">
+            <div class="form-group duration-amount">
               <label class="form-label required">Duração</label>
               <input 
                 type="number" 
@@ -86,7 +86,7 @@
                 placeholder="Ex: 30">
             </div>
 
-            <div class="form-group">
+            <div class="form-group duration-unit">
               <label class="form-label required">Unidade</label>
               <select 
                 class="form-control" 
@@ -95,22 +95,9 @@
                 <option value="dias">Dias</option>
                 <option value="semanas">Semanas</option>
                 <option value="meses">Meses</option>
-                <option value="reuniões">Reuniões</option>
+                <option value="encontros">Encontros</option>
               </select>
             </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label required">Valor</label>
-            <input 
-              type="text" 
-              class="form-control value-input" 
-              [value]="formatValueForDisplay(formData.value)"
-              (input)="formatCurrency($event)"
-              name="value"
-              placeholder="0,00"
-              [class.error]="errors.value">
-            <span class="error-message" *ngIf="errors.value">{{ errors.value }}</span>
           </div>
 
           <div class="form-group" *ngIf="isEditMode">
@@ -150,10 +137,6 @@
           </div>
           <div class="preview-item">
             <strong>Duração:</strong> {{ getFormattedDuration() }}
-          </div>
-          <div class="preview-item">
-            <strong>Valor:</strong> 
-            <span class="value-preview">{{ getFormattedValue() }}</span>
           </div>
           <div class="preview-item">
             <strong>Status:</strong> 
