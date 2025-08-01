@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface ReportRequest {
+  companyId?: string;
+  serviceId?: string;
   clientId: string;
   format: 'pdf' | 'excel';
 }

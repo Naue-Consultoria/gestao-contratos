@@ -1,7 +1,11 @@
-import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
+import { ContractService, ApiContract } from '../../services/contract';
+import { ServiceService, ServiceStats } from '../../services/service';
+import { ProposalService } from '../../services/proposal';
 
 Chart.register(...registerables);
 
@@ -11,6 +15,8 @@ interface ServiceData {
   color: string;
   icon: string;
   contracts: number;
+  activeContracts: number;
+  completedContracts: number;
 }
 
 interface MetricData {
@@ -20,6 +26,7 @@ interface MetricData {
   color: string;
   trend?: number;
   suffix?: string;
+  isCurrency?: boolean;
 }
 
 @Component({
@@ -30,105 +37,25 @@ interface MetricData {
   styleUrls: ['./analytics-page.css']
 })
 export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy {
-  // Período selecionado
-  selectedPeriod: 'week' | 'month' | 'quarter' | 'year' = 'month';
-  
-  // Analytics data
-  successRate = 92;
-  topService = 'OKR';
-  topServicePercentage = 25;
-  
-  // Service distribution data
-  services: ServiceData[] = [
-    { 
-      name: 'Diagnóstico Organizacional', 
-      value: 25, 
-      color: '#003b2b',
-      icon: 'fas fa-stethoscope',
-      contracts: 6
-    },
-    { 
-      name: 'OKR', 
-      value: 20, 
-      color: '#6366f1',
-      icon: 'fas fa-bullseye',
-      contracts: 5
-    },
-    { 
-      name: 'Mentoria', 
-      value: 18, 
-      color: '#ec4899',
-      icon: 'fas fa-user-tie',
-      contracts: 4
-    },
-    { 
-      name: 'RH', 
-      value: 15, 
-      color: '#fb923c',
-      icon: 'fas fa-users',
-      contracts: 3
-    },
-    { 
-      name: 'Outros', 
-      value: 22, 
-      color: '#94a3b8',
-      icon: 'fas fa-ellipsis-h',
-      contracts: 6
-    }
-  ];
+  private contractService = inject(ContractService);
+  private serviceService = inject(ServiceService);
+  private proposalService = inject(ProposalService);
 
-  // Métricas principais
-  metrics: MetricData[] = [
-    {
-      label: 'Contratos Ativos',
-      value: 18,
-      icon: 'fas fa-file-contract',
-      color: '#003b2b',
-      trend: 12
-    },
-    {
-      label: 'Renovação Média',
-      value: 85,
-      icon: 'fas fa-sync',
-      color: '#003b2b',
-      trend: 5,
-      suffix: '%'
-    },
-    {
-      label: 'Tempo Médio de Projeto',
-      value: '3.5',
-      icon: 'fas fa-clock',
-      color: '#003b2b',
-      trend: -8,
-      suffix: ' meses'
-    },
-    {
-      label: 'NPS Score',
-      value: 78,
-      icon: 'fas fa-smile',
-      color: '#003b2b',
-      trend: 15
-    }
-  ];
+  selectedPeriod: 'month' | 'quarter' | 'year' = 'month';
+  
+  // --- Analytics Data ---
+  isLoading = true;
+  successRate = 0;
+  topService = 'N/A';
+  topServicePercentage = 0;
+
+  topServiceData: ServiceData | null = null;
+  
+  services: ServiceData[] = [];
+  metrics: MetricData[] = [];
 
   // Dados de evolução mensal
-  monthlyEvolution = {
-    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-    datasets: [
-      {
-        label: 'Novos Contratos',
-        data: [3, 5, 4, 7, 6, 8],
-        borderColor: '#003b2b',
-        backgroundColor: 'rgba(14, 155, 113, 0.1)'
-      },
-      {
-        label: 'Serviços Concluídos',
-        data: [8, 12, 10, 15, 14, 18],
-        borderColor: '#6366f1',
-        backgroundColor: 'rgba(99, 102, 241, 0.1)'
-      }
-    ]
-  };
+   monthlyEvolution: { labels: string[], datasets: any[] } = { labels: [], datasets: [] };
 
   // Charts
   servicesChart: Chart | null = null;
@@ -138,55 +65,186 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   constructor() {}
 
   ngOnInit() {
-    // Carregar dados baseado no período selecionado
     this.loadAnalyticsData();
   }
 
-  ngAfterViewInit() {
-    // Pequeno delay para garantir que os canvas estão renderizados
-    setTimeout(() => {
-      this.initCharts();
-    }, 100);
-  }
+  ngAfterViewInit() {}
 
   ngOnDestroy() {
-    // Destruir gráficos ao sair
     if (this.servicesChart) this.servicesChart.destroy();
     if (this.evolutionChart) this.evolutionChart.destroy();
     if (this.satisfactionChart) this.satisfactionChart.destroy();
   }
 
-  /**
-   * Mudar período de análise
-   */
   onPeriodChange() {
     this.loadAnalyticsData();
-    this.updateCharts();
   }
 
-  /**
-   * Carregar dados de analytics
-   */
-  private loadAnalyticsData() {
-    // TODO: Implementar carregamento real de dados baseado no período
-    console.log('Carregando dados para período:', this.selectedPeriod);
+  private async loadAnalyticsData() {
+    this.isLoading = true;
+    try {
+      const [contractStats, serviceStats, proposalStats, allContractsResponse] = await Promise.all([
+        firstValueFrom(this.contractService.getStats({ period: this.selectedPeriod })),
+        firstValueFrom(this.serviceService.getStats({ period: this.selectedPeriod })),
+        firstValueFrom(this.proposalService.getProposalStats()),
+        firstValueFrom(this.contractService.getContracts({ period: this.selectedPeriod }))
+      ]);
+
+      const allContracts = allContractsResponse?.contracts || [];
+
+      if (proposalStats?.stats) {
+        const stats = proposalStats.stats;
+        const totalConsidered = stats.byStatus.sent + stats.byStatus.accepted + stats.byStatus.rejected;
+        
+        if (totalConsidered > 0) {
+          this.successRate = Math.round((stats.byStatus.accepted / totalConsidered) * 100);
+        } else {
+          this.successRate = 0;
+        }
+      }
+
+      if (contractStats?.stats) {
+        const stats = contractStats.stats;
+        this.metrics = [
+          { label: 'Contratos Ativos', value: stats.active, icon: 'fas fa-file-contract', color: '#0A8060', trend: 12 },
+          { label: 'Valor Total Ativo', value: stats.totalValueActive, icon: 'fas fa-dollar-sign', color: '#0A8060', trend: 5, isCurrency: true },
+          { label: 'Duração Média', value: stats.averageDuration, icon: 'fas fa-clock', color: '#0A8060', trend: -8, suffix: ' dias' },
+          { label: 'Total de Contratos', value: stats.total, icon: 'fas fa-list-alt', color: '#0A8060', trend: 15 }
+        ];
+      }
+
+      if (serviceStats?.stats) {
+        this.services = this.mapServiceStatsToChartData(serviceStats.stats, allContracts);
+
+        if (this.services.length > 0) {
+          this.topServiceData = this.services.reduce((prev, current) => (prev.contracts > current.contracts) ? prev : current);
+          this.topService = this.topServiceData.name;
+          
+          const totalServiceContracts = this.services.reduce((sum, s) => sum + s.contracts, 0);
+          this.topServicePercentage = totalServiceContracts > 0 
+            ? Math.round((this.topServiceData.contracts / totalServiceContracts) * 100) 
+            : 0;
+        }
+      }
+
+      if (allContractsResponse?.contracts) {
+        this.monthlyEvolution = this.processEvolutionData(allContractsResponse.contracts);
+      }
+
+    } catch (error) {
+      console.error('❌ Error loading analytics data:', error);
+    } finally {
+      this.isLoading = false;
+      this.initCharts();
+    }
   }
 
-  /**
-   * Inicializar todos os gráficos
-   */
+  private processEvolutionData(contracts: ApiContract[]): { labels: string[], datasets: any[] } {
+    const labels: string[] = [];
+    const newContractsData: number[] = [];
+    const completedContractsData: number[] = [];
+    
+    // Get the last 6 months including the current one
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      labels.push(d.toLocaleString('default', { month: 'short' }));
+      newContractsData.push(0);
+      completedContractsData.push(0);
+    }
+
+    // Populate the data arrays
+    contracts.forEach(contract => {
+      const contractDate = new Date(contract.created_at);
+      const monthIndex = (contractDate.getMonth() - (new Date().getMonth() - 5) + 12) % 12;
+      
+      if (monthIndex >= 0 && monthIndex < 6) {
+        newContractsData[monthIndex]++;
+        if (contract.status === 'completed') {
+          completedContractsData[monthIndex]++;
+        }
+      }
+    });
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Novos Contratos',
+          data: newContractsData,
+          borderColor: '#0A8060',
+          backgroundColor: 'rgba(14, 155, 113, 0.1)',
+          fill: true,
+          tension: 0.4
+        },
+        {
+          label: 'Contratos Concluídos',
+          data: completedContractsData,
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          fill: true,
+          tension: 0.4
+        }
+      ]
+    };
+  }
+
+  private mapServiceStatsToChartData(stats: ServiceStats, allContracts: ApiContract[]): ServiceData[] {
+    const categoryStats = stats.categoryStats || {};
+    const totalContracts = stats.total;
+    const colors = ['#0A8060', '#6366f1', '#ec4899', '#fb923c', '#94a3b8'];
+    const icons: { [key: string]: string } = {
+        'Diagnóstico': 'fas fa-stethoscope',
+        'OKR': 'fas fa-bullseye',
+        'Mentoria': 'fas fa-user-tie',
+        'RH': 'fas fa-users',
+        'Consultoria': 'fas fa-comments',
+        'Default': 'fas fa-concierge-bell'
+    };
+
+    return Object.entries(categoryStats)
+      .map(([name, totalContracts], index) => {
+        const active = allContracts.filter(c => c.status === 'active' && c.contract_services.some(s => s.service.category === name)).length;
+        const completed = allContracts.filter(c => c.status === 'completed' && c.contract_services.some(s => s.service.category === name)).length;
+
+        return {
+          name: name,
+          contracts: totalContracts,
+          value: stats.total > 0 ? (totalContracts / stats.total) * 100 : 0,
+          color: colors[index % colors.length],
+          icon: icons[name] || icons['Default'],
+          activeContracts: active,
+          completedContracts: completed
+        };
+      })
+      .sort((a, b) => b.contracts - a.contracts);
+  }
+
   private initCharts() {
-    this.initServicesChart();
-    this.initEvolutionChart();
-    this.initSatisfactionChart();
+    setTimeout(() => {
+      if (this.servicesChart) this.servicesChart.destroy();
+      if (this.evolutionChart) this.evolutionChart.destroy();
+      if (this.satisfactionChart) this.satisfactionChart.destroy();
+
+      this.initServicesChart();
+      this.initEvolutionChart();
+      this.initSatisfactionChart();
+    }, 100);
   }
 
-  /**
-   * Gráfico de distribuição de serviços (Doughnut)
-   */
+  formatMetricValue(metric: MetricData): string {
+    if (metric.isCurrency && typeof metric.value === 'number') {
+      return this.contractService.formatValue(metric.value);
+    }
+    if (typeof metric.value === 'number') {
+      return metric.value + (metric.suffix || '');
+    }
+    return metric.value;
+  }
+
   private initServicesChart() {
     const canvas = document.getElementById('servicesChart') as HTMLCanvasElement;
-    if (!canvas) return;
+    if (!canvas || this.services.length === 0) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -198,7 +256,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       data: {
         labels: this.services.map(s => s.name),
         datasets: [{
-          data: this.services.map(s => s.value),
+          data: this.services.map(s => s.contracts),
           backgroundColor: this.services.map(s => s.color),
           borderWidth: 0,
           spacing: 2
@@ -224,9 +282,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
               label: (context) => {
                 const label = context.label || '';
                 const value = context.parsed || 0;
-                const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
-                const percentage = ((value / total) * 100).toFixed(1);
-                return `${label}: ${percentage}%`;
+                return `${label}: ${value} contratos`;
               }
             }
           }
@@ -235,23 +291,20 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  /**
-   * Gráfico de evolução temporal (Line)
-   */
   private initEvolutionChart() {
     const canvas = document.getElementById('evolutionChart') as HTMLCanvasElement;
-    if (!canvas) return;
+    if (!canvas || !this.monthlyEvolution.datasets.length) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
+    
     const isDarkMode = document.body.classList.contains('dark-mode');
     const textColor = isDarkMode ? '#e5e7eb' : '#374151';
     const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
 
     this.evolutionChart = new Chart(ctx, {
       type: 'line',
-      data: this.monthlyEvolution,
+      data: this.monthlyEvolution, // Use the dynamic data
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -262,14 +315,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
         plugins: {
           legend: {
             position: 'bottom',
-            labels: {
-              color: textColor,
-              padding: 15,
-              usePointStyle: true,
-              font: {
-                size: 12
-              }
-            }
+            labels: { color: textColor, padding: 15, usePointStyle: true, font: { size: 12 } }
           },
           tooltip: {
             backgroundColor: isDarkMode ? '#374151' : '#fff',
@@ -281,51 +327,17 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
           }
         },
         scales: {
-          x: {
-            grid: {
-              color: gridColor,
-              display: true
-            },
-            ticks: {
-              color: textColor,
-              font: {
-                size: 12
-              }
-            }
-          },
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: gridColor,
-              display: true
-            },
-            ticks: {
-              color: textColor,
-              font: {
-                size: 12
-              }
-            }
-          }
+          x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 12 } } },
+          y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 12 } } }
         },
         elements: {
-          line: {
-            tension: 0.4,
-            borderWidth: 3
-          },
-          point: {
-            radius: 4,
-            hoverRadius: 6,
-            backgroundColor: '#fff',
-            borderWidth: 2
-          }
+          line: { borderWidth: 3 },
+          point: { radius: 4, hoverRadius: 6, backgroundColor: '#fff', borderWidth: 2 }
         }
       }
     });
   }
 
-  /**
-   * Gráfico de satisfação (Gauge/Radial)
-   */
   private initSatisfactionChart() {
     const canvas = document.getElementById('satisfactionChart') as HTMLCanvasElement;
     if (!canvas) return;
@@ -363,41 +375,14 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  /**
-   * Atualizar gráficos ao mudar período
-   */
-  private updateCharts() {
-    // TODO: Implementar atualização dos gráficos com novos dados
-    if (this.evolutionChart) {
-      // Atualizar dados do gráfico de evolução
-      this.evolutionChart.update();
-    }
-  }
-
-  /**
-   * Obter ícone para tendência
-   */
   getTrendIcon(trend?: number): string {
     if (!trend) return '';
     return trend > 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down';
   }
 
-  /**
-   * Obter classe CSS para tendência
-   */
   getTrendClass(trend?: number): string {
     if (!trend) return '';
     return trend > 0 ? 'positive' : 'negative';
-  }
-
-  /**
-   * Formatar valor da métrica
-   */
-  formatMetricValue(metric: MetricData): string {
-    if (typeof metric.value === 'number') {
-      return metric.value + (metric.suffix || '');
-    }
-    return metric.value;
   }
 
   public abs(value: number): number {

@@ -17,12 +17,6 @@
     <div class="period-buttons">
       <button 
         class="period-btn" 
-        [class.active]="selectedPeriod === 'week'"
-        (click)="selectedPeriod = 'week'; onPeriodChange()">
-        Semana
-      </button>
-      <button 
-        class="period-btn" 
         [class.active]="selectedPeriod === 'month'"
         (click)="selectedPeriod = 'month'; onPeriodChange()">
         Mês
@@ -55,13 +49,13 @@
         <div class="highlight-value">{{ successRate }}%</div>
         <div class="highlight-description">
           <i class="fas fa-arrow-up"></i>
-          de satisfação dos clientes
+          de sucesso
         </div>
         <div class="satisfaction-gauge">
           <canvas id="satisfactionChart"></canvas>
           <div class="gauge-center">
             <span class="gauge-value">{{ successRate }}%</span>
-            <span class="gauge-label">Satisfação</span>
+            <span class="gauge-label">Sucesso</span>
           </div>
         </div>
       </div>
@@ -81,15 +75,15 @@
           {{ topServicePercentage }}% dos contratos
         </div>
         <div class="service-stats">
-          <div class="stat-item">
-            <span class="stat-number">5</span>
-            <span class="stat-text">Contratos ativos</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-number">12</span>
-            <span class="stat-text">Projetos concluídos</span>
-          </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ topServiceData?.activeContracts || 0 }}</span>
+          <span class="stat-text">Contratos ativos</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">{{ topServiceData?.completedContracts || 0 }}</span>
+          <span class="stat-text">Projetos concluídos</span>
+        </div>
         </div>
       </div>
     </div>
