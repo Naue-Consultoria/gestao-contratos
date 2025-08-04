@@ -7,7 +7,6 @@ export interface CreateServiceRequest {
   name: string;
   duration_amount: number;
   duration_unit: 'dias' | 'semanas' | 'meses' | 'encontros';
-  value: number; // em centavos
   description?: string | null;
   category?: string | null;
   is_active?: boolean;
@@ -17,7 +16,6 @@ export interface UpdateServiceRequest {
   name?: string;
   duration_amount?: number;
   duration_unit?: 'dias' | 'semanas' | 'meses' | 'encontros';
-  value?: number; // em centavos
   description?: string | null;
   category?: string | null;
   is_active?: boolean;
@@ -28,12 +26,13 @@ export interface ApiService {
   name: string;
   duration_amount: number;
   duration_unit: string;
-  value: number; // em centavos
   description: string | null;
   category: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  created_by: number;
+  updated_by: number;
   created_by_user?: { name: string };
   updated_by_user?: { name: string };
 }
@@ -42,7 +41,6 @@ export interface ServiceStats {
   total: number;
   active: number;
   inactive: number;
-  totalValue: number;
   averageDuration: number;
   categoryStats: { [key: string]: number };
 }
@@ -129,21 +127,6 @@ export class ServiceService {
     return `${amount} ${unit}`;
   }
 
-  formatValue(valueInCents: number): string {
-    const valueInReais = valueInCents / 100;
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valueInReais);
-  }
-
-  convertToCents(valueInReais: number): number {
-    return Math.round(valueInReais * 100);
-  }
-
-  convertToReais(valueInCents: number): number {
-    return valueInCents / 100;
-  }
 
   getStats(filters?: any): Observable<{ stats: ServiceStats }> {
     return this.http.get<{ stats: ServiceStats }>(`${this.API_URL}/meta/stats`, {

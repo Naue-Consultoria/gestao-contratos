@@ -22,7 +22,6 @@ export class ServiceFormComponent implements OnInit {
     name: '',
     duration_amount: 30,
     duration_unit: 'dias' as 'dias' | 'semanas' | 'meses' | 'encontros',
-    value: 0,
     category: 'Geral',
     description: '',
     is_active: true
@@ -66,7 +65,6 @@ export class ServiceFormComponent implements OnInit {
           name: service.name,
           duration_amount: service.duration_amount,
           duration_unit: service.duration_unit as any,
-          value: this.serviceService.convertToReais(service.value),
           category: service.category || 'Geral',
           description: service.description || '',
           is_active: service.is_active
@@ -81,24 +79,6 @@ export class ServiceFormComponent implements OnInit {
     }
   }
 
-  formatCurrency(event: any) {
-    let value = event.target.value.replace(/\D/g, '');
-    if (value) {
-      const numericValue = parseInt(value) / 100;
-      this.formData.value = numericValue;
-      event.target.value = this.formatValueForDisplay(numericValue);
-    } else {
-      this.formData.value = 0;
-      event.target.value = '';
-    }
-  }
-
-  formatValueForDisplay(value: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  }
 
   validateForm(): boolean {
     this.errors = {};
@@ -107,9 +87,6 @@ export class ServiceFormComponent implements OnInit {
     }
     if (!this.formData.duration_amount || this.formData.duration_amount < 1) {
       this.errors.duration = 'A duração deve ser de no mínimo 1';
-    }
-    if (this.formData.value <= 0) {
-      this.errors.value = 'Valor deve ser maior que zero';
     }
     return Object.keys(this.errors).length === 0;
   }
@@ -125,9 +102,9 @@ export class ServiceFormComponent implements OnInit {
     try {
       if (this.isEditMode && this.serviceId) {
         const updateData: UpdateServiceRequest = {
-          duration_amount: 30,
-          duration_unit: 'dias' as 'dias' | 'semanas' | 'meses' | 'encontros', 
-          value: this.serviceService.convertToCents(this.formData.value),
+          name: this.formData.name,
+          duration_amount: this.formData.duration_amount,
+          duration_unit: this.formData.duration_unit,
           category: this.formData.category,
           description: this.formData.description || null,
           is_active: this.formData.is_active
@@ -140,7 +117,6 @@ export class ServiceFormComponent implements OnInit {
           name: this.formData.name,
           duration_amount: this.formData.duration_amount,
           duration_unit: this.formData.duration_unit,
-          value: this.serviceService.convertToCents(this.formData.value), // converter para centavos
           category: this.formData.category,
           description: this.formData.description || null
         };
@@ -169,7 +145,4 @@ export class ServiceFormComponent implements OnInit {
     return this.serviceService.formatDuration(this.formData.duration_amount, this.formData.duration_unit);
   }
 
-  getFormattedValue(): string {
-    return this.serviceService.formatValue(this.serviceService.convertToCents(this.formData.value));
-  }
 }

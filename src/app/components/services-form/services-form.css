@@ -213,13 +213,6 @@ textarea.form-control {
   font-size: 14px;
 }
 
-.currency-symbol {
-  position: absolute;
-  left: 14px;
-  color: #6c737f;
-  font-size: 14px;
-  font-weight: 500;
-}
 
 /* Status toggle */
 .status-toggle-group {
@@ -389,12 +382,6 @@ textarea.form-control {
   border-color: #c7d2fe;
 }
 
-/* Value preview */
-.value-preview {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--naue-green);
-}
 
 /* Status badge */
 .status-badge {
@@ -449,7 +436,7 @@ textarea.form-control {
 
 .btn-primary {
   background-color: var(--naue-green);
-  color: #1a1a1a;
+  color: white;
 }
 
 .btn-primary:hover:not(:disabled) {

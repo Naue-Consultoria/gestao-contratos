@@ -271,8 +271,8 @@ export class ContractFormComponent implements OnInit {
       service_id: service.id,
       name: service.name,
       quantity: 1,
-      unit_value: service.value,
-      total_value: service.value,
+      unit_value: 0, // Valor será definido pelo usuário
+      total_value: 0,
       duration: service.duration_amount,
       duration_unit: service.duration_unit,
       category: service.category || 'Geral',

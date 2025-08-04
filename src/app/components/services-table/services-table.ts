@@ -10,7 +10,6 @@ interface ServiceDisplay {
   name: string;
   category: string;
   duration: string;
-  value: string;
   description?: string;
   isActive: boolean;
   raw: ApiService;
@@ -64,7 +63,6 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
       name: apiService.name,
       category: apiService.category || 'N/A',
       duration: this.serviceService.formatDuration(apiService.duration_amount, apiService.duration_unit),
-      value: this.serviceService.formatValue(apiService.value),
       isActive: apiService.is_active,
       raw: apiService
     };

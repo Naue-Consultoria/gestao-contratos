@@ -202,11 +202,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     
     // If no unit_value, try to get from selected service
     const serviceId = serviceForm.get('service_id')?.value;
-    if (serviceId) {
-      const service = this.getServiceById(serviceId);
-      return service?.value || 0; // Service value is already in cents
-    }
-    
+    // Serviços agora não têm valor pré-definido
     return 0;
   }
 
@@ -236,9 +232,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     if (serviceId) {
       const service = this.getServiceById(serviceId);
       if (service) {
-        // Preencher automaticamente com o valor do serviço (convertendo de centavos para reais)
-        const valueInReais = service.value / 100;
-        serviceForm.get('unit_value')?.setValue(valueInReais);
+        // Serviços não têm mais valor pré-definido, mantém valor atual ou 0
+        // Não altera o valor automaticamente
       }
     } else {
       // Limpar valor quando nenhum serviço está selecionado
