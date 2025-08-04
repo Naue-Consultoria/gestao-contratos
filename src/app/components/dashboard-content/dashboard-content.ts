@@ -2,6 +2,9 @@ import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
 import { Router } from '@angular/router';
+import { ContractService } from '../../services/contract';
+import { ServiceService } from '../../services/service';
+import { forkJoin } from 'rxjs';
 
 Chart.register(...registerables);
 
@@ -39,12 +42,7 @@ interface QuickAction {
   styleUrls: ['./dashboard-content.css']
 })
 export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestroy {
-  statCards: StatCard[] = [
-    { label: 'Total de Contratos', value: 24, change: '+12% este mês', changeType: 'positive', icon: 'fas fa-file-contract', progress: 75, color: '#003b2b', bgColor: 'rgba(14, 155, 113, 0.15)' },
-    { label: 'Contratos Ativos', value: 18, change: '75% do total', changeType: 'positive', icon: 'fas fa-check-circle', progress: 75, color: '#003b2b', bgColor: 'rgba(14, 155, 113, 0.15)' },
-    { label: 'Serviços em Andamento', value: 42, change: 'Em 18 contratos', changeType: 'positive', icon: 'fas fa-list-check', progress: 65, color: '#003b2b', bgColor: 'rgba(14, 155, 113, 0.15)' },
-    { label: 'Próximas Atividades', value: 8, change: '3 urgentes', changeType: 'negative', icon: 'fas fa-clock', progress: 40, color: '#003b2b', bgColor: 'rgba(14, 155, 113, 0.15)' }
-  ];
+  statCards: StatCard[] = [];
   recentActivities: Activity[] = [
     { time: 'Há 2 horas', title: 'Diagnóstico Organizacional - Empresa ABC', description: 'Reunião inicial realizada com sucesso', type: 'diagnostic', status: 'completed' },
     { time: 'Há 5 horas', title: 'OKR - Tech Solutions', description: 'Workshop de definição de objetivos concluído', type: 'okr', status: 'completed' },
@@ -59,9 +57,36 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     { icon: 'fas fa-chart-bar', label: 'Gerar Relatório', color: '#003b2b', action: 'generateReport' }
   ];
   monthlyContractsData = {
-    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+    labels: [] as string[],
     datasets: [{
-      label: 'Contratos', data: [12, 15, 18, 22, 20, 24], borderColor: '#003b2b', backgroundColor: 'rgba(14, 155, 113, 0.1)', fill: true
+      label: 'Contratos Criados',
+      data: [] as number[],
+      borderColor: '#003b2b',
+      backgroundColor: 'rgba(0, 59, 43, 0.1)',
+      fill: true,
+      tension: 0.4,
+      borderWidth: 3,
+      pointBackgroundColor: '#ffffff',
+      pointBorderColor: '#003b2b',
+      pointBorderWidth: 2,
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      pointHoverBorderWidth: 3
+    }, {
+      label: 'Contratos Ativos',
+      data: [] as number[],
+      borderColor: '#0a8560',
+      backgroundColor: 'rgba(10, 133, 96, 0.1)',
+      fill: false,
+      tension: 0.4,
+      borderWidth: 2,
+      pointBackgroundColor: '#ffffff',
+      pointBorderColor: '#0a8560',
+      pointBorderWidth: 2,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      pointHoverBorderWidth: 2,
+      borderDash: [5, 5]
     }]
   };
   contractsChart: Chart | null = null;
@@ -69,19 +94,32 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
   private themeObserver!: MutationObserver;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private contractService: ContractService,
+    private serviceService: ServiceService
+  ) {}
 
   ngOnInit() {
+    // Inicializar com dados zerados
+    this.updateStatCards({ total: 0, active: 0 }, { total: 0 });
+    // Carregar dados reais
     this.loadDashboardData();
+    this.loadChartData();
   }
 
   ngAfterViewInit() {
-    this.initCharts();
+    // Aguardar um pouco para garantir que o DOM esteja pronto
+    setTimeout(() => {
+      this.initCharts();
+    }, 100);
 
     this.themeObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {
-          this.initCharts();
+          setTimeout(() => {
+            this.initCharts();
+          }, 100);
         }
       });
     });
@@ -99,7 +137,158 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   private loadDashboardData() {
-    console.log('Carregando dados do dashboard...');
+    console.log('Iniciando carregamento dos dados do dashboard...');
+    
+    // Buscar dados de contratos e serviços em paralelo
+    forkJoin({
+      contractStats: this.contractService.getStats(),
+      serviceStats: this.serviceService.getStats()
+    }).subscribe({
+      next: (response) => {
+        console.log('Dados recebidos:', response);
+        this.updateStatCards(response.contractStats.stats, response.serviceStats.stats);
+      },
+      error: (error) => {
+        console.error('Erro ao carregar dados do dashboard:', error);
+        // Usar dados com valores zerados em caso de erro
+        this.updateStatCards({ total: 0, active: 0 }, { total: 0 });
+      }
+    });
+  }
+
+  private loadChartData() {
+    // Buscar contratos para gerar dados do gráfico
+    this.contractService.getContracts().subscribe({
+      next: (response) => {
+        this.generateChartData(response.contracts);
+        if (this.contractsChart) {
+          this.contractsChart.destroy();
+        }
+        this.initContractsChart();
+      },
+      error: (error) => {
+        console.error('Erro ao carregar dados do gráfico:', error);
+        // Usar dados mock em caso de erro
+        this.generateMockChartData();
+        if (this.contractsChart) {
+          this.contractsChart.destroy();
+        }
+        this.initContractsChart();
+      }
+    });
+  }
+
+  private generateChartData(contracts: any[]) {
+    // Obter últimos 6 meses
+    const months = [];
+    const createdData = [];
+    const activeData = [];
+    
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const monthKey = date.toISOString().substring(0, 7); // YYYY-MM
+      const monthLabel = date.toLocaleDateString('pt-BR', { month: 'short' });
+      
+      months.push(monthLabel);
+      
+      // Contar contratos criados no mês
+      const createdInMonth = contracts.filter(contract => {
+        const contractDate = new Date(contract.created_at).toISOString().substring(0, 7);
+        return contractDate === monthKey;
+      }).length;
+      
+      // Contar contratos ativos no mês (criados até o mês e ainda ativos)
+      const activeInMonth = contracts.filter(contract => {
+        const contractDate = new Date(contract.created_at).toISOString().substring(0, 7);
+        const isCreatedBeforeOrInMonth = contractDate <= monthKey;
+        const isActiveInMonth = contract.status === 'active' || 
+          (contract.end_date && new Date(contract.end_date).toISOString().substring(0, 7) >= monthKey);
+        return isCreatedBeforeOrInMonth && isActiveInMonth;
+      }).length;
+      
+      createdData.push(createdInMonth);
+      activeData.push(activeInMonth);
+    }
+    
+    this.monthlyContractsData.labels = months;
+    this.monthlyContractsData.datasets[0].data = createdData;
+    this.monthlyContractsData.datasets[1].data = activeData;
+  }
+
+  private generateMockChartData() {
+    const months = ['Ago', 'Set', 'Out', 'Nov', 'Dez', 'Jan'];
+    const createdData = [8, 12, 15, 18, 14, 20];
+    const activeData = [6, 10, 13, 16, 12, 18];
+    
+    this.monthlyContractsData.labels = months;
+    this.monthlyContractsData.datasets[0].data = createdData;
+    this.monthlyContractsData.datasets[1].data = activeData;
+  }
+
+
+  private updateStatCards(contractStats: any, serviceStats: any) {
+    // Calcular serviços em andamento (assumindo que contratos ativos têm serviços em andamento)
+    const servicesInProgress = contractStats.active > 0 ? contractStats.active * 2 : 0; // Estimativa média
+    
+    // Para próximas atividades, usar dados reais quando disponíveis
+    // Por enquanto, mostrar 0 até ter endpoint específico para atividades
+    const upcomingActivities = 0;
+
+    this.statCards = [
+      { 
+        label: 'Total de Contratos', 
+        value: contractStats.total || 0, 
+        change: contractStats.total === 0 ? '0%' : this.calculateGrowthPercentage(contractStats.total, 20),
+        changeType: contractStats.total === 0 ? 'positive' : (contractStats.total >= 20 ? 'positive' : 'negative'), 
+        icon: 'fas fa-file-contract', 
+        progress: contractStats.total === 0 ? 0 : Math.min((contractStats.total / 30) * 100, 100),
+        color: '#003b2b', 
+        bgColor: 'rgba(14, 155, 113, 0.15)' 
+      },
+      { 
+        label: 'Contratos Ativos', 
+        value: contractStats.active || 0, 
+        change: contractStats.active === 0 ? '0% do total' : `${Math.round((contractStats.active / contractStats.total) * 100)}% do total`, 
+        changeType: 'positive', 
+        icon: 'fas fa-check-circle', 
+        progress: contractStats.active === 0 ? 0 : Math.min((contractStats.active / contractStats.total) * 100, 100), 
+        color: '#003b2b', 
+        bgColor: 'rgba(14, 155, 113, 0.15)' 
+      },
+      { 
+        label: 'Serviços em Andamento', 
+        value: servicesInProgress, 
+        change: servicesInProgress === 0 ? 'Nenhum serviço' : `Em ${contractStats.active} contratos`, 
+        changeType: 'positive', 
+        icon: 'fas fa-list-check', 
+        progress: servicesInProgress === 0 ? 0 : Math.min((servicesInProgress / 50) * 100, 100),
+        color: '#003b2b', 
+        bgColor: 'rgba(14, 155, 113, 0.15)' 
+      },
+      { 
+        label: 'Próximas Atividades', 
+        value: upcomingActivities, 
+        change: upcomingActivities === 0 ? 'Nenhuma atividade' : this.getUrgentActivitiesText(upcomingActivities), 
+        changeType: upcomingActivities === 0 ? 'positive' : (upcomingActivities > 5 ? 'negative' : 'positive'), 
+        icon: 'fas fa-clock', 
+        progress: upcomingActivities === 0 ? 0 : Math.min((upcomingActivities / 15) * 100, 100),
+        color: '#003b2b', 
+        bgColor: 'rgba(14, 155, 113, 0.15)' 
+      }
+    ];
+  }
+
+  private calculateGrowthPercentage(current: number, previous: number): string {
+    if (previous === 0) return '+100% este mês';
+    const growth = ((current - previous) / previous) * 100;
+    const sign = growth >= 0 ? '+' : '';
+    return `${sign}${Math.round(growth)}% este mês`;
+  }
+
+  private getUrgentActivitiesText(total: number): string {
+    const urgent = Math.floor(total * 0.3); // 30% são urgentes
+    return urgent > 0 ? `${urgent} urgentes` : 'Nenhuma urgente';
   }
 
   private initCharts() {
@@ -118,7 +307,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
     const isDarkMode = document.body.classList.contains('dark-mode');
     const textColor = isDarkMode ? '#e5e7eb' : '#374151';
-    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 59, 43, 0.08)';
 
     this.contractsChart = new Chart(ctx, {
       type: 'line',
@@ -126,36 +315,90 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
+        interaction: { 
+          mode: 'index', 
+          intersect: false 
+        },
         plugins: {
-          legend: { display: false },
+          legend: { 
+            display: true,
+            position: 'top',
+            align: 'end',
+            labels: {
+              color: textColor,
+              font: { size: 12, weight: 'bold' as const },
+              padding: 15,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          },
           tooltip: {
-            backgroundColor: isDarkMode ? '#374151' : '#fff',
+            backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
             titleColor: textColor,
             bodyColor: textColor,
-            borderColor: isDarkMode ? '#4b5563' : '#e5e7eb',
+            borderColor: isDarkMode ? '#4b5563' : 'rgba(0, 59, 43, 0.2)',
             borderWidth: 1,
             padding: 12,
-            displayColors: false,
+            cornerRadius: 8,
+            displayColors: true,
+            titleFont: { size: 13, weight: 'bold' as const },
+            bodyFont: { size: 12 },
             callbacks: {
-              label: (context) => `Contratos: ${context.parsed.y}`
+              title: (context) => {
+                return `${context[0].label} 2025`;
+              },
+              label: (context) => {
+                return `${context.dataset.label}: ${context.parsed.y} contratos`;
+              }
             }
           }
         },
         scales: {
           x: {
-            grid: { color: gridColor, display: false },
-            ticks: { color: textColor, font: { size: 12 } }
+            grid: { 
+              color: gridColor, 
+              display: false 
+            },
+            ticks: { 
+              color: textColor, 
+              font: { size: 11, weight: 'bold' as const },
+              padding: 8
+            },
+            border: {
+              color: gridColor
+            }
           },
           y: {
             beginAtZero: true,
-            grid: { color: gridColor, display: true },
-            ticks: { color: textColor, font: { size: 12 }, stepSize: 5 }
+            grid: { 
+              color: gridColor, 
+              display: true
+            },
+            ticks: { 
+              color: textColor, 
+              font: { size: 11 }, 
+              stepSize: 2,
+              padding: 10,
+              callback: function(value) {
+                return Number.isInteger(value as number) ? value : '';
+              }
+            },
+            border: {
+              display: false
+            }
           }
         },
         elements: {
-          line: { tension: 0.4, borderWidth: 3 },
-          point: { radius: 5, hoverRadius: 7, backgroundColor: '#fff', borderWidth: 3, borderColor: '#003b2b' }
+          line: { 
+            tension: 0.4
+          },
+          point: { 
+            hoverBorderWidth: 3
+          }
+        },
+        animation: {
+          duration: 1500,
+          easing: 'easeInOutQuart'
         }
       }
     });
@@ -170,6 +413,21 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     return this.recentActivities.filter(activity => activity.status === this.activityFilter);
   }
 
+  getDisplayedActivities(): Activity[] {
+    // Mostrar apenas as 2 primeiras atividades filtradas
+    return this.filteredActivities.slice(0, 2);
+  }
+
+  getTotalActivitiesCount(): number {
+    return this.filteredActivities.length;
+  }
+
+  navigateToActivities(): void {
+    // Por enquanto, apenas log - pode implementar navegação futura
+    console.log('Navegando para todas as atividades...');
+    // this.router.navigate(['/home/activities']);
+  }
+
   executeQuickAction(action: string) {
     const routes: { [key: string]: string } = {
       'newProposal': '/home/proposals/new',
@@ -182,17 +440,46 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   getActivityIcon(type: string): string {
-    const icons: { [key: string]: string } = { 'diagnostic': 'fas fa-stethoscope', 'okr': 'fas fa-bullseye', 'mentoring': 'fas fa-user-tie', 'hr': 'fas fa-users', 'other': 'fas fa-ellipsis-h' };
-    return icons[type] || 'fas fa-circle';
+    const icons: { [key: string]: string } = { 
+      'diagnostic': 'fa fa-stethoscope', 
+      'okr': 'fa fa-bullseye', 
+      'mentoring': 'fa fa-user-tie', 
+      'hr': 'fa fa-users', 
+      'other': 'fa fa-ellipsis-h' 
+    };
+    return icons[type] || 'fa fa-circle';
   }
 
   getActivityColor(type: string): string {
-    const colors: { [key: string]: string } = { 'diagnostic': '#17915a', 'okr': '#17915a', 'mentoring': '#17915a', 'hr': '#17915a', 'other': '#17915a' };
-    return colors[type] || '#17915a';
+    const colors: { [key: string]: string } = { 
+      'diagnostic': '#0a8560', 
+      'okr': '#003b2b', 
+      'mentoring': '#065f46', 
+      'hr': '#0f766e', 
+      'other': '#17915a' 
+    };
+    return colors[type] || '#0a8560';
   }
   
   getStatusText(status: string): string {
     const texts: { [key: string]: string } = { 'completed': 'Concluído', 'in-progress': 'Em andamento', 'scheduled': 'Agendado' };
     return texts[status] || status;
+  }
+
+  getChartInsights() {
+    const data = this.monthlyContractsData.datasets[0].data as number[];
+    if (data.length === 0) return { growth: '0%', average: 0, projection: 0 };
+    
+    const current = data[data.length - 1] || 0;
+    const previous = data[data.length - 2] || 0;
+    const growth = previous === 0 ? (current > 0 ? 100 : 0) : Math.round(((current - previous) / previous) * 100);
+    const average = Math.round(data.reduce((a, b) => a + b, 0) / data.length);
+    const projection = Math.round(current * 1.15); // Projeção de 15% de crescimento
+    
+    return {
+      growth: `${growth >= 0 ? '+' : ''}${growth}%`,
+      average,
+      projection
+    };
   }
 }

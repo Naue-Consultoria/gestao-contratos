@@ -13,6 +13,31 @@
     z-index: 900;
 }
 
+/* Custom Scrollbar para Sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    margin: 10px 0;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.sidebar::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.4);
+}
+
 
 /* Botão Toggle Compacto */
 .sidebar-toggle-compact {
@@ -208,6 +233,23 @@
     background-color: #064c3f;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     border-top-right-radius: 15px; /* Mantém o arredondamento no dark mode */
+}
+
+/* Custom Scrollbar para Dark Mode */
+:host-context(body.dark-mode) .sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+:host-context(body.dark-mode) .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+:host-context(body.dark-mode) .sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+:host-context(body.dark-mode) .sidebar::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.35);
 }
 :host-context(body.dark-mode) .sidebar-toggle-compact {
     border-color: #444;

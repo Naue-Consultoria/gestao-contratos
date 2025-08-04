@@ -59,10 +59,10 @@
         <h2 class="section-title">Evolução de Contratos</h2>
         <div class="section-actions">
           <button class="icon-btn" title="Expandir">
-            <i class="fas fa-expand"></i>
+            <i class="fa fa-expand" aria-hidden="true"></i>
           </button>
           <button class="icon-btn" title="Download">
-            <i class="fas fa-download"></i>
+            <i class="fa fa-download" aria-hidden="true"></i>
           </button>
         </div>
       </div>
@@ -72,17 +72,17 @@
       <div class="chart-insights">
         <div class="insight-item">
           <span class="insight-label">Crescimento</span>
-          <span class="insight-value positive">+33%</span>
+          <span class="insight-value" [ngClass]="getChartInsights().growth.includes('+') ? 'positive' : ''">{{ getChartInsights().growth }}</span>
         </div>
         <div class="insight-divider"></div>
         <div class="insight-item">
           <span class="insight-label">Média Mensal</span>
-          <span class="insight-value">18</span>
+          <span class="insight-value">{{ getChartInsights().average }}</span>
         </div>
         <div class="insight-divider"></div>
         <div class="insight-item">
           <span class="insight-label">Projeção Próx. Mês</span>
-          <span class="insight-value">28</span>
+          <span class="insight-value">{{ getChartInsights().projection }}</span>
         </div>
       </div>
     </div>
@@ -96,37 +96,37 @@
             class="tab-btn" 
             [class.active]="activityFilter === 'all'"
             (click)="filterActivities('all')">
-            Todas
+            <span>Todas</span>
           </button>
           <button 
             class="tab-btn" 
             [class.active]="activityFilter === 'completed'"
             (click)="filterActivities('completed')">
-            Concluídas
+            <span>Concluídas</span>
           </button>
           <button 
             class="tab-btn" 
             [class.active]="activityFilter === 'in-progress'"
             (click)="filterActivities('in-progress')">
-            Em andamento
+            <span>Em andamento</span>
           </button>
         </div>
       </div>
 
       <div class="activities-list">
-        <div class="activity-card" *ngFor="let activity of filteredActivities">
+        <div class="activity-card" *ngFor="let activity of getDisplayedActivities()">
           <div 
             class="activity-icon"
             [style.background-color]="getActivityColor(activity.type) + '20'"
             [style.color]="getActivityColor(activity.type)">
-            <i [class]="getActivityIcon(activity.type)"></i>
+            <i [class]="getActivityIcon(activity.type)" [attr.aria-hidden]="true"></i>
           </div>
           <div class="activity-content">
             <h4 class="activity-title">{{ activity.title }}</h4>
             <p class="activity-description">{{ activity.description }}</p>
             <div class="activity-meta">
               <span class="activity-time">
-                <i class="far fa-clock"></i>
+                <i class="fa fa-clock" aria-hidden="true"></i>
                 {{ activity.time }}
               </span>
               <span class="activity-status" [ngClass]="'status-' + activity.status">
@@ -137,10 +137,19 @@
         </div>
       </div>
 
-      <button class="view-all-btn">
-        Ver todas as atividades
-        <i class="fas fa-arrow-right"></i>
+      <button class="view-all-btn" (click)="navigateToActivities()">
+        <span>Ver todas as atividades ({{ getTotalActivitiesCount() }})</span>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
       </button>
+      
+      <!-- Mensagem quando não há atividades -->
+      <div class="no-activities" *ngIf="getDisplayedActivities().length === 0">
+        <div class="no-activities-icon">
+          <i class="fa fa-calendar-times" aria-hidden="true"></i>
+        </div>
+        <p class="no-activities-text">Nenhuma atividade encontrada</p>
+        <p class="no-activities-subtext">As atividades aparecerão aqui quando houver movimentação no sistema</p>
+      </div>
     </div>
   </div>
   </div>
