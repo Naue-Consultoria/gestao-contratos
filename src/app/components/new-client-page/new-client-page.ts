@@ -34,7 +34,6 @@ export class NewClientPageComponent implements OnInit {
     zipcode: '',
     // PF fields
     cpf: '',
-    rg: '',
     full_name: '',
     // PJ fields
     cnpj: '',
@@ -77,7 +76,6 @@ export class NewClientPageComponent implements OnInit {
         zipcode: client.zipcode,
         // PF fields
         cpf: client.cpf || '',
-        rg: client.rg || '',
         full_name: client.full_name || '',
         // PJ fields
         cnpj: client.cnpj || '',
