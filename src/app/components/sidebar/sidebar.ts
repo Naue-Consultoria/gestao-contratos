@@ -34,10 +34,10 @@ export class SidebarComponent {
       title: 'PRINCIPAL',
       items: [
         { id: 'dashboard', icon: 'fas fa-chart-line', text: 'Dashboard', route: '/home/dashboard' },
-        { id: 'contracts', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contracts' },
-        { id: 'proposals', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/proposals' },
+        { id: 'services', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/services' },
         { id: 'clients', icon: 'fas fa-users', text: 'Clientes', route: '/home/clients' },
-        { id: 'services', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/services' }
+        { id: 'proposals', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/proposals' },
+        { id: 'contracts', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contracts' }
       ]
     },
     {
