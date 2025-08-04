@@ -60,7 +60,6 @@ export interface Proposal {
 
 export interface CreateProposalData {
   client_id: number;
-  client_type: 'pf' | 'pj' | '';
   proposal_type: 'consultoria_corporativa' | 'mentoria' | 'prestacao_servicos' | 'r_s';
   client_name: string;
   client_document: string;
@@ -71,14 +70,15 @@ export interface CreateProposalData {
   client_complement?: string;
   client_neighborhood: string;
   client_city: string;
+  client_state: string;
   client_zipcode: string;
   end_date?: string;
   validity_days?: number;
   services: {
     service_id: number;
     quantity: number;
-    unit_value: number; // Add unit_value as per proposal_services table
-    total_value: number; // Add total_value as per proposal_services table
+    unit_value: number;
+    total_value?: number; // Optional since backend calculates it
   }[];
 }
 

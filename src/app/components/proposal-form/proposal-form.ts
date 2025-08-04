@@ -80,6 +80,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     this.proposalForm = this.fb.group({
       client_id: ['', Validators.required],
       end_date: [''],
+      observations: [''],
       services: this.fb.array([]),
     });
 
@@ -350,7 +351,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     
     const formData: CreateProposalData = {
       client_id: clientId,
-      client_type: clientType,
       proposal_type: 'prestacao_servicos', // Valor padrão
       client_name: selectedClient.full_name || selectedClient.company_name || '',
       client_document: selectedClient.cpf || selectedClient.cnpj || '',
@@ -361,6 +361,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       client_complement: selectedClient.complement || undefined,
       client_neighborhood: selectedClient.neighborhood || '',
       client_city: selectedClient.city || '',
+      client_state: selectedClient.state || '',
       client_zipcode: selectedClient.zipcode || '',
       end_date: this.proposalForm.value.end_date || null,
       validity_days: 30, // Valor padrão
@@ -369,8 +370,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
         .map((s: any) => ({
           service_id: parseInt(s.service_id) || 0,
           quantity: parseInt(s.quantity) || 1,
-          unit_value: Math.round(parseFloat(s.unit_value) * 100), // Convert to cents
-          total_value: Math.round(parseFloat(s.unit_value) * 100 * parseInt(s.quantity) || 1) // Calculate total in cents
+          unit_value: Math.round(parseFloat(s.unit_value) * 100) // Convert to cents
         }))
     };
 

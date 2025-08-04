@@ -50,10 +50,10 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     { time: 'Há 2 dias', title: 'Consultoria RH - Inovação Corp', description: 'Análise de clima organizacional em andamento', type: 'hr', status: 'in-progress' }
   ];
   quickActions: QuickAction[] = [
-    { icon: 'fas fa-file-alt', label: 'Nova Proposta', color: '#003b2b', action: 'newProposal' },
-    { icon: 'fas fa-users', label: 'Novo Cliente', color: '#003b2b', action: 'newClient' },
     { icon: 'fas fa-briefcase', label: 'Novo Serviço', color: '#003b2b', action: 'newService' },
-    { icon: 'fas fa-plus', label: 'Novo Contrato', color: '#003b2b', action: 'newContract' },
+    { icon: 'fas fa-users', label: 'Novo Cliente', color: '#003b2b', action: 'newClient' },
+    { icon: 'fas fa-file-alt', label: 'Nova Proposta', color: '#003b2b', action: 'newProposal' },
+    { icon: 'fas fa-file-contract', label: 'Novo Contrato', color: '#003b2b', action: 'newContract' },
     { icon: 'fas fa-chart-bar', label: 'Gerar Relatório', color: '#003b2b', action: 'generateReport' }
   ];
   monthlyContractsData = {
