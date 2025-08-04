@@ -251,6 +251,16 @@
     text-decoration: line-through;
 }
 
+/* Client Name */
+.client-name {
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .client-name {
+    color: var(--dark-text);
+}
+
 /* Company Name */
 .company-name {
     font-weight: 500;

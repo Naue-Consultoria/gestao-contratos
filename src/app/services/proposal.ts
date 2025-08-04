@@ -376,7 +376,7 @@ export class ProposalService {
   /**
    * Verificar se proposta está expirada
    */
-  isProposalExpired(proposal: Proposal): boolean {
+  isProposalExpired(proposal: any): boolean {
     if (!proposal.end_date) return false;
     return new Date(proposal.end_date) < new Date();
   }

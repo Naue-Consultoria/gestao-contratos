@@ -56,8 +56,11 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     this.error = '';
     try {
       const proposalsResponse = await firstValueFrom(this.proposalService.getProposals());
+      
       if (proposalsResponse && proposalsResponse.success) {
-        this.proposals = (proposalsResponse.data || []).map((apiProposal: Proposal) => this.mapApiProposalToTableProposal(apiProposal));
+        this.proposals = (proposalsResponse.data || []).map((apiProposal: any) => {
+          return this.mapApiProposalToTableProposal(apiProposal);
+        });
       } else {
         // Se não há dados ou falha na resposta, deixa array vazio
         this.proposals = [];
@@ -79,12 +82,22 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  private mapApiProposalToTableProposal(apiProposal: Proposal): ProposalDisplay {
+  private mapApiProposalToTableProposal(apiProposal: any): ProposalDisplay {
+    // Extrair nome do cliente baseado no tipo (PF ou PJ)
+    let clientName = 'Cliente não identificado';
+    if (apiProposal.client) {
+      if (apiProposal.client.clients_pf) {
+        clientName = apiProposal.client.clients_pf.full_name;
+      } else if (apiProposal.client.clients_pj) {
+        clientName = apiProposal.client.clients_pj.company_name;
+      }
+    }
+
     return {
       id: apiProposal.id,
       proposalNumber: apiProposal.proposal_number,
-      clientName: apiProposal.client_name,
-      companyName: apiProposal.client?.name || 'N/A',
+      clientName: clientName,
+      companyName: clientName,
       status: apiProposal.status,
       statusText: this.proposalService.getStatusText(apiProposal.status),
       totalValue: this.proposalService.formatCurrency(apiProposal.total_value || 0),
@@ -196,7 +209,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
 
   private formatDate(dateString: string | null | undefined): string {
     if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   }
 
   openSendProposalModal(proposal: ProposalDisplay, event: MouseEvent) {
