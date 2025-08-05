@@ -22,13 +22,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   @Input() userName = '';
   @Input() userRole = '';
   @Input() userInitials = '';
-  @Input() isDarkMode = false;
   @Input() notifications: Notification[] = [];
   @Input() unreadNotificationsCount = 0;
   @Input() isNotificationOpen = false;
   
   @Output() toggleMobileSidebar = new EventEmitter<void>();
-  @Output() toggleTheme = new EventEmitter<void>();
   @Output() toggleNotifications = new EventEmitter<void>();
   @Output() clearNotifications = new EventEmitter<void>();
   @Output() logout = new EventEmitter<void>();
@@ -39,7 +37,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isSearchActive = false;
   isUserMenuOpen = false;
   
-  // Date and time properties
   currentDayName = '';
   currentDate = '';
   currentYear = '';
@@ -53,7 +50,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.updateDateTime();
     this.timeInterval = setInterval(() => {
       this.updateDateTime();
-    }, 60000); // Atualiza a cada minuto
+    }, 60000);
   }
 
   ngOnDestroy(): void {
@@ -64,22 +61,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private updateDateTime(): void {
     const now = new Date();
-    
-    // Dia da semana em português
     const dayNames = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
     this.currentDayName = dayNames[now.getDay()];
-    
-    // Data formatada (dia de mês)
     const day = now.getDate();
     const monthNames = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 
                        'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
     const month = monthNames[now.getMonth()];
     this.currentDate = `${day} de ${month}`;
-    
-    // Ano
     this.currentYear = now.getFullYear().toString();
-    
-    // Horário formatado (sem segundos)
     const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
     this.currentTime = `${hours}:${minutes}`;
@@ -100,7 +89,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isSearchActive = !this.isSearchActive;
     if (this.isSearchActive) {
       this.isUserMenuOpen = false;
-      
       setTimeout(() => {
         this.mobileSearchInput?.nativeElement?.focus();
       }, 100);
@@ -125,12 +113,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   closeUserMenu(): void {
     this.isUserMenuOpen = false;
   }
-  
-  // navigateToProfile(event: Event): void {
-  //   event.preventDefault();
-  //   this.router.navigate(['/home/settings']);
-  //   this.closeUserMenu();
-  // }
   
   navigateToSettings(event: Event): void {
     event.preventDefault();

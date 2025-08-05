@@ -13,21 +13,12 @@
     gap: 1rem;
 }
 
-:host-context(body.dark-mode) .period-selector {
-    background-color: var(--dark-card);
-    border-color: var(--dark-border);
-}
-
 .period-label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-weight: 600;
     color: var(--text-dark);
-}
-
-:host-context(body.dark-mode) .period-label {
-    color: var(--dark-text);
 }
 
 .period-label i {
@@ -48,12 +39,6 @@
     color: var(--text-gray);
     cursor: pointer;
     transition: all 0.3s ease;
-}
-
-:host-context(body.dark-mode) .period-btn {
-    background-color: var(--dark-bg);
-    border-color: var(--dark-border);
-    color: #ccc;
 }
 
 .period-btn:hover {
@@ -218,11 +203,6 @@
     transition: all 0.3s ease;
 }
 
-:host-context(body.dark-mode) .metric-card {
-    background-color: var(--dark-card);
-    border-color: var(--dark-border);
-}
-
 .metric-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
@@ -253,10 +233,6 @@
     font-size: 1.75rem;
     font-weight: 700;
     color: var(--text-dark);
-}
-
-:host-context(body.dark-mode) .metric-value {
-    color: var(--dark-text);
 }
 
 .metric-trend {
@@ -291,11 +267,6 @@
     border: 1px solid var(--border-gray);
 }
 
-:host-context(body.dark-mode) .chart-container {
-    background-color: var(--dark-card);
-    border-color: var(--dark-border);
-}
-
 .chart-header {
     display: flex;
     justify-content: space-between;
@@ -308,10 +279,6 @@
     font-weight: 600;
     color: var(--text-dark);
     margin: 0;
-}
-
-:host-context(body.dark-mode) .chart-title {
-    color: var(--dark-text);
 }
 
 .chart-actions {
@@ -331,11 +298,6 @@
     color: var(--text-gray);
     cursor: pointer;
     transition: all 0.3s ease;
-}
-
-:host-context(body.dark-mode) .chart-action {
-    background-color: var(--dark-bg);
-    border-color: var(--dark-border);
 }
 
 .chart-action:hover {
@@ -401,10 +363,6 @@
     font-size: 0.875rem;
 }
 
-:host-context(body.dark-mode) .legend-name {
-    color: var(--dark-text);
-}
-
 .legend-stats {
     display: flex;
     align-items: center;
@@ -436,16 +394,8 @@
     gap: 0.5rem;
 }
 
-:host-context(body.dark-mode) .section-title {
-    color: var(--dark-text);
-}
-
 .section-title i {
     color: var(--primary-green);
-}
-
-:host-context(body.dark-mode) .insight-content h4 {
-    color: var(--dark-text);
 }
 
 /* Responsive */

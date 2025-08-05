@@ -56,16 +56,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   userName = '';
   userRole = '';
   userInitials = '';
-  isDarkMode = false;
   isSidebarCollapsed = false;
   isMobileSidebarOpen = false;
   isNotificationOpen = false;
   editingUser: ApiUser | null = null;
   editingCompany: ApiCompany | null = null;
-  notifications: any[] = []; // Simplified
+  notifications: any[] = [];
   unreadNotificationsCount = 0;
-  navSections: any[] = []; // Simplified
-  servicesList: any[] = []; // Simplified
+  navSections: any[] = [];
+  servicesList: any[] = [];
   selectedServices: Set<string> = new Set();
   isContractModalOpen = false;
   isCompanyModalOpen = false;
@@ -82,7 +81,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadUserData();
-    this.loadThemePreference();
     
     this.subscriptions.add(
       this.notificationService.unreadCount$.subscribe(count => {
@@ -108,17 +106,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.userRole = user.role === 'admin' ? 'Administrador' : 'Usuário';
       this.userInitials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     }
-  }
-  
-  loadThemePreference() {
-    this.isDarkMode = localStorage.getItem('theme') === 'dark';
-    document.body.classList.toggle('dark-mode', this.isDarkMode);
-  }
-
-  toggleTheme() {
-    this.isDarkMode = !this.isDarkMode;
-    document.body.classList.toggle('dark-mode', this.isDarkMode);
-    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
   }
 
   toggleSidebar() { this.isSidebarCollapsed = !this.isSidebarCollapsed; }

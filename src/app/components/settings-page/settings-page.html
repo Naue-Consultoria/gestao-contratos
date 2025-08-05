@@ -23,7 +23,6 @@
     </div>
     
     <div class="settings-content">
-      <!-- Configurações Gerais -->
       <div *ngIf="activeTab === 'general'" class="table-container">
         <h2 class="table-title mb-3">Configurações Gerais</h2>
         
@@ -43,21 +42,8 @@
           </div>
         </div>
         
-        <div class="form-section">
-          <h3 class="section-subtitle">Tema do Sistema</h3>
-          
-          <div class="form-group">
-            <label class="form-label">Modo</label>
-            <select class="form-control" [(ngModel)]="tema.modo" (change)="aplicarTema()">
-              <option value="light">Claro</option>
-              <option value="dark">Escuro</option>
-              <option value="auto">Automático</option>
-            </select>
-          </div>
-        </div>
       </div>
       
-      <!-- Notificações -->
       <div *ngIf="activeTab === 'notifications'" class="table-container">
         <h2 class="table-title mb-3">Configurações de Notificações</h2>
         
@@ -119,7 +105,6 @@
         </button>
       </div>
       
-      <!-- Segurança -->
       <div *ngIf="activeTab === 'security'" class="table-container">
         <h2 class="table-title mb-3">Configurações de Segurança</h2>
         

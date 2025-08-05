@@ -23,10 +23,6 @@ export class SettingsPageComponent implements OnInit {
     dataCriacao: null as Date | null
   };
   
-  tema = {
-    modo: 'light'
-  };
-  
   notificacoes = {
     email: true,
     contratoVencendo: true,
@@ -51,7 +47,6 @@ export class SettingsPageComponent implements OnInit {
 
   ngOnInit() {
     this.loadCurrentUser();
-    this.tema.modo = localStorage.getItem('theme') || 'light';
   }
 
   async loadCurrentUser() {
@@ -77,18 +72,6 @@ export class SettingsPageComponent implements OnInit {
 
   setActiveTab(tabId: string) {
     this.activeTab = tabId;
-  }
-  
-  aplicarTema() {
-    const body = document.body;
-    localStorage.setItem('theme', this.tema.modo);
-
-    if (this.tema.modo === 'dark') {
-      body.classList.add('dark-mode');
-    } else {
-      body.classList.remove('dark-mode');
-    }
-    this.notificationService.info(`Tema alterado para modo ${this.tema.modo}`, 'Preferência Salva');
   }
   
   salvarNotificacoes() {

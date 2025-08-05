@@ -1,17 +1,13 @@
-<!-- src/app/components/header/header.html -->
 <header class="header" [class.search-open]="isSearchActive">
   <div class="header-content">
-    <!-- Mobile Menu Button -->
     <button class="mobile-menu-btn" (click)="toggleMobileSidebar.emit()">
       <i class="fas fa-bars"></i>
     </button>
 
-    <!-- Logo -->
     <a class="logo" routerLink="/home/dashboard">
         <img src="logoNaueNeg.png" alt="NAUE Consultoria" class="logo-image">
     </a>
 
-    <!-- Date and Time Display -->
     <div class="datetime-display">
       <div class="date-info">
         <div class="date-line">
@@ -27,10 +23,8 @@
       </div>
     </div>
 
-    <!-- Header Actions -->
     <div class="header-actions">
 
-      <!-- Notifications Button with Badge -->
       <button
         class="notification-btn tooltip"
         (click)="toggleNotifications.emit()"
@@ -46,16 +40,6 @@
         </span>
       </button>
 
-      <!-- Theme Toggle -->
-      <button
-        class="theme-toggle"
-        (click)="toggleTheme.emit()"
-        title="Alternar tema"
-      >
-        <i [class]="isDarkMode ? 'fas fa-moon' : 'fas fa-sun'"></i>
-      </button>
-
-      <!-- User Menu com Wrapper -->
       <div class="header-actions">
         <div class="user-menu-wrapper">
           <div class="user-info" (click)="toggleUserMenu()" [class.open]="isUserMenuOpen">
@@ -71,12 +55,6 @@
               </div>
             </div>
             <ul class="user-dropdown-menu">
-              <!-- <li>
-                <a href="#" (click)="navigateToProfile($event)">
-                  <i class="fas fa-user"></i>
-                  Meu Perfil
-                </a>
-              </li> -->
               <li>
                 <a routerLink="/home/settings" (click)="closeUserMenu()">
                   <i class="fas fa-cog"></i>

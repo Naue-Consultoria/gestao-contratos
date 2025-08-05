@@ -318,19 +318,6 @@
   }
   
   /* ==========================================
-     DARK MODE
-     ========================================== */
-  
-  :host-context(body.dark-mode) .table-container,
-  :host-context(body.dark-mode) .form-container,
-  :host-context(body.dark-mode) .content-section,
-  :host-context(body.dark-mode) .stat-card {
-    background-color: var(--dark-card);
-    border-color: var(--dark-border);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* ==========================================
      UTILITÁRIOS RESPONSIVOS
      ========================================== */
   

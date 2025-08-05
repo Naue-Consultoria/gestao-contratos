@@ -136,38 +136,6 @@
     color: var(--text-gray);
 }
 
-/* Dark mode */
-:host-context(body.dark-mode) .settings-sidebar,
-:host-context(body.dark-mode) .table-container {
-    background-color: var(--dark-card);
-    border-color: var(--dark-border);
-}
-
-:host-context(body.dark-mode) .nav-item {
-    color: #ccc;
-}
-
-:host-context(body.dark-mode) .nav-item.active {
-    color: var(--primary-green);
-}
-
-:host-context(body.dark-mode) .table-title,
-:host-context(body.dark-mode) .section-subtitle,
-:host-context(body.dark-mode) .form-label {
-    color: var(--dark-text);
-}
-
-:host-context(body.dark-mode) .form-control {
-    background-color: #333;
-    border-color: #444;
-    color: var(--dark-text);
-}
-
-:host-context(body.dark-mode) .form-control:disabled {
-    background-color: #2a2a2a;
-    color: #999;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
     .settings-layout {
@@ -239,19 +207,6 @@
     opacity: 0.5;
 }
 
-/* Dark mode - Notificações */
-:host-context(body.dark-mode) .notification-item {
-    background-color: #2a2a2a;
-}
-
-:host-context(body.dark-mode) .notification-item:hover {
-    background-color: #333;
-}
-
-:host-context(body.dark-mode) .notification-text strong {
-    color: var(--dark-text);
-}
-
 /* Segurança */
 .security-info {
     background-color: #f9fafb;
@@ -298,17 +253,4 @@
 
 .mt-3 {
     margin-top: 1rem;
-}
-
-/* Dark mode - Segurança */
-:host-context(body.dark-mode) .security-info {
-    background-color: #2a2a2a;
-}
-
-:host-context(body.dark-mode) .info-item:not(:last-child) {
-    border-color: #444;
-}
-
-:host-context(body.dark-mode) .info-value {
-    color: var(--dark-text);
 }

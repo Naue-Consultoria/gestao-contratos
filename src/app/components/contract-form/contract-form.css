@@ -1177,39 +1177,3 @@ textarea.form-control {
 .role-selector select {
   min-width: 180px;
 }
-
-/* Dark Mode Styles */
-:host-context(body.dark-mode) .user-item {
-    background-color: var(--dark-bg);
-    border-color: var(--dark-border);
-}
-
-:host-context(body.dark-mode) .user-item .user-name {
-    color: var(--dark-text);
-}
-
-:host-context(body.dark-mode) .user-management-row {
-    border-color: var(--dark-border);
-}
-
-:host-context(body.dark-mode) .user-details .user-name {
-    color: var(--dark-text);
-}
-
-:host-context(body.dark-mode) .view-section .section-title {
-  border-color: var(--dark-border);
-}
-:host-context(body.dark-mode) .detail-value {
-  color: var(--dark-text);
-}
-:host-context(body.dark-mode) .services-table th,
-:host-context(body.dark-mode) .services-table td {
-  border-color: var(--dark-border);
-}
-:host-context(body.dark-mode) .services-table th {
-  color: #9ca3af;
-}
-:host-context(body.dark-mode) .services-table td {
-  color: var(--dark-text);
-}
-
