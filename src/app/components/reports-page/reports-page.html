@@ -108,21 +108,6 @@
     </p>
     
     <div class="report-controls">
-      <div class="form-group">
-        <label class="filter-label">
-          <i class="fas fa-users"></i>
-          Cliente
-        </label>
-        <select 
-          class="form-control" 
-          [(ngModel)]="servicesReport.clientId"
-          [disabled]="servicesReport.isLoading">
-          <option value="">Selecione um cliente</option>
-          <option *ngFor="let client of clients" [value]="client.id">
-            {{ client.name }}
-          </option>
-        </select>
-      </div>
       
       <div class="form-group">
         <label class="filter-label">
@@ -159,7 +144,7 @@
       <button 
         class="btn btn-primary"
         (click)="generateReport('services', servicesReport)"
-        [disabled]="!servicesReport.clientId || servicesReport.isLoading">
+        [disabled]="!servicesReport.serviceId || servicesReport.isLoading">
         <i class="fas" [class.fa-download]="!servicesReport.isLoading" [class.fa-spinner]="servicesReport.isLoading" [class.fa-spin]="servicesReport.isLoading"></i>
         {{ servicesReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}
       </button>

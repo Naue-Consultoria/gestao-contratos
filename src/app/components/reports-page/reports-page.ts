@@ -74,7 +74,7 @@ export class ReportsPage implements OnInit {
 
   generateReport(reportType: 'monthly' | 'client' | 'services' | 'financial', config: ReportConfig | GeneralReportConfig) {
     // Validation logic for reports that require a client
-    if ((reportType === 'client' || reportType === 'services') && !config.clientId) {
+    if (reportType === 'client' && !config.clientId) {
       this.toastr.warning('Por favor, selecione um cliente.');
       return;
     }

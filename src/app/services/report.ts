@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment';
 export interface ReportRequest {
   companyId?: string;
   serviceId?: string;
-  clientId: string;
+  clientId?: string;
   format: 'pdf' | 'excel';
 }
 
