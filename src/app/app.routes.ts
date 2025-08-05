@@ -7,6 +7,7 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
 import { DashboardContentComponent } from './components/dashboard-content/dashboard-content';
 import { ContractsTableComponent } from './components/contracts-table/contracts-table';
 import { ContractFormComponent } from './components/contract-form/contract-form';
+import { ContractViewPageComponent } from './components/contract-view-page/contract-view-page';
 import { ClientsTableComponent } from './components/clients-table/clients-table';
 import { NewClientPageComponent } from './components/new-client-page/new-client-page';
 import { ServicesTableComponent } from './components/services-table/services-table';
@@ -97,7 +98,7 @@ export const routes: Routes = [
       // Visualizar contrato
       {
         path: 'contracts/view/:id',
-        component: ContractFormComponent,
+        component: ContractViewPageComponent,
         title: 'Visualizar Contrato - NAUE Consultoria',
       },
       

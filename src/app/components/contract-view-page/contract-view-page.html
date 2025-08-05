@@ -1,0 +1,106 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="goBack()">
+        <i class="fas fa-arrow-left"></i> Voltar
+      </button>
+      <h1 class="page-title">Detalhes do Contrato</h1>
+    </div>
+    <div class="header-actions" *ngIf="contract && canEdit">
+      <button class="btn btn-primary" (click)="editContract()">
+        <i class="fas fa-edit"></i> Editar Contrato
+      </button>
+    </div>
+  </div>
+
+  <div class="content" *ngIf="!isLoading && contract">
+    <!-- Contract Info Card -->
+    <div class="contract-info-card">
+      <div class="contract-header">
+        <div class="contract-number-section">
+          <h2>{{ contract.contract_number }}</h2>
+          <span class="contract-type">
+            <i [class]="getTypeIcon(contract.type)"></i>
+            {{ contract.type }}
+          </span>
+        </div>
+        <div class="contract-status" [style.color]="getStatusColor(contract.status)">
+          {{ getStatusText(contract.status) }}
+        </div>
+      </div>
+
+      <div class="contract-details">
+        <div class="detail-row">
+          <div class="detail-item">
+            <label>Cliente:</label>
+            <span>{{ contract.client ? contract.client.name : 'N/A' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Valor Total:</label>
+            <span class="value">{{ formatValue(contract.total_value || 0) }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-item">
+            <label>Data de Início:</label>
+            <span>{{ formatDate(contract.start_date) }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Data de Término:</label>
+            <span>{{ formatDate(contract.end_date) }}</span>
+          </div>
+        </div>
+
+        <div class="detail-item full-width" *ngIf="contract.notes">
+          <label>Observações:</label>
+          <p class="notes">{{ contract.notes }}</p>
+        </div>
+      </div>
+
+      <!-- Assigned Users -->
+      <div class="assigned-users" *ngIf="contract.assigned_users && contract.assigned_users.length > 0">
+        <h3>Usuários Vinculados</h3>
+        <div class="users-list">
+          <div class="user-chip" *ngFor="let assignment of contract.assigned_users">
+            <i class="fas fa-user"></i>
+            <span>{{ assignment.user.name }}</span>
+            <span class="user-role">({{ assignment.role }})</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Services Section -->
+    <div class="services-section">
+      <h2 class="section-title">
+        <i class="fas fa-tasks"></i>
+        Serviços do Contrato
+      </h2>
+
+      <app-contract-services-manager
+        [services]="contract.contract_services"
+        [contractId]="contract.id"
+        [canEdit]="canEdit"
+        (serviceUpdated)="onServiceUpdated()">
+      </app-contract-services-manager>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+    </div>
+    <p>Carregando contrato...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && !contract">
+    <i class="fas fa-file-contract"></i>
+    <p>Contrato não encontrado</p>
+    <button class="btn btn-primary" (click)="goBack()">
+      Voltar para Contratos
+    </button>
+  </div>
+</div>
