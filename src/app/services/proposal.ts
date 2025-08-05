@@ -240,7 +240,7 @@ export class ProposalService {
       style: 'currency',
       currency: 'BRL',
       minimumFractionDigits: 2
-    }).format(value / 100); // Converter de centavos para reais
+    }).format(value); // Valor já está em reais
   }
 
   /**

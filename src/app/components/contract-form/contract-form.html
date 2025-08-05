@@ -1,17 +1,14 @@
 <div class="page">
   <div class="page-header">
     <h1 class="page-title">
-      {{ isViewMode ? 'Visualizar Contrato' : (isEditMode ? 'Editar Contrato' :
-      'Novo Contrato') }}
+      {{ isViewMode ? 'Visualizar Contrato' : (isEditMode ? 'Editar Contrato' : 'Novo Contrato') }}
     </h1>
     <div class="breadcrumb">
-      <span>Home</span><span class="breadcrumb-separator">/</span>
-      <span class="clickable" (click)="cancel()">Contratos</span
-      ><span class="breadcrumb-separator">/</span>
-      <span
-        >{{ isViewMode ? 'Visualizar' : (isEditMode ? 'Editar' : 'Novo')
-        }}</span
-      >
+      <span>Home</span>
+      <span class="breadcrumb-separator">/</span>
+      <span class="clickable" (click)="cancel()">Contratos</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>{{ isViewMode ? 'Visualizar' : (isEditMode ? 'Editar' : 'Novo') }}</span>
     </div>
   </div>
 
@@ -19,228 +16,253 @@
     <i class="fas fa-spinner fa-spin"></i>Carregando...
   </div>
 
-  <div class="form-container" *ngIf="!isLoading">
-    <form (ngSubmit)="save()" *ngIf="!isViewMode">
-      <div class="form-grid">
-        <div class="form-section">
-          <h2 class="section-title">
-            <i class="fas fa-info-circle"></i>Informações Básicas
-          </h2>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label required">Número</label>
-              <input
-                type="text"
-                class="form-control"
-                [(ngModel)]="formData.contract_number"
-                name="contract_number"
-                [readonly]="isEditMode"
-                [class.error]="errors.contract_number"
-              />
-            </div>
-            <div class="form-group">
-              <label class="form-label required">Tipo</label>
-              <select class="form-control" [(ngModel)]="formData.type" name="type">
-                <option *ngFor="let type of contractTypes" [value]="type">
-                  {{ type }}
-                </option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group" *ngIf="isEditMode">
-            <label class="form-label required">Status</label>
-            <select class="form-control" [(ngModel)]="formData.status" name="status">
-              <option *ngFor="let status of contractStatuses" [value]="status.value">
-                {{ status.label }}
-              </option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label required">Cliente</label>
-            <select
-              class="form-control"
-              [(ngModel)]="formData.client_id"
-              name="client_id"
-              [class.error]="errors.client_id"
-            >
-              <option [value]="null" disabled>Selecione</option>
-              <option *ngFor="let client of clients" [value]="client.id">
-                {{ client.name }}
-              </option>
-            </select>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label required">Data de Início</label>
-              <input
-                type="date"
-                class="form-control"
-                [(ngModel)]="formData.start_date"
-                name="start_date"
-                [class.error]="errors.start_date"
-              />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Data de Término</label>
-              <input
-                type="date"
-                class="form-control"
-                [(ngModel)]="formData.end_date"
-                name="end_date"
-                [min]="formData.start_date"
-              />
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Atribuir Usuários</label>
-            <div class="user-assignment-box">
-              <div class="selected-users-display">
-                <i class="fas fa-users"></i>
-                <span>{{ getSelectedUserNames() }}</span>
-              </div>
-              <button
-                type="button"
-                class="btn btn-secondary"
-                (click)="openUserModal()"
-              >
-                <i class="fas fa-edit"></i>Selecionar
-              </button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Observações</label>
-            <textarea
-              class="form-control"
-              [(ngModel)]="formData.notes"
-              name="notes"
-              rows="3"
-              placeholder="..."
-            ></textarea>
-          </div>
-        </div>
-
-        <div class="view-mode" *ngIf="isViewMode">
-          <div class="view-grid">
-            <div class="view-section">
-              <div class="detail-item">
-                <span class="detail-label">Status:</span>
-                <span class="detail-value">
-                  <span class="status-badge" [ngClass]="'status-' + formData.status">
-                    {{ getStatusText(formData.status) }}
-                  </span>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h2 class="section-title">
-            <i class="fas fa-briefcase"></i>Serviços do Contrato
-          </h2>
-          <div class="services-header">
-            <button
-              type="button"
-              class="btn btn-primary"
-              (click)="openServiceModal()"
-            >
-              <i class="fas fa-plus"></i>Adicionar Serviço
-            </button>
-          </div>
-          <div class="selected-services" *ngIf="selectedServices.length > 0">
-            <div
-              class="service-item"
-              *ngFor="let service of selectedServices; let i = index"
-            >
-              <div class="service-info">
-                <h4 class="service-name">{{ service.name }}</h4>
-              </div>
-              <div class="service-controls">
-                <div class="price-control">
-                  <label>Valor Unit.:</label>
-                  <div class="input-with-prefix">
-                    <span>R$</span>
-                    <input
-                      type="number"
-                      class="price-input"
-                      [ngModel]="service.unit_value / 100"
-                      (ngModelChange)="updateServicePrice(i, $event)"
-                      [name]="'price_' + i"
-                    />
-                  </div>
-                </div>
-                <div class="quantity-control">
-                  <label>Qtd.:</label>
-                  <input
-                    type="number"
-                    class="quantity-input"
-                    [(ngModel)]="service.quantity"
-                    [name]="'quantity_' + i"
-                    (ngModelChange)="updateServiceQuantity(i, service.quantity)"
-                  />
-                </div>
-                <div class="service-total">
-                  <label>Total:</label>
-                  <span class="total-value"
-                    >{{ formatCurrency(service.total_value) }}</span
-                  >
-                </div>
-                <button
-                  type="button"
-                  class="remove-btn"
-                  (click)="removeService(i)"
-                >
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="contract-summary" *ngIf="selectedServices.length > 0">
-            <div class="summary-item total">
-              <span class="summary-label">Valor Total:</span>
-              <span class="summary-value">{{ getFormattedTotalValue() }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="form-section" *ngIf="isEditMode && assignedUsers.length > 0">
-          <h2 class="section-title">
-              <i class="fas fa-users-cog"></i>Gerenciar Acessos
-          </h2>
-          <div class="assigned-users-management">
-            <div *ngFor="let assignedUser of assignedUsers" class="user-management-row">
-              <div class="user-details">
-                  <span class="user-name">{{ assignedUser.user.name }}</span>
-                  <span class="user-email">{{ assignedUser.user.email }}</span>
-              </div>
-              <div class="role-selector">
-                <select 
+  <div class="table-container" *ngIf="!isLoading">
+    <form (ngSubmit)="save()" class="contract-form" *ngIf="!isViewMode">
+      <div class="form-layout">
+        <!-- Lado Esquerdo: Informações Básicas -->
+        <div class="left-column">
+          <!-- Informações Básicas -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-info-circle"></i>
+              Informações Básicas
+            </h3>
+        
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Número <span class="required">*</span></label>
+                <input
+                  type="text"
                   class="form-control"
-                  [ngModel]="assignedUser.role"
-                  (ngModelChange)="onRoleChange(assignedUser, $event)"
-                  [name]="'role_' + assignedUser.user.id">
-                  <option *ngFor="let role of availableRoles" [value]="role.value">
-                    {{ role.label }}
+                  [(ngModel)]="formData.contract_number"
+                  name="contract_number"
+                  [readonly]="isEditMode"
+                  [disabled]="isLoading"
+                  [class.error]="errors.contract_number"
+                  placeholder="NAUE-YYYY-XXXX"
+                />
+                <span class="error-message" *ngIf="errors.contract_number">{{ errors.contract_number }}</span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Tipo <span class="required">*</span></label>
+                <select class="form-control" [(ngModel)]="formData.type" name="type" [disabled]="isLoading">
+                  <option value="">Selecione o tipo</option>
+                  <option *ngFor="let type of contractTypes" [value]="type">
+                    {{ type }}
                   </option>
                 </select>
               </div>
             </div>
+            
+            <div class="form-grid" *ngIf="isEditMode">
+              <div class="form-group">
+                <label class="form-label">Status <span class="required">*</span></label>
+                <select class="form-control" [(ngModel)]="formData.status" name="status" [disabled]="isLoading">
+                  <option value="">Selecione o status</option>
+                  <option *ngFor="let status of contractStatuses" [value]="status.value">
+                    {{ status.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Cliente <span class="required">*</span></label>
+              <select
+                class="form-control"
+                [(ngModel)]="formData.client_id"
+                name="client_id"
+                [disabled]="isLoading"
+                [class.error]="errors.client_id"
+              >
+                <option [value]="null" disabled>Selecione um cliente</option>
+                <option *ngFor="let client of clients" [value]="client.id">
+                  {{ client.name }}
+                </option>
+              </select>
+              <span class="error-message" *ngIf="errors.client_id">{{ errors.client_id }}</span>
+            </div>
+            
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Data de Início <span class="required">*</span></label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="formData.start_date"
+                  name="start_date"
+                  [disabled]="isLoading"
+                  [class.error]="errors.start_date"
+                />
+                <span class="error-message" *ngIf="errors.start_date">{{ errors.start_date }}</span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Data de Término</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="formData.end_date"
+                  name="end_date"
+                  [disabled]="isLoading"
+                  [min]="formData.start_date"
+                />
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Atribuir Usuários</label>
+              <div class="user-assignment-box">
+                <div class="selected-users-display">
+                  <i class="fas fa-users"></i>
+                  <span>{{ getSelectedUserNames() }}</span>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  (click)="openUserModal()"
+                  [disabled]="isLoading"
+                >
+                  <i class="fas fa-edit"></i>
+                  Selecionar
+                </button>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <textarea
+                class="form-control"
+                [(ngModel)]="formData.notes"
+                name="notes"
+                rows="3"
+                [disabled]="isLoading"
+                placeholder="Adicione observações sobre este contrato..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lado Direito: Serviços e Gerenciar Acessos -->
+        <div class="right-column">
+          <!-- Serviços do Contrato -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-briefcase"></i>
+              Serviços do Contrato
+            </h3>
+        
+            <div class="services-header">
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="openServiceModal()"
+                [disabled]="isLoading"
+              >
+                <i class="fas fa-plus"></i>
+                Adicionar Serviço
+              </button>
+            </div>
+            
+            <div class="selected-services" *ngIf="selectedServices.length > 0">
+              <div
+                class="service-item"
+                *ngFor="let service of selectedServices; let i = index"
+              >
+                <div class="service-info">
+                  <h4 class="service-name">{{ service.name }}</h4>
+                </div>
+                <div class="service-controls">
+                  <div class="price-control">
+                    <label>Valor Unit.:</label>
+                    <input
+                      type="text"
+                      class="price-input"
+                      [(ngModel)]="service.unit_value"
+                      (ngModelChange)="onPriceChange(i, $event)"
+                      [name]="'price_' + i"
+                      placeholder="R$ 0,00"
+                      appCurrencyMask
+                    />
+                  </div>
+                  <div class="quantity-control">
+                    <label>Qtd.:</label>
+                    <input
+                      type="number"
+                      class="quantity-input"
+                      [(ngModel)]="service.quantity"
+                      [name]="'quantity_' + i"
+                      (ngModelChange)="updateServiceQuantity(i, service.quantity)"
+                    />
+                  </div>
+                  <div class="service-total">
+                    <label>Total:</label>
+                    <span class="total-value">{{ formatCurrency(service.total_value) }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="remove-btn"
+                    (click)="removeService(i)"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="contract-summary" *ngIf="selectedServices.length > 0">
+              <div class="summary-item total">
+                <span class="summary-label">Valor Total:</span>
+                <span class="summary-value">{{ getFormattedTotalValue() }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gerenciar Acessos (se aplicável) -->
+          <div class="form-section" *ngIf="isEditMode && assignedUsers.length > 0">
+            <h3 class="section-title">
+              <i class="fas fa-users-cog"></i>Gerenciar Acessos
+            </h3>
+            <div class="assigned-users-management">
+              <div *ngFor="let assignedUser of assignedUsers" class="user-management-row">
+                <div class="user-details">
+                  <span class="user-name">{{ assignedUser.user.name }}</span>
+                  <span class="user-email">{{ assignedUser.user.email }}</span>
+                </div>
+                <div class="role-selector">
+                  <select 
+                    class="form-control"
+                    [ngModel]="assignedUser.role"
+                    (ngModelChange)="onRoleChange(assignedUser, $event)"
+                    [name]="'role_' + assignedUser.user.id">
+                    <option *ngFor="let role of availableRoles" [value]="role.value">
+                      {{ role.label }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Form Actions -->
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="cancel()">
-          Cancelar
+        <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isSaving">
+          <i class="fas fa-arrow-left"></i>
+          Voltar
         </button>
+        
         <button type="submit" class="btn btn-primary" [disabled]="isSaving">
-          <i
-            class="fas"
-            [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"
-          ></i
-          >{{ isEditMode ? 'Atualizar' : 'Criar' }}
+          <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+          <i class="fas fa-save" *ngIf="!isSaving"></i>
+          {{ isEditMode ? 'Atualizar' : 'Criar' }} Contrato
         </button>
       </div>
     </form>
 
+    <!-- View Mode -->
     <div class="view-mode" *ngIf="isViewMode">
       <div class="view-grid">
         <div class="view-section">
@@ -248,38 +270,39 @@
             <i class="fas fa-file-contract"></i>Detalhes do Contrato
           </h2>
           <div class="detail-item">
-            <span class="detail-label">Número:</span
-            ><span class="detail-value">{{ formData.contract_number }}</span>
+            <span class="detail-label">Número:</span>
+            <span class="detail-value">{{ formData.contract_number }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Tipo:</span
-            ><span class="type-badge" [attr.data-type]="formData.type"
-              >{{ formData.type }}</span
-            >
+            <span class="detail-label">Tipo:</span>
+            <span class="type-badge" [attr.data-type]="formData.type">{{ formData.type }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Cliente:</span
-            ><span class="detail-value"
-              >{{ getClientName(formData.client_id) }}</span
-            >
+            <span class="detail-label">Cliente:</span>
+            <span class="detail-value">{{ getClientName(formData.client_id) }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Início:</span
-            ><span class="detail-value"
-              >{{ formatDate(formData.start_date) }}</span
-            >
+            <span class="detail-label">Início:</span>
+            <span class="detail-value">{{ formatDate(formData.start_date) }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Término:</span
-            ><span class="detail-value"
-              >{{ formatDate(formData.end_date) }}</span
-            >
+            <span class="detail-label">Término:</span>
+            <span class="detail-value">{{ formatDate(formData.end_date) }}</span>
           </div>
           <div class="detail-item" *ngIf="formData.notes">
             <span class="detail-label">Obs:</span>
             <p class="detail-value notes">{{ formData.notes }}</p>
           </div>
+          <div class="detail-item">
+            <span class="detail-label">Status:</span>
+            <span class="detail-value">
+              <span class="status-badge" [ngClass]="'status-' + formData.status">
+                {{ getStatusText(formData.status) }}
+              </span>
+            </span>
+          </div>
         </div>
+        
         <div class="view-section">
           <h2 class="section-title">
             <i class="fas fa-briefcase"></i>Serviços Contratados
@@ -317,9 +340,10 @@
             </table>
           </div>
         </div>
+        
         <div class="view-section" *ngIf="isViewMode && assignedUsers.length > 0">
           <h2 class="section-title">
-              <i class="fas fa-users"></i>Usuários Atribuídos
+            <i class="fas fa-users"></i>Usuários Atribuídos
           </h2>
           <div class="assigned-users-list">
             <div *ngFor="let assignedUser of assignedUsers" class="user-item">
@@ -329,6 +353,7 @@
           </div>
         </div>
       </div>
+      
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="cancel()">
           <i class="fas fa-arrow-left"></i>Voltar
@@ -375,10 +400,9 @@
             <h4>{{ service.name }}</h4>
             <div class="service-option-details">
               <span><i class="fas fa-tag"></i> {{ service.category }}</span>
-              <span
-                ><i class="fas fa-clock"></i> {{ formatServiceDuration(service)
-                }}</span
-              >
+              <span>
+                <i class="fas fa-clock"></i> {{ formatServiceDuration(service) }}
+              </span>
             </div>
           </div>
           <div class="service-option-action">
@@ -396,6 +420,7 @@
     </div>
   </div>
 </div>
+
 <app-user-selection-modal
   [isOpen]="isUserModalOpen"
   [allUsers]="allUsers"

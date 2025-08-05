@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment';
 export interface ContractServiceItem {
   service_id: number;
   quantity: number;
-  unit_value: number; // em centavos
+  unit_value: number; // em reais
   scheduled_start_date?: string | null;
   status?: 'not_started' | 'scheduled' | 'in_progress' | 'completed';
 }
@@ -58,7 +58,7 @@ export interface ApiContract {
   start_date: string;
   end_date: string | null;
   status: 'active' | 'completed' | 'cancelled' | 'suspended';
-  total_value: number; // em centavos
+  total_value: number; // em reais
   notes: string | null;
   is_active: boolean;
   created_at: string;
@@ -195,17 +195,8 @@ export class ContractService {
     return this.http.delete(`${this.API_URL}/${id}/permanent`, { headers });
   }
 
-  formatValue(valueInCents: number): string {
-    const valueInReais = (valueInCents || 0) / 100;
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valueInReais);
-  }
-
-  convertToCents(valueInReais: number): number {
-    return Math.round((valueInReais || 0) * 100);
-  }
-
-  convertToReais(valueInCents: number): number {
-    return (valueInCents || 0) / 100;
+  formatValue(valueInReais: number): string {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valueInReais || 0);
   }
 
   formatDate(date: string | null): string {

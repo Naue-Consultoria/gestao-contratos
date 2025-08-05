@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
-import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { DocumentMaskDirective } from '../../directives/document-mask.directive';
+import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
@@ -15,7 +15,7 @@ import { ServiceService, ApiService } from '../../services/service';
 @Component({
   selector: 'app-proposal-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, CurrencyMaskDirective, DocumentMaskDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DocumentMaskDirective, CurrencyMaskDirective],
   templateUrl: './proposal-form.html',
   styleUrls: ['./proposal-form.css'],
   animations: [
@@ -161,8 +161,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       this.addService({
         service_id: service.service_id,
         quantity: service.quantity,
-        unit_value: service.unit_value / 100, // Convert cents to reais for display
-        total_value: service.total_value / 100 // Convert cents to reais for display
+        unit_value: service.unit_value, // Already in reais
+        total_value: service.total_value // Already in reais
       });
     });
   }
@@ -196,9 +196,9 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     const serviceForm = this.servicesArray.at(index);
     const unitValue = serviceForm.get('unit_value')?.value;
     
-    // If unit_value is provided and greater than 0, use it (convert from reais to cents)
+    // If unit_value is provided and greater than 0, use it (already in reais)
     if (unitValue !== null && unitValue !== undefined && unitValue > 0) {
-        return unitValue * 100; // Convert to cents for internal calculation
+        return unitValue; // Already in reais
     }
     
     // If no unit_value, try to get from selected service
@@ -370,7 +370,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
         .map((s: any) => ({
           service_id: parseInt(s.service_id) || 0,
           quantity: parseInt(s.quantity) || 1,
-          unit_value: Math.round(parseFloat(s.unit_value) * 100) // Convert to cents
+          unit_value: parseFloat(s.unit_value) || 0 // Already in reais
         }))
     };
 

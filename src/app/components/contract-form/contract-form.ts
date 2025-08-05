@@ -10,6 +10,7 @@ import { ModalService } from '../../services/modal.service';
 import { UserService } from '../../services/user';
 import { AuthService } from '../../services/auth';
 import { UserSelectionModalComponent } from '../user-selection-modal/user-selection-modal';
+import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 
 interface SelectedService {
   service_id: number;
@@ -41,7 +42,7 @@ interface AssignedUser {
 @Component({
   selector: 'app-contract-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, UserSelectionModalComponent],
+  imports: [CommonModule, FormsModule, UserSelectionModalComponent, CurrencyMaskDirective],
   templateUrl: './contract-form.html',
   styleUrls: ['./contract-form.css'],
 })
@@ -290,16 +291,33 @@ export class ContractFormComponent implements OnInit {
       service.quantity = 1;
     }
     service.total_value = service.unit_value * service.quantity;
+    
+    // Força a atualização do formulário
+    this.formData.total_value = this.getTotalValue();
   }
 
   updateServicePrice(index: number, priceInReais: number) {
     const service = this.selectedServices[index];
     if (priceInReais < 0) {
-        priceInReais = service.unit_value / 100;
+        priceInReais = 0;
     }
-    service.unit_value = Math.round(priceInReais * 100);
+    service.unit_value = priceInReais;
     service.total_value = service.unit_value * service.quantity;
+    
+    // Força a atualização do formulário
+    this.formData.total_value = this.getTotalValue();
   }
+
+  // Método chamado pelo directive quando o valor muda (recebe reais)
+  onPriceChange(index: number, priceInReais: number) {
+    const service = this.selectedServices[index];
+    service.unit_value = priceInReais;
+    service.total_value = service.unit_value * service.quantity;
+    
+    // Força a atualização do formulário
+    this.formData.total_value = this.getTotalValue();
+  }
+
 
   getTotalValue(): number {
     return this.selectedServices.reduce((sum, s) => sum + s.total_value, 0);
