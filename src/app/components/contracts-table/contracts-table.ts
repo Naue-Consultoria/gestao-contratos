@@ -117,13 +117,16 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = '';
     try {
+      // Carrega clientes e estatísticas primeiro
       const [statsResponse, clientsResponse] = await Promise.all([
         firstValueFrom(this.contractService.getStats()),
         firstValueFrom(this.clientService.getClients({ is_active: true })),
       ]);
       if (statsResponse?.stats) this.stats = statsResponse.stats;
-      if (clientsResponse?.clients)
-        this.clients = clientsResponse.clients;
+      if (clientsResponse?.clients) this.clients = clientsResponse.clients;
+
+      // Agora carrega os contratos, já tendo a lista de clientes disponível
+      await this.loadContracts();
     } catch (error: any) {
       this.error = 'Não foi possível carregar os dados da página.';
       console.error('❌ Error loading initial data:', error);
@@ -288,7 +291,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
           this.contractService.deleteContractPermanent(contractId)
         );
         this.modalService.showSuccess('Contrato excluído com sucesso!');
-        this.loadContracts();
+        this.loadInitialData();
       } catch (error) {
         console.error('❌ Error deleting contract:', error);
         this.modalService.showError('Não foi possível excluir o contrato.');
