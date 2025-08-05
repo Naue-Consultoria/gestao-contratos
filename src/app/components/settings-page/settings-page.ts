@@ -83,6 +83,11 @@ export class SettingsPageComponent implements OnInit {
     this.router.navigate(['/change-password']);
   }
   
+  cancelar() {
+    // Recarregar dados originais
+    this.loadCurrentUser();
+  }
+  
   formatarData(data: Date | null): string {
     if (!data) return 'Não disponível';
     return new Intl.DateTimeFormat('pt-BR', {

@@ -44,6 +44,7 @@
         <div class="user-menu-wrapper">
           <div class="user-info" (click)="toggleUserMenu()" [class.open]="isUserMenuOpen">
             <div class="user-avatar">{{ userInitials }}</div>
+            <i class="fas fa-chevron-down dropdown-arrow" [class.rotate]="isUserMenuOpen"></i>
           </div>
           
           <div class="user-dropdown" *ngIf="isUserMenuOpen">
@@ -51,7 +52,7 @@
               <div class="user-avatar-large">{{ userInitials }}</div>
               <div class="user-dropdown-info">
                 <div class="user-dropdown-name">{{ userName }}</div>
-                <div class="user-dropdown-role">{{ userRole }}</div>
+                <div class="user-dropdown-role"><i class="fas fa-shield-alt"></i> {{ userRole }}</div>
               </div>
             </div>
             <ul class="user-dropdown-menu">
