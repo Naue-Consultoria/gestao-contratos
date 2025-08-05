@@ -7,6 +7,8 @@ export interface ContractServiceItem {
   service_id: number;
   quantity: number;
   unit_value: number; // em centavos
+  scheduled_start_date?: string | null;
+  status?: 'not_started' | 'scheduled' | 'in_progress' | 'completed';
 }
 
 export interface CreateContractRequest {
@@ -38,6 +40,9 @@ export interface ApiContractService {
   quantity: number;
   unit_value: number;
   total_value: number;
+  scheduled_start_date?: string | null;
+  status?: 'not_started' | 'scheduled' | 'in_progress' | 'completed';
+  updated_at?: string;
   service: {
     id: number;
     name: string;
@@ -65,7 +70,7 @@ export interface ApiContract {
   contract_services: ApiContractService[];
   created_by_user?: { name: string };
   updated_by_user?: { name: string };
-  assigned_users?: { user: { id: number; name: string } }[];
+  assigned_users?: { user: { id: number; name: string; email: string }; role: string }[];
 }
 
 export interface ContractsResponse {
@@ -237,4 +242,83 @@ export class ContractService {
     };
     return icons[type] || 'fas fa-file-contract';
   }
+
+  // Métodos para serviços do contrato
+  updateContractService(serviceId: number, data: { status?: string; scheduled_start_date?: string | null }): Observable<any> {
+    return this.http.patch(`${this.API_URL}/services/${serviceId}`, data, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  getServiceComments(serviceId: number): Observable<{ comments: ServiceComment[]; total: number }> {
+    return this.http.get<{ comments: ServiceComment[]; total: number }>(
+      `${this.API_URL}/services/${serviceId}/comments`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  addServiceComment(serviceId: number, comment: string): Observable<any> {
+    return this.http.post(
+      `${this.API_URL}/services/${serviceId}/comments`,
+      { comment },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  updateServiceComment(commentId: number, comment: string): Observable<any> {
+    return this.http.put(
+      `${this.API_URL}/comments/${commentId}`,
+      { comment },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  deleteServiceComment(commentId: number): Observable<any> {
+    return this.http.delete(`${this.API_URL}/comments/${commentId}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  // Helpers para status de serviços
+  getServiceStatusColor(status: string): string {
+    const colors: { [key: string]: string } = {
+      'not_started': '#6b7280',
+      'scheduled': '#3b82f6',
+      'in_progress': '#f59e0b',
+      'completed': '#10b981'
+    };
+    return colors[status] || '#6b7280';
+  }
+
+  getServiceStatusText(status: string): string {
+    const texts: { [key: string]: string } = {
+      'not_started': 'Não iniciado',
+      'scheduled': 'Agendado',
+      'in_progress': 'Em andamento',
+      'completed': 'Finalizado'
+    };
+    return texts[status] || status;
+  }
+
+  getServiceStatusIcon(status: string): string {
+    const icons: { [key: string]: string } = {
+      'not_started': 'fas fa-circle',
+      'scheduled': 'fas fa-calendar-alt',
+      'in_progress': 'fas fa-spinner',
+      'completed': 'fas fa-check-circle'
+    };
+    return icons[status] || 'fas fa-circle';
+  }
+}
+
+export interface ServiceComment {
+  id: number;
+  comment: string;
+  created_at: string;
+  updated_at: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
 }
