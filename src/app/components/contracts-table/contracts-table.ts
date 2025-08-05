@@ -187,10 +187,13 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   private mapContractToDisplay(contract: ApiContract): ContractDisplay {
+    const client = this.clients.find(c => c.id === contract.client.id);
+    const clientName = client ? client.name : (contract.client?.name || 'Cliente não encontrado');
+
     return {
       id: contract.id,
       contractNumber: contract.contract_number,
-      clientName: contract.client?.name || 'N/A',
+      clientName: clientName,
       type: contract.type,
       startDate: this.contractService.formatDate(contract.start_date),
       endDate: this.contractService.formatDate(contract.end_date || null),

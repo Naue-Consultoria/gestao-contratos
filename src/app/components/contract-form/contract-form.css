@@ -1158,6 +1158,12 @@ textarea.form-control {
   border-radius: 8px;
 }
 
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .user-details .user-name {
   font-weight: 600;
   color: var(--text-dark);

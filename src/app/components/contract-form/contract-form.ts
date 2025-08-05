@@ -55,7 +55,7 @@ export class ContractFormComponent implements OnInit {
   private userService = inject(UserService);
   private authService = inject(AuthService);
 
-  formData = {
+  formData: any = {
     contract_number: '',
     client_id: null as number | null,
     type: 'Full' as 'Full' | 'Pontual' | 'Individual',
@@ -79,7 +79,6 @@ export class ContractFormComponent implements OnInit {
   contractTypes = ['Full', 'Pontual', 'Individual'];
   assignedUsers: AssignedUser[] = [];
   
-  // ADDED: Available roles for the dropdown
   availableRoles = [
     { value: 'owner', label: 'Proprietário' },
     { value: 'editor', label: 'Editor' },
@@ -182,6 +181,7 @@ export class ContractFormComponent implements OnInit {
           unit_value: cs.unit_value,
           total_value: cs.total_value,
           duration: cs.service.duration,
+          duration_unit: cs.service.duration_unit,
           category: cs.service.category,
         }));
         this.assignedUsers = contract.assigned_users || [];
@@ -271,7 +271,7 @@ export class ContractFormComponent implements OnInit {
       service_id: service.id,
       name: service.name,
       quantity: 1,
-      unit_value: 0, // Valor será definido pelo usuário
+      unit_value: 0,
       total_value: 0,
       duration: service.duration_amount,
       duration_unit: service.duration_unit,
@@ -325,8 +325,8 @@ export class ContractFormComponent implements OnInit {
       return 'Nenhum usuário selecionado';
     }
     return this.formData.assigned_users
-      .map(id => this.allUsers.find(user => user.id === id)?.name)
-      .filter(name => name)
+      .map((id: number) => this.allUsers.find(user => user.id === id)?.name)
+      .filter((name?: string): name is string => !!name)
       .join(', ');
   }
 
