@@ -1,59 +1,146 @@
-
-import { Directive, HostListener, ElementRef, OnInit, Optional } from '@angular/core';
-import { NgControl } from '@angular/forms';
+import { Directive, HostListener, ElementRef, forwardRef, Input } from '@angular/core';
+import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 
 @Directive({
   selector: '[appCurrencyMask]',
   standalone: true,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => CurrencyMaskDirective),
+      multi: true,
+    },
+  ],
 })
-export class CurrencyMaskDirective implements OnInit {
-  private el: HTMLInputElement;
+export class CurrencyMaskDirective implements ControlValueAccessor {
+  @Input() allowNegative = false;
+  @Input() maxValue?: number;
 
-  constructor(
-    private elementRef: ElementRef,
-    @Optional() private ngControl: NgControl
-  ) {
+  private el: HTMLInputElement;
+  private onChange: (value: any) => void = () => {};
+  private onTouched: () => void = () => {};
+
+  constructor(private elementRef: ElementRef) {
     this.el = this.elementRef.nativeElement;
   }
 
-  ngOnInit() {
-    if (this.ngControl?.control?.value) {
-      this.format(String(this.ngControl.control.value));
-    }
+  writeValue(value: any): void {
+    this.formatValue(value);
+  }
+
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState?(isDisabled: boolean): void {
+    this.el.disabled = isDisabled;
   }
 
   @HostListener('input', ['$event'])
   onInput(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    this.format(value);
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    let cleanValue = value.replace(/[^\d,-]/g, '');
+
+    const parts = cleanValue.split(',');
+    if (parts.length > 2) {
+      cleanValue = parts[0] + ',' + parts.slice(1).join('');
+    }
+
+    if (parts.length === 2 && parts[1].length > 2) {
+      cleanValue = parts[0] + ',' + parts[1].substring(0, 2);
+    }
+
+    const numericValue = this.getNumericValue(cleanValue);
+
+    if (this.maxValue && numericValue > this.maxValue) {
+      this.formatValue(this.maxValue);
+      this.onChange(this.maxValue);
+      return;
+    }
+
+    if (!this.allowNegative && numericValue < 0) {
+        this.formatValue(0);
+        this.onChange(0);
+        return;
+    }
+
+    this.el.value = cleanValue;
+    this.onChange(numericValue);
   }
 
-  private format(value: string) {
-    if (!this.ngControl?.control) {
-      return;
-    }
+  @HostListener('blur')
+  onBlur() {
+    this.onTouched();
+    this.formatValue(this.el.value);
+  }
 
-    if (!value) {
-      this.ngControl.control.setValue(null);
+  @HostListener('focus')
+  onFocus() {
+    const numericValue = this.getNumericValue(this.el.value);
+    if (numericValue === 0) {
       this.el.value = '';
-      return;
+    } else {
+      this.el.value = this.formatNumberForEditing(numericValue);
+    }
+  }
+
+  private formatValue(value: any) {
+    if (value === null || value === undefined || value === '') {
+        this.el.value = '';
+        return;
     }
 
-    let cleanValue = value.replace(/[^\d]/g, '');
-    if (!cleanValue) {
-      this.ngControl.control.setValue(null);
-      this.el.value = '';
-      return;
+    let numericValue = typeof value === 'string' ? this.getNumericValue(value) : value;
+
+    if (isNaN(numericValue)) {
+        numericValue = 0;
     }
 
-    const numericValue = parseFloat(cleanValue) / 100;
+    this.el.value = this.formatAsCurrency(numericValue);
+  }
 
-    const formattedValue = new Intl.NumberFormat('pt-BR', {
+  private formatNumberForEditing(value: number): string {
+    if (value === 0) return '';
+    return value.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).replace(/\R\$\s?/, '');
+  }
+
+  private formatAsCurrency(value: number): string {
+    return value.toLocaleString('pt-BR', {
       style: 'currency',
-      currency: 'BRL'
-    }).format(numericValue);
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
 
-    this.ngControl.control.setValue(numericValue);
-    this.el.value = formattedValue;
+  private getNumericValue(value: string): number {
+    if (!value) return 0;
+
+    let cleanValue = value.replace(/[^\d,-]/g, '');
+    
+    if (this.allowNegative) {
+        const negativeSignCount = (cleanValue.match(/-/g) || []).length;
+        if (negativeSignCount > 1) {
+            // Remove all but the first hyphen
+            cleanValue = cleanValue.replace(/-/g, (match, offset) => offset > 0 ? '' : match);
+        }
+        if (cleanValue.indexOf('-') > 0) {
+            // If hyphen is not at the beginning, remove it
+            cleanValue = cleanValue.replace(/-/g, '');
+        }
+    }
+
+    cleanValue = cleanValue.replace(',', '.');
+    const numericValue = parseFloat(cleanValue);
+    return isNaN(numericValue) ? 0 : numericValue;
   }
 }

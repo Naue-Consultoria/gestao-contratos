@@ -7,6 +7,7 @@ import { provideToastr } from 'ngx-toastr';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth';
+import { CurrencyMaskDirective } from './directives/currency-mask.directive';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -29,6 +30,9 @@ export const appConfig: ApplicationConfig = {
       progressBar: true,
       closeButton: true,
       enableHtml: true
-    })
+    }),
+
+    // Diretivas
+    CurrencyMaskDirective
   ]
 };

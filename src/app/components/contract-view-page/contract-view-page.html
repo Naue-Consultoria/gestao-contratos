@@ -32,35 +32,35 @@
       <div class="contract-details">
         <div class="detail-row">
           <div class="detail-item">
-            <label>Cliente:</label>
+            <label><i class="fas fa-user"></i> Cliente:</label>
             <span>{{ contract.client ? contract.client.name : 'N/A' }}</span>
           </div>
           <div class="detail-item">
-            <label>Valor Total:</label>
+            <label><i class="fas fa-dollar-sign"></i> Valor Total:</label>
             <span class="value">{{ formatValue(contract.total_value || 0) }}</span>
           </div>
         </div>
 
         <div class="detail-row">
           <div class="detail-item">
-            <label>Data de Início:</label>
+            <label><i class="fas fa-calendar-alt"></i> Data de Início:</label>
             <span>{{ formatDate(contract.start_date) }}</span>
           </div>
           <div class="detail-item">
-            <label>Data de Término:</label>
+            <label><i class="fas fa-calendar-check"></i> Data de Término:</label>
             <span>{{ formatDate(contract.end_date) }}</span>
           </div>
         </div>
 
         <div class="detail-item full-width" *ngIf="contract.notes">
-          <label>Observações:</label>
+          <label><i class="fas fa-sticky-note"></i> Observações:</label>
           <p class="notes">{{ contract.notes }}</p>
         </div>
       </div>
 
       <!-- Assigned Users -->
       <div class="assigned-users" *ngIf="contract.assigned_users && contract.assigned_users.length > 0">
-        <h3>Usuários Vinculados</h3>
+        <h3><i class="fas fa-users"></i> Usuários Vinculados</h3>
         <div class="users-list">
           <div class="user-chip" *ngFor="let assignment of contract.assigned_users">
             <i class="fas fa-user"></i>

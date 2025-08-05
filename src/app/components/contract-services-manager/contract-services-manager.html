@@ -5,8 +5,14 @@
         <div class="service-info">
           <h4 class="service-name">{{ service.service.name }}</h4>
           <div class="service-details">
-            <span class="service-quantity">Qtd: {{ service.quantity }}</span>
-            <span class="service-value">{{ formatValue(service.total_value) }}</span>
+            <span class="service-quantity">
+              <i class="fas fa-calculator"></i>
+              Qtd: {{ service.quantity }}
+            </span>
+            <span class="service-value">
+              <i class="fas fa-dollar-sign"></i>
+              {{ formatValue(service.total_value) }}
+            </span>
           </div>
         </div>
         
