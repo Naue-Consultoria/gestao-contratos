@@ -19,13 +19,28 @@ export class CurrencyMaskDirective implements ControlValueAccessor {
   private el: HTMLInputElement;
   private onChange: (value: any) => void = () => {};
   private onTouched: () => void = () => {};
+  private rawValue = '';
 
   constructor(private elementRef: ElementRef) {
     this.el = this.elementRef.nativeElement;
   }
 
   writeValue(value: any): void {
-    this.formatValue(value);
+    if (value === null || value === undefined || value === '' || value === 0) {
+      this.rawValue = '';
+      this.el.value = '';
+      return;
+    }
+    
+    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numericValue)) {
+      this.rawValue = '';
+      this.el.value = '';
+      return;
+    }
+    
+    this.rawValue = Math.abs(numericValue * 100).toString();
+    this.updateDisplay();
   }
 
   registerOnChange(fn: any): void {
@@ -39,108 +54,78 @@ export class CurrencyMaskDirective implements ControlValueAccessor {
   setDisabledState?(isDisabled: boolean): void {
     this.el.disabled = isDisabled;
   }
-
+                          
   @HostListener('input', ['$event'])
   onInput(event: Event) {
     const input = event.target as HTMLInputElement;
-    let value = input.value;
+    let inputValue = input.value;
 
-    let cleanValue = value.replace(/[^\d,-]/g, '');
-
-    const parts = cleanValue.split(',');
-    if (parts.length > 2) {
-      cleanValue = parts[0] + ',' + parts.slice(1).join('');
-    }
-
-    if (parts.length === 2 && parts[1].length > 2) {
-      cleanValue = parts[0] + ',' + parts[1].substring(0, 2);
-    }
-
-    const numericValue = this.getNumericValue(cleanValue);
-
-    if (this.maxValue && numericValue > this.maxValue) {
-      this.formatValue(this.maxValue);
-      this.onChange(this.maxValue);
+    // Extrair apenas números da entrada
+    const numbersOnly = inputValue.replace(/\D/g, '');
+    
+    // Se não há números, resetar para vazio
+    if (!numbersOnly) {
+      this.rawValue = '';
+      this.updateDisplay();
+      this.onChange(0);
       return;
     }
 
-    if (!this.allowNegative && numericValue < 0) {
-        this.formatValue(0);
-        this.onChange(0);
-        return;
+    // Atualizar o valor bruto (sempre preenchendo da direita para esquerda)
+    this.rawValue = numbersOnly;
+    
+    // Verificar limite máximo se definido
+    const numericValue = this.getNumericValueFromRaw();
+    if (this.maxValue && numericValue > this.maxValue) {
+      this.rawValue = (this.maxValue * 100).toString();
     }
 
-    this.el.value = cleanValue;
-    this.onChange(numericValue);
+    this.updateDisplay();
+    this.onChange(this.getNumericValueFromRaw());
   }
 
   @HostListener('blur')
   onBlur() {
     this.onTouched();
-    this.formatValue(this.el.value);
+    // Manter sempre o formato com placeholder
+    this.updateDisplay();
   }
 
   @HostListener('focus')
   onFocus() {
-    const numericValue = this.getNumericValue(this.el.value);
-    if (numericValue === 0) {
+    // Manter sempre o formato com placeholder, sem mudanças no foco
+    this.updateDisplay();
+  }
+
+  private updateDisplay(): void {
+    if (!this.rawValue) {
       this.el.value = '';
-    } else {
-      this.el.value = this.formatNumberForEditing(numericValue);
-    }
-  }
-
-  private formatValue(value: any) {
-    if (value === null || value === undefined || value === '') {
-        this.el.value = '';
-        return;
+      return;
     }
 
-    let numericValue = typeof value === 'string' ? this.getNumericValue(value) : value;
-
-    if (isNaN(numericValue)) {
-        numericValue = 0;
-    }
-
-    this.el.value = this.formatAsCurrency(numericValue);
-  }
-
-  private formatNumberForEditing(value: number): string {
-    if (value === 0) return '';
-    return value.toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).replace(/\R\$\s?/, '');
-  }
-
-  private formatAsCurrency(value: number): string {
-    return value.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  }
-
-  private getNumericValue(value: string): number {
-    if (!value) return 0;
-
-    let cleanValue = value.replace(/[^\d,-]/g, '');
+    // Garantir que temos pelo menos 3 dígitos (para centavos)
+    const paddedValue = this.rawValue.padStart(3, '0');
     
-    if (this.allowNegative) {
-        const negativeSignCount = (cleanValue.match(/-/g) || []).length;
-        if (negativeSignCount > 1) {
-            // Remove all but the first hyphen
-            cleanValue = cleanValue.replace(/-/g, (match, offset) => offset > 0 ? '' : match);
-        }
-        if (cleanValue.indexOf('-') > 0) {
-            // If hyphen is not at the beginning, remove it
-            cleanValue = cleanValue.replace(/-/g, '');
-        }
-    }
+    // Separar reais e centavos
+    const centavos = paddedValue.slice(-2);
+    let reais = paddedValue.slice(0, -2) || '0';
+    
+    // Remover zeros à esquerda dos reais
+    reais = parseInt(reais).toString();
+    
+    // Formatar reais com separadores de milhar
+    const formattedReais = this.addThousandsSeparator(reais);
+    
+    // Montar o valor final
+    this.el.value = `R$ ${formattedReais},${centavos}`;
+  }
 
-    cleanValue = cleanValue.replace(',', '.');
-    const numericValue = parseFloat(cleanValue);
-    return isNaN(numericValue) ? 0 : numericValue;
+  private addThousandsSeparator(value: string): string {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  private getNumericValueFromRaw(): number {
+    if (!this.rawValue) return 0;
+    return parseInt(this.rawValue) / 100;
   }
 }
