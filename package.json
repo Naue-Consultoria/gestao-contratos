@@ -8,7 +8,17 @@
     "build:production": "ng build --configuration production",
     "build:development": "ng build --configuration development",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:headless": "cypress run --headless",
+    "e2e:dev": "start-server-and-test start http://localhost:4200 cypress:open",
+    "e2e:frontend": "start-server-and-test start 4200 cypress:open",
+    "e2e:run": "start-server-and-test start http://localhost:4200 cypress:run",
+    "servers:start": "concurrently \"cd ../gestao-contratos-backend && npm run dev\" \"npm start\"",
+    "e2e:full": "concurrently \"cd ../gestao-contratos-backend && npm run dev\" \"npm start\" \"wait-on http://localhost:3000 http://localhost:4200 && cypress open\"",
+    "e2e:ci": "concurrently \"cd ../gestao-contratos-backend && npm run dev\" \"npm start\" \"wait-on http://localhost:3000 http://localhost:4200 && cypress run --headless\"",
+    "e2e:manual": "wait-on http://localhost:3000 http://localhost:4200 && cypress open"
   },
   "private": true,
   "dependencies": {
@@ -32,12 +42,15 @@
     "@angular/cli": "^20.0.2",
     "@angular/compiler-cli": "^20.0.0",
     "@types/jasmine": "~5.1.0",
+    "concurrently": "^9.2.0",
     "jasmine-core": "~5.7.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.8.2"
+    "start-server-and-test": "^2.0.13",
+    "typescript": "~5.8.2",
+    "wait-on": "^8.0.4"
   }
 }

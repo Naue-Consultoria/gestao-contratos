@@ -395,11 +395,14 @@ export class ContractFormComponent implements OnInit {
         this.modalService.showSuccess('Contrato atualizado com sucesso!', 'Sucesso');
       } else {
         const createData: CreateContractRequest = {
-          ...this.formData,
+          contract_number: this.formData.contract_number,
           client_id: this.formData.client_id!,
+          type: this.formData.type,
+          start_date: this.formData.start_date,
           end_date: this.formData.end_date || null,
           notes: this.formData.notes || null,
           services,
+          assigned_users: this.formData.assigned_users,
         };
         await firstValueFrom(this.contractService.createContract(createData));
         this.modalService.showSuccess('Contrato criado com sucesso!', 'Sucesso');
