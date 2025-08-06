@@ -91,7 +91,10 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe((term) => {
         this.filters.search = term;
-        this.loadContracts();
+        // Só carrega contratos se não estiver carregando
+        if (!this.isLoading) {
+          this.loadContracts();
+        }
       });
     this.subscriptions.add(searchSubscription);
   }
@@ -136,6 +139,9 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   async loadContracts() {
+    // Evita múltiplas chamadas simultâneas
+    if (this.isLoading) return;
+    
     this.isLoading = true;
     this.error = '';
     try {
@@ -149,10 +155,18 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       const response = await firstValueFrom(
         this.contractService.getContracts(cleanFilters)
       );
-      this.contracts = response.contracts.map((contract) =>
+      
+      // Limpa a lista antes de adicionar novos contratos
+      this.contracts = [];
+      this.filteredContracts = [];
+      
+      // Mapeia e adiciona os contratos sem duplicação
+      const uniqueContracts = response.contracts.map((contract) =>
         this.mapContractToDisplay(contract)
       );
-      this.filteredContracts = this.contracts;
+      
+      this.contracts = uniqueContracts;
+      this.filteredContracts = [...uniqueContracts];
     } catch (error: any) {
       this.error = 'Não foi possível carregar os contratos.';
       console.error('❌ Error loading contracts:', error);

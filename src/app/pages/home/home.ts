@@ -110,6 +110,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   toggleSidebar() { this.isSidebarCollapsed = !this.isSidebarCollapsed; }
   toggleMobileSidebar() { this.isMobileSidebarOpen = !this.isMobileSidebarOpen; }
+  closeMobileSidebar() { this.isMobileSidebarOpen = false; }
   toggleNotifications() { this.isNotificationOpen = !this.isNotificationOpen; }
   clearNotifications() { this.notificationService.clearHistory(); }
   closeContractModal() { this.isContractModalOpen = false; }

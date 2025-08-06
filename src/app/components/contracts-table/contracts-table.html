@@ -132,37 +132,31 @@
             (input)="applyFilters()">
         </div>
         
-        <select class="filter-select" [(ngModel)]="filters.status" (change)="applyFilters()">
-          <option value="">Todos os status</option>
-          <option value="active">Ativo</option>
-          <option value="completed">Concluído</option>
-          <option value="cancelled">Cancelado</option>
-          <option value="suspended">Suspenso</option>
-        </select>
+        <div class="filter-group">
+          <select class="filter-select" [(ngModel)]="filters.status" (change)="applyFilters()">
+            <option value="">Todos os status</option>
+            <option value="active">Ativo</option>
+            <option value="completed">Concluído</option>
+            <option value="cancelled">Cancelado</option>
+            <option value="suspended">Suspenso</option>
+          </select>
+          
+          <select class="filter-select" [(ngModel)]="filters.client_id" (change)="applyFilters()">
+            <option [value]="null">Todos os clientes</option>
+            <option *ngFor="let client of clients" [value]="client.id">{{ client.name }}</option>
+          </select>
+        </div>
         
-        <select class="filter-select" [(ngModel)]="filters.client_id" (change)="applyFilters()">
-          <option [value]="null">Todos os clientes</option>
-          <option *ngFor="let client of clients" [value]="client.id">{{ client.name }}</option>
-        </select>
-        
-        <button class="btn btn-secondary" (click)="clearFilters()" *ngIf="filters.search || filters.status || filters.client_id">
+        <button class="btn btn-secondary btn-clear" (click)="clearFilters()" *ngIf="filters.search || filters.status || filters.client_id">
           <i class="fas fa-times"></i>
-          Limpar filtros
+          <span class="btn-text">Limpar filtros</span>
         </button>
       </div>
       
-      <div class="action-buttons">
-        <button class="btn btn-secondary" (click)="exportToPDF()">
-          <i class="fas fa-file-pdf"></i>
-          PDF
-        </button>
-        <button class="btn btn-secondary" (click)="exportToExcel()">
-          <i class="fas fa-file-excel"></i>
-          Excel
-        </button>
-        <button class="btn btn-primary" (click)="openNewContractPage()">
-          <i class="fas fa-plus"></i>
-          Novo Contrato
+      <div class="action-buttons btn-group">
+        <button class="btn btn-primary btn-new" (click)="openNewContractPage()">
+          <i class="fas fa-plus-circle"></i>
+          <span class="btn-text">Novo Contrato</span>
         </button>
       </div>
     </div>
@@ -193,7 +187,7 @@
         </p>
       </div>
       
-      <!-- Contracts Table -->
+      <!-- Contracts Table - Desktop -->
       <table class="contracts-table" *ngIf="filteredContracts.length > 0">
         <thead>
           <tr>
@@ -260,6 +254,60 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Contracts Cards - Mobile -->
+      <div class="table-card-mode" *ngIf="filteredContracts.length > 0">
+        <div *ngFor="let contract of filteredContracts" class="table-card" (click)="viewContract(contract.id)">
+          <div class="table-card-header">
+            <div class="contract-number">{{ contract.contractNumber }}</div>
+            <span class="status-badge" [style.background-color]="contract.statusColor + '20'" [style.color]="contract.statusColor">
+              <span class="status-dot" [style.background-color]="contract.statusColor"></span>
+              {{ contract.status }}
+            </span>
+          </div>
+          <div class="table-card-content">
+            <div class="table-card-row">
+              <span class="table-card-label">Cliente:</span>
+              <span class="table-card-value">{{ contract.clientName }}</span>
+            </div>
+            <div class="table-card-row">
+              <span class="table-card-label">Tipo:</span>
+              <span class="table-card-value">
+                <span class="type-badge" [attr.data-type]="contract.type">
+                  <i [class]="getTypeIcon(contract.type)"></i>
+                  {{ contract.type }}
+                </span>
+              </span>
+            </div>
+            <div class="table-card-row">
+              <span class="table-card-label">Serviços:</span>
+              <span class="table-card-value">
+                <span class="services-badge">
+                  {{ contract.servicesCount }} serviço{{ contract.servicesCount !== 1 ? 's' : '' }}
+                </span>
+              </span>
+            </div>
+            <div class="table-card-row">
+              <span class="table-card-label">Valor:</span>
+              <span class="table-card-value value-amount">{{ contract.totalValue }}</span>
+            </div>
+          </div>
+          <div class="table-card-actions">
+            <button class="btn-sm btn-secondary" (click)="viewContract(contract.id); $event.stopPropagation()">
+              <i class="fas fa-eye"></i>
+              Ver
+            </button>
+            <button class="btn-sm btn-primary" (click)="editContract(contract.id, $event)">
+              <i class="fas fa-edit"></i>
+              Editar
+            </button>
+            <button class="btn-sm btn-danger" (click)="deleteContract(contract.id, $event)">
+              <i class="fas fa-trash"></i>
+              Excluir
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

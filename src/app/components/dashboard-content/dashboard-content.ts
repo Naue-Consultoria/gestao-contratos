@@ -10,6 +10,7 @@ import { forkJoin } from 'rxjs';
 Chart.register(...registerables);
 
 interface StatCard {
+  id: string;
   label: string;
   value: number | string;
   change: string;
@@ -29,6 +30,7 @@ interface Activity {
 }
 
 interface QuickAction {
+  id: string;
   icon: string;
   label: string;
   color: string;
@@ -51,11 +53,12 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     { time: 'Há 2 dias', title: 'Consultoria RH - Inovação Corp', description: 'Análise de clima organizacional em andamento', type: 'hr', status: 'in-progress' }
   ];
   quickActions: QuickAction[] = [
-    { icon: 'fas fa-briefcase', label: 'Novo Serviço', color: '#003b2b', action: 'newService' },
-    { icon: 'fas fa-users', label: 'Novo Cliente', color: '#003b2b', action: 'newClient' },
-    { icon: 'fas fa-file-alt', label: 'Nova Proposta', color: '#003b2b', action: 'newProposal' },
-    { icon: 'fas fa-file-contract', label: 'Novo Contrato', color: '#003b2b', action: 'newContract' },
-    { icon: 'fas fa-chart-bar', label: 'Gerar Relatório', color: '#003b2b', action: 'generateReport' }
+    { id: 'new-service', icon: 'fas fa-briefcase', label: 'Novo Serviço', color: '#003b2b', action: 'newService' },
+    { id: 'new-client', icon: 'fas fa-users', label: 'Novo Cliente', color: '#003b2b', action: 'newClient' },
+    { id: 'new-proposal', icon: 'fas fa-file-alt', label: 'Nova Proposta', color: '#003b2b', action: 'newProposal' },
+    { id: 'new-contract', icon: 'fas fa-file-contract', label: 'Novo Contrato', color: '#003b2b', action: 'newContract' },
+    { id: 'routines', icon: 'fas fa-tasks', label: 'Rotinas', color: '#003b2b', action: 'routines' },
+    { id: 'generate-report', icon: 'fas fa-chart-bar', label: 'Gerar Relatório', color: '#003b2b', action: 'generateReport' }
   ];
   monthlyContractsData = {
     labels: [] as string[],
@@ -237,6 +240,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
     this.statCards = [
       { 
+        id: 'total-contracts',
         label: 'Total de Contratos', 
         value: contractStats.total || 0, 
         change: contractStats.total === 0 ? '0%' : this.calculateGrowthPercentage(contractStats.total, 20),
@@ -247,6 +251,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
         bgColor: 'rgba(14, 155, 113, 0.15)' 
       },
       { 
+        id: 'active-contracts',
         label: 'Contratos Ativos', 
         value: contractStats.active || 0, 
         change: contractStats.active === 0 ? '0% do total' : `${Math.round((contractStats.active / contractStats.total) * 100)}% do total`, 
@@ -257,6 +262,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
         bgColor: 'rgba(14, 155, 113, 0.15)' 
       },
       { 
+        id: 'services-progress',
         label: 'Serviços em Andamento', 
         value: servicesInProgress, 
         change: servicesInProgress === 0 ? 'Nenhum serviço vinculado' : `Vinculados a contratos ativos`, 
@@ -267,6 +273,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
         bgColor: 'rgba(14, 155, 113, 0.15)' 
       },
       { 
+        id: 'total-clients',
         label: 'Total de Clientes', 
         value: totalClients, 
         change: totalClients === 0 ? 'Nenhum cliente cadastrado' : `${contractStats.active > 0 ? Math.round((contractStats.active / totalClients) * 100) : 0}% com contratos ativos`, 
@@ -432,6 +439,13 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
       'newService': '/home/services/new',
       'generateReport': '/home/reports'
     };
+    
+    // Ação especial para rotinas - pode ser implementada futuramente
+    if (action === 'routines') {
+      alert('Funcionalidade de Rotinas em desenvolvimento');
+      return;
+    }
+    
     if (routes[action]) this.router.navigate([routes[action]]);
   }
 
@@ -478,5 +492,30 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
       average,
       projection
     };
+  }
+
+  // TrackBy functions para performance
+  trackByCardId(index: number, card: StatCard): string {
+    return card.id;
+  }
+
+  trackByActionId(index: number, action: QuickAction): string {
+    return action.id;
+  }
+
+  // Métodos para responsividade do gráfico
+  expandChart() {
+    // Implementar modal de gráfico expandido
+    console.log('Expandindo gráfico...');
+  }
+
+  downloadChart() {
+    if (this.contractsChart) {
+      const url = this.contractsChart.toBase64Image();
+      const link = document.createElement('a');
+      link.download = 'evolucao-contratos.png';
+      link.href = url;
+      link.click();
+    }
   }
 }

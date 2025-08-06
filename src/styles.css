@@ -101,7 +101,236 @@ table {
     width: 100vw;
 }
 
+/* ==========================================
+   BOTÕES RESPONSIVOS ESPECÍFICOS
+   ========================================== */
+
+/* Botões pequenos para mobile */
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-sm.btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-sm.btn-primary {
+    background: #0a8560;
+    color: white;
+}
+
+.btn-sm.btn-danger {
+    background: #dc2626;
+    color: white;
+}
+
+.btn-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Responsividade para grupos de filtros */
+.filter-group {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+    .filter-group {
+        width: 100%;
+        gap: 0.5rem;
+    }
+    
+    .filter-group select {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .btn-text {
+        display: none;
+    }
+    
+    .btn-clear,
+    .btn-export,
+    .btn-new {
+        min-width: 40px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 575px) {
+    .search-box {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .search-input {
+        font-size: 16px; /* Previne zoom no iOS */
+    }
+    
+    .filter-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .filter-select {
+        width: 100%;
+    }
+}
+
+/* ==========================================
+   INPUTS E FORMULÁRIOS RESPONSIVOS
+   ========================================== */
+
+input, select, textarea {
+    font-size: 14px;
+    line-height: 1.5;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #0a8560;
+    box-shadow: 0 0 0 3px rgba(10, 133, 96, 0.1);
+}
+
+@media (max-width: 767px) {
+    input, select, textarea {
+        font-size: 16px; /* Previne zoom no iOS */
+        padding: 0.875rem 1rem;
+    }
+    
+    .search-input {
+        padding-left: 2.5rem; /* Espaço para ícone */
+    }
+}
+
+/* ==========================================
+   MELHORIAS PARA DISPOSITIVOS TÁCTEIS
+   ========================================== */
+
+/* Melhorar área de toque para elementos interativos */
+button, .btn, .nav-item, .tab {
+    min-height: 44px; /* Padrão iOS/Android para área de toque */
+    min-width: 44px;
+}
+
+@media (max-width: 767px) {
+    button, .btn, .nav-item, .tab {
+        min-height: 48px; /* Aumentar em mobile */
+        min-width: 48px;
+    }
+    
+    /* Aumentar espaçamento entre elementos clicáveis */
+    .btn-group > * + * {
+        margin-left: 0.75rem;
+    }
+    
+    /* Melhor feedback visual para toque */
+    button:active, .btn:active {
+        transform: scale(0.95);
+        transition: transform 0.1s ease;
+    }
+}
+
+/* Otimizações para scroll em móveis */
+.table-wrapper,
+.tabs,
+.overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.table-wrapper::-webkit-scrollbar,
+.tabs::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar {
+    display: none; /* Safari/Chrome */
+}
+
+/* Prevenir zoom acidental em inputs no iOS */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    select,
+    textarea,
+    input[type="text"],
+    input[type="password"],
+    input[type="datetime"],
+    input[type="datetime-local"],
+    input[type="date"],
+    input[type="month"],
+    input[type="time"],
+    input[type="week"],
+    input[type="number"],
+    input[type="email"],
+    input[type="url"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="color"] {
+        font-size: 16px;
+    }
+}
+
 /* Utilitários */
 .w-full { width: 100% !important; }
 .overflow-hidden { overflow: hidden !important; }
 .overflow-x-auto { overflow-x: auto !important; }
+
+/* Utilitários responsivos adicionais */
+.mobile-hidden {
+    display: block;
+}
+
+.mobile-only {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .mobile-hidden {
+        display: none !important;
+    }
+    
+    .mobile-only {
+        display: block !important;
+    }
+}
+
+/* Classe para prevenir scroll do body quando modais estão abertos */
+.no-scroll {
+    overflow: hidden;
+}
+
+/* Melhor contraste para acessibilidade */
+@media (prefers-contrast: high) {
+    input, select, textarea {
+        border-width: 2px;
+    }
+    
+    .btn {
+        border-width: 2px;
+        border-style: solid;
+    }
+    
+    .btn-primary {
+        border-color: #065f46;
+    }
+    
+    .btn-secondary {
+        border-color: #4b5563;
+    }
+}

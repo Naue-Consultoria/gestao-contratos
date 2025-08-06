@@ -19,8 +19,15 @@
   </app-notification-dropdown>
 </div>
 
+<!-- Mobile Sidebar Overlay -->
+<div class="sidebar-overlay" 
+     [class.visible]="isMobileSidebarOpen" 
+     (click)="closeMobileSidebar()">
+</div>
+
 <app-sidebar
-  [isCollapsed]="isSidebarCollapsed" [isMobileSidebarOpen]="isMobileSidebarOpen"
+  [isCollapsed]="isSidebarCollapsed" 
+  [isMobileSidebarOpen]="isMobileSidebarOpen"
   (sidebarToggled)="toggleSidebar()">
 </app-sidebar>
 

@@ -1,4 +1,4 @@
-<nav class="sidebar" [class.collapsed]="isCollapsed" [class.active]="isMobileSidebarOpen">
+<nav class="sidebar" [class.collapsed]="isCollapsed" [class.mobile-open]="isMobileSidebarOpen">
   <button class="sidebar-toggle-compact" (click)="toggleSidebar()" title="Recolher/Expandir menu">
     <i class="fas fa-chevron-left" *ngIf="!isCollapsed"></i>
     <i class="fas fa-chevron-right" *ngIf="isCollapsed"></i>
