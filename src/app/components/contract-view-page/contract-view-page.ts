@@ -55,6 +55,8 @@ export class ContractViewPageComponent implements OnInit {
     this.isLoading = true;
     this.contractService.getContract(contractId).subscribe({
       next: (response) => {
+        console.log('📄 Contract received from API:', response.contract);
+        console.log('👤 Client data:', response.contract?.client);
         this.contract = response.contract;
         this.checkEditPermissions();
         this.isLoading = false;
@@ -114,27 +116,39 @@ export class ContractViewPageComponent implements OnInit {
   }
 
   getClientName(): string {
-    if (!this.contract?.client) return 'Cliente não informado';
+    console.log('🏷️ Getting client name for contract:', this.contract?.id);
+    console.log('🏷️ Client data available:', this.contract?.client);
+    
+    if (!this.contract?.client) {
+      console.log('❌ No client data found');
+      return 'Cliente não informado';
+    }
     
     const client = this.contract.client as any;
     
     // Check if client has a name property (from backend transformation)
     if (client.name) {
+      console.log('✅ Client name found:', client.name);
       return client.name;
     }
     
     // Fallback: try to get name from the client data structure directly
     // For PF (Pessoa Física)
     if (client.clients_pf && client.clients_pf.length > 0) {
-      return client.clients_pf[0].full_name || 'Nome não informado';
+      const pfName = client.clients_pf[0].full_name || 'Nome não informado';
+      console.log('✅ PF name found:', pfName);
+      return pfName;
     }
     
     // For PJ (Pessoa Jurídica)  
     if (client.clients_pj && client.clients_pj.length > 0) {
-      return client.clients_pj[0].company_name || client.clients_pj[0].trade_name || 'Empresa não informada';
+      const pjName = client.clients_pj[0].company_name || client.clients_pj[0].trade_name || 'Empresa não informada';
+      console.log('✅ PJ name found:', pjName);
+      return pjName;
     }
     
     // Final fallback
+    console.log('❌ Client not identified');
     return 'Cliente não identificado';
   }
 
