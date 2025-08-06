@@ -1,30 +1,35 @@
 <div class="services-manager">
-  <div class="services-list">
-    <div *ngFor="let service of services" class="service-card">
-      <div class="service-header">
+  <div class="services-table">
+    <div class="table-header-row">
+      <div class="col-service">Serviço</div>
+      <div class="col-quantity">Quantidade</div>
+      <div class="col-value">Valor</div>
+      <div class="col-status">Status</div>
+      <div class="col-date">Data Agendada</div>
+      <div class="col-actions">Observações</div>
+    </div>
+    
+    <div *ngFor="let service of services" class="service-row">
+      <div class="col-service">
         <div class="service-info">
           <h4 class="service-name">{{ service.service.name }}</h4>
-          <div class="service-details">
-            <span class="service-quantity">
-              <i class="fas fa-calculator"></i>
-              Qtd: {{ service.quantity }}
-            </span>
-            <span class="service-value">
-              <i class="fas fa-dollar-sign"></i>
-              {{ formatValue(service.total_value) }}
-            </span>
-          </div>
-        </div>
-        
-        <div class="service-status" [style.color]="getStatusColor(service.status)">
-          <i [class]="getStatusIcon(service.status)"></i>
-          <span>{{ getStatusText(service.status) }}</span>
+          <span class="service-category">{{ service.service.category || 'Geral' }}</span>
         </div>
       </div>
-
-      <div class="service-controls">
-        <div class="control-group">
-          <label>Status:</label>
+      
+      <div class="col-quantity">
+        <span class="quantity-badge">{{ service.quantity }}x</span>
+      </div>
+      
+      <div class="col-value">
+        <div class="value-info">
+          <div class="unit-value">{{ formatValue(service.unit_value) }}</div>
+          <div class="total-value">{{ formatValue(service.total_value) }}</div>
+        </div>
+      </div>
+      
+      <div class="col-status">
+        <div class="status-controls">
           <select 
             [(ngModel)]="service.status" 
             (ngModelChange)="updateServiceStatus(service, $event)"
@@ -35,38 +40,49 @@
             </option>
           </select>
         </div>
-
-        <div class="control-group">
-          <label>Data de Início Agendada:</label>
+      </div>
+      
+      <div class="col-date">
+        <div class="date-controls">
           <input 
             type="date" 
             [value]="service.scheduled_start_date || ''"
             (change)="updateServiceDate(service, $event)"
             [disabled]="!canEdit"
-            class="date-input">
+            class="date-input"
+            placeholder="Selecionar data">
         </div>
       </div>
+      
+      <div class="col-actions">
 
-      <div class="service-comments">
         <button 
           type="button"
           (click)="toggleComments(service.id)"
-          class="comments-toggle">
+          class="comments-toggle"
+          [class.active]="showComments[service.id]">
           <i class="fas fa-comments"></i>
-          Observações
-          <i class="fas fa-chevron-down" *ngIf="!showComments[service.id]"></i>
-          <i class="fas fa-chevron-up" *ngIf="showComments[service.id]"></i>
+          <span class="comment-count" *ngIf="comments[service.id] && comments[service.id].length > 0">
+            {{ comments[service.id].length }}
+          </span>
         </button>
-
-        <div *ngIf="showComments[service.id]" class="comments-section">
+      </div>
+      
+      <!-- Comments Section (Full Width) -->
+      <div *ngIf="showComments[service.id]" class="service-comments">
+        <div class="comments-section">
           <div class="comments-list" *ngIf="!loadingComments[service.id]">
-            <div *ngIf="comments[service.id]?.length === 0" class="no-comments">
-              Nenhuma observação ainda.
+            <div *ngIf="!comments[service.id] || comments[service.id].length === 0" class="no-comments">
+              <i class="fas fa-comment-slash"></i>
+              <span>Nenhuma observação ainda.</span>
             </div>
 
-            <div *ngFor="let comment of comments[service.id]" class="comment">
+            <div *ngFor="let comment of comments[service.id] || []" class="comment">
               <div class="comment-header">
-                <strong>{{ comment.user.name }}</strong>
+                <div class="comment-author">
+                  <i class="fas fa-user-circle"></i>
+                  <strong>{{ comment.user.name }}</strong>
+                </div>
                 <span class="comment-date">{{ formatCommentDate(comment.created_at) }}</span>
               </div>
               
@@ -90,10 +106,10 @@
                 </textarea>
                 <div class="edit-actions">
                   <button type="button" (click)="updateComment(comment)" class="btn-save">
-                    Salvar
+                    <i class="fas fa-save"></i> Salvar
                   </button>
                   <button type="button" (click)="cancelEditComment(comment.id)" class="btn-cancel">
-                    Cancelar
+                    <i class="fas fa-times"></i> Cancelar
                   </button>
                 </div>
               </div>
@@ -101,23 +117,26 @@
           </div>
 
           <div *ngIf="loadingComments[service.id]" class="loading-comments">
-            <i class="fas fa-spinner fa-spin"></i> Carregando comentários...
+            <i class="fas fa-spinner fa-spin"></i> 
+            <span>Carregando comentários...</span>
           </div>
 
           <div class="add-comment">
-            <textarea 
-              [(ngModel)]="newComments[service.id]"
-              placeholder="Adicionar observação..."
-              class="comment-input"
-              rows="2">
-            </textarea>
-            <button 
-              type="button"
-              (click)="addComment(service.id)"
-              [disabled]="!newComments[service.id] || !newComments[service.id].trim()"
-              class="btn-add-comment">
-              <i class="fas fa-paper-plane"></i> Enviar
-            </button>
+            <div class="comment-input-group">
+              <textarea 
+                [(ngModel)]="newComments[service.id]"
+                placeholder="Adicionar observação sobre este serviço..."
+                class="comment-input"
+                rows="3">
+              </textarea>
+              <button 
+                type="button"
+                (click)="addComment(service.id)"
+                [disabled]="!newComments[service.id] || !newComments[service.id].trim()"
+                class="btn-add-comment">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>

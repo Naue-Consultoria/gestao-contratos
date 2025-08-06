@@ -27,8 +27,21 @@ export class ContractViewPageComponent implements OnInit {
     private toastr: ToastrService,
     private authService: AuthService
   ) {
-    this.currentUserId = parseInt(localStorage.getItem('userId') || '0');
-    this.isAdmin = localStorage.getItem('userRole') === 'admin';
+    // Recuperar informações do usuário do localStorage
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        this.currentUserId = user.id || 0;
+        this.isAdmin = user.role === 'admin';
+      } catch (error) {
+        this.currentUserId = 0;
+        this.isAdmin = false;
+      }
+    } else {
+      this.currentUserId = 0;
+      this.isAdmin = false;
+    }
   }
 
   ngOnInit() {
@@ -98,6 +111,73 @@ export class ContractViewPageComponent implements OnInit {
     if (this.contract) {
       this.router.navigate(['/home/contracts/edit', this.contract.id]);
     }
+  }
+
+  getClientName(): string {
+    if (!this.contract?.client) return 'Cliente não informado';
+    
+    const client = this.contract.client as any;
+    
+    // Check if client has a name property (from backend transformation)
+    if (client.name) {
+      return client.name;
+    }
+    
+    // Fallback: try to get name from the client data structure directly
+    // For PF (Pessoa Física)
+    if (client.clients_pf && client.clients_pf.length > 0) {
+      return client.clients_pf[0].full_name || 'Nome não informado';
+    }
+    
+    // For PJ (Pessoa Jurídica)  
+    if (client.clients_pj && client.clients_pj.length > 0) {
+      return client.clients_pj[0].company_name || client.clients_pj[0].trade_name || 'Empresa não informada';
+    }
+    
+    // Final fallback
+    return 'Cliente não identificado';
+  }
+
+  getContractDuration(): string {
+    if (!this.contract?.start_date || !this.contract?.end_date) return '-';
+    
+    const start = new Date(this.contract.start_date);
+    const end = new Date(this.contract.end_date);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 30) {
+      return `${diffDays} dias`;
+    } else if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} ${months === 1 ? 'mês' : 'meses'}`;
+    } else {
+      const years = Math.floor(diffDays / 365);
+      const remainingMonths = Math.floor((diffDays % 365) / 30);
+      if (remainingMonths > 0) {
+        return `${years} ${years === 1 ? 'ano' : 'anos'} e ${remainingMonths} ${remainingMonths === 1 ? 'mês' : 'meses'}`;
+      }
+      return `${years} ${years === 1 ? 'ano' : 'anos'}`;
+    }
+  }
+
+  getRoleText(role: string): string {
+    const roleMap: { [key: string]: string } = {
+      'owner': 'Proprietário',
+      'editor': 'Editor',
+      'viewer': 'Visualizador'
+    };
+    return roleMap[role] || role;
+  }
+
+  getStatusIcon(status: string): string {
+    const iconMap: { [key: string]: string } = {
+      'active': 'fas fa-play-circle',
+      'completed': 'fas fa-check-circle',
+      'cancelled': 'fas fa-times-circle', 
+      'suspended': 'fas fa-pause-circle'
+    };
+    return iconMap[status] || 'fas fa-circle';
   }
 
   onServiceUpdated() {

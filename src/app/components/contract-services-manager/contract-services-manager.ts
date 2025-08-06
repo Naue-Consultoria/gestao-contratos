@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ContractService, ApiContractService, ServiceComment } from '../../services/contract';
@@ -11,7 +11,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './contract-services-manager.html',
   styleUrls: ['./contract-services-manager.css']
 })
-export class ContractServicesManagerComponent implements OnInit {
+export class ContractServicesManagerComponent implements OnInit, OnChanges {
   @Input() services: ApiContractService[] = [];
   @Input() contractId!: number;
   @Input() canEdit: boolean = false;
@@ -37,11 +37,28 @@ export class ContractServicesManagerComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Inicializar status dos serviços se não existir
+    // Inicializar status dos serviços se não existir e ordenar alfabeticamente
     this.services.forEach(service => {
       if (!service.status) {
         service.status = 'not_started';
       }
+    });
+    
+    // Ordenar serviços por nome alfabeticamente
+    this.sortServices();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['services'] && changes['services'].currentValue) {
+      this.sortServices();
+    }
+  }
+  
+  private sortServices() {
+    this.services.sort((a, b) => {
+      const nameA = a.service.name.toLowerCase();
+      const nameB = b.service.name.toLowerCase();
+      return nameA.localeCompare(nameB, 'pt-BR');
     });
   }
 
@@ -67,7 +84,12 @@ export class ContractServicesManagerComponent implements OnInit {
   }
 
   updateServiceStatus(service: ApiContractService, newStatus: string | undefined) {
-    if (!this.canEdit || !newStatus) return;
+    if (!this.canEdit) {
+      this.toastr.warning('Você não tem permissão para editar este serviço');
+      return;
+    }
+    
+    if (!newStatus) return;
 
     const oldStatus = service.status;
     service.status = newStatus as any;
@@ -85,7 +107,10 @@ export class ContractServicesManagerComponent implements OnInit {
   }
 
   updateServiceDate(service: ApiContractService, event: Event) {
-    if (!this.canEdit) return;
+    if (!this.canEdit) {
+      this.toastr.warning('Você não tem permissão para editar este serviço');
+      return;
+    }
 
     const input = event.target as HTMLInputElement;
     const newDate = input.value || null;
@@ -186,8 +211,17 @@ export class ContractServicesManagerComponent implements OnInit {
   }
 
   canEditComment(comment: ServiceComment): boolean {
-    const currentUserId = parseInt(localStorage.getItem('userId') || '0');
-    return comment.user.id === currentUserId;
+    // Recuperar ID do usuário corretamente do localStorage
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        return comment.user.id === user.id;
+      } catch (error) {
+        return false;
+      }
+    }
+    return false;
   }
 
   formatCommentDate(date: string): string {

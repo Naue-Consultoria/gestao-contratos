@@ -4,6 +4,7 @@ import { Chart, registerables } from 'chart.js';
 import { Router } from '@angular/router';
 import { ContractService } from '../../services/contract';
 import { ServiceService } from '../../services/service';
+import { ClientService } from '../../services/client';
 import { forkJoin } from 'rxjs';
 
 Chart.register(...registerables);
@@ -97,12 +98,13 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   constructor(
     private router: Router,
     private contractService: ContractService,
-    private serviceService: ServiceService
+    private serviceService: ServiceService,
+    private clientService: ClientService
   ) {}
 
   ngOnInit() {
     // Inicializar com dados zerados
-    this.updateStatCards({ total: 0, active: 0 }, { total: 0 });
+    this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
     // Carregar dados reais
     this.loadDashboardData();
     this.loadChartData();
@@ -139,19 +141,21 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   private loadDashboardData() {
     console.log('Iniciando carregamento dos dados do dashboard...');
     
-    // Buscar dados de contratos e serviços em paralelo
+    // Buscar dados de contratos, serviços e clientes em paralelo
     forkJoin({
       contractStats: this.contractService.getStats(),
-      serviceStats: this.serviceService.getStats()
+      serviceStats: this.serviceService.getStats(),
+      clientsData: this.clientService.getClients()
     }).subscribe({
       next: (response) => {
         console.log('Dados recebidos:', response);
-        this.updateStatCards(response.contractStats.stats, response.serviceStats.stats);
+        const totalClients = response.clientsData.total || 0;
+        this.updateStatCards(response.contractStats.stats, response.serviceStats.stats, totalClients);
       },
       error: (error) => {
         console.error('Erro ao carregar dados do dashboard:', error);
         // Usar dados com valores zerados em caso de erro
-        this.updateStatCards({ total: 0, active: 0 }, { total: 0 });
+        this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
       }
     });
   }
@@ -227,13 +231,9 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
 
-  private updateStatCards(contractStats: any, serviceStats: any) {
-    // Calcular serviços em andamento (assumindo que contratos ativos têm serviços em andamento)
-    const servicesInProgress = contractStats.active > 0 ? contractStats.active * 2 : 0; // Estimativa média
-    
-    // Para próximas atividades, usar dados reais quando disponíveis
-    // Por enquanto, mostrar 0 até ter endpoint específico para atividades
-    const upcomingActivities = 0;
+  private updateStatCards(contractStats: any, serviceStats: any, totalClients: number) {
+    // Usar contagem real de serviços vinculados a contratos ativos
+    const servicesInProgress = serviceStats.activeServicesFromActiveContracts || 0;
 
     this.statCards = [
       { 
@@ -259,7 +259,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
       { 
         label: 'Serviços em Andamento', 
         value: servicesInProgress, 
-        change: servicesInProgress === 0 ? 'Nenhum serviço' : `Em ${contractStats.active} contratos`, 
+        change: servicesInProgress === 0 ? 'Nenhum serviço vinculado' : `Vinculados a contratos ativos`, 
         changeType: 'positive', 
         icon: 'fas fa-list-check', 
         progress: servicesInProgress === 0 ? 0 : Math.min((servicesInProgress / 50) * 100, 100),
@@ -267,12 +267,12 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
         bgColor: 'rgba(14, 155, 113, 0.15)' 
       },
       { 
-        label: 'Próximas Atividades', 
-        value: upcomingActivities, 
-        change: upcomingActivities === 0 ? 'Nenhuma atividade' : this.getUrgentActivitiesText(upcomingActivities), 
-        changeType: upcomingActivities === 0 ? 'positive' : (upcomingActivities > 5 ? 'negative' : 'positive'), 
-        icon: 'fas fa-clock', 
-        progress: upcomingActivities === 0 ? 0 : Math.min((upcomingActivities / 15) * 100, 100),
+        label: 'Total de Clientes', 
+        value: totalClients, 
+        change: totalClients === 0 ? 'Nenhum cliente cadastrado' : `${contractStats.active > 0 ? Math.round((contractStats.active / totalClients) * 100) : 0}% com contratos ativos`, 
+        changeType: 'positive', 
+        icon: 'fas fa-users', 
+        progress: totalClients === 0 ? 0 : Math.min((totalClients / 100) * 100, 100),
         color: '#003b2b', 
         bgColor: 'rgba(14, 155, 113, 0.15)' 
       }
@@ -286,10 +286,6 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     return `${sign}${Math.round(growth)}% este mês`;
   }
 
-  private getUrgentActivitiesText(total: number): string {
-    const urgent = Math.floor(total * 0.3); // 30% são urgentes
-    return urgent > 0 ? `${urgent} urgentes` : 'Nenhuma urgente';
-  }
 
   private initCharts() {
     if (this.contractsChart) {
@@ -465,6 +461,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     const texts: { [key: string]: string } = { 'completed': 'Concluído', 'in-progress': 'Em andamento', 'scheduled': 'Agendado' };
     return texts[status] || status;
   }
+
 
   getChartInsights() {
     const data = this.monthlyContractsData.datasets[0].data as number[];
