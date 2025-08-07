@@ -1,13 +1,7 @@
 <div class="page">
   <div class="page-header">
     <h1 class="page-title">{{ isEditMode ? 'Editar Serviço' : 'Novo Serviço' }}</h1>
-    <div class="breadcrumb">
-      <span>Home</span>
-      <span class="breadcrumb-separator">/</span>
-      <span class="clickable" (click)="cancel()">Serviços</span>
-      <span class="breadcrumb-separator">/</span>
-      <span>{{ isEditMode ? 'Editar' : 'Novo' }}</span>
-    </div>
+    <app-breadcrumb></app-breadcrumb>
   </div>
 
   <!-- Loading -->

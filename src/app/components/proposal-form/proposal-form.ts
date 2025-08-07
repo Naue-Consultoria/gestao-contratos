@@ -11,11 +11,12 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { ProposalService, CreateProposalData, Proposal } from '../../services/proposal';
 import { ClientService, ApiClient, CreateClientRequest } from '../../services/client';
 import { ServiceService, ApiService } from '../../services/service';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-proposal-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DocumentMaskDirective, CurrencyMaskDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DocumentMaskDirective, CurrencyMaskDirective, BreadcrumbComponent],
   templateUrl: './proposal-form.html',
   styleUrls: ['./proposal-form.css'],
   animations: [

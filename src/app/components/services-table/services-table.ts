@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { ServiceService, ApiService, ServiceStats } from '../../services/service';
 import { Subscription, firstValueFrom } from 'rxjs';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 interface ServiceDisplay {
   id: number;
@@ -18,7 +19,7 @@ interface ServiceDisplay {
 @Component({
   selector: 'app-services-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BreadcrumbComponent],
   templateUrl: './services-table.html',
   styleUrls: ['./services-table.css']
 })

@@ -5,6 +5,7 @@ import { ModalService } from '../../services/modal.service';
 import { ProposalService, Proposal, PrepareProposalData } from '../../services/proposal';
 import { SendProposalModalComponent } from '../send-proposal-modal/send-proposal-modal';
 import { Subscription, firstValueFrom } from 'rxjs';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 interface ProposalDisplay {
   id: number;
@@ -23,7 +24,7 @@ interface ProposalDisplay {
 @Component({
   selector: 'app-proposals-page',
   standalone: true,
-  imports: [CommonModule, SendProposalModalComponent],
+  imports: [CommonModule, SendProposalModalComponent, BreadcrumbComponent],
   templateUrl: './proposals-page.html',
   styleUrls: ['./proposals-page.css']
 })

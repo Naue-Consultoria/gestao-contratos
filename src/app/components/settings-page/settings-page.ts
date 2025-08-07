@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../services/notification.service';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-settings-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent],
   templateUrl: './settings-page.html',
   styleUrls: ['./settings-page.css']
 })

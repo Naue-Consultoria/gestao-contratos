@@ -1,12 +1,6 @@
 <div class="page-header">
   <h1 class="page-title">{{ isEditMode ? 'Editar Usuário' : 'Novo Usuário' }}</h1>
-  <div class="breadcrumb">
-    <a routerLink="/home">Home</a>
-    <span class="breadcrumb-separator">›</span>
-    <a routerLink="/home/users">Usuários</a>
-    <span class="breadcrumb-separator">›</span>
-    <span>{{ isEditMode ? 'Editar' : 'Novo' }}</span>
-  </div>
+  <app-breadcrumb></app-breadcrumb>
 </div>
 
 <div class="table-container">

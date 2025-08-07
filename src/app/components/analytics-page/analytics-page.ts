@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { ContractService, ApiContract } from '../../services/contract';
 import { ServiceService, ServiceStats } from '../../services/service';
 import { ProposalService } from '../../services/proposal';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 Chart.register(...registerables);
 
@@ -32,7 +33,7 @@ interface MetricData {
 @Component({
   selector: 'app-analytics-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent],
   templateUrl: './analytics-page.html',
   styleUrls: ['./analytics-page.css']
 })

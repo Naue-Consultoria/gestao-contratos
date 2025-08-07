@@ -4,13 +4,7 @@
       <i class="fas fa-arrow-left"></i> Voltar
     </button>
     <h1 class="page-title">Detalhes do Contrato</h1>
-    <div class="breadcrumb">
-      <span>Home</span>
-      <span class="breadcrumb-separator">/</span>
-      <span>Contratos</span>
-      <span class="breadcrumb-separator">/</span>
-      <span>Detalhes</span>
-    </div>
+    <app-breadcrumb></app-breadcrumb>
   </div>
   <div class="header-actions" *ngIf="contract && canEdit">
     <button class="btn btn-primary" (click)="editContract()">

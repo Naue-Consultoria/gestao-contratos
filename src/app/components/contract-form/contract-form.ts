@@ -11,6 +11,7 @@ import { UserService } from '../../services/user';
 import { AuthService } from '../../services/auth';
 import { UserSelectionModalComponent } from '../user-selection-modal/user-selection-modal';
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 interface SelectedService {
   service_id: number;
@@ -42,7 +43,7 @@ interface AssignedUser {
 @Component({
   selector: 'app-contract-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, UserSelectionModalComponent, CurrencyMaskDirective],
+  imports: [CommonModule, FormsModule, UserSelectionModalComponent, CurrencyMaskDirective, BreadcrumbComponent],
   templateUrl: './contract-form.html',
   styleUrls: ['./contract-form.css'],
 })

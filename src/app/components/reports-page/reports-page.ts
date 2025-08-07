@@ -6,6 +6,7 @@ import { ClientService } from '../../services/client';
 import { ServiceService } from '../../services/service';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 interface ReportConfig {
   clientId: string;
@@ -19,7 +20,7 @@ type GeneralReportConfig = Omit<ReportConfig, 'clientId'> & { clientId?: string 
 @Component({
   selector: 'app-reports-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent],
   templateUrl: './reports-page.html',
   styleUrls: ['./reports-page.css']
 })

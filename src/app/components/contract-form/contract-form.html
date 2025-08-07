@@ -3,13 +3,7 @@
     <h1 class="page-title">
       {{ isViewMode ? 'Visualizar Contrato' : (isEditMode ? 'Editar Contrato' : 'Novo Contrato') }}
     </h1>
-    <div class="breadcrumb">
-      <span>Home</span>
-      <span class="breadcrumb-separator">/</span>
-      <span class="clickable" (click)="cancel()">Contratos</span>
-      <span class="breadcrumb-separator">/</span>
-      <span>{{ isViewMode ? 'Visualizar' : (isEditMode ? 'Editar' : 'Novo') }}</span>
-    </div>
+    <app-breadcrumb></app-breadcrumb>
   </div>
 
   <div *ngIf="isLoading" class="loading-container">

@@ -5,11 +5,12 @@ import { ContractService, ApiContract } from '../../services/contract';
 import { ContractServicesManagerComponent } from '../contract-services-manager/contract-services-manager';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../services/auth';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-contract-view-page',
   standalone: true,
-  imports: [CommonModule, ContractServicesManagerComponent],
+  imports: [CommonModule, ContractServicesManagerComponent, BreadcrumbComponent],
   templateUrl: './contract-view-page.html',
   styleUrls: ['./contract-view-page.css']
 })

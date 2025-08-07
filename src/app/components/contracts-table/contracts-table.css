@@ -253,6 +253,12 @@
     flex-wrap: wrap;
 }
 
+.filter-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
 .search-box {
     position: relative;
     min-width: 300px;
@@ -303,6 +309,8 @@
     color: var(--text-dark);
     cursor: pointer;
     transition: all 0.3s ease;
+    width: 200px;
+    height: 42px;
 }
 
 :host-context(body.dark-mode) .filter-select {
@@ -428,9 +436,6 @@
     transition: background-color 0.3s ease;
 }
 
-.contracts-table tr.clickable {
-    cursor: pointer;
-}
 
 .contracts-table tr:hover {
     background-color: rgba(14, 155, 113, 0.03);

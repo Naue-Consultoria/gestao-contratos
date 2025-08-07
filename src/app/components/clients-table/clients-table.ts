@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { ClientService, ApiClient } from '../../services/client';
 import { ContractService, ApiContract } from '../../services/contract';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth';
 
@@ -26,7 +27,7 @@ interface ClientDisplay {
 @Component({
   selector: 'app-clients-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BreadcrumbComponent],
   templateUrl: './clients-table.html',
   styleUrls: ['./clients-table.css']
 })

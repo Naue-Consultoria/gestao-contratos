@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ContractService } from '../../services/contract';
 import { ServiceService } from '../../services/service';
 import { ClientService } from '../../services/client';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { forkJoin } from 'rxjs';
 
 Chart.register(...registerables);
@@ -40,7 +41,7 @@ interface QuickAction {
 @Component({
   selector: 'app-dashboard-content',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BreadcrumbComponent],
   templateUrl: './dashboard-content.html',
   styleUrls: ['./dashboard-content.css']
 })
@@ -437,14 +438,9 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
       'newContract': '/home/contracts/new',
       'newClient': '/home/clients/new',
       'newService': '/home/services/new',
-      'generateReport': '/home/reports'
+      'generateReport': '/home/reports',
+      'routines': '/home/routines'
     };
-    
-    // Ação especial para rotinas - pode ser implementada futuramente
-    if (action === 'routines') {
-      alert('Funcionalidade de Rotinas em desenvolvimento');
-      return;
-    }
     
     if (routes[action]) this.router.navigate([routes[action]]);
   }

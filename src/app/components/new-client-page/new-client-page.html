@@ -1,13 +1,7 @@
 <div class="page">
   <div class="page-header">
     <h1 class="page-title">{{ getPageTitle() }}</h1>
-    <div class="breadcrumb">
-      <span>Home</span>
-      <span class="breadcrumb-separator">/</span>
-      <span>Clientes</span>
-      <span class="breadcrumb-separator">/</span>
-      <span>{{ isEditing ? 'Editar' : 'Novo' }}</span>
-    </div>
+    <app-breadcrumb></app-breadcrumb>
   </div>
 
   <div class="table-container">

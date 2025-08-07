@@ -21,6 +21,7 @@ import { UsersPageComponent } from './components/users-page/users-page';
 import { NewUserPageComponent } from './components/new-user-page/new-user-page';
 import { SettingsPageComponent } from './components/settings-page/settings-page';
 import { HelpPageComponent } from './components/help-page/help-page';
+import { RoutinesPageComponent } from './components/routines-page/routines-page';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -191,6 +192,13 @@ export const routes: Routes = [
         path: 'analytics',
         component: AnalyticsPageComponent,
         title: 'Analytics - NAUE Consultoria',
+      },
+
+      // Rotinas
+      {
+        path: 'routines',
+        component: RoutinesPageComponent,
+        title: 'Rotinas - NAUE Consultoria',
       },
 
       // Gestão de usuários

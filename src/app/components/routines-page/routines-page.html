@@ -1,0 +1,137 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Rotinas de Contratos</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Carregando rotinas de contratos...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <div class="error-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3>Erro ao carregar rotinas</h3>
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="loadContractRoutines()">
+      <i class="fas fa-refresh"></i>
+      Tentar novamente
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !error" class="routines-container">
+    
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="card-icon high">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ highPriorityCount }}</h3>
+          <p>Contratos Prioritários</p>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="card-icon active">
+          <i class="fas fa-play-circle"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ contracts.length }}</h3>
+          <p>Contratos Ativos</p>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="card-icon services">
+          <i class="fas fa-tasks"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ totalServicesCount }}</h3>
+          <p>Serviços Totais</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contracts Routines List -->
+    <div class="routines-list">
+      <h2 class="section-title">
+        <i class="fas fa-calendar-check"></i>
+        Rotinas Ativas
+      </h2>
+      
+      <div *ngIf="contracts.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-calendar-times"></i>
+        </div>
+        <h3>Nenhuma rotina encontrada</h3>
+        <p>Não há contratos ativos para exibir rotinas no momento.</p>
+      </div>
+
+      <div class="routine-cards">
+        <div *ngFor="let contract of contracts" 
+             class="routine-card" 
+             (click)="viewContractDetails(contract.id)">
+          
+          <div class="routine-header">
+            <div class="contract-info">
+              <h3 class="contract-number">{{ contract.contractNumber }}</h3>
+              <p class="client-name">{{ contract.clientName }}</p>
+            </div>
+            
+            <div class="priority-badge" [ngClass]="getPriorityClass(contract.priority)">
+              {{ getPriorityLabel(contract.priority) }}
+            </div>
+          </div>
+
+          <div class="routine-body">
+            <div class="contract-details">
+              <div class="detail-item">
+                <i class="fas fa-tag"></i>
+                <span>{{ contract.type }}</span>
+              </div>
+              
+              <div class="detail-item">
+                <i class="fas fa-tasks"></i>
+                <span>{{ contract.servicesCount }} serviços</span>
+              </div>
+              
+              <div class="detail-item">
+                <i class="fas fa-dollar-sign"></i>
+                <span>{{ contract.totalValue }}</span>
+              </div>
+            </div>
+
+            <div class="routine-schedule">
+              <div class="next-due">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="due-label">Próximo vencimento:</span>
+                <span class="due-date">{{ contract.nextDueDate }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="routine-actions">
+            <button class="action-btn view-btn" 
+                    (click)="viewContractDetails(contract.id); $event.stopPropagation()" 
+                    title="Ver detalhes">
+              <i class="fas fa-eye"></i>
+            </button>
+            
+            <button class="action-btn edit-btn" 
+                    (click)="editContract(contract.id, $event)" 
+                    title="Editar contrato">
+              <i class="fas fa-edit"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

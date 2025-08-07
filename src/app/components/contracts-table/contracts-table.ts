@@ -9,6 +9,7 @@ import {
   ContractStats,
 } from '../../services/contract';
 import { ClientService } from '../../services/client';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { SearchService } from '../../services/search.service'; // Import the new service
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -31,7 +32,7 @@ interface ContractDisplay {
 @Component({
   selector: 'app-contracts-table',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent],
   templateUrl: './contracts-table.html',
   styleUrls: ['./contracts-table.css'],
 })
@@ -246,13 +247,11 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     this.router.navigate(['/home/contracts/new']);
   }
 
-  editContract(id: number, event: MouseEvent) {
-    event.stopPropagation();
+  editContract(id: number, event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+    }
     this.router.navigate(['/home/contracts/edit', id]);
-  }
-
-  viewContract(id: number) {
-    this.router.navigate(['/home/contracts/view', id]);
   }
 
   formatTotalValue(): string {

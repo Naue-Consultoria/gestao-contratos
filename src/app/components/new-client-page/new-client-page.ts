@@ -6,11 +6,12 @@ import { ClientService, CreateClientRequest, UpdateClientRequest, ApiClient } fr
 import { ModalService } from '../../services/modal.service';
 import { DocumentMaskDirective } from '../../directives/document-mask.directive';
 import { firstValueFrom } from 'rxjs';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-new-client-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DocumentMaskDirective],
+  imports: [CommonModule, FormsModule, DocumentMaskDirective, BreadcrumbComponent],
   templateUrl: './new-client-page.html',
   styleUrls: ['./new-client-page.css']
 })

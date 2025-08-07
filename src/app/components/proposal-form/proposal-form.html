@@ -1,12 +1,6 @@
   <div class="page-header">
     <h1 class="page-title">{{ isEditMode ? 'Editar Proposta' : 'Nova Proposta' }}</h1>
-    <div class="breadcrumb">
-      <a routerLink="/home" class="breadcrumb-link">Home</a>
-      <span class="breadcrumb-separator">/</span>
-      <a routerLink="/proposals" class="breadcrumb-link" (click)="cancel()">Propostas</a>
-      <span class="breadcrumb-separator">/</span>
-      <span class="breadcrumb-current">{{ isEditMode ? 'Editar' : 'Nova' }}</span>
-    </div>
+    <app-breadcrumb></app-breadcrumb>
   </div>
 
   <div *ngIf="isLoading" class="loading-container">

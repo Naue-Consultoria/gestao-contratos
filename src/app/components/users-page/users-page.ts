@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { UserService } from '../../services/user';
 import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 interface User {
   id: number;
@@ -20,7 +21,7 @@ interface User {
 @Component({
   selector: 'app-users-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BreadcrumbComponent],
   templateUrl: './users-page.html',
   styleUrls: ['./users-page.css']
 })
