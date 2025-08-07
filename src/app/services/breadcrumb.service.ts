@@ -123,7 +123,12 @@ export class BreadcrumbService {
     ],
     '/home/routines': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Rotinas' }
+      { label: 'Rotinas de Contratos' }
+    ],
+    '/home/routines/view': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Rotinas de Contratos', url: '/home/routines' },
+      { label: 'Detalhes do Contrato' }
     ],
     '/home/notifications': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
@@ -176,6 +181,17 @@ export class BreadcrumbService {
           this.setBreadcrumbs(breadcrumbs);
           return;
         }
+      }
+      
+      // Para URLs como /home/routines/123 (detalhes do contrato)
+      if (urlParts.length === 4 && urlParts[2] === 'routines' && !isNaN(Number(urlParts[3]))) {
+        const breadcrumbs = [
+          { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+          { label: 'Rotinas de Contratos', url: '/home/routines' },
+          { label: `Detalhes do Contrato #${urlParts[3]}` }
+        ];
+        this.setBreadcrumbs(breadcrumbs);
+        return;
       }
       
       // Para URLs como /home/contracts/123

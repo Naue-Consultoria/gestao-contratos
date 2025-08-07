@@ -3,7 +3,6 @@
     <div class="table-header-row">
       <div class="col-service">Serviço</div>
       <div class="col-quantity">Quantidade</div>
-      <div class="col-value">Valor</div>
       <div class="col-status">Status</div>
       <div class="col-date">Data Agendada</div>
       <div class="col-actions">Observações</div>
@@ -21,12 +20,6 @@
         <span class="quantity-badge">{{ service.quantity }}x</span>
       </div>
       
-      <div class="col-value">
-        <div class="value-info">
-          <div class="unit-value">{{ formatValue(service.unit_value) }}</div>
-          <div class="total-value">{{ formatValue(service.total_value) }}</div>
-        </div>
-      </div>
       
       <div class="col-status">
         <div class="status-controls">
