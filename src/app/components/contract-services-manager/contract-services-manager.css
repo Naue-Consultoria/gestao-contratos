@@ -429,6 +429,12 @@
   text-align: left;
 }
 
+/* Centralizar ícone quando não há texto */
+.comments-toggle-modern:not(:has(.comments-label)) {
+  justify-content: center;
+  text-align: center;
+}
+
 .comments-toggle-modern:hover {
   background: var(--green-50);
   border-color: var(--naue-primary);

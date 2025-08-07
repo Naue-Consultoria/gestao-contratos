@@ -4,7 +4,7 @@
       <div class="col-service">Serviço</div>
       <div class="col-status">Status</div>
       <div class="col-date">Data Agendada</div>
-      <div class="col-actions">Observações</div>
+      <div class="col-actions">Acompanhamento</div>
     </div>
     
     <div *ngFor="let service of services" class="service-row" [class.expanded]="showComments[service.id]">
@@ -54,8 +54,8 @@
                 {{ comments[service.id].length }}
               </span>
             </div>
-            <span class="comments-label">
-              {{ (comments[service.id].length || 0) === 0 ? 'Adicionar nota' : (comments[service.id].length || 0) + ' nota(s)' }}
+            <span class="comments-label" *ngIf="(comments[service.id]?.length || 0) > 0">
+              {{ (comments[service.id].length || 0) + ' nota(s)' }}
             </span>
           </button>
         </div>
@@ -68,7 +68,7 @@
         <div class="comments-header">
           <div class="comments-title">
             <i class="fas fa-sticky-note"></i>
-            <h4>Notas e Observações</h4>
+            <h4>Registros do Serviço</h4>
           </div>
           <div class="comments-stats">
             <span class="comments-count">{{ (comments[service.id] || []).length }} nota(s)</span>

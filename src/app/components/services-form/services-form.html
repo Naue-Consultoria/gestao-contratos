@@ -61,7 +61,7 @@
           </div>
         </div>
 
-        <!-- Duration and Value Section -->
+        <!-- Duration Section -->
         <div class="form-section">
           <h2 class="section-title">
             <i class="fas fa-clock"></i>
@@ -113,33 +113,6 @@
         </div>
       </div>
 
-      <!-- Preview Card -->
-      <div class="preview-card">
-        <h3 class="preview-title">
-          <i class="fas fa-eye"></i>
-          Pré-visualização
-        </h3>
-        <div class="preview-content">
-          <div class="preview-item">
-            <strong>Serviço:</strong> {{ formData.name || 'Nome do serviço' }}
-          </div>
-          <div class="preview-item">
-            <strong>Categoria:</strong> 
-            <span class="category-badge" [attr.data-category]="formData.category">
-              {{ formData.category }}
-            </span>
-          </div>
-          <div class="preview-item">
-            <strong>Duração:</strong> {{ getFormattedDuration() }}
-          </div>
-          <div class="preview-item">
-            <strong>Status:</strong> 
-            <span class="status-badge" [class.active]="formData.is_active" [class.inactive]="!formData.is_active">
-              {{ formData.is_active ? 'Ativo' : 'Inativo' }}
-            </span>
-          </div>
-        </div>
-      </div>
 
       <!-- Form Actions -->
       <div class="form-actions">
