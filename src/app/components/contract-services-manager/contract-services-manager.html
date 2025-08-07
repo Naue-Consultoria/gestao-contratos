@@ -61,7 +61,7 @@
               </span>
             </div>
             <span class="comments-label">
-              {{ (comments[service.id]?.length || 0) === 0 ? 'Adicionar nota' : comments[service.id].length + ' nota(s)' }}
+              {{ (comments[service.id].length || 0) === 0 ? 'Adicionar nota' : (comments[service.id].length || 0) + ' nota(s)' }}
             </span>
           </button>
         </div>
@@ -77,7 +77,7 @@
             <h4>Notas e Observações</h4>
           </div>
           <div class="comments-stats">
-            <span class="comments-count">{{ comments[service.id]?.length || 0 }} nota(s)</span>
+            <span class="comments-count">{{ (comments[service.id] || []).length }} nota(s)</span>
           </div>
         </div>
 
@@ -93,7 +93,7 @@
                 placeholder="Adicionar nova nota sobre este serviço..."
                 class="modern-textarea"
                 rows="3"
-                [class.expanded]="newComments[service.id]?.trim() || (newCommentFiles[service.id]?.length || 0) > 0">
+                [class.expanded]="(newComments[service.id] || '').trim() || (newCommentFiles[service.id] || []).length > 0">
               </textarea>
               
               <!-- File Attachments Preview -->
@@ -117,7 +117,7 @@
           
           <!-- Comment Actions -->
           <div class="comment-form-actions" 
-               *ngIf="newComments[service.id]?.trim() || (newCommentFiles[service.id]?.length || 0) > 0">
+               *ngIf="(newComments[service.id] || '').trim() || (newCommentFiles[service.id] || []).length > 0">
             <div class="actions-left">
               <input 
                 type="file" 
@@ -141,7 +141,7 @@
               <button 
                 type="button"
                 (click)="addCommentWithFiles(service.id)"
-                [disabled]="(!newComments[service.id]?.trim() && (!newCommentFiles[service.id] || newCommentFiles[service.id].length === 0)) || isAddingComment[service.id]"
+                [disabled]="(!(newComments[service.id] || '').trim() && (!newCommentFiles[service.id] || newCommentFiles[service.id].length === 0)) || isAddingComment[service.id]"
                 class="btn-send-modern"
                 [class.loading]="isAddingComment[service.id]">
                 <i class="fas fa-paper-plane" *ngIf="!isAddingComment[service.id]"></i>
