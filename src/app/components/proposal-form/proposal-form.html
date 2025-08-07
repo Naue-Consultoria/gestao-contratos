@@ -68,12 +68,6 @@
                        [appDocumentMask]="newClientForm.get('client_type')?.value === 'pf' ? 'cpf' : 'cnpj'">
                 <div *ngIf="isNewClientFieldInvalid('document')" class="error-message">Documento é obrigatório.</div>
               </div>
-              <div class="form-group" *ngIf="newClientForm.get('client_type')?.value === 'pf'">
-                <label for="new_client_rg" class="form-label">RG</label>
-                <input id="new_client_rg" type="text" formControlName="rg" class="form-control" 
-                       placeholder="00.000.000-0"
-                       appDocumentMask="rg">
-              </div>
               <div class="form-group" *ngIf="newClientForm.get('client_type')?.value === 'pj'">
                 <label for="new_client_trade_name" class="form-label">Nome Fantasia</label>
                 <input id="new_client_trade_name" type="text" formControlName="trade_name" class="form-control" 

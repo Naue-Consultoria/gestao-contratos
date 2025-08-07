@@ -89,7 +89,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       client_type: ['', Validators.required],
       name: ['', [Validators.required, Validators.minLength(2)]],
       document: ['', [Validators.required, Validators.minLength(5)]],
-      rg: [''],
       trade_name: [''],
       email: ['', [Validators.required, Validators.email]],
       phone: [''],
@@ -277,7 +276,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     if (clientType === 'pf') {
       clientData.cpf = formValue.document || '';
       clientData.full_name = formValue.name || '';
-      clientData.rg = formValue.rg || undefined;
     } else {
       clientData.cnpj = formValue.document || '';
       clientData.company_name = formValue.name || '';

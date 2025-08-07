@@ -8,6 +8,7 @@ import { ContractService, ApiContract } from '../../services/contract';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth';
+import { UploadService } from '../../services/upload';
 
 interface ClientDisplay {
   id: number;
@@ -23,6 +24,7 @@ interface ClientDisplay {
   gradient: string;
   actionMenuOpen: boolean;
   raw: ApiClient;
+  logo_url?: string | null;
 }
 
 @Component({
@@ -37,6 +39,7 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
   private modalService = inject(ModalService);
   private clientService = inject(ClientService);
   private contractService = inject(ContractService);
+  private uploadService = inject(UploadService);
   private router = inject(Router);
 
   private subscriptions = new Subscription();
@@ -140,7 +143,8 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
       since: since,
       gradient: this.generateGradient(apiClient.name),
       actionMenuOpen: false,
-      raw: apiClient
+      raw: apiClient,
+      logo_url: apiClient.logo_url
     };
   }
 

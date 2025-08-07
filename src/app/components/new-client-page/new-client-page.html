@@ -99,6 +99,48 @@
               placeholder="00.000.000/0000-00"
               appDocumentMask="cnpj">
           </div>
+          
+          <!-- Informações Adicionais da Empresa -->
+          <div class="form-group">
+            <label class="form-label">Quantidade de Funcionários</label>
+            <input 
+              type="number" 
+              name="employee_count"
+              class="form-control"
+              [(ngModel)]="formData.employee_count" 
+              [disabled]="isLoading"
+              placeholder="Ex: 10"
+              min="0">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Segmento de Atuação</label>
+            <input 
+              type="text" 
+              name="business_segment"
+              class="form-control"
+              [(ngModel)]="formData.business_segment" 
+              [disabled]="isLoading"
+              placeholder="Ex: Tecnologia, Saúde, Educação">
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- Logo do Cliente -->
+      <div class="form-section" *ngIf="formData.type">
+        <h3 class="section-title">
+          <i class="fas fa-image"></i>
+          Logo do {{ formData.type === 'PF' ? 'Cliente' : 'Empresa' }} (Opcional)
+        </h3>
+        <div class="form-grid">
+          <app-image-upload
+            [currentImageUrl]="formData.logo_url || null"
+            [placeholder]="'Selecione a logo do ' + (formData.type === 'PF' ? 'cliente' : 'empresa')"
+            [disabled]="isLoading"
+            (imageUploaded)="onLogoUploaded($event)"
+            (imageRemoved)="onLogoRemoved()">
+          </app-image-upload>
         </div>
       </div>
 

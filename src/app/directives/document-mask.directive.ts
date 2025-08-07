@@ -1,7 +1,7 @@
 import { Directive, HostListener, ElementRef, OnInit, Optional, Input } from '@angular/core';
 import { NgControl } from '@angular/forms';
 
-export type DocumentMaskType = 'cpf' | 'cnpj' | 'rg' | 'cep' | 'phone';
+export type DocumentMaskType = 'cpf' | 'cnpj' | 'cep' | 'phone';
 
 @Directive({
   selector: '[appDocumentMask]',
@@ -52,9 +52,6 @@ export class DocumentMaskDirective implements OnInit {
         break;
       case 'cnpj':
         formattedValue = this.formatCNPJ(cleanValue);
-        break;
-      case 'rg':
-        formattedValue = this.formatRG(cleanValue);
         break;
       case 'cep':
         formattedValue = this.formatCEP(cleanValue);
@@ -109,24 +106,6 @@ export class DocumentMaskDirective implements OnInit {
     }
   }
 
-  private formatRG(value: string): string {
-    // Remove caracteres não numéricos
-    value = value.replace(/\D/g, '');
-    
-    // Limita a 9 dígitos
-    value = value.substring(0, 9);
-    
-    // Aplica a máscara
-    if (value.length <= 2) {
-      return value;
-    } else if (value.length <= 5) {
-      return value.replace(/(\d{2})(\d+)/, '$1.$2');
-    } else if (value.length <= 8) {
-      return value.replace(/(\d{2})(\d{3})(\d+)/, '$1.$2.$3');
-    } else {
-      return value.replace(/(\d{2})(\d{3})(\d{3})(\d+)/, '$1.$2.$3-$4');
-    }
-  }
 
   private formatCEP(value: string): string {
     // Remove caracteres não numéricos

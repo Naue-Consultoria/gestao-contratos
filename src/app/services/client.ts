@@ -14,9 +14,12 @@ export interface CreateClientRequest {
   city: string;
   state: string;
   zipcode: string;
+  // Optional fields
+  employee_count?: number;
+  business_segment?: string;
+  logo_url?: string;
   // PF fields
   cpf?: string;
-  rg?: string;
   full_name?: string;
   // PJ fields
   cnpj?: string;
@@ -34,9 +37,12 @@ export interface UpdateClientRequest {
   city?: string;
   state?: string;
   zipcode?: string;
+  // Optional fields
+  employee_count?: number;
+  business_segment?: string;
+  logo_url?: string;
   // PF fields
   cpf?: string;
-  rg?: string;
   full_name?: string;
   // PJ fields
   cnpj?: string;
@@ -65,14 +71,16 @@ export interface ApiClient {
   updated_by_user?: { name: string };
   // PF specific
   cpf?: string;
-  rg?: string;
   full_name?: string;
   // PJ specific
   cnpj?: string;
   company_name?: string;
   trade_name?: string;
-  // Legacy fields for compatibility
+  // New optional fields
   employee_count?: number | null;
+  business_segment?: string | null;
+  logo_url?: string | null;
+  // Legacy fields for compatibility
   founded_date?: string | null;
   headquarters?: string | null;
   market_sector?: string | null;
