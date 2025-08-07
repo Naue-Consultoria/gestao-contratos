@@ -307,6 +307,7 @@ export interface ServiceComment {
   comment: string;
   created_at: string;
   updated_at: string;
+  has_attachments?: boolean;
   user: {
     id: number;
     name: string;

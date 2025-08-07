@@ -20,9 +20,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const shouldAddToken = !publicUrls.some(url => req.url.includes(url));
   
   // Clonar requisição e adicionar headers padrão
+  // Não definir Content-Type para FormData (uploads de arquivo)
+  const isFormData = req.body instanceof FormData;
+  
   let authReq = req.clone({
     setHeaders: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       'Accept': 'application/json'
     }
   });
@@ -39,12 +42,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }
   }
 
-  console.log('🔍 Interceptor - Request:', authReq.method, authReq.url);
-  console.log('🔍 Interceptor - Headers:', authReq.headers.keys());
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      console.log('❌ Interceptor - Erro capturado:', error);
 
       // Erro 401 - Token inválido ou expirado
       if (error.status === 401) {

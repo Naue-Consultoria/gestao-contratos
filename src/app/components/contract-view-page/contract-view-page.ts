@@ -103,9 +103,6 @@ export class ContractViewPageComponent implements OnInit {
     return this.contractService.getTypeIcon(type);
   }
 
-  goBack() {
-    this.router.navigate(['/home/contracts']);
-  }
 
   editContract() {
     if (this.contract) {
@@ -114,11 +111,8 @@ export class ContractViewPageComponent implements OnInit {
   }
 
   getClientName(): string {
-    console.log('🏷️ Getting client name for contract:', this.contract?.id);
-    console.log('🏷️ Client data available:', this.contract?.client);
-    
+  
     if (!this.contract?.client) {
-      console.log('❌ No client data found');
       return 'Cliente não informado';
     }
     
@@ -126,7 +120,6 @@ export class ContractViewPageComponent implements OnInit {
     
     // Check if client has a name property (from backend transformation)
     if (client.name) {
-      console.log('✅ Client name found:', client.name);
       return client.name;
     }
     
