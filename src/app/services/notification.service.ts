@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { HttpClient } from '@angular/common/http';
 
 export interface Notification {
   id: string;
@@ -31,6 +33,8 @@ export interface NotificationOptions {
   providedIn: 'root'
 })
 export class NotificationService {
+  private readonly API_URL = `${environment.apiUrl}/notifications`;
+  
   // Fila de notificações toast
   private toastQueue = new BehaviorSubject<Notification[]>([]);
   public toastQueue$ = this.toastQueue.asObservable();
@@ -48,9 +52,10 @@ export class NotificationService {
   private maxToasts = 3; // máximo de toasts visíveis simultaneamente
   private soundEnabled = false; // Som desabilitado por padrão
 
-  constructor() {
-    // Carregar notificações do localStorage
+  constructor(private http: HttpClient) {
     this.loadNotificationsFromStorage();
+    // A chamada a fetchUserNotifications pode ser movida para depois do login
+    // this.fetchUserNotifications(); 
   }
 
   /**
@@ -146,7 +151,6 @@ export class NotificationService {
   private addToToastQueue(notification: Notification): void {
     const currentToasts = this.toastQueue.value;
     
-    // Se exceder o máximo, remover o mais antigo
     if (currentToasts.length >= this.maxToasts) {
       currentToasts.shift();
     }
@@ -161,7 +165,6 @@ export class NotificationService {
     const history = this.notificationHistory.value;
     const updatedHistory = [notification, ...history];
     
-    // Limitar histórico a 100 notificações
     if (updatedHistory.length > 100) {
       updatedHistory.pop();
     }
@@ -180,15 +183,42 @@ export class NotificationService {
   }
 
   /**
+   * Buscar notificações do servidor.
+   */
+  fetchUserNotifications() {
+    this.http.get<any>(this.API_URL).subscribe({
+      next: (response) => {
+        if (response.success && response.notifications) {
+          const serverNotifications = response.notifications.map((n: any) => ({
+            ...n,
+            persistent: true,
+            timestamp: new Date(n.created_at)
+          }));
+          
+          this.notificationHistory.next(serverNotifications);
+          this.updateUnreadCount();
+          this.saveNotificationsToStorage();
+        }
+      },
+      error: (err) => console.error("Falha ao buscar notificações", err)
+    });
+  }
+
+  /**
    * Marcar notificação como lida
    */
   markAsRead(id: string): void {
+    const numericId = parseInt(id.replace('notification-', ''));
+    if (isNaN(numericId)) return;
+
     const history = this.notificationHistory.value.map(n => 
       n.id === id ? { ...n, isRead: true } : n
     );
     this.notificationHistory.next(history);
     this.updateUnreadCount();
     this.saveNotificationsToStorage();
+
+    this.http.patch(`${this.API_URL}/${numericId}/read`, {}).subscribe();
   }
 
   /**
@@ -211,7 +241,7 @@ export class NotificationService {
   }
 
   /**
-   * Limpar notificações antigas (mais de 7 dias)
+   * Limpar notificações antigas
    */
   clearOldNotifications(): void {
     const sevenDaysAgo = new Date();
@@ -254,7 +284,6 @@ export class NotificationService {
       const stored = localStorage.getItem('notification_history');
       if (stored) {
         const history = JSON.parse(stored);
-        // Converter strings de data para objetos Date
         const parsedHistory = history.map((n: any) => ({
           ...n,
           timestamp: new Date(n.timestamp)
@@ -283,7 +312,7 @@ export class NotificationService {
   }
 
   /**
-   * Tocar som de notificação (usando Web Audio API)
+   * Tocar som de notificação
    */
   private playSound(): void {
     try {
