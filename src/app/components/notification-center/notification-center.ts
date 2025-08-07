@@ -27,14 +27,6 @@ import { Subscription } from 'rxjs';
           
           <button 
             class="action-button"
-            (click)="toggleSilentMode()"
-            [class.active]="isSilentMode"
-            title="Modo silencioso">
-            <i [class]="isSilentMode ? 'fas fa-bell-slash' : 'fas fa-bell'"></i>
-          </button>
-          
-          <button 
-            class="action-button"
             (click)="clearAll()"
             [disabled]="notifications.length === 0"
             title="Limpar todas">
@@ -127,7 +119,6 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   unreadCount = 0;
   todayCount = 0;
   currentFilter: 'all' | 'unread' | 'today' = 'all';
-  isSilentMode = false;
   
   private subscriptions = new Subscription();
   
@@ -149,10 +140,7 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
         this.unreadCount = count;
       })
     );
-    
-    // Verificar modo silencioso
-    this.isSilentMode = localStorage.getItem('notification_silent_mode') === 'true';
-    
+   
     // Limpar notificações antigas ao abrir
     this.notificationService.clearOldNotifications();
   }
@@ -217,11 +205,6 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
     if (confirm('Tem certeza que deseja limpar todas as notificações?')) {
       this.notificationService.clearHistory();
     }
-  }
-  
-  toggleSilentMode() {
-    this.notificationService.toggleSilentMode();
-    this.isSilentMode = !this.isSilentMode;
   }
   
   formatTime(timestamp: Date): string {
