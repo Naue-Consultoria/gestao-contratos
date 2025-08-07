@@ -1,8 +1,5 @@
 <div class="page-header">
   <div class="header-left">
-    <button class="btn-back" (click)="goBack()">
-      <i class="fas fa-arrow-left"></i> Voltar
-    </button>
     <h1 class="page-title">Detalhes do Contrato</h1>
     <app-breadcrumb></app-breadcrumb>
   </div>
@@ -107,7 +104,7 @@
 <div class="empty-state" *ngIf="!isLoading && !contract">
   <i class="fas fa-file-contract"></i>
   <p>Contrato não encontrado</p>
-  <button class="btn btn-primary" (click)="goBack()">
-    Voltar para Contratos
+  <button class="btn btn-primary" (click)="editContract()">
+    Editar Contrato
   </button>
 </div>

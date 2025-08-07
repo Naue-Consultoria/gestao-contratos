@@ -4,9 +4,10 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--spacing-lg);
-  padding-bottom: var(--spacing-md);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border-color);
+  min-height: 60px;
 }
 
 .header-left {
@@ -25,25 +26,6 @@
   color: var(--border-color);
 }
 
-.btn-back {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--white);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-gray);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-back:hover {
-  background: var(--gray-50);
-  color: var(--naue-primary);
-  border-color: var(--naue-primary);
-}
 
 .page-title {
   font-size: var(--text-xl);
@@ -82,15 +64,20 @@
 .content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: 16px;
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* Two Column Layout */
+/* Two Column Layout - Optimized for 1280x800 */
 .contract-layout {
   display: grid;
-  grid-template-columns: 400px 1fr;
-  gap: 24px;
+  grid-template-columns: 340px 1fr;
+  gap: 16px;
   align-items: start;
+  max-width: 100%;
+  overflow-x: hidden;
+  min-height: 0;
 }
 
 .contract-info-column {
@@ -108,8 +95,10 @@
   background: var(--white);
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
 }
 
 /* Primary Info Section */
@@ -309,8 +298,36 @@
   background: var(--white);
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  /* Altura aumentada para acomodar comentários expandidos */
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  /* Scroll suave */
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(10, 128, 96, 0.3) rgba(0, 0, 0, 0.05);
+}
+
+/* Scrollbar personalizada para WebKit */
+.services-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.services-section::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.services-section::-webkit-scrollbar-thumb {
+  background: rgba(10, 128, 96, 0.3);
+  border-radius: 4px;
+}
+
+.services-section::-webkit-scrollbar-thumb:hover {
+  background: rgba(10, 128, 96, 0.5);
 }
 
 .services-section h3 {
@@ -497,7 +514,10 @@
   padding: var(--spacing-2xl);
   border: 1px solid rgba(10, 128, 96, 0.08);
   position: relative;
-  overflow: hidden;
+  /* Alterado para permitir scroll */
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 .services-section::before {
@@ -638,11 +658,57 @@
 
 /* Remove old styles - replaced with compact design above */
 
-/* Responsive Design - Two Column to Single Column */
-@media (max-width: 1200px) {
+/* Responsive Design - Specific for 1280x800 */
+@media (max-width: 1280px) and (min-width: 1200px) {
   .contract-layout {
-    grid-template-columns: 350px 1fr;
-    gap: 20px;
+    grid-template-columns: 320px 1fr;
+    gap: 14px;
+    padding: 0;
+  }
+  
+  .contract-overview,
+  .services-section {
+    padding: 14px;
+    /* Altura aumentada em telas menores */
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+  
+  .contract-number {
+    font-size: 17px;
+  }
+  
+  .services-section h3 {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .page-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+  
+  .page-title {
+    font-size: 22px;
+  }
+  
+  .primary-info {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+  }
+  
+  .quick-details {
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .detail-value {
+    font-size: 13px;
+  }
+  
+  .detail-label {
+    font-size: 11px;
   }
 }
 
