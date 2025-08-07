@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, Injector } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
@@ -61,12 +61,16 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private notificationService: NotificationService,
-    private websocketService: WebsocketService
-  ) {
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private injector = inject(Injector);
+  private websocketService = inject(WebsocketService);
+  
+  private get notificationService(): NotificationService {
+    return this.injector.get(NotificationService);
+  }
+
+  constructor() {
     this.loadUserFromStorage();
   }
 
