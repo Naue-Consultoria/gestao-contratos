@@ -86,9 +86,6 @@ export class ContractViewPageComponent implements OnInit {
     this.canEdit = userAssignment && ['owner', 'editor'].includes(userAssignment.role || '');
   }
 
-  formatValue(value: number): string {
-    return this.contractService.formatValue(value);
-  }
 
   formatDate(date: string | null): string {
     return this.contractService.formatDate(date);

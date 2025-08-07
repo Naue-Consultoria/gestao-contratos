@@ -25,40 +25,6 @@
 
   <!-- Main Content -->
   <div *ngIf="!isLoading && !error" class="routines-container">
-    
-    <!-- Summary Cards -->
-    <div class="summary-cards">
-      <div class="summary-card">
-        <div class="card-icon high">
-          <i class="fas fa-exclamation-circle"></i>
-        </div>
-        <div class="card-content">
-          <h3>{{ highPriorityCount }}</h3>
-          <p>Contratos Prioritários</p>
-        </div>
-      </div>
-      
-      <div class="summary-card">
-        <div class="card-icon active">
-          <i class="fas fa-play-circle"></i>
-        </div>
-        <div class="card-content">
-          <h3>{{ contracts.length }}</h3>
-          <p>Contratos Ativos</p>
-        </div>
-      </div>
-      
-      <div class="summary-card">
-        <div class="card-icon services">
-          <i class="fas fa-tasks"></i>
-        </div>
-        <div class="card-content">
-          <h3>{{ totalServicesCount }}</h3>
-          <p>Serviços Totais</p>
-        </div>
-      </div>
-    </div>
-
     <!-- Contracts Routines List -->
     <div class="routines-list">
       <h2 class="section-title">
@@ -102,10 +68,6 @@
                 <span>{{ contract.servicesCount }} serviços</span>
               </div>
               
-              <div class="detail-item">
-                <i class="fas fa-dollar-sign"></i>
-                <span>{{ contract.totalValue }}</span>
-              </div>
             </div>
 
             <div class="routine-schedule">

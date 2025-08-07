@@ -62,9 +62,6 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
     });
   }
 
-  formatValue(value: number): string {
-    return this.contractService.formatValue(value);
-  }
 
   formatDate(date: string | null | undefined): string {
     if (!date) return '-';

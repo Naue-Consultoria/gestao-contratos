@@ -200,6 +200,13 @@ export const routes: Routes = [
         component: RoutinesPageComponent,
         title: 'Rotinas - NAUE Consultoria',
       },
+      
+      // Visualizar contrato via rotinas
+      {
+        path: 'routines/:id',
+        component: ContractViewPageComponent,
+        title: 'Detalhes do Contrato - NAUE Consultoria',
+      },
 
       // Gestão de usuários
       {

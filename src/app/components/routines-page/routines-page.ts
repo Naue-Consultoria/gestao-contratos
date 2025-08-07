@@ -13,7 +13,6 @@ interface ContractRoutine {
   status: string;
   statusColor: string;
   servicesCount: number;
-  totalValue: string;
   nextDueDate: string;
   priority: 'high' | 'medium' | 'low';
   raw: ApiContract;
@@ -35,14 +34,6 @@ export class RoutinesPageComponent implements OnInit {
   isLoading = true;
   error = '';
 
-  // Propriedades computadas para o template
-  get highPriorityCount(): number {
-    return this.contracts.filter(c => c.priority === 'high').length;
-  }
-
-  get totalServicesCount(): number {
-    return this.contracts.reduce((sum, c) => sum + c.servicesCount, 0);
-  }
 
   ngOnInit() {
     this.loadContractRoutines();
@@ -79,7 +70,6 @@ export class RoutinesPageComponent implements OnInit {
             status: contract.status,
             statusColor: this.getStatusColor(contract.status),
             servicesCount: contract.contract_services?.length || 0,
-            totalValue: this.formatValue(contract.total_value || 0),
             nextDueDate: this.calculateNextDueDate(contract),
             priority: this.calculatePriority(contract),
             raw: contract
@@ -117,9 +107,6 @@ export class RoutinesPageComponent implements OnInit {
     return colors[status] || '#6b7280';
   }
 
-  private formatValue(value: number): string {
-    return this.contractService.formatValue(value);
-  }
 
   private calculateNextDueDate(contract: ApiContract): string {
     // Lógica simplificada - pode ser expandida baseada nos serviços do contrato
@@ -135,19 +122,18 @@ export class RoutinesPageComponent implements OnInit {
   }
 
   private calculatePriority(contract: ApiContract): 'high' | 'medium' | 'low' {
-    const totalValue = contract.total_value || 0;
     const servicesCount = contract.contract_services?.length || 0;
     
-    if (totalValue > 50000 || servicesCount > 5) {
+    if (servicesCount > 5) {
       return 'high';
-    } else if (totalValue > 20000 || servicesCount > 2) {
+    } else if (servicesCount > 2) {
       return 'medium';
     }
     return 'low';
   }
 
   viewContractDetails(id: number) {
-    this.router.navigate(['/home/contracts/view', id]);
+    this.router.navigate(['/home/routines', id]);
   }
 
   editContract(id: number, event: MouseEvent) {
