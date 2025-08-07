@@ -4,6 +4,7 @@ import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { NotificationService } from './notification.service';
 import { environment } from '../../environments/environment';
+import { WebsocketService } from './websocket.service';
 
 export interface User {
   id: number;
@@ -63,73 +64,60 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private websocketService: WebsocketService
   ) {
     this.loadUserFromStorage();
   }
 
-  /**
-   * Realiza login do usuário
-   */
   login(email: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.API_URL}/login`, {
-      email,
-      password
-    }).pipe(
+    return this.http.post<LoginResponse>(`${this.API_URL}/login`, { email, password }).pipe(
       tap(response => {
         if (response.token && response.user) {
           this.setSession(response.token, response.user);
-          
-          // Notificação de sucesso removida daqui
-          // Será mostrada no HomeComponent
+          this.websocketService.connect(response.user.id);
         }
       }),
       catchError(error => {
-        // Notificação de erro
-        if (error.status === 401) {
-          this.notificationService.error(
-            'Email ou senha incorretos',
-            'Erro de Login'
-          );
-        } else if (error.status === 0) {
-          this.notificationService.error(
-            'Não foi possível conectar ao servidor. Verifique sua conexão.',
-            'Erro de Conexão'
-          );
-        } else {
-          this.notificationService.error(
-            'Erro ao realizar login. Tente novamente.',
-            'Erro'
-          );
-        }
+        this.notificationService.error('Email ou senha inválidos', 'Falha no Login');
         return throwError(() => error);
       })
     );
   }
 
-  /**
-   * Altera a senha do usuário
-   */
+  logout(): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.post(`${this.API_URL}/logout`, {}, { headers }).pipe(
+      tap(() => {
+        this.websocketService.disconnect(); // <<< ADICIONE
+        this.clearSession();
+        this.notificationService.info('Você foi desconectado.', 'Sessão Encerrada');
+        this.router.navigate(['/login']);
+      }),
+      catchError(error => {
+        this.websocketService.disconnect(); // <<< ADICIONE (mesmo em caso de erro)
+        this.clearSession();
+        this.router.navigate(['/login']);
+        return throwError(() => error);
+      })
+    );
+  }
+
   changePassword(endpoint: string, data: any): Observable<ChangePasswordResponse> {
     const headers = this.getAuthHeaders();
     const fullUrl = `${this.API_URL}/${endpoint}`;
     
     return this.http.post<ChangePasswordResponse>(fullUrl, data, { headers }).pipe(
       tap(response => {
-        // Se retornou novo token e usuário, atualizar sessão
         if (response.token && response.user) {
           this.setSession(response.token, response.user);
         } else if (response.user) {
-          // Se retornou apenas usuário atualizado, manter token atual
           this.updateUser(response.user);
         }
       })
     );
   }
 
-  /**
-   * Solicita recuperação de senha
-   */
   forgotPassword(email: string): Observable<ForgotPasswordResponse> {
     return this.http.post<ForgotPasswordResponse>(`${this.API_URL}/forgot-password`, { email }).pipe(
       tap(response => {
@@ -142,9 +130,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Reseta a senha usando o código
-   */
   resetPassword(code: string, password: string): Observable<ResetPasswordResponse> {
     return this.http.post<ResetPasswordResponse>(`${this.API_URL}/reset-password`, {
       token: code,
@@ -160,9 +145,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Valida se um código de recuperação é válido
-   */
   validateResetCode(code: string): Observable<any> {
     return this.http.post(`${this.API_URL}/validate-reset-code`, { token: code }).pipe(
       tap(response => {
@@ -180,35 +162,10 @@ export class AuthService {
     return this.http.get<ApiUserResponse>(`${this.API_URL}/me`, { headers });
   }
 
-  /**
-   * Realiza logout do usuário
-   */
-  logout(): Observable<any> {
-    const headers = this.getAuthHeaders();
-    
-    return this.http.post(`${this.API_URL}/logout`, {}, { headers }).pipe(
-      tap(() => {
-        this.notificationService.info('Você foi desconectado', 'Logout');
-        this.clearSession();
-        this.router.navigate(['/login']);
-      }),
-      catchError(error => {
-        // Em caso de erro, fazer logout local mesmo assim
-        this.clearSession();
-        this.router.navigate(['/login']);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  /**
-   * Verifica se o usuário está autenticado
-   */
   isAuthenticated(): boolean {
     const token = this.getToken();
     if (!token) return false;
 
-    // Verificar se o token não expirou
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const currentTime = Math.floor(Date.now() / 1000);
@@ -218,63 +175,39 @@ export class AuthService {
     }
   }
 
-  /**
-   * Verifica se o usuário tem uma role específica
-   */
   hasRole(role: string): boolean {
     const user = this.getUser();
     return user?.role === role;
   }
 
-  /**
-   * Verifica se o usuário é admin
-   */
   isAdmin(): boolean {
     const user = this.getUser();
     return user?.role === 'admin' || user?.role_id === 1;
   }
 
-  /**
-   * Verifica se o usuário tem uma permissão específica
-   */
   hasPermission(permission: string): boolean {
     const user = this.getUser();
     return user?.permissions?.includes(permission) || false;
   }
 
-  /**
-   * Obtém o token de autenticação
-   */
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  /**
-   * Obtém o usuário atual
-   */
   getUser(): User | null {
     return this.currentUserSubject.value;
   }
 
-  /**
-   * Verifica se o usuário precisa trocar a senha
-   */
   mustChangePassword(): boolean {
     const user = this.getUser();
     return user?.must_change_password || false;
   }
 
-  /**
-   * Atualiza os dados do usuário atual
-   */
   updateUser(user: User): void {
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSubject.next(user);
   }
 
-  /**
-   * Obtém headers com autorização
-   */
   private getAuthHeaders(): HttpHeaders {
     const token = this.getToken();
     return new HttpHeaders({
@@ -283,27 +216,18 @@ export class AuthService {
     });
   }
 
-  /**
-   * Define a sessão do usuário
-   */
   private setSession(token: string, user: User): void {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSubject.next(user);
   }
 
-  /**
-   * Limpa a sessão do usuário
-   */
   private clearSession(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.currentUserSubject.next(null);
   }
 
-  /**
-   * Carrega o usuário do localStorage
-   */
   private loadUserFromStorage(): void {
     const userJson = localStorage.getItem('user');
     if (userJson && this.isAuthenticated()) {
@@ -314,9 +238,6 @@ export class AuthService {
     }
   }
 
-  /**
-   * Refresh do token (se o backend suportar)
-   */
   refreshToken(): Observable<LoginResponse> {
     const headers = this.getAuthHeaders();
     return this.http.post<LoginResponse>(`${this.API_URL}/refresh`, {}, { headers }).pipe(
