@@ -73,9 +73,9 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   private handleRefresh = () => this.loadInitialData();
 
   ngOnInit() {
-    this.loadInitialData();
     this.subscribeToSearch();
     this.subscribeToRefreshEvents();
+    this.loadInitialData();
   }
 
   ngOnDestroy() {
@@ -92,8 +92,8 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe((term) => {
         this.filters.search = term;
-        // Só carrega contratos se não estiver carregando
-        if (!this.isLoading) {
+        // Só carrega contratos se houve mudança no termo e não está carregando
+        if (!this.isLoading && term !== undefined) {
           this.loadContracts();
         }
       });
@@ -118,7 +118,6 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   async loadInitialData() {
-    this.isLoading = true;
     this.error = '';
     try {
       // Carrega clientes e estatísticas primeiro
@@ -129,20 +128,16 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       if (statsResponse?.stats) this.stats = statsResponse.stats;
       if (clientsResponse?.clients) this.clients = clientsResponse.clients;
 
-      // Agora carrega os contratos, já tendo a lista de clientes disponível
-      await this.loadContracts();
+      // Força o carregamento dos contratos
+      await this.forceLoadContracts();
     } catch (error: any) {
       this.error = 'Não foi possível carregar os dados da página.';
       console.error('❌ Error loading initial data:', error);
-    } finally {
-      this.isLoading = false;
     }
   }
 
-  async loadContracts() {
-    // Evita múltiplas chamadas simultâneas
-    if (this.isLoading) return;
-    
+  async forceLoadContracts() {
+    // Método para forçar carregamento sem verificar isLoading
     this.isLoading = true;
     this.error = '';
     try {
@@ -174,6 +169,13 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  async loadContracts() {
+    // Evita múltiplas chamadas simultâneas
+    if (this.isLoading) return;
+    
+    await this.forceLoadContracts();
   }
 
   private calculateStatsFromContracts(apiContracts: ApiContract[]) {

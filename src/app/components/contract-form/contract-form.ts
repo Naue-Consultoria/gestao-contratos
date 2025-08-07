@@ -16,7 +16,6 @@ import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 interface SelectedService {
   service_id: number;
   name: string;
-  quantity: number;
   unit_value: number;
   total_value: number;
   duration: number;
@@ -179,7 +178,6 @@ export class ContractFormComponent implements OnInit {
         this.selectedServices = contract.contract_services.map((cs: any) => ({
           service_id: cs.service.id,
           name: cs.service.name,
-          quantity: cs.quantity,
           unit_value: cs.unit_value,
           total_value: cs.total_value,
           duration: cs.service.duration,
@@ -272,7 +270,6 @@ export class ContractFormComponent implements OnInit {
     this.selectedServices.push({
       service_id: service.id,
       name: service.name,
-      quantity: 1,
       unit_value: 0,
       total_value: 0,
       duration: service.duration_amount,
@@ -286,34 +283,17 @@ export class ContractFormComponent implements OnInit {
     this.selectedServices.splice(index, 1);
   }
 
-  updateServiceQuantity(index: number, quantity: number) {
-    const service = this.selectedServices[index];
-    if (quantity < 1) {
-      service.quantity = 1;
-    }
-    service.total_value = service.unit_value * service.quantity;
-    
-    // Força a atualização do formulário
-    this.formData.total_value = this.getTotalValue();
-  }
-
-  updateServicePrice(index: number, priceInReais: number) {
-    const service = this.selectedServices[index];
-    if (priceInReais < 0) {
-        priceInReais = 0;
-    }
-    service.unit_value = priceInReais;
-    service.total_value = service.unit_value * service.quantity;
-    
-    // Força a atualização do formulário
-    this.formData.total_value = this.getTotalValue();
-  }
+  // Método removido - quantity não é mais usado
+  // updateServiceQuantity foi removido
 
   // Método chamado pelo directive quando o valor muda (recebe reais)
   onPriceChange(index: number, priceInReais: number) {
     const service = this.selectedServices[index];
+    if (priceInReais < 0) {
+      priceInReais = 0;
+    }
     service.unit_value = priceInReais;
-    service.total_value = service.unit_value * service.quantity;
+    service.total_value = service.unit_value; // Sem multiplicação por quantity
     
     // Força a atualização do formulário
     this.formData.total_value = this.getTotalValue();
@@ -373,7 +353,6 @@ export class ContractFormComponent implements OnInit {
       const services: ContractServiceItem[] = this.selectedServices.map(
         (s) => ({
           service_id: s.service_id,
-          quantity: s.quantity,
           unit_value: s.unit_value,
         })
       );

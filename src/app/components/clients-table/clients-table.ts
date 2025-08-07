@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { ClientService, ApiClient } from '../../services/client';
@@ -27,7 +28,7 @@ interface ClientDisplay {
 @Component({
   selector: 'app-clients-table',
   standalone: true,
-  imports: [CommonModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent],
   templateUrl: './clients-table.html',
   styleUrls: ['./clients-table.css']
 })
@@ -48,6 +49,8 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
   };
 
   clients: ClientDisplay[] = [];
+  filteredClients: ClientDisplay[] = [];
+  searchTerm = '';
   isLoading = true;
   error = '';
 
@@ -80,6 +83,8 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
         };
         return this.mapApiClientToTableClient(apiClient, aggregates);
       });
+      
+      this.filteredClients = [...this.clients];
 
     } catch (err) {
       console.error('❌ Error loading client data:', err);
@@ -186,5 +191,25 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
   onClientSaved() {
     this.loadData();
     this.modalService.showNotification('Cliente salvo com sucesso!', true);
+  }
+
+  filterClients() {
+    if (!this.searchTerm.trim()) {
+      this.filteredClients = [...this.clients];
+      return;
+    }
+
+    const term = this.searchTerm.toLowerCase();
+    this.filteredClients = this.clients.filter(client => {
+      return client.name.toLowerCase().includes(term) ||
+             client.document.toLowerCase().includes(term) ||
+             client.location.toLowerCase().includes(term) ||
+             client.type.toLowerCase().includes(term);
+    });
+  }
+
+  clearSearch() {
+    this.searchTerm = '';
+    this.filterClients();
   }
 }

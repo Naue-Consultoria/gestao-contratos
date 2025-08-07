@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ContractService, ApiContract } from '../../services/contract';
 import { ContractServicesManagerComponent } from '../contract-services-manager/contract-services-manager';
 import { ToastrService } from 'ngx-toastr';
@@ -10,7 +10,7 @@ import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 @Component({
   selector: 'app-contract-view-page',
   standalone: true,
-  imports: [CommonModule, ContractServicesManagerComponent, BreadcrumbComponent],
+  imports: [CommonModule, RouterModule, ContractServicesManagerComponent, BreadcrumbComponent],
   templateUrl: './contract-view-page.html',
   styleUrls: ['./contract-view-page.css']
 })
@@ -47,23 +47,53 @@ export class ContractViewPageComponent implements OnInit {
 
   ngOnInit() {
     const contractId = this.route.snapshot.paramMap.get('id');
+    console.log('🔍 Contract ID from route:', contractId);
     if (contractId) {
       this.loadContract(parseInt(contractId));
+    } else {
+      this.toastr.error('ID do contrato não encontrado');
+      this.router.navigate(['/home/contracts']);
     }
   }
 
   loadContract(contractId: number) {
+    console.log('🚀 Loading contract with ID:', contractId);
     this.isLoading = true;
+    this.contract = null;
+    
     this.contractService.getContract(contractId).subscribe({
       next: (response) => {
-        console.log('📄 Contract received from API:', response.contract);
-        console.log('👤 Client data:', response.contract?.client);
+        console.log('✅ Full API response:', response);
+        
+        if (!response || !response.contract) {
+          console.error('❌ Invalid response structure');
+          this.toastr.error('Dados do contrato inválidos');
+          this.router.navigate(['/home/contracts']);
+          return;
+        }
+        
+        console.log('📄 Contract data:', response.contract);
+        console.log('👤 Client data:', response.contract.client);
+        console.log('📋 Services:', response.contract.contract_services);
+        
         this.contract = response.contract;
+        
+        // Garantir que contract_services seja um array
+        if (!this.contract.contract_services) {
+          this.contract.contract_services = [];
+        }
+        
+        // Garantir que assigned_users seja um array
+        if (!this.contract.assigned_users) {
+          this.contract.assigned_users = [];
+        }
+        
         this.checkEditPermissions();
         this.isLoading = false;
       },
       error: (error) => {
-        this.toastr.error('Erro ao carregar contrato');
+        console.error('❌ Error loading contract:', error);
+        this.toastr.error('Erro ao carregar contrato: ' + (error.message || 'Erro desconhecido'));
         this.isLoading = false;
         this.router.navigate(['/home/contracts']);
       }
@@ -187,8 +217,11 @@ export class ContractViewPageComponent implements OnInit {
 
   onServiceUpdated() {
     // Recarregar o contrato quando um serviço for atualizado
-    if (this.contract) {
+    console.log('🔄 Service updated, reloading contract...');
+    if (this.contract && this.contract.id) {
       this.loadContract(this.contract.id);
+    } else {
+      console.error('❌ Cannot reload: no contract or contract ID');
     }
   }
 }

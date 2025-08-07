@@ -52,6 +52,10 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
       if (!service.status) {
         service.status = 'not_started';
       }
+      // Inicializar o array de comentários vazio para cada serviço
+      if (!this.comments[service.id]) {
+        this.comments[service.id] = [];
+      }
     });
     
     // Ordenar serviços por nome alfabeticamente
@@ -60,6 +64,12 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['services'] && changes['services'].currentValue) {
+      // Inicializar comentários para novos serviços
+      this.services.forEach(service => {
+        if (!this.comments[service.id]) {
+          this.comments[service.id] = [];
+        }
+      });
       this.sortServices();
     }
   }

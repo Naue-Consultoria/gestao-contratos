@@ -10,6 +10,18 @@
   </div>
 </div>
 
+<!-- Mensagem de erro quando não há contrato -->
+<div class="error-container" *ngIf="!isLoading && !contract">
+  <div class="error-content">
+    <i class="fas fa-exclamation-triangle"></i>
+    <h2>Contrato não encontrado</h2>
+    <p>Não foi possível carregar os dados do contrato.</p>
+    <button class="btn btn-primary" routerLink="/home/contracts">
+      <i class="fas fa-arrow-left"></i> Voltar para Contratos
+    </button>
+  </div>
+</div>
+
 <div class="content" *ngIf="!isLoading && contract">
   <!-- Two Column Layout -->
   <div class="contract-layout">
@@ -45,11 +57,11 @@
           </div>
           <div class="detail-group">
             <span class="detail-label">Total Serviços</span>
-            <span class="detail-value">{{ contract.contract_services.length }} itens</span>
+            <span class="detail-value">{{ contract.contract_services.length || 0 }} itens</span>
           </div>
           <div class="detail-group" *ngIf="contract.assigned_users && contract.assigned_users.length > 0">
             <span class="detail-label">Equipe</span>
-            <span class="detail-value">{{ contract.assigned_users.length }} usuário(s)</span>
+            <span class="detail-value">{{ contract.assigned_users.length || 0 }} usuário(s)</span>
           </div>
         </div>
         
@@ -81,7 +93,7 @@
       <div class="services-section">
         <h3>Serviços do Contrato</h3>
         <app-contract-services-manager
-          [services]="contract.contract_services"
+          [services]="contract.contract_services || []"
           [contractId]="contract.id"
           [canEdit]="canEdit"
           (serviceUpdated)="onServiceUpdated()">

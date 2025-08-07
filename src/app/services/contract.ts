@@ -5,7 +5,6 @@ import { environment } from '../../environments/environment';
 
 export interface ContractServiceItem {
   service_id: number;
-  quantity: number;
   unit_value: number; // em reais
   scheduled_start_date?: string | null;
   status?: 'not_started' | 'scheduled' | 'in_progress' | 'completed';
@@ -37,7 +36,6 @@ export interface UpdateContractRequest {
 
 export interface ApiContractService {
   id: number;
-  quantity: number;
   unit_value: number;
   total_value: number;
   scheduled_start_date?: string | null;

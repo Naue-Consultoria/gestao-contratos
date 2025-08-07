@@ -4,59 +4,29 @@
     <app-breadcrumb></app-breadcrumb>
   </div>
 
-  <div class="dashboard-grid mb-4">
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Total de Clientes</div>
-          <div class="stat-value">{{ stats.total }}</div>
-          <div class="stat-change positive" *ngIf="stats.newProspects > 0">
-            <i class="fas fa-arrow-up"></i>
-            +{{ stats.newProspects }} este mês
-          </div>
-        </div>
-        <div class="stat-icon">
-          <i class="fas fa-building"></i>
-        </div>
-      </div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Clientes Ativos</div>
-          <div class="stat-value">{{ stats.active }}</div>
-          <div class="stat-change positive">
-            <i class="fas fa-check-circle"></i>
-            {{ stats.activePercentage }}% do total
-          </div>
-        </div>
-        <div class="stat-icon">
-          <i class="fas fa-handshake"></i>
-        </div>
-      </div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Novos Prospects</div>
-          <div class="stat-value">{{ stats.newProspects }}</div>
-          <div class="stat-change positive">
-            <i class="fas fa-user-plus"></i>
-            Últimos 30 dias
-          </div>
-        </div>
-        <div class="stat-icon">
-          <i class="fas fa-chart-line"></i>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="table-container">
     <div class="table-header">
       <h2 class="table-title">Lista de Clientes</h2>
+      
+      <!-- Barra de pesquisa -->
+      <div class="search-input-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Buscar por nome, documento, cidade..." 
+          [(ngModel)]="searchTerm"
+          (input)="filterClients()"
+        />
+        <button 
+          *ngIf="searchTerm" 
+          class="clear-search-btn" 
+          (click)="clearSearch()"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
       <button class="btn btn-primary" (click)="openNewClientPage()">
         <i class="fas fa-plus"></i>
         Novo Cliente
@@ -78,14 +48,16 @@
     <!-- Tabela -->
     <div class="table-wrapper" *ngIf="!isLoading">
       <!-- Mensagem quando não há empresas -->
-      <div *ngIf="clients.length === 0 && !error" class="empty-state">
+      <div *ngIf="filteredClients.length === 0 && !error" class="empty-state">
         <i class="fas fa-building empty-icon"></i>
-        <h3>Nenhum cliente cadastrado</h3>
-        <p>Clique no botão "Novo Cliente" para adicionar o primeiro cliente.</p>
+        <h3 *ngIf="!searchTerm">Nenhum cliente cadastrado</h3>
+        <h3 *ngIf="searchTerm">Nenhum cliente encontrado</h3>
+        <p *ngIf="!searchTerm">Clique no botão "Novo Cliente" para adicionar o primeiro cliente.</p>
+        <p *ngIf="searchTerm">Tente buscar com outros termos ou limpe a pesquisa.</p>
       </div>
       
       <!-- Tabela de clientes -->
-      <table class="custom-table" *ngIf="clients.length > 0">
+      <table class="custom-table" *ngIf="filteredClients.length > 0">
         <thead>
           <tr>
             <th>Cliente</th>
@@ -99,7 +71,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let client of clients" class="clickable" (click)="editClient(client.id)">
+          <tr *ngFor="let client of filteredClients" class="clickable" (click)="editClient(client.id)">
             <td>
               <div class="client-info">
                 <div class="client-avatar" [style.background]="client.gradient">

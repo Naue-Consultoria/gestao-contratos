@@ -180,16 +180,6 @@
                       appCurrencyMask
                     />
                   </div>
-                  <div class="quantity-control">
-                    <label>Qtd.:</label>
-                    <input
-                      type="number"
-                      class="quantity-input"
-                      [(ngModel)]="service.quantity"
-                      [name]="'quantity_' + i"
-                      (ngModelChange)="updateServiceQuantity(i, service.quantity)"
-                    />
-                  </div>
                   <div class="service-total">
                     <label>Total:</label>
                     <span class="total-value">{{ formatCurrency(service.total_value) }}</span>
@@ -306,7 +296,6 @@
               <thead>
                 <tr>
                   <th>Serviço</th>
-                  <th>Qtd</th>
                   <th>Valor Unit.</th>
                   <th>Valor Total</th>
                 </tr>
@@ -314,7 +303,6 @@
               <tbody>
                 <tr *ngFor="let service of selectedServices">
                   <td>{{ service.name }}</td>
-                  <td>{{ service.quantity }}</td>
                   <td>{{ formatCurrency(service.unit_value) }}</td>
                   <td class="value-highlight">
                     {{ formatCurrency(service.total_value) }}
@@ -323,7 +311,7 @@
               </tbody>
               <tfoot>
                 <tr>
-                  <td colspan="3" class="text-right">
+                  <td class="text-right">
                     <strong>Total:</strong>
                   </td>
                   <td class="total-value">
