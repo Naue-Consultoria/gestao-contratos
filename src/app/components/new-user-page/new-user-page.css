@@ -93,7 +93,7 @@
 }
 
 .section-title i {
-  color: var(--naue-green);
+  color: #0a6254 !important; /* Verde escuro */
   font-size: 16px;
 }
 
@@ -353,7 +353,7 @@ select.form-control {
 
 .btn-generate-password i {
   font-size: 14px;
-  color: #6b7280;
+  color: white !important;
 }
 
 /* Responsividade */

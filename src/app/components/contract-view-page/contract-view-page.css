@@ -1,5 +1,12 @@
 /* Contract view page - Clean & Compact Design */
 
+/* Ícones nos detalhes do contrato */
+.page-header i,
+.contract-view i,
+.error-content i {
+  color: #0a6254 !important; /* Verde escuro para ícones */
+}
+
 /* Error Container */
 .error-container {
   display: flex;
@@ -574,7 +581,7 @@
 }
 
 .section-title i {
-  color: var(--naue-primary);
+  color: #032520 !important; /* Verde escuro */
   padding: var(--spacing-sm);
   background: var(--green-50);
   border-radius: var(--radius-lg);

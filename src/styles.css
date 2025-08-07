@@ -334,3 +334,79 @@ button, .btn, .nav-item, .tab {
         border-color: #4b5563;
     }
 }
+
+/* Força cor branca nos ícones de botões com background escuro */
+.btn-primary i,
+.btn-primary .fas,
+.btn-primary .fa,
+button.btn-primary i,
+button.btn-primary .fas,
+button.btn-primary .fa,
+.btn-danger i,
+.btn-danger .fas,
+.btn-danger .fa,
+.btn-success i,
+.btn-success .fas,
+.btn-success .fa,
+.btn-warning i,
+.btn-warning .fas,
+.btn-warning .fa {
+    color: white !important; /* Branco para ícones de botões com background escuro */
+}
+
+/* Força cor verde escuro nos ícones dos títulos de seção */
+.section-title i,
+.section-title .fas,
+.section-title .fa,
+h2.section-title i,
+h2.section-title .fas,
+h2.section-title .fa {
+    color: #032520 !important; /* Verde escuro para ícones das seções */
+}
+
+/* Força cor verde escuro nos ícones de botões com background branco/transparente */
+.btn-secondary i,
+.btn-secondary .fas,
+.btn-secondary .fa,
+.btn-outline i,
+.btn-outline .fas,
+.btn-outline .fa,
+.action-btn i,
+.action-btn .fas,
+.action-btn .fa,
+button.btn-secondary i,
+button.btn-secondary .fas,
+button.btn-secondary .fa,
+button.btn-outline i,
+button.btn-outline .fas,
+button.btn-outline .fa {
+    color: #0a6254 !important; /* Verde escuro para botões com background claro */
+}
+
+/* Força cor vermelha nos ícones de botões de exclusão */
+.action-btn.delete i,
+.action-btn.delete .fas,
+.action-btn.delete .fa,
+.action-btn-danger i,
+.action-btn-danger .fas,
+.action-btn-danger .fa,
+.remove-btn i,
+.remove-btn .fas,
+.remove-btn .fa,
+.btn-remove i,
+.btn-remove .fas,
+.btn-remove .fa,
+.btn-action-menu.delete i,
+.btn-action-menu.delete .fas,
+.btn-action-menu.delete .fa,
+.btn-attachment-action.delete i,
+.btn-attachment-action.delete .fas,
+.btn-attachment-action.delete .fa,
+.delete-btn i,
+.delete-btn .fas,
+.delete-btn .fa,
+button.delete i,
+button.delete .fas,
+button.delete .fa {
+    color: #dc3545 !important; /* Vermelho para ícones de exclusão */
+}

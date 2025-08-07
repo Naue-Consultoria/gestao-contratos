@@ -112,7 +112,7 @@ form {
 }
 
 .section-title i {
-  color: var(--primary-green, #003b2b);
+  color: #0a6254 !important; /* Verde escuro */
   font-size: 16px;
 }
 
@@ -458,6 +458,15 @@ textarea.form-control {
 .btn-sm {
   padding: 8px 12px;
   font-size: 12px;
+}
+
+/* Cores específicas dos ícones */
+.btn-outline i {
+  color: #0a6254 !important; /* Verde escuro para botão "Novo Cliente" */
+}
+
+.btn-secondary i {
+  color: #dc3545 !important; /* Vermelho para botões "Cancelar" */
 }
 
 /* Animations */

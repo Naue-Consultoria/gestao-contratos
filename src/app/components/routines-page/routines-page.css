@@ -147,7 +147,7 @@
 }
 
 .section-title i {
-  color: #0e9b71;
+  color: #032520 !important; /* Verde escuro */
 }
 
 /* Empty State */
@@ -278,9 +278,15 @@
 }
 
 .detail-item i {
-  color: #0e9b71;
+  color: #0a6254 !important; /* Verde escuro */
   width: 16px;
   text-align: center;
+}
+
+/* Outros ícones nas rotinas de contratos */
+.next-due i,
+.action-btn i {
+  color: #0a6254 !important; /* Verde escuro */
 }
 
 .routine-schedule {

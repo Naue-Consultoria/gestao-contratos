@@ -29,6 +29,10 @@
   color: #718096;
 }
 
+.action-btn i {
+  color: #0a6254 !important; /* Verde escuro para ícones dos botões de ação */
+}
+
 .action-btn:hover {
   border-color: #cbd5e0;
   background-color: #f7fafc;
@@ -250,6 +254,10 @@
   );
   color: var(--white);
   box-shadow: 0 4px 12px rgba(14, 155, 113, 0.3);
+}
+
+.btn-primary i {
+  color: white !important; /* Branco para o ícone */
 }
 
 .btn-primary:hover {

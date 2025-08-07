@@ -307,6 +307,7 @@
 
 .action-btn i {
   font-size: 14px;
+  color: #0a6254 !important; /* Verde escuro para ícones dos botões de ação */
 }
 
 /* Empty State */

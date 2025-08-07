@@ -182,6 +182,10 @@
     box-shadow: 0 4px 12px rgba(14, 155, 113, 0.3);
 }
 
+.btn-primary i {
+    color: white !important; /* Branco para o ícone */
+}
+
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(14, 155, 113, 0.4);

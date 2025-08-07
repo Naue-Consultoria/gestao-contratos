@@ -355,7 +355,7 @@
 }
 
 .btn-primary i {
-    color: rgba(255, 255, 255, 0.95);
+    color: white !important; /* Branco para o ícone */
     font-size: 1rem;
 }
 

@@ -123,8 +123,14 @@
 }
 
 .section-title i {
-  color: var(--naue-primary);
+  color: #0a6254 !important; /* Verde escuro */
   font-size: 16px;
+}
+
+/* Garantir cor verde escura para todos os ícones nos detalhes do contrato */
+.view-section i,
+.detail-item i {
+  color: #0a6254 !important; /* Verde escuro */
 }
 
 /* Grupos de formulário */

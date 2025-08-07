@@ -136,7 +136,7 @@
 }
 
 .section-title i {
-  color: var(--naue-green);
+  color: #0a6254 !important; /* Verde escuro */
   font-size: 16px;
 }
 

@@ -395,7 +395,7 @@
 }
 
 .section-title i {
-    color: var(--primary-green);
+    color: #032520 !important; /* Verde escuro */
 }
 
 /* Responsive */

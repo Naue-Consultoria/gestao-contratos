@@ -4,6 +4,11 @@
    - user-modal.component.css
 */
 
+/* Ícones nos detalhes do contrato */
+.modal-content i {
+  color: #0a6254 !important; /* Verde escuro para ícones */
+}
+
 /* Modal Base */
 .modal {
     display: none;
