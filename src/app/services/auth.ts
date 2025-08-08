@@ -195,7 +195,48 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    
+    // Validar formato do token antes de retornar
+    if (token && this.isValidJwtFormat(token)) {
+      return token;
+    }
+    
+    // Se token inválido, limpar storage
+    if (token) {
+      console.warn('🔑 Token inválido encontrado - limpando storage');
+      this.clearSession();
+    }
+    
+    return null;
+  }
+
+  private isValidJwtFormat(token: string): boolean {
+    if (!token || typeof token !== 'string') {
+      return false;
+    }
+    
+    // JWT deve ter 3 partes separadas por ponto
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return false;
+    }
+    
+    // Cada parte deve ser base64 válido (pelo menos tentar)
+    try {
+      for (const part of parts) {
+        if (!part || part.trim() === '') {
+          return false;
+        }
+        // Tentar decodificar as duas primeiras partes (header e payload)
+        if (parts.indexOf(part) < 2) {
+          JSON.parse(atob(part));
+        }
+      }
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   getUser(): User | null {
@@ -214,6 +255,11 @@ export class AuthService {
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.getToken();
+    
+    if (!token) {
+      throw new Error('Token não encontrado');
+    }
+    
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'

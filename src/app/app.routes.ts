@@ -10,6 +10,7 @@ import { ContractFormComponent } from './components/contract-form/contract-form'
 import { ContractViewPageComponent } from './components/contract-view-page/contract-view-page';
 import { ClientsTableComponent } from './components/clients-table/clients-table';
 import { NewClientPageComponent } from './components/new-client-page/new-client-page';
+import { ClientViewPageComponent } from './components/client-view-page/client-view-page';
 import { ServicesTableComponent } from './components/services-table/services-table';
 import { ServiceFormComponent } from './components/services-form/services-form';
 import { ProposalsPageComponent } from './components/proposals-page/proposals-page';
@@ -122,6 +123,13 @@ export const routes: Routes = [
         path: 'clients/new',
         component: NewClientPageComponent,
         title: 'Novo Cliente - NAUE Consultoria',
+      },
+      
+      // Visualizar cliente
+      {
+        path: 'clients/view/:id',
+        component: ClientViewPageComponent,
+        title: 'Detalhes do Cliente - NAUE Consultoria',
       },
       
       // Editar cliente

@@ -7,12 +7,12 @@ import { ModalService } from '../../services/modal.service';
 import { DocumentMaskDirective } from '../../directives/document-mask.directive';
 import { firstValueFrom } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
-import { ImageUploadComponent } from '../image-upload/image-upload.component';
+// import { ImageUploadComponent } from '../image-upload/image-upload.component';
 
 @Component({
   selector: 'app-new-client-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DocumentMaskDirective, BreadcrumbComponent, ImageUploadComponent],
+  imports: [CommonModule, FormsModule, DocumentMaskDirective, BreadcrumbComponent],
   templateUrl: './new-client-page.html',
   styleUrls: ['./new-client-page.css']
 })
@@ -37,7 +37,6 @@ export class NewClientPageComponent implements OnInit {
     // Optional fields
     employee_count: undefined,
     business_segment: '',
-    logo_url: '',
     // PF fields
     cpf: '',
     full_name: '',
@@ -83,7 +82,6 @@ export class NewClientPageComponent implements OnInit {
         // Optional fields
         employee_count: client.employee_count || undefined,
         business_segment: client.business_segment || '',
-        logo_url: client.logo_url || '',
         // PF fields
         cpf: client.cpf || '',
         full_name: client.full_name || '',
@@ -137,11 +135,12 @@ export class NewClientPageComponent implements OnInit {
     return this.isEditing ? 'Editar Cliente' : 'Novo Cliente';
   }
 
-  onLogoUploaded(logoUrl: string) {
-    this.formData.logo_url = logoUrl;
-  }
+  // Logo upload methods removed - will be implemented separately
+  // onLogoUploaded(logoUrl: string) {
+  //   // TODO: Implement with new logo system
+  // }
 
-  onLogoRemoved() {
-    this.formData.logo_url = '';
-  }
+  // onLogoRemoved() {
+  //   // TODO: Implement with new logo system
+  // }
 }

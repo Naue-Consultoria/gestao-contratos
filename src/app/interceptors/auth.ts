@@ -33,12 +33,17 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Adicionar token se necessário
   if (shouldAddToken) {
     const token = authService.getToken();
-    if (token) {
+    if (token && token.trim() !== '' && token !== 'null' && token !== 'undefined') {
       authReq = authReq.clone({
         setHeaders: {
           'Authorization': `Bearer ${token}`
         }
       });
+    } else if (shouldAddToken) {
+      // Se deveria ter token mas não tem, redirecionar para login
+      console.warn('🔑 Token ausente ou inválido - redirecionando para login');
+      router.navigate(['/login']);
+      return throwError(() => new Error('Token não encontrado'));
     }
   }
 

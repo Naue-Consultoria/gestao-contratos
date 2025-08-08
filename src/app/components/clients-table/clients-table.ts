@@ -9,6 +9,7 @@ import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { UploadService } from '../../services/upload';
+import { environment } from '../../../environments/environment';
 
 interface ClientDisplay {
   id: number;
@@ -24,7 +25,7 @@ interface ClientDisplay {
   gradient: string;
   actionMenuOpen: boolean;
   raw: ApiClient;
-  logo_url?: string | null;
+  logo_path?: string | null;
 }
 
 @Component({
@@ -144,7 +145,7 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
       gradient: this.generateGradient(apiClient.name),
       actionMenuOpen: false,
       raw: apiClient,
-      logo_url: apiClient.logo_url
+      logo_path: apiClient.logo_path
     };
   }
 
@@ -183,6 +184,10 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
     this.router.navigate(['/home/clients/new']);
   }
 
+  viewClient(id: number) {
+    this.router.navigate(['/home/clients/view', id]);
+  }
+
   editClient(id: number) {
     this.router.navigate(['/home/clients/edit', id]);
   }
@@ -215,5 +220,11 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
   clearSearch() {
     this.searchTerm = '';
     this.filterClients();
+  }
+
+  getClientLogoUrl(clientId: number): string {
+    if (!clientId) return '';
+    // URL da API para buscar a logo do cliente
+    return `${environment.apiUrl}/clients/${clientId}/logo`;
   }
 }

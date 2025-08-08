@@ -49,6 +49,11 @@ export class BreadcrumbService {
       { label: 'Clientes', url: '/home/clients' },
       { label: 'Novo Cliente' }
     ],
+    '/home/clients/view': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Clientes', url: '/home/clients' },
+      { label: 'Detalhes do Cliente' }
+    ],
     '/home/clients/edit': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Clientes', url: '/home/clients' },

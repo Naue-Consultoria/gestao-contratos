@@ -65,20 +65,19 @@
             <th>Cidade/UF</th>
             <th>Documento</th>
             <th>Contratos</th>
-            <th>Valor Total</th>
             <th>Desde</th>
             <th>Ações</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let client of filteredClients" class="clickable" (click)="editClient(client.id)">
+          <tr *ngFor="let client of filteredClients" class="clickable" (click)="viewClient(client.id)">
             <td>
               <div class="client-info">
-                <div class="client-avatar" [style.background]="client.gradient" *ngIf="!client.logo_url">
+                <div class="client-avatar" [style.background]="client.gradient" *ngIf="!client.logo_path">
                   {{ client.initials }}
                 </div>
-                <div class="client-logo" *ngIf="client.logo_url">
-                  <img [src]="client.logo_url" [alt]="client.name + ' logo'" />
+                <div class="client-logo" *ngIf="client.logo_path">
+                  <img [src]="getClientLogoUrl(client.raw.id)" [alt]="client.name + ' logo'" />
                 </div>
                 <span class="client-name">{{ client.name }}</span>
               </div>
@@ -96,11 +95,14 @@
                 <span class="active" *ngIf="client.activeContracts > 0">({{ client.activeContracts }} ativos)</span>
               </div>
             </td>
-            <td>{{ client.totalValue }}</td>
             <td>{{ client.since }}</td>
             <td>
               <div class="actions-cell">
-                <button class="action-btn" (click)="editClient(client.id); $event.stopPropagation()">
+                <button class="action-btn" (click)="viewClient(client.id); $event.stopPropagation()" title="Ver Detalhes">
+                  <i class="fas fa-eye"></i>
+                </button>
+                
+                <button class="action-btn" (click)="editClient(client.id); $event.stopPropagation()" title="Editar">
                   <i class="fas fa-edit"></i>
                 </button>
                 

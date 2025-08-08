@@ -17,7 +17,6 @@ export interface CreateClientRequest {
   // Optional fields
   employee_count?: number;
   business_segment?: string;
-  logo_url?: string;
   // PF fields
   cpf?: string;
   full_name?: string;
@@ -40,7 +39,6 @@ export interface UpdateClientRequest {
   // Optional fields
   employee_count?: number;
   business_segment?: string;
-  logo_url?: string;
   // PF fields
   cpf?: string;
   full_name?: string;
@@ -79,7 +77,12 @@ export interface ApiClient {
   // New optional fields
   employee_count?: number | null;
   business_segment?: string | null;
-  logo_url?: string | null;
+  // Logo fields
+  logo_path?: string | null;
+  logo_original_name?: string | null;
+  logo_mime_type?: string | null;
+  logo_size?: number | null;
+  logo_uploaded_at?: string | null;
   // Legacy fields for compatibility
   founded_date?: string | null;
   headquarters?: string | null;
