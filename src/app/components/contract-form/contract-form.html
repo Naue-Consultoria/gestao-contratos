@@ -40,7 +40,7 @@
               
               <div class="form-group">
                 <label class="form-label">Tipo <span class="required">*</span></label>
-                <select class="form-control" [(ngModel)]="formData.type" name="type" [disabled]="isLoading">
+                <select class="form-control select-input" [(ngModel)]="formData.type" name="type" [disabled]="isLoading">
                   <option value="">Selecione o tipo</option>
                   <option *ngFor="let type of contractTypes" [value]="type">
                     {{ type }}
@@ -52,7 +52,7 @@
             <div class="form-grid" *ngIf="isEditMode">
               <div class="form-group">
                 <label class="form-label">Status <span class="required">*</span></label>
-                <select class="form-control" [(ngModel)]="formData.status" name="status" [disabled]="isLoading">
+                <select class="form-control status-select" [(ngModel)]="formData.status" name="status" [disabled]="isLoading">
                   <option value="">Selecione o status</option>
                   <option *ngFor="let status of contractStatuses" [value]="status.value">
                     {{ status.label }}
@@ -64,7 +64,7 @@
             <div class="form-group">
               <label class="form-label">Cliente <span class="required">*</span></label>
               <select
-                class="form-control"
+                class="form-control select-input"
                 [(ngModel)]="formData.client_id"
                 name="client_id"
                 [disabled]="isLoading"
@@ -83,7 +83,7 @@
                 <label class="form-label">Data de Início <span class="required">*</span></label>
                 <input
                   type="date"
-                  class="form-control"
+                  class="form-control date-input"
                   [(ngModel)]="formData.start_date"
                   name="start_date"
                   [disabled]="isLoading"
@@ -96,7 +96,7 @@
                 <label class="form-label">Data de Término</label>
                 <input
                   type="date"
-                  class="form-control"
+                  class="form-control date-input"
                   [(ngModel)]="formData.end_date"
                   name="end_date"
                   [disabled]="isLoading"
@@ -169,7 +169,7 @@
                 </div>
                 <div class="service-controls">
                   <div class="price-control">
-                    <label>Valor Unit.:</label>
+                    <label>Valor:</label>
                     <input
                       type="text"
                       class="price-input"

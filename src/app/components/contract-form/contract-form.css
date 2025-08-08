@@ -332,7 +332,7 @@ textarea.form-control {
 
 .service-controls {
   display: grid;
-  grid-template-columns: 110px 60px 1fr auto;
+  grid-template-columns: 1fr auto auto auto;
   align-items: center;
   gap: 1rem;
   width: 100%;
@@ -386,15 +386,15 @@ textarea.form-control {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-self: end;
-  min-width: 100px;
-  max-width: 120px;
-  padding: 0.75rem 0.5rem;
+  justify-self: center;
+  min-width: 120px;
+  max-width: 140px;
+  padding: 0.75rem 0.75rem;
   background: linear-gradient(135deg, rgba(10, 128, 96, 0.06) 0%, rgba(10, 128, 96, 0.1) 100%);
   border-radius: 10px;
   border: 1px solid rgba(10, 128, 96, 0.2);
   box-shadow: 0 2px 8px rgba(10, 128, 96, 0.12);
-  margin-right: 0.5rem;
+  flex-shrink: 0;
 }
 
 .service-total label {
@@ -428,8 +428,8 @@ textarea.form-control {
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -437,7 +437,7 @@ textarea.form-control {
   font-size: 0.875rem;
   box-shadow: 0 2px 6px rgba(220, 38, 38, 0.15);
   align-self: center;
-  justify-self: end;
+  justify-self: center;
 }
 
 .remove-btn:hover {
@@ -1055,17 +1055,6 @@ textarea.form-control {
     margin-top: 1rem;
   }
 
-  .service-total {
-    grid-column: 1 / -1;
-    justify-self: center;
-    margin: 0.5rem 0 0 0;
-  }
-
-  .remove-btn {
-    grid-column: 1 / -1;
-    justify-self: center;
-    margin-top: 0.5rem;
-  }
 
   .services-table {
     font-size: 0.813rem;
@@ -1081,7 +1070,8 @@ textarea.form-control {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  min-width: 110px;
+  min-width: 140px;
+  flex: 1 1 auto;
   align-items: flex-start;
 }
 
@@ -1328,4 +1318,161 @@ textarea.form-control {
 
 .role-selector select {
   min-width: 180px;
+}
+
+/* Service Controls Responsive Layout */
+@media (max-width: 1024px) {
+  .service-controls {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .price-control {
+    align-items: center;
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .service-total {
+    justify-self: center;
+    margin: 0.5rem 0;
+  }
+  
+  .remove-btn {
+    justify-self: center;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .service-controls {
+    gap: 0.75rem;
+  }
+  
+  .service-total {
+    min-width: 100px;
+    max-width: 100%;
+    padding: 0.5rem;
+  }
+  
+  .price-control {
+    min-width: 100%;
+  }
+}
+
+@media (min-width: 1025px) {
+  .service-controls {
+    grid-template-columns: 2fr auto auto auto;
+    gap: 1.5rem;
+  }
+  
+  .price-control {
+    min-width: 160px;
+  }
+  
+  .service-total {
+    min-width: 130px;
+    max-width: 150px;
+  }
+}
+
+/* Responsive Styles for Form Elements - Optimized for 1200x800 and larger */
+@media (min-width: 1200px) and (min-height: 800px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .form-control.select-input,
+  .form-control.status-select {
+    min-width: 200px;
+    width: 100%;
+  }
+  
+  .form-control.date-input {
+    min-width: 180px;
+    width: 100%;
+  }
+  
+  .form-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 2rem;
+  }
+  
+  .input-with-prefix {
+    width: 140px;
+    min-width: 140px;
+    max-width: 140px;
+  }
+  
+  .price-input {
+    width: 90px;
+  }
+}
+
+/* Extra large screens (1400px+) */
+@media (min-width: 1400px) {
+  .form-grid {
+    gap: 2rem;
+  }
+  
+  .form-control.select-input,
+  .form-control.status-select {
+    min-width: 220px;
+  }
+  
+  .form-control.date-input {
+    min-width: 200px;
+  }
+  
+  .input-with-prefix {
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+  }
+}
+
+/* Medium screens (768px to 1199px) */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .form-control.select-input,
+  .form-control.status-select,
+  .form-control.date-input {
+    width: 100%;
+  }
+}
+
+/* Small screens (less than 768px) */
+@media (max-width: 767px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .form-control.select-input,
+  .form-control.status-select,
+  .form-control.date-input {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .input-with-prefix {
+    width: 100%;
+    min-width: 100px;
+    max-width: 100%;
+  }
 }

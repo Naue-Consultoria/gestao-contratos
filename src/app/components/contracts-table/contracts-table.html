@@ -4,95 +4,6 @@
     <app-breadcrumb></app-breadcrumb>
   </div>
 
-  <!-- Statistics Cards -->
-  <div class="dashboard-grid mb-4">
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Total de Contratos</div>
-          <div class="stat-value">{{ stats.total }}</div>
-          <div class="stat-breakdown">
-            <div class="stat-change positive" *ngIf="stats.active > 0">
-              <i class="fas fa-check-circle"></i>
-              {{ stats.active }} ativos
-            </div>
-            <div class="stat-change neutral" *ngIf="stats.completed > 0">
-              <i class="fas fa-history"></i>
-              {{ stats.completed }} concluídos
-            </div>
-            <div class="stat-change warning" *ngIf="stats.suspended > 0">
-              <i class="fas fa-pause-circle"></i>
-              {{ stats.suspended }} suspensos
-            </div>
-          </div>
-        </div>
-        <div class="stat-icon">
-          <i class="fas fa-file-contract"></i>
-        </div>
-      </div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Valor Total</div>
-          <div class="stat-value">{{ formatTotalValue() }}</div>
-          <div class="stat-change positive">
-            <i class="fas fa-chart-line"></i>
-            Contratos ativos: {{ formatActiveValue() }}
-          </div>
-        </div>
-        <div class="stat-icon">
-          <i class="fas fa-dollar-sign"></i>
-        </div>
-      </div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Valor Médio</div>
-          <div class="stat-value">{{ formatAverageValue() }}</div>
-          <div class="stat-change positive">
-            <i class="fas fa-balance-scale"></i>
-            Média por contrato
-          </div>
-        </div>
-        <div class="stat-icon">
-          <i class="fas fa-receipt"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-header">
-        <div>
-          <div class="stat-label">Contratos por Tipo</div>
-        </div>
-        <div class="stat-icon">
-          <i class="fas fa-chart-pie"></i>
-        </div>
-      </div>
-
-      <div class="type-progress-bar">
-        <div *ngFor="let type of typeStatsAsArray"
-            class="progress-segment"
-            [style.width.%]="(type.count / stats.total) * 100"
-            [style.background-color]="type.color"
-            [title]="type.name + ': ' + type.count">
-        </div>
-      </div>
-
-      <div class="type-legend">
-        <div *ngFor="let type of typeStatsAsArray" class="legend-item">
-          <span class="legend-dot" [style.background-color]="type.color"></span>
-          <span class="legend-name">{{ type.name }}</span>
-          <span class="legend-count">{{ type.count }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Tabs -->
   <div class="tabs">
     <div class="tab" [class.active]="currentTab === 'all'" (click)="changeTab('all')">
@@ -191,7 +102,7 @@
             <th>Cliente</th>
             <th>Tipo</th>
             <th class="text-center">Serviços</th>
-            <th>Valor</th>
+            <th>Data de Término</th>
             <th>Status</th>
             <th>Ações</th>
           </tr>
@@ -224,7 +135,15 @@
               </div>
             </td>
             <td>
-              <span class="value-amount">{{ contract.totalValue }}</span>
+              <div class="end-date">
+                <i class="fas fa-calendar-times"></i>
+                <span *ngIf="contract.endDate; else noEndDate">
+                  {{ contract.endDate }}
+                </span>
+                <ng-template #noEndDate>
+                  <span class="no-end-date">Indeterminado</span>
+                </ng-template>
+              </div>
             </td>
             <td>
               <div class="status-container">
@@ -281,8 +200,17 @@
               </span>
             </div>
             <div class="table-card-row">
-              <span class="table-card-label">Valor:</span>
-              <span class="table-card-value value-amount">{{ contract.totalValue }}</span>
+              <span class="table-card-label">
+                <i class="fas fa-calendar-times"></i> Data de Término:
+              </span>
+              <span class="table-card-value">
+                <span *ngIf="contract.endDate; else noEndDateMobile">
+                  {{ contract.endDate }}
+                </span>
+                <ng-template #noEndDateMobile>
+                  <span class="no-end-date">Indeterminado</span>
+                </ng-template>
+              </span>
             </div>
           </div>
           <div class="table-card-actions">
