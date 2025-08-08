@@ -1,75 +1,37 @@
-<div class="page-header">
-  <div class="header-left">
+<div class="page">
+  <div class="page-header">
     <h1 class="page-title">Detalhes do Contrato</h1>
     <app-breadcrumb></app-breadcrumb>
   </div>
-  <div class="header-actions" *ngIf="contract && canEdit">
-    <button class="btn btn-primary" (click)="editContract()">
-      <i class="fas fa-edit"></i> Editar Contrato
-    </button>
-  </div>
-</div>
 
-<!-- Mensagem de erro quando não há contrato -->
-<div class="error-container" *ngIf="!isLoading && !contract">
-  <div class="error-content">
-    <i class="fas fa-exclamation-triangle"></i>
-    <h2>Contrato não encontrado</h2>
+  <!-- Mensagem de erro quando não há contrato -->
+  <div class="error-container" *ngIf="!isLoading && !contract">
+    <div class="error-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3>Contrato não encontrado</h3>
     <p>Não foi possível carregar os dados do contrato.</p>
     <button class="btn btn-primary" routerLink="/home/contracts">
       <i class="fas fa-arrow-left"></i> Voltar para Contratos
     </button>
   </div>
-</div>
 
-<div class="content" *ngIf="!isLoading && contract">
-  <!-- Two Column Layout -->
-  <div class="contract-layout">
-    
-    <!-- Left Column - Contract Info -->
-    <div class="contract-info-column">
-      <div class="contract-overview">
-        <!-- Primary Info -->
-        <div class="primary-info">
-          <div class="contract-header">
-            <h2 class="contract-number">{{ contract.contract_number }}</h2>
-            <div class="contract-badges">
-              <span class="type-badge">{{ contract.type }}</span>
-              <span class="status-badge" [attr.data-status]="contract.status">
-                {{ getStatusText(contract.status) }}
-              </span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Quick Details -->
-        <div class="quick-details">
-          <div class="detail-group">
-            <span class="detail-label">Cliente</span>
-            <span class="detail-value">{{ getClientName() }}</span>
-          </div>
-          <div class="detail-group">
-            <span class="detail-label">Período</span>
-            <span class="detail-value">
-              {{ formatDate(contract.start_date) }}
-              <span *ngIf="contract.end_date"> → {{ formatDate(contract.end_date) }}</span>
+  <!-- Main Content -->
+  <div class="content" *ngIf="!isLoading && contract">
+  
+  <!-- Unified Contract Details Section -->
+  <div class="contract-details-unified">
+    <!-- Contract Overview Header -->
+    <div class="contract-overview-header">
+      <!-- Primary Info -->
+      <div class="primary-info">
+        <div class="contract-header">
+          <h2 class="contract-number">{{ contract.contract_number }}</h2>
+          <div class="contract-badges">
+            <span class="type-badge">{{ contract.type }}</span>
+            <span class="status-badge" [attr.data-status]="contract.status">
+              {{ getStatusText(contract.status) }}
             </span>
-          </div>
-          <div class="detail-group">
-            <span class="detail-label">Total Serviços</span>
-            <span class="detail-value">{{ contract.contract_services.length || 0 }} itens</span>
-          </div>
-          <div class="detail-group" *ngIf="contract.assigned_users && contract.assigned_users.length > 0">
-            <span class="detail-label">Equipe</span>
-            <span class="detail-value">{{ contract.assigned_users.length || 0 }} usuário(s)</span>
-          </div>
-        </div>
-        
-        <!-- Additional Notes -->
-        <div class="additional-notes" *ngIf="contract.notes">
-          <div class="notes-content">
-            <span class="notes-label">Observações</span>
-            <p class="notes-text">{{ contract.notes }}</p>
           </div>
         </div>
         
@@ -86,37 +48,71 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Right Column - Services -->
-    <div class="services-column">
-      <div class="services-section">
-        <h3>Serviços do Contrato</h3>
-        <app-contract-services-manager
-          [services]="contract.contract_services || []"
-          [contractId]="contract.id"
-          [canEdit]="canEdit"
-          (serviceUpdated)="onServiceUpdated()">
-        </app-contract-services-manager>
+      
+      <!-- Quick Details Grid -->
+      <div class="quick-details">
+        <div class="detail-group">
+          <span class="detail-label">Cliente</span>
+          <span class="detail-value">{{ getClientName() }}</span>
+        </div>
+        <div class="detail-group">
+          <span class="detail-label">Período</span>
+          <span class="detail-value">
+            {{ formatDate(contract.start_date) }}
+            <span *ngIf="contract.end_date"> → {{ formatDate(contract.end_date) }}</span>
+          </span>
+        </div>
+        <div class="detail-group">
+          <span class="detail-label">Total Serviços</span>
+          <span class="detail-value">{{ contract.contract_services.length || 0 }} itens</span>
+        </div>
+        <div class="detail-group" *ngIf="contract.assigned_users && contract.assigned_users.length > 0">
+          <span class="detail-label">Equipe</span>
+          <span class="detail-value">{{ contract.assigned_users.length || 0 }} usuário(s)</span>
+        </div>
+      </div>
+      
+      <!-- Additional Notes -->
+      <div class="additional-notes" *ngIf="contract.notes">
+        <div class="notes-content">
+          <span class="notes-label">Observações</span>
+          <p class="notes-text">{{ contract.notes }}</p>
+        </div>
       </div>
     </div>
-    
-  </div>
-</div>
 
-<!-- Loading State -->
-<div class="loading-container" *ngIf="isLoading">
-  <div class="spinner">
-    <i class="fas fa-spinner fa-spin"></i>
-  </div>
-  <p>Carregando contrato...</p>
-</div>
+    <!-- Services Section Divider -->
+    <div class="section-divider"></div>
 
-<!-- Empty State -->
-<div class="empty-state" *ngIf="!isLoading && !contract">
-  <i class="fas fa-file-contract"></i>
-  <p>Contrato não encontrado</p>
-  <button class="btn btn-primary" (click)="editContract()">
-    Editar Contrato
-  </button>
+    <!-- Services Section -->
+    <div class="services-section-content">
+      <h3 class="services-title">
+        <i class="fas fa-cogs"></i>
+        Serviços do Contrato
+      </h3>
+      <app-contract-services-manager
+        [services]="contract.contract_services || []"
+        [contractId]="contract.id"
+        [canEdit]="canEdit"
+        (serviceUpdated)="onServiceUpdated()">
+      </app-contract-services-manager>
+    </div>
+  </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="loading-spinner"></div>
+    <p>Carregando contrato...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && !contract">
+    <div class="empty-icon">
+      <i class="fas fa-file-contract"></i>
+    </div>
+    <h3>Contrato não encontrado</h3>
+    <p>Este contrato não existe ou foi removido do sistema.</p>
+  </div>
+
 </div>
