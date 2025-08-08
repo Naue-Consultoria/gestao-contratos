@@ -99,6 +99,7 @@ export class ContractFormComponent implements OnInit {
 
   showServiceModal = false;
   serviceSearchTerm = '';
+  serviceCategoryFilter = '';
 
   ngOnInit() {
     this.currentUserId = this.authService.getUser()?.id ?? null;
@@ -236,13 +237,24 @@ export class ContractFormComponent implements OnInit {
   }
 
   get filteredServices(): ApiService[] {
-    if (!this.serviceSearchTerm) return this.availableServices;
-    const search = this.serviceSearchTerm.toLowerCase();
-    return this.availableServices.filter(
-      (s) =>
-        s.name.toLowerCase().includes(search) ||
-        s.category?.toLowerCase().includes(search)
-    );
+    let services = this.availableServices;
+
+    // Filter by category
+    if (this.serviceCategoryFilter) {
+      services = services.filter(s => s.category === this.serviceCategoryFilter);
+    }
+
+    // Filter by search term
+    if (this.serviceSearchTerm) {
+      const search = this.serviceSearchTerm.toLowerCase();
+      services = services.filter(
+        (s) =>
+          s.name.toLowerCase().includes(search) ||
+          s.category?.toLowerCase().includes(search)
+      );
+    }
+
+    return services;
   }
 
   formatDate(dateString: string): string {
@@ -253,13 +265,23 @@ export class ContractFormComponent implements OnInit {
     return this.serviceService.formatDuration(service.duration_amount, service.duration_unit);
   }
 
+  get availableCategories(): string[] {
+    const categories = this.availableServices
+      .map(s => s.category || 'Geral')
+      .filter((category, index, self) => self.indexOf(category) === index)
+      .sort();
+    return categories;
+  }
+
   openServiceModal() {
     this.showServiceModal = true;
     this.serviceSearchTerm = '';
+    this.serviceCategoryFilter = '';
   }
   closeServiceModal() {
     this.showServiceModal = false;
     this.serviceSearchTerm = '';
+    this.serviceCategoryFilter = '';
   }
 
   addService(service: ApiService) {

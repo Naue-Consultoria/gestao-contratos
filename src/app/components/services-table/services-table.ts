@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { ServiceService, ApiService, ServiceStats } from '../../services/service';
@@ -19,7 +20,7 @@ interface ServiceDisplay {
 @Component({
   selector: 'app-services-table',
   standalone: true,
-  imports: [CommonModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent],
   templateUrl: './services-table.html',
   styleUrls: ['./services-table.css']
 })
@@ -30,8 +31,14 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   services: ServiceDisplay[] = [];
+  filteredServices: ServiceDisplay[] = [];
   isLoading = true;
   error = '';
+  
+  // Filter properties
+  searchTerm = '';
+  selectedCategory = '';
+  availableCategories: string[] = [];
 
   ngOnInit() {
     this.loadData();
@@ -49,6 +56,8 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     try {
       const servicesResponse = await firstValueFrom(this.serviceService.getServices({ is_active: true }));
       this.services = servicesResponse.services.map(apiService => this.mapApiServiceToTableService(apiService));
+      this.extractCategories();
+      this.applyFilters();
 
     } catch (error) {
       console.error('❌ Error loading services data:', error);
@@ -119,5 +128,42 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
       'Estratégia': 'fas fa-bullseye'
     };
     return iconMap[category] || 'fas fa-concierge-bell';
+  }
+
+  private extractCategories() {
+    const categories = new Set(this.services.map(service => service.category));
+    this.availableCategories = Array.from(categories).sort();
+  }
+
+  applyFilters() {
+    let filtered = [...this.services];
+
+    // Apply search filter
+    if (this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(service =>
+        service.name.toLowerCase().includes(searchLower) ||
+        service.category.toLowerCase().includes(searchLower) ||
+        (service.description && service.description.toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Apply category filter
+    if (this.selectedCategory) {
+      filtered = filtered.filter(service => service.category === this.selectedCategory);
+    }
+
+    this.filteredServices = filtered;
+  }
+
+  clearSearch() {
+    this.searchTerm = '';
+    this.applyFilters();
+  }
+
+  clearFilters() {
+    this.searchTerm = '';
+    this.selectedCategory = '';
+    this.applyFilters();
   }
 }

@@ -7,6 +7,42 @@
   <div class="table-container">
     <div class="table-header">
       <h2 class="table-title">Lista de Serviços</h2>
+      
+      <div class="center-controls">
+        <!-- Filtro por categoria -->
+        <div class="category-filter">
+          <select
+            class="form-select"
+            [(ngModel)]="selectedCategory"
+            (change)="applyFilters()"
+          >
+            <option value="">Todas as Categorias</option>
+            <option *ngFor="let category of availableCategories" [value]="category">
+              {{ category }}
+            </option>
+          </select>
+        </div>
+        
+        <!-- Barra de pesquisa -->
+        <div class="search-input-wrapper">
+          <i class="fas fa-search search-icon"></i>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Buscar serviços..." 
+            [(ngModel)]="searchTerm"
+            (input)="applyFilters()"
+          />
+          <button 
+            *ngIf="searchTerm" 
+            class="clear-search-btn" 
+            (click)="clearSearch()"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      
       <button class="btn btn-primary" (click)="openNewServicePage()">
         <i class="fas fa-plus"></i>
         Novo Serviço
@@ -28,14 +64,22 @@
     <!-- Tabela -->
     <div class="table-wrapper" *ngIf="!isLoading">
       <!-- Mensagem quando não há serviços -->
-      <div *ngIf="services.length === 0 && !error" class="empty-state">
+      <div *ngIf="filteredServices.length === 0 && services.length === 0 && !error" class="empty-state">
         <i class="fas fa-briefcase empty-icon"></i>
         <h3>Nenhum serviço cadastrado</h3>
         <p>Clique no botão "Novo Serviço" para adicionar o primeiro serviço.</p>
       </div>
 
+      <!-- Mensagem quando não há resultados na busca -->
+      <div *ngIf="filteredServices.length === 0 && services.length > 0 && !error" class="empty-state">
+        <i class="fas fa-search empty-icon"></i>
+        <h3>Nenhum serviço encontrado</h3>
+        <p>Tente ajustar os filtros ou termo de busca.</p>
+        <button class="btn btn-secondary" (click)="clearFilters()">Limpar Filtros</button>
+      </div>
+
       <!-- Tabela de serviços -->
-      <table class="custom-table" *ngIf="services.length > 0">
+      <table class="custom-table" *ngIf="filteredServices.length > 0">
         <thead>
           <tr>
             <th>Nome do Serviço</th>
@@ -48,7 +92,7 @@
         </thead>
         <tbody>
           <tr
-            *ngFor="let service of services"
+            *ngFor="let service of filteredServices"
             class="clickable"
             (click)="editService(service.id)"
           >

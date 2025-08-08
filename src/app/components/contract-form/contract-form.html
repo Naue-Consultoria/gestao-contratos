@@ -361,15 +361,26 @@
       </button>
     </div>
     <div class="modal-body">
-      <div class="modal-search">
-        <i class="fas fa-search"></i>
-        <input
-          type="text"
-          class="modal-search-input"
-          placeholder="Buscar serviço..."
-          [(ngModel)]="serviceSearchTerm"
-          name="serviceSearch"
-        />
+      <div class="modal-filters">
+        <div class="modal-search">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            class="modal-search-input"
+            placeholder="Buscar serviço..."
+            [(ngModel)]="serviceSearchTerm"
+            name="serviceSearch"
+          />
+        </div>
+        <select 
+          class="modal-category-filter"
+          [(ngModel)]="serviceCategoryFilter"
+          name="categoryFilter">
+          <option value="">Todas as categorias</option>
+          <option *ngFor="let category of availableCategories" [value]="category">
+            {{ category }}
+          </option>
+        </select>
       </div>
       <div class="services-list">
         <div

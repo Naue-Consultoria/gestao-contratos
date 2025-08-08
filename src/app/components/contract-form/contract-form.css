@@ -851,6 +851,58 @@ textarea.form-control {
   box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
 }
 
+.modal-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-category-filter {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-gray);
+  border-radius: 10px;
+  font-size: 0.875rem;
+  background-color: var(--white);
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2398A2B3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+:host-context(body.dark-mode) .modal-category-filter {
+  background-color: #333;
+  border-color: #444;
+  color: var(--dark-text);
+}
+
+.modal-category-filter:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
+}
+
+@media (min-width: 768px) {
+  .modal-filters {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .modal-search {
+    flex: 1;
+    margin-bottom: 0;
+  }
+  
+  .modal-category-filter {
+    flex: 0 0 200px;
+  }
+}
+
 .services-list {
   display: flex;
   flex-direction: column;
