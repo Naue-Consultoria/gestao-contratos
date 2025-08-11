@@ -7,6 +7,8 @@ export interface PublicProposalService {
   id: number;
   service_id: number;
   quantity: number;
+  unit_value: number;
+  total_value: number;
   custom_value?: number;
   selected_by_client?: boolean;
   client_notes?: string;

@@ -6,13 +6,15 @@ import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 import { 
-  PublicProposalService, 
+  PublicProposalService as PublicProposalServiceAPI, 
   PublicProposal, 
-  PublicProposalService as ProposalServiceItem,
+  PublicProposalService,
   ServiceSelectionData,
   SignatureData,
   ConfirmationData
 } from '../../services/public-proposal.service';
+
+type ProposalServiceItem = PublicProposalService;
 
 @Component({
   selector: 'app-public-proposal-view',
@@ -27,12 +29,21 @@ export class PublicProposalViewComponent implements OnInit {
 
   // Landing page properties
   clients = [
-    { name: 'Cliente 1', logo: 'assets/images/clients/client1.png' },
-    { name: 'Cliente 2', logo: 'assets/images/clients/client2.png' },
-    { name: 'Cliente 3', logo: 'assets/images/clients/client3.png' },
-    { name: 'Cliente 4', logo: 'assets/images/clients/client4.png' },
-    { name: 'Cliente 5', logo: 'assets/images/clients/client5.png' },
-    { name: 'Cliente 6', logo: 'assets/images/clients/client6.png' },
+    { name: 'MRV', logo: '/mrv.png' },
+    { name: 'Cyrela', logo: '/cyrela.png' },
+    { name: 'Tenda', logo: '/tenda.png' },
+    { name: 'Even', logo: '/even.png' },
+    { name: 'Direcional', logo: '/direcional.png' },
+    { name: 'Plano&Plano', logo: '/plano.png' },
+    { name: 'Melnick', logo: '/melnick.png' },
+    // Duplicate for seamless carousel
+    { name: 'MRV', logo: '/mrv.png' },
+    { name: 'Cyrela', logo: '/cyrela.png' },
+    { name: 'Tenda', logo: '/tenda.png' },
+    { name: 'Even', logo: '/even.png' },
+    { name: 'Direcional', logo: '/direcional.png' },
+    { name: 'Plano&Plano', logo: '/plano.png' },
+    { name: 'Melnick', logo: '/melnick.png' },
   ];
   
   carouselTransform = '0px';
@@ -68,7 +79,7 @@ export class PublicProposalViewComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private publicProposalService: PublicProposalService,
+    private publicProposalService: PublicProposalServiceAPI,
     private toastr: ToastrService
   ) {
     this.initializeForms();
@@ -107,7 +118,8 @@ export class PublicProposalViewComponent implements OnInit {
       client_name: ['', [Validators.required, Validators.minLength(2)]],
       client_email: ['', [Validators.required, Validators.email]],
       client_phone: [''],
-      client_document: ['']
+      client_document: [''],
+      client_observations: ['']
     });
 
     this.confirmationForm = this.fb.group({
@@ -156,10 +168,14 @@ export class PublicProposalViewComponent implements OnInit {
   private initializeServiceSelection(): void {
     if (!this.proposal?.services) return;
     
+    // Todos os serviços começam selecionados por padrão
     this.proposal.services.forEach(service => {
-      this.selectedServices.set(service.service_id, service.selected_by_client ?? true);
+      this.selectedServices.set(service.service_id, true);
       this.serviceNotes.set(service.service_id, service.client_notes || '');
     });
+    
+    // Initialize signature canvas after view init
+    setTimeout(() => this.initializeSignatureCanvas(), 100);
   }
 
   // === MÉTODOS DE SELEÇÃO DE SERVIÇOS ===
@@ -198,6 +214,51 @@ export class PublicProposalViewComponent implements OnInit {
 
   getServiceNote(serviceId: number): string {
     return this.serviceNotes.get(serviceId) || '';
+  }
+
+  // === MÉTODOS PARA TABELA DE SERVIÇOS ===
+  
+  areAllServicesSelected(): boolean {
+    if (!this.proposal?.services.length) return false;
+    return this.proposal.services.every(service => this.isServiceSelected(service.service_id));
+  }
+
+  areSomeServicesSelected(): boolean {
+    if (!this.proposal?.services.length) return false;
+    const selectedCount = this.proposal.services.filter(service => this.isServiceSelected(service.service_id)).length;
+    return selectedCount > 0 && selectedCount < this.proposal.services.length;
+  }
+
+  toggleAllServices(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const selectAll = target.checked;
+    
+    if (!this.proposal?.services) return;
+    
+    this.proposal.services.forEach(service => {
+      this.selectedServices.set(service.service_id, selectAll);
+    });
+  }
+
+  getSelectedServicesCount(): number {
+    if (!this.proposal?.services) return 0;
+    return this.proposal.services.filter(service => this.isServiceSelected(service.service_id)).length;
+  }
+
+  // === MÉTODOS DE VALIDAÇÃO E ASSINATURA ===
+  
+  canSignProposal(): boolean {
+    return (
+      this.signatureForm.get('client_name')?.valid === true &&
+      this.signatureForm.get('client_email')?.valid === true &&
+      this.signatureDrawn &&
+      this.hasSelectedServices()
+    );
+  }
+
+  isFieldInvalid(form: FormGroup, fieldName: string): boolean {
+    const field = form.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
   }
 
   async saveServiceSelection(): Promise<void> {
@@ -411,27 +472,36 @@ export class PublicProposalViewComponent implements OnInit {
     return this.proposal.services
       .filter(service => this.selectedServices.get(service.service_id))
       .reduce((total, service) => {
-        const value = service.custom_value || service.service.value;
-        return total + (value * service.quantity);
+        return total + this.getServiceTotal(service);
       }, 0);
   }
 
   formatCurrency(value: number): string {
-    return this.publicProposalService.formatCurrency(value);
+    if (typeof value !== 'number' || value === null || value === undefined || isNaN(value)) {
+      return 'R$ 0,00';
+    }
+    
+    try {
+      return this.publicProposalService.formatCurrency(value);
+    } catch (error) {
+      // Fallback para formatação manual
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: 2
+      }).format(value);
+    }
   }
 
   getServiceValue(service: ProposalServiceItem): number {
-    return service.custom_value || service.service.value;
+    // First try unit_value from proposal data, then custom_value, then service.value
+    const value = service.unit_value || service.custom_value || service.service?.value || 0;
+    return value;
   }
 
   getServiceTotal(service: ProposalServiceItem): number {
-    const value = this.getServiceValue(service);
-    return value * service.quantity;
-  }
-
-  isFieldInvalid(form: FormGroup, fieldName: string): boolean {
-    const field = form.get(fieldName);
-    return !!(field && field.invalid && (field.dirty || field.touched));
+    // Use the total_value from proposal data if available, otherwise calculate
+    return service.total_value || (this.getServiceValue(service) * service.quantity);
   }
 
   private markFormGroupTouched(formGroup: FormGroup): void {

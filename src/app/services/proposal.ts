@@ -42,6 +42,7 @@ export interface Proposal {
   status: 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted';
   converted_to_contract_id?: number;
   converted_at?: string;
+  notes?: string;
   created_at: string;
   updated_at: string;
   created_by: number;

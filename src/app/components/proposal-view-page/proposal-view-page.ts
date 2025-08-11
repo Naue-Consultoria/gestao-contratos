@@ -3,13 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { ProposalService, Proposal } from '../../services/proposal';
-import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-proposal-view-page',
   standalone: true,
-  imports: [CommonModule, BreadcrumbComponent],
+  imports: [CommonModule],
   templateUrl: './proposal-view-page.html',
   styleUrls: ['./proposal-view-page.css']
 })
@@ -202,9 +201,9 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
 
   canSignProposal(): boolean {
     if (!this.proposal) return false;
-    const isPending = this.proposal.status === 'pending';
+    const isSent = this.proposal.status === 'sent';
     const isNotExpired = !this.isProposalExpired();
-    return isPending && isNotExpired;
+    return isSent && isNotExpired;
   }
 
   signProposal(): void {
