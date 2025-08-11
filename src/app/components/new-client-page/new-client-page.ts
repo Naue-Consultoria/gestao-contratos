@@ -2,12 +2,13 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ClientService, CreateClientRequest, UpdateClientRequest, ApiClient } from '../../services/client';
+import { ClientService, CreateClientRequest } from '../../services/client';
 import { ModalService } from '../../services/modal.service';
 import { DocumentMaskDirective } from '../../directives/document-mask.directive';
 import { firstValueFrom } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-new-client-page',
@@ -21,9 +22,10 @@ export class NewClientPageComponent implements OnInit {
   private modalService = inject(ModalService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private sanitizer = inject(DomSanitizer);
   
   // Form data
-  formData: CreateClientRequest & { logo_url?: string } = {
+  formData: CreateClientRequest & { logo_url?: string | SafeUrl } = {
     type: 'PF',
     email: '',
     phone: '',
@@ -92,7 +94,7 @@ export class NewClientPageComponent implements OnInit {
       };
 
       if (client.logo_path) {
-        this.formData.logo_url = this.clientService.getClientLogoUrl(client.id);
+        this.loadLogo();
       }
     } catch (error) {
       console.error('Erro ao carregar cliente:', error);
@@ -101,6 +103,14 @@ export class NewClientPageComponent implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  loadLogo() {
+    if (!this.editingId) return;
+    this.clientService.getClientLogo(this.editingId).subscribe(blob => {
+      const objectURL = URL.createObjectURL(blob);
+      this.formData.logo_url = this.sanitizer.bypassSecurityTrustUrl(objectURL);
+    });
   }
 
   async onSubmit() {
@@ -140,29 +150,29 @@ export class NewClientPageComponent implements OnInit {
   }
 
   async onLogoUploaded(file: File) {
-  if (!this.editingId) {
-    this.modalService.showError('É necessário salvar o cliente antes de enviar uma logo.');
-    return;
-  }
-  
-  try {
-    this.isLoading = true;
-    
-    const response = await firstValueFrom(this.clientService.uploadClientLogo(this.editingId, file));
-
-    this.modalService.showSuccess('Logo enviada com sucesso!');
-
-    if (response && response.logo_url) {
-      this.formData.logo_url = response.logo_url;
+    if (!this.editingId) {
+      this.modalService.showError('É necessário salvar o cliente antes de enviar uma logo.');
+      return;
     }
+  
+    try {
+      this.isLoading = true;
+    
+      const response = await firstValueFrom(this.clientService.uploadClientLogo(this.editingId, file));
 
-  } catch (error) {
-    this.modalService.showError('Ocorreu um erro ao enviar a logo.');
-    console.error('Upload error:', error);
-  } finally {
-    this.isLoading = false;
+      this.modalService.showSuccess('Logo enviada com sucesso!');
+
+      if (response && response.logo_url) {
+        this.loadLogo();
+      }
+
+    } catch (error) {
+      this.modalService.showError('Ocorreu um erro ao enviar a logo.');
+      console.error('Upload error:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
-}
 
   async onLogoRemoved() {
     if (!this.editingId) return;

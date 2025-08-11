@@ -6,7 +6,6 @@
 
   <div class="table-container">
     <form (ngSubmit)="onSubmit()" #clientForm="ngForm" class="client-form">
-      <!-- Tipo de Cliente -->
       <div class="form-section">
         <h3 class="section-title">
           <i class="fas fa-user-tag"></i>
@@ -27,14 +26,12 @@
         </div>
       </div>
 
-      <!-- Dados Pessoais/Empresariais -->
       <div class="form-section" *ngIf="formData.type">
         <h3 class="section-title">
           <i class="fas fa-info-circle"></i>
           {{ formData.type === 'PF' ? 'Dados Pessoais' : 'Dados da Empresa' }}
         </h3>
         
-        <!-- Pessoa Física -->
         <div *ngIf="formData.type === 'PF'" class="form-grid">
           <div class="form-group">
             <label class="form-label">Nome Completo <span class="required">*</span></label>
@@ -62,7 +59,6 @@
           </div>
         </div>
 
-        <!-- Pessoa Jurídica -->
         <div *ngIf="formData.type === 'PJ'" class="form-grid">
           <div class="form-group">
             <label class="form-label">Razão Social <span class="required">*</span></label>
@@ -100,7 +96,6 @@
               appDocumentMask="cnpj">
           </div>
           
-          <!-- Informações Adicionais da Empresa -->
           <div class="form-group">
             <label class="form-label">Quantidade de Funcionários</label>
             <input 
@@ -127,7 +122,6 @@
         </div>
       </div>
 
-      <!-- Logo do Cliente -->
       <div class="form-section" *ngIf="formData.type">
         <h3 class="section-title">
           <i class="fas fa-image"></i>
@@ -137,7 +131,7 @@
           <app-image-upload
             [label]="'Logo do ' + (formData.type === 'PF' ? 'Cliente' : 'Empresa')"
             
-            [currentImageUrl]="formData.logo_url || null"
+            [currentImageUrl]="formData.logo_url"
             [placeholder]="'Arraste ou clique para selecionar a logo'"
             [disabled]="isLoading"
             (imageUploaded)="onLogoUploaded($event)"
@@ -146,7 +140,6 @@
         </div>
       </div>
 
-      <!-- Dados de Contato -->
       <div class="form-section">
         <h3 class="section-title">
           <i class="fas fa-envelope"></i>
@@ -179,7 +172,6 @@
         </div>
       </div>
 
-      <!-- Endereço -->
       <div class="form-section">
         <h3 class="section-title">
           <i class="fas fa-map-marker-alt"></i>
@@ -299,7 +291,6 @@
         </div>
       </div>
 
-      <!-- Botões -->
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="goBack()" [disabled]="isLoading">
           <i class="fas fa-arrow-left"></i>

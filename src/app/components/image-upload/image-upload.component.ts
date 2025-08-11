@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModalService } from '../../services/modal.service';
+import { SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-image-upload',
@@ -12,17 +13,16 @@ import { ModalService } from '../../services/modal.service';
 export class ImageUploadComponent implements OnChanges {
   @ViewChild('fileInput', { static: false }) fileInput!: ElementRef<HTMLInputElement>;
 
-  @Input() currentImageUrl: string | null = null;
+  @Input() currentImageUrl: string | SafeUrl | null | undefined = null;
   @Input({ required: true }) label!: string;
   @Input() placeholder: string = 'Clique para selecionar ou arraste uma imagem';
   @Input() disabled: boolean = false;
 
-  // LINHA CRÍTICA: Garantir que o EventEmitter está tipado como <File>
   @Output() imageUploaded = new EventEmitter<File>();
   @Output() imageRemoved = new EventEmitter<void>();
 
   dragOver = false;
-  previewUrl: string | ArrayBuffer | null = null;
+  previewUrl: string | SafeUrl | ArrayBuffer | null | undefined = null;
   
   constructor(private modalService: ModalService) {}
 
@@ -51,14 +51,12 @@ export class ImageUploadComponent implements OnChanges {
   private handleFileSelection(file: File): void {
     if (!this.isValidFile(file)) return;
 
-    // Gera a pré-visualização localmente
     const reader = new FileReader();
     reader.onload = () => {
       this.previewUrl = reader.result;
     };
     reader.readAsDataURL(file);
 
-    // LINHA CRÍTICA: Emitir o objeto 'File' completo para o componente pai
     this.imageUploaded.emit(file);
   }
 
@@ -86,7 +84,6 @@ export class ImageUploadComponent implements OnChanges {
     return true;
   }
 
-  // Funções para drag & drop e clique
   onDragOver(event: DragEvent): void { event.preventDefault(); this.dragOver = true; }
   onDragLeave(event: DragEvent): void { event.preventDefault(); this.dragOver = false; }
   triggerFileInput(): void { if (!this.disabled) this.fileInput.nativeElement.click(); }
