@@ -1,8 +1,6 @@
-import { Component, Input, Output, EventEmitter, inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UploadService } from '../../services/upload';
 import { ModalService } from '../../services/modal.service';
-import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-image-upload',
@@ -11,111 +9,85 @@ import { firstValueFrom } from 'rxjs';
   templateUrl: './image-upload.component.html',
   styleUrls: ['./image-upload.component.css']
 })
-export class ImageUploadComponent {
-  private uploadService = inject(UploadService);
-  private modalService = inject(ModalService);
-
+export class ImageUploadComponent implements OnChanges {
   @ViewChild('fileInput', { static: false }) fileInput!: ElementRef<HTMLInputElement>;
 
   @Input() currentImageUrl: string | null = null;
-  @Input() label: string = 'Upload de Imagem';
-  @Input() placeholder: string = 'Clique para selecionar uma imagem';
+  @Input({ required: true }) label!: string;
+  @Input() placeholder: string = 'Clique para selecionar ou arraste uma imagem';
   @Input() disabled: boolean = false;
-  
-  @Output() imageUploaded = new EventEmitter<string>();
+
+  // LINHA CRÍTICA: Garantir que o EventEmitter está tipado como <File>
+  @Output() imageUploaded = new EventEmitter<File>();
   @Output() imageRemoved = new EventEmitter<void>();
 
-  isUploading = false;
   dragOver = false;
-  previewUrl: string | null = null;
+  previewUrl: string | ArrayBuffer | null = null;
+  
+  constructor(private modalService: ModalService) {}
 
-  ngOnInit() {
-    this.previewUrl = this.currentImageUrl;
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['currentImageUrl']) {
+      this.previewUrl = this.currentImageUrl;
+    }
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
+  onFileSelected(event: any): void {
+    const file = event.target.files?.[0];
     if (file) {
-      this.handleFileUpload(file);
+      this.handleFileSelection(file);
     }
   }
 
-  onDragOver(event: DragEvent) {
-    event.preventDefault();
-    this.dragOver = true;
-  }
-
-  onDragLeave(event: DragEvent) {
+  onDrop(event: DragEvent): void {
     event.preventDefault();
     this.dragOver = false;
-  }
-
-  onDrop(event: DragEvent) {
-    event.preventDefault();
-    this.dragOver = false;
-    
-    const files = event.dataTransfer?.files;
-    if (files && files.length > 0) {
-      this.handleFileUpload(files[0]);
+    const file = event.dataTransfer?.files?.[0];
+    if (file) {
+      this.handleFileSelection(file);
     }
   }
+  
+  private handleFileSelection(file: File): void {
+    if (!this.isValidFile(file)) return;
 
-  async handleFileUpload(file: File) {
-    if (this.disabled) return;
+    // Gera a pré-visualização localmente
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.previewUrl = reader.result;
+    };
+    reader.readAsDataURL(file);
 
-    // Validar arquivo
-    const validation = this.uploadService.validateImageFile(file);
-    if (!validation.valid) {
-      this.modalService.showError(validation.message!);
-      return;
-    }
-
-    try {
-      this.isUploading = true;
-
-      // Criar preview local
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.previewUrl = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-
-      // Fazer upload
-      const response = await firstValueFrom(this.uploadService.uploadClientLogo(file));
-      
-      if (response.success && response.file) {
-        const fullUrl = this.uploadService.getFileUrl(response.file.url);
-        this.imageUploaded.emit(fullUrl);
-        this.modalService.showSuccess('Imagem enviada com sucesso!');
-      }
-    } catch (error: any) {
-      console.error('Erro no upload:', error);
-      this.modalService.showError(error.error?.message || 'Erro ao enviar imagem');
-      this.previewUrl = this.currentImageUrl; // Restaurar preview anterior
-    } finally {
-      this.isUploading = false;
-    }
+    // LINHA CRÍTICA: Emitir o objeto 'File' completo para o componente pai
+    this.imageUploaded.emit(file);
   }
 
-  removeImage() {
-    if (this.disabled) return;
-    
+  removeImage(): void {
     this.previewUrl = null;
     this.currentImageUrl = null;
-    
-    // Reset the file input
-    if (this.fileInput && this.fileInput.nativeElement) {
+    if (this.fileInput?.nativeElement) {
       this.fileInput.nativeElement.value = '';
     }
-    
     this.imageRemoved.emit();
   }
 
-  triggerFileInput() {
-    if (this.disabled) return;
-    
-    if (this.fileInput && this.fileInput.nativeElement) {
-      this.fileInput.nativeElement.click();
+  private isValidFile(file: File): boolean {
+    const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+    if (file.size > maxSizeInBytes) {
+      this.modalService.showError('O ficheiro excede o tamanho máximo de 5MB.');
+      return false;
     }
+    if (!allowedTypes.includes(file.type)) {
+      this.modalService.showError('Tipo de ficheiro inválido. Apenas imagens são permitidas.');
+      return false;
+    }
+    return true;
   }
+
+  // Funções para drag & drop e clique
+  onDragOver(event: DragEvent): void { event.preventDefault(); this.dragOver = true; }
+  onDragLeave(event: DragEvent): void { event.preventDefault(); this.dragOver = false; }
+  triggerFileInput(): void { if (!this.disabled) this.fileInput.nativeElement.click(); }
 }

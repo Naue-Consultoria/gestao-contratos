@@ -7,12 +7,12 @@ import { ModalService } from '../../services/modal.service';
 import { DocumentMaskDirective } from '../../directives/document-mask.directive';
 import { firstValueFrom } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
-// import { ImageUploadComponent } from '../image-upload/image-upload.component';
+import { ImageUploadComponent } from '../image-upload/image-upload.component';
 
 @Component({
   selector: 'app-new-client-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DocumentMaskDirective, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, DocumentMaskDirective, BreadcrumbComponent, ImageUploadComponent],
   templateUrl: './new-client-page.html',
   styleUrls: ['./new-client-page.css']
 })
@@ -23,7 +23,7 @@ export class NewClientPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   
   // Form data
-  formData: CreateClientRequest = {
+  formData: CreateClientRequest & { logo_url?: string } = {
     type: 'PF',
     email: '',
     phone: '',
@@ -90,6 +90,10 @@ export class NewClientPageComponent implements OnInit {
         company_name: client.company_name || '',
         trade_name: client.trade_name || ''
       };
+
+      if (client.logo_path) {
+        this.formData.logo_url = this.clientService.getClientLogoUrl(client.id);
+      }
     } catch (error) {
       console.error('Erro ao carregar cliente:', error);
       this.modalService.showError('Erro ao carregar dados do cliente');
@@ -135,12 +139,40 @@ export class NewClientPageComponent implements OnInit {
     return this.isEditing ? 'Editar Cliente' : 'Novo Cliente';
   }
 
-  // Logo upload methods removed - will be implemented separately
-  // onLogoUploaded(logoUrl: string) {
-  //   // TODO: Implement with new logo system
-  // }
+  async onLogoUploaded(file: File) {
+  if (!this.editingId) {
+    this.modalService.showError('É necessário salvar o cliente antes de enviar uma logo.');
+    return;
+  }
+  
+  try {
+    this.isLoading = true;
+    
+    const response = await firstValueFrom(this.clientService.uploadClientLogo(this.editingId, file));
 
-  // onLogoRemoved() {
-  //   // TODO: Implement with new logo system
-  // }
+    this.modalService.showSuccess('Logo enviada com sucesso!');
+
+    if (response && response.logo_url) {
+      this.formData.logo_url = response.logo_url;
+    }
+
+  } catch (error) {
+    this.modalService.showError('Ocorreu um erro ao enviar a logo.');
+    console.error('Upload error:', error);
+  } finally {
+    this.isLoading = false;
+  }
+}
+
+  async onLogoRemoved() {
+    if (!this.editingId) return;
+
+    try {
+      await firstValueFrom(this.clientService.deleteClientLogo(this.editingId));
+      this.modalService.showSuccess('Logo removida com sucesso!');
+      this.formData.logo_url = undefined;
+    } catch (error) {
+      this.modalService.showError('Erro ao remover a logo.');
+    }
+  }
 }

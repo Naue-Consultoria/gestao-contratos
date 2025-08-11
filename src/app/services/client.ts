@@ -284,4 +284,38 @@ export class ClientService {
     }
     return '';
   }
+
+  /**
+   * Upload da logo do cliente
+   */
+  uploadClientLogo(clientId: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('logo', file);
+
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.post(`${this.API_URL}/${clientId}/logo`, formData, { headers });
+  }
+
+  /**
+   * Deletar a logo do cliente
+   */
+  deleteClientLogo(clientId: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.delete(`${this.API_URL}/${clientId}/logo`, { headers });
+  }
+
+  /**
+   * Obter a URL da logo do cliente
+   */
+  getClientLogoUrl(clientId: number): string {
+    return `${this.API_URL}/${clientId}/logo`;
+  }
 }

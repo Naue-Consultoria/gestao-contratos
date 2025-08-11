@@ -134,15 +134,15 @@
           Logo do {{ formData.type === 'PF' ? 'Cliente' : 'Empresa' }} (Opcional)
         </h3>
         <div class="form-grid">
-          <!-- TODO: Implement logo upload with new system -->
-          <!-- <app-image-upload
+          <app-image-upload
+            [label]="'Logo do ' + (formData.type === 'PF' ? 'Cliente' : 'Empresa')"
+            
             [currentImageUrl]="formData.logo_url || null"
-            [placeholder]="'Selecione a logo do ' + (formData.type === 'PF' ? 'cliente' : 'empresa')"
+            [placeholder]="'Arraste ou clique para selecionar a logo'"
             [disabled]="isLoading"
             (imageUploaded)="onLogoUploaded($event)"
             (imageRemoved)="onLogoRemoved()">
-          </app-image-upload> -->
-          <p class="placeholder-text">Upload de logo será implementado em breve</p>
+          </app-image-upload>
         </div>
       </div>
 
