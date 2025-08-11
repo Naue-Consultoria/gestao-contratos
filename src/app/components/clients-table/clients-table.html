@@ -77,7 +77,7 @@
                   {{ client.initials }}
                 </div>
                 <div class="client-logo" *ngIf="client.logo_path">
-                  <img [src]="getClientLogoUrl(client.raw.id)" [alt]="client.name + ' logo'" />
+                  <img [src]="client.logoUrl" [alt]="client.name + ' logo'" />
                 </div>
                 <span class="client-name">{{ client.name }}</span>
               </div>

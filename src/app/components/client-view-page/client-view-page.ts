@@ -10,6 +10,7 @@ import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { environment } from '../../../environments/environment';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-client-view-page',
@@ -25,11 +26,13 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
   private contractService = inject(ContractService);
   private clientAttachmentService = inject(ClientAttachmentService);
   private breadcrumbService = inject(BreadcrumbService);
+  private sanitizer = inject(DomSanitizer);
   public authService = inject(AuthService);
   
   private subscriptions = new Subscription();
 
   client: ApiClient | null = null;
+  logoUrl: SafeUrl | null = null;
   contracts: ApiContract[] = [];
   isLoading = true;
   error = '';
@@ -50,6 +53,9 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    if (this.logoUrl) {
+      URL.revokeObjectURL(this.logoUrl.toString());
+    }
     this.subscriptions.unsubscribe();
   }
 
@@ -61,6 +67,10 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
       // Load client details
       const clientResponse = await firstValueFrom(this.clientService.getClient(id));
       this.client = clientResponse.client;
+
+      if (this.client.logo_path) {
+        this.loadLogo();
+      }
 
       // Update breadcrumb with client name
       this.updateBreadcrumb();
@@ -85,6 +95,14 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  loadLogo() {
+    if (!this.client) return;
+    this.clientService.getClientLogo(this.client.id).subscribe(blob => {
+      const objectURL = URL.createObjectURL(blob);
+      this.logoUrl = this.sanitizer.bypassSecurityTrustUrl(objectURL);
+    });
   }
 
   private calculateStatistics() {

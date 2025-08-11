@@ -14,13 +14,10 @@ export interface CreateClientRequest {
   city: string;
   state: string;
   zipcode: string;
-  // Optional fields
   employee_count?: number;
   business_segment?: string;
-  // PF fields
   cpf?: string;
   full_name?: string;
-  // PJ fields
   cnpj?: string;
   company_name?: string;
   trade_name?: string;
@@ -36,13 +33,10 @@ export interface UpdateClientRequest {
   city?: string;
   state?: string;
   zipcode?: string;
-  // Optional fields
   employee_count?: number;
   business_segment?: string;
-  // PF fields
   cpf?: string;
   full_name?: string;
-  // PJ fields
   cnpj?: string;
   company_name?: string;
   trade_name?: string;
@@ -51,7 +45,7 @@ export interface UpdateClientRequest {
 export interface ApiClient {
   id: number;
   type: 'PF' | 'PJ';
-  name: string; // full_name for PF or company_name for PJ
+  name: string;
   email: string;
   phone: string | null;
   street: string;
@@ -67,23 +61,18 @@ export interface ApiClient {
   updated_by?: number;
   created_by_user?: { name: string };
   updated_by_user?: { name: string };
-  // PF specific
   cpf?: string;
   full_name?: string;
-  // PJ specific
   cnpj?: string;
   company_name?: string;
   trade_name?: string;
-  // New optional fields
   employee_count?: number | null;
   business_segment?: string | null;
-  // Logo fields
   logo_path?: string | null;
   logo_original_name?: string | null;
   logo_mime_type?: string | null;
   logo_size?: number | null;
   logo_uploaded_at?: string | null;
-  // Legacy fields for compatibility
   founded_date?: string | null;
   headquarters?: string | null;
   market_sector?: string | null;
@@ -128,9 +117,6 @@ export class ClientService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Obter headers com autorização
-   */
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     return new HttpHeaders({
@@ -283,6 +269,17 @@ export class ClientService {
       return this.formatCNPJ(client.cnpj);
     }
     return '';
+  }
+
+  /**
+   * Busca a logo de um cliente como um objeto Blob.
+   */
+  getClientLogo(clientId: number): Observable<Blob> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get(`${this.API_URL}/${clientId}/logo`, { headers, responseType: 'blob' });
   }
 
   /**

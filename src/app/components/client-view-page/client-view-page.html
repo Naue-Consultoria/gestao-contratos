@@ -36,7 +36,7 @@
               {{ getInitials(getClientName()) }}
             </div>
             <div class="client-logo-large" *ngIf="client.logo_path">
-              <img [src]="getClientLogoUrl()" [alt]="getClientName() + ' logo'" />
+              <img [src]="logoUrl" [alt]="getClientName() + ' logo'" />
             </div>
           </div>
           <div class="client-info">
