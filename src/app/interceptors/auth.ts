@@ -13,7 +13,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     '/auth/login',
     '/auth/forgot-password',
     '/auth/reset-password',
-    '/auth/validate-reset-token'
+    '/auth/validate-reset-token',
+    '/public/proposals'
   ];
 
   // Verificar se deve adicionar token
@@ -50,17 +51,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Verificar se é uma rota pública
+      const isPublicRoute = publicUrls.some(url => req.url.includes(url));
 
       // Erro 401 - Token inválido ou expirado
-      if (error.status === 401) {
+      if (error.status === 401 && !isPublicRoute) {
         console.log('🔄 Token inválido - fazendo logout');
         authService.logout().subscribe(() => {
           router.navigate(['/login']);
         });
       }
 
-      // Erro 403 - Acesso negado
-      if (error.status === 403) {
+      // Erro 403 - Acesso negado (só redireciona se não for rota pública)
+      if (error.status === 403 && !isPublicRoute) {
         console.log('🚫 Acesso negado');
         router.navigate(['/home/dashboard']);
       }

@@ -1,42 +1,42 @@
 :root {
     /* Cores da Identidade Visual Naue Consultoria */
     --naue-black: #282C2A;
-    --naue-dark-green: #0A8060;
-    --naue-primary: #0A8060;         /* Nova cor primária - verde médio vibrante */
-    --naue-secondary: #0A8060;       /* Verde escuro como secundária */
+    --naue-dark-green: #003b2b;
+    --naue-primary: #003b2b;         /* Nova cor primária - verde escuro */
+    --naue-secondary: #003b2b;       /* Verde escuro como secundária */
     
     /* Cores derivadas */
-    --naue-primary-hover: #085A44;   /* Hover da cor primária */
-    --naue-primary-light: rgba(10, 128, 96, 0.15);
-    --naue-dark-green-light: rgba(10, 128, 96, 0.1);
+    --naue-primary-hover: #002821;   /* Hover da cor primária */
+    --naue-primary-light: rgba(0, 59, 43, 0.15);
+    --naue-dark-green-light: rgba(0, 59, 43, 0.1);
     --naue-gray-light: #f8f9fa;
     --naue-gray-border: #e5e7eb;
     --naue-text-gray: #6b7280;
     --naue-white: #FFFFFF;
     
     /* Sistema de cores para compatibilidade */
-    --primary-green: #0A8060;        /* Era #14E79F - agora verde médio vibrante */
-    --primary-green-alt: #0E9B71;    /* Era #1DD882 - tom alternativo */
-    --primary-green-dark: #0E9B71;   /* Era #0db87a - tom escuro */
-    --primary-green-darker: #0A8060; /* Era #16a860 - mais escuro */
-    --primary-green-light: #13B882;  /* Era #4de89f - tom claro */
+    --primary-green: #003b2b;        /* Verde escuro principal */
+    --primary-green-alt: #004f3a;    /* Tom alternativo */
+    --primary-green-dark: #002821;   /* Tom escuro */
+    --primary-green-darker: #001a14; /* Mais escuro */
+    --primary-green-light: #006b4f;  /* Tom claro */
     
     /* Para manter compatibilidade com --naue-neon-green */
-    --naue-neon-green: #0A8060;      /* Agora aponta para a cor primária */
-    --naue-neon-green-hover: #085A44;
-    --naue-neon-green-light: rgba(10, 128, 96, 0.15);
+    --naue-neon-green: #003b2b;      /* Agora aponta para a cor primária */
+    --naue-neon-green-hover: #002821;
+    --naue-neon-green-light: rgba(0, 59, 43, 0.15);
     
     /* Escala completa de verdes */
-    --green-50: #E8F5F1;    /* Muito claro - backgrounds */
-    --green-100: #C7E9DF;   /* Claro - hover backgrounds */
-    --green-200: #9DDCC5;   /* Claro médio - badges */
-    --green-300: #5FC49F;   /* Médio claro - bordas ativas */
-    --green-400: #2EAD7F;   /* Médio - ícones secundários */
-    --green-500: #0A8060;   /* PRIMÁRIA - botões, links */
-    --green-600: #085A44;   /* Escuro - hover states */
-    --green-700: #0A8060;   /* SECUNDÁRIA - textos, headers */
-    --green-800: #032520;   /* Muito escuro - ênfase */
-    --green-900: #021815;   /* Extra escuro - sombras */
+    --green-50: #e8f2f0;    /* Muito claro - backgrounds */
+    --green-100: #c7dfd8;   /* Claro - hover backgrounds */
+    --green-200: #9dc9bc;   /* Claro médio - badges */
+    --green-300: #73b39f;   /* Médio claro - bordas ativas */
+    --green-400: #4d9d83;   /* Médio - ícones secundários */
+    --green-500: #003b2b;   /* PRIMÁRIA - botões, links */
+    --green-600: #002821;   /* Escuro - hover states */
+    --green-700: #003b2b;   /* SECUNDÁRIA - textos, headers */
+    --green-800: #001a14;   /* Muito escuro - ênfase */
+    --green-900: #000d0a;   /* Extra escuro - sombras */
     
     /* Cores neutras */
     --dark-gray: #282C2A;

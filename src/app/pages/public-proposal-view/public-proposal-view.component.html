@@ -1,410 +1,367 @@
-<div class="public-proposal-container">
-  <!-- Loading State -->
+<!DOCTYPE html>
+<div class="landing-page">
+  
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">
+            Mariana Naue criou a primeira consultoria
+            especializada em mercado imobiliário do
+            Brasil.
+          </h1>
+          <p class="hero-subtitle">
+            Com metodologia própria e comprovada,
+            transformamos mais de 1.500 líderes e
+            centenas de construtoras, incorporadoras,
+            loteadoras e imobiliárias em referências de
+            mercado.
+          </p>
+        </div>
+        <div class="hero-image">
+          <img src="assets/images/naue.jpg" 
+               alt="Mariana Naue" 
+               class="naue-photo"
+               (error)="onImageError($event)">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Clients Carousel Section -->
+  <section class="clients-section">
+    <div class="clients-container">
+      <h2 class="clients-title">Nossos Clientes</h2>
+      <div class="clients-carousel">
+        <div class="clients-track" [style.transform]="'translateX(' + carouselTransform + ')'">
+          <div class="client-logo" *ngFor="let client of clients">
+            <img [src]="client.logo" [alt]="client.name + ' logo'" (error)="onClientLogoError($event)">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading State for Proposal -->
   <div *ngIf="isLoading" class="loading-container">
     <div class="loading-spinner">
       <i class="fas fa-spinner fa-spin"></i>
-      <p>Carregando proposta...</p>
+      <p>Carregando sua proposta personalizada...</p>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <div *ngIf="!isLoading && proposal" class="proposal-content">
-    
-    <!-- Header -->
-    <div class="proposal-header">
-      <div class="client-info">
-        <h1 class="client-name">{{ proposal.client.name }}</h1>
-        <p class="client-details">
-          <span *ngIf="proposal.client.headquarters">{{ proposal.client.headquarters }}</span>
-          <span *ngIf="proposal.client.market_sector"> • {{ proposal.client.market_sector }}</span>
-        </p>
-      </div>
+  <!-- Proposal Content -->
+  <section *ngIf="!isLoading && proposal" class="proposal-section">
+    <div class="proposal-container">
       
-      <div class="proposal-status">
-        <div class="status-badge" [ngClass]="'status-' + proposal.status">
-          {{ getStatusText(proposal.status) }}
+      <!-- Proposal Header -->
+      <div class="proposal-header">
+        <div class="proposal-header-content">
+          <h1 class="proposal-title">Sua Proposta Personalizada</h1>
+          <p class="proposal-subtitle">
+            Preparamos especialmente para você uma proposta sob medida
+          </p>
         </div>
         
-        <div *ngIf="!proposalExpired && daysUntilExpiration !== null" class="validity-info">
-          <i class="fas fa-clock"></i>
-          <span *ngIf="daysUntilExpiration > 0">Válida por {{ daysUntilExpiration }} dias</span>
-          <span *ngIf="daysUntilExpiration === 0" class="expiring-today">Expira hoje</span>
-        </div>
-        
-        <div *ngIf="proposalExpired" class="validity-info expired">
-          <i class="fas fa-exclamation-triangle"></i>
-          <span>Proposta expirada</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Proposal Info -->
-    <div class="proposal-info">
-      <h2 class="proposal-title">{{ proposal.title }}</h2>
-      <p *ngIf="proposal.description" class="proposal-description">{{ proposal.description }}</p>
-      
-      <div class="proposal-meta">
-        <div class="meta-item">
-          <i class="fas fa-calendar"></i>
-          <span>Enviada em {{ formatDate(proposal.sent_at) }}</span>
-        </div>
-        <div *ngIf="proposal.valid_until" class="meta-item">
-          <i class="fas fa-hourglass-end"></i>
-          <span>Válida até {{ formatDate(proposal.valid_until) }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Step Indicator -->
-    <div class="step-indicator">
-      <div class="step" [ngClass]="{'active': currentStep === 'view', 'completed': ['selecting', 'signing', 'confirming', 'completed'].includes(currentStep)}">
-        <div class="step-number">1</div>
-        <div class="step-label">Visualizar</div>
-      </div>
-      <div class="step" [ngClass]="{'active': currentStep === 'selecting', 'completed': ['signing', 'confirming', 'completed'].includes(currentStep)}">
-        <div class="step-number">2</div>
-        <div class="step-label">Selecionar</div>
-      </div>
-      <div class="step" [ngClass]="{'active': currentStep === 'signing', 'completed': ['confirming', 'completed'].includes(currentStep)}">
-        <div class="step-number">3</div>
-        <div class="step-label">Assinar</div>
-      </div>
-      <div class="step" [ngClass]="{'active': currentStep === 'confirming', 'completed': currentStep === 'completed'}">
-        <div class="step-number">4</div>
-        <div class="step-label">Confirmar</div>
-      </div>
-    </div>
-
-    <!-- Total Value Summary -->
-    <div class="total-summary">
-      <div class="summary-card">
-        <div class="summary-left">
-          <h3 class="total-label">Valor Total da Proposta</h3>
-          <p class="total-original">{{ formatCurrency(proposal.total_value) }}</p>
-        </div>
-        <div *ngIf="currentStep === 'selecting' || (currentStep !== 'view' && hasSelectedServices())" class="summary-right">
-          <h3 class="selected-label">Valor Selecionado</h3>
-          <p class="total-selected">{{ formatCurrency(getSelectedTotal()) }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Services List -->
-    <div class="services-section">
-      <h3 class="section-title">
-        <i class="fas fa-briefcase"></i>
-        Serviços da Proposta
-        <span *ngIf="currentStep === 'selecting'" class="section-subtitle">
-          Selecione os serviços que deseja contratar
-        </span>
-      </h3>
-      
-      <div class="services-list">
-        <div *ngFor="let service of proposal.services" class="service-card" 
-             [ngClass]="{'selected': isServiceSelected(service.service_id), 'selectable': currentStep === 'selecting'}">
-          
-          <!-- Service Selection Checkbox (only in selecting step) -->
-          <div *ngIf="currentStep === 'selecting'" class="service-checkbox">
-            <label class="checkbox-container">
-              <input type="checkbox" 
-                     [checked]="isServiceSelected(service.service_id)"
-                     (change)="toggleService(service.service_id)">
-              <span class="checkmark"></span>
-            </label>
+        <div class="proposal-status">
+          <div class="status-badge" [ngClass]="'status-' + proposal.status">
+            {{ getStatusText(proposal.status) }}
           </div>
+          
+          <div *ngIf="!proposalExpired && daysUntilExpiration !== null" class="validity-info">
+            <i class="fas fa-clock"></i>
+            <span *ngIf="daysUntilExpiration > 0">Válida por {{ daysUntilExpiration }} dias</span>
+            <span *ngIf="daysUntilExpiration === 0" class="expiring-today">Expira hoje</span>
+          </div>
+          
+          <div *ngIf="proposalExpired" class="validity-info expired">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Proposta expirada</span>
+          </div>
+        </div>
+      </div>
 
-          <!-- Service Details -->
-          <div class="service-details">
+      <!-- Services Section -->
+      <div class="services-section">
+        <h2 class="services-title">Serviços Inclusos</h2>
+        <div class="services-grid">
+          <div class="service-card" *ngFor="let service of proposal.services">
             <div class="service-header">
-              <h4 class="service-name">{{ service.service.name }}</h4>
+              <h3 class="service-name">{{ service.service.name }}</h3>
               <div class="service-price">
-                <span class="unit-price">{{ formatCurrency(getServiceValue(service)) }}</span>
-                <span class="quantity">x{{ service.quantity }}</span>
-                <span class="total-price">= {{ formatCurrency(getServiceTotal(service)) }}</span>
+                <span class="price-value">{{ formatCurrency(getServiceTotal(service)) }}</span>
+                <span class="price-label">{{ service.quantity > 1 ? service.quantity + 'x' : '' }}</span>
               </div>
             </div>
-            
             <p *ngIf="service.service.description" class="service-description">
               {{ service.service.description }}
             </p>
-            
-            <div class="service-meta">
-              <span *ngIf="service.service.duration_amount" class="duration">
+            <div class="service-features">
+              <div class="service-duration" *ngIf="service.service.duration_amount">
                 <i class="fas fa-clock"></i>
                 {{ service.service.duration_amount }} {{ service.service.duration_unit }}
-              </span>
-              <span class="category">
+              </div>
+              <div class="service-category">
                 <i class="fas fa-tag"></i>
                 {{ service.service.category }}
-              </span>
-            </div>
-
-            <!-- Client Notes (only in selecting step) -->
-            <div *ngIf="currentStep === 'selecting'" class="service-notes">
-              <label>Observações sobre este serviço (opcional):</label>
-              <textarea [ngModel]="getServiceNote(service.service_id)" 
-                        (ngModelChange)="updateServiceNote(service.service_id, $event)"
-                        placeholder="Adicione observações específicas sobre este serviço..."></textarea>
-            </div>
-
-            <!-- Show existing notes in other steps -->
-            <div *ngIf="currentStep !== 'selecting' && getServiceNote(service.service_id)" class="existing-notes">
-              <strong>Suas observações:</strong>
-              <p>{{ getServiceNote(service.service_id) }}</p>
+              </div>
             </div>
           </div>
-
-          <!-- Selection Indicator -->
-          <div *ngIf="currentStep !== 'selecting' && isServiceSelected(service.service_id)" class="selected-indicator">
-            <i class="fas fa-check-circle"></i>
+        </div>
+        
+        <div class="total-section">
+          <div class="total-card">
+            <div class="total-label">Valor Total da Proposta</div>
+            <div class="total-value">{{ formatCurrency(proposal.total_value) }}</div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Observations -->
-    <div *ngIf="proposal.observations" class="observations-section">
-      <h3 class="section-title">
-        <i class="fas fa-info-circle"></i>
-        Observações e Termos
-      </h3>
-      <div class="observations-content">
-        <p>{{ proposal.observations }}</p>
-      </div>
-    </div>
-
-    <!-- Step Content -->
-    <div class="step-content">
-      
-      <!-- View Step -->
-      <div *ngIf="currentStep === 'view'" class="step-view">
-        <div class="step-actions">
-          <button class="btn btn-primary btn-lg" 
-                  (click)="startServiceSelection()"
-                  [disabled]="proposalExpired">
-            <i class="fas fa-hand-pointer"></i>
-            Selecionar Serviços
+      <!-- Action Buttons -->
+      <div class="action-section" *ngIf="currentStep === 'view' && proposal.status === 'sent' && !proposalExpired">
+        <div class="action-buttons">
+          <button class="btn btn-primary btn-large" (click)="startServiceSelection()">
+            <i class="fas fa-check"></i>
+            Aceitar Proposta
           </button>
-          <button class="btn btn-outline-danger" 
-                  (click)="rejectProposal()">
+          <button class="btn btn-secondary btn-large" (click)="rejectProposal()">
             <i class="fas fa-times"></i>
-            Rejeitar Proposta
+            Recusar Proposta
           </button>
         </div>
       </div>
 
-      <!-- Selecting Step -->
-      <div *ngIf="currentStep === 'selecting'" class="step-selecting">
-        <div class="selecting-notes">
-          <label>Observações gerais (opcional):</label>
-          <textarea [(ngModel)]="clientObservations" 
-                    placeholder="Adicione observações gerais sobre a proposta..." 
-                    rows="3"></textarea>
-        </div>
-        
-        <div class="step-actions">
-          <button class="btn btn-secondary" 
-                  (click)="currentStep = 'view'">
-            <i class="fas fa-arrow-left"></i>
-            Voltar
-          </button>
-          <button class="btn btn-primary btn-lg" 
-                  (click)="saveServiceSelection()"
-                  [disabled]="!hasSelectedServices() || isSubmitting">
-            <i *ngIf="!isSubmitting" class="fas fa-check"></i>
-            <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
-            {{ isSubmitting ? 'Salvando...' : 'Continuar' }}
-          </button>
+    </div>
+  </section>
+
+  <!-- Service Selection Step -->
+  <section *ngIf="currentStep === 'selecting' && proposal" class="step-section">
+    <div class="step-container">
+      <div class="step-header">
+        <h2>Personalizar Serviços</h2>
+        <p>Selecione os serviços que deseja incluir em seu projeto</p>
+      </div>
+      
+      <div class="services-selection">
+        <div class="service-item" *ngFor="let service of proposal.services">
+          <div class="service-checkbox">
+            <input 
+              type="checkbox" 
+              [id]="'service-' + service.service_id"
+              [checked]="isServiceSelected(service.service_id)"
+              (change)="toggleService(service.service_id)">
+            <label [for]="'service-' + service.service_id">
+              <div class="checkbox-content">
+                <h3>{{ service.service.name }}</h3>
+                <p>{{ service.service.description }}</p>
+                <div class="service-price">{{ formatCurrency(getServiceTotal(service)) }}</div>
+              </div>
+            </label>
+          </div>
+          
+          <div class="service-notes" *ngIf="isServiceSelected(service.service_id)">
+            <label [for]="'notes-' + service.service_id">Observações específicas:</label>
+            <textarea 
+              [id]="'notes-' + service.service_id"
+              [value]="getServiceNote(service.service_id)"
+              (input)="updateServiceNoteFromEvent(service.service_id, $event)"
+              placeholder="Adicione observações específicas para este serviço..."
+              rows="3">
+            </textarea>
+          </div>
         </div>
       </div>
 
-      <!-- Signing Step -->
-      <div *ngIf="currentStep === 'signing'" class="step-signing">
-        <h3>Dados para Assinatura</h3>
-        
-        <form [formGroup]="signatureForm" class="signature-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="client_name" class="required">Nome Completo</label>
-              <input id="client_name" 
-                     type="text" 
-                     formControlName="client_name" 
-                     class="form-control"
-                     [class.error]="isFieldInvalid(signatureForm, 'client_name')"
-                     placeholder="Seu nome completo">
-              <span class="error-message" *ngIf="isFieldInvalid(signatureForm, 'client_name')">
-                Nome é obrigatório
-              </span>
-            </div>
+      <div class="selection-summary">
+        <div class="summary-total">
+          Total Selecionado: {{ formatCurrency(getSelectedTotal()) }}
+        </div>
+      </div>
 
-            <div class="form-group">
-              <label for="client_email" class="required">E-mail</label>
-              <input id="client_email" 
-                     type="email" 
-                     formControlName="client_email" 
-                     class="form-control"
-                     [class.error]="isFieldInvalid(signatureForm, 'client_email')"
-                     placeholder="seu@email.com">
-              <span class="error-message" *ngIf="isFieldInvalid(signatureForm, 'client_email')">
-                Email válido é obrigatório
-              </span>
+      <div class="step-actions">
+        <button class="btn btn-secondary" (click)="currentStep = 'view'">Voltar</button>
+        <button class="btn btn-primary" [disabled]="!hasSelectedServices() || isSubmitting" (click)="saveServiceSelection()">
+          <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+          <span *ngIf="!isSubmitting">Continuar para Assinatura</span>
+          <span *ngIf="isSubmitting">Salvando...</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Signature Step -->
+  <section *ngIf="currentStep === 'signing'" class="step-section">
+    <div class="step-container">
+      <div class="step-header">
+        <h2>Assinatura Digital</h2>
+        <p>Finalize sua proposta com a assinatura digital</p>
+      </div>
+
+      <form [formGroup]="signatureForm" class="signature-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="client_name">Nome Completo *</label>
+            <input 
+              type="text" 
+              id="client_name" 
+              formControlName="client_name"
+              [class.error]="isFieldInvalid(signatureForm, 'client_name')">
+            <div class="error-message" *ngIf="isFieldInvalid(signatureForm, 'client_name')">
+              Nome é obrigatório
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="client_phone">Telefone</label>
-              <input id="client_phone" 
-                     type="tel" 
-                     formControlName="client_phone" 
-                     class="form-control"
-                     placeholder="(00) 00000-0000">
-            </div>
-
-            <div class="form-group">
-              <label for="client_document">CPF/CNPJ</label>
-              <input id="client_document" 
-                     type="text" 
-                     formControlName="client_document" 
-                     class="form-control"
-                     placeholder="000.000.000-00">
+          <div class="form-group">
+            <label for="client_email">Email *</label>
+            <input 
+              type="email" 
+              id="client_email" 
+              formControlName="client_email"
+              [class.error]="isFieldInvalid(signatureForm, 'client_email')">
+            <div class="error-message" *ngIf="isFieldInvalid(signatureForm, 'client_email')">
+              Email válido é obrigatório
             </div>
           </div>
-        </form>
+
+          <div class="form-group">
+            <label for="client_phone">Telefone</label>
+            <input 
+              type="tel" 
+              id="client_phone" 
+              formControlName="client_phone">
+          </div>
+
+          <div class="form-group">
+            <label for="client_document">CPF/CNPJ</label>
+            <input 
+              type="text" 
+              id="client_document" 
+              formControlName="client_document">
+          </div>
+        </div>
 
         <div class="signature-section">
-          <h4>Assinatura Eletrônica</h4>
-          <p class="signature-instruction">
-            Desenhe sua assinatura no campo abaixo:
-          </p>
-          
+          <label>Assinatura Digital *</label>
           <div class="signature-canvas-container">
-            <canvas #signatureCanvas 
-                    class="signature-canvas"
-                    (mousedown)="startDrawing($event)"
-                    (mousemove)="draw($event)"
-                    (mouseup)="stopDrawing()"
-                    (mouseleave)="stopDrawing()"
-                    (touchstart)="startTouchDrawing($event)"
-                    (touchmove)="touchDraw($event)"
-                    (touchend)="stopTouchDrawing($event)">
+            <canvas 
+              #signatureCanvas
+              class="signature-canvas"
+              (mousedown)="startDrawing($event)"
+              (mousemove)="draw($event)"
+              (mouseup)="stopDrawing()"
+              (touchstart)="startTouchDrawing($event)"
+              (touchmove)="touchDraw($event)"
+              (touchend)="stopTouchDrawing($event)">
             </canvas>
-            <div *ngIf="!signatureDrawn" class="signature-placeholder">
-              Clique e arraste para assinar
+            <div class="signature-placeholder" *ngIf="!signatureDrawn">
+              Assine aqui com o mouse ou toque
             </div>
           </div>
-          
-          <div class="signature-actions">
-            <button type="button" 
-                    class="btn btn-outline-secondary" 
-                    (click)="clearSignature()">
-              <i class="fas fa-eraser"></i>
-              Limpar
-            </button>
-          </div>
+          <button type="button" class="btn btn-outline" (click)="clearSignature()">
+            Limpar Assinatura
+          </button>
         </div>
-        
+
         <div class="step-actions">
-          <button class="btn btn-secondary" 
-                  (click)="currentStep = 'selecting'">
-            <i class="fas fa-arrow-left"></i>
-            Voltar
-          </button>
-          <button class="btn btn-success btn-lg" 
-                  (click)="signProposal()"
-                  [disabled]="isSubmitting || !signatureDrawn">
-            <i *ngIf="!isSubmitting" class="fas fa-signature"></i>
+          <button type="button" class="btn btn-secondary" (click)="currentStep = 'selecting'">Voltar</button>
+          <button type="button" class="btn btn-primary" [disabled]="isSubmitting" (click)="signProposal()">
             <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
-            {{ isSubmitting ? 'Assinando...' : 'Assinar Proposta' }}
+            <span *ngIf="!isSubmitting">Finalizar Proposta</span>
+            <span *ngIf="isSubmitting">Processando...</span>
           </button>
         </div>
-      </div>
-
-      <!-- Confirming Step -->
-      <div *ngIf="currentStep === 'confirming'" class="step-confirming">
-        <div class="confirmation-summary">
-          <h3>Confirmação Final</h3>
-          <p>Revise os dados antes de finalizar:</p>
-          
-          <!-- Selected Services Summary -->
-          <div class="final-summary">
-            <h4>Serviços Selecionados:</h4>
-            <div class="final-services">
-              <ng-container *ngFor="let service of proposal.services">
-                <div class="final-service" *ngIf="isServiceSelected(service.service_id)">
-                  <span class="service-name">{{ service.service.name }}</span>
-                  <span class="service-quantity">{{ service.quantity }}x</span>
-                  <span class="service-value">{{ formatCurrency(getServiceTotal(service)) }}</span>
-                </div>
-              </ng-container>
-            </div>
-            <div class="final-total">
-              <strong>Total: {{ formatCurrency(getSelectedTotal()) }}</strong>
-            </div>
-          </div>
-        </div>
-        
-        <form [formGroup]="confirmationForm" class="confirmation-form">
-          <div class="form-group">
-            <label>Observações Finais (opcional):</label>
-            <textarea formControlName="client_observations" 
-                      placeholder="Alguma observação adicional..." 
-                      rows="3"></textarea>
-          </div>
-        </form>
-        
-        <div class="step-actions">
-          <button class="btn btn-outline-danger" 
-                  (click)="rejectProposal()">
-            <i class="fas fa-times"></i>
-            Rejeitar
-          </button>
-          <button class="btn btn-success btn-lg" 
-                  (click)="confirmProposal()"
-                  [disabled]="isSubmitting">
-            <i *ngIf="!isSubmitting" class="fas fa-check-circle"></i>
-            <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
-            {{ isSubmitting ? 'Finalizando...' : 'Confirmar Proposta' }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Completed Step -->
-      <div *ngIf="currentStep === 'completed'" class="step-completed">
-        <div class="success-message">
-          <i class="fas fa-check-circle success-icon"></i>
-          <h3>Proposta Confirmada com Sucesso!</h3>
-          <p>Sua confirmação foi registrada e o administrador foi notificado.</p>
-          <p>Em breve entraremos em contato para dar continuidade ao processo.</p>
-        </div>
-      </div>
-
-      <!-- Rejected Step -->
-      <div *ngIf="currentStep === 'rejected'" class="step-rejected">
-        <div class="rejection-message">
-          <i class="fas fa-times-circle rejection-icon"></i>
-          <h3>Proposta Rejeitada</h3>
-          <p>Sua rejeição foi registrada.</p>
-          <p>Obrigado pelo tempo dedicado à análise de nossa proposta.</p>
-        </div>
-      </div>
-      
+      </form>
     </div>
+  </section>
 
-    <!-- Footer -->
-    <footer class="proposal-footer">
-      <p>&copy; {{ currentYear }} NAUE Consultoria. Todos os direitos reservados.</p>
-      <p class="footer-info">
-        Esta é uma proposta comercial confidencial. 
-        Não compartilhe o link de acesso.
-      </p>
-    </footer>
-  </div>
+  <!-- Confirmation Step -->
+  <section *ngIf="currentStep === 'confirming'" class="step-section">
+    <div class="step-container success-container">
+      <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h2>Proposta Assinada!</h2>
+      <p>Sua proposta foi assinada com sucesso. Em breve entraremos em contato para dar continuidade ao projeto.</p>
+      
+      <form [formGroup]="confirmationForm" class="confirmation-form">
+        <div class="form-group">
+          <label for="client_observations">Observações finais (opcional)</label>
+          <textarea 
+            id="client_observations" 
+            formControlName="client_observations"
+            placeholder="Adicione qualquer observação ou dúvida que tenha sobre o projeto..."
+            rows="4">
+          </textarea>
+        </div>
 
-  <!-- Error State -->
-  <div *ngIf="!isLoading && !proposal" class="error-container">
-    <i class="fas fa-exclamation-triangle"></i>
-    <h2>Proposta não encontrada</h2>
-    <p>O link que você acessou é inválido ou expirou.</p>
-  </div>
+        <div class="step-actions">
+          <button type="button" class="btn btn-primary" [disabled]="isSubmitting" (click)="confirmProposal()">
+            <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+            <span *ngIf="!isSubmitting">Finalizar</span>
+            <span *ngIf="isSubmitting">Confirmando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Completed Step -->
+  <section *ngIf="currentStep === 'completed' && proposal" class="step-section">
+    <div class="step-container success-container">
+      <div class="success-icon">
+        <i class="fas fa-trophy"></i>
+      </div>
+      <h2>Parabéns!</h2>
+      <p>Sua proposta foi aceita e processada com sucesso. Nossa equipe entrará em contato em breve para iniciar o projeto.</p>
+      
+      <div class="completion-info">
+        <div class="info-item">
+          <i class="fas fa-calendar-check"></i>
+          <span>Proposta aceita em {{ getFormattedSignatureDate() }}</span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-dollar-sign"></i>
+          <span>Valor: {{ formatCurrency(getSelectedTotal() || proposal.total_value) }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rejected Step -->
+  <section *ngIf="currentStep === 'rejected'" class="step-section">
+    <div class="step-container">
+      <div class="rejection-icon">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <h2>Proposta Recusada</h2>
+      <p>Obrigado por considerar nossa proposta. Se tiver alguma dúvida ou quiser discutir alternativas, entre em contato conosco.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3>NAUE Consultoria</h3>
+          <p>Transformando o mercado imobiliário brasileiro</p>
+        </div>
+        <div class="footer-contact">
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <span>contato&#64;naueconsultoria.com</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <span>(11) 99999-9999</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; {{ currentYear }} NAUE Consultoria. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
 </div>

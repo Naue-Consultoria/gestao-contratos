@@ -78,7 +78,7 @@ export class PublicProposalService {
     data: PublicProposal;
     message?: string;
   }> {
-    return this.http.get<any>(`${this.apiUrl}/view/${token}`);
+    return this.http.get<any>(`${this.apiUrl}/${token}`);
   }
 
   /**

@@ -25,6 +25,19 @@ export class PublicProposalViewComponent implements OnInit {
   currentYear = new Date().getFullYear();
   @ViewChild('signatureCanvas', { static: false }) signatureCanvas!: ElementRef<HTMLCanvasElement>;
 
+  // Landing page properties
+  clients = [
+    { name: 'Cliente 1', logo: 'assets/images/clients/client1.png' },
+    { name: 'Cliente 2', logo: 'assets/images/clients/client2.png' },
+    { name: 'Cliente 3', logo: 'assets/images/clients/client3.png' },
+    { name: 'Cliente 4', logo: 'assets/images/clients/client4.png' },
+    { name: 'Cliente 5', logo: 'assets/images/clients/client5.png' },
+    { name: 'Cliente 6', logo: 'assets/images/clients/client6.png' },
+  ];
+  
+  carouselTransform = '0px';
+  private carouselInterval: any;
+
   proposal: PublicProposal | null = null;
   signatureForm!: FormGroup;
   confirmationForm!: FormGroup;
@@ -70,6 +83,7 @@ export class PublicProposalViewComponent implements OnInit {
       return;
     }
 
+    this.initializeCarousel();
     this.loadProposal();
   }
 
@@ -83,6 +97,9 @@ export class PublicProposalViewComponent implements OnInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.carouselInterval) {
+      clearInterval(this.carouselInterval);
+    }
   }
 
   private initializeForms(): void {
@@ -172,6 +189,11 @@ export class PublicProposalViewComponent implements OnInit {
 
   updateServiceNote(serviceId: number, note: string): void {
     this.serviceNotes.set(serviceId, note);
+  }
+
+  updateServiceNoteFromEvent(serviceId: number, event: Event): void {
+    const target = event.target as HTMLTextAreaElement;
+    this.updateServiceNote(serviceId, target.value);
   }
 
   getServiceNote(serviceId: number): string {
@@ -423,6 +445,13 @@ export class PublicProposalViewComponent implements OnInit {
     return new Date(dateString).toLocaleDateString('pt-BR');
   }
 
+  getFormattedSignatureDate(): string {
+    if (this.proposal?.signed_at) {
+      return this.formatDate(this.proposal.signed_at);
+    }
+    return this.formatDate(new Date().toISOString());
+  }
+
   getStatusText(status: string): string {
     const texts: { [key: string]: string } = {
       'draft': 'Rascunho',
@@ -432,5 +461,25 @@ export class PublicProposalViewComponent implements OnInit {
       'expired': 'Expirada'
     };
     return texts[status] || status;
+  }
+
+  // === LANDING PAGE METHODS ===
+
+  onImageError(event: any): void {
+    // Fallback para quando a imagem naue.jpg não existir
+    event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1hcmlhbmEgTmF1ZTwvdGV4dD48L3N2Zz4=';
+  }
+
+  onClientLogoError(event: any): void {
+    // Fallback para logos de clientes
+    event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIiBzdHJva2U9IiNkZGQiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG-yPSJtaWRkbGUiIGR5PSIuM2VtIj5DbGllbnRlPC90ZXh0Pjwvc3ZnPg==';
+  }
+
+  private initializeCarousel(): void {
+    let currentIndex = 0;
+    this.carouselInterval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % this.clients.length;
+      this.carouselTransform = `-${currentIndex * 200}px`;
+    }, 3000);
   }
 }

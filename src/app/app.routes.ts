@@ -15,7 +15,8 @@ import { ServicesTableComponent } from './components/services-table/services-tab
 import { ServiceFormComponent } from './components/services-form/services-form';
 import { ProposalsPageComponent } from './components/proposals-page/proposals-page';
 import { ProposalFormComponent } from './components/proposal-form/proposal-form';
-import { PublicProposalViewComponent } from './components/public-proposal-view/public-proposal-view';
+import { ProposalViewPageComponent } from './components/proposal-view-page/proposal-view-page';
+import { PublicProposalViewComponent } from './pages/public-proposal-view/public-proposal-view.component';
 import { ReportsPage } from './components/reports-page/reports-page';
 import { AnalyticsPageComponent } from './components/analytics-page/analytics-page';
 import { UsersPageComponent } from './components/users-page/users-page';
@@ -49,6 +50,7 @@ export const routes: Routes = [
     component: ResetPasswordComponent,
     title: 'Nova senha - NAUE Consultoria',
   },
+
 
   // Rota pública para visualização de propostas
   {
@@ -177,7 +179,7 @@ export const routes: Routes = [
       // Visualizar proposta
       {
         path: 'proposals/view/:id',
-        component: ProposalFormComponent,
+        component: ProposalViewPageComponent,
         title: 'Visualizar Proposta - NAUE Consultoria',
       },
       
