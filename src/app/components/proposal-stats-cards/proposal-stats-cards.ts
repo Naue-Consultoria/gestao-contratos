@@ -78,28 +78,28 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy {
         title: 'Total de Propostas',
         value: totalProposals,
         icon: 'fas fa-file-alt',
-        color: '#3b82f6',
+        color: '#003b2b',
         subtitle: 'Todas as propostas'
       },
       {
         title: 'Propostas Enviadas',
         value: sentProposals,
         icon: 'fas fa-paper-plane',
-        color: '#f59e0b',
+        color: '#003b2b',
         subtitle: 'Aguardando resposta'
       },
       {
         title: 'Propostas Assinadas',
         value: signedProposals,
         icon: 'fas fa-check-circle',
-        color: '#10b981',
+        color: '#003b2b',
         subtitle: 'Aceitas pelos clientes'
       },
       {
         title: 'Valor em Aberto',
         value: this.formatCurrency(pendingValue),
         icon: 'fas fa-dollar-sign',
-        color: '#ef4444',
+        color: '#003b2b',
         subtitle: 'Propostas não assinadas'
       }
     ];
@@ -111,28 +111,28 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy {
         title: 'Total de Propostas',
         value: 0,
         icon: 'fas fa-file-alt',
-        color: '#3b82f6',
+        color: '#003b2b',
         subtitle: 'Todas as propostas'
       },
       {
         title: 'Propostas Enviadas',
         value: 0,
         icon: 'fas fa-paper-plane',
-        color: '#f59e0b',
+        color: '#003b2b',
         subtitle: 'Aguardando resposta'
       },
       {
         title: 'Propostas Assinadas',
         value: 0,
         icon: 'fas fa-check-circle',
-        color: '#10b981',
+        color: '#003b2b',
         subtitle: 'Aceitas pelos clientes'
       },
       {
         title: 'Valor em Aberto',
         value: 'R$ 0,00',
         icon: 'fas fa-dollar-sign',
-        color: '#ef4444',
+        color: '#003b2b',
         subtitle: 'Propostas não assinadas'
       }
     ];

@@ -36,18 +36,6 @@
         <span *ngIf="card.trend">{{ abs(card.trend) }}%</span>
         <span *ngIf="!card.trend && card.subtitle">{{ card.subtitle }}</span>
       </div>
-      <div class="progress-container" [attr.aria-label]="'Progresso'">
-        <div class="progress-bar" role="progressbar" 
-             [attr.aria-valuenow]="50"
-             [attr.aria-valuemin]="0"
-             [attr.aria-valuemax]="100">
-          <div 
-            class="progress-fill" 
-            [style.width.%]="50"
-            [style.background-color]="card.color">
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
