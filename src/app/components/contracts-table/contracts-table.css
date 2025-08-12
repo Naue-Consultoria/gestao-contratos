@@ -430,6 +430,20 @@
 }
 
 
+/* Contract Value */
+.contract-value {
+    font-size: 0.875rem;
+}
+
+.value-amount {
+    font-weight: 600;
+    color: #0A8060;
+}
+
+:host-context(body.dark-mode) .value-amount {
+    color: #13c99d;
+}
+
 /* End Date */
 .end-date {
     display: flex;

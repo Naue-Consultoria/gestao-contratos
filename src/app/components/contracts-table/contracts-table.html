@@ -4,6 +4,9 @@
     <app-breadcrumb></app-breadcrumb>
   </div>
 
+  <!-- Stats Cards -->
+  <app-contract-stats-cards></app-contract-stats-cards>
+
   <!-- Tabs -->
   <div class="tabs">
     <div class="tab" [class.active]="currentTab === 'all'" (click)="changeTab('all')">
@@ -102,6 +105,7 @@
             <th>Cliente</th>
             <th>Tipo</th>
             <th class="text-center">Serviços</th>
+            <th>Valor Total</th>
             <th>Data de Término</th>
             <th>Status</th>
             <th>Ações</th>
@@ -132,6 +136,11 @@
                 <span class="services-badge">
                   {{ contract.servicesCount }} serviço{{ contract.servicesCount !== 1 ? 's' : '' }}
                 </span>
+              </div>
+            </td>
+            <td>
+              <div class="contract-value">
+                <span class="value-amount">{{ contract.totalValue }}</span>
               </div>
             </td>
             <td>
@@ -197,6 +206,12 @@
                 <span class="services-badge">
                   {{ contract.servicesCount }} serviço{{ contract.servicesCount !== 1 ? 's' : '' }}
                 </span>
+              </span>
+            </div>
+            <div class="table-card-row">
+              <span class="table-card-label">Valor Total:</span>
+              <span class="table-card-value">
+                <span class="value-amount">{{ contract.totalValue }}</span>
               </span>
             </div>
             <div class="table-card-row">

@@ -10,6 +10,7 @@ import {
 } from '../../services/contract';
 import { ClientService } from '../../services/client';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
+import { ContractStatsCardsComponent } from '../contract-stats-cards/contract-stats-cards';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { SearchService } from '../../services/search.service'; // Import the new service
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -32,7 +33,7 @@ interface ContractDisplay {
 @Component({
   selector: 'app-contracts-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, ContractStatsCardsComponent],
   templateUrl: './contracts-table.html',
   styleUrls: ['./contracts-table.css'],
 })
