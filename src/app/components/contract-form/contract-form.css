@@ -262,13 +262,18 @@ textarea.form-control {
 }
 
 .service-item::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--naue-primary) 0%, #13c99d 50%, #10b981 100%);
+  background: linear-gradient(
+    90deg,
+    var(--naue-primary) 0%,
+    #13c99d 50%,
+    #10b981 100%
+  );
   border-radius: 12px 12px 0 0;
 }
 
@@ -390,7 +395,11 @@ textarea.form-control {
   min-width: 120px;
   max-width: 140px;
   padding: 0.75rem 0.75rem;
-  background: linear-gradient(135deg, rgba(10, 128, 96, 0.06) 0%, rgba(10, 128, 96, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(10, 128, 96, 0.06) 0%,
+    rgba(10, 128, 96, 0.1) 100%
+  );
   border-radius: 10px;
   border: 1px solid rgba(10, 128, 96, 0.2);
   box-shadow: 0 2px 8px rgba(10, 128, 96, 0.12);
@@ -418,34 +427,6 @@ textarea.form-control {
   text-overflow: ellipsis;
   max-width: 100%;
   text-shadow: 0 1px 2px rgba(10, 128, 96, 0.1);
-}
-
-.remove-btn {
-  background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
-  border: 1.5px solid #fecaca;
-  color: #dc2626;
-  padding: 0;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 0.875rem;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.15);
-  align-self: center;
-  justify-self: center;
-}
-
-.remove-btn:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  border-color: #dc2626;
-  color: white;
-  transform: scale(1.08);
-  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.35);
 }
 
 /* Empty Services */
@@ -631,24 +612,24 @@ textarea.form-control {
 }
 
 .type-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 99px;
-    font-size: 0.813rem;
-    font-weight: 500;
-    color: white;
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.813rem;
+  font-weight: 500;
+  color: white;
 }
 
 .type-badge[data-type="Full"] {
-    background-color: #3b82f6;
+  background-color: #3b82f6;
 }
 
 .type-badge[data-type="Pontual"] {
-    background-color: #8b5cf6;
+  background-color: #8b5cf6;
 }
 
 .type-badge[data-type="Individual"] {
-    background-color: #10b981;
+  background-color: #10b981;
 }
 
 /* Services Table */
@@ -892,12 +873,12 @@ textarea.form-control {
     flex-direction: row;
     align-items: center;
   }
-  
+
   .modal-search {
     flex: 1;
     margin-bottom: 0;
   }
-  
+
   .modal-category-filter {
     flex: 0 0 200px;
   }
@@ -1064,7 +1045,7 @@ textarea.form-control {
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  
+
   .right-column .form-section {
     background: none;
     border: none;
@@ -1079,17 +1060,17 @@ textarea.form-control {
   .form-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .form-layout {
     padding: 16px;
   }
-  
+
   .form-actions {
     flex-direction: column-reverse;
     padding: 0 16px 16px 16px;
     margin: 0 -16px -16px -16px;
   }
-  
+
   .btn {
     width: 100%;
     justify-content: center;
@@ -1106,7 +1087,6 @@ textarea.form-control {
     width: 100%;
     margin-top: 1rem;
   }
-
 
   .services-table {
     font-size: 0.813rem;
@@ -1286,22 +1266,22 @@ textarea.form-control {
 
 /* Modifier classes for each status */
 .status-badge.status-active {
-  color: #10B981;
+  color: #10b981;
   background-color: rgba(16, 185, 129, 0.1);
 }
 
 .status-badge.status-completed {
-  color: #6B7280;
+  color: #6b7280;
   background-color: rgba(107, 114, 128, 0.1);
 }
 
 .status-badge.status-suspended {
-  color: #F59E0B;
+  color: #f59e0b;
   background-color: rgba(245, 158, 11, 0.1);
 }
 
 .status-badge.status-cancelled {
-  color: #EF4444;
+  color: #ef4444;
   background-color: rgba(239, 68, 68, 0.1);
 }
 
@@ -1337,19 +1317,24 @@ textarea.form-control {
 
 /* User Management (Edit Mode) */
 .assigned-users-management {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .user-management-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 1.5rem;
   padding: 1rem;
-  border: 1px solid var(--border-gray);
+  border: 1px solid #e9ecef;
   border-radius: 8px;
+  margin-bottom: 0.75rem;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.user-management-row:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 }
 
 .user-details {
@@ -1358,18 +1343,51 @@ textarea.form-control {
   gap: 0.25rem;
 }
 
-.user-details .user-name {
+.user-name {
   font-weight: 600;
-  color: var(--text-dark);
+  color: #343a40;
 }
 
-.user-details .user-email {
-  font-size: 0.8125rem;
-  color: var(--text-gray);
+.user-email {
+  font-size: 0.875rem;
+  color: #6c757d;
 }
 
-.role-selector select {
-  min-width: 180px;
+.user-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* Espaço entre o dropdown e o botão */
+}
+
+.role-selector select.form-control {
+  min-width: 140px; /* Largura mínima para o dropdown */
+}
+
+.remove-btn {
+  background-color: transparent;
+  border: none;
+  color: #dc3545; /* Cor vermelha para o ícone de lixeira */
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 1.1rem; /* Tamanho do ícone */
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.remove-btn:hover {
+  background-color: #f8d7da; /* Fundo vermelho claro ao passar o mouse */
+  color: #721c24;
+}
+
+.remove-btn:disabled {
+  color: #adb5bd;
+  cursor: not-allowed;
+  background-color: transparent;
 }
 
 /* Service Controls Responsive Layout */
@@ -1379,18 +1397,18 @@ textarea.form-control {
     gap: 1rem;
     text-align: center;
   }
-  
+
   .price-control {
     align-items: center;
     min-width: auto;
     width: 100%;
   }
-  
+
   .service-total {
     justify-self: center;
     margin: 0.5rem 0;
   }
-  
+
   .remove-btn {
     justify-self: center;
     margin-top: 0.5rem;
@@ -1401,13 +1419,13 @@ textarea.form-control {
   .service-controls {
     gap: 0.75rem;
   }
-  
+
   .service-total {
     min-width: 100px;
     max-width: 100%;
     padding: 0.5rem;
   }
-  
+
   .price-control {
     min-width: 100%;
   }
@@ -1418,11 +1436,11 @@ textarea.form-control {
     grid-template-columns: 2fr auto auto auto;
     gap: 1.5rem;
   }
-  
+
   .price-control {
     min-width: 160px;
   }
-  
+
   .service-total {
     min-width: 130px;
     max-width: 150px;
@@ -1435,30 +1453,30 @@ textarea.form-control {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
   }
-  
+
   .form-control.select-input,
   .form-control.status-select {
     min-width: 200px;
     width: 100%;
   }
-  
+
   .form-control.date-input {
     min-width: 180px;
     width: 100%;
   }
-  
+
   .form-layout {
     display: grid;
     grid-template-columns: 1.2fr 1fr;
     gap: 2rem;
   }
-  
+
   .input-with-prefix {
     width: 140px;
     min-width: 140px;
     max-width: 140px;
   }
-  
+
   .price-input {
     width: 90px;
   }
@@ -1469,16 +1487,16 @@ textarea.form-control {
   .form-grid {
     gap: 2rem;
   }
-  
+
   .form-control.select-input,
   .form-control.status-select {
     min-width: 220px;
   }
-  
+
   .form-control.date-input {
     min-width: 200px;
   }
-  
+
   .input-with-prefix {
     width: 150px;
     min-width: 150px;
@@ -1491,12 +1509,12 @@ textarea.form-control {
   .form-layout {
     grid-template-columns: 1fr;
   }
-  
+
   .form-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
-  
+
   .form-control.select-input,
   .form-control.status-select,
   .form-control.date-input {
@@ -1509,19 +1527,19 @@ textarea.form-control {
   .form-layout {
     grid-template-columns: 1fr;
   }
-  
+
   .form-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .form-control.select-input,
   .form-control.status-select,
   .form-control.date-input {
     width: 100%;
     max-width: 100%;
   }
-  
+
   .input-with-prefix {
     width: 100%;
     min-width: 100px;

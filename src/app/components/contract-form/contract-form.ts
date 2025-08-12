@@ -64,7 +64,6 @@ export class ContractFormComponent implements OnInit {
     start_date: '',
     end_date: '',
     notes: '',
-    assigned_users: [] as number[],
   };
 
   contractStatuses = [
@@ -173,8 +172,6 @@ export class ContractFormComponent implements OnInit {
           start_date: contract.start_date.split('T')[0],
           end_date: contract.end_date ? contract.end_date.split('T')[0] : '',
           notes: contract.notes || '',
-          assigned_users:
-            contract.assigned_users?.map((u: any) => u.user.id) || [],
         };
         this.selectedServices = contract.contract_services.map((cs: any) => ({
           service_id: cs.service.id,
@@ -239,12 +236,10 @@ export class ContractFormComponent implements OnInit {
   get filteredServices(): ApiService[] {
     let services = this.availableServices;
 
-    // Filter by category
     if (this.serviceCategoryFilter) {
       services = services.filter(s => s.category === this.serviceCategoryFilter);
     }
 
-    // Filter by search term
     if (this.serviceSearchTerm) {
       const search = this.serviceSearchTerm.toLowerCase();
       services = services.filter(
@@ -278,6 +273,7 @@ export class ContractFormComponent implements OnInit {
     this.serviceSearchTerm = '';
     this.serviceCategoryFilter = '';
   }
+
   closeServiceModal() {
     this.showServiceModal = false;
     this.serviceSearchTerm = '';
@@ -305,26 +301,21 @@ export class ContractFormComponent implements OnInit {
     this.selectedServices.splice(index, 1);
   }
 
-  // Método removido - quantity não é mais usado
-  // updateServiceQuantity foi removido
-
-  // Método chamado pelo directive quando o valor muda (recebe reais)
   onPriceChange(index: number, priceInReais: number) {
     const service = this.selectedServices[index];
     if (priceInReais < 0) {
       priceInReais = 0;
     }
     service.unit_value = priceInReais;
-    service.total_value = service.unit_value; // Sem multiplicação por quantity
+    service.total_value = service.unit_value; 
     
-    // Força a atualização do formulário
     this.formData.total_value = this.getTotalValue();
   }
-
 
   getTotalValue(): number {
     return this.selectedServices.reduce((sum, s) => sum + s.total_value, 0);
   }
+
   getFormattedTotalValue(): string {
     return this.contractService.formatValue(this.getTotalValue());
   }
@@ -337,18 +328,36 @@ export class ContractFormComponent implements OnInit {
     this.isUserModalOpen = false;
   }
 
-  updateAssignedUsers(selectedIds: number[]): void {
-    this.formData.assigned_users = selectedIds;
+  getAssignedUserIds(): number[] {
+    return this.assignedUsers.map(u => u.user.id);
   }
 
-  getSelectedUserNames(): string {
-    if (this.formData.assigned_users.length === 0) {
-      return 'Nenhum usuário selecionado';
-    }
-    return this.formData.assigned_users
-      .map((id: number) => this.allUsers.find(user => user.id === id)?.name)
-      .filter((name?: string): name is string => !!name)
-      .join(', ');
+  updateAssignedUsers(selectedIds: number[]): void {
+    const currentIds = new Set(this.assignedUsers.map(u => u.user.id));
+    selectedIds.forEach(id => {
+        if (!currentIds.has(id)) {
+            const userToAdd = this.allUsers.find(u => u.id === id);
+            if (userToAdd) {
+                this.assignedUsers.push({
+                    id: 0, 
+                    user: {
+                        id: userToAdd.id,
+                        name: userToAdd.name,
+                        email: userToAdd.email
+                    },
+                    role: 'viewer' 
+                });
+            }
+        }
+    });
+    this.closeUserModal();
+  }
+
+  removeUser(userToRemove: AssignedUser): void {
+      const userIndex = this.assignedUsers.findIndex(u => u.user.id === userToRemove.user.id);
+      if (userIndex > -1) {
+          this.assignedUsers.splice(userIndex, 1);
+      }
   }
 
   validateForm(): boolean {
@@ -371,6 +380,8 @@ export class ContractFormComponent implements OnInit {
     }
     this.isSaving = true;
 
+    const userIdsToSave = this.assignedUsers.map(u => u.user.id);
+
     try {
       const services: ContractServiceItem[] = this.selectedServices.map(
         (s) => ({
@@ -389,7 +400,7 @@ export class ContractFormComponent implements OnInit {
           services: services,
           notes: this.formData.notes || null,
           status: this.formData.status,
-          assigned_users: this.formData.assigned_users,
+          assigned_users: userIdsToSave,
         };
         await firstValueFrom(
           this.contractService.updateContract(this.contractId, updateData)
@@ -404,7 +415,7 @@ export class ContractFormComponent implements OnInit {
           end_date: this.formData.end_date || null,
           notes: this.formData.notes || null,
           services,
-          assigned_users: this.formData.assigned_users,
+          assigned_users: userIdsToSave,
         };
         await firstValueFrom(this.contractService.createContract(createData));
         this.modalService.showSuccess('Contrato criado com sucesso!', 'Sucesso');
@@ -420,21 +431,26 @@ export class ContractFormComponent implements OnInit {
   cancel() {
     this.router.navigate(['/home/contracts']);
   }
+
   enableEdit() {
     this.isViewMode = false;
     this.isEditMode = true;
   }
+
   formatCurrency(value: number): string {
     return this.contractService.formatValue(value);
   }
+
   getClientName(clientId: number | null): string {
     const client = this.clients.find((c) => c.id === clientId);
     return client ? client.name : '-';
   }
+
   getStatusText(status: string): string {
     if (!status) return '';
     return this.contractService.getStatusText(status);
   }
+
   isServiceSelected(serviceId: number): boolean {
     return this.selectedServices.some((s) => s.service_id === serviceId);
   }

@@ -13,9 +13,7 @@
   <div class="table-container" *ngIf="!isLoading">
     <form (ngSubmit)="save()" class="contract-form" *ngIf="!isViewMode">
       <div class="form-layout">
-        <!-- Lado Esquerdo: Informações Básicas -->
         <div class="left-column">
-          <!-- Informações Básicas -->
           <div class="form-section">
             <h3 class="section-title">
               <i class="fas fa-info-circle"></i>
@@ -106,25 +104,6 @@
             </div>
             
             <div class="form-group">
-              <label class="form-label">Atribuir Usuários</label>
-              <div class="user-assignment-box">
-                <div class="selected-users-display">
-                  <i class="fas fa-users"></i>
-                  <span>{{ getSelectedUserNames() }}</span>
-                </div>
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  (click)="openUserModal()"
-                  [disabled]="isLoading"
-                >
-                  <i class="fas fa-edit"></i>
-                  Selecionar
-                </button>
-              </div>
-            </div>
-            
-            <div class="form-group">
               <label class="form-label">Observações</label>
               <textarea
                 class="form-control"
@@ -138,9 +117,7 @@
           </div>
         </div>
 
-        <!-- Lado Direito: Serviços e Gerenciar Acessos -->
         <div class="right-column">
-          <!-- Serviços do Contrato -->
           <div class="form-section">
             <h3 class="section-title">
               <i class="fas fa-briefcase"></i>
@@ -203,35 +180,56 @@
             </div>
           </div>
 
-          <!-- Gerenciar Acessos (se aplicável) -->
-          <div class="form-section" *ngIf="isEditMode && assignedUsers.length > 0">
+          <div class="form-section">
             <h3 class="section-title">
-              <i class="fas fa-users-cog"></i>Gerenciar Acessos
+                <i class="fas fa-users-cog"></i>
+                Usuários e Permissões
             </h3>
+            <div class="services-header">
+                <button 
+                    type="button" 
+                    class="btn btn-secondary" 
+                    (click)="openUserModal()"
+                    [disabled]="isLoading">
+                    <i class="fas fa-plus"></i> 
+                    Adicionar Usuário
+                </button>
+            </div>
             <div class="assigned-users-management">
-              <div *ngFor="let assignedUser of assignedUsers" class="user-management-row">
-                <div class="user-details">
-                  <span class="user-name">{{ assignedUser.user.name }}</span>
-                  <span class="user-email">{{ assignedUser.user.email }}</span>
+                <div *ngIf="assignedUsers.length === 0" class="no-users-message" style="text-align: center; padding: 1rem; color: #6c757d;">
+                    Nenhum usuário atribuído.
                 </div>
-                <div class="role-selector">
-                  <select 
-                    class="form-control"
-                    [ngModel]="assignedUser.role"
-                    (ngModelChange)="onRoleChange(assignedUser, $event)"
-                    [name]="'role_' + assignedUser.user.id">
-                    <option *ngFor="let role of availableRoles" [value]="role.value">
-                      {{ role.label }}
-                    </option>
-                  </select>
+
+                <div *ngFor="let assignedUser of assignedUsers" class="user-management-row">
+                    <div class="user-details">
+                        <span class="user-name">{{ assignedUser.user.name }}</span>
+                        <span class="user-email">{{ assignedUser.user.email }}</span>
+                    </div>
+                    <div class="user-controls">
+                        <div class="role-selector">
+                            <select 
+                                class="form-control" 
+                                [ngModel]="assignedUser.role"
+                                (ngModelChange)="onRoleChange(assignedUser, $event)"
+                                [name]="'role_' + assignedUser.user.id"
+                                [disabled]="!isEditMode"
+                                title="{{ isEditMode ? 'Alterar permissão' : 'É preciso salvar o contrato para definir permissões' }}">
+                                <option *ngFor="let role of availableRoles" [value]="role.value">
+                                    {{ role.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <button type="button" class="remove-btn" (click)="removeUser(assignedUser)" title="Remover usuário">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
-              </div>
+
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Form Actions -->
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isSaving">
           <i class="fas fa-arrow-left"></i>
@@ -246,7 +244,6 @@
       </div>
     </form>
 
-    <!-- View Mode -->
     <div class="view-mode" *ngIf="isViewMode">
       <div class="view-grid">
         <div class="view-section">
@@ -417,7 +414,7 @@
 <app-user-selection-modal
   [isOpen]="isUserModalOpen"
   [allUsers]="allUsers"
-  [initialSelectedIds]="formData.assigned_users"
+  [initialSelectedIds]="getAssignedUserIds()"
   (close)="closeUserModal()"
   (selectionConfirmed)="updateAssignedUsers($event)"
 >
