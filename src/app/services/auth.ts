@@ -281,8 +281,13 @@ export class AuthService {
   private loadUserFromStorage(): void {
     const userJson = localStorage.getItem('user');
     if (userJson && this.isAuthenticated()) {
-      const user = JSON.parse(userJson);
-      this.currentUserSubject.next(user);
+      try {
+        const user = JSON.parse(userJson);
+        this.currentUserSubject.next(user);
+      } catch (error) {
+        console.error('❌ Erro ao analisar dados do usuário no localStorage. Limpando sessão.', error);
+        this.clearSession();
+      }
     } else {
       this.clearSession();
     }
