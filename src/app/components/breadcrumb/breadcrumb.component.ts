@@ -134,6 +134,34 @@ import { takeUntil } from 'rxjs/operators';
       }
     }
 
+    /* Específico para 1280x800 */
+    @media (width: 1280px) and (height: 800px) {
+      .breadcrumb-container {
+        padding: 0.5rem 0;
+        margin-bottom: 0.75rem;
+      }
+
+      .breadcrumb {
+        font-size: 0.8rem;
+      }
+
+      .breadcrumb-link,
+      .breadcrumb-text {
+        padding: 0.2rem 0.4rem;
+        gap: 0.3rem;
+      }
+
+      .breadcrumb-link i,
+      .breadcrumb-text i {
+        font-size: 0.7rem;
+      }
+
+      .breadcrumb-separator {
+        margin: 0 0.2rem;
+        font-size: 0.55rem;
+      }
+    }
+
     /* Responsivo */
     @media (max-width: 767px) {
       .breadcrumb-container {

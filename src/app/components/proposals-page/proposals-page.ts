@@ -43,9 +43,17 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   showSendModal = false;
   selectedProposalForSending: Proposal | null = null;
 
+  // Dropdown control
+  activeDropdownId: number | null = null;
+
   ngOnInit() {
     this.loadData();
     window.addEventListener('refreshProposals', this.loadData.bind(this));
+    
+    // Fechar dropdown quando clicar fora
+    document.addEventListener('click', () => {
+      this.activeDropdownId = null;
+    });
   }
 
   ngOnDestroy() {
@@ -302,6 +310,33 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       document.body.removeChild(textArea);
       this.modalService.showSuccess('Link copiado para a área de transferência!');
     }
+  }
+
+  // Métodos para controlar dropdown
+  toggleDropdown(proposalId: number, event: MouseEvent) {
+    event.stopPropagation();
+    if (this.activeDropdownId === proposalId) {
+      this.activeDropdownId = null;
+    } else {
+      this.activeDropdownId = proposalId;
+      
+      // Calcular posição para position: fixed
+      setTimeout(() => {
+        const target = event.target as HTMLElement;
+        const button = target.closest('.dropdown-btn') as HTMLElement;
+        const buttonRect = button.getBoundingClientRect();
+        const dropdown = document.querySelector('.dropdown-menu') as HTMLElement;
+        
+        if (dropdown) {
+          dropdown.style.top = `${buttonRect.bottom + 4}px`;
+          dropdown.style.left = `${buttonRect.right - dropdown.offsetWidth}px`;
+        }
+      }, 0);
+    }
+  }
+
+  closeDropdown() {
+    this.activeDropdownId = null;
   }
 
 }

@@ -91,6 +91,7 @@
             </td>
             <td>
               <div class="action-buttons">
+                <!-- Botão de Visualizar - sempre visível -->
                 <button
                   class="action-btn"
                   (click)="viewProposal(proposal.id); $event.stopPropagation()"
@@ -98,20 +99,8 @@
                 >
                   <i class="fas fa-eye"></i>
                 </button>
-                <button
-                  class="action-btn"
-                  (click)="editProposal(proposal.id); $event.stopPropagation()"
-                  title="Editar"
-                >
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button
-                  class="action-btn"
-                  (click)="duplicateProposal(proposal, $event)"
-                  title="Duplicar"
-                >
-                  <i class="fas fa-copy"></i>
-                </button>
+
+                <!-- Botão de Link Público/Gerar Link - condicional -->
                 <button
                   *ngIf="proposal.raw.status === 'draft'"
                   class="action-btn generate-link-btn"
@@ -121,14 +110,6 @@
                   <i class="fas fa-external-link-alt"></i>
                 </button>
                 <button
-                  *ngIf="proposal.raw.status === 'draft'"
-                  class="action-btn send-btn"
-                  (click)="openSendProposalModal(proposal, $event)"
-                  title="Enviar Proposta"
-                >
-                  <i class="fas fa-paper-plane"></i>
-                </button>
-                <button
                   *ngIf="proposal.raw.status === 'sent' || proposal.raw.status === 'signed' || proposal.raw.status === 'rejected' || proposal.raw.status === 'converted'"
                   class="action-btn link-btn"
                   (click)="copyPublicLink(proposal, $event)"
@@ -136,20 +117,46 @@
                 >
                   <i class="fas fa-link"></i>
                 </button>
-                <button
-                  class="action-btn"
-                  (click)="generatePDF(proposal, $event)"
-                  title="Gerar PDF"
-                >
-                  <i class="fas fa-file-pdf"></i>
-                </button>
-                <button
-                  class="action-btn delete-btn"
-                  (click)="deleteProposal(proposal, $event)"
-                  title="Excluir"
-                >
-                  <i class="fas fa-trash"></i>
-                </button>
+
+                <!-- Dropdown Menu com 3 pontos -->
+                <div class="dropdown" [class.open]="proposal.id === activeDropdownId">
+                  <button
+                    class="action-btn dropdown-btn"
+                    (click)="toggleDropdown(proposal.id, $event)"
+                    title="Mais ações"
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="dropdown-menu" *ngIf="proposal.id === activeDropdownId">
+                    <!-- Editar - só se não estiver assinada -->
+                    <button
+                      *ngIf="proposal.raw.status !== 'signed' && proposal.raw.status !== 'converted'"
+                      class="dropdown-item"
+                      (click)="editProposal(proposal.id); closeDropdown()"
+                    >
+                      <i class="fas fa-edit"></i>
+                      <span>Editar</span>
+                    </button>
+                    
+                    <!-- Gerar PDF -->
+                    <button
+                      class="dropdown-item"
+                      (click)="generatePDF(proposal, $event); closeDropdown()"
+                    >
+                      <i class="fas fa-file-pdf"></i>
+                      <span>Gerar PDF</span>
+                    </button>
+                    
+                    <!-- Excluir -->
+                    <button
+                      class="dropdown-item delete-item"
+                      (click)="deleteProposal(proposal, $event); closeDropdown()"
+                    >
+                      <i class="fas fa-trash"></i>
+                      <span>Excluir</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </td>
           </tr>

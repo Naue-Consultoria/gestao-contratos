@@ -45,8 +45,8 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy {
     try {
       const response = await firstValueFrom(this.proposalService.getProposalStats());
       
-      if (response && response.success && response.stats) {
-        this.buildStatCards(response.stats);
+      if (response && response.success && response.data) {
+        this.buildStatCards(response.data);
       } else {
         // Se não há dados, mostra zeros
         this.buildDefaultCards();
@@ -71,7 +71,8 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy {
     const totalProposals = stats.total || 0;
     const sentProposals = stats.byStatus?.sent || 0;
     const signedProposals = stats.byStatus?.signed || 0;
-    const pendingValue = (stats.totalValue || 0) - (stats.signedValue || 0);
+    const acceptedProposals = stats.byStatus?.accepted || 0;
+    const pendingValue = (stats.totalValue || 0) - (stats.acceptedValue || 0);
 
     this.cards = [
       {
@@ -79,28 +80,24 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy {
         value: totalProposals,
         icon: 'fas fa-file-alt',
         color: '#003b2b',
-        subtitle: 'Todas as propostas'
       },
       {
         title: 'Propostas Enviadas',
         value: sentProposals,
         icon: 'fas fa-paper-plane',
         color: '#003b2b',
-        subtitle: 'Aguardando resposta'
       },
       {
         title: 'Propostas Assinadas',
-        value: signedProposals,
+        value: signedProposals + acceptedProposals,
         icon: 'fas fa-check-circle',
         color: '#003b2b',
-        subtitle: 'Aceitas pelos clientes'
       },
       {
         title: 'Valor em Aberto',
         value: this.formatCurrency(pendingValue),
         icon: 'fas fa-dollar-sign',
         color: '#003b2b',
-        subtitle: 'Propostas não assinadas'
       }
     ];
   }
@@ -112,28 +109,24 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy {
         value: 0,
         icon: 'fas fa-file-alt',
         color: '#003b2b',
-        subtitle: 'Todas as propostas'
       },
       {
         title: 'Propostas Enviadas',
         value: 0,
         icon: 'fas fa-paper-plane',
         color: '#003b2b',
-        subtitle: 'Aguardando resposta'
       },
       {
         title: 'Propostas Assinadas',
         value: 0,
         icon: 'fas fa-check-circle',
         color: '#003b2b',
-        subtitle: 'Aceitas pelos clientes'
       },
       {
         title: 'Valor em Aberto',
         value: 'R$ 0,00',
         icon: 'fas fa-dollar-sign',
         color: '#003b2b',
-        subtitle: 'Propostas não assinadas'
       }
     ];
   }
