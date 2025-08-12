@@ -384,7 +384,6 @@
           class="service-option"
           *ngFor="let service of filteredServices"
           (click)="addService(service)"
-          [class.disabled]="isServiceSelected(service.id)"
         >
           <div class="service-option-info">
             <h4>{{ service.name }}</h4>
@@ -396,14 +395,7 @@
             </div>
           </div>
           <div class="service-option-action">
-            <i
-              class="fas fa-plus-circle"
-              *ngIf="!isServiceSelected(service.id)"
-            ></i>
-            <i
-              class="fas fa-check-circle"
-              *ngIf="isServiceSelected(service.id)"
-            ></i>
+            <i class="fas fa-plus-circle"></i>
           </div>
         </div>
       </div>

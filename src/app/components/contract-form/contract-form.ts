@@ -281,10 +281,6 @@ export class ContractFormComponent implements OnInit {
   }
 
   addService(service: ApiService) {
-    if (this.isServiceSelected(service.id)) {
-      this.modalService.showWarning('Serviço já adicionado');
-      return;
-    }
     this.selectedServices.push({
       service_id: service.id,
       name: service.name,
