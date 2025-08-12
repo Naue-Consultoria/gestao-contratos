@@ -9,6 +9,7 @@ import { ServiceService, ApiService } from '../../services/service';
 import { ModalService } from '../../services/modal.service';
 import { UserService } from '../../services/user';
 import { AuthService } from '../../services/auth';
+import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { UserSelectionModalComponent } from '../user-selection-modal/user-selection-modal';
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
@@ -56,6 +57,7 @@ export class ContractFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private userService = inject(UserService);
   private authService = inject(AuthService);
+  private breadcrumbService = inject(BreadcrumbService);
 
   formData: any = {
     contract_number: '',
@@ -122,14 +124,35 @@ export class ContractFormComponent implements OnInit {
       this.contractId = parseInt(id);
       this.isEditMode = !isView;
       this.isViewMode = isView;
+      this.setBreadcrumb(id, isView);
       this.loadContract();
     } else {
+      this.setBreadcrumb();
       this.generateContractNumber();
       this.setDefaultFirstInstallmentDate();
       this.isLoading = false;
     }
 
     this.loadInitialData();
+  }
+
+  private setBreadcrumb(id?: string, isView?: boolean) {
+    const baseBreadcrumbs: any[] = [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Contratos', url: '/home/contracts' }
+    ];
+
+    if (id) {
+      if (isView) {
+        baseBreadcrumbs.push({ label: `Visualizar Contrato #${id}` });
+      } else {
+        baseBreadcrumbs.push({ label: `Editar Contrato #${id}` });
+      }
+    } else {
+      baseBreadcrumbs.push({ label: 'Novo Contrato' });
+    }
+
+    this.breadcrumbService.setBreadcrumbs(baseBreadcrumbs);
   }
 
   private setDefaultFirstInstallmentDate() {
@@ -211,6 +234,11 @@ export class ContractFormComponent implements OnInit {
         // Carregar parcelas se existirem
         if (contract.installments && contract.installments.length > 0) {
           this.apiInstallments = contract.installments;
+          
+          // Definir a data da primeira parcela se existir
+          if (contract.installments[0] && contract.installments[0].due_date) {
+            this.firstInstallmentDate = contract.installments[0].due_date.split('T')[0];
+          }
         }
       }
     } catch (error) {

@@ -214,15 +214,14 @@
 
         <div class="right-column">
           <div class="form-section">
-            <h3 class="section-title">
-              <i class="fas fa-briefcase"></i>
-              Serviços do Contrato
-            </h3>
-        
-            <div class="services-header">
+            <div class="section-header">
+              <h3 class="section-title">
+                <i class="fas fa-briefcase"></i>
+                Serviços do Contrato
+              </h3>
               <button
                 type="button"
-                class="btn btn-primary"
+                class="btn btn-primary btn-sm"
                 (click)="openServiceModal()"
                 [disabled]="isLoading"
               >
@@ -230,47 +229,86 @@
                 Adicionar Serviço
               </button>
             </div>
-            
-            <div class="selected-services" *ngIf="selectedServices.length > 0">
-              <div
-                class="service-item"
-                *ngFor="let service of selectedServices; let i = index"
-              >
-                <div class="service-info">
-                  <h4 class="service-name">{{ service.name }}</h4>
-                </div>
-                <div class="service-controls">
-                  <div class="price-control">
-                    <label>Valor:</label>
-                    <input
-                      type="text"
-                      class="price-input"
-                      [(ngModel)]="service.unit_value"
-                      (ngModelChange)="onPriceChange(i, $event)"
-                      [name]="'price_' + i"
-                      placeholder="R$ 1.500,00"
-                      appCurrencyMask
-                    />
-                  </div>
-                  <div class="service-total">
-                    <label>Total:</label>
-                    <span class="total-value">{{ formatCurrency(service.total_value) }}</span>
-                  </div>
-                  <button
-                    type="button"
-                    class="remove-btn"
-                    (click)="removeService(i)"
-                  >
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
+
+            <!-- Estado vazio -->
+            <div class="empty-services" *ngIf="selectedServices.length === 0">
+              <div class="empty-icon">
+                <i class="fas fa-briefcase"></i>
               </div>
+              <h4 class="empty-title">Nenhum serviço adicionado</h4>
+              <p class="empty-description">Adicione serviços para começar a montar seu contrato</p>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="openServiceModal()"
+                [disabled]="isLoading"
+              >
+                <i class="fas fa-plus"></i>
+                Adicionar Primeiro Serviço
+              </button>
             </div>
             
-            <div class="contract-summary" *ngIf="selectedServices.length > 0">
-              <div class="summary-item total">
-                <span class="summary-label">Valor Total:</span>
-                <span class="summary-value">{{ getFormattedTotalValue() }}</span>
+            <!-- Lista de serviços -->
+            <div class="services-list" *ngIf="selectedServices.length > 0">
+              <div class="selected-services" [class.enable-scroll]="selectedServices.length > 3">
+                <div
+                  class="service-card"
+                  *ngFor="let service of selectedServices; let i = index"
+                >
+                  <div class="service-header">
+                    <div class="service-info">
+                      <h4 class="service-name">{{ service.name }}</h4>
+                      <div class="service-meta">
+                        <span class="service-category">
+                          <i class="fas fa-tag"></i>
+                          {{ service.category }}
+                        </span>
+                        <span class="service-duration" *ngIf="service.duration && service.duration_unit">
+                          <i class="fas fa-clock"></i>
+                          {{ service.duration }} {{ service.duration_unit }}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="remove-service-btn"
+                      (click)="removeService(i)"
+                      title="Remover serviço"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+
+                  <div class="service-pricing">
+                    <div class="price-input-group">
+                      <label class="price-label">Valor do Serviço</label>
+                      <div class="price-input-wrapper">
+                        <span class="currency-symbol">R$</span>
+                        <input
+                          type="text"
+                          class="price-input"
+                          [(ngModel)]="service.unit_value"
+                          (ngModelChange)="onPriceChange(i, $event)"
+                          [name]="'price_' + i"
+                          placeholder="0,00"
+                          appCurrencyMask
+                        />
+                      </div>
+                    </div>
+                    <div class="price-display">
+                      <span class="price-label">Total</span>
+                      <span class="price-value">{{ formatCurrency(service.total_value) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Resumo do contrato -->
+              <div class="contract-total-summary">
+                <div class="summary-row total">
+                  <span class="summary-label">Valor Total do Contrato</span>
+                  <span class="summary-value">{{ getFormattedTotalValue() }}</span>
+                </div>
               </div>
             </div>
           </div>

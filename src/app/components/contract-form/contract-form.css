@@ -333,67 +333,234 @@ textarea.form-control {
    SERVICES SECTION
    ======================================== */
 
-.services-header {
+.section-header {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
+
+
+/* Estado vazio */
+.empty-services {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  border: 2px dashed #e1e4e8;
+  border-radius: 12px;
+  background: #f8f9fa;
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  background: #e1e4e8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.empty-icon i {
+  font-size: 24px;
+  color: #6c737f;
+}
+
+.empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.empty-description {
+  font-size: 14px;
+  color: #6c737f;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+/* Lista de serviços */
+.services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 
 .selected-services {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-height: none;
+  overflow-y: visible;
 }
 
-.service-item {
-  background: #f8f9fa;
+/* Ativar scroll apenas quando há mais de 3 serviços */
+.selected-services.enable-scroll {
+  max-height: 480px; /* Aproximadamente 3 cards + gaps */
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* Scrollbar personalizada apenas quando scroll está ativo */
+.selected-services.enable-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.selected-services.enable-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.selected-services.enable-scroll::-webkit-scrollbar-thumb {
+  background: var(--naue-primary);
+  border-radius: 3px;
+}
+
+.selected-services.enable-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--naue-primary-hover);
+}
+
+/* Card de serviço */
+.service-card {
+  background: white;
   border: 1px solid #e1e4e8;
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 12px;
+  padding: 20px;
   transition: all 0.2s ease;
+  position: relative;
 }
 
-.service-item:hover {
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--naue-primary) 0%, var(--naue-primary-hover) 100%);
+  border-radius: 12px 12px 0 0;
+}
+
+.service-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
   border-color: var(--naue-primary);
-  box-shadow: var(--shadow-sm);
+}
+
+/* Header do serviço */
+.service-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
 
 .service-info {
-  margin-bottom: 12px;
+  flex: 1;
 }
 
 .service-name {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 4px 0;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
 }
 
-.service-controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
+.service-meta {
+  display: flex;
   gap: 16px;
-  align-items: center;
+  flex-wrap: wrap;
 }
 
-.price-control {
+.service-category,
+.service-duration {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6c737f;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.service-category i,
+.service-duration i {
+  color: var(--naue-primary);
+}
+
+/* Botão de remover */
+.remove-service-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #fef2f2;
+  color: #dc3545;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.remove-service-btn:hover {
+  background: #dc3545;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Precificação do serviço */
+.service-pricing {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  align-items: end;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.price-input-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
-.price-control label {
+.price-label {
   font-size: 12px;
   font-weight: 600;
   color: #344054;
 }
 
-.price-input {
-  padding: 8px 12px;
-  border: 1px solid #d0d5dd;
-  border-radius: 6px;
+.price-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 12px;
   font-size: 14px;
+  font-weight: 600;
+  color: #6c737f;
+  z-index: 1;
+}
+
+.price-input {
+  width: 100%;
+  padding: 12px 12px 12px 32px;
+  border: 2px solid #e1e4e8;
+  border-radius: 8px;
+  font-size: 16px;
   font-weight: 600;
   text-align: right;
   background: white;
@@ -406,42 +573,67 @@ textarea.form-control {
   box-shadow: 0 0 0 3px rgba(0, 59, 43, 0.1);
 }
 
-.service-total {
-  text-align: right;
+.price-input::placeholder {
+  color: #98a2b3;
+  font-weight: normal;
 }
 
-.service-total label {
-  font-size: 12px;
-  font-weight: 600;
+.price-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.price-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--naue-primary);
+}
+
+/* Resumo total do contrato */
+.contract-total-summary {
+  background: linear-gradient(135deg, var(--naue-primary-light) 0%, rgba(0, 59, 43, 0.05) 100%);
+  border: 1px solid rgba(0, 59, 43, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 8px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.summary-row.total {
+  border-top: 2px solid rgba(0, 59, 43, 0.2);
+  margin-top: 12px;
+  padding-top: 16px;
+}
+
+.summary-row .summary-label {
+  font-size: 14px;
+  font-weight: 500;
   color: #344054;
-  display: block;
-  margin-bottom: 4px;
 }
 
-.total-value {
+.summary-row.total .summary-label {
   font-size: 16px;
   font-weight: 700;
-  color: var(--success);
+  color: #1a1a1a;
 }
 
-.remove-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: #fef2f2;
-  color: #dc3545;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+.summary-row .summary-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--naue-primary);
 }
 
-.remove-btn:hover {
-  background: #dc3545;
-  color: white;
-  transform: scale(1.05);
+.summary-row.total .summary-value {
+  font-size: 24px;
+  color: var(--naue-primary);
 }
 
 /* ========================================
@@ -989,5 +1181,26 @@ textarea.form-control {
 
   .service-option-action {
     align-self: flex-end;
+  }
+
+  /* Responsividade da seção de serviços */
+  .service-pricing {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .price-display {
+    align-items: flex-start;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .service-meta {
+    flex-direction: column;
+    gap: 8px;
   }
 }

@@ -171,7 +171,7 @@ export class BreadcrumbService {
         const baseRoute = `/${urlParts[1]}/${urlParts[2]}/edit`;
         if (this.routeMap[baseRoute]) {
           const breadcrumbs = [...this.routeMap[baseRoute]];
-          breadcrumbs[breadcrumbs.length - 1].label += ` #${urlParts[4]}`;
+          breadcrumbs[breadcrumbs.length - 1].label = `Editar ${this.getEntityName(urlParts[2])} #${urlParts[4]}`;
           this.setBreadcrumbs(breadcrumbs);
           return;
         }
@@ -182,7 +182,7 @@ export class BreadcrumbService {
         const baseRoute = `/${urlParts[1]}/${urlParts[2]}/view`;
         if (this.routeMap[baseRoute]) {
           const breadcrumbs = [...this.routeMap[baseRoute]];
-          breadcrumbs[breadcrumbs.length - 1].label += ` #${urlParts[4]}`;
+          breadcrumbs[breadcrumbs.length - 1].label = `Visualizar ${this.getEntityName(urlParts[2])} #${urlParts[4]}`;
           this.setBreadcrumbs(breadcrumbs);
           return;
         }
@@ -190,7 +190,7 @@ export class BreadcrumbService {
       
       // Para URLs como /home/routines/123 (detalhes do contrato)
       if (urlParts.length === 4 && urlParts[2] === 'routines' && !isNaN(Number(urlParts[3]))) {
-        const breadcrumbs = [
+        const breadcrumbs: any[] = [
           { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
           { label: 'Rotinas de Contratos', url: '/home/routines' },
           { label: `Detalhes do Contrato #${urlParts[3]}` }
@@ -203,18 +203,59 @@ export class BreadcrumbService {
       if (urlParts.length === 4 && !isNaN(Number(urlParts[3]))) {
         const baseRoute = `/${urlParts[1]}/${urlParts[2]}`;
         if (this.routeMap[baseRoute]) {
-          const breadcrumbs = [...this.routeMap[baseRoute]];
-          breadcrumbs.push({ label: `Detalhes #${urlParts[3]}` });
+          const breadcrumbs: any[] = [...this.routeMap[baseRoute]];
+          breadcrumbs.push({ label: `Detalhes ${this.getEntityName(urlParts[2])} #${urlParts[3]}` });
           this.setBreadcrumbs(breadcrumbs);
           return;
         }
       }
     }
 
-    // Fallback para rota não mapeada
-    this.setBreadcrumbs([
+    // Fallback para rota não mapeada - mantém pelo menos o breadcrumb padrão
+    const fallbackBreadcrumbs: any[] = [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' }
-    ]);
+    ];
+    
+    // Tenta identificar a seção atual
+    if (urlParts.length >= 3) {
+      const section = urlParts[2];
+      const sectionName = this.getSectionName(section);
+      if (sectionName) {
+        fallbackBreadcrumbs.push({ label: sectionName, url: `/${urlParts[1]}/${section}` });
+      }
+    }
+    
+    this.setBreadcrumbs(fallbackBreadcrumbs);
+  }
+
+  private getEntityName(entity: string): string {
+    const entityMap: { [key: string]: string } = {
+      'contracts': 'Contrato',
+      'clients': 'Cliente',
+      'services': 'Serviço',
+      'proposals': 'Proposta',
+      'users': 'Usuário'
+    };
+    return entityMap[entity] || entity;
+  }
+
+  private getSectionName(section: string): string {
+    const sectionMap: { [key: string]: string } = {
+      'contracts': 'Contratos',
+      'clients': 'Clientes',
+      'services': 'Serviços',
+      'proposals': 'Propostas',
+      'users': 'Usuários',
+      'routines': 'Rotinas de Contratos',
+      'dashboard': 'Dashboard',
+      'analytics': 'Analytics',
+      'reports': 'Relatórios',
+      'notifications': 'Notificações',
+      'settings': 'Configurações',
+      'profile': 'Meu Perfil',
+      'help': 'Ajuda'
+    };
+    return sectionMap[section] || '';
   }
 
   addBreadcrumb(item: BreadcrumbItem): void {

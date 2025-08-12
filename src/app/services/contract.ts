@@ -375,7 +375,7 @@ export class ContractService {
 
   // Verificar se forma de pagamento permite parcelamento
   isPaymentMethodInstallable(paymentMethod: string): boolean {
-    const installableMethods = ['Boleto', 'Cartão de Crédito', 'Cartão de Débito'];
+    const installableMethods = ['Boleto', 'Cartão de Crédito'];
     return installableMethods.includes(paymentMethod);
   }
 
