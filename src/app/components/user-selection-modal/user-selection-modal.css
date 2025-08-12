@@ -89,6 +89,7 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  gap: 0.75rem;
 }
 .user-option:hover {
   border-color: #003b2b;
@@ -143,4 +144,28 @@
   background-color: #003b2b;
   color: white;
   border: none;
+}
+
+/* User Avatar Styles */
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0a8560 0%, #065f46 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.user-profile-picture {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #0a8560;
 }

@@ -190,6 +190,15 @@
   flex-shrink: 0;
 }
 
+.user-profile-picture {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #0e9b71;
+}
+
 .user-info {
   display: flex;
   flex-direction: column;

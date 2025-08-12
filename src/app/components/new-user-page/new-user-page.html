@@ -68,6 +68,37 @@
       </div>
     </div>
     
+    <div class="form-section">
+      <h2 class="section-title">
+        <i class="fas fa-user-circle"></i>
+        Foto de Perfil (Opcional)
+      </h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="profile-picture-upload">
+            <div class="current-picture" *ngIf="profilePictureUrl">
+              <img [src]="profilePictureUrl" alt="Foto de perfil atual" class="profile-preview">
+              <button type="button" class="remove-picture-btn" (click)="removeProfilePicture()" [disabled]="isLoading">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="upload-area">
+              <input type="file" 
+                     id="profilePicture" 
+                     accept="image/*" 
+                     (change)="onProfilePictureSelected($event)"
+                     [disabled]="isLoading"
+                     #fileInput>
+              <label for="profilePicture" class="upload-label">
+                <i class="fas fa-camera"></i>
+                {{ profilePictureUrl ? 'Alterar foto' : 'Selecionar foto' }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <div class="form-actions">
       <button 
         type="button" 

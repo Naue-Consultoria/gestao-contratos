@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { SearchService } from '../../services/search.service';
+import { ProfilePictureService } from '../../services/profile-picture.service';
 
 interface Notification {
   id: number;
@@ -22,6 +23,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   @Input() userName = '';
   @Input() userRole = '';
   @Input() userInitials = '';
+  @Input() userId = 0;
+  @Input() hasProfilePicture = false;
   @Input() notifications: Notification[] = [];
   @Input() unreadNotificationsCount = 0;
   @Input() isNotificationOpen = false;
@@ -45,12 +48,27 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private router = inject(Router);
   private searchService = inject(SearchService);
+  private profilePictureService = inject(ProfilePictureService);
+  
+  profilePictureUrl = '';
 
   ngOnInit(): void {
     this.updateDateTime();
     this.timeInterval = setInterval(() => {
       this.updateDateTime();
     }, 60000);
+    
+    // Load profile picture only if user has one
+    if (this.userId && this.hasProfilePicture) {
+      this.profilePictureService.getProfilePictureUrl(this.userId).subscribe({
+        next: (url) => {
+          this.profilePictureUrl = url;
+        },
+        error: () => {
+          this.profilePictureUrl = '';
+        }
+      });
+    }
   }
 
   ngOnDestroy(): void {

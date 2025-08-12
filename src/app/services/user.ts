@@ -29,12 +29,15 @@ export interface ApiUser {
   last_login_at?: string | null;
   last_activity_at?: string | null;
   login_count?: number;
+  profile_picture_path?: string;
+  profile_picture_uploaded_at?: string;
 }
 
 export interface AssignableUser {
   id: number;
   name: string;
   email: string;
+  profile_picture_path?: string;
 }
 
 export interface UsersResponse {
@@ -93,5 +96,24 @@ export class UserService {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return password;
+  }
+
+  // Profile picture methods
+  uploadProfilePicture(userId: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('profilePicture', file);
+    return this.http.post(`${this.API_URL}/${userId}/profile-picture`, formData);
+  }
+
+  getProfilePictureUrl(userId: number): string {
+    return `${this.API_URL}/${userId}/profile-picture`;
+  }
+
+  getProfilePictureBlob(userId: number): Observable<Blob> {
+    return this.http.get(`${this.API_URL}/${userId}/profile-picture`, { responseType: 'blob' });
+  }
+
+  deleteProfilePicture(userId: number): Observable<any> {
+    return this.http.delete(`${this.API_URL}/${userId}/profile-picture`);
   }
 }

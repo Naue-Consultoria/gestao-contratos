@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UserService } from '../../services/user';
+import { ProfilePictureService } from '../../services/profile-picture.service';
 import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
@@ -25,6 +26,7 @@ export class NewUserPageComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private userService = inject(UserService);
+  private profilePictureService = inject(ProfilePictureService);
   private toastr = inject(ToastrService);
 
   // Form data
@@ -41,8 +43,8 @@ export class NewUserPageComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   errors: { [key: string]: string } = {};
-  showPassword = false;
-  showConfirmPassword = false;
+  profilePictureUrl = '';
+  selectedProfilePicture: File | null = null;
 
   ngOnInit() {
     const userStr = localStorage.getItem('user');
@@ -82,6 +84,18 @@ export class NewUserPageComponent implements OnInit {
           role: user.role_name || 'user',
           isActive: user.is_active !== false
         };
+        
+        // Load profile picture if exists
+        if (user.profile_picture_path) {
+          this.profilePictureService.getProfilePictureUrl(user.id).subscribe({
+            next: (url) => {
+              this.profilePictureUrl = url;
+            },
+            error: () => {
+              this.profilePictureUrl = '';
+            }
+          });
+        }
       } else {
         this.toastr.error('Usuário não encontrado');
         this.router.navigate(['/home/users']);
@@ -115,9 +129,35 @@ export class NewUserPageComponent implements OnInit {
         payload.is_active = this.userData.isActive;
         
         await this.userService.updateUser(this.editingUserId, payload).toPromise();
+        
+        // Upload profile picture if selected
+        if (this.selectedProfilePicture) {
+          try {
+            await this.userService.uploadProfilePicture(this.editingUserId, this.selectedProfilePicture).toPromise();
+            // Invalidar cache da foto de perfil
+            this.profilePictureService.invalidateCache(this.editingUserId);
+          } catch (error) {
+            console.error('Erro ao fazer upload da foto de perfil:', error);
+            this.toastr.warning('Usuário atualizado, mas houve erro ao salvar a foto de perfil');
+          }
+        }
+        
         this.toastr.success('Usuário atualizado com sucesso!');
       } else {
-        await firstValueFrom(this.userService.createUser(payload));
+        const response = await firstValueFrom(this.userService.createUser(payload));
+        
+        // Upload profile picture if selected for new user
+        if (this.selectedProfilePicture && response.user?.id) {
+          try {
+            await this.userService.uploadProfilePicture(response.user.id, this.selectedProfilePicture).toPromise();
+            // Invalidar cache da foto de perfil
+            this.profilePictureService.invalidateCache(response.user.id);
+          } catch (error) {
+            console.error('Erro ao fazer upload da foto de perfil:', error);
+            this.toastr.warning('Usuário criado, mas houve erro ao salvar a foto de perfil');
+          }
+        }
+        
         this.toastr.success('Usuário criado com sucesso! Uma senha temporária foi enviada por e-mail.');
       }
 
@@ -151,5 +191,43 @@ export class NewUserPageComponent implements OnInit {
 
   getPageTitle(): string {
     return this.isEditMode ? 'Editar Usuário' : 'Novo Usuário';
+  }
+
+  onProfilePictureSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.selectedProfilePicture = input.files[0];
+      
+      // Preview the selected image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.profilePictureUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(this.selectedProfilePicture);
+    }
+  }
+
+  async removeProfilePicture(): Promise<void> {
+    if (this.isEditMode && !this.editingUserId) return;
+    
+    // Se está editando, remove do servidor
+    if (this.isEditMode && this.editingUserId) {
+      try {
+        this.isLoading = true;
+        await this.userService.deleteProfilePicture(this.editingUserId).toPromise();
+        // Invalidar cache da foto de perfil
+        this.profilePictureService.invalidateCache(this.editingUserId);
+        this.toastr.success('Foto de perfil removida com sucesso!');
+      } catch (error) {
+        console.error('Erro ao remover foto de perfil:', error);
+        this.toastr.error('Erro ao remover foto de perfil');
+      } finally {
+        this.isLoading = false;
+      }
+    }
+    
+    // Em ambos os casos, limpa o preview local
+    this.profilePictureUrl = '';
+    this.selectedProfilePicture = null;
   }
 }

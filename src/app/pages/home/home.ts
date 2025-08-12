@@ -56,6 +56,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   userName = '';
   userRole = '';
   userInitials = '';
+  userId = 0;
+  userHasProfilePicture = false;
   isSidebarCollapsed = false;
   isMobileSidebarOpen = false;
   isNotificationOpen = false;
@@ -105,6 +107,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.userName = user.name;
       this.userRole = user.role === 'admin' ? 'Administrador' : 'Usuário';
       this.userInitials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+      this.userId = user.id;
+      this.userHasProfilePicture = !!(user.profile_picture_path);
     }
   }
 

@@ -24,6 +24,11 @@
           (click)="toggleSelection(user.id)"
           [class.selected]="isSelected(user.id)">
           
+          <div class="user-avatar" *ngIf="!user.profile_picture_path">
+            {{ getInitials(user.name) }}
+          </div>
+          <img *ngIf="user.profile_picture_path" [src]="getProfilePictureUrl(user.id)" alt="Foto de perfil" class="user-profile-picture">
+          
           <div class="user-info">
             <h4>{{ user.name }}</h4>
             <p>{{ user.email }}</p>

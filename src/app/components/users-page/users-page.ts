@@ -2,6 +2,7 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user';
+import { ProfilePictureService } from '../../services/profile-picture.service';
 import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
@@ -16,6 +17,8 @@ interface User {
   since: string;
   initials: string;
   avatarGradient: string;
+  profilePictureUrl?: string;
+  hasProfilePicture?: boolean;
 }
 
 @Component({
@@ -28,6 +31,7 @@ interface User {
 export class UsersPageComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private userService = inject(UserService);
+  private profilePictureService = inject(ProfilePictureService);
   private toastr = inject(ToastrService);
   private subscriptions = new Subscription();
 
@@ -73,6 +77,7 @@ export class UsersPageComponent implements OnInit, OnDestroy {
       
       if (response && response.users) {
         this.users = response.users.map(user => this.mapApiUserToTableUser(user));
+        this.loadProfilePictures();
       }
     } catch (error: any) {
       console.error('❌ Erro ao carregar usuários:', error);
@@ -98,8 +103,28 @@ export class UsersPageComponent implements OnInit, OnDestroy {
       status: apiUser.is_active ? 'active' : 'inactive',
       since: since,
       initials: initials,
-      avatarGradient: this.generateGradient(apiUser.name || apiUser.email)
+      profilePictureUrl: undefined,
+      avatarGradient: this.generateGradient(apiUser.name || apiUser.email),
+      hasProfilePicture: !!(apiUser.profile_picture_path) // Nova propriedade
     };
+  }
+
+  private loadProfilePictures(): void {
+    this.users.forEach(user => {
+      // Só carrega se o usuário tem foto de perfil no banco
+      if (user.hasProfilePicture) {
+        this.profilePictureService.getProfilePictureUrl(user.id).subscribe({
+          next: (url) => {
+            if (url) {
+              user.profilePictureUrl = url;
+            }
+          },
+          error: () => {
+            // Ignora erros, mantém undefined para mostrar iniciais
+          }
+        });
+      }
+    });
   }
 
   private getRoleDisplay(roleName: string): string {

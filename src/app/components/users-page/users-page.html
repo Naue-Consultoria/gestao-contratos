@@ -59,9 +59,10 @@
         <tr *ngFor="let user of users; trackBy: trackByUserId">
           <td>
             <div class="user-cell">
-              <div class="user-avatar" [style.background]="user.avatarGradient">
+              <div class="user-avatar" [style.background]="user.avatarGradient" *ngIf="!user.profilePictureUrl">
                 {{ user.initials }}
               </div>
+              <img *ngIf="user.profilePictureUrl" [src]="user.profilePictureUrl" alt="Foto de perfil" class="user-profile-picture">
               <div class="user-info">
                 <div class="user-name">{{ user.name }}</div>
                 <div class="user-role">{{ user.role }}</div>

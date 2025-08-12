@@ -14,6 +14,7 @@ export interface User {
   role_id: number;
   must_change_password: boolean;
   permissions?: string[];
+  profile_picture_path?: string;
 }
 
 export interface ApiUserResponse {
@@ -28,6 +29,7 @@ export interface ApiUserResponse {
     first_login_at: string | null;
     last_login_at?: string | null;
     created_at?: string;
+    profile_picture_path?: string;
   }
 }
 

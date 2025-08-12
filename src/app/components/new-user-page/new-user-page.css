@@ -49,6 +49,81 @@
   overflow: hidden;
 }
 
+/* Profile Picture Upload Styles */
+.profile-picture-upload {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.current-picture {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #0e9b71;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.remove-picture-btn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.remove-picture-btn:hover {
+  background: #dc2626;
+}
+
+.upload-area input[type="file"] {
+  display: none;
+}
+
+.upload-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: #0e9b71;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.upload-label:hover {
+  background: #0d8461;
+  transform: translateY(-1px);
+}
+
+.upload-label:active {
+  transform: translateY(0);
+}
+
+.upload-label i {
+  font-size: 14px;
+}
+
 /* Mensagem de erro */
 .error-message {
   background-color: #fef2f2;
