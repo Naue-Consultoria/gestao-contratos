@@ -14,7 +14,6 @@ interface ContractRoutine {
   statusColor: string;
   servicesCount: number;
   nextDueDate: string;
-  priority: 'high' | 'medium' | 'low';
   raw: ApiContract;
 }
 
@@ -71,13 +70,11 @@ export class RoutinesPageComponent implements OnInit {
             statusColor: this.getStatusColor(contract.status),
             servicesCount: contract.contract_services?.length || 0,
             nextDueDate: this.calculateNextDueDate(contract),
-            priority: this.calculatePriority(contract),
             raw: contract
           }))
           .sort((a, b) => {
-            // Ordenar por prioridade e depois por data
-            const priorityOrder = { high: 3, medium: 2, low: 1 };
-            return priorityOrder[b.priority] - priorityOrder[a.priority];
+            // Ordenar por data de criação (mais recentes primeiro)
+            return new Date(b.raw.created_at).getTime() - new Date(a.raw.created_at).getTime();
           });
       }
     } catch (error) {
@@ -121,16 +118,6 @@ export class RoutinesPageComponent implements OnInit {
     });
   }
 
-  private calculatePriority(contract: ApiContract): 'high' | 'medium' | 'low' {
-    const servicesCount = contract.contract_services?.length || 0;
-    
-    if (servicesCount > 5) {
-      return 'high';
-    } else if (servicesCount > 2) {
-      return 'medium';
-    }
-    return 'low';
-  }
 
   viewContractDetails(id: number) {
     this.router.navigate(['/home/routines', id]);
@@ -141,16 +128,4 @@ export class RoutinesPageComponent implements OnInit {
     this.router.navigate(['/home/contracts/edit', id]);
   }
 
-  getPriorityClass(priority: string): string {
-    return `priority-${priority}`;
-  }
-
-  getPriorityLabel(priority: string): string {
-    const labels: { [key: string]: string } = {
-      'high': 'Alta',
-      'medium': 'Média', 
-      'low': 'Baixa'
-    };
-    return labels[priority] || priority;
-  }
 }
