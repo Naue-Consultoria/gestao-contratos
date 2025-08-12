@@ -97,6 +97,57 @@
     color: var(--primary-green);
 }
 
+/* Informações de pagamento */
+.payment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+}
+
+.payment-status {
+  margin-bottom: 2px;
+}
+
+.payment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.payment-badge.mobile {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.payment-badge i {
+  font-size: 10px;
+}
+
+.payment-method-text,
+.payment-date-text {
+  font-size: 11px;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.payment-method-text {
+  font-weight: 500;
+}
+
+.payment-date-text i {
+  font-size: 10px;
+}
+
 /* Table Container */
 .table-container {
     background-color: var(--white);

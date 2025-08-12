@@ -108,6 +108,7 @@
             <th>Valor Total</th>
             <th>Data de Término</th>
             <th>Status</th>
+            <th>Pagamento</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -160,6 +161,25 @@
                   <span class="status-dot" [style.background-color]="contract.statusColor"></span>
                   {{ contract.status }}
                 </span>
+              </div>
+            </td>
+            <td>
+              <div class="payment-info">
+                <div class="payment-status">
+                  <span class="payment-badge" [style.background-color]="contract.paymentStatusColor + '20'" [style.color]="contract.paymentStatusColor">
+                    <i [class]="contract.paymentStatusIcon"></i>
+                    {{ contract.paymentStatus }}
+                  </span>
+                </div>
+                <div class="payment-method" *ngIf="contract.paymentMethod">
+                  <small class="payment-method-text">{{ contract.paymentMethod }}</small>
+                </div>
+                <div class="payment-date" *ngIf="contract.expectedPaymentDate">
+                  <small class="payment-date-text">
+                    <i class="fas fa-calendar-alt"></i>
+                    {{ contract.expectedPaymentDate }}
+                  </small>
+                </div>
               </div>
             </td>
             <td>
@@ -226,6 +246,25 @@
                   <span class="no-end-date">Indeterminado</span>
                 </ng-template>
               </span>
+            </div>
+            <div class="table-card-row">
+              <span class="table-card-label">
+                <i class="fas fa-credit-card"></i> Pagamento:
+              </span>
+              <span class="table-card-value">
+                <span class="payment-badge mobile" [style.background-color]="contract.paymentStatusColor + '20'" [style.color]="contract.paymentStatusColor">
+                  <i [class]="contract.paymentStatusIcon"></i>
+                  {{ contract.paymentStatus }}
+                </span>
+              </span>
+            </div>
+            <div class="table-card-row" *ngIf="contract.paymentMethod">
+              <span class="table-card-label">Forma de Pagamento:</span>
+              <span class="table-card-value">{{ contract.paymentMethod }}</span>
+            </div>
+            <div class="table-card-row" *ngIf="contract.expectedPaymentDate">
+              <span class="table-card-label">Data Prevista:</span>
+              <span class="table-card-value">{{ contract.expectedPaymentDate }}</span>
             </div>
           </div>
           <div class="table-card-actions">

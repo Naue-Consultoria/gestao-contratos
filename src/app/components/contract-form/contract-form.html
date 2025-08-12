@@ -1,4 +1,4 @@
-<div class="page">
+<div class="contract-page-content">
   <div class="page-header">
     <h1 class="page-title">
       {{ isViewMode ? 'Visualizar Contrato' : (isEditMode ? 'Editar Contrato' : 'Novo Contrato') }}
@@ -114,6 +114,101 @@
                 placeholder="Adicione observações sobre este contrato..."
               ></textarea>
             </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-credit-card"></i>
+              Informações de Pagamento
+            </h3>
+            
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Forma de Pagamento</label>
+                <select
+                  class="form-control select-input"
+                  [(ngModel)]="formData.payment_method"
+                  name="payment_method"
+                  [disabled]="isLoading"
+                  (ngModelChange)="onPaymentMethodChange()"
+                >
+                  <option value="">Selecione a forma de pagamento</option>
+                  <option *ngFor="let method of paymentMethods" [value]="method.value">
+                    {{ method.label }}
+                  </option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Data Prevista para Pagamento</label>
+                <input
+                  type="date"
+                  class="form-control date-input"
+                  [(ngModel)]="formData.expected_payment_date"
+                  name="expected_payment_date"
+                  [disabled]="isLoading || (formData.installment_count > 1 && isPaymentMethodInstallable(formData.payment_method))"
+                />
+                <span class="help-text" *ngIf="formData.installment_count > 1 && isPaymentMethodInstallable(formData.payment_method)">
+                  <i class="fas fa-info-circle"></i>
+                  Data automaticamente definida como vencimento da última parcela
+                </span>
+              </div>
+            </div>
+
+            <!-- Campos de Parcelamento Integrados -->
+            <div *ngIf="isPaymentMethodInstallable(formData.payment_method)" class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Número de Parcelas</label>
+                <select 
+                  class="form-control select-input" 
+                  [(ngModel)]="formData.installment_count" 
+                  (ngModelChange)="onInstallmentCountChange($event)"
+                  name="installmentCount"
+                  [disabled]="isLoading">
+                  <option value="1">À vista</option>
+                  <option *ngFor="let i of [2,3,4,5,6,7,8,9,10,11,12,18,24,36]" [value]="i">
+                    {{ i }}x
+                  </option>
+                </select>
+              </div>
+              
+              <div class="form-group" *ngIf="formData.installment_count > 1">
+                <label class="form-label">Primeira Parcela</label>
+                <input 
+                  type="date" 
+                  class="form-control" 
+                  [(ngModel)]="firstInstallmentDate"
+                  (ngModelChange)="onFirstInstallmentDateChange($event)"
+                  name="firstInstallmentDate"
+                  [disabled]="isLoading">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Status do Pagamento</label>
+              <select
+                class="form-control select-input"
+                [(ngModel)]="formData.payment_status"
+                name="payment_status"
+                [disabled]="isLoading"
+              >
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+              </select>
+            </div>
+
+            <!-- Componente de Gerenciamento de Parcelas (apenas para visualização detalhada) -->
+            <app-installments-manager
+              *ngIf="isViewMode"
+              [totalValue]="getTotalValue()"
+              [paymentMethod]="formData.payment_method"
+              [installments]="contractInstallments"
+              [isViewMode]="isViewMode"
+              [contractId]="contractId"
+              [apiInstallments]="apiInstallments"
+              (installmentsChange)="onInstallmentsChange($event)"
+              (installmentCountChange)="onInstallmentCountChange($event)">
+            </app-installments-manager>
           </div>
         </div>
 
@@ -286,6 +381,28 @@
         
         <div class="view-section">
           <h2 class="section-title">
+            <i class="fas fa-credit-card"></i>Informações de Pagamento
+          </h2>
+          <div class="detail-item">
+            <span class="detail-label">Forma de Pagamento:</span>
+            <span class="detail-value">{{ formData.payment_method || 'Não informado' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Data Prevista:</span>
+            <span class="detail-value">{{ formatDate(formData.expected_payment_date) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Status do Pagamento:</span>
+            <span class="detail-value">
+              <span class="payment-status-badge" [ngClass]="'payment-' + formData.payment_status">
+                {{ getPaymentStatusText(formData.payment_status) }}
+              </span>
+            </span>
+          </div>
+        </div>
+        
+        <div class="view-section">
+          <h2 class="section-title">
             <i class="fas fa-briefcase"></i>Serviços Contratados
           </h2>
           <div class="services-table">
@@ -343,7 +460,6 @@
       </div>
     </div>
   </div>
-</div>
 
 <div
   class="modal"
@@ -411,3 +527,4 @@
   (selectionConfirmed)="updateAssignedUsers($event)"
 >
 </app-user-selection-modal>
+</div>

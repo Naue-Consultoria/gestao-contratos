@@ -27,6 +27,11 @@ interface ContractDisplay {
   status: string;
   statusColor: string;
   servicesCount: number;
+  paymentMethod: string;
+  expectedPaymentDate: string;
+  paymentStatus: string;
+  paymentStatusColor: string;
+  paymentStatusIcon: string;
   raw: ApiContract;
 }
 
@@ -226,6 +231,11 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       status: this.contractService.getStatusText(contract.status),
       statusColor: this.contractService.getStatusColor(contract.status),
       servicesCount: contract.contract_services?.length || 0,
+      paymentMethod: contract.payment_method || '',
+      expectedPaymentDate: this.contractService.formatDate(contract.expected_payment_date || null),
+      paymentStatus: this.contractService.getPaymentStatusText(contract.payment_status || 'pendente'),
+      paymentStatusColor: this.contractService.getPaymentStatusColor(contract.payment_status || 'pendente'),
+      paymentStatusIcon: this.contractService.getPaymentStatusIcon(contract.payment_status || 'pendente'),
       raw: contract,
     };
   }

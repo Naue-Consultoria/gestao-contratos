@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { ContractService, CreateContractRequest, UpdateContractRequest, ContractServiceItem } from '../../services/contract';
+import { ContractService, CreateContractRequest, UpdateContractRequest, ContractServiceItem, ContractInstallment, ApiContractInstallment } from '../../services/contract';
 import { ClientService, ApiClient } from '../../services/client';
 import { ServiceService, ApiService } from '../../services/service';
 import { ModalService } from '../../services/modal.service';
@@ -12,6 +12,7 @@ import { AuthService } from '../../services/auth';
 import { UserSelectionModalComponent } from '../user-selection-modal/user-selection-modal';
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
+import { InstallmentsManagerComponent } from '../installments-manager/installments-manager';
 
 interface SelectedService {
   service_id: number;
@@ -42,7 +43,7 @@ interface AssignedUser {
 @Component({
   selector: 'app-contract-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, UserSelectionModalComponent, CurrencyMaskDirective, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, UserSelectionModalComponent, CurrencyMaskDirective, BreadcrumbComponent, InstallmentsManagerComponent],
   templateUrl: './contract-form.html',
   styleUrls: ['./contract-form.css'],
 })
@@ -64,6 +65,10 @@ export class ContractFormComponent implements OnInit {
     start_date: '',
     end_date: '',
     notes: '',
+    payment_method: '',
+    expected_payment_date: '',
+    payment_status: 'pendente' as 'pago' | 'pendente',
+    installment_count: 1,
   };
 
   contractStatuses = [
@@ -78,6 +83,12 @@ export class ContractFormComponent implements OnInit {
   clients: ApiClient[] = [];
   contractTypes = ['Full', 'Pontual', 'Individual'];
   assignedUsers: AssignedUser[] = [];
+  paymentMethods = this.contractService.getPaymentMethods();
+  
+  // Propriedades para parcelamento
+  contractInstallments: ContractInstallment[] = [];
+  apiInstallments: ApiContractInstallment[] = [];
+  firstInstallmentDate: string = '';
   
   availableRoles = [
     { value: 'owner', label: 'Proprietário' },
@@ -114,10 +125,19 @@ export class ContractFormComponent implements OnInit {
       this.loadContract();
     } else {
       this.generateContractNumber();
+      this.setDefaultFirstInstallmentDate();
       this.isLoading = false;
     }
 
     this.loadInitialData();
+  }
+
+  private setDefaultFirstInstallmentDate() {
+    if (!this.firstInstallmentDate) {
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      this.firstInstallmentDate = nextMonth.toISOString().split('T')[0];
+    }
   }
 
   loadInitialData() {
@@ -172,6 +192,10 @@ export class ContractFormComponent implements OnInit {
           start_date: contract.start_date.split('T')[0],
           end_date: contract.end_date ? contract.end_date.split('T')[0] : '',
           notes: contract.notes || '',
+          payment_method: contract.payment_method || '',
+          expected_payment_date: contract.expected_payment_date ? contract.expected_payment_date.split('T')[0] : '',
+          payment_status: contract.payment_status || 'pendente',
+          installment_count: contract.installment_count || 1,
         };
         this.selectedServices = contract.contract_services.map((cs: any) => ({
           service_id: cs.service.id,
@@ -183,6 +207,11 @@ export class ContractFormComponent implements OnInit {
           category: cs.service.category,
         }));
         this.assignedUsers = contract.assigned_users || [];
+        
+        // Carregar parcelas se existirem
+        if (contract.installments && contract.installments.length > 0) {
+          this.apiInstallments = contract.installments;
+        }
       }
     } catch (error) {
       this.modalService.showError('Erro ao carregar contrato');
@@ -306,6 +335,11 @@ export class ContractFormComponent implements OnInit {
     service.total_value = service.unit_value; 
     
     this.formData.total_value = this.getTotalValue();
+    
+    // Recriar parcelas se necessário
+    if (this.formData.installment_count > 1 && this.firstInstallmentDate) {
+      this.generateInstallments();
+    }
   }
 
   getTotalValue(): number {
@@ -397,6 +431,11 @@ export class ContractFormComponent implements OnInit {
           notes: this.formData.notes || null,
           status: this.formData.status,
           assigned_users: userIdsToSave,
+          payment_method: this.formData.payment_method || null,
+          expected_payment_date: this.formData.expected_payment_date || null,
+          payment_status: this.formData.payment_status,
+          installment_count: this.formData.installment_count || 1,
+          installments: this.contractInstallments,
         };
         await firstValueFrom(
           this.contractService.updateContract(this.contractId, updateData)
@@ -412,6 +451,11 @@ export class ContractFormComponent implements OnInit {
           notes: this.formData.notes || null,
           services,
           assigned_users: userIdsToSave,
+          payment_method: this.formData.payment_method || null,
+          expected_payment_date: this.formData.expected_payment_date || null,
+          payment_status: this.formData.payment_status,
+          installment_count: this.formData.installment_count || 1,
+          installments: this.contractInstallments,
         };
         await firstValueFrom(this.contractService.createContract(createData));
         this.modalService.showSuccess('Contrato criado com sucesso!', 'Sucesso');
@@ -447,7 +491,72 @@ export class ContractFormComponent implements OnInit {
     return this.contractService.getStatusText(status);
   }
 
+  getPaymentStatusText(status: string): string {
+    if (!status) return 'Não informado';
+    return this.contractService.getPaymentStatusText(status);
+  }
+
+  // Métodos para gerenciar parcelas
+  onInstallmentsChange(installments: ContractInstallment[]) {
+    this.contractInstallments = installments;
+  }
+
+  onInstallmentCountChange(count: number) {
+    this.formData.installment_count = count;
+    
+    if (count > 1 && this.getTotalValue() > 0 && this.firstInstallmentDate) {
+      this.generateInstallments();
+    } else if (count === 1) {
+      this.contractInstallments = [];
+      // Quando voltar para "À vista", resetar para a data padrão se não foi definida manualmente
+      if (!this.formData.expected_payment_date) {
+        this.formData.expected_payment_date = '';
+      }
+    }
+  }
+
+  onFirstInstallmentDateChange(date: string) {
+    this.firstInstallmentDate = date;
+    
+    if (this.formData.installment_count > 1 && this.getTotalValue() > 0 && date) {
+      this.generateInstallments();
+    }
+  }
+
+  private generateInstallments() {
+    if (this.getTotalValue() <= 0 || this.formData.installment_count <= 1 || !this.firstInstallmentDate) {
+      return;
+    }
+
+    this.contractInstallments = this.contractService.generateInstallments(
+      this.getTotalValue(),
+      this.formData.installment_count,
+      this.firstInstallmentDate,
+      30 // intervalo padrão de 30 dias
+    );
+
+    // Atualizar data prevista para pagamento com a data da última parcela
+    if (this.contractInstallments.length > 0) {
+      const lastInstallment = this.contractInstallments[this.contractInstallments.length - 1];
+      this.formData.expected_payment_date = lastInstallment.due_date;
+    }
+  }
+
+  onPaymentMethodChange() {
+    // Resetar parcelamento se forma de pagamento não permitir
+    if (!this.isPaymentMethodInstallable(this.formData.payment_method)) {
+      this.formData.installment_count = 1;
+      this.contractInstallments = [];
+      // Resetar data prevista para pagamento quando não há parcelamento
+      this.formData.expected_payment_date = '';
+    }
+  }
+
   isServiceSelected(serviceId: number): boolean {
     return this.selectedServices.some((s) => s.service_id === serviceId);
+  }
+
+  isPaymentMethodInstallable(paymentMethod: string): boolean {
+    return this.contractService.isPaymentMethodInstallable(paymentMethod);
   }
 }

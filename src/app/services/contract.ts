@@ -10,6 +10,25 @@ export interface ContractServiceItem {
   status?: 'not_started' | 'scheduled' | 'in_progress' | 'completed';
 }
 
+export interface ContractInstallment {
+  due_date: string;
+  amount: number;
+  notes?: string | null;
+}
+
+export interface ApiContractInstallment {
+  id: number;
+  installment_number: number;
+  due_date: string;
+  amount: number;
+  payment_status: 'pago' | 'pendente' | 'atrasado';
+  paid_date?: string | null;
+  paid_amount?: number | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CreateContractRequest {
   contract_number?: string;
   client_id: number;
@@ -20,6 +39,11 @@ export interface CreateContractRequest {
   services: ContractServiceItem[];
   notes?: string | null;
   assigned_users?: number[];
+  payment_method?: string | null;
+  expected_payment_date?: string | null;
+  payment_status?: 'pago' | 'pendente';
+  installment_count?: number;
+  installments?: ContractInstallment[];
 }
 
 export interface UpdateContractRequest {
@@ -31,7 +55,12 @@ export interface UpdateContractRequest {
   status?: 'active' | 'completed' | 'cancelled' | 'suspended';
   services?: ContractServiceItem[];
   notes?: string | null;
-  assigned_users?: number[]; // <-- ADD THIS LINE
+  assigned_users?: number[];
+  payment_method?: string | null;
+  expected_payment_date?: string | null;
+  payment_status?: 'pago' | 'pendente';
+  installment_count?: number;
+  installments?: ContractInstallment[];
 }
 
 export interface ApiContractService {
@@ -61,6 +90,12 @@ export interface ApiContract {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  payment_method?: string | null;
+  expected_payment_date?: string | null;
+  payment_status?: 'pago' | 'pendente';
+  installment_count?: number;
+  installment_value?: number | null;
+  installments?: ApiContractInstallment[];
   client: {
     id: number;
     name: string;
@@ -297,6 +332,140 @@ export class ContractService {
       'completed': 'fas fa-check-circle'
     };
     return icons[status] || 'fas fa-circle';
+  }
+
+  // Métodos para status de pagamento
+  getPaymentStatusColor(status: string): string {
+    const colors: { [key: string]: string } = {
+      'pago': '#10b981',
+      'pendente': '#f59e0b'
+    };
+    return colors[status] || '#6b7280';
+  }
+
+  getPaymentStatusText(status: string): string {
+    const texts: { [key: string]: string } = {
+      'pago': 'Pago',
+      'pendente': 'Pendente'
+    };
+    return texts[status] || status;
+  }
+
+  getPaymentStatusIcon(status: string): string {
+    const icons: { [key: string]: string } = {
+      'pago': 'fas fa-check-circle',
+      'pendente': 'fas fa-clock'
+    };
+    return icons[status] || 'fas fa-question-circle';
+  }
+
+  // Métodos de pagamento comuns
+  getPaymentMethods(): { value: string, label: string }[] {
+    return [
+      { value: 'PIX', label: 'PIX' },
+      { value: 'Transferência', label: 'Transferência Bancária' },
+      { value: 'Boleto', label: 'Boleto Bancário' },
+      { value: 'Cartão de Crédito', label: 'Cartão de Crédito' },
+      { value: 'Cartão de Débito', label: 'Cartão de Débito' },
+      { value: 'Dinheiro', label: 'Dinheiro' },
+      { value: 'Cheque', label: 'Cheque' },
+      { value: 'Outros', label: 'Outros' }
+    ];
+  }
+
+  // Verificar se forma de pagamento permite parcelamento
+  isPaymentMethodInstallable(paymentMethod: string): boolean {
+    const installableMethods = ['Boleto', 'Cartão de Crédito', 'Cartão de Débito'];
+    return installableMethods.includes(paymentMethod);
+  }
+
+  // Gerar parcelas automaticamente
+  generateInstallments(totalValue: number, installmentCount: number, firstDueDate: string, intervalDays: number = 30): ContractInstallment[] {
+    const installments: ContractInstallment[] = [];
+    const installmentValue = totalValue / installmentCount;
+    let currentDate = new Date(firstDueDate);
+
+    for (let i = 0; i < installmentCount; i++) {
+      installments.push({
+        due_date: currentDate.toISOString().split('T')[0],
+        amount: installmentValue,
+        notes: `Parcela ${i + 1} de ${installmentCount}`
+      });
+
+      // Próxima data (soma intervalDays)
+      currentDate = new Date(currentDate.getTime() + (intervalDays * 24 * 60 * 60 * 1000));
+    }
+
+    return installments;
+  }
+
+  // Métodos para API de parcelas
+  getContractInstallments(contractId: number): Observable<{ installments: ApiContractInstallment[]; total: number }> {
+    return this.http.get<{ installments: ApiContractInstallment[]; total: number }>(
+      `${environment.apiUrl}/contracts/${contractId}/installments`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  updateInstallmentStatus(installmentId: number, statusData: { payment_status: string; paid_amount?: number; paid_date?: string; notes?: string }): Observable<any> {
+    return this.http.put(
+      `${environment.apiUrl}/installments/${installmentId}/status`,
+      statusData,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  markInstallmentAsPaid(installmentId: number, paidAmount: number, paidDate?: string): Observable<any> {
+    return this.http.put(
+      `${environment.apiUrl}/installments/${installmentId}/pay`,
+      { paid_amount: paidAmount, paid_date: paidDate },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  getOverdueInstallments(): Observable<{ installments: ApiContractInstallment[]; total: number }> {
+    return this.http.get<{ installments: ApiContractInstallment[]; total: number }>(
+      `${environment.apiUrl}/installments/overdue`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  getInstallmentsByDateRange(startDate: string, endDate: string, status?: string): Observable<{ installments: ApiContractInstallment[]; total: number }> {
+    const params: any = { start_date: startDate, end_date: endDate };
+    if (status) params.status = status;
+
+    return this.http.get<{ installments: ApiContractInstallment[]; total: number }>(
+      `${environment.apiUrl}/installments/date-range`,
+      { params, headers: this.getAuthHeaders() }
+    );
+  }
+
+  // Helper para status de parcelas
+  getInstallmentStatusColor(status: string): string {
+    const colors: { [key: string]: string } = {
+      'pago': '#10b981',
+      'pendente': '#f59e0b',
+      'atrasado': '#ef4444'
+    };
+    return colors[status] || '#6b7280';
+  }
+
+  getInstallmentStatusText(status: string): string {
+    const texts: { [key: string]: string } = {
+      'pago': 'Pago',
+      'pendente': 'Pendente',
+      'atrasado': 'Atrasado'
+    };
+    return texts[status] || status;
+  }
+
+  getInstallmentStatusIcon(status: string): string {
+    const icons: { [key: string]: string } = {
+      'pago': 'fas fa-check-circle',
+      'pendente': 'fas fa-clock',
+      'atrasado': 'fas fa-exclamation-triangle'
+    };
+    return icons[status] || 'fas fa-question-circle';
   }
 }
 
