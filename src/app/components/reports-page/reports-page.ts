@@ -103,13 +103,13 @@ export class ReportsPage implements OnInit {
         reportObservable = this.reportService.generateMonthlyReport(requestData);
         break;
       case 'client':
-        const client = this.clients.find(c => c.id === config.clientId);
+        const client = this.clients.find(c => c.id === parseInt(config.clientId as string, 10));
         const clientName = client ? client.name.replace(/\s+/g, '_').toLowerCase() : 'cliente';
         fileName = `relatorio_cliente_${clientName}_${year}_${month}`;
         reportObservable = this.reportService.generateClientReport(requestData);
         break;
       case 'services':
-        const service = this.services.find(s => s.id === config.serviceId);
+        const service = this.services.find(s => s.id === parseInt(config.serviceId as string, 10));
         const serviceName = service ? service.name.replace(/\s+/g, '_').toLowerCase() : 'servico';
         fileName = `relatorio_servico_${serviceName}_${year}_${month}`;
         reportObservable = this.reportService.generateServicesReport(requestData);
