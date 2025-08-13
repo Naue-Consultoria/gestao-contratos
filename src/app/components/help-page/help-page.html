@@ -1,34 +1,37 @@
-<div class="page">
+<div class="help-page-content">
   <div class="page-header">
     <h1 class="page-title">Suporte e Ajuda</h1>
     <app-breadcrumb></app-breadcrumb>
   </div>
 
   <div class="table-container">
-    <h2 class="table-title mb-3">Central de Ajuda</h2>
-    
-    <div class="form-group">
-      <label class="form-label">Como podemos ajudar?</label>
-      <input 
-        type="text" 
-        class="form-control" 
-        placeholder="Descreva sua dúvida ou problema"
-        [(ngModel)]="searchQuery">
+    <div class="section-header">
+      <h3 class="section-description">Encontre respostas para suas dúvidas ou entre em contato conosco</h3>
     </div>
     
-    <div class="dashboard-grid mt-4">
-      <div *ngFor="let card of helpCards" class="stat-card help-card">
-        <div class="stat-icon" 
-             [style.background]="card.iconBackground"
-             [style.color]="card.iconColor">
-          <i [class]="card.icon"></i>
+    <div class="help-grid">
+      <div *ngFor="let card of helpCards" class="help-card">
+        <div class="card-header">
+          <div class="card-icon">
+            <i [class]="card.icon"></i>
+          </div>
+          <h3 class="card-title">{{ card.title }}</h3>
         </div>
-        <h3 class="card-title">{{ card.title }}</h3>
-        <p class="card-description">{{ card.description }}</p>
-        <button class="btn btn-secondary full-width" (click)="onHelpAction(card.title)">
-          <i [class]="card.buttonIcon"></i>
-          {{ card.buttonText }}
-        </button>
+        <div class="card-content">
+          <p class="card-description">{{ card.description }}</p>
+          <ul class="card-features" *ngIf="card.features">
+            <li *ngFor="let feature of card.features">
+              <i class="fas fa-check"></i>
+              {{ feature }}
+            </li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary" (click)="onHelpAction(card.title)">
+            <i [class]="card.buttonIcon"></i>
+            {{ card.buttonText }}
+          </button>
+        </div>
       </div>
     </div>
   </div>

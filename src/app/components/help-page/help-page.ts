@@ -11,54 +11,126 @@ import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
   styleUrls: ['./help-page.css']
 })
 export class HelpPageComponent {
-  searchQuery = '';
   
   helpCards = [
     {
-      icon: 'fas fa-book',
-      iconBackground: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%)',
-      iconColor: '#6366f1',
+      icon: 'fas fa-book-open',
       title: 'Documentação',
-      description: 'Acesse o manual completo do sistema',
+      description: 'Acesse o manual completo do sistema com guias detalhados e instruções passo a passo.',
       buttonText: 'Acessar Documentação',
-      buttonIcon: 'fas fa-external-link-alt'
+      buttonIcon: 'fas fa-external-link-alt',
+      features: [
+        'Manual de usuário completo',
+        'Guias de funcionalidades',
+        'Perguntas frequentes',
+        'Glossário de termos'
+      ]
     },
     {
-      icon: 'fas fa-video',
-      iconBackground: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%)',
-      iconColor: '#ec4899',
+      icon: 'fas fa-play-circle',
       title: 'Tutoriais em Vídeo',
-      description: 'Assista tutoriais passo a passo',
+      description: 'Aprenda a usar o sistema com nossos tutoriais em vídeo explicativos e práticos.',
       buttonText: 'Ver Tutoriais',
-      buttonIcon: 'fas fa-play-circle'
+      buttonIcon: 'fas fa-video',
+      features: [
+        'Vídeos passo a passo',
+        'Casos práticos de uso',
+        'Dicas e truques',
+        'Atualizações semanais'
+      ]
     },
     {
       icon: 'fas fa-headset',
-      iconBackground: 'linear-gradient(135deg, rgba(251, 146, 60, 0.2) 0%, rgba(251, 146, 60, 0.1) 100%)',
-      iconColor: '#fb923c',
-      title: 'Suporte Online',
-      description: 'Fale com nossa equipe de suporte',
-      buttonText: 'Iniciar Chat',
-      buttonIcon: 'fas fa-comments'
+      title: 'Suporte Técnico',
+      description: 'Nossa equipe especializada está pronta para ajudar você com qualquer dúvida técnica.',
+      buttonText: 'Abrir Chamado',
+      buttonIcon: 'fas fa-ticket-alt',
+      features: [
+        'Suporte especializado',
+        'Resposta em até 2h',
+        'Acompanhamento de chamados',
+        'Relatórios de resolução'
+      ]
+    },
+    {
+      icon: 'fas fa-lightbulb',
+      title: 'Sugestões',
+      description: 'Contribua para o desenvolvimento do sistema enviando suas ideias e sugestões de melhorias.',
+      buttonText: 'Enviar Sugestão',
+      buttonIcon: 'fas fa-paper-plane',
+      features: [
+        'Portal de ideias',
+        'Votação da comunidade',
+        'Feedback dos desenvolvedores',
+        'Acompanhamento de implementação'
+      ]
     }
   ];
   
   onHelpAction(action: string) {
     console.log('Help action:', action);
-    // Implementar a lógica específica para cada ação
+    
     switch(action) {
       case 'Documentação':
-        // Abrir documentação
-        window.open('/docs', '_blank');
+        this.openDocumentation();
         break;
       case 'Tutoriais em Vídeo':
-        // Abrir página de tutoriais
-        window.open('/tutorials', '_blank');
+        this.openTutorials();
         break;
-      case 'Suporte Online':
-        // Iniciar chat de suporte
-        alert('Iniciando chat de suporte...');
+      case 'Suporte Técnico':
+        this.openSupportTicket();
+        break;
+      case 'Sugestões':
+        this.openSuggestionPortal();
         break;
     }
+  }
+
+  openEmailSupport() {
+    const subject = encodeURIComponent('Solicitação de Suporte - Sistema de Gestão de Contratos');
+    const body = encodeURIComponent(
+      'Olá equipe de suporte,\n\n' +
+      'Preciso de ajuda com:\n' +
+      '- [Descreva sua dúvida ou problema aqui]\n\n' +
+      'Informações adicionais:\n' +
+      '- Usuário: [Seu nome]\n' +
+      '- Empresa: [Nome da empresa]\n' +
+      '- Funcionalidade: [Área do sistema relacionada]\n\n' +
+      'Obrigado!'
+    );
+    
+    window.open(`mailto:suporte@naueconsultoria.com.br?subject=${subject}&body=${body}`, '_self');
+  }
+
+  openWhatsAppSupport() {
+    const message = encodeURIComponent(
+      'Olá! Preciso de ajuda com o Sistema de Gestão de Contratos da Naue Consultoria. ' +
+      'Pode me auxiliar?'
+    );
+    
+    // Número do WhatsApp da Naue Consultoria (exemplo)
+    const phoneNumber = '5511999999999';
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+  }
+
+  private openDocumentation() {
+    // Abrir documentação online ou PDF
+    window.open('https://docs.naueconsultoria.com.br/contratos', '_blank');
+  }
+
+  private openTutorials() {
+    // Abrir canal do YouTube ou plataforma de vídeos
+    window.open('https://www.youtube.com/c/NaueConsultoria', '_blank');
+  }
+
+  private openSupportTicket() {
+    // Abrir sistema de tickets ou formulário
+    window.open('https://suporte.naueconsultoria.com.br/novo-chamado', '_blank');
+  }
+
+
+  private openSuggestionPortal() {
+    // Abrir portal de sugestões
+    window.open('https://ideias.naueconsultoria.com.br', '_blank');
   }
 }

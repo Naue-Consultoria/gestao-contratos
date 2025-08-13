@@ -1,97 +1,82 @@
-<div class="page">
+<div class="settings-page-content">
   <div class="page-header">
     <h1 class="page-title">Configurações</h1>
     <app-breadcrumb></app-breadcrumb>
   </div>
 
-  <div class="settings-container">
-    <div class="settings-header">
-      <div class="settings-header-content">
-        <div class="settings-title-group">
-          <i class="fas fa-cog settings-icon"></i>
-          <h2 class="settings-title">Configurações</h2>
-        </div>
-        <p class="settings-description">Gerencie suas preferências e configurações da conta</p>
-      </div>
-      
-      <nav class="settings-tabs">
-        <button *ngFor="let tab of tabs" 
-                type="button"
-                class="tab-button" 
-                [class.active]="activeTab === tab.id"
-                (click)="setActiveTab(tab.id)">
-          <i [class]="tab.icon + ' tab-icon'"></i>
-          <span class="tab-label">{{ tab.label }}</span>
-        </button>
-      </nav>
+  <div class="table-container">
+    <div class="settings-tabs">
+      <button *ngFor="let tab of tabs" 
+              type="button"
+              class="tab-button" 
+              [class.active]="activeTab === tab.id"
+              (click)="setActiveTab(tab.id)">
+        <i [class]="tab.icon"></i>
+        <span>{{ tab.label }}</span>
+      </button>
     </div>
     
     <div class="settings-content">
       <div *ngIf="activeTab === 'general'" class="settings-panel">
-        <div class="panel-header">
-          <div class="panel-title-group">
-            <h2 class="panel-title">Configurações Gerais</h2>
-            <p class="panel-subtitle">Gerencie suas informações pessoais e preferências do sistema</p>
-          </div>
-        </div>
-        
         <div class="settings-card">
           <div class="card-header">
-            <i class="fas fa-user card-icon"></i>
-            <h3 class="card-title">Informações do Usuário</h3>
+            <div class="card-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="card-title-group">
+              <h3 class="card-title">Informações do Usuário</h3>
+              <p class="card-subtitle">Dados básicos da sua conta no sistema</p>
+            </div>
           </div>
           
           <div class="card-content">
             <div class="form-grid">
               <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-id-card"></i>
-                  Nome Completo
-                </label>
+                <label class="form-label">Nome Completo</label>
                 <div class="input-wrapper">
                   <input type="text" class="form-control" [(ngModel)]="usuario.nome" disabled>
-                  <span class="input-hint">Este campo não pode ser editado</span>
+                  <span class="input-hint">
+                    <i class="fas fa-info-circle"></i>
+                    Este campo não pode ser editado
+                  </span>
                 </div>
               </div>
               
               <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-envelope"></i>
-                  Email
-                </label>
+                <label class="form-label">Email</label>
                 <div class="input-wrapper">
                   <input type="email" class="form-control" [(ngModel)]="usuario.email" disabled>
-                  <span class="input-hint">Entre em contato com o administrador para alterar</span>
+                  <span class="input-hint">
+                    <i class="fas fa-info-circle"></i>
+                    Entre em contato com o administrador para alterar
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
       </div>
       
       <div *ngIf="activeTab === 'notifications'" class="settings-panel">
-        <div class="panel-header">
-          <div class="panel-title-group">
-            <h2 class="panel-title">Configurações de Notificações</h2>
-            <p class="panel-subtitle">Escolha como e quando deseja receber notificações</p>
-          </div>
-        </div>
-        
         <div class="settings-card">
           <div class="card-header">
-            <i class="fas fa-bell card-icon"></i>
-            <h3 class="card-title">Notificações por Email</h3>
+            <div class="card-icon">
+              <i class="fas fa-bell"></i>
+            </div>
+            <div class="card-title-group">
+              <h3 class="card-title">Notificações por Email</h3>
+              <p class="card-subtitle">Configure como deseja receber as notificações</p>
+            </div>
           </div>
           
           <div class="card-content">
-            <div class="notification-list">
-              <label class="notification-item master-toggle">
+            <div class="notification-master">
+              <label class="notification-toggle">
                 <div class="toggle-wrapper">
                   <input type="checkbox" class="toggle-input" [(ngModel)]="notificacoes.email">
                   <span class="toggle-slider"></span>
                 </div>
-                <div class="notification-content">
+                <div class="toggle-content">
                   <strong>Ativar notificações por email</strong>
                   <small>Receber todas as notificações no email cadastrado</small>
                 </div>
@@ -102,60 +87,85 @@
         
         <div class="settings-card">
           <div class="card-header">
-            <i class="fas fa-list-check card-icon"></i>
-            <h3 class="card-title">Tipos de Notificação</h3>
+            <div class="card-icon">
+              <i class="fas fa-list-check"></i>
+            </div>
+            <div class="card-title-group">
+              <h3 class="card-title">Tipos de Notificação</h3>
+              <p class="card-subtitle">Escolha quais notificações deseja receber</p>
+            </div>
           </div>
           
           <div class="card-content">
             <div class="notification-list">
-              <label class="notification-item" [class.disabled]="!notificacoes.email">
-                <div class="notification-icon">
-                  <i class="fas fa-calendar-xmark"></i>
+              <div class="notification-item" [class.disabled]="!notificacoes.email">
+                <div class="notification-info">
+                  <div class="notification-icon">
+                    <i class="fas fa-calendar-xmark"></i>
+                  </div>
+                  <div class="notification-content">
+                    <strong>Contratos vencendo</strong>
+                    <small>Avisar quando contratos estiverem próximos do vencimento</small>
+                  </div>
                 </div>
-                <div class="notification-content">
-                  <strong>Contratos vencendo</strong>
-                  <small>Avisar quando contratos estiverem próximos do vencimento</small>
-                </div>
-                <input type="checkbox" class="custom-checkbox" [(ngModel)]="notificacoes.contratoVencendo" [disabled]="!notificacoes.email">
-              </label>
+                <label class="checkbox-wrapper">
+                  <input type="checkbox" [(ngModel)]="notificacoes.contratoVencendo" [disabled]="!notificacoes.email">
+                  <span class="checkmark"></span>
+                </label>
+              </div>
             
-              <label class="notification-item" [class.disabled]="!notificacoes.email">
-                <div class="notification-icon">
-                  <i class="fas fa-file-circle-plus"></i>
+              <div class="notification-item" [class.disabled]="!notificacoes.email">
+                <div class="notification-info">
+                  <div class="notification-icon">
+                    <i class="fas fa-file-circle-plus"></i>
+                  </div>
+                  <div class="notification-content">
+                    <strong>Novos contratos</strong>
+                    <small>Notificar quando novos contratos forem adicionados</small>
+                  </div>
                 </div>
-                <div class="notification-content">
-                  <strong>Novos contratos</strong>
-                  <small>Notificar quando novos contratos forem adicionados</small>
-                </div>
-                <input type="checkbox" class="custom-checkbox" [(ngModel)]="notificacoes.novoContrato" [disabled]="!notificacoes.email">
-              </label>
+                <label class="checkbox-wrapper">
+                  <input type="checkbox" [(ngModel)]="notificacoes.novoContrato" [disabled]="!notificacoes.email">
+                  <span class="checkmark"></span>
+                </label>
+              </div>
             
-              <label class="notification-item" [class.disabled]="!notificacoes.email">
-                <div class="notification-icon">
-                  <i class="fas fa-dollar-sign"></i>
+              <div class="notification-item" [class.disabled]="!notificacoes.email">
+                <div class="notification-info">
+                  <div class="notification-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                  </div>
+                  <div class="notification-content">
+                    <strong>Pagamentos pendentes</strong>
+                    <small>Lembrete de pagamentos que precisam ser realizados</small>
+                  </div>
                 </div>
-                <div class="notification-content">
-                  <strong>Pagamentos pendentes</strong>
-                  <small>Lembrete de pagamentos que precisam ser realizados</small>
-                </div>
-                <input type="checkbox" class="custom-checkbox" [(ngModel)]="notificacoes.pagamentoPendente" [disabled]="!notificacoes.email">
-              </label>
+                <label class="checkbox-wrapper">
+                  <input type="checkbox" [(ngModel)]="notificacoes.pagamentoPendente" [disabled]="!notificacoes.email">
+                  <span class="checkmark"></span>
+                </label>
+              </div>
             
-              <label class="notification-item" [class.disabled]="!notificacoes.email">
-                <div class="notification-icon">
-                  <i class="fas fa-chart-line"></i>
+              <div class="notification-item" [class.disabled]="!notificacoes.email">
+                <div class="notification-info">
+                  <div class="notification-icon">
+                    <i class="fas fa-chart-line"></i>
+                  </div>
+                  <div class="notification-content">
+                    <strong>Relatório mensal</strong>
+                    <small>Receber resumo mensal de atividades</small>
+                  </div>
                 </div>
-                <div class="notification-content">
-                  <strong>Relatório mensal</strong>
-                  <small>Receber resumo mensal de atividades</small>
-                </div>
-                <input type="checkbox" class="custom-checkbox" [(ngModel)]="notificacoes.relatorioMensal" [disabled]="!notificacoes.email">
-              </label>
+                <label class="checkbox-wrapper">
+                  <input type="checkbox" [(ngModel)]="notificacoes.relatorioMensal" [disabled]="!notificacoes.email">
+                  <span class="checkmark"></span>
+                </label>
+              </div>
             </div>
           </div>
         </div>
         
-        <div class="panel-footer">
+        <div class="form-actions">
           <button class="btn btn-secondary" (click)="cancelar()">
             <i class="fas fa-times"></i>
             Cancelar
@@ -168,40 +178,38 @@
       </div>
       
       <div *ngIf="activeTab === 'security'" class="settings-panel">
-        <div class="panel-header">
-          <div class="panel-title-group">
-            <h2 class="panel-title">Configurações de Segurança</h2>
-            <p class="panel-subtitle">Mantenha sua conta segura e protegida</p>
-          </div>
-        </div>
-        
         <div class="settings-card">
           <div class="card-header">
-            <i class="fas fa-shield-alt card-icon"></i>
-            <h3 class="card-title">Senha de Acesso</h3>
+            <div class="card-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="card-title-group">
+              <h3 class="card-title">Segurança da Conta</h3>
+              <p class="card-subtitle">Mantenha sua conta segura e protegida</p>
+            </div>
           </div>
           
           <div class="card-content">
-            <div class="security-info-grid">
-              <div class="info-card">
+            <div class="security-info">
+              <div class="info-item">
                 <div class="info-icon">
                   <i class="fas fa-clock"></i>
                 </div>
                 <div class="info-content">
-                  <span class="info-label">Última alteração</span>
+                  <span class="info-label">Última alteração de senha</span>
                   <span class="info-value">{{ formatarData(seguranca.ultimaAlteracaoSenha) }}</span>
                 </div>
               </div>
               
-              <div class="info-card">
+              <div class="info-item">
                 <div class="info-icon">
-                  <i class="fas fa-lock"></i>
+                  <i class="fas fa-shield-check"></i>
                 </div>
                 <div class="info-content">
                   <span class="info-label">Força da senha</span>
                   <div class="password-strength">
                     <div class="strength-bar">
-                      <div class="strength-fill strength-strong"></div>
+                      <div class="strength-fill"></div>
                     </div>
                     <span class="strength-text">Forte</span>
                   </div>
@@ -209,8 +217,11 @@
               </div>
             </div>
             
-            <div class="action-area">
-              <p class="action-description">Recomendamos que você altere sua senha periodicamente para manter sua conta segura.</p>
+            <div class="security-actions">
+              <div class="action-info">
+                <i class="fas fa-info-circle"></i>
+                <p>Recomendamos que você altere sua senha periodicamente para manter sua conta segura.</p>
+              </div>
               <button class="btn btn-primary" (click)="alterarSenha()">
                 <i class="fas fa-key"></i>
                 Alterar Senha

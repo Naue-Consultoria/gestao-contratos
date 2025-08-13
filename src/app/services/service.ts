@@ -5,8 +5,8 @@ import { environment } from '../../environments/environment';
 
 export interface CreateServiceRequest {
   name: string;
-  duration_amount: number;
-  duration_unit: 'dias' | 'semanas' | 'meses' | 'encontros';
+  duration_amount: number | null;
+  duration_unit: 'dias' | 'semanas' | 'meses' | 'encontros' | 'Projeto';
   description?: string | null;
   category?: string | null;
   is_active?: boolean;
@@ -14,8 +14,8 @@ export interface CreateServiceRequest {
 
 export interface UpdateServiceRequest {
   name?: string;
-  duration_amount?: number;
-  duration_unit?: 'dias' | 'semanas' | 'meses' | 'encontros';
+  duration_amount?: number | null;
+  duration_unit?: 'dias' | 'semanas' | 'meses' | 'encontros' | 'Projeto';
   description?: string | null;
   category?: string | null;
   is_active?: boolean;
@@ -24,7 +24,7 @@ export interface UpdateServiceRequest {
 export interface ApiService {
   id: number;
   name: string;
-  duration_amount: number;
+  duration_amount: number | null;
   duration_unit: string;
   description: string | null;
   category: string | null;
@@ -118,7 +118,8 @@ export class ServiceService {
     });
   }
 
-  formatDuration(amount: number, unit: string): string {
+  formatDuration(amount: number | null, unit: string): string {
+    if (unit === 'Projeto') return 'Projeto';
     if (!amount || !unit) return 'N/A';
     if (amount === 1) {
       const singularUnit = unit.endsWith('es') ? unit.slice(0, -2) : (unit.endsWith('s') ? unit.slice(0, -1) : unit);

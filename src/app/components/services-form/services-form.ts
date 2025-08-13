@@ -21,8 +21,8 @@ export class ServiceFormComponent implements OnInit {
 
   formData = {
     name: '',
-    duration_amount: 30,
-    duration_unit: 'dias' as 'dias' | 'semanas' | 'meses' | 'encontros',
+    duration_amount: 30 as number | null,
+    duration_unit: 'dias' as 'dias' | 'semanas' | 'meses' | 'encontros' | 'Projeto',
     category: 'Geral',
     description: '',
     is_active: true
@@ -64,7 +64,7 @@ export class ServiceFormComponent implements OnInit {
         const service = response.service;
         this.formData = {
           name: service.name,
-          duration_amount: service.duration_amount,
+          duration_amount: service.duration_amount || (service.duration_unit === 'Projeto' ? null : 30),
           duration_unit: service.duration_unit as any,
           category: service.category || 'Geral',
           description: service.description || '',
@@ -86,7 +86,7 @@ export class ServiceFormComponent implements OnInit {
     if (!this.formData.name || this.formData.name.trim().length < 2) {
       this.errors.name = 'Nome deve ter pelo menos 2 caracteres';
     }
-    if (!this.formData.duration_amount || this.formData.duration_amount < 1) {
+    if (this.formData.duration_unit !== 'Projeto' && (!this.formData.duration_amount || this.formData.duration_amount < 1)) {
       this.errors.duration = 'A duração deve ser de no mínimo 1';
     }
     return Object.keys(this.errors).length === 0;
@@ -104,7 +104,7 @@ export class ServiceFormComponent implements OnInit {
       if (this.isEditMode && this.serviceId) {
         const updateData: UpdateServiceRequest = {
           name: this.formData.name,
-          duration_amount: this.formData.duration_amount,
+          duration_amount: this.formData.duration_unit === 'Projeto' ? null : this.formData.duration_amount,
           duration_unit: this.formData.duration_unit,
           category: this.formData.category,
           description: this.formData.description || null,
@@ -116,7 +116,7 @@ export class ServiceFormComponent implements OnInit {
       } else {
         const createData: CreateServiceRequest = {
           name: this.formData.name,
-          duration_amount: this.formData.duration_amount,
+          duration_amount: this.formData.duration_unit === 'Projeto' ? null : this.formData.duration_amount,
           duration_unit: this.formData.duration_unit,
           category: this.formData.category,
           description: this.formData.description || null
@@ -140,6 +140,14 @@ export class ServiceFormComponent implements OnInit {
 
   cancel() {
     this.router.navigate(['/home/services']);
+  }
+
+  onDurationUnitChange() {
+    if (this.formData.duration_unit === 'Projeto') {
+      this.formData.duration_amount = null;
+    } else if (!this.formData.duration_amount) {
+      this.formData.duration_amount = 30;
+    }
   }
 
   getFormattedDuration(): string {

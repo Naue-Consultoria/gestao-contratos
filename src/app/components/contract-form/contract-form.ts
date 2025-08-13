@@ -20,7 +20,7 @@ interface SelectedService {
   name: string;
   unit_value: number;
   total_value: number;
-  duration: number;
+  duration: number | null;
   duration_unit: string; // Added this property
   category: string;
 }
@@ -343,7 +343,7 @@ export class ContractFormComponent implements OnInit {
       name: service.name,
       unit_value: 0,
       total_value: 0,
-      duration: service.duration_amount,
+      duration: service.duration_amount || null,
       duration_unit: service.duration_unit,
       category: service.category || 'Geral',
     });

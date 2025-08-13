@@ -69,29 +69,40 @@
           </h2>
 
           <div class="form-row">
-            <div class="form-group duration-amount">
-              <label class="form-label required">Duração</label>
+            <div class="form-group duration-amount" *ngIf="formData.duration_unit !== 'Projeto'">
+              <label class="form-label required">Quantidade</label>
               <input 
                 type="number" 
                 class="form-control" 
                 [(ngModel)]="formData.duration_amount"
                 name="duration_amount"
                 min="1"
-                placeholder="Ex: 30">
+                placeholder="Ex: 30"
+                [class.error]="errors.duration">
+              <span class="error-message" *ngIf="errors.duration">{{ errors.duration }}</span>
             </div>
 
             <div class="form-group duration-unit">
-              <label class="form-label required">Unidade</label>
+              <label class="form-label required">Tipo de Duração</label>
               <select 
                 class="form-control" 
                 [(ngModel)]="formData.duration_unit"
-                name="duration_unit">
+                name="duration_unit"
+                (change)="onDurationUnitChange()">
                 <option value="dias">Dias</option>
                 <option value="semanas">Semanas</option>
                 <option value="meses">Meses</option>
                 <option value="encontros">Encontros</option>
+                <option value="Projeto">Projeto</option>
               </select>
             </div>
+          </div>
+
+          <div class="form-group" *ngIf="formData.duration_unit === 'Projeto'">
+            <p class="help-text">
+              <i class="fas fa-info-circle"></i>
+              Duração do tipo "Projeto" não requer especificação de tempo, pois varia conforme o escopo do projeto.
+            </p>
           </div>
 
           <div class="form-group" *ngIf="isEditMode">

@@ -1,148 +1,375 @@
 <div class="page">
   <div class="page-header">
-    <h1 class="page-title">Analytics</h1>
+    <h1 class="page-title">Analytics & Insights</h1>
     <app-breadcrumb></app-breadcrumb>
   </div>
 
-  <!-- Seletor de Período -->
-  <div class="period-selector">
-    <label class="period-label">
-      <i class="fas fa-calendar-alt"></i>
-      Período de análise
-    </label>
-    <div class="period-buttons">
-      <button 
-        class="period-btn" 
-        [class.active]="selectedPeriod === 'month'"
-        (click)="selectedPeriod = 'month'; onPeriodChange()">
-        Mês
-      </button>
-      <button 
-        class="period-btn" 
-        [class.active]="selectedPeriod === 'quarter'"
-        (click)="selectedPeriod = 'quarter'; onPeriodChange()">
-        Trimestre
-      </button>
-      <button 
-        class="period-btn" 
-        [class.active]="selectedPeriod === 'year'"
-        (click)="selectedPeriod = 'year'; onPeriodChange()">
-        Ano
-      </button>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      <span>Carregando dados...</span>
     </div>
   </div>
 
-  <!-- Cards de Destaque -->
-  <div class="highlight-grid">
-    <div class="highlight-card success-card">
-      <div class="highlight-content">
-        <div class="highlight-header">
-          <h3 class="highlight-title">Taxa de Sucesso</h3>
-          <div class="highlight-icon">
-            <i class="fas fa-chart-pie"></i>
-          </div>
-        </div>
-        <div class="highlight-value">{{ successRate }}%</div>
-        <div class="highlight-description">
-          <i class="fas fa-arrow-up"></i>
-          de sucesso
-        </div>
-        <div class="satisfaction-gauge">
-          <canvas id="satisfactionChart"></canvas>
-          <div class="gauge-center">
-            <span class="gauge-value">{{ successRate }}%</span>
-            <span class="gauge-label">Sucesso</span>
-          </div>
-        </div>
+  <div *ngIf="!isLoading">
+    <!-- Seletor de Período -->
+    <div class="period-selector">
+      <label class="period-label">
+        <i class="fas fa-calendar-alt"></i>
+        Período de análise
+      </label>
+      <div class="period-buttons">
+        <button 
+          class="period-btn" 
+          [class.active]="selectedPeriod === 'week'"
+          (click)="setPeriod('week')">
+          Semana
+        </button>
+        <button 
+          class="period-btn" 
+          [class.active]="selectedPeriod === 'month'"
+          (click)="setPeriod('month')">
+          Mês
+        </button>
+        <button 
+          class="period-btn" 
+          [class.active]="selectedPeriod === 'quarter'"
+          (click)="setPeriod('quarter')">
+          Trimestre
+        </button>
+        <button 
+          class="period-btn" 
+          [class.active]="selectedPeriod === 'year'"
+          (click)="setPeriod('year')">
+          Ano
+        </button>
+      </div>
+      <div class="period-info">
+        <span class="last-updated">
+          <i class="fas fa-clock"></i>
+          Atualizado: {{ lastUpdated | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+        <button class="refresh-btn" (click)="refreshData()" [disabled]="isRefreshing">
+          <i class="fas fa-sync" [class.fa-spin]="isRefreshing"></i>
+        </button>
       </div>
     </div>
-    
-    <div class="highlight-card service-card">
-      <div class="highlight-content">
-        <div class="highlight-header">
-          <h3 class="highlight-title">Serviço Mais Procurado</h3>
-          <div class="highlight-icon">
-            <i class="fas fa-star"></i>
-          </div>
-        </div>
-        <div class="highlight-value">{{ topService }}</div>
-        <div class="highlight-description">
-          <i class="fas fa-check-circle"></i>
-          {{ topServicePercentage }}% dos contratos
-        </div>
-        <div class="service-stats">
-        <div class="stat-item">
-          <span class="stat-number">{{ topServiceData?.activeContracts || 0 }}</span>
-          <span class="stat-text">Contratos ativos</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-number">{{ topServiceData?.completedContracts || 0 }}</span>
-          <span class="stat-text">Projetos concluídos</span>
-        </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Métricas Principais -->
-  <div class="metrics-grid">
-    <div class="metric-card" *ngFor="let metric of metrics">
-      <div class="metric-icon" [style.background-color]="metric.color + '20'">
-        <i [class]="metric.icon" [style.color]="metric.color"></i>
-      </div>
-      <div class="metric-content">
-        <div class="metric-label">{{ metric.label }}</div>
-        <div class="metric-value">{{ formatMetricValue(metric) }}</div>
-        <div class="metric-trend" [ngClass]="getTrendClass(metric.trend)" *ngIf="metric.trend">
-          <i [class]="getTrendIcon(metric.trend)"></i>
-          {{ metric.trend > 0 ? metric.trend : -metric.trend }}%
+    <!-- Insights Automáticos -->
+    <div class="insights-section" *ngIf="insights.length > 0">
+      <h3 class="section-title">
+        <i class="fas fa-lightbulb"></i>
+        Insights Automáticos
+      </h3>
+      <div class="insights-grid">
+        <div class="insight-card" *ngFor="let insight of insights">
+          <div class="insight-content" [innerHTML]="insight"></div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Gráficos Principais -->
-  <div class="charts-grid">
-    <!-- Distribuição de Serviços -->
-    <div class="chart-container">
-      <div class="chart-header">
-        <h2 class="chart-title">Distribuição de Serviços</h2>
-      </div>
-      <div class="services-chart-wrapper">
-        <div class="chart-area">
-          <canvas id="servicesChart"></canvas>
+    <!-- KPIs Principais -->
+    <div class="kpi-section">
+      <h3 class="section-title">
+        <i class="fas fa-tachometer-alt"></i>
+        Indicadores-Chave de Performance
+      </h3>
+      <div class="kpi-grid">
+        <!-- Taxa de Conversão -->
+        <div class="kpi-card primary-kpi">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Taxa de Conversão</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-percentage"></i>
+            </div>
+          </div>
+          <div class="kpi-value">{{ analyticsData?.general?.conversionRate || 0 }}%</div>
+          <div class="kpi-description">
+            <span class="trend" [ngClass]="getTrendClass(12)">
+              <i class="fas fa-arrow-up"></i> +12% vs mês anterior
+            </span>
+          </div>
+          <div class="kpi-gauge">
+            <canvas id="conversionGauge" width="120" height="60"></canvas>
+          </div>
         </div>
-        <div class="services-legend">
-          <div *ngFor="let service of services" class="legend-item">
-            <div class="legend-color" [style.background-color]="service.color"></div>
-            <div class="legend-info">
-              <div class="legend-header">
-                <i [class]="service.icon"></i>
-                <span class="legend-name">{{ service.name }}</span>
-              </div>
-              <div class="legend-stats">
-                <span class="legend-value">{{ service.value }}%</span>
-                <span class="legend-contracts">{{ service.contracts }} contratos</span>
-              </div>
+
+        <!-- Receita Total -->
+        <div class="kpi-card revenue-kpi">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Receita Total</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-dollar-sign"></i>
+            </div>
+          </div>
+          <div class="kpi-value">{{ formatCurrency(analyticsData?.general?.totalRevenue || 0) }}</div>
+          <div class="kpi-description">
+            <div class="revenue-breakdown">
+              <span>Coletado: {{ formatCurrency(analyticsData?.revenue?.totalCollected || 0) }}</span>
+              <span>Pendente: {{ formatCurrency(analyticsData?.revenue?.totalPending || 0) }}</span>
+            </div>
+          </div>
+          <div class="revenue-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" 
+                   [style.width.%]="getRevenueProgress()"
+                   [style.background]="'var(--primary-green)'"></div>
+            </div>
+            <span class="progress-text">{{ getRevenueProgress() }}% coletado</span>
+          </div>
+        </div>
+
+        <!-- Contratos Ativos -->
+        <div class="kpi-card contracts-kpi">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Contratos Ativos</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-file-contract"></i>
+            </div>
+          </div>
+          <div class="kpi-value">{{ analyticsData?.general?.activeContracts || 0 }}</div>
+          <div class="kpi-description">
+            <div class="contract-stats">
+              <span>Total: {{ analyticsData?.general?.totalContracts || 0 }}</span>
+              <span>Concluídos: {{ analyticsData?.general?.completedContracts || 0 }}</span>
+            </div>
+          </div>
+          <div class="contract-chart">
+            <canvas id="contractsDonut" width="80" height="80"></canvas>
+          </div>
+        </div>
+
+        <!-- Crescimento -->
+        <div class="kpi-card growth-kpi">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Taxa de Crescimento</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+          </div>
+          <div class="kpi-value">{{ formatGrowthRate(analyticsData?.general?.growthRate || 0) }}%</div>
+          <div class="kpi-description">
+            <span class="growth-period">vs {{ selectedPeriod === 'month' ? 'mês' : selectedPeriod === 'quarter' ? 'trimestre' : 'ano' }} anterior</span>
+          </div>
+          <div class="growth-sparkline">
+            <canvas id="growthSparkline" width="200" height="40"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas Detalhadas -->
+    <div class="metrics-section">
+      <h3 class="section-title">
+        <i class="fas fa-chart-bar"></i>
+        Métricas Detalhadas
+      </h3>
+      <div class="metrics-grid">
+        <div class="metric-card" *ngFor="let metric of detailedMetrics">
+          <div class="metric-icon" [style.background-color]="metric.color + '15'">
+            <i [class]="metric.icon" [style.color]="metric.color"></i>
+          </div>
+          <div class="metric-content">
+            <div class="metric-label">{{ metric.label }}</div>
+            <div class="metric-value">{{ formatMetricValue(metric) }}</div>
+            <div class="metric-trend" [ngClass]="getTrendClass(metric.trend)" *ngIf="metric.trend !== undefined">
+              <i [class]="getTrendIcon(metric.trend)"></i>
+              {{ abs(metric.trend) }}% 
+              <span class="trend-period">vs período anterior</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Evolução Temporal -->
-    <div class="chart-container">
-      <div class="chart-header">
-        <h2 class="chart-title">Evolução Temporal</h2>
-        <div class="chart-actions">
-          <button class="chart-action">
-            <i class="fas fa-expand"></i>
-          </button>
+    <!-- Gráficos Principais -->
+    <div class="charts-section">
+      <h3 class="section-title">
+        <i class="fas fa-chart-area"></i>
+        Análises Visuais
+      </h3>
+      <div class="charts-grid">
+        <!-- Evolução Temporal -->
+        <div class="chart-container full-width">
+          <div class="chart-header">
+            <h4 class="chart-title">Evolução Temporal de Contratos e Receita</h4>
+            <div class="chart-actions">
+              <button class="chart-toggle" 
+                      [class.active]="chartView === 'combined'"
+                      (click)="setChartView('combined')">
+                Combinado
+              </button>
+              <button class="chart-toggle" 
+                      [class.active]="chartView === 'separate'"
+                      (click)="setChartView('separate')">
+                Separado
+              </button>
+              <button class="chart-action" (click)="exportChart('evolution')">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          </div>
+          <div class="evolution-chart-wrapper">
+            <canvas id="evolutionChart"></canvas>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-items">
+              <div class="legend-item">
+                <div class="legend-dot" style="background-color: var(--primary-green)"></div>
+                <span>Novos Contratos</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background-color: #6366f1"></div>
+                <span>Receita (R$)</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background-color: #f59e0b"></div>
+                <span>Contratos Concluídos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Distribuição de Serviços -->
+        <div class="chart-container">
+          <div class="chart-header">
+            <h4 class="chart-title">Distribuição de Serviços</h4>
+            <div class="chart-actions">
+              <button class="chart-action" (click)="exportChart('services')">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          </div>
+          <div class="services-chart-wrapper">
+            <div class="chart-area">
+              <canvas id="servicesChart"></canvas>
+            </div>
+            <div class="services-legend">
+              <div *ngFor="let service of topServices; let i = index" class="legend-item">
+                <div class="legend-color" [style.background-color]="service.color"></div>
+                <div class="legend-info">
+                  <div class="legend-header">
+                    <i [class]="service.icon"></i>
+                    <span class="legend-name">{{ service.name }}</span>
+                  </div>
+                  <div class="legend-stats">
+                    <span class="legend-value">{{ service.popularity.toFixed(1) }}%</span>
+                    <span class="legend-contracts">{{ service.totalContracts }} contratos</span>
+                  </div>
+                  <div class="service-progress">
+                    <div class="service-progress-bar">
+                      <div class="service-progress-fill" 
+                           [style.width.%]="service.popularity"
+                           [style.background-color]="service.color"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance por Cliente -->
+        <div class="chart-container">
+          <div class="chart-header">
+            <h4 class="chart-title">Performance por Tipo de Cliente</h4>
+            <div class="chart-actions">
+              <button class="chart-action" (click)="exportChart('clients')">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          </div>
+          <div class="client-chart-wrapper">
+            <div class="client-stats">
+              <div class="client-stat-item">
+                <div class="client-stat-header">
+                  <i class="fas fa-user"></i>
+                  <span>Pessoa Física</span>
+                </div>
+                <div class="client-stat-value">{{ analyticsData?.clients?.byType?.pf || 0 }}</div>
+                <div class="client-stat-percentage">
+                  {{ getClientTypePercentage('pf') }}% do total
+                </div>
+              </div>
+              <div class="client-stat-divider"></div>
+              <div class="client-stat-item">
+                <div class="client-stat-header">
+                  <i class="fas fa-building"></i>
+                  <span>Pessoa Jurídica</span>
+                </div>
+                <div class="client-stat-value">{{ analyticsData?.clients?.byType?.pj || 0 }}</div>
+                <div class="client-stat-percentage">
+                  {{ getClientTypePercentage('pj') }}% do total
+                </div>
+              </div>
+            </div>
+            <div class="client-chart-area">
+              <canvas id="clientTypeChart"></canvas>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="evolution-chart-wrapper">
-        <canvas id="evolutionChart"></canvas>
+    </div>
+
+    <!-- Análise de Receita -->
+    <div class="revenue-section">
+      <h3 class="section-title">
+        <i class="fas fa-money-bill-wave"></i>
+        Análise Financeira
+      </h3>
+      <div class="revenue-grid">
+        <div class="revenue-card">
+          <div class="revenue-header">
+            <h4>Receita por Mês</h4>
+            <div class="revenue-actions">
+              <select class="revenue-period" [(ngModel)]="revenuePeriod" (change)="updateRevenueChart()">
+                <option value="6">Últimos 6 meses</option>
+                <option value="12">Último ano</option>
+                <option value="24">Últimos 2 anos</option>
+              </select>
+            </div>
+          </div>
+          <div class="revenue-chart-wrapper">
+            <canvas id="revenueChart"></canvas>
+          </div>
+          <div class="revenue-summary">
+            <div class="revenue-summary-item">
+              <span class="revenue-label">Média Mensal:</span>
+              <span class="revenue-value">{{ formatCurrency(getMonthlyAverage()) }}</span>
+            </div>
+            <div class="revenue-summary-item">
+              <span class="revenue-label">Maior Mês:</span>
+              <span class="revenue-value">{{ formatCurrency(getHighestMonth()) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="actions-section">
+      <h3 class="section-title">
+        <i class="fas fa-bolt"></i>
+        Ações Rápidas
+      </h3>
+      <div class="actions-grid">
+        <button class="action-btn export-btn" (click)="exportAnalytics('excel')">
+          <i class="fas fa-file-excel"></i>
+          <span>Exportar para Excel</span>
+        </button>
+        <button class="action-btn report-btn" (click)="generateReport()">
+          <i class="fas fa-file-pdf"></i>
+          <span>Gerar Relatório PDF</span>
+        </button>
+        <button class="action-btn share-btn" (click)="shareAnalytics()">
+          <i class="fas fa-share-alt"></i>
+          <span>Compartilhar Dashboard</span>
+        </button>
+        <button class="action-btn schedule-btn" (click)="scheduleReport()">
+          <i class="fas fa-clock"></i>
+          <span>Agendar Relatório</span>
+        </button>
       </div>
     </div>
   </div>
