@@ -43,9 +43,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   // Dados de analytics
   analyticsData: AnalyticsData | null = null;
-  insights: string[] = [];
-  detailedMetrics: DetailedMetric[] = [];
-  topServices: ServiceAnalytics[] = [];
 
   // Charts
   private charts: { [key: string]: Chart } = {};
@@ -85,12 +82,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
       // Carregar dados de analytics
       this.analyticsData = await firstValueFrom(this.analyticsService.getAnalytics(filters));
-      
-      // Carregar insights
-      this.insights = await firstValueFrom(this.analyticsService.getInsights());
-
-      // Processar dados
-      this.processAnalyticsData();
       this.lastUpdated = new Date();
 
       // Inicializar charts
@@ -103,83 +94,15 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  /**
-   * Processar dados de analytics
-   */
-  private processAnalyticsData() {
-    if (!this.analyticsData) return;
 
-    // Processar métricas detalhadas
-    this.detailedMetrics = [
-      {
-        label: 'Valor Médio do Contrato',
-        value: this.analyticsData.general.averageContractValue,
-        icon: 'fas fa-calculator',
-        color: '#0A8060',
-        isCurrency: true,
-        trend: 8.5
-      },
-      {
-        label: 'Duração Média (dias)',
-        value: this.analyticsData.general.averageContractDuration,
-        icon: 'fas fa-hourglass-half',
-        color: '#6366f1',
-        trend: -5.2
-      },
-      {
-        label: 'Novos Clientes',
-        value: this.analyticsData.clients.newClients,
-        icon: 'fas fa-user-plus',
-        color: '#f59e0b',
-        trend: 15.3
-      },
-      {
-        label: 'Taxa de Retenção',
-        value: 87,
-        icon: 'fas fa-handshake',
-        color: '#10b981',
-        suffix: '%',
-        trend: 3.1
-      },
-      {
-        label: 'Ticket Médio',
-        value: this.calculateAverageTicket(),
-        icon: 'fas fa-receipt',
-        color: '#8b5cf6',
-        isCurrency: true,
-        trend: 12.8
-      },
-      {
-        label: 'Contratos Vencendo',
-        value: this.calculateExpiringContracts(),
-        icon: 'fas fa-exclamation-triangle',
-        color: '#f97316',
-        trend: -8.4
-      }
-    ];
-
-    // Top 5 serviços
-    this.topServices = this.analyticsData.services
-      .sort((a, b) => b.popularity - a.popularity)
-      .slice(0, 5);
-  }
 
   /**
-   * Calcular ticket médio
+   * Obter classe de tendência
    */
-  private calculateAverageTicket(): number {
-    if (!this.analyticsData?.general) return 0;
-    const { totalRevenue, totalContracts } = this.analyticsData.general;
-    return totalContracts > 0 ? totalRevenue / totalContracts : 0;
+  getTrendClass(trend: number): string {
+    return trend >= 0 ? 'positive' : 'negative';
   }
 
-  /**
-   * Calcular contratos vencendo
-   */
-  private calculateExpiringContracts(): number {
-    // Simulação - em produção viria da API
-    return Math.floor(Math.random() * 15) + 5;
-  }
 
   /**
    * Definir período
@@ -209,16 +132,13 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * Inicializar todos os charts
+   * Inicializar charts
    */
   private initializeCharts() {
     this.initConversionGauge();
     this.initContractsDonut();
     this.initGrowthSparkline();
     this.initEvolutionChart();
-    this.initServicesChart();
-    this.initClientTypeChart();
-    this.initRevenueChart();
   }
 
   /**
@@ -434,164 +354,8 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  /**
-   * Gráfico de serviços
-   */
-  private initServicesChart() {
-    const canvas = document.getElementById('servicesChart') as HTMLCanvasElement;
-    if (!canvas || !this.topServices.length) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
 
-    const colors = ['#0A8060', '#6366f1', '#f59e0b', '#10b981', '#8b5cf6'];
-
-    this.charts['servicesChart'] = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: this.topServices.map(s => s.name),
-        datasets: [{
-          data: this.topServices.map(s => s.totalContracts),
-          backgroundColor: colors.slice(0, this.topServices.length),
-          borderWidth: 0,
-          spacing: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '60%',
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#fff',
-            titleColor: '#374151',
-            bodyColor: '#374151',
-            borderColor: '#e5e7eb',
-            borderWidth: 1,
-            callbacks: {
-              label: (context) => {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const percentage = this.topServices[context.dataIndex].popularity;
-                return `${label}: ${value} contratos (${percentage.toFixed(1)}%)`;
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  /**
-   * Gráfico de tipo de cliente
-   */
-  private initClientTypeChart() {
-    const canvas = document.getElementById('clientTypeChart') as HTMLCanvasElement;
-    if (!canvas || !this.analyticsData) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const { pf, pj } = this.analyticsData.clients.byType;
-
-    this.charts['clientTypeChart'] = new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: ['Pessoa Física', 'Pessoa Jurídica'],
-        datasets: [{
-          data: [pf, pj],
-          backgroundColor: ['#0A8060', '#6366f1'],
-          borderWidth: 0
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: (context) => {
-                const value = context.parsed || 0;
-                const total = pf + pj;
-                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-                return `${context.label}: ${value} (${percentage}%)`;
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  /**
-   * Gráfico de receita
-   */
-  private initRevenueChart() {
-    const canvas = document.getElementById('revenueChart') as HTMLCanvasElement;
-    if (!canvas || !this.analyticsData) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const revenueData = this.analyticsData.revenue.monthly;
-    const labels = revenueData.map(r => r.month);
-    const revenue = revenueData.map(r => r.revenue);
-    const projected = revenueData.map(r => r.projected);
-
-    this.charts['revenueChart'] = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'Receita Real',
-            data: revenue,
-            backgroundColor: '#0A8060',
-            borderRadius: 6
-          },
-          {
-            label: 'Projeção',
-            data: projected,
-            backgroundColor: 'rgba(10, 128, 96, 0.3)',
-            borderRadius: 6
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { padding: 20 }
-          },
-          tooltip: {
-            callbacks: {
-              label: (context) => {
-                const value = context.parsed.y;
-                return `${context.dataset.label}: ${this.formatCurrency(value)}`;
-              }
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: '#6b7280' }
-          },
-          y: {
-            grid: { color: 'rgba(0, 0, 0, 0.05)' },
-            ticks: { 
-              color: '#6b7280',
-              callback: (value) => this.formatCurrency(Number(value))
-            }
-          }
-        }
-      }
-    });
-  }
 
   /**
    * Atualizar gráfico de evolução
@@ -604,15 +368,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  /**
-   * Atualizar gráfico de receita
-   */
-  updateRevenueChart() {
-    if (this.charts['revenueChart']) {
-      this.charts['revenueChart'].destroy();
-      this.initRevenueChart();
-    }
-  }
 
   // Métodos de formatação e utilitários
 
@@ -623,26 +378,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   formatGrowthRate(rate: number): string {
     const sign = rate >= 0 ? '+' : '';
     return `${sign}${rate.toFixed(1)}`;
-  }
-
-  formatMetricValue(metric: DetailedMetric): string {
-    if (metric.isCurrency && typeof metric.value === 'number') {
-      return this.formatCurrency(metric.value);
-    }
-    if (typeof metric.value === 'number') {
-      return metric.value.toLocaleString('pt-BR') + (metric.suffix || '');
-    }
-    return String(metric.value);
-  }
-
-  getTrendClass(trend?: number): string {
-    if (trend === undefined) return '';
-    return trend >= 0 ? 'positive' : 'negative';
-  }
-
-  getTrendIcon(trend?: number): string {
-    if (trend === undefined) return '';
-    return trend >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down';
   }
 
   getRevenueProgress(): number {
@@ -658,22 +393,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const total = pf + pj;
     if (total === 0) return 0;
     return Math.round(((type === 'pf' ? pf : pj) / total) * 100);
-  }
-
-  getMonthlyAverage(): number {
-    if (!this.analyticsData?.revenue.monthly) return 0;
-    const revenues = this.analyticsData.revenue.monthly.map(r => r.revenue);
-    return revenues.reduce((sum, r) => sum + r, 0) / revenues.length;
-  }
-
-  getHighestMonth(): number {
-    if (!this.analyticsData?.revenue.monthly) return 0;
-    const revenues = this.analyticsData.revenue.monthly.map(r => r.revenue);
-    return Math.max(...revenues);
-  }
-
-  abs(value: number): number {
-    return Math.abs(value);
   }
 
   // Métodos de ações
@@ -708,21 +427,4 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     this.router.navigate(['/home/reports']);
   }
 
-  shareAnalytics() {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Analytics Dashboard - NAUE Consultoria',
-        text: 'Confira nossos indicadores de performance',
-        url: window.location.href
-      });
-    } else {
-      // Fallback para copiar URL
-      navigator.clipboard.writeText(window.location.href);
-    }
-  }
-
-  scheduleReport() {
-    // Implementar modal de agendamento
-    console.log('Agendar relatório - implementar modal');
-  }
 }

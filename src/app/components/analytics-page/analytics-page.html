@@ -1,6 +1,6 @@
 <div class="page">
   <div class="page-header">
-    <h1 class="page-title">Analytics & Insights</h1>
+    <h1 class="page-title">Analytics</h1>
     <app-breadcrumb></app-breadcrumb>
   </div>
 
@@ -56,18 +56,6 @@
       </div>
     </div>
 
-    <!-- Insights Automáticos -->
-    <div class="insights-section" *ngIf="insights.length > 0">
-      <h3 class="section-title">
-        <i class="fas fa-lightbulb"></i>
-        Insights Automáticos
-      </h3>
-      <div class="insights-grid">
-        <div class="insight-card" *ngFor="let insight of insights">
-          <div class="insight-content" [innerHTML]="insight"></div>
-        </div>
-      </div>
-    </div>
 
     <!-- KPIs Principais -->
     <div class="kpi-section">
@@ -159,216 +147,57 @@
       </div>
     </div>
 
-    <!-- Métricas Detalhadas -->
-    <div class="metrics-section">
-      <h3 class="section-title">
-        <i class="fas fa-chart-bar"></i>
-        Métricas Detalhadas
-      </h3>
-      <div class="metrics-grid">
-        <div class="metric-card" *ngFor="let metric of detailedMetrics">
-          <div class="metric-icon" [style.background-color]="metric.color + '15'">
-            <i [class]="metric.icon" [style.color]="metric.color"></i>
+    <!-- Resumo Simples -->
+    <div class="summary-section">
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-calculator"></i>
           </div>
-          <div class="metric-content">
-            <div class="metric-label">{{ metric.label }}</div>
-            <div class="metric-value">{{ formatMetricValue(metric) }}</div>
-            <div class="metric-trend" [ngClass]="getTrendClass(metric.trend)" *ngIf="metric.trend !== undefined">
-              <i [class]="getTrendIcon(metric.trend)"></i>
-              {{ abs(metric.trend) }}% 
-              <span class="trend-period">vs período anterior</span>
-            </div>
+          <div class="summary-content">
+            <div class="summary-label">Valor Médio do Contrato</div>
+            <div class="summary-value">{{ formatCurrency(analyticsData?.general?.averageContractValue || 0) }}</div>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-label">Novos Clientes</div>
+            <div class="summary-value">{{ analyticsData?.clients?.newClients || 0 }}</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Gráficos Principais -->
-    <div class="charts-section">
+    <!-- Gráfico Principal -->
+    <div class="chart-section">
       <h3 class="section-title">
         <i class="fas fa-chart-area"></i>
-        Análises Visuais
+        Evolução Temporal
       </h3>
-      <div class="charts-grid">
-        <!-- Evolução Temporal -->
-        <div class="chart-container full-width">
-          <div class="chart-header">
-            <h4 class="chart-title">Evolução Temporal de Contratos e Receita</h4>
-            <div class="chart-actions">
-              <button class="chart-toggle" 
-                      [class.active]="chartView === 'combined'"
-                      (click)="setChartView('combined')">
-                Combinado
-              </button>
-              <button class="chart-toggle" 
-                      [class.active]="chartView === 'separate'"
-                      (click)="setChartView('separate')">
-                Separado
-              </button>
-              <button class="chart-action" (click)="exportChart('evolution')">
-                <i class="fas fa-download"></i>
-              </button>
-            </div>
-          </div>
-          <div class="evolution-chart-wrapper">
-            <canvas id="evolutionChart"></canvas>
-          </div>
-          <div class="chart-legend">
-            <div class="legend-items">
-              <div class="legend-item">
-                <div class="legend-dot" style="background-color: var(--primary-green)"></div>
-                <span>Novos Contratos</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-dot" style="background-color: #6366f1"></div>
-                <span>Receita (R$)</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-dot" style="background-color: #f59e0b"></div>
-                <span>Contratos Concluídos</span>
-              </div>
-            </div>
-          </div>
+      <div class="main-chart-container">
+        <div class="chart-header">
+          <h4 class="chart-title">Contratos e Receita</h4>
         </div>
-
-        <!-- Distribuição de Serviços -->
-        <div class="chart-container">
-          <div class="chart-header">
-            <h4 class="chart-title">Distribuição de Serviços</h4>
-            <div class="chart-actions">
-              <button class="chart-action" (click)="exportChart('services')">
-                <i class="fas fa-download"></i>
-              </button>
-            </div>
-          </div>
-          <div class="services-chart-wrapper">
-            <div class="chart-area">
-              <canvas id="servicesChart"></canvas>
-            </div>
-            <div class="services-legend">
-              <div *ngFor="let service of topServices; let i = index" class="legend-item">
-                <div class="legend-color" [style.background-color]="service.color"></div>
-                <div class="legend-info">
-                  <div class="legend-header">
-                    <i [class]="service.icon"></i>
-                    <span class="legend-name">{{ service.name }}</span>
-                  </div>
-                  <div class="legend-stats">
-                    <span class="legend-value">{{ service.popularity.toFixed(1) }}%</span>
-                    <span class="legend-contracts">{{ service.totalContracts }} contratos</span>
-                  </div>
-                  <div class="service-progress">
-                    <div class="service-progress-bar">
-                      <div class="service-progress-fill" 
-                           [style.width.%]="service.popularity"
-                           [style.background-color]="service.color"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Performance por Cliente -->
-        <div class="chart-container">
-          <div class="chart-header">
-            <h4 class="chart-title">Performance por Tipo de Cliente</h4>
-            <div class="chart-actions">
-              <button class="chart-action" (click)="exportChart('clients')">
-                <i class="fas fa-download"></i>
-              </button>
-            </div>
-          </div>
-          <div class="client-chart-wrapper">
-            <div class="client-stats">
-              <div class="client-stat-item">
-                <div class="client-stat-header">
-                  <i class="fas fa-user"></i>
-                  <span>Pessoa Física</span>
-                </div>
-                <div class="client-stat-value">{{ analyticsData?.clients?.byType?.pf || 0 }}</div>
-                <div class="client-stat-percentage">
-                  {{ getClientTypePercentage('pf') }}% do total
-                </div>
-              </div>
-              <div class="client-stat-divider"></div>
-              <div class="client-stat-item">
-                <div class="client-stat-header">
-                  <i class="fas fa-building"></i>
-                  <span>Pessoa Jurídica</span>
-                </div>
-                <div class="client-stat-value">{{ analyticsData?.clients?.byType?.pj || 0 }}</div>
-                <div class="client-stat-percentage">
-                  {{ getClientTypePercentage('pj') }}% do total
-                </div>
-              </div>
-            </div>
-            <div class="client-chart-area">
-              <canvas id="clientTypeChart"></canvas>
-            </div>
-          </div>
+        <div class="evolution-chart-wrapper">
+          <canvas id="evolutionChart"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- Análise de Receita -->
-    <div class="revenue-section">
-      <h3 class="section-title">
-        <i class="fas fa-money-bill-wave"></i>
-        Análise Financeira
-      </h3>
-      <div class="revenue-grid">
-        <div class="revenue-card">
-          <div class="revenue-header">
-            <h4>Receita por Mês</h4>
-            <div class="revenue-actions">
-              <select class="revenue-period" [(ngModel)]="revenuePeriod" (change)="updateRevenueChart()">
-                <option value="6">Últimos 6 meses</option>
-                <option value="12">Último ano</option>
-                <option value="24">Últimos 2 anos</option>
-              </select>
-            </div>
-          </div>
-          <div class="revenue-chart-wrapper">
-            <canvas id="revenueChart"></canvas>
-          </div>
-          <div class="revenue-summary">
-            <div class="revenue-summary-item">
-              <span class="revenue-label">Média Mensal:</span>
-              <span class="revenue-value">{{ formatCurrency(getMonthlyAverage()) }}</span>
-            </div>
-            <div class="revenue-summary-item">
-              <span class="revenue-label">Maior Mês:</span>
-              <span class="revenue-value">{{ formatCurrency(getHighestMonth()) }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Ações Rápidas -->
+    <!-- Ações -->
     <div class="actions-section">
-      <h3 class="section-title">
-        <i class="fas fa-bolt"></i>
-        Ações Rápidas
-      </h3>
-      <div class="actions-grid">
+      <div class="actions-simple">
         <button class="action-btn export-btn" (click)="exportAnalytics('excel')">
           <i class="fas fa-file-excel"></i>
-          <span>Exportar para Excel</span>
+          <span>Exportar Excel</span>
         </button>
         <button class="action-btn report-btn" (click)="generateReport()">
           <i class="fas fa-file-pdf"></i>
-          <span>Gerar Relatório PDF</span>
-        </button>
-        <button class="action-btn share-btn" (click)="shareAnalytics()">
-          <i class="fas fa-share-alt"></i>
-          <span>Compartilhar Dashboard</span>
-        </button>
-        <button class="action-btn schedule-btn" (click)="scheduleReport()">
-          <i class="fas fa-clock"></i>
-          <span>Agendar Relatório</span>
+          <span>Gerar Relatório</span>
         </button>
       </div>
     </div>
