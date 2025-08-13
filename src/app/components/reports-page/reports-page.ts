@@ -74,12 +74,10 @@ export class ReportsPage implements OnInit {
   }
 
   generateReport(reportType: 'monthly' | 'client' | 'services' | 'financial', config: ReportConfig | GeneralReportConfig) {
-    // Validation logic for reports that require a client
     if (reportType === 'client' && !config.clientId) {
       this.toastr.warning('Por favor, selecione um cliente.');
       return;
     }
-    // Validation for the services report
     if (reportType === 'services' && !config.serviceId) {
       this.toastr.warning('Por favor, selecione um serviço.');
       return;
@@ -93,19 +91,31 @@ export class ReportsPage implements OnInit {
     };
 
     let reportObservable: Observable<Blob>;
-    let fileName = `relatorio_${reportType}_${new Date().toISOString().split('T')[0]}`;
+    let fileName = '';
+
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
 
     switch (reportType) {
       case 'monthly':
+        fileName = `relatorio_mensal_${year}_${month}`;
         reportObservable = this.reportService.generateMonthlyReport(requestData);
         break;
       case 'client':
+        const client = this.clients.find(c => c.id === config.clientId);
+        const clientName = client ? client.name.replace(/\s+/g, '_').toLowerCase() : 'cliente';
+        fileName = `relatorio_cliente_${clientName}_${year}_${month}`;
         reportObservable = this.reportService.generateClientReport(requestData);
         break;
       case 'services':
+        const service = this.services.find(s => s.id === config.serviceId);
+        const serviceName = service ? service.name.replace(/\s+/g, '_').toLowerCase() : 'servico';
+        fileName = `relatorio_servico_${serviceName}_${year}_${month}`;
         reportObservable = this.reportService.generateServicesReport(requestData);
         break;
       case 'financial':
+        fileName = `relatorio_financeiro_${year}_${month}`;
         reportObservable = this.reportService.generateFinancialReport(requestData);
         break;
     }
