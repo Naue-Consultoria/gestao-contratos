@@ -98,25 +98,46 @@
             <td>{{ client.since }}</td>
             <td>
               <div class="actions-cell">
-                <button class="action-btn" (click)="viewClient(client.id); $event.stopPropagation()" title="Ver Detalhes">
-                  <i class="fas fa-eye"></i>
-                </button>
-                
-                <button class="action-btn" (click)="editClient(client.id); $event.stopPropagation()" title="Editar">
-                  <i class="fas fa-edit"></i>
-                </button>
-                
-                <button class="action-btn" (click)="softDeleteClient(client, $event)" title="Desativar">
-                  <i class="fas fa-archive"></i>
-                </button>
-
-                <button 
-                  *ngIf="authService.isAdmin()"
-                  class="action-btn action-btn-danger" 
-                  (click)="hardDeleteClient(client, $event)"
-                  title="Excluir Permanentemente">
-                  <i class="fas fa-trash"></i>
-                </button>
+                <div class="dropdown" [class.active]="dropdownOpen === client.id">
+                  <button 
+                    class="action-btn dropdown-toggle" 
+                    (click)="toggleDropdown(client.id, $event)"
+                    title="Ações">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="dropdown-menu" *ngIf="dropdownOpen === client.id">
+                    <button 
+                      class="dropdown-item" 
+                      (click)="viewClient(client.id); closeDropdown()"
+                      title="Ver Detalhes">
+                      <i class="fas fa-eye"></i>
+                      Ver Cliente
+                    </button>
+                    <button 
+                      class="dropdown-item" 
+                      (click)="editClient(client.id); closeDropdown()"
+                      title="Editar">
+                      <i class="fas fa-edit"></i>
+                      Editar
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button 
+                      class="dropdown-item" 
+                      (click)="softDeleteClient(client, $event); closeDropdown()"
+                      title="Desativar">
+                      <i class="fas fa-archive"></i>
+                      Desativar
+                    </button>
+                    <button 
+                      *ngIf="authService.isAdmin()"
+                      class="dropdown-item danger" 
+                      (click)="hardDeleteClient(client, $event); closeDropdown()"
+                      title="Excluir Permanentemente">
+                      <i class="fas fa-trash"></i>
+                      Excluir
+                    </button>
+                  </div>
+                </div>
               </div>
             </td>
           </tr>

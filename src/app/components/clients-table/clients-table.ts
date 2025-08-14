@@ -58,10 +58,12 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
   searchTerm = '';
   isLoading = true;
   error = '';
+  dropdownOpen: number | null = null;
 
   ngOnInit() {
     this.loadData();
     window.addEventListener('refreshClients', this.loadData.bind(this));
+    document.addEventListener('click', this.handleClickOutside.bind(this));
   }
 
   ngOnDestroy() {
@@ -72,6 +74,7 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
     });
     this.subscriptions.unsubscribe();
     window.removeEventListener('refreshClients', this.loadData.bind(this));
+    document.removeEventListener('click', this.handleClickOutside.bind(this));
   }
 
   async loadData() {
@@ -228,6 +231,22 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
 
   editClient(id: number) {
     this.router.navigate(['/home/clients/edit', id]);
+  }
+
+  toggleDropdown(clientId: number, event: MouseEvent) {
+    event.stopPropagation();
+    this.dropdownOpen = this.dropdownOpen === clientId ? null : clientId;
+  }
+
+  closeDropdown() {
+    this.dropdownOpen = null;
+  }
+
+  handleClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown')) {
+      this.dropdownOpen = null;
+    }
   }
 
   toggleActionMenu(client: ClientDisplay, event: MouseEvent) {

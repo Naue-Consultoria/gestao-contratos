@@ -66,51 +66,12 @@
              aria-label="Gráfico de evolução de contratos">
       <div class="section-header">
         <h2 class="section-title">Evolução de Contratos</h2>
-        <div class="section-actions mobile-hidden">
-          <button class="icon-btn" 
-                  type="button"
-                  [attr.aria-label]="'Expandir gráfico'"
-                  (click)="expandChart()">
-            <i class="fas fa-expand" aria-hidden="true"></i>
-          </button>
-          <button class="icon-btn" 
-                  type="button"
-                  [attr.aria-label]="'Baixar gráfico'"
-                  (click)="downloadChart()">
-            <i class="fas fa-download" aria-hidden="true"></i>
-          </button>
-        </div>
       </div>
       <div class="chart-wrapper" 
            role="img" 
            [attr.aria-label]="'Gráfico mostrando evolução de contratos ao longo do tempo'">
         <canvas id="contractsChart" 
                 [attr.aria-label]="'Dados do gráfico de contratos'"></canvas>
-      </div>
-      <div class="chart-insights" 
-           role="region" 
-           aria-label="Insights do gráfico">
-        <div class="insight-item" 
-             [attr.aria-label]="'Crescimento: ' + getChartInsights().growth">
-          <span class="insight-label">Crescimento</span>
-          <span class="insight-value" 
-                [ngClass]="getChartInsights().growth.includes('+') ? 'positive' : ''"
-                [attr.aria-live]="'polite'">{{ getChartInsights().growth }}</span>
-        </div>
-        <div class="insight-divider" aria-hidden="true"></div>
-        <div class="insight-item" 
-             [attr.aria-label]="'Média mensal: ' + getChartInsights().average">
-          <span class="insight-label">Média Mensal</span>
-          <span class="insight-value" 
-                [attr.aria-live]="'polite'">{{ getChartInsights().average }}</span>
-        </div>
-        <div class="insight-divider" aria-hidden="true"></div>
-        <div class="insight-item" 
-             [attr.aria-label]="'Projeção próximo mês: ' + getChartInsights().projection">
-          <span class="insight-label">Projeção Próx. Mês</span>
-          <span class="insight-value" 
-                [attr.aria-live]="'polite'">{{ getChartInsights().projection }}</span>
-        </div>
       </div>
     </section>
 
