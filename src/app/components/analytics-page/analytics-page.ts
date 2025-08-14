@@ -37,12 +37,12 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   isLoading = true;
   isRefreshing = false;
   selectedPeriod: 'week' | 'month' | 'quarter' | 'year' = 'month';
-  chartView: 'combined' | 'separate' = 'combined';
   revenuePeriod = '6';
   lastUpdated: Date = new Date();
 
   // Dados de analytics
   analyticsData: AnalyticsData | null = null;
+  revenueProgress: number = 0;
 
   // Charts
   private charts: { [key: string]: Chart } = {};
@@ -84,11 +84,16 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       this.analyticsData = await firstValueFrom(this.analyticsService.getAnalytics(filters));
       this.lastUpdated = new Date();
 
+      // Calcular progresso de receita uma vez
+      this.calculateRevenueProgress();
+
       // Inicializar charts
       setTimeout(() => this.initializeCharts(), 100);
 
     } catch (error) {
       console.error('Erro ao carregar analytics:', error);
+      // Mostrar mensagem de erro para o usuário
+      this.analyticsData = null;
     } finally {
       this.isLoading = false;
     }
@@ -124,21 +129,14 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * Definir visualização do gráfico
-   */
-  setChartView(view: 'combined' | 'separate') {
-    this.chartView = view;
-    this.updateEvolutionChart();
-  }
-
-  /**
    * Inicializar charts
    */
   private initializeCharts() {
     this.initConversionGauge();
     this.initContractsDonut();
-    this.initGrowthSparkline();
-    this.initEvolutionChart();
+    this.initServicesByUserChart();
+    this.initCompletedServicesChart();
+    this.initTopServicesChart();
   }
 
   /**
@@ -219,154 +217,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  /**
-   * Sparkline de crescimento
-   */
-  private initGrowthSparkline() {
-    const canvas = document.getElementById('growthSparkline') as HTMLCanvasElement;
-    if (!canvas || !this.analyticsData) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Gerar dados simulados de crescimento
-    const growthData = Array.from({ length: 12 }, () => Math.random() * 30 - 10);
-
-    this.charts['growthSparkline'] = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: Array.from({ length: 12 }, (_, i) => `M${i + 1}`),
-        datasets: [{
-          data: growthData,
-          borderColor: '#0A8060',
-          backgroundColor: 'rgba(10, 128, 96, 0.1)',
-          fill: true,
-          tension: 0.4,
-          pointRadius: 0,
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false }
-        },
-        scales: {
-          x: { display: false },
-          y: { display: false }
-        }
-      }
-    });
-  }
-
-  /**
-   * Gráfico de evolução
-   */
-  private initEvolutionChart() {
-    const canvas = document.getElementById('evolutionChart') as HTMLCanvasElement;
-    if (!canvas || !this.analyticsData) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const monthlyData = this.analyticsData.contracts.byMonth;
-    const labels = monthlyData.map(d => d.month);
-    const newContracts = monthlyData.map(d => d.new);
-    const completedContracts = monthlyData.map(d => d.completed);
-    const revenue = monthlyData.map(d => d.revenue);
-
-    this.charts['evolutionChart'] = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'Novos Contratos',
-            data: newContracts,
-            borderColor: '#0A8060',
-            backgroundColor: 'rgba(10, 128, 96, 0.1)',
-            fill: true,
-            tension: 0.4,
-            yAxisID: 'y'
-          },
-          {
-            label: 'Receita (R$ mil)',
-            data: revenue.map(r => r / 1000),
-            borderColor: '#6366f1',
-            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-            fill: true,
-            tension: 0.4,
-            yAxisID: 'y1'
-          },
-          {
-            label: 'Concluídos',
-            data: completedContracts,
-            borderColor: '#f59e0b',
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            fill: false,
-            tension: 0.4,
-            yAxisID: 'y'
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
-        plugins: {
-          legend: {
-            display: false
-          },
-          tooltip: {
-            backgroundColor: '#fff',
-            titleColor: '#374151',
-            bodyColor: '#374151',
-            borderColor: '#e5e7eb',
-            borderWidth: 1
-          }
-        },
-        scales: {
-          x: {
-            grid: { color: 'rgba(0, 0, 0, 0.05)' },
-            ticks: { color: '#6b7280' }
-          },
-          y: {
-            type: 'linear',
-            display: true,
-            position: 'left',
-            grid: { color: 'rgba(0, 0, 0, 0.05)' },
-            ticks: { color: '#6b7280' }
-          },
-          y1: {
-            type: 'linear',
-            display: true,
-            position: 'right',
-            grid: { drawOnChartArea: false },
-            ticks: { color: '#6b7280' }
-          }
-        }
-      }
-    });
-  }
-
-
-
-
-  /**
-   * Atualizar gráfico de evolução
-   */
-  private updateEvolutionChart() {
-    if (this.charts['evolutionChart']) {
-      // Recriar o gráfico com a nova configuração
-      this.charts['evolutionChart'].destroy();
-      this.initEvolutionChart();
-    }
-  }
 
 
   // Métodos de formatação e utilitários
@@ -375,16 +226,19 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     return this.contractService.formatValue(value);
   }
 
-  formatGrowthRate(rate: number): string {
-    const sign = rate >= 0 ? '+' : '';
-    return `${sign}${rate.toFixed(1)}`;
+
+  private calculateRevenueProgress(): void {
+    if (!this.analyticsData?.revenue) {
+      this.revenueProgress = 0;
+      return;
+    }
+    const { totalCollected, totalPending } = this.analyticsData.revenue;
+    const total = totalCollected + totalPending;
+    this.revenueProgress = total > 0 ? Math.round((totalCollected / total) * 100) : 0;
   }
 
   getRevenueProgress(): number {
-    if (!this.analyticsData?.revenue) return 0;
-    const { totalCollected, totalPending } = this.analyticsData.revenue;
-    const total = totalCollected + totalPending;
-    return total > 0 ? Math.round((totalCollected / total) * 100) : 0;
+    return this.revenueProgress;
   }
 
   getClientTypePercentage(type: 'pf' | 'pj'): number {
@@ -425,6 +279,226 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   generateReport() {
     // Navegar para página de relatórios
     this.router.navigate(['/home/reports']);
+  }
+
+  /**
+   * Gráfico de distribuição de serviços por usuário
+   */
+  private initServicesByUserChart() {
+    const canvas = document.getElementById('servicesByUserChart') as HTMLCanvasElement;
+    if (!canvas || !this.analyticsData?.servicesByUser || this.analyticsData.servicesByUser.length === 0) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const data = this.analyticsData.servicesByUser.slice(0, 8); // Top 8 usuários
+    if (data.length === 0) return;
+    const labels = data.map((user: any) => user.userName);
+    const values = data.map((user: any) => user.totalServices);
+
+    this.charts['servicesByUserChart'] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Serviços',
+          data: values,
+          backgroundColor: [
+            '#0A8060',
+            '#6366f1',
+            '#f59e0b',
+            '#8b5cf6',
+            '#10b981',
+            '#f97316',
+            '#ef4444',
+            '#06b6d4'
+          ],
+          borderColor: '#ffffff',
+          borderWidth: 2,
+          borderRadius: 8,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#374151',
+            bodyColor: '#374151',
+            borderColor: '#e5e7eb',
+            borderWidth: 1,
+            callbacks: {
+              label: (context) => {
+                const user = data[context.dataIndex];
+                return `${user.totalServices} serviços`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { 
+              color: '#6b7280',
+              maxRotation: 45
+            }
+          },
+          y: {
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            ticks: { 
+              color: '#6b7280',
+              stepSize: 1
+            },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Gráfico de serviços concluídos ao longo do tempo
+   */
+  private initCompletedServicesChart() {
+    const canvas = document.getElementById('completedServicesChart') as HTMLCanvasElement;
+    if (!canvas || !this.analyticsData?.completedServices) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const data = this.analyticsData.completedServices;
+    const labels = data.map((item: any) => item.month);
+    const values = data.map((item: any) => item.completed);
+
+    this.charts['completedServicesChart'] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Serviços Concluídos',
+          data: values,
+          borderColor: '#0A8060',
+          backgroundColor: 'rgba(10, 128, 96, 0.1)',
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#0A8060',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#374151',
+            bodyColor: '#374151',
+            borderColor: '#e5e7eb',
+            borderWidth: 1
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            ticks: { color: '#6b7280' }
+          },
+          y: {
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            ticks: { 
+              color: '#6b7280',
+              stepSize: 1
+            },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Gráfico de serviços mais contratados
+   */
+  private initTopServicesChart() {
+    const canvas = document.getElementById('topServicesChart') as HTMLCanvasElement;
+    if (!canvas || !this.analyticsData?.topServices || this.analyticsData.topServices.length === 0) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const data = this.analyticsData.topServices.slice(0, 10); // Top 10
+    if (data.length === 0) return;
+    const labels = data.map((service: any) => service.name);
+    const values = data.map((service: any) => service.contractCount);
+
+    // Cores categorizadas
+    const colors = [
+      '#0A8060', '#6366f1', '#f59e0b', '#8b5cf6', '#10b981',
+      '#f97316', '#ef4444', '#06b6d4', '#84cc16', '#f43f5e'
+    ];
+
+    this.charts['topServicesChart'] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Contratos',
+          data: values,
+          backgroundColor: colors,
+          borderColor: '#ffffff',
+          borderWidth: 2,
+          borderRadius: 8,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y', // Barras horizontais
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#374151',
+            bodyColor: '#374151',
+            borderColor: '#e5e7eb',
+            borderWidth: 1,
+            callbacks: {
+              label: (context) => {
+                const service = data[context.dataIndex];
+                return `${service.contractCount} contratos - ${this.formatCurrency(service.totalValue)}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            ticks: { 
+              color: '#6b7280',
+              stepSize: 1
+            },
+            beginAtZero: true
+          },
+          y: {
+            grid: { display: false },
+            ticks: { 
+              color: '#6b7280',
+              callback: function(value: any) {
+                const label = labels[value as number];
+                return label && label.length > 25 ? label.substring(0, 25) + '...' : label;
+              }
+            }
+          }
+        }
+      }
+    });
   }
 
 }

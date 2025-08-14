@@ -51,19 +51,6 @@ export class HelpPageComponent {
         'Acompanhamento de chamados',
         'Relatórios de resolução'
       ]
-    },
-    {
-      icon: 'fas fa-lightbulb',
-      title: 'Sugestões',
-      description: 'Contribua para o desenvolvimento do sistema enviando suas ideias e sugestões de melhorias.',
-      buttonText: 'Enviar Sugestão',
-      buttonIcon: 'fas fa-paper-plane',
-      features: [
-        'Portal de ideias',
-        'Votação da comunidade',
-        'Feedback dos desenvolvedores',
-        'Acompanhamento de implementação'
-      ]
     }
   ];
   

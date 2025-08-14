@@ -108,6 +108,26 @@ export interface RevenueAnalytics {
   }[];
 }
 
+export interface ServicesByUser {
+  userId: number;
+  userName: string;
+  totalServices: number;
+  servicesByCategory: { [category: string]: number };
+}
+
+export interface CompletedService {
+  month: string;
+  completed: number;
+}
+
+export interface TopService {
+  id: number;
+  name: string;
+  category: string;
+  contractCount: number;
+  totalValue: number;
+}
+
 export interface AnalyticsData {
   general: GeneralStats;
   services: ServiceAnalytics[];
@@ -115,6 +135,9 @@ export interface AnalyticsData {
   contracts: ContractAnalytics;
   proposals: ProposalAnalytics;
   revenue: RevenueAnalytics;
+  servicesByUser?: ServicesByUser[];
+  completedServices?: CompletedService[];
+  topServices?: TopService[];
   period?: string;
   generatedAt?: string;
 }
@@ -167,7 +190,7 @@ export class AnalyticsService {
       catchError(error => {
         console.error('❌ Erro ao buscar analytics:', error);
         this._isLoading$.next(false);
-        return of(this.getMockAnalyticsData());
+        throw error;
       })
     );
   }
@@ -247,65 +270,4 @@ export class AnalyticsService {
     });
   }
 
-  /**
-   * Dados mock para fallback em caso de erro
-   */
-  private getMockAnalyticsData(): AnalyticsData {
-    return {
-      general: {
-        totalContracts: 0,
-        activeContracts: 0,
-        completedContracts: 0,
-        totalClients: 0,
-        totalRevenue: 0,
-        activeRevenue: 0,
-        averageContractValue: 0,
-        averageContractDuration: 0,
-        conversionRate: 0,
-        growthRate: 0
-      },
-      services: [],
-      clients: {
-        totalClients: 0,
-        newClients: 0,
-        activeClients: 0,
-        retentionRate: 0,
-        byType: {
-          pf: 0,
-          pj: 0
-        }
-      },
-      contracts: {
-        total: 0,
-        byStatus: {},
-        byType: {},
-        monthlyEvolution: [],
-        byMonth: []
-      },
-      proposals: {
-        total: 0,
-        byStatus: {
-          draft: 0,
-          sent: 0,
-          signed: 0,
-          rejected: 0,
-          expired: 0,
-          converted: 0
-        },
-        totalValue: 0,
-        averageValue: 0
-      },
-      revenue: {
-        totalRevenue: 0,
-        receivedRevenue: 0,
-        pendingRevenue: 0,
-        totalCollected: 0,
-        totalPending: 0,
-        monthlyRevenue: [],
-        monthly: []
-      },
-      period: 'month',
-      generatedAt: new Date().toISOString()
-    };
-  }
 }

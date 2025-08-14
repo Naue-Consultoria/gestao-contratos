@@ -5,14 +5,62 @@
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <div class="loading-spinner">
-      <i class="fas fa-spinner fa-spin"></i>
-      <span>Carregando dados...</span>
+  <div *ngIf="isLoading" class="loading-page">
+    <!-- Header Skeleton -->
+    <div class="loading-header">
+      <div class="skeleton skeleton-title"></div>
+      <div class="skeleton skeleton-subtitle"></div>
+    </div>
+
+    <!-- KPI Cards Skeleton -->
+    <div class="loading-kpi-grid">
+      <div class="skeleton-card" *ngFor="let item of [1,2,3]">
+        <div class="skeleton skeleton-kpi-title"></div>
+        <div class="skeleton skeleton-kpi-value"></div>
+        <div class="skeleton skeleton-kpi-chart"></div>
+      </div>
+    </div>
+
+    <!-- Charts Skeleton -->
+    <div class="loading-charts">
+      <div class="skeleton-chart-container">
+        <div class="skeleton skeleton-chart-title"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+      <div class="loading-chart-grid">
+        <div class="skeleton-chart-small" *ngFor="let item of [1,2,3]">
+          <div class="skeleton skeleton-chart-title"></div>
+          <div class="skeleton skeleton-chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div class="loading-indicator">
+      <div class="loading-spinner">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <span class="loading-text">Carregando analytics...</span>
+      <div class="loading-progress">
+        <div class="progress-bar"></div>
+      </div>
     </div>
   </div>
 
-  <div *ngIf="!isLoading">
+  <!-- Error State -->
+  <div *ngIf="!isLoading && !analyticsData" class="error-container">
+    <div class="error-message">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>Erro ao carregar dados</h3>
+      <p>Não foi possível carregar os dados de analytics. Tente novamente.</p>
+      <button class="retry-btn" (click)="refreshData()">
+        <i class="fas fa-redo"></i>
+        Tentar novamente
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && analyticsData">
     <!-- Seletor de Período -->
     <div class="period-selector">
       <label class="period-label">
@@ -72,11 +120,10 @@
               <i class="fas fa-percentage"></i>
             </div>
           </div>
-          <div class="kpi-value">{{ analyticsData?.general?.conversionRate || 0 }}%</div>
+          <div class="kpi-value">{{ analyticsData.general.conversionRate || 0 }}%</div>
           <div class="kpi-description">
-            <span class="trend" [ngClass]="getTrendClass(12)">
-              <i class="fas fa-arrow-up"></i> +12% vs mês anterior
-            </span>
+            <span class="kpi-subtitle">Sucesso Comercial</span>
+            <span class="kpi-detail">Propostas aceitas / enviadas</span>
           </div>
           <div class="kpi-gauge">
             <canvas id="conversionGauge" width="120" height="60"></canvas>
@@ -91,20 +138,12 @@
               <i class="fas fa-dollar-sign"></i>
             </div>
           </div>
-          <div class="kpi-value">{{ formatCurrency(analyticsData?.general?.totalRevenue || 0) }}</div>
+          <div class="kpi-value">{{ formatCurrency(analyticsData.general.totalRevenue || 0) }}</div>
           <div class="kpi-description">
             <div class="revenue-breakdown">
-              <span>Coletado: {{ formatCurrency(analyticsData?.revenue?.totalCollected || 0) }}</span>
-              <span>Pendente: {{ formatCurrency(analyticsData?.revenue?.totalPending || 0) }}</span>
+              <span>Coletado: {{ formatCurrency(analyticsData.revenue.totalCollected || 0) }}</span>
+              <span>Pendente: {{ formatCurrency(analyticsData.revenue.totalPending || 0) }}</span>
             </div>
-          </div>
-          <div class="revenue-progress">
-            <div class="progress-bar">
-              <div class="progress-fill" 
-                   [style.width.%]="getRevenueProgress()"
-                   [style.background]="'var(--primary-green)'"></div>
-            </div>
-            <span class="progress-text">{{ getRevenueProgress() }}% coletado</span>
           </div>
         </div>
 
@@ -116,11 +155,11 @@
               <i class="fas fa-file-contract"></i>
             </div>
           </div>
-          <div class="kpi-value">{{ analyticsData?.general?.activeContracts || 0 }}</div>
+          <div class="kpi-value">{{ analyticsData.general.activeContracts || 0 }}</div>
           <div class="kpi-description">
             <div class="contract-stats">
-              <span>Total: {{ analyticsData?.general?.totalContracts || 0 }}</span>
-              <span>Concluídos: {{ analyticsData?.general?.completedContracts || 0 }}</span>
+              <span>Total: {{ analyticsData.general.totalContracts || 0 }}</span>
+              <span>Concluídos: {{ analyticsData.general.completedContracts || 0 }}</span>
             </div>
           </div>
           <div class="contract-chart">
@@ -128,65 +167,69 @@
           </div>
         </div>
 
-        <!-- Crescimento -->
-        <div class="kpi-card growth-kpi">
-          <div class="kpi-header">
-            <h4 class="kpi-title">Taxa de Crescimento</h4>
-            <div class="kpi-icon">
-              <i class="fas fa-chart-line"></i>
+      </div>
+    </div>
+
+
+
+    <!-- Novos Gráficos Analytics -->
+    <div class="analytics-charts-section">
+      <h3 class="section-title">
+        <i class="fas fa-chart-bar"></i>
+        Analytics Detalhados
+      </h3>
+      
+      <div class="charts-grid">
+        <!-- Distribuição de Serviços por Usuário -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-users"></i>
+              Distribuição de Serviços por Usuário
+            </h4>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="servicesByUserChart" *ngIf="analyticsData.servicesByUser && analyticsData.servicesByUser.length > 0"></canvas>
+            <div *ngIf="!analyticsData.servicesByUser || analyticsData.servicesByUser.length === 0" class="no-data-message">
+              <i class="fas fa-info-circle"></i>
+              <p>Nenhum dado de distribuição por usuário disponível ainda</p>
+              <small>Os dados aparecerão quando houver usuários com serviços atribuídos</small>
             </div>
           </div>
-          <div class="kpi-value">{{ formatGrowthRate(analyticsData?.general?.growthRate || 0) }}%</div>
-          <div class="kpi-description">
-            <span class="growth-period">vs {{ selectedPeriod === 'month' ? 'mês' : selectedPeriod === 'quarter' ? 'trimestre' : 'ano' }} anterior</span>
+        </div>
+
+        <!-- Serviços Concluídos ao Longo do Tempo -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-check-circle"></i>
+              Serviços Concluídos
+            </h4>
           </div>
-          <div class="growth-sparkline">
-            <canvas id="growthSparkline" width="200" height="40"></canvas>
+          <div class="chart-wrapper">
+            <canvas id="completedServicesChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Serviços Mais Contratados -->
+        <div class="chart-card full-width">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-trophy"></i>
+              Serviços Mais Contratados
+            </h4>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="topServicesChart" *ngIf="analyticsData.topServices && analyticsData.topServices.length > 0"></canvas>
+            <div *ngIf="!analyticsData.topServices || analyticsData.topServices.length === 0" class="no-data-message">
+              <i class="fas fa-info-circle"></i>
+              <p>Nenhum dado de serviços disponível ainda</p>
+              <small>Os dados aparecerão quando houver contratos com serviços vinculados</small>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Resumo Simples -->
-    <div class="summary-section">
-      <div class="summary-grid">
-        <div class="summary-card">
-          <div class="summary-icon">
-            <i class="fas fa-calculator"></i>
-          </div>
-          <div class="summary-content">
-            <div class="summary-label">Valor Médio do Contrato</div>
-            <div class="summary-value">{{ formatCurrency(analyticsData?.general?.averageContractValue || 0) }}</div>
-          </div>
-        </div>
-        <div class="summary-card">
-          <div class="summary-icon">
-            <i class="fas fa-user-plus"></i>
-          </div>
-          <div class="summary-content">
-            <div class="summary-label">Novos Clientes</div>
-            <div class="summary-value">{{ analyticsData?.clients?.newClients || 0 }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Gráfico Principal -->
-    <div class="chart-section">
-      <h3 class="section-title">
-        <i class="fas fa-chart-area"></i>
-        Evolução Temporal
-      </h3>
-      <div class="main-chart-container">
-        <div class="chart-header">
-          <h4 class="chart-title">Contratos e Receita</h4>
-        </div>
-        <div class="evolution-chart-wrapper">
-          <canvas id="evolutionChart"></canvas>
-        </div>
-      </div>
-    </div>
-
 
     <!-- Ações -->
     <div class="actions-section">
