@@ -168,6 +168,7 @@
 .contract-form {
   padding: 24px;
   width: 100%;
+  overflow: hidden;
 }
 
 /* ========================================
@@ -178,7 +179,8 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 32px;
-  align-items: start;
+  align-items: stretch;
+  overflow: hidden;
 }
 
 .left-column,
@@ -186,6 +188,8 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* ========================================
@@ -199,11 +203,23 @@
   padding: 24px;
   transition: all 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
 }
 
 .form-section:hover {
   box-shadow: var(--shadow-md);
   border-color: var(--naue-primary);
+}
+
+/* Seção de serviços - Container principal SEM SCROLL */
+.right-column .form-section:first-child {
+  height: 600.36px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  padding: 24px !important;
+  overflow: hidden !important;
 }
 
 .section-title {
@@ -352,6 +368,9 @@ textarea.form-control {
   border: 2px dashed #e1e4e8;
   border-radius: 12px;
   background: #f8f9fa;
+  /* Altura para preencher o espaço disponível na seção de 600.36px */
+  min-height: 472px;
+  flex: 1;
 }
 
 .empty-icon {
@@ -384,109 +403,138 @@ textarea.form-control {
   line-height: 1.5;
 }
 
-/* Lista de serviços */
-.services-list {
+/* Container principal da lista de serviços - SEM SCROLL */
+.right-column .form-section:first-child .services-list {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  min-height: 0;
+  margin-top: 20px;
+  padding-bottom: 80px;
+  overflow: hidden;
 }
 
-
-.selected-services {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-height: none;
-  overflow-y: visible;
+/* Área onde os serviços são listados - APENAS ESTE TEM SCROLL */
+.right-column .form-section:first-child .selected-services {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  padding: 16px !important;
+  background: #f8fafc !important;
+  border: 2px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  /* APENAS ESTA DIV TEM SCROLL */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  /* Altura fixa */
+  height: 380px !important;
+  max-height: 380px !important;
+  min-height: 380px !important;
+  /* Garantir que os cards não encolham */
+  align-items: stretch !important;
+  flex-shrink: 0 !important;
 }
 
-/* Ativar scroll apenas quando há mais de 3 serviços */
-.selected-services.enable-scroll {
-  max-height: 480px; /* Aproximadamente 3 cards + gaps */
-  overflow-y: auto;
-  padding-right: 8px;
-}
-
-/* Scrollbar personalizada apenas quando scroll está ativo */
-.selected-services.enable-scroll::-webkit-scrollbar {
+/* Scrollbar simples e limpa */
+.selected-services::-webkit-scrollbar {
   width: 6px;
 }
 
-.selected-services.enable-scroll::-webkit-scrollbar-track {
+.selected-services::-webkit-scrollbar-track {
   background: #f1f5f9;
   border-radius: 3px;
 }
 
-.selected-services.enable-scroll::-webkit-scrollbar-thumb {
-  background: var(--naue-primary);
+.selected-services::-webkit-scrollbar-thumb {
+  background: #94a3b8;
   border-radius: 3px;
 }
 
-.selected-services.enable-scroll::-webkit-scrollbar-thumb:hover {
-  background: var(--naue-primary-hover);
+.selected-services::-webkit-scrollbar-thumb:hover {
+  background: var(--naue-primary);
 }
 
-/* Card de serviço */
+/* Card de serviço - Tamanho fixo */
 .service-card {
   background: white;
-  border: 1px solid #e1e4e8;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 20px;
-  transition: all 0.2s ease;
+  padding: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  animation: slideIn 0.4s ease-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  /* Tamanho fixo para evitar redimensionamento */
+  flex-shrink: 0;
+  min-height: 120px;
+  width: 100%;
 }
 
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Accent border no topo - mais discreto */
 .service-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--naue-primary) 0%, var(--naue-primary-hover) 100%);
+  height: 3px;
+  background: var(--naue-primary);
   border-radius: 12px 12px 0 0;
 }
 
+/* Hover effect mais sutil */
 .service-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.1);
   border-color: var(--naue-primary);
 }
 
-/* Header do serviço */
+/* Header do serviço - Layout enxuto */
 .service-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
+  display: block;
+  margin-bottom: 12px;
+  position: relative;
 }
 
 .service-info {
-  flex: 1;
+  margin-right: 40px; /* Espaço para o botão */
 }
 
 .service-name {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #1f2937;
   margin: 0 0 8px 0;
   line-height: 1.3;
 }
 
 .service-meta {
   display: flex;
-  gap: 16px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .service-category,
 .service-duration {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   font-size: 12px;
-  color: #6c737f;
-  background: #f1f5f9;
+  font-weight: 500;
+  color: #6b7280;
+  background: #f3f4f6;
   padding: 4px 8px;
   border-radius: 6px;
 }
@@ -494,75 +542,70 @@ textarea.form-control {
 .service-category i,
 .service-duration i {
   color: var(--naue-primary);
+  font-size: 11px;
 }
 
-/* Botão de remover */
+/* Botão de remover - Canto superior direito */
 .remove-service-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   border: none;
-  background: #fef2f2;
-  color: #dc3545;
+  background: #fee2e2;
+  color: #dc2626;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  flex-shrink: 0;
+  z-index: 3;
 }
 
 .remove-service-btn:hover {
-  background: #dc3545;
+  background: #dc2626;
   color: white;
   transform: scale(1.1);
 }
 
-/* Precificação do serviço */
+.remove-service-btn i {
+  font-size: 12px;
+}
+
+/* Precificação do serviço - Layout enxuto */
 .service-pricing {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
-  align-items: end;
-  padding-top: 16px;
-  border-top: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 8px;
 }
 
 .price-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex: 1;
 }
 
 .price-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #344054;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 4px;
 }
 
 .price-input-wrapper {
   position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.currency-symbol {
-  position: absolute;
-  left: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #6c737f;
-  z-index: 1;
 }
 
 .price-input {
   width: 100%;
-  padding: 12px 12px 12px 32px;
-  border: 2px solid #e1e4e8;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  text-align: right;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
   background: white;
   transition: all 0.2s ease;
 }
@@ -570,70 +613,51 @@ textarea.form-control {
 .price-input:focus {
   outline: none;
   border-color: var(--naue-primary);
-  box-shadow: 0 0 0 3px rgba(0, 59, 43, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 59, 43, 0.1);
 }
 
-.price-input::placeholder {
-  color: #98a2b3;
-  font-weight: normal;
-}
-
-.price-display {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-}
-
+/* Valor total compacto */
 .price-value {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--naue-primary);
+  white-space: nowrap;
 }
 
-/* Resumo total do contrato */
-.contract-total-summary {
-  background: linear-gradient(135deg, var(--naue-primary-light) 0%, rgba(0, 59, 43, 0.05) 100%);
-  border: 1px solid rgba(0, 59, 43, 0.2);
+/* Resumo total - fixado no rodapé da form-section */
+.right-column .form-section:first-child .contract-total-summary {
+  background: linear-gradient(135deg, var(--naue-primary) 0%, var(--naue-primary-hover) 100%);
+  color: white;
   border-radius: 12px;
-  padding: 20px;
-  margin-top: 8px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.15);
+  /* Posicionamento absoluto no rodapé da form-section */
+  position: absolute;
+  bottom: 20px;
+  left: 24px;
+  right: 24px;
+  margin: 0;
+  z-index: 10;
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-}
-
-.summary-row.total {
-  border-top: 2px solid rgba(0, 59, 43, 0.2);
-  margin-top: 12px;
-  padding-top: 16px;
+  margin: 0;
+  padding: 0;
 }
 
 .summary-row .summary-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #344054;
-}
-
-.summary-row.total .summary-label {
   font-size: 16px;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-weight: 600;
+  color: white;
 }
 
 .summary-row .summary-value {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
-  color: var(--naue-primary);
-}
-
-.summary-row.total .summary-value {
-  font-size: 24px;
-  color: var(--naue-primary);
+  color: white;
 }
 
 /* ========================================

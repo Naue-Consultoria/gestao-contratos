@@ -123,7 +123,7 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
       'Treinamento': 'fas fa-chalkboard-teacher',
       'Mentoria': 'fas fa-user-tie',
       'Diagnóstico': 'fas fa-stethoscope',
-      'Desenvolvimento': 'fas fa-code',
+      'Desenvolvimento': 'fas fa-line-chart',
       'Gestão': 'fas fa-tasks',
       'Estratégia': 'fas fa-bullseye'
     };

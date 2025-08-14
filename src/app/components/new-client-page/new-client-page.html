@@ -116,7 +116,18 @@
               class="form-control"
               [(ngModel)]="formData.business_segment" 
               [disabled]="isLoading"
-              placeholder="Ex: Tecnologia, Saúde, Educação">
+              placeholder="">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Representante Legal</label>
+            <input 
+              type="text" 
+              name="legal_representative"
+              class="form-control"
+              [(ngModel)]="formData.legal_representative" 
+              [disabled]="isLoading"
+              placeholder="Nome do representante legal da empresa">
           </div>
           
         </div>

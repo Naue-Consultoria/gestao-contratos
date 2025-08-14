@@ -6,7 +6,7 @@ import { WebsocketService } from './websocket.service';
 
 export interface Notification {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
+  type: 'success' | 'error' | 'warning' | 'info' | 'contract_assignment' | 'permission_change' | 'contract_expiring' | 'payment_overdue' | 'service_comment' | 'service_status_change';
   title: string;
   message: string;
   timestamp: Date;
@@ -15,10 +15,35 @@ export interface Notification {
   link?: string;
   icon?: string;
   duration?: number;
+  priority?: 'normal' | 'high';
+  metadata?: any;
   action?: {
     label: string;
     callback: () => void;
   };
+}
+
+export interface ApiNotificationResponse {
+  id: number;
+  user_id: number;
+  type: string;
+  title: string;
+  message: string;
+  link?: string;
+  priority?: string;
+  metadata?: any;
+  is_read: boolean;
+  read_at?: string;
+  created_at: string;
+}
+
+export interface NotificationListResponse {
+  success: boolean;
+  notifications: ApiNotificationResponse[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export interface NotificationOptions {
@@ -46,6 +71,11 @@ export class NotificationService {
   private unreadCount = new BehaviorSubject<number>(0);
   public unreadCount$ = this.unreadCount.asObservable();
 
+  private currentPage = 1;
+  private readonly pageSize = 20;
+  private totalPages = 1;
+  private isLoading = false;
+
   private defaultDuration = 5000;
   private maxToasts = 3;
 
@@ -55,6 +85,7 @@ export class NotificationService {
   ) {
     this.loadNotificationsFromStorage();
     this.fetchUserNotifications();
+    this.fetchUnreadCount();
     this.listenForRealTimeNotifications();
   }
 
@@ -62,15 +93,17 @@ export class NotificationService {
     this.websocketService.listenForNewNotifications().subscribe(notificationFromServer => {
       const newNotification: Notification = {
         ...notificationFromServer,
-        id: this.generateId(),
-        timestamp: new Date(notificationFromServer.timestamp),
-        isRead: false,
+        id: `server-${(notificationFromServer as any).id}`,
+        timestamp: new Date((notificationFromServer as any).created_at || Date.now()),
+        isRead: (notificationFromServer as any).is_read || false,
         persistent: true,
-        type: 'info',
-        icon: 'fas fa-bell'
+        type: this.mapNotificationType((notificationFromServer as any).type),
+        icon: this.getNotificationIcon((notificationFromServer as any).type),
+        priority: (notificationFromServer as any).priority || 'normal'
       };
       this.addToHistory(newNotification);
-      this.show(newNotification);
+      this.show({ ...newNotification, persistent: false, duration: this.getNotificationDuration(newNotification) });
+      this.fetchUnreadCount(); // Atualizar contador
     });
   }
 
@@ -115,39 +148,75 @@ export class NotificationService {
     this.saveNotificationsToStorage();
   }
 
-  fetchUserNotifications() {
-    this.http.get<{ success: boolean, notifications: Notification[] }>(this.API_URL).subscribe({
+  fetchUserNotifications(page: number = 1) {
+    if (this.isLoading) return;
+    
+    this.isLoading = true;
+    this.http.get<NotificationListResponse>(`${this.API_URL}?page=${page}&limit=${this.pageSize}`).subscribe({
       next: (response) => {
         if (response.success && response.notifications) {
-          const serverNotifications = response.notifications.map(n => ({
-            ...n,
-            id: this.generateId(),
-            persistent: true,
-            timestamp: new Date(n.timestamp)
-          }));
-          this.notificationHistory.next(serverNotifications);
-          this.updateUnreadCount();
+          const serverNotifications = response.notifications.map(this.mapApiNotificationToClient);
+          
+          if (page === 1) {
+            this.notificationHistory.next(serverNotifications);
+          } else {
+            const current = this.notificationHistory.value;
+            this.notificationHistory.next([...current, ...serverNotifications]);
+          }
+          
+          this.currentPage = response.page;
+          this.totalPages = response.totalPages;
           this.saveNotificationsToStorage();
         }
+        this.isLoading = false;
       },
-      error: (err) => console.error("Falha ao buscar notificações", err)
+      error: (err) => {
+        console.error("Falha ao buscar notificações", err);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  fetchUnreadCount() {
+    this.http.get<{ success: boolean, unreadCount: number }>(`${this.API_URL}/unread-count`).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.unreadCount.next(response.unreadCount);
+        }
+      },
+      error: (err) => console.error("Falha ao buscar contador de não lidas", err)
     });
   }
 
   markAsRead(id: string): void {
+    // Atualizar localmente primeiro
     const history = this.notificationHistory.value.map(n => n.id === id ? { ...n, isRead: true } : n);
     this.notificationHistory.next(history);
     this.updateUnreadCount();
     this.saveNotificationsToStorage();
-    const numericId = id.split('-')[1];
-    if (numericId) this.http.patch(`${this.API_URL}/${numericId}/read`, {}).subscribe();
+
+    // Extrair ID numérico do servidor
+    const numericId = this.extractServerId(id);
+    if (numericId) {
+      this.http.patch(`${this.API_URL}/${numericId}/read`, {}).subscribe({
+        next: () => this.fetchUnreadCount(), // Sincronizar contador
+        error: (err) => console.error('Erro ao marcar notificação como lida:', err)
+      });
+    }
   }
 
   markAllAsRead(): void {
+    // Atualizar localmente primeiro
     const history = this.notificationHistory.value.map(n => ({ ...n, isRead: true }));
     this.notificationHistory.next(history);
     this.updateUnreadCount();
     this.saveNotificationsToStorage();
+
+    // Chamar API
+    this.http.patch(`${this.API_URL}/read-all`, {}).subscribe({
+      next: () => this.fetchUnreadCount(), // Sincronizar contador
+      error: (err) => console.error('Erro ao marcar todas como lidas:', err)
+    });
   }
 
   clearHistory(): void {
@@ -187,5 +256,77 @@ export class NotificationService {
 
   private generateId(): string {
     return `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private mapApiNotificationToClient = (apiNotification: ApiNotificationResponse): Notification => {
+    return {
+      id: `server-${apiNotification.id}`,
+      type: this.mapNotificationType(apiNotification.type),
+      title: apiNotification.title,
+      message: apiNotification.message,
+      timestamp: new Date(apiNotification.created_at),
+      isRead: apiNotification.is_read,
+      persistent: true,
+      link: apiNotification.link,
+      icon: this.getNotificationIcon(apiNotification.type),
+      priority: apiNotification.priority as 'normal' | 'high' || 'normal',
+      metadata: apiNotification.metadata
+    };
+  }
+
+  private mapNotificationType(serverType: string): Notification['type'] {
+    const typeMap: Record<string, Notification['type']> = {
+      'contract_assignment': 'contract_assignment',
+      'permission_change': 'permission_change',
+      'contract_expiring': 'contract_expiring',
+      'payment_overdue': 'payment_overdue',
+      'service_comment': 'service_comment',
+      'service_status_change': 'service_status_change'
+    };
+    return typeMap[serverType] || 'info';
+  }
+
+  private getNotificationIcon(type: string): string {
+    const iconMap: Record<string, string> = {
+      'contract_assignment': 'fas fa-file-contract',
+      'permission_change': 'fas fa-user-shield',
+      'contract_expiring': 'fas fa-calendar-times',
+      'payment_overdue': 'fas fa-exclamation-triangle',
+      'service_comment': 'fas fa-comment',
+      'service_status_change': 'fas fa-tasks',
+      'success': 'fas fa-check-circle',
+      'error': 'fas fa-exclamation-circle',
+      'warning': 'fas fa-exclamation-triangle',
+      'info': 'fas fa-info-circle'
+    };
+    return iconMap[type] || 'fas fa-bell';
+  }
+
+  private getNotificationDuration(notification: Notification): number {
+    if (notification.priority === 'high') return 8000;
+    if (notification.type === 'error') return 7000;
+    return this.defaultDuration;
+  }
+
+  private extractServerId(clientId: string): number | null {
+    const match = clientId.match(/^server-(\d+)$/);
+    return match ? parseInt(match[1], 10) : null;
+  }
+
+  // Métodos públicos para paginação
+  hasMoreNotifications(): boolean {
+    return this.currentPage < this.totalPages;
+  }
+
+  loadMoreNotifications(): void {
+    if (this.hasMoreNotifications() && !this.isLoading) {
+      this.fetchUserNotifications(this.currentPage + 1);
+    }
+  }
+
+  refreshNotifications(): void {
+    this.currentPage = 1;
+    this.fetchUserNotifications(1);
+    this.fetchUnreadCount();
   }
 }

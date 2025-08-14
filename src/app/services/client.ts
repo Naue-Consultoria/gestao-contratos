@@ -21,6 +21,7 @@ export interface CreateClientRequest {
   cnpj?: string;
   company_name?: string;
   trade_name?: string;
+  legal_representative?: string;
 }
 
 export interface UpdateClientRequest {
@@ -40,6 +41,7 @@ export interface UpdateClientRequest {
   cnpj?: string;
   company_name?: string;
   trade_name?: string;
+  legal_representative?: string;
 }
 
 export interface ApiClient {
@@ -66,6 +68,7 @@ export interface ApiClient {
   cnpj?: string;
   company_name?: string;
   trade_name?: string;
+  legal_representative?: string;
   employee_count?: number | null;
   business_segment?: string | null;
   logo_path?: string | null;

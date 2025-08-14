@@ -29,7 +29,10 @@
     <div class="routines-list">
       <h2 class="section-title">
         <i class="fas fa-calendar-check"></i>
-        Rotinas Ativas
+        <span>Rotinas Ativas</span>
+        <span class="contracts-scope" [class.user-only]="currentUser?.role !== 'admin'">
+          {{ currentUser?.role === 'admin' ? '(Todos os contratos)' : '(Meus contratos)' }}
+        </span>
       </h2>
       
       <div *ngIf="contracts.length === 0" class="empty-state">
@@ -37,7 +40,13 @@
           <i class="fas fa-calendar-times"></i>
         </div>
         <h3>Nenhuma rotina encontrada</h3>
-        <p>Não há contratos ativos para exibir rotinas no momento.</p>
+        <p *ngIf="currentUser?.role === 'admin'">
+          Não há contratos ativos para exibir rotinas no momento.
+        </p>
+        <p *ngIf="currentUser?.role !== 'admin'">
+          Você não está atribuído a nenhum contrato ativo no momento.<br>
+          Entre em contato com o administrador para obter acesso aos contratos.
+        </p>
       </div>
 
       <div class="routine-cards">

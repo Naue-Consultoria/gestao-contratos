@@ -3,6 +3,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angu
 import { CommonModule } from '@angular/common';
 import { NotificationService, Notification } from '../../services/notification.service';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-notification-dropdown',
@@ -19,7 +20,10 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
   notifications: Notification[] = [];
   private subscription?: Subscription;
   
-  constructor(private notificationService: NotificationService) {}
+  constructor(
+    private notificationService: NotificationService,
+    private router: Router
+  ) {}
   
   ngOnInit() {
     this.subscription = this.notificationService.notificationHistory$.subscribe(
@@ -40,6 +44,12 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
   markAsRead(notification: Notification) {
     if (!notification.isRead) {
       this.notificationService.markAsRead(notification.id);
+    }
+    
+    // Navegar para o link se existir
+    if (notification.link) {
+      this.router.navigateByUrl(notification.link);
+      this.close.emit();
     }
   }
   

@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angu
 import { CommonModule } from '@angular/common';
 import { NotificationService, Notification } from '../../services/notification.service';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-notification-center',
@@ -23,6 +24,13 @@ import { Subscription } from 'rxjs';
             [disabled]="unreadCount === 0"
             title="Marcar todas como lidas">
             <i class="fas fa-check-double"></i>
+          </button>
+          
+          <button 
+            class="action-button"
+            (click)="refreshNotifications()"
+            title="Atualizar">
+            <i class="fas fa-sync-alt"></i>
           </button>
           
           <button 
@@ -76,10 +84,17 @@ import { Subscription } from 'rxjs';
             *ngFor="let notification of filteredNotifications; trackBy: trackById"
             class="notification-item"
             [class.unread]="!notification.isRead"
+            [class.high-priority]="notification.priority === 'high'"
             [class.success]="notification.type === 'success'"
             [class.error]="notification.type === 'error'"
             [class.warning]="notification.type === 'warning'"
             [class.info]="notification.type === 'info'"
+            [class.contract-assignment]="notification.type === 'contract_assignment'"
+            [class.permission-change]="notification.type === 'permission_change'"
+            [class.contract-expiring]="notification.type === 'contract_expiring'"
+            [class.payment-overdue]="notification.type === 'payment_overdue'"
+            [class.service-comment]="notification.type === 'service_comment'"
+            [class.service-status-change]="notification.type === 'service_status_change'"
             (click)="handleNotificationClick(notification)">
             
             <div class="notification-item-icon">
@@ -89,7 +104,10 @@ import { Subscription } from 'rxjs';
             <div class="notification-item-content">
               <div class="notification-item-header">
                 <h4 class="notification-item-title">{{ notification.title }}</h4>
-                <span class="notification-item-time">{{ formatTime(notification.timestamp) }}</span>
+                <div class="notification-item-meta">
+                  <span class="notification-item-time">{{ formatTime(notification.timestamp) }}</span>
+                  <span *ngIf="notification.priority === 'high'" class="priority-badge">Alta Prioridade</span>
+                </div>
               </div>
               
               <p class="notification-item-message">{{ notification.message }}</p>
@@ -104,6 +122,13 @@ import { Subscription } from 'rxjs';
             
             <div class="notification-item-indicator" *ngIf="!notification.isRead"></div>
           </div>
+        
+        <div class="load-more" *ngIf="canLoadMore" (click)="loadMoreNotifications()">
+          <button class="load-more-button">
+            <i class="fas fa-chevron-down"></i>
+            Carregar mais notificações
+          </button>
+        </div>
         </div>
       </div>
     </div>
@@ -119,10 +144,14 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   unreadCount = 0;
   todayCount = 0;
   currentFilter: 'all' | 'unread' | 'today' = 'all';
+  canLoadMore = false;
   
   private subscriptions = new Subscription();
   
-  constructor(private notificationService: NotificationService) {}
+  constructor(
+    private notificationService: NotificationService,
+    private router: Router
+  ) {}
   
   ngOnInit() {
     // Subscrever ao histórico de notificações
@@ -131,6 +160,7 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
         this.notifications = notifications;
         this.applyFilter();
         this.updateCounts();
+        this.updateLoadMoreState();
       })
     );
     
@@ -140,9 +170,6 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
         this.unreadCount = count;
       })
     );
-   
-    // Limpar notificações antigas ao abrir
-    this.notificationService.clearOldNotifications();
   }
   
   ngOnDestroy() {
@@ -186,6 +213,12 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   handleNotificationClick(notification: Notification) {
     if (!notification.isRead) {
       this.notificationService.markAsRead(notification.id);
+    }
+    
+    // Navegar para o link se existir
+    if (notification.link) {
+      this.router.navigateByUrl(notification.link);
+      this.close.emit(); // Fechar o centro de notificações
     }
   }
   
@@ -231,5 +264,17 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
       default:
         return '';
     }
+  }
+
+  refreshNotifications() {
+    this.notificationService.refreshNotifications();
+  }
+
+  loadMoreNotifications() {
+    this.notificationService.loadMoreNotifications();
+  }
+
+  private updateLoadMoreState() {
+    this.canLoadMore = this.notificationService.hasMoreNotifications();
   }
 }

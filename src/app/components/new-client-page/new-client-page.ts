@@ -45,7 +45,8 @@ export class NewClientPageComponent implements OnInit {
     // PJ fields
     cnpj: '',
     company_name: '',
-    trade_name: ''
+    trade_name: '',
+    legal_representative: ''
   };
   
   isLoading = false;
@@ -90,7 +91,8 @@ export class NewClientPageComponent implements OnInit {
         // PJ fields
         cnpj: client.cnpj || '',
         company_name: client.company_name || '',
-        trade_name: client.trade_name || ''
+        trade_name: client.trade_name || '',
+        legal_representative: client.legal_representative || ''
       };
 
       if (client.logo_path) {

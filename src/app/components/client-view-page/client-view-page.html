@@ -61,6 +61,14 @@
           <span class="info-label">Telefone</span>
           <span class="info-value">{{ client.phone }}</span>
         </div>
+        <div class="info-group" *ngIf="client.type === 'PJ' && client.legal_representative">
+          <span class="info-label">Representante Legal</span>
+          <span class="info-value">{{ client.legal_representative }}</span>
+        </div>
+        <div class="info-group" *ngIf="client.type === 'PJ' && client.employee_count">
+          <span class="info-label">Nº de Funcionários</span>
+          <span class="info-value">{{ client.employee_count }}</span>
+        </div>
         <div class="info-group">
           <span class="info-label">Endereço</span>
           <span class="info-value">{{ getAddress() }}</span>

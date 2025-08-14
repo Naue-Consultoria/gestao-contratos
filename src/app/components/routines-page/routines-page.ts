@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ContractService, ApiContract } from '../../services/contract';
 import { ClientService } from '../../services/client';
+import { AuthService } from '../../services/auth';
 
 interface ContractRoutine {
   id: number;
@@ -27,11 +28,13 @@ interface ContractRoutine {
 export class RoutinesPageComponent implements OnInit {
   private contractService = inject(ContractService);
   private clientService = inject(ClientService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   contracts: ContractRoutine[] = [];
   isLoading = true;
   error = '';
+  currentUser = this.authService.getUser();
 
 
   ngOnInit() {
@@ -45,6 +48,9 @@ export class RoutinesPageComponent implements OnInit {
   private async loadData() {
     try {
       this.isLoading = true;
+      // O backend já filtra automaticamente:
+      // - Admin: vê todos os contratos
+      // - Usuário comum: vê apenas contratos aos quais está atribuído
       const response = await this.contractService.getContracts().toPromise();
       
       if (response && response.contracts) {

@@ -150,6 +150,35 @@
   color: #032520 !important; /* Verde escuro */
 }
 
+.contracts-scope {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-gray);
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(14, 155, 113, 0.1);
+  border-radius: 20px;
+  border: 1px solid rgba(14, 155, 113, 0.2);
+}
+
+.contracts-scope.user-only {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+:host-context(body.dark-mode) .contracts-scope {
+  background: rgba(14, 155, 113, 0.15);
+  border-color: rgba(14, 155, 113, 0.3);
+  color: #10b981;
+}
+
+:host-context(body.dark-mode) .contracts-scope.user-only {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;

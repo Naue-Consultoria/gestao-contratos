@@ -17,9 +17,16 @@
   <app-notification-dropdown
     [isOpen]="isNotificationOpen"
     (close)="isNotificationOpen = false"
-    (viewAllClick)="isNotificationOpen = false">
+    (viewAllClick)="openNotificationCenter()">
   </app-notification-dropdown>
 </div>
+
+<!-- Notification Center -->
+<app-notification-center
+  *ngIf="isNotificationCenterOpen"
+  [isOpen]="isNotificationCenterOpen"
+  (close)="closeNotificationCenter()">
+</app-notification-center>
 
 <!-- Mobile Sidebar Overlay -->
 <div class="sidebar-overlay" 

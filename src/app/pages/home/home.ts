@@ -7,6 +7,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { ContractModalComponent } from '../../components/contract-modal/contract-modal';
 import { UserModal } from '../../components/user-modal/user-modal';
 import { NotificationDropdownComponent } from '../../components/notification-dropdown/notification-dropdown';
+import { NotificationCenterComponent } from '../../components/notification-center/notification-center';
 import { AuthService, User } from '../../services/auth';
 import { ApiUser } from '../../services/user';
 import { ApiCompany } from '../../services/company';
@@ -47,7 +48,8 @@ interface NavSection {
     SidebarComponent,
     ContractModalComponent,
     UserModal,
-    NotificationDropdownComponent
+    NotificationDropdownComponent,
+    NotificationCenterComponent
   ],
   templateUrl: './home.html',
   styleUrls: ['./home.css']
@@ -61,6 +63,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   isSidebarCollapsed = false;
   isMobileSidebarOpen = false;
   isNotificationOpen = false;
+  isNotificationCenterOpen = false;
   editingUser: ApiUser | null = null;
   editingCompany: ApiCompany | null = null;
   notifications: any[] = [];
@@ -116,6 +119,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   toggleMobileSidebar() { this.isMobileSidebarOpen = !this.isMobileSidebarOpen; }
   closeMobileSidebar() { this.isMobileSidebarOpen = false; }
   toggleNotifications() { this.isNotificationOpen = !this.isNotificationOpen; }
+  
+  openNotificationCenter() { 
+    this.isNotificationCenterOpen = true; 
+    this.isNotificationOpen = false; // Fechar dropdown se estiver aberto
+  }
+  
+  closeNotificationCenter() { 
+    this.isNotificationCenterOpen = false; 
+  }
   clearNotifications() { this.notificationService.clearHistory(); }
   closeContractModal() { this.isContractModalOpen = false; }
   closeUserModal() { this.isUserModalOpen = false; }
