@@ -132,23 +132,37 @@ export class NewClientPageComponent implements OnInit {
       // Preparar dados para envio
       const dataToSend = { ...this.formData };
       
-      // Se for PJ, usar os emails múltiplos
+      // Se for PJ, usar o primeiro email como principal e salvar os outros depois
       if (this.formData.type === 'PJ') {
         const validEmails = this.emailFields.filter(email => email.trim() !== '');
         if (validEmails.length === 0) {
           this.modalService.showError('Pelo menos um e-mail é obrigatório para empresas.');
           return;
         }
-        dataToSend.emails = validEmails;
-        delete dataToSend.email; // Remove o campo email simples
+        // Usar o primeiro email válido como email principal
+        dataToSend.email = validEmails[0];
+        // Não enviar o campo emails no momento da criação
+        delete dataToSend.emails;
       }
+      
+      let clientId: number;
       
       if (this.isEditing && this.editingId) {
         await firstValueFrom(this.clientService.updateClient(this.editingId, dataToSend));
+        clientId = this.editingId;
         this.modalService.showSuccess('Cliente atualizado com sucesso!');
       } else {
-        await firstValueFrom(this.clientService.createClient(dataToSend));
+        const response = await firstValueFrom(this.clientService.createClient(dataToSend));
+        clientId = response.client.id;
         this.modalService.showSuccess('Cliente criado com sucesso!');
+      }
+      
+      // Salvar emails adicionais para PJ (se houver mais de um email)
+      if (this.formData.type === 'PJ') {
+        const validEmails = this.emailFields.filter(email => email.trim() !== '');
+        if (validEmails.length > 1) {
+          await this.saveAdditionalEmails(clientId, validEmails);
+        }
       }
       
       this.goBack();
@@ -267,6 +281,19 @@ export class NewClientPageComponent implements OnInit {
    */
   trackByEmailIndex(index: number): number {
     return index;
+  }
+
+  /**
+   * Salva emails adicionais após criar/atualizar cliente
+   */
+  private async saveAdditionalEmails(clientId: number, allEmails: string[]): Promise<void> {
+    try {
+      // Substitui todos os emails do cliente
+      await firstValueFrom(this.clientService.replaceAllEmails(clientId, allEmails));
+    } catch (error) {
+      console.warn('Erro ao salvar emails adicionais:', error);
+      // Não exibe erro para o usuário pois o cliente já foi criado/atualizado com sucesso
+    }
   }
 
   /**
