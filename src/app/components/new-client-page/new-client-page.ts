@@ -48,6 +48,9 @@ export class NewClientPageComponent implements OnInit {
     trade_name: '',
     legal_representative: ''
   };
+
+  // Email fields para PJ (múltiplos emails)
+  emailFields: string[] = [''];
   
   isLoading = false;
   isEditing = false;
@@ -95,6 +98,11 @@ export class NewClientPageComponent implements OnInit {
         legal_representative: client.legal_representative || ''
       };
 
+      // Carregat emails se for PJ
+      if (client.type === 'PJ') {
+        this.loadClientEmails();
+      }
+
       if (client.logo_path) {
         this.loadLogo();
       }
@@ -121,11 +129,25 @@ export class NewClientPageComponent implements OnInit {
     try {
       this.isLoading = true;
       
+      // Preparar dados para envio
+      const dataToSend = { ...this.formData };
+      
+      // Se for PJ, usar os emails múltiplos
+      if (this.formData.type === 'PJ') {
+        const validEmails = this.emailFields.filter(email => email.trim() !== '');
+        if (validEmails.length === 0) {
+          this.modalService.showError('Pelo menos um e-mail é obrigatório para empresas.');
+          return;
+        }
+        dataToSend.emails = validEmails;
+        delete dataToSend.email; // Remove o campo email simples
+      }
+      
       if (this.isEditing && this.editingId) {
-        await firstValueFrom(this.clientService.updateClient(this.editingId, this.formData));
+        await firstValueFrom(this.clientService.updateClient(this.editingId, dataToSend));
         this.modalService.showSuccess('Cliente atualizado com sucesso!');
       } else {
-        await firstValueFrom(this.clientService.createClient(this.formData));
+        await firstValueFrom(this.clientService.createClient(dataToSend));
         this.modalService.showSuccess('Cliente criado com sucesso!');
       }
       
@@ -185,6 +207,110 @@ export class NewClientPageComponent implements OnInit {
       this.formData.logo_url = undefined;
     } catch (error) {
       this.modalService.showError('Erro ao remover a logo.');
+    }
+  }
+
+  // ========== MÉTODOS PARA GERENCIAR MÚLTIPLOS EMAILS ==========
+
+  /**
+   * Carrega os emails do cliente (para edição)
+   */
+  async loadClientEmails() {
+    if (!this.editingId) return;
+    
+    try {
+      const response = await firstValueFrom(this.clientService.getClientEmails(this.editingId));
+      if (response.success && response.emails.length > 0) {
+        this.emailFields = response.emails.map(e => e.email);
+      } else {
+        // Se não houver emails específicos, usar o email do cliente
+        this.emailFields = [this.formData.email || ''];
+      }
+    } catch (error) {
+      console.error('Erro ao carregar emails:', error);
+      // Usar o email padrão em caso de erro
+      this.emailFields = [this.formData.email || ''];
+    }
+  }
+
+  /**
+   * Adiciona um novo campo de email
+   */
+  addEmailField() {
+    this.emailFields.push('');
+  }
+
+  /**
+   * Remove um campo de email específico
+   */
+  removeEmailField(index: number) {
+    if (index > 0 && this.emailFields.length > 1) {
+      this.emailFields.splice(index, 1);
+    }
+  }
+
+  /**
+   * Valida um email específico
+   */
+  validateEmail(index: number) {
+    const email = this.emailFields[index];
+    if (email && email.trim() !== '') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        this.modalService.showError(`E-mail ${index + 1} inválido.`);
+      }
+    }
+  }
+
+  /**
+   * TrackBy function para o ngFor dos emails
+   */
+  trackByEmailIndex(index: number): number {
+    return index;
+  }
+
+  /**
+   * Verifica se o formulário é válido
+   */
+  isFormValid(): boolean {
+    if (this.formData.type === 'PJ') {
+      // Para PJ, verificar se há pelo menos um email válido
+      const validEmails = this.emailFields.filter(email => {
+        const trimmedEmail = email.trim();
+        if (!trimmedEmail) return false;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(trimmedEmail);
+      });
+      
+      if (validEmails.length === 0) return false;
+      
+      // Verificar campos obrigatórios para PJ
+      return !!(
+        this.formData.company_name &&
+        this.formData.cnpj &&
+        this.formData.street &&
+        this.formData.number &&
+        this.formData.neighborhood &&
+        this.formData.city &&
+        this.formData.state &&
+        this.formData.zipcode
+      );
+    } else {
+      // Para PF, usar validação padrão
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const isEmailValid = !!(this.formData.email && emailRegex.test(this.formData.email));
+      
+      return !!(
+        isEmailValid &&
+        this.formData.full_name &&
+        this.formData.cpf &&
+        this.formData.street &&
+        this.formData.number &&
+        this.formData.neighborhood &&
+        this.formData.city &&
+        this.formData.state &&
+        this.formData.zipcode
+      );
     }
   }
 }

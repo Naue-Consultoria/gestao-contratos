@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ClientAttachmentsComponent } from '../client-attachments/client-attachments.component';
-import { ClientService, ApiClient } from '../../services/client';
+import { ClientService, ApiClient, ClientEmail } from '../../services/client';
 import { ContractService, ApiContract } from '../../services/contract';
 import { ClientAttachmentService } from '../../services/client-attachment.service';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
@@ -34,6 +34,7 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
   client: ApiClient | null = null;
   logoUrl: SafeUrl | null = null;
   contracts: ApiContract[] = [];
+  clientEmails: ClientEmail[] = [];
   isLoading = true;
   error = '';
 
@@ -78,6 +79,11 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
       // Load client contracts
       const contractsResponse = await firstValueFrom(this.contractService.getContracts());
       this.contracts = contractsResponse.contracts.filter(contract => contract.client.id === id);
+      
+      // Load emails if PJ
+      if (this.client.type === 'PJ') {
+        await this.loadClientEmails(id);
+      }
       
       // Load attachments count
       await this.loadAttachmentsCount(id);
@@ -237,5 +243,32 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
       console.warn('Erro ao carregar contagem de anexos:', error);
       this.attachmentsCount = 0;
     }
+  }
+
+  private async loadClientEmails(clientId: number): Promise<void> {
+    try {
+      const response = await firstValueFrom(this.clientService.getClientEmails(clientId));
+      if (response.success && response.emails) {
+        this.clientEmails = response.emails;
+      } else {
+        this.clientEmails = [];
+      }
+    } catch (error) {
+      console.warn('Erro ao carregar emails do cliente:', error);
+      // Fallback para o email principal se houver erro
+      if (this.client?.email) {
+        this.clientEmails = [{
+          id: 0,
+          email: this.client.email,
+          is_primary: true
+        }];
+      } else {
+        this.clientEmails = [];
+      }
+    }
+  }
+
+  trackByEmailId(index: number, email: ClientEmail): number {
+    return email.id;
   }
 }

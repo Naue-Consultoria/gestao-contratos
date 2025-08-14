@@ -156,7 +156,9 @@
           <i class="fas fa-envelope"></i>
           Dados de Contato
         </h3>
-        <div class="form-grid">
+        
+        <!-- Emails para PF (apenas um campo) -->
+        <div class="form-grid" *ngIf="formData.type === 'PF'">
           <div class="form-group">
             <label class="form-label">E-mail <span class="required">*</span></label>
             <input 
@@ -179,6 +181,71 @@
               [disabled]="isLoading"
               placeholder="(00) 00000-0000"
               appDocumentMask="phone">
+          </div>
+        </div>
+
+        <!-- Emails para PJ (múltiplos emails) -->
+        <div *ngIf="formData.type === 'PJ'">
+          <div class="emails-section">
+            <div class="section-header">
+              <label class="form-label">E-mails da Empresa <span class="required">*</span></label>
+              <button 
+                type="button" 
+                class="btn btn-sm btn-outline-primary add-email-btn"
+                (click)="addEmailField()"
+                [disabled]="isLoading"
+                title="Adicionar novo e-mail">
+                <i class="fas fa-plus"></i>
+                Adicionar E-mail
+              </button>
+            </div>
+            
+            <div class="emails-list">
+              <div 
+                *ngFor="let email of emailFields; let i = index; trackBy: trackByEmailIndex"
+                class="email-field-group">
+                <div class="email-input-container">
+                  <input 
+                    type="email" 
+                    [name]="'email_' + i"
+                    class="form-control"
+                    [(ngModel)]="emailFields[i]" 
+                    [required]="i === 0"
+                    [disabled]="isLoading"
+                    [placeholder]="i === 0 ? 'E-mail principal da empresa' : 'E-mail adicional'"
+                    (blur)="validateEmail(i)">
+                  
+                  <button 
+                    *ngIf="i > 0"
+                    type="button" 
+                    class="btn btn-sm btn-outline-danger remove-email-btn"
+                    (click)="removeEmailField(i)"
+                    [disabled]="isLoading"
+                    title="Remover este e-mail">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                
+                <div *ngIf="i === 0" class="email-note">
+                  <i class="fas fa-info-circle"></i>
+                  Este será o e-mail principal da empresa
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Telefone</label>
+              <input 
+                type="text" 
+                name="phone"
+                class="form-control"
+                [(ngModel)]="formData.phone" 
+                [disabled]="isLoading"
+                placeholder="(00) 00000-0000"
+                appDocumentMask="phone">
+            </div>
           </div>
         </div>
       </div>
@@ -308,7 +375,7 @@
           Voltar
         </button>
         
-        <button type="submit" class="btn btn-primary" [disabled]="!clientForm.form.valid || isLoading">
+        <button type="submit" class="btn btn-primary" [disabled]="!isFormValid() || isLoading">
           <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
           <i class="fas fa-save" *ngIf="!isLoading"></i>
           {{ isEditing ? 'Atualizar' : 'Criar' }} Cliente

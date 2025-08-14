@@ -53,10 +53,25 @@
       
       <!-- Contact Information -->
       <div class="contact-info">
-        <div class="info-group">
+        <!-- E-mails para PF (apenas um) -->
+        <div class="info-group" *ngIf="client.type === 'PF'">
           <span class="info-label">E-mail</span>
           <span class="info-value">{{ client.email || 'Não informado' }}</span>
         </div>
+        
+        <!-- E-mails para PJ (múltiplos) -->
+        <div class="info-group emails-group" *ngIf="client.type === 'PJ'">
+          <span class="info-label">E-mails da Empresa</span>
+          <div class="emails-container" *ngIf="clientEmails.length > 0; else noEmails">
+            <div class="email-item" *ngFor="let email of clientEmails; trackBy: trackByEmailId">
+              <span class="email-value">{{ email.email }}</span>
+            </div>
+          </div>
+          <ng-template #noEmails>
+            <span class="info-value">Nenhum e-mail cadastrado</span>
+          </ng-template>
+        </div>
+        
         <div class="info-group" *ngIf="client.phone">
           <span class="info-label">Telefone</span>
           <span class="info-value">{{ client.phone }}</span>

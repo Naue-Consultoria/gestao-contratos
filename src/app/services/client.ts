@@ -5,7 +5,8 @@ import { environment } from '../../environments/environment';
 
 export interface CreateClientRequest {
   type: 'PF' | 'PJ';
-  email: string;
+  email?: string; // Para compatibilidade com PF
+  emails?: string[]; // Para múltiplos emails em PJ
   phone?: string;
   street: string;
   number: string;
@@ -25,7 +26,8 @@ export interface CreateClientRequest {
 }
 
 export interface UpdateClientRequest {
-  email?: string;
+  email?: string; // Para compatibilidade com PF
+  emails?: string[]; // Para múltiplos emails em PJ
   phone?: string;
   street?: string;
   number?: string;
@@ -44,11 +46,19 @@ export interface UpdateClientRequest {
   legal_representative?: string;
 }
 
+export interface ClientEmail {
+  id: number;
+  email: string;
+  is_primary: boolean;
+}
+
 export interface ApiClient {
   id: number;
   type: 'PF' | 'PJ';
   name: string;
-  email: string;
+  email: string; // Email primário para compatibilidade
+  emails?: ClientEmail[]; // Lista de emails para PJ
+  primary_email?: string; // Email primário extraído
   phone: string | null;
   street: string;
   number: string;
@@ -317,5 +327,102 @@ export class ClientService {
    */
   getClientLogoUrl(clientId: number): string {
     return `${this.API_URL}/${clientId}/logo`;
+  }
+
+  // ========== MÉTODOS PARA GERENCIAR EMAILS ==========
+
+  /**
+   * Obter todos os emails de um cliente
+   */
+  getClientEmails(clientId: number): Observable<{ success: boolean; emails: ClientEmail[] }> {
+    return this.http.get<{ success: boolean; emails: ClientEmail[] }>(
+      `${environment.apiUrl}/clients/${clientId}/emails`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Adicionar um novo email a um cliente
+   */
+  addClientEmail(clientId: number, email: string, isPrimary = false): Observable<{ success: boolean; email: ClientEmail; message: string }> {
+    return this.http.post<{ success: boolean; email: ClientEmail; message: string }>(
+      `${environment.apiUrl}/clients/${clientId}/emails`,
+      { email, is_primary: isPrimary },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Atualizar um email
+   */
+  updateClientEmail(emailId: number, email?: string, isPrimary?: boolean): Observable<{ success: boolean; email: ClientEmail; message: string }> {
+    const updateData: any = {};
+    if (email !== undefined) updateData.email = email;
+    if (isPrimary !== undefined) updateData.is_primary = isPrimary;
+
+    return this.http.put<{ success: boolean; email: ClientEmail; message: string }>(
+      `${environment.apiUrl}/emails/${emailId}`,
+      updateData,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Definir um email como primário
+   */
+  setPrimaryEmail(emailId: number): Observable<{ success: boolean; email: ClientEmail; message: string }> {
+    return this.http.put<{ success: boolean; email: ClientEmail; message: string }>(
+      `${environment.apiUrl}/emails/${emailId}/primary`,
+      {},
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Remover um email
+   */
+  removeClientEmail(emailId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${environment.apiUrl}/emails/${emailId}`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Substituir todos os emails de um cliente PJ
+   */
+  replaceAllEmails(clientId: number, emails: string[]): Observable<{ success: boolean; emails: ClientEmail[]; message: string }> {
+    return this.http.put<{ success: boolean; emails: ClientEmail[]; message: string }>(
+      `${environment.apiUrl}/clients/${clientId}/emails/replace`,
+      { emails },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Obter o email primário de um cliente
+   */
+  getPrimaryEmail(client: ApiClient): string {
+    if (client.primary_email) {
+      return client.primary_email;
+    }
+    
+    if (client.emails && client.emails.length > 0) {
+      const primaryEmail = client.emails.find(e => e.is_primary);
+      return primaryEmail?.email || client.emails[0].email;
+    }
+    
+    return client.email || '';
+  }
+
+  /**
+   * Obter todos os emails de um cliente como array de strings
+   */
+  getAllEmails(client: ApiClient): string[] {
+    if (client.emails && client.emails.length > 0) {
+      return client.emails.map(e => e.email);
+    }
+    
+    return client.email ? [client.email] : [];
   }
 }
