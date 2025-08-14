@@ -25,18 +25,6 @@
           <i class="fas" [ngClass]="card.changeType === 'positive' ? 'fa-arrow-up' : 'fa-calendar-xmark'" aria-hidden="true"></i>
           <span>{{ card.change }}</span>
         </div>
-        <div class="progress-container" [attr.aria-label]="'Progresso: ' + card.progress + '%'">
-          <div class="progress-bar" role="progressbar" 
-               [attr.aria-valuenow]="card.progress"
-               [attr.aria-valuemin]="0"
-               [attr.aria-valuemax]="100">
-            <div 
-              class="progress-fill" 
-              [style.width.%]="card.progress"
-              [style.background-color]="card.color">
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -77,8 +65,8 @@
 
     <!-- Activities Section -->
     <div class="activities-container">
+      <h2 class="section-title">Atividades Recentes</h2>
       <div class="section-header">
-        <h2 class="section-title">Atividades Recentes</h2>
         <div class="activity-tabs">
           <button 
             class="tab-btn" 
@@ -88,15 +76,21 @@
           </button>
           <button 
             class="tab-btn" 
-            [class.active]="activityFilter === 'completed'"
-            (click)="filterActivities('completed')">
-            <span>Concluídas</span>
+            [class.active]="activityFilter === 'not_started'"
+            (click)="filterActivities('not_started')">
+            <span>Não iniciados</span>
           </button>
           <button 
             class="tab-btn" 
-            [class.active]="activityFilter === 'in-progress'"
-            (click)="filterActivities('in-progress')">
+            [class.active]="activityFilter === 'in_progress'"
+            (click)="filterActivities('in_progress')">
             <span>Em andamento</span>
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="activityFilter === 'completed'"
+            (click)="filterActivities('completed')">
+            <span>Concluídas</span>
           </button>
         </div>
       </div>
@@ -112,15 +106,42 @@
           <div class="activity-content">
             <h4 class="activity-title">{{ activity.title }}</h4>
             <p class="activity-description">{{ activity.description }}</p>
+            
+            <!-- Informações específicas para serviços -->
+            <div class="service-details" *ngIf="activity.type === 'service'">
+              <div class="service-info">
+                <span class="service-category" *ngIf="activity.category">
+                  <i class="fa fa-tag" aria-hidden="true"></i>
+                  {{ activity.category }}
+                </span>
+                <span class="service-duration" *ngIf="activity.duration">
+                  <i class="fa fa-clock" aria-hidden="true"></i>
+                  {{ activity.duration }}
+                </span>
+              </div>
+            </div>
+            
             <div class="activity-meta">
               <span class="activity-time">
                 <i class="fa fa-clock" aria-hidden="true"></i>
                 {{ activity.time }}
               </span>
-              <span class="activity-status" [ngClass]="'status-' + activity.status">
+              <span class="activity-status" 
+                    [ngClass]="'status-' + activity.status"
+                    [style.color]="getStatusColor(activity.status)">
                 {{ getStatusText(activity.status) }}
               </span>
             </div>
+          </div>
+          
+          <!-- Botão de ação para serviços -->
+          <div class="activity-action" *ngIf="activity.type === 'service'">
+            <button 
+              class="action-btn"
+              (click)="navigateToContract(activity.contractId)"
+              title="Ver contrato">
+              <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
       </div>

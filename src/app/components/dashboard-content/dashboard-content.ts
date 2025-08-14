@@ -23,11 +23,17 @@ interface StatCard {
 }
 
 interface Activity {
+  id?: number;
   time: string;
   title: string;
   description: string;
-  type: 'diagnostic' | 'okr' | 'mentoring' | 'hr' | 'other';
-  status: 'completed' | 'in-progress' | 'scheduled';
+  type: 'service' | 'diagnostic' | 'okr' | 'mentoring' | 'hr' | 'other';
+  status: 'not_started' | 'scheduled' | 'in_progress' | 'completed';
+  category?: string;
+  value?: number;
+  duration?: string;
+  contractId?: number;
+  serviceId?: number;
 }
 
 interface QuickAction {
@@ -51,7 +57,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     { time: 'Há 2 horas', title: 'Diagnóstico Organizacional - Empresa ABC', description: 'Reunião inicial realizada com sucesso', type: 'diagnostic', status: 'completed' },
     { time: 'Há 5 horas', title: 'OKR - Tech Solutions', description: 'Workshop de definição de objetivos concluído', type: 'okr', status: 'completed' },
     { time: 'Ontem', title: 'Mentoria Individual - Startup XYZ', description: 'Sessão agendada para próxima semana', type: 'mentoring', status: 'scheduled' },
-    { time: 'Há 2 dias', title: 'Consultoria RH - Inovação Corp', description: 'Análise de clima organizacional em andamento', type: 'hr', status: 'in-progress' }
+    { time: 'Há 2 dias', title: 'Consultoria RH - Inovação Corp', description: 'Análise de clima organizacional em andamento', type: 'hr', status: 'in_progress' }
   ];
   quickActions: QuickAction[] = [
     { id: 'routines', icon: 'fas fa-tasks', label: 'Rotinas', color: '#003b2b', action: 'routines' },
@@ -95,7 +101,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     }]
   };
   contractsChart: Chart | null = null;
-  activityFilter: 'all' | 'completed' | 'in-progress' | 'scheduled' = 'all';
+  activityFilter: 'all' | 'completed' | 'in_progress' | 'scheduled' | 'not_started' = 'all';
 
   private themeObserver!: MutationObserver;
 
@@ -112,6 +118,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     // Carregar dados reais
     this.loadDashboardData();
     this.loadChartData();
+    this.loadRecentActivities();
   }
 
   ngAfterViewInit() {
@@ -186,6 +193,35 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     });
   }
 
+  private loadRecentActivities() {
+    console.log('Carregando atividades recentes dos serviços...');
+    
+    this.contractService.getRecentServiceActivities(10).subscribe({
+      next: (response) => {
+        console.log('Atividades recebidas:', response);
+        if (response.success && response.activities) {
+          this.recentActivities = response.activities.map((activity: any) => ({
+            id: activity.id,
+            time: activity.time,
+            title: activity.title,
+            description: activity.description,
+            type: 'service',
+            status: activity.status,
+            category: activity.category,
+            value: activity.value,
+            duration: activity.duration,
+            contractId: activity.contractId,
+            serviceId: activity.serviceId
+          }));
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao carregar atividades recentes:', error);
+        // Manter atividades mock em caso de erro para demonstração
+      }
+    });
+  }
+
   private generateChartData(contracts: any[]) {
     // Obter últimos 6 meses
     const months = [];
@@ -239,13 +275,16 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     // Usar contagem real de serviços vinculados a contratos ativos
     const servicesInProgress = serviceStats.activeServicesFromActiveContracts || 0;
 
+    // Obter informações de novos contratos
+    const newContractsInfo = this.getNewContractsInfo(contractStats);
+
     this.statCards = [
       { 
         id: 'total-contracts',
         label: 'Total de Contratos', 
         value: contractStats.total || 0, 
-        change: contractStats.total === 0 ? '0%' : this.calculateGrowthPercentage(contractStats.total, 20),
-        changeType: contractStats.total === 0 ? 'positive' : (contractStats.total >= 20 ? 'positive' : 'negative'), 
+        change: newContractsInfo.text,
+        changeType: newContractsInfo.type, 
         icon: 'fas fa-file-contract', 
         progress: contractStats.total === 0 ? 0 : Math.min((contractStats.total / 30) * 100, 100),
         color: '#003b2b', 
@@ -292,6 +331,23 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     const growth = ((current - previous) / previous) * 100;
     const sign = growth >= 0 ? '+' : '';
     return `${sign}${Math.round(growth)}% este mês`;
+  }
+
+  private getNewContractsInfo(contractStats: any): { text: string, type: 'positive' | 'negative' } {
+    if (contractStats.total === 0) {
+      return { text: 'Nenhum contrato cadastrado', type: 'positive' };
+    }
+
+    // Calcular quantos contratos foram criados este mês
+    const contractsThisMonth = contractStats.contractsThisMonth || 0;
+    
+    if (contractsThisMonth === 0) {
+      return { text: 'Nenhum novo este mês', type: 'negative' };
+    } else if (contractsThisMonth === 1) {
+      return { text: '1 novo contrato este mês', type: 'positive' };
+    } else {
+      return { text: `${contractsThisMonth} novos este mês`, type: 'positive' };
+    }
   }
 
 
@@ -408,7 +464,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     });
   }
 
-  filterActivities(filter: 'all' | 'completed' | 'in-progress' | 'scheduled') {
+  filterActivities(filter: 'all' | 'completed' | 'in_progress' | 'scheduled' | 'not_started') {
     this.activityFilter = filter;
   }
 
@@ -427,9 +483,20 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   navigateToActivities(): void {
-    // Por enquanto, apenas log - pode implementar navegação futura
-    console.log('Navegando para todas as atividades...');
-    // this.router.navigate(['/home/activities']);
+    this.router.navigate(['/home/routines']);
+  }
+
+  navigateToContract(contractId?: number): void {
+    if (contractId) {
+      this.router.navigate(['/home/contracts/view', contractId]);
+    }
+  }
+
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
   }
 
   executeQuickAction(action: string) {
@@ -447,6 +514,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
   getActivityIcon(type: string): string {
     const icons: { [key: string]: string } = { 
+      'service': 'fa fa-tasks',
       'diagnostic': 'fa fa-stethoscope', 
       'okr': 'fa fa-bullseye', 
       'mentoring': 'fa fa-user-tie', 
@@ -458,6 +526,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
   getActivityColor(type: string): string {
     const colors: { [key: string]: string } = { 
+      'service': '#003b2b',
       'diagnostic': '#0a8560', 
       'okr': '#003b2b', 
       'mentoring': '#065f46', 
@@ -468,8 +537,23 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
   
   getStatusText(status: string): string {
-    const texts: { [key: string]: string } = { 'completed': 'Concluído', 'in-progress': 'Em andamento', 'scheduled': 'Agendado' };
+    const texts: { [key: string]: string } = { 
+      'completed': 'Concluído', 
+      'in_progress': 'Em andamento', 
+      'scheduled': 'Agendado',
+      'not_started': 'Não iniciado'
+    };
     return texts[status] || status;
+  }
+
+  getStatusColor(status: string): string {
+    const colors: { [key: string]: string } = {
+      'completed': '#10b981',
+      'in_progress': '#f59e0b',
+      'scheduled': '#3b82f6',
+      'not_started': '#6b7280'
+    };
+    return colors[status] || '#6b7280';
   }
 
 

@@ -6,7 +6,7 @@ import { WebsocketService } from './websocket.service';
 
 export interface Notification {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info' | 'contract_assignment' | 'permission_change' | 'contract_expiring' | 'payment_overdue' | 'service_comment' | 'service_status_change';
+  type: 'success' | 'error' | 'warning' | 'info' | 'contract_assignment' | 'permission_change' | 'contract_expiring' | 'payment_overdue' | 'service_comment' | 'service_status_change' | 'new_contract' | 'new_user' | 'security_alert' | 'approval_required' | 'system_event';
   title: string;
   message: string;
   timestamp: Date;
@@ -281,7 +281,12 @@ export class NotificationService {
       'contract_expiring': 'contract_expiring',
       'payment_overdue': 'payment_overdue',
       'service_comment': 'service_comment',
-      'service_status_change': 'service_status_change'
+      'service_status_change': 'service_status_change',
+      'new_contract': 'new_contract',
+      'new_user': 'new_user',
+      'security_alert': 'security_alert',
+      'approval_required': 'approval_required',
+      'system_event': 'system_event'
     };
     return typeMap[serverType] || 'info';
   }
@@ -294,6 +299,11 @@ export class NotificationService {
       'payment_overdue': 'fas fa-exclamation-triangle',
       'service_comment': 'fas fa-comment',
       'service_status_change': 'fas fa-tasks',
+      'new_contract': 'fas fa-file-plus',
+      'new_user': 'fas fa-user-plus',
+      'security_alert': 'fas fa-shield-alt',
+      'approval_required': 'fas fa-check-double',
+      'system_event': 'fas fa-cog',
       'success': 'fas fa-check-circle',
       'error': 'fas fa-exclamation-circle',
       'warning': 'fas fa-exclamation-triangle',

@@ -467,6 +467,10 @@ export class ContractService {
     };
     return icons[status] || 'fas fa-question-circle';
   }
+
+  getRecentServiceActivities(limit: number = 10): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/meta/recent-activities?limit=${limit}`);
+  }
 }
 
 export interface ServiceComment {
@@ -480,4 +484,19 @@ export interface ServiceComment {
     name: string;
     email: string;
   };
+}
+
+export interface ServiceActivity {
+  id: number;
+  type: 'service';
+  status: 'not_started' | 'scheduled' | 'in_progress' | 'completed';
+  title: string;
+  description: string;
+  time: string;
+  scheduledStartDate?: string | null;
+  value: number;
+  category: string;
+  duration?: string | null;
+  contractId: number;
+  serviceId: number;
 }

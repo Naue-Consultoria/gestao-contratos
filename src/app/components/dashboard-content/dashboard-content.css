@@ -2039,3 +2039,145 @@
     border-radius: 10px;
   }
 }
+
+/* Estilos para detalhes dos serviços */
+.service-details {
+  margin: 0.5rem 0;
+}
+
+.service-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.service-category,
+.service-value,
+.service-duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 59, 43, 0.08);
+  color: #003b2b;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.service-category i,
+.service-value i,
+.service-duration i {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.service-value {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.service-duration {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+
+/* Botão de ação da atividade */
+.activity-action {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 59, 43, 0.1);
+  color: #003b2b;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
+}
+
+.action-btn:hover {
+  background: #003b2b;
+  color: white;
+  transform: translateX(2px);
+}
+
+/* Estilos para diferentes status */
+.activity-status {
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+.status-completed {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.status-in_progress {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.status-scheduled {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+
+.status-not_started {
+  background: rgba(107, 114, 128, 0.1);
+  color: #4b5563;
+}
+
+/* Dark mode para os novos elementos */
+:host-context(body.dark-mode) .service-category,
+:host-context(body.dark-mode) .service-value,
+:host-context(body.dark-mode) .service-duration {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+}
+
+:host-context(body.dark-mode) .action-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+}
+
+:host-context(body.dark-mode) .action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+:host-context(body.dark-mode) .activity-status {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+}
+
+/* Responsividade para novos elementos */
+@media (max-width: 768px) {
+  .service-info {
+    gap: 0.5rem;
+  }
+  
+  .service-category,
+  .service-value,
+  .service-duration {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .action-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+}
