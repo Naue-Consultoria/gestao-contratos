@@ -159,6 +159,30 @@
     <div class="report-controls">
       <div class="form-group">
         <label class="filter-label">
+          <i class="fas fa-calendar"></i>
+          Data Inicial
+        </label>
+        <input 
+          type="date" 
+          class="form-control" 
+          [(ngModel)]="financialReport.startDate"
+          [disabled]="financialReport.isLoading">
+      </div>
+      
+      <div class="form-group">
+        <label class="filter-label">
+          <i class="fas fa-calendar"></i>
+          Data Final
+        </label>
+        <input 
+          type="date" 
+          class="form-control" 
+          [(ngModel)]="financialReport.endDate"
+          [disabled]="financialReport.isLoading">
+      </div>
+      
+      <div class="form-group">
+        <label class="filter-label">
           <i class="fas fa-file-alt"></i>
           Formato
         </label>

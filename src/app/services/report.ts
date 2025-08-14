@@ -8,6 +8,8 @@ export interface ReportRequest {
   serviceId?: string;
   clientId?: string;
   format: 'pdf' | 'excel';
+  startDate?: string;
+  endDate?: string;
 }
 
 @Injectable({

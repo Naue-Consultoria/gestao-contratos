@@ -13,6 +13,8 @@ interface ReportConfig {
   serviceId?: string;
   format: 'pdf' | 'excel';
   isLoading: boolean;
+  startDate?: string;
+  endDate?: string;
 }
 
 type GeneralReportConfig = Omit<ReportConfig, 'clientId'> & { clientId?: string };
@@ -87,7 +89,9 @@ export class ReportsPage implements OnInit {
     const requestData: ReportRequest = {
       clientId: config.clientId || '',
       serviceId: config.serviceId,
-      format: config.format
+      format: config.format,
+      startDate: config.startDate,
+      endDate: config.endDate
     };
 
     let reportObservable: Observable<Blob>;
