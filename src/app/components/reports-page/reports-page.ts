@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ReportService, ReportRequest } from '../../services/report';
 import { ClientService } from '../../services/client';
 import { ServiceService } from '../../services/service';
+import { ContractService } from '../../services/contract';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
@@ -11,6 +12,7 @@ import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 interface ReportConfig {
   clientId: string;
   serviceId?: string;
+  contractId?: string;
   format: 'pdf' | 'excel';
   isLoading: boolean;
   startDate?: string;
@@ -29,16 +31,19 @@ type GeneralReportConfig = Omit<ReportConfig, 'clientId'> & { clientId?: string 
 export class ReportsPage implements OnInit {
   clients: any[] = [];
   services: any[] = [];
+  clientContracts: any[] = [];
   
   monthlyReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
   financialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
   clientReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
   servicesReport: ReportConfig = { clientId: '', serviceId: '', format: 'pdf', isLoading: false };
+  serviceRoutinesReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
 
   constructor(
     private reportService: ReportService,
     private clientService: ClientService,
     private serviceService: ServiceService,
+    private contractService: ContractService,
     private toastr: ToastrService
   ) {}
 
@@ -75,8 +80,32 @@ export class ReportsPage implements OnInit {
     });
   }
 
-  generateReport(reportType: 'monthly' | 'client' | 'services' | 'financial', config: ReportConfig | GeneralReportConfig) {
-    if (reportType === 'client' && !config.clientId) {
+  onClientChange(event: any) {
+    const clientId = event.target.value;
+    if (clientId) {
+      this.loadClientContracts(clientId);
+    } else {
+      this.clientContracts = [];
+    }
+    // Reset contract selection when client changes
+    this.serviceRoutinesReport.contractId = '';
+  }
+
+  loadClientContracts(clientId: string) {
+    this.contractService.getContracts({ client_id: clientId }).subscribe({
+      next: (response: any) => {
+        this.clientContracts = response?.contracts || [];
+      },
+      error: (error: any) => {
+        console.error('Erro ao carregar contratos:', error);
+        this.toastr.error('Erro ao carregar contratos do cliente');
+        this.clientContracts = [];
+      }
+    });
+  }
+
+  generateReport(reportType: 'monthly' | 'client' | 'services' | 'financial' | 'serviceRoutines', config: ReportConfig | GeneralReportConfig) {
+    if ((reportType === 'client' || reportType === 'serviceRoutines') && !config.clientId) {
       this.toastr.warning('Por favor, selecione um cliente.');
       return;
     }
@@ -89,6 +118,7 @@ export class ReportsPage implements OnInit {
     const requestData: ReportRequest = {
       clientId: config.clientId || '',
       serviceId: config.serviceId,
+      contractId: config.contractId && config.contractId !== '' ? config.contractId : undefined,
       format: config.format,
       startDate: config.startDate,
       endDate: config.endDate
@@ -121,6 +151,12 @@ export class ReportsPage implements OnInit {
       case 'financial':
         fileName = `relatorio_financeiro_${year}_${month}`;
         reportObservable = this.reportService.generateFinancialReport(requestData);
+        break;
+      case 'serviceRoutines':
+        const routineClient = this.clients.find(c => c.id === parseInt(config.clientId as string, 10));
+        const routineClientName = routineClient ? routineClient.name.replace(/\s+/g, '_').toLowerCase() : 'cliente';
+        fileName = `relatorio_rotinas_${routineClientName}_${year}_${month}`;
+        reportObservable = this.reportService.generateServiceRoutinesReport(requestData);
         break;
     }
 

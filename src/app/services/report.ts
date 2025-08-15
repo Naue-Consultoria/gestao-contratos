@@ -7,6 +7,7 @@ export interface ReportRequest {
   companyId?: string;
   serviceId?: string;
   clientId?: string;
+  contractId?: string;
   format: 'pdf' | 'excel';
   startDate?: string;
   endDate?: string;
@@ -43,6 +44,13 @@ export class ReportService {
 
   generateFinancialReport(data: ReportRequest): Observable<Blob> {
     return this.http.post(`${this.apiUrl}/financial`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
+  generateServiceRoutinesReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/service-routines`, data, {
       responseType: 'blob',
       headers: this.getHeaders()
     });
