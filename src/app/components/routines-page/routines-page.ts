@@ -51,11 +51,13 @@ export class RoutinesPageComponent implements OnInit {
   ngOnInit() {
     this.loadContractRoutines();
     // Close dropdown when clicking outside
-    document.addEventListener('click', this.closeClientFilter.bind(this));
+    document.addEventListener('click', this.closeDropdownHandler);
   }
 
+  private closeDropdownHandler = (event: Event) => this.closeClientFilter(event);
+
   ngOnDestroy() {
-    document.removeEventListener('click', this.closeClientFilter.bind(this));
+    document.removeEventListener('click', this.closeDropdownHandler);
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
@@ -188,7 +190,10 @@ export class RoutinesPageComponent implements OnInit {
     this.filteredClients = [...this.availableClients];
   }
 
-  toggleClientFilter() {
+  toggleClientFilter(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
     this.isClientFilterOpen = !this.isClientFilterOpen;
     if (this.isClientFilterOpen) {
       // Reset search when opening
@@ -197,7 +202,15 @@ export class RoutinesPageComponent implements OnInit {
     }
   }
 
-  closeClientFilter() {
+  closeClientFilter(event?: Event) {
+    // Verificar se o clique foi fora do dropdown
+    if (event && event.target) {
+      const target = event.target as HTMLElement;
+      const dropdown = target.closest('.filter-dropdown');
+      if (dropdown) {
+        return; // Não fechar se o clique foi dentro do dropdown
+      }
+    }
     this.isClientFilterOpen = false;
   }
 
@@ -213,7 +226,10 @@ export class RoutinesPageComponent implements OnInit {
     );
   }
 
-  selectClient(clientName: string) {
+  selectClient(clientName: string, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
     this.selectedClient = clientName;
     this.isClientFilterOpen = false;
     this.applyFilters();

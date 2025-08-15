@@ -58,13 +58,13 @@
           
           <div class="filter-dropdown-wrapper">
             <div class="filter-dropdown" [class.open]="isClientFilterOpen">
-              <button class="filter-btn" (click)="toggleClientFilter()" title="Filtrar por cliente">
+              <button class="filter-btn" (click)="toggleClientFilter($event)" title="Filtrar por cliente">
                 <i class="fas fa-user-tie"></i>
                 <span class="filter-label">{{ selectedClient || 'Todos os clientes' }}</span>
                 <i class="fas fa-chevron-down filter-arrow" [class.rotated]="isClientFilterOpen"></i>
               </button>
               
-              <div class="filter-options" *ngIf="isClientFilterOpen">
+              <div class="filter-options" *ngIf="isClientFilterOpen" (click)="$event.stopPropagation()">
                 <div class="filter-search">
                   <i class="fas fa-search"></i>
                   <input 
@@ -78,7 +78,7 @@
                 
                 <div class="filter-option" 
                      [class.selected]="!selectedClient"
-                     (click)="selectClient('')">
+                     (click)="selectClient('', $event)">
                   <span>Todos os clientes</span>
                   <span class="option-count">({{ contracts.length }})</span>
                 </div>
@@ -86,7 +86,7 @@
                 <div class="filter-option" 
                      *ngFor="let client of filteredClients"
                      [class.selected]="selectedClient === client.name"
-                     (click)="selectClient(client.name)">
+                     (click)="selectClient(client.name, $event)">
                   <span>{{ client.name }}</span>
                   <span class="option-count">({{ client.count }})</span>
                 </div>
