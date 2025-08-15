@@ -237,6 +237,32 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     this.openDropdownId = null;
   }
 
+  getEmptyStateTitle(): string {
+    switch (this.currentFilter) {
+      case 'active':
+        return 'Nenhum usuário ativo encontrado';
+      case 'inactive':
+        return 'Nenhum usuário inativo encontrado';
+      case 'all':
+        return 'Nenhum usuário cadastrado';
+      default:
+        return 'Nenhum usuário encontrado';
+    }
+  }
+
+  getEmptyStateMessage(): string {
+    switch (this.currentFilter) {
+      case 'active':
+        return 'Não há usuários ativos no momento.';
+      case 'inactive':
+        return 'Não há usuários inativos no momento.';
+      case 'all':
+        return 'Adicione o primeiro usuário clicando no botão acima';
+      default:
+        return 'Não há usuários para exibir.';
+    }
+  }
+
   async deleteUser(userId: number, userName: string) {
     this.closeDropdown();
     // First, ask for a permanent delete
