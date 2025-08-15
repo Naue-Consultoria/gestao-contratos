@@ -206,11 +206,57 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
     return isSent && isNotExpired;
   }
 
-  signProposal(): void {
+  async generatePublicLink(): Promise<void> {
     if (!this.proposal) return;
-    // Lógica para assinatura - pode abrir um modal ou navegar para uma página de assinatura
-    // Por enquanto, vamos apenas simular a ação
-    this.modalService.showInfo(`Redirecionando para assinar a proposta ${this.proposal.proposal_number}...`);
-    // this.router.navigate(['/sign-proposal', this.proposal.unique_link]);
+
+    try {
+      const response = await firstValueFrom(this.proposalService.generatePublicLink(this.proposalId));
+      if (response && response.success) {
+        this.modalService.showSuccess('Link público gerado com sucesso! A proposta foi enviada.');
+        // Recarregar a proposta para mostrar o novo status e link
+        await this.loadProposal();
+      }
+    } catch (error: any) {
+      console.error('❌ Error generating public link:', error);
+      if (error?.status === 500 || error?.status === 404) {
+        this.modalService.showError('Funcionalidade de gerar link público ainda não implementada no backend.');
+      } else {
+        this.modalService.showError('Não foi possível gerar o link público.');
+      }
+    }
+  }
+
+  canGeneratePublicLink(): boolean {
+    return this.proposal ? 
+      (this.proposal.status === 'draft' && this.proposal.services.length > 0) : 
+      false;
+  }
+
+  async signProposal(): Promise<void> {
+    if (!this.proposal) return;
+
+    const confirmed = confirm(
+      `Confirma a assinatura da proposta ${this.proposal.proposal_number}?\n\n` +
+      `Valor total: ${this.formatCurrency(this.proposal.total_value)}\n\n` +
+      'Esta ação não pode ser desfeita.'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const response = await firstValueFrom(this.proposalService.signProposal(this.proposalId));
+      if (response && response.success) {
+        this.modalService.showSuccess('Proposta assinada com sucesso!');
+        // Recarregar a proposta para mostrar o novo status
+        await this.loadProposal();
+      }
+    } catch (error: any) {
+      console.error('❌ Error signing proposal:', error);
+      if (error?.status === 500 || error?.status === 404) {
+        this.modalService.showError('Funcionalidade de assinatura ainda não implementada no backend.');
+      } else {
+        this.modalService.showError('Não foi possível assinar a proposta.');
+      }
+    }
   }
 }

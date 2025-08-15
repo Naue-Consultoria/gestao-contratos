@@ -116,6 +116,84 @@
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
+/* Specific action button styles */
+.generate-link-btn {
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.generate-link-btn:hover {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.sign-btn {
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.sign-btn:hover {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.edit-btn {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.edit-btn:hover {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.pdf-btn {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.pdf-btn:hover {
+  background: #f59e0b;
+  color: white;
+  border-color: #f59e0b;
+}
+
+.link-btn {
+  border-color: #6366f1;
+  color: #6366f1;
+}
+
+.link-btn:hover {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
+}
+
+.duplicate-btn {
+  border-color: #8b5cf6;
+  color: #8b5cf6;
+}
+
+.duplicate-btn:hover {
+  background: #8b5cf6;
+  color: white;
+  border-color: #8b5cf6;
+}
+
+.delete-btn {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.delete-btn:hover {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
 /* Proposal Body Layout */
 .proposal-body {
   display: grid;
@@ -181,6 +259,59 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   display: inline-block;
+}
+
+/* Public Link Section */
+.public-link-section {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 0.5rem;
+}
+
+.link-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: #059669;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.link-info i {
+  color: #10b981;
+}
+
+.link-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Generate Link Section */
+.generate-link-section {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 0.5rem;
+}
+
+.action-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: #1d4ed8;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.action-info i {
+  color: #3b82f6;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
 }
 
 .meta-grid {
@@ -395,6 +526,64 @@
   font-size: 1rem;
   margin: 0;
   opacity: 0.9;
+}
+
+/* Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  background: transparent;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.btn-outline {
+  color: #6b7280;
+  border-color: #d1d5db;
+}
+
+.btn-outline:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.btn-success {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.btn-success:hover {
+  background: #059669;
+  border-color: #059669;
 }
 
 .btn-success.btn-lg {

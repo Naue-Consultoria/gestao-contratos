@@ -408,6 +408,20 @@ export class ProposalService {
   }
 
   /**
+   * Gerar link público da proposta (muda status de draft para sent automaticamente)
+   */
+  generatePublicLink(proposalId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${proposalId}/generate-link`, {});
+  }
+
+  /**
+   * Assinar proposta (muda status de sent para signed)
+   */
+  signProposal(proposalId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${proposalId}/sign`, {});
+  }
+
+  /**
    * Regenerar token público da proposta
    */
   regeneratePublicToken(proposalId: number): Observable<any> {

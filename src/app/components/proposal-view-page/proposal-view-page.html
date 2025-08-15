@@ -38,8 +38,14 @@
           <button class="action-btn pdf-btn" (click)="generatePDF()" title="Gerar PDF">
             <i class="fas fa-file-pdf"></i>
           </button>
+          <button *ngIf="canGeneratePublicLink()" class="action-btn generate-link-btn" (click)="generatePublicLink()" title="Gerar Link Público">
+            <i class="fas fa-share-alt"></i>
+          </button>
           <button *ngIf="hasPublicLink()" class="action-btn link-btn" (click)="copyPublicLink()" title="Copiar Link Público">
             <i class="fas fa-link"></i>
+          </button>
+          <button *ngIf="canSignProposal()" class="action-btn sign-btn" (click)="signProposal()" title="Assinar Proposta">
+            <i class="fas fa-signature"></i>
           </button>
           <button *ngIf="canEditProposal()" class="action-btn delete-btn" (click)="deleteProposal()" title="Excluir Proposta">
             <i class="fas fa-trash"></i>
@@ -124,6 +130,32 @@
             <span class="status-badge" [style.background-color]="getStatusColor(proposal.status)">
               {{ getStatusText(proposal.status) }}
             </span>
+          </div>
+          
+          <!-- Public Link Section -->
+          <div *ngIf="hasPublicLink()" class="public-link-section">
+            <div class="link-info">
+              <i class="fas fa-link"></i>
+              <span>Link público disponível</span>
+            </div>
+            <div class="link-actions">
+              <button class="btn btn-sm btn-outline" (click)="copyPublicLink()">
+                <i class="fas fa-copy"></i>
+                Copiar Link
+              </button>
+            </div>
+          </div>
+          
+          <!-- Generate Link Action -->
+          <div *ngIf="canGeneratePublicLink()" class="generate-link-section">
+            <div class="action-info">
+              <i class="fas fa-info-circle"></i>
+              <span>Gere um link público para enviar esta proposta</span>
+            </div>
+            <button class="btn btn-sm btn-primary" (click)="generatePublicLink()">
+              <i class="fas fa-share-alt"></i>
+              Gerar Link de Envio
+            </button>
           </div>
           <div class="meta-grid">
             <div class="meta-item">
