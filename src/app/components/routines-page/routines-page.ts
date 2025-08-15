@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ContractService, ApiContract } from '../../services/contract';
@@ -21,7 +22,7 @@ interface ContractRoutine {
 @Component({
   selector: 'app-routines-page',
   standalone: true,
-  imports: [CommonModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent],
   templateUrl: './routines-page.html',
   styleUrls: ['./routines-page.css']
 })
@@ -32,13 +33,32 @@ export class RoutinesPageComponent implements OnInit {
   private router = inject(Router);
 
   contracts: ContractRoutine[] = [];
+  filteredContracts: ContractRoutine[] = [];
+  searchTerm = '';
   isLoading = true;
   error = '';
   currentUser = this.authService.getUser();
+  private searchTimeout: any;
+
+  // Client filter properties
+  selectedClient = '';
+  isClientFilterOpen = false;
+  clientSearchTerm = '';
+  availableClients: { name: string; count: number }[] = [];
+  filteredClients: { name: string; count: number }[] = [];
 
 
   ngOnInit() {
     this.loadContractRoutines();
+    // Close dropdown when clicking outside
+    document.addEventListener('click', this.closeClientFilter.bind(this));
+  }
+
+  ngOnDestroy() {
+    document.removeEventListener('click', this.closeClientFilter.bind(this));
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
   }
 
   loadContractRoutines() {
@@ -82,6 +102,9 @@ export class RoutinesPageComponent implements OnInit {
             // Ordenar por data de criação (mais recentes primeiro)
             return new Date(b.raw.created_at).getTime() - new Date(a.raw.created_at).getTime();
           });
+        
+        this.filteredContracts = [...this.contracts];
+        this.prepareClientsList();
       }
     } catch (error) {
       console.error('Erro ao carregar rotinas de contratos:', error);
@@ -129,9 +152,100 @@ export class RoutinesPageComponent implements OnInit {
     this.router.navigate(['/home/routines', id]);
   }
 
-  editContract(id: number, event: MouseEvent) {
-    event.stopPropagation();
-    this.router.navigate(['/home/contracts/edit', id]);
+
+  onSearchChange(event: any) {
+    const searchValue = event.target.value;
+    this.searchTerm = searchValue;
+    
+    // Debounce search to avoid excessive filtering
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+    
+    this.searchTimeout = setTimeout(() => {
+      this.filterContracts();
+    }, 300);
+  }
+
+  clearSearch() {
+    this.searchTerm = '';
+    this.selectedClient = '';
+    this.applyFilters();
+  }
+
+  prepareClientsList() {
+    const clientCounts = new Map<string, number>();
+    
+    this.contracts.forEach(contract => {
+      const clientName = contract.clientName;
+      clientCounts.set(clientName, (clientCounts.get(clientName) || 0) + 1);
+    });
+    
+    this.availableClients = Array.from(clientCounts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    
+    this.filteredClients = [...this.availableClients];
+  }
+
+  toggleClientFilter() {
+    this.isClientFilterOpen = !this.isClientFilterOpen;
+    if (this.isClientFilterOpen) {
+      // Reset search when opening
+      this.clientSearchTerm = '';
+      this.filteredClients = [...this.availableClients];
+    }
+  }
+
+  closeClientFilter() {
+    this.isClientFilterOpen = false;
+  }
+
+  filterClients() {
+    if (!this.clientSearchTerm.trim()) {
+      this.filteredClients = [...this.availableClients];
+      return;
+    }
+
+    const searchLower = this.clientSearchTerm.toLowerCase().trim();
+    this.filteredClients = this.availableClients.filter(client =>
+      client.name.toLowerCase().includes(searchLower)
+    );
+  }
+
+  selectClient(clientName: string) {
+    this.selectedClient = clientName;
+    this.isClientFilterOpen = false;
+    this.applyFilters();
+  }
+
+  private filterContracts() {
+    this.applyFilters();
+  }
+
+  private applyFilters() {
+    let filtered = [...this.contracts];
+
+    // Apply client filter
+    if (this.selectedClient) {
+      filtered = filtered.filter(contract => 
+        contract.clientName === this.selectedClient
+      );
+    }
+
+    // Apply search filter
+    if (this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(contract => {
+        const contractNumberMatch = contract.contractNumber.toLowerCase().includes(searchLower);
+        const clientNameMatch = contract.clientName.toLowerCase().includes(searchLower);
+        const typeMatch = contract.type.toLowerCase().includes(searchLower);
+        
+        return contractNumberMatch || clientNameMatch || typeMatch;
+      });
+    }
+
+    this.filteredContracts = filtered;
   }
 
 }

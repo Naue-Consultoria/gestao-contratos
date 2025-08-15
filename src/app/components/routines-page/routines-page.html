@@ -27,14 +27,93 @@
   <div *ngIf="!isLoading && !error" class="routines-container">
     <!-- Contracts Routines List -->
     <div class="routines-list">
-      <h2 class="section-title">
-        <i class="fas fa-calendar-check"></i>
-        <span>Rotinas Ativas</span>
-        <span class="contracts-scope" [class.user-only]="currentUser?.role !== 'admin'">
-          {{ currentUser?.role === 'admin' ? '(Todos os contratos)' : '(Meus contratos)' }}
-        </span>
-      </h2>
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-calendar-check"></i>
+          <span>Rotinas Ativas</span>
+          <span class="contracts-scope" [class.user-only]="currentUser?.role !== 'admin'">
+            {{ currentUser?.role === 'admin' ? '(Todos os contratos)' : '(Meus contratos)' }}
+          </span>
+        </h2>
+        
+        <!-- Search/Filter Section -->
+        <div class="search-container">
+          <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input 
+              type="text" 
+              class="search-input"
+              placeholder="Pesquisar por contrato ou cliente..."
+              [(ngModel)]="searchTerm"
+              (input)="onSearchChange($event)"
+            />
+            <button 
+              *ngIf="searchTerm" 
+              class="clear-search-btn" 
+              (click)="clearSearch()"
+              title="Limpar pesquisa">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="filter-dropdown-wrapper">
+            <div class="filter-dropdown" [class.open]="isClientFilterOpen">
+              <button class="filter-btn" (click)="toggleClientFilter()" title="Filtrar por cliente">
+                <i class="fas fa-user-tie"></i>
+                <span class="filter-label">{{ selectedClient || 'Todos os clientes' }}</span>
+                <i class="fas fa-chevron-down filter-arrow" [class.rotated]="isClientFilterOpen"></i>
+              </button>
+              
+              <div class="filter-options" *ngIf="isClientFilterOpen">
+                <div class="filter-search">
+                  <i class="fas fa-search"></i>
+                  <input 
+                    type="text" 
+                    placeholder="Buscar cliente..."
+                    [(ngModel)]="clientSearchTerm"
+                    (input)="filterClients()"
+                    #clientSearchInput
+                  />
+                </div>
+                
+                <div class="filter-option" 
+                     [class.selected]="!selectedClient"
+                     (click)="selectClient('')">
+                  <span>Todos os clientes</span>
+                  <span class="option-count">({{ contracts.length }})</span>
+                </div>
+                
+                <div class="filter-option" 
+                     *ngFor="let client of filteredClients"
+                     [class.selected]="selectedClient === client.name"
+                     (click)="selectClient(client.name)">
+                  <span>{{ client.name }}</span>
+                  <span class="option-count">({{ client.count }})</span>
+                </div>
+                
+                <div *ngIf="filteredClients.length === 0 && clientSearchTerm" class="no-options">
+                  Nenhum cliente encontrado
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
+      <div *ngIf="filteredContracts.length === 0 && contracts.length > 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-search"></i>
+        </div>
+        <h3>Nenhuma rotina encontrada</h3>
+        <p *ngIf="searchTerm && !selectedClient">Não há contratos que correspondam à sua pesquisa "{{ searchTerm }}".</p>
+        <p *ngIf="!searchTerm && selectedClient">Não há contratos para o cliente "{{ selectedClient }}".</p>
+        <p *ngIf="searchTerm && selectedClient">Não há contratos para o cliente "{{ selectedClient }}" que correspondam à pesquisa "{{ searchTerm }}".</p>
+        <button class="btn btn-secondary" (click)="clearSearch()">
+          <i class="fas fa-times"></i>
+          Limpar filtros
+        </button>
+      </div>
+
       <div *ngIf="contracts.length === 0" class="empty-state">
         <div class="empty-icon">
           <i class="fas fa-calendar-times"></i>
@@ -50,53 +129,51 @@
       </div>
 
       <div class="routine-cards">
-        <div *ngFor="let contract of contracts" 
+        <div *ngFor="let contract of filteredContracts" 
              class="routine-card" 
              (click)="viewContractDetails(contract.id)">
           
-          <div class="routine-header">
-            <div class="contract-info">
-              <h3 class="contract-number">{{ contract.contractNumber }}</h3>
-              <p class="client-name">{{ contract.clientName }}</p>
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="contract-badge">
+              <span class="contract-number">{{ contract.contractNumber }}</span>
+              <span class="contract-type">{{ contract.type }}</span>
             </div>
-            
-          </div>
-
-          <div class="routine-body">
-            <div class="contract-details">
-              <div class="detail-item">
-                <i class="fas fa-tag"></i>
-                <span>{{ contract.type }}</span>
-              </div>
-              
-              <div class="detail-item">
-                <i class="fas fa-tasks"></i>
-                <span>{{ contract.servicesCount }} serviços</span>
-              </div>
-              
-            </div>
-
-            <div class="routine-schedule">
-              <div class="next-due">
-                <i class="fas fa-calendar-alt"></i>
-                <span class="due-label">Próximo vencimento:</span>
-                <span class="due-date">{{ contract.nextDueDate }}</span>
-              </div>
+            <div class="click-indicator">
+              <i class="fas fa-arrow-right"></i>
             </div>
           </div>
 
-          <div class="routine-actions">
-            <button class="action-btn view-btn" 
-                    (click)="viewContractDetails(contract.id); $event.stopPropagation()" 
-                    title="Ver detalhes">
-              <i class="fas fa-eye"></i>
-            </button>
-            
-            <button class="action-btn edit-btn" 
-                    (click)="editContract(contract.id, $event)" 
-                    title="Editar contrato">
-              <i class="fas fa-edit"></i>
-            </button>
+          <!-- Client Info -->
+          <div class="client-section">
+            <div class="client-avatar">
+              <i class="fas fa-building"></i>
+            </div>
+            <div class="client-info">
+              <h3 class="client-name">{{ contract.clientName }}</h3>
+              <p class="client-meta">{{ contract.servicesCount }} serviço{{ contract.servicesCount !== 1 ? 's' : '' }} ativo{{ contract.servicesCount !== 1 ? 's' : '' }}</p>
+            </div>
+          </div>
+
+          <!-- Schedule Info -->
+          <div class="schedule-section">
+            <div class="schedule-item">
+              <div class="schedule-icon">
+                <i class="fas fa-calendar-check"></i>
+              </div>
+              <div class="schedule-details">
+                <span class="schedule-label">Próximo vencimento</span>
+                <span class="schedule-date">{{ contract.nextDueDate }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Indicator -->
+          <div class="card-footer">
+            <div class="status-indicator active">
+              <span class="status-dot"></span>
+              <span class="status-text">Contrato ativo</span>
+            </div>
           </div>
         </div>
       </div>
