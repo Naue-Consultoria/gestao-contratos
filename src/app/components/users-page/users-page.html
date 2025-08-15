@@ -50,7 +50,6 @@
           <th>USUÁRIO</th>
           <th>EMAIL</th>
           <th>PERMISSÃO</th>
-          <th>STATUS</th>
           <th>DESDE</th>
           <th>AÇÕES</th>
         </tr>
@@ -80,14 +79,6 @@
             </span>
           </td>
           <td>
-            <span class="status-badge" 
-                  [class.status-active]="user.status === 'active'" 
-                  [class.status-inactive]="user.status === 'inactive'">
-              <span class="status-indicator"></span>
-              {{ user.status === 'active' ? 'Ativo' : 'Inativo' }}
-            </span>
-          </td>
-          <td>
             <div class="since-date">{{ user.since }}</div>
           </td>
           <td>
@@ -97,19 +88,31 @@
                       (click)="editUser(user.id); $event.stopPropagation()">
                 <i class="fas fa-edit"></i>
               </button>
-              <button class="action-btn" 
-                      [title]="user.status === 'active' ? 'Desativar Usuário' : 'Ativar Usuário'"
-                      (click)="toggleUserStatus(user); $event.stopPropagation()">
-                <i [class]="user.status === 'active' ? 'fas fa-user-slash' : 'fas fa-user-check'"></i>
-              </button>
-              <button class="action-btn" 
-                      title="Resetar Senha"
-                      (click)="resetPassword(user); $event.stopPropagation()">
-                <i class="fas fa-key"></i>
-              </button>
-              <button class="action-btn delete" (click)="deleteUser(user.id, user.name)" title="Excluir Usuário">
-                <i class="fas fa-trash"></i>
-              </button>
+              <div class="dropdown-container" [class.open]="user.id === openDropdownId">
+                <button class="action-btn dropdown-toggle" 
+                        title="Mais ações"
+                        (click)="toggleDropdown(user.id); $event.stopPropagation()">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="dropdown-menu" *ngIf="user.id === openDropdownId">
+                  <button class="dropdown-item" 
+                          (click)="toggleUserStatus(user); $event.stopPropagation()">
+                    <i [class]="user.status === 'active' ? 'fas fa-user-slash' : 'fas fa-user-check'"></i>
+                    {{ user.status === 'active' ? 'Desativar usuário' : 'Ativar usuário' }}
+                  </button>
+                  <button class="dropdown-item" 
+                          (click)="resetPassword(user); $event.stopPropagation()">
+                    <i class="fas fa-key"></i>
+                    Resetar senha
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item danger" 
+                          (click)="deleteUser(user.id, user.name); $event.stopPropagation()">
+                    <i class="fas fa-trash"></i>
+                    Excluir usuário
+                  </button>
+                </div>
+              </div>
             </div>
           </td>
         </tr>

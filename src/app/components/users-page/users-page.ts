@@ -39,15 +39,19 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   loading = false;
   error = '';
   currentFilter: 'active' | 'inactive' | 'all' = 'active';
+  openDropdownId: number | null = null;
 
   ngOnInit() {
     this.loadUsers();
     this.subscribeToRefreshEvents();
+    // Close dropdown when clicking outside
+    document.addEventListener('click', this.closeDropdown.bind(this));
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
     window.removeEventListener('refreshUsers', this.handleRefreshUsers);
+    document.removeEventListener('click', this.closeDropdown.bind(this));
   }
 
   private subscribeToRefreshEvents() {
@@ -190,6 +194,7 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   }
 
   async toggleUserStatus(user: User) {
+    this.closeDropdown();
     const action = user.status === 'active' ? 'desativar' : 'ativar';
     const confirmMessage = `Tem certeza que deseja ${action} o usuário ${user.name}?`;
     
@@ -208,6 +213,7 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   }
 
   async resetPassword(user: User) {
+    this.closeDropdown();
     const confirmMessage = `Tem certeza que deseja resetar a senha do usuário ${user.name}? Uma nova senha temporária será enviada por email.`;
     
     if (confirm(confirmMessage)) {
@@ -223,7 +229,16 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  toggleDropdown(userId: number) {
+    this.openDropdownId = this.openDropdownId === userId ? null : userId;
+  }
+
+  closeDropdown() {
+    this.openDropdownId = null;
+  }
+
   async deleteUser(userId: number, userName: string) {
+    this.closeDropdown();
     // First, ask for a permanent delete
     const hardDeleteConfirmation = confirm(`Você deseja EXCLUIR PERMANENTEMENTE o usuário "${userName}"?
 
