@@ -206,6 +206,15 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  getProposalTypeText(type: string): string {
+    const types: { [key: string]: string } = {
+      'Full': 'Full',
+      'Pontual': 'Pontual',
+      'Individual': 'Individual'
+    };
+    return types[type] || type || 'Full';
+  }
+
   getStatusColor(status: string): string {
     const statusColors: { [key: string]: string } = {
       'draft': '#6c757d',

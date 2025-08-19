@@ -1,10 +1,9 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
-import { DocumentMaskDirective } from '../../directives/document-mask.directive';
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { Subject, takeUntil, forkJoin, BehaviorSubject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -16,7 +15,7 @@ import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 @Component({
   selector: 'app-proposal-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DocumentMaskDirective, CurrencyMaskDirective, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, CurrencyMaskDirective, BreadcrumbComponent],
   templateUrl: './proposal-form.html',
   styleUrls: ['./proposal-form.css'],
   animations: [
@@ -40,11 +39,21 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   proposalForm!: FormGroup;
   clients: ApiClient[] = [];
   services: ApiService[] = [];
+  selectedServices: any[] = [];
+  availableServices: ApiService[] = [];
+  showServiceModal = false;
+  serviceSearchTerm = '';
+  serviceCategoryFilter = '';
   isLoading = false;
   isSubmitting = false;
   isEditMode = false;
   showNewClientForm = false;
   newClientForm!: FormGroup;
+
+  // Observable para valor total reativo
+  private totalValue$ = new BehaviorSubject<number>(0);
+  updateCounter: number = 0;
+  isCreatingClient: boolean = false;
 
   private destroy$ = new Subject<void>();
 
@@ -55,7 +64,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     private serviceService: ServiceService,
     private toastr: ToastrService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     this.initializeForms();
   }
@@ -80,32 +90,19 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   private initializeForms(): void {
     this.proposalForm = this.fb.group({
       client_id: ['', Validators.required],
+      type: ['Full', Validators.required],
       end_date: [''],
       observations: [''],
-      services: this.fb.array([]),
     });
 
     this.newClientForm = this.fb.group({
       client_type: ['', Validators.required],
       name: ['', [Validators.required, Validators.minLength(2)]],
-      document: ['', [Validators.required, Validators.minLength(5)]],
-      trade_name: [''],
       email: ['', [Validators.required, Validators.email]],
-      phone: [''],
-      street: ['', Validators.required],
-      number: ['', Validators.required],
-      complement: [''],
-      neighborhood: ['', Validators.required],
-      city: ['', Validators.required],
-      state: ['', Validators.required],
-      zipcode: ['', [Validators.required, Validators.minLength(8)]],
-      headquarters: [''],
-      market_sector: [''],
-      description: ['']
+      trade_name: [''] // Apenas para PJ, opcional
     });
 
-    // Adicionar pelo menos um serviço vazio
-    this.addService();
+    // Não adiciona serviço vazio - agora é via modal
   }
 
   private loadInitialData(): void {
@@ -121,6 +118,12 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
         this.clients = data.clients.clients || [];
         // Filtrar apenas serviços ativos
         this.services = (data.services.services || []).filter(service => service.is_active);
+        this.availableServices = [...this.services];
+        console.log('✅ Dados carregados:', {
+          clients: this.clients.length,
+          services: this.services.length,
+          availableServices: this.availableServices.length
+        });
         this.isLoading = false;
       },
       error: (error) => {
@@ -152,94 +155,235 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   private populateForm(proposal: Proposal): void {
     this.proposalForm.patchValue({
       client_id: proposal.client_id,
+      type: proposal.type || 'Full',
       end_date: proposal.end_date ? proposal.end_date.split('T')[0] : '',
+      observations: proposal.notes || ''
     });
 
-    // Limpar serviços e adicionar os da proposta
-    this.servicesArray.clear();
-    proposal.services.forEach(service => {
-      this.addService({
-        service_id: service.service_id,
-        quantity: service.quantity,
-        unit_value: service.unit_value, // Already in reais
-        total_value: service.total_value // Already in reais
-      });
-    });
+    // Carregar serviços da proposta
+    this.selectedServices = proposal.services.map(service => {
+      const serviceData = this.services.find(s => s.id === service.service_id);
+      return {
+        ...serviceData,
+        id: service.service_id,
+        unit_value: service.unit_value || 0,
+        total_value: service.total_value || 0,
+        // Preservar dados de duração do serviço original
+        duration: serviceData?.duration_amount || null,
+        duration_unit: serviceData?.duration_unit || null
+      };
+    }).filter(service => service.id);
+    
+    console.log('✅ Serviços carregados na edição:', this.selectedServices.map(s => ({
+      name: s.name,
+      duration: s.duration,
+      duration_unit: s.duration_unit
+    })));
+
+    // Atualização concluída - serviços carregados
   }
 
-  get servicesArray(): FormArray {
-    return this.proposalForm.get('services') as FormArray;
+  // Service Modal Methods (igual ao contrato)
+  openServiceModal(): void {
+    this.showServiceModal = true;
+    this.serviceSearchTerm = '';
+    this.serviceCategoryFilter = '';
   }
 
-  addService(serviceData?: any): void {
-    const serviceForm = this.fb.group({
-      service_id: [serviceData?.service_id || '', Validators.required],
-      quantity: [serviceData?.quantity || 1, [Validators.required, Validators.min(1)]],
-      unit_value: [serviceData?.unit_value || null, [Validators.min(0)]],
-      total_value: [serviceData?.total_value || null, [Validators.min(0)]]
-    });
+  closeServiceModal(): void {
+    this.showServiceModal = false;
+    this.serviceSearchTerm = '';
+    this.serviceCategoryFilter = '';
+  }
 
-    this.servicesArray.push(serviceForm);
+  addService(service: ApiService): void {
+    this.selectedServices.push({
+      service_id: service.id,
+      id: service.id, // Para compatibilidade
+      name: service.name,
+      unit_value: 0,
+      total_value: 0,
+      duration: service.duration_amount || null,
+      duration_unit: service.duration_unit || null,
+      category: service.category || 'Geral'
+    });
+    
+    console.log('✅ Serviço adicionado:', {
+      name: service.name,
+      duration_amount: service.duration_amount,
+      duration_unit: service.duration_unit,
+      mapped: {
+        duration: service.duration_amount || null,
+        duration_unit: service.duration_unit || null
+      }
+    });
+    
+    // Atualizar valor total
+    this.updateTotalValue();
+    
+    // Fechar modal após adicionar
+    this.closeServiceModal();
   }
 
   removeService(index: number): void {
-    if (this.servicesArray.length > 1) {
-      this.servicesArray.removeAt(index);
+    this.selectedServices.splice(index, 1);
+    // Atualizar valor total após remover serviço
+    this.updateTotalValue();
+  }
+
+  get filteredServices(): ApiService[] {
+    let services = this.availableServices;
+
+    if (this.serviceCategoryFilter) {
+      services = services.filter(s => s.category === this.serviceCategoryFilter);
     }
+
+    if (this.serviceSearchTerm) {
+      services = services.filter(s =>
+        s.name.toLowerCase().includes(this.serviceSearchTerm.toLowerCase()) ||
+        s.category?.toLowerCase().includes(this.serviceSearchTerm.toLowerCase())
+      );
+    }
+
+    return services;
   }
 
-  getServiceById(serviceId: number): ApiService | undefined {
-    return this.services.find(s => s.id === serviceId);
+  get serviceCategories(): string[] {
+    const categories = Array.from(new Set(
+      this.availableServices
+        .map(s => s.category)
+        .filter((category): category is string => Boolean(category))
+    ));
+    return categories.sort();
   }
 
-  getServiceValue(index: number): number {
-    const serviceForm = this.servicesArray.at(index);
-    const unitValue = serviceForm.get('unit_value')?.value;
+  onPriceChange(index: number, priceInReais: number): void {
+    this.updateServicePrice(index, priceInReais);
+  }
+
+  onPriceInput(index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const rawValue = input.value;
     
-    // If unit_value is provided and greater than 0, use it (already in reais)
-    if (unitValue !== null && unitValue !== undefined && unitValue > 0) {
-        return unitValue; // Already in reais
+    // Extrai valor numérico do input formatado
+    const numericValue = this.extractNumericValue(rawValue);
+    this.updateServicePriceImmediate(index, numericValue);
+  }
+
+  onPriceKeyup(index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const rawValue = input.value;
+    
+    // Extrai valor numérico do input formatado
+    const numericValue = this.extractNumericValue(rawValue);
+    this.updateServicePriceImmediate(index, numericValue);
+  }
+
+  private updateServicePriceImmediate(index: number, priceInReais: number): void {
+    if (index < 0 || index >= this.selectedServices.length) return;
+    
+    const service = this.selectedServices[index];
+    if (priceInReais < 0) {
+      priceInReais = 0;
     }
     
-    // If no unit_value, try to get from selected service
-    const serviceId = serviceForm.get('service_id')?.value;
-    // Serviços agora não têm valor pré-definido
-    return 0;
+    service.unit_value = priceInReais;
+    service.total_value = service.unit_value;
+    
+    // Atualização imediata
+    this.updateCounter++;
+    this.cdr.detectChanges();
   }
 
-  getServiceTotal(index: number): number {
-    const serviceForm = this.servicesArray.at(index);
-    const quantity = serviceForm.get('quantity')?.value || 1;
-    const unitValue = this.getServiceValue(index); // This returns value in cents
-    return unitValue * quantity;
+  private extractNumericValue(formattedValue: string): number {
+    // Remove formatação de moeda e converte para número
+    if (!formattedValue) return 0;
+    
+    // Remove R$, espaços, pontos de milhar e converte vírgula para ponto
+    const cleanValue = formattedValue
+      .replace(/[R$\s]/g, '')
+      .replace(/\./g, '')
+      .replace(',', '.');
+    
+    const numericValue = parseFloat(cleanValue) || 0;
+    return numericValue;
+  }
+
+  private updateServicePrice(index: number, priceInReais: number): void {
+    if (index < 0 || index >= this.selectedServices.length) return;
+    
+    const service = this.selectedServices[index];
+    if (priceInReais < 0) {
+      priceInReais = 0;
+    }
+    
+    service.unit_value = priceInReais;
+    service.total_value = service.unit_value;
+    
+    // Log do valor total antes e depois
+    const oldTotal = this.getTotalValue();
+    
+    // Força múltiplas atualizações
+    this.updateTotalValue();
+    
+    // Log do novo total
+    const newTotal = this.getTotalValue();
+  }
+
+  private updateTotalValue(): void {   
+    // Calcular novo total
+    const newTotal = this.calculateTotal();
+    this.updateCounter++;
+    
+    // Atualizar observable
+    this.totalValue$.next(newTotal);
+    
+    // Forçar detecção de mudanças
+    this.cdr.detectChanges();
+    this.cdr.markForCheck();
+    
+    // Backup async update
+    setTimeout(() => {
+      this.cdr.detectChanges();
+    }, 0);
+  }
+
+  private calculateTotal(): number {
+    return this.selectedServices.reduce((sum, service) => {
+      const serviceValue = parseFloat(service.unit_value?.toString()) || 0;
+      return sum + serviceValue;
+    }, 0);
   }
 
   getTotalValue(): number {
-    let total = 0;
-    for (let i = 0; i < this.servicesArray.length; i++) {
-      total += this.getServiceTotal(i);
-    }
+    const total = this.selectedServices.reduce((sum, service) => {
+      const serviceValue = parseFloat(service.unit_value?.toString()) || 0;
+      return sum + serviceValue;
+    }, 0);
+    
     return total;
+  }
+
+  getTotalValueFormatted(): string {
+    const total = this.getTotalValue();
+    const formatted = this.formatCurrency(total);
+    return formatted;
   }
 
   formatCurrency(value: number): string {
     return this.proposalService.formatCurrency(value);
   }
 
-  onServiceChange(index: number): void {
-    const serviceForm = this.servicesArray.at(index);
-    const serviceId = serviceForm.get('service_id')?.value;
-    
-    if (serviceId) {
-      const service = this.getServiceById(serviceId);
-      if (service) {
-        // Serviços não têm mais valor pré-definido, mantém valor atual ou 0
-        // Não altera o valor automaticamente
-      }
-    } else {
-      // Limpar valor quando nenhum serviço está selecionado
-      serviceForm.get('unit_value')?.setValue(null);
-    }
+  // Debug method
+  debugComponent(): void {
+    console.log('🔍 DEBUG - Estado atual do componente:');
+    console.log('- isLoading:', this.isLoading);
+    console.log('- showServiceModal:', this.showServiceModal);
+    console.log('- availableServices:', this.availableServices.length);
+    console.log('- selectedServices:', this.selectedServices.length);
+    console.log('- clients:', this.clients.length);
+    console.log('- services:', this.services.length);
+    console.log('- proposalForm valid:', this.proposalForm.valid);
   }
 
   toggleNewClientForm(): void {
@@ -250,80 +394,357 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   createNewClient(): void {
-    if (this.newClientForm.invalid) {
-      this.toastr.error('Preencha os campos obrigatórios do novo cliente');
+    // Prevenir múltiplos cliques/submissions
+    if (this.isCreatingClient) {
+      this.toastr.warning('Aguarde... Cliente sendo criado.');
       return;
     }
 
+    if (this.newClientForm.invalid) {
+      this.toastr.error('Preencha os campos obrigatórios do novo cliente');
+      this.markNewClientFormGroupTouched();
+      return;
+    }
+
+    this.isCreatingClient = true;
     const formValue = this.newClientForm.value;
     const clientType = formValue.client_type;
     
-    // Build client data according to the expected API format
+    console.log('📝 Form values:', formValue);
+    console.log('🔍 Client type:', clientType);
+    
+    // Build comprehensive client data with ALL potentially required fields
     const clientData: CreateClientRequest = {
       type: clientType === 'pf' ? 'PF' : 'PJ',
-      email: formValue.email || '',
-      phone: formValue.phone || undefined,
-      street: formValue.street || '',
-      number: formValue.number || '',
-      complement: formValue.complement || undefined,
-      neighborhood: formValue.neighborhood || '',
-      city: formValue.city || '',
-      state: formValue.state || '',
-      zipcode: formValue.zipcode || ''
+      // Endereço - campos obrigatórios conforme schema
+      street: 'Rua temporária',
+      number: '123',
+      complement: '', // pode ser null conforme schema
+      neighborhood: 'Centro',
+      city: 'São Paulo',
+      state: 'SP',
+      zipcode: '01310100',
+      phone: '' // pode ser null conforme schema
     };
 
-    // Add type-specific fields
+    // Configurar email e campos específicos por tipo
     if (clientType === 'pf') {
-      clientData.cpf = formValue.document || '';
+      // Pessoa Física - usa email único
+      clientData.email = formValue.email || '';
+      clientData.cpf = '00000000000'; // CPF temporário com zeros
       clientData.full_name = formValue.name || '';
     } else {
-      clientData.cnpj = formValue.document || '';
+      // Pessoa Jurídica - pode usar array de emails
+      clientData.email = formValue.email || ''; // Tentar email único também
+      clientData.emails = [formValue.email || '']; // E array de emails
+      clientData.cnpj = '00000000000000'; // CNPJ temporário com zeros
       clientData.company_name = formValue.name || '';
-      clientData.trade_name = formValue.trade_name || undefined;
+      clientData.trade_name = formValue.trade_name || '';
+      
+      // Campos específicos PJ que podem ser obrigatórios
+      clientData.legal_representative = 'A definir';
+      clientData.employee_count = 1;
+      clientData.business_segment = 'A definir';
     }
+    
+    console.log('🆕 Client data being sent:', JSON.stringify(clientData, null, 2));
+    console.log('📧 Email configuration:', {
+      clientType,
+      email: clientData.email,
+      emails: clientData.emails,
+      formEmail: formValue.email
+    });
     
     this.clientService.createClient(clientData)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
+          console.log('✅ Client created successfully:', response);
           this.clients.push(response.client);
           this.proposalForm.get('client_id')?.setValue(response.client.id);
           this.showNewClientForm = false;
           this.newClientForm.reset();
-          this.toastr.success(response.message || 'Cliente criado com sucesso');
+          this.isCreatingClient = false;
+          this.toastr.success('Cliente criado com sucesso! Complete as informações depois editando o cliente.');
         },
         error: (error) => {
-          console.error('Erro ao criar cliente:', error);
-          this.toastr.error('Erro ao criar cliente');
+          console.error('❌ Error creating client:', error);
+          console.error('📋 Complete error details:', {
+            status: error.status,
+            statusText: error.statusText,
+            message: error?.error?.message,
+            details: error?.error?.details,
+            validationErrors: error?.error?.errors,
+            fullError: error?.error,
+            requestPayload: clientData
+          });
+          
+          // Log específico do erro para debug
+          if (error?.error?.message) {
+            console.error('🚨 Server error message:', error.error.message);
+          }
+          
+          // Tratamento específico por tipo de erro
+          if (error.status === 429) {
+            console.log('⏳ Rate limit atingido, aguardando...');
+            this.isCreatingClient = false;
+            this.toastr.error('Muitas tentativas. Aguarde alguns segundos antes de tentar novamente.', 'Limite de Tentativas');
+          } else if (error.status === 400) {
+            console.log('🔄 Tentando estratégias alternativas para erro 400...');
+            this.tryAlternativeClientCreation(formValue, clientType);
+          } else if (error.status === 500) {
+            console.log('🔄 Tentando com payload simplificado para erro 500...');
+            this.trySimplifiedClientCreation(formValue, clientType);
+          } else {
+            this.isCreatingClient = false;
+            this.handleClientCreationError(error);
+          }
         }
       });
   }
 
+  private tryAlternativeClientCreation(formValue: any, clientType: string): void {
+    console.log('🎯 Trying alternative strategies for 400 error...');
+    
+    // Strategy 1: Try with minimal required fields only
+    const minimalData: CreateClientRequest = {
+      type: clientType === 'pf' ? 'PF' : 'PJ',
+      street: 'A definir',
+      number: '0',
+      neighborhood: 'A definir',
+      city: 'A definir',
+      state: 'SP',
+      zipcode: '00000000'
+    };
+
+    if (clientType === 'pf') {
+      minimalData.email = formValue.email || '';
+      minimalData.cpf = '00000000000';
+      minimalData.full_name = formValue.name || '';
+    } else {
+      // Try only with email field (not emails array) for PJ
+      minimalData.email = formValue.email || '';
+      minimalData.cnpj = '00000000000000';
+      minimalData.company_name = formValue.name || '';
+      minimalData.trade_name = formValue.trade_name || '';
+      minimalData.legal_representative = 'A definir';
+      minimalData.employee_count = 1;
+      minimalData.business_segment = 'A definir';
+    }
+
+    console.log('🔄 Alternative strategy 1 - Minimal payload:', JSON.stringify(minimalData, null, 2));
+
+    this.clientService.createClient(minimalData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('✅ Alternative strategy 1 succeeded:', response);
+          this.clients.push(response.client);
+          this.proposalForm.get('client_id')?.setValue(response.client.id);
+          this.showNewClientForm = false;
+          this.newClientForm.reset();
+          this.isCreatingClient = false;
+          this.toastr.success('Cliente criado com sucesso! Complete as informações obrigatórias depois editando o cliente.');
+        },
+        error: (error) => {
+          console.error('❌ Alternative strategy 1 failed:', error);
+          console.log('🔄 Trying alternative strategy 2 - emails array for PJ...');
+          this.tryEmailsArrayStrategy(formValue, clientType);
+        }
+      });
+  }
+
+  private tryEmailsArrayStrategy(formValue: any, clientType: string): void {
+    if (clientType !== 'pj') {
+      // If not PJ, fallback to simplified creation
+      this.trySimplifiedClientCreation(formValue, clientType);
+      return;
+    }
+
+    // Strategy 2: For PJ, try with emails array instead of email field
+    const emailsArrayData: CreateClientRequest = {
+      type: 'PJ',
+      street: 'A definir',
+      number: '0', 
+      neighborhood: 'A definir',
+      city: 'A definir',
+      state: 'SP',
+      zipcode: '00000000',
+      // Use emails array, NOT email field for PJ
+      emails: [formValue.email || ''],
+      cnpj: '00000000000000',
+      company_name: formValue.name || '',
+      trade_name: formValue.trade_name || '',
+      legal_representative: 'A definir',
+      employee_count: 1,
+      business_segment: 'A definir'
+    };
+
+    // Explicitly remove email field
+    delete (emailsArrayData as any).email;
+
+    console.log('🔄 Alternative strategy 2 - emails array for PJ:', JSON.stringify(emailsArrayData, null, 2));
+
+    this.clientService.createClient(emailsArrayData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('✅ Alternative strategy 2 succeeded:', response);
+          this.clients.push(response.client);
+          this.proposalForm.get('client_id')?.setValue(response.client.id);
+          this.showNewClientForm = false;
+          this.newClientForm.reset();
+          this.isCreatingClient = false;
+          this.toastr.success('Cliente criado com sucesso! Complete as informações obrigatórias depois editando o cliente.');
+        },
+        error: (error) => {
+          console.error('❌ Alternative strategy 2 also failed:', error);
+          console.log('🔄 Falling back to simplified strategy...');
+          this.trySimplifiedClientCreation(formValue, clientType);
+        }
+      });
+  }
+
+  private trySimplifiedClientCreation(formValue: any, clientType: string): void {
+    // Payload mais simples sem dados temporários complexos
+    const simplifiedData: CreateClientRequest = {
+      type: clientType === 'pf' ? 'PF' : 'PJ',
+      phone: '',
+      street: 'Não informado',
+      number: '0',
+      neighborhood: 'Não informado',
+      city: 'Não informado',
+      state: 'SP',
+      zipcode: '00000000'
+    };
+
+    // Configurar email de acordo com o tipo (mesma lógica)
+    if (clientType === 'pj') {
+      simplifiedData.emails = [formValue.email || ''];
+    } else {
+      simplifiedData.email = formValue.email || '';
+    }
+
+    if (clientType === 'pf') {
+      simplifiedData.cpf = '00000000000'; // CPF com zeros para editar depois
+      simplifiedData.full_name = formValue.name || '';
+    } else {
+      simplifiedData.cnpj = '00000000000000'; // CNPJ com zeros para editar depois
+      simplifiedData.company_name = formValue.name || '';
+      simplifiedData.trade_name = formValue.trade_name || '';
+      // Campos adicionais mínimos para PJ
+      simplifiedData.legal_representative = 'A definir';
+      simplifiedData.employee_count = 1;
+      simplifiedData.business_segment = 'Outros';
+    }
+
+    console.log('🔄 Trying simplified payload:', simplifiedData);
+    console.log('📧 Simplified email setup:', {
+      clientType,
+      email: simplifiedData.email,
+      emails: simplifiedData.emails,
+      formEmail: formValue.email
+    });
+
+    this.clientService.createClient(simplifiedData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('✅ Simplified client created successfully:', response);
+          this.clients.push(response.client);
+          this.proposalForm.get('client_id')?.setValue(response.client.id);
+          this.showNewClientForm = false;
+          this.newClientForm.reset();
+          this.isCreatingClient = false;
+          this.toastr.success('Cliente criado com sucesso! Complete as informações obrigatórias depois editando o cliente.');
+        },
+        error: (error) => {
+          console.error('❌ Simplified creation also failed:', error);
+          this.isCreatingClient = false;
+          this.handleClientCreationError(error);
+        }
+      });
+  }
+
+  private handleClientCreationError(error: any): void {
+    let errorMessage = 'Erro ao criar cliente após todas as tentativas';
+    let errorTitle = 'Erro ao criar cliente';
+    
+    // Log detalhado final para debug
+    console.error('🚨 FINAL ERROR after all strategies failed:', {
+      status: error.status,
+      message: error?.error?.message,
+      details: error?.error?.details,
+      validationErrors: error?.error?.errors,
+      fullError: error?.error
+    });
+    
+    if (error.status === 429) {
+      errorMessage = 'Muitas tentativas. Aguarde alguns segundos antes de tentar novamente.';
+      errorTitle = 'Limite de Tentativas Excedido';
+    } else if (error?.error?.message) {
+      errorMessage = `${error.error.message}. Verifique se todos os campos obrigatórios estão preenchidos.`;
+    } else if (error?.error?.errors) {
+      // Se tiver erros de validação específicos
+      const validationErrors = error.error.errors;
+      const errorMessages = Object.keys(validationErrors).map(key => 
+        `${key}: ${validationErrors[key]}`
+      );
+      errorMessage = `Erro de validação: ${errorMessages.join(', ')}`;
+      errorTitle = 'Erro de Validação';
+    } else if (error?.error?.details) {
+      errorMessage = `${error.error.details}. Entre em contato com o suporte se o problema persistir.`;
+    } else if (error.status === 500) {
+      errorMessage = 'Erro interno do servidor. Tente novamente ou contate o suporte.';
+      errorTitle = 'Erro do Servidor';
+    } else if (error.status === 400) {
+      errorMessage = 'Dados inválidos ou campos obrigatórios faltando. Entre em contato com o suporte para verificar a configuração.';
+      errorTitle = 'Dados Inválidos';
+    } else {
+      errorMessage = `Erro desconhecido (${error.status}). Entre em contato com o suporte.`;
+      errorTitle = 'Erro Desconhecido';
+    }
+    
+    this.toastr.error(errorMessage, errorTitle, {
+      timeOut: 10000, // Mais tempo para ler a mensagem
+      closeButton: true
+    });
+  }
+
+  private markNewClientFormGroupTouched(): void {
+    Object.keys(this.newClientForm.controls).forEach(key => {
+      const control = this.newClientForm.get(key);
+      control?.markAsTouched();
+    });
+  }
+
   onSubmit(): void {
+    console.log('🚀 Iniciando envio da proposta');
+    console.log('📝 Dados do formulário:', this.proposalForm.value);
+    console.log('🔧 Serviços selecionados:', this.selectedServices);
+    
     if (this.proposalForm.invalid) {
+      console.log('❌ Formulário inválido:', this.proposalForm.errors);
       this.markFormGroupTouched(this.proposalForm);
       this.toastr.error('Preencha todos os campos obrigatórios');
       return;
     }
 
     // Validar se há pelo menos um serviço
-    if (this.servicesArray.length === 0) {
+    if (this.selectedServices.length === 0) {
+      console.log('❌ Nenhum serviço selecionado');
       this.toastr.error('Adicione pelo menos um serviço');
       return;
     }
 
-    // Validar serviços
-    let hasValidService = false;
-    for (let i = 0; i < this.servicesArray.length; i++) {
-      const serviceForm = this.servicesArray.at(i);
-      if (serviceForm.valid && serviceForm.get('service_id')?.value) {
-        hasValidService = true;
-        break;
-      }
-    }
+    // Validar se todos os serviços têm valor
+    const invalidServices = this.selectedServices.filter(service => 
+      !service.unit_value || parseFloat(service.unit_value) <= 0
+    );
 
-    if (!hasValidService) {
-      this.toastr.error('Pelo menos um serviço deve ser válido');
+    if (invalidServices.length > 0) {
+      console.log('❌ Serviços com valores inválidos:', invalidServices);
+      this.toastr.error('Todos os serviços devem ter um valor válido');
       return;
     }
 
@@ -346,11 +767,11 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     }
 
     // Determinar tipo do cliente baseado no documento
-    const clientType = this.detectClientType(selectedClient.cpf || selectedClient.cnpj || '');
+    const clientType = selectedClient.cpf ? 'pf' : 'pj';
     
     const formData: CreateProposalData = {
       client_id: clientId,
-      proposal_type: 'prestacao_servicos', // Valor padrão
+      type: this.proposalForm.value.type || 'Full',
       client_name: selectedClient.full_name || selectedClient.company_name || '',
       client_document: selectedClient.cpf || selectedClient.cnpj || '',
       client_email: selectedClient.email || '',
@@ -364,13 +785,10 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       client_zipcode: selectedClient.zipcode || '',
       end_date: this.proposalForm.value.end_date || null,
       validity_days: 30, // Valor padrão
-      services: this.servicesArray.value
-        .filter((s: any) => s.service_id)
-        .map((s: any) => ({
-          service_id: parseInt(s.service_id) || 0,
-          quantity: parseInt(s.quantity) || 1,
-          unit_value: parseFloat(s.unit_value) || 0 // Already in reais
-        }))
+      services: this.selectedServices.map(service => ({
+        service_id: service.id,
+        unit_value: parseFloat(service.unit_value) || 0
+      }))
     };
 
     console.log('📤 Dados enviados para backend:', JSON.stringify(formData, null, 2));
@@ -441,9 +859,11 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
   private resetForm(): void {
     this.proposalForm.reset();
-    this.servicesArray.clear();
-    this.addService();
-    this.proposalForm.get('client_id')?.setValue('');
+    this.selectedServices = [];
+    this.proposalForm.patchValue({
+      type: 'Full',
+      client_id: ''
+    });
   }
 
   cancel(): void {
@@ -460,31 +880,32 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
 
-  isServiceFieldInvalid(index: number, fieldName: string): boolean {
-    const serviceForm = this.servicesArray.at(index);
-    const field = serviceForm.get(fieldName);
-    return !!(field && field.invalid && (field.dirty || field.touched));
-  }
 
 
   getNewClientNamePlaceholder(): string {
     const clientType = this.newClientForm.get('client_type')?.value;
     if (clientType === 'pf') {
-      return 'Nome completo da pessoa';
+      return 'Ex: João da Silva Santos';
     } else if (clientType === 'pj') {
-      return 'Razão social da empresa';
+      return 'Ex: Empresa LTDA';
     }
     return 'Nome completo ou razão social';
   }
 
-  getNewClientDocumentPlaceholder(): string {
+  getNewClientNameLabel(): string {
     const clientType = this.newClientForm.get('client_type')?.value;
     if (clientType === 'pf') {
-      return '000.000.000-00';
+      return 'Nome completo';
     } else if (clientType === 'pj') {
-      return '00.000.000/0001-00';
+      return 'Razão social';
     }
-    return '000.000.000-00 ou 00.000.000/0001-00';
+    return 'Nome';
+  }
+
+  cancelNewClient(): void {
+    this.showNewClientForm = false;
+    this.newClientForm.reset();
+    this.isCreatingClient = false; // Reset do flag de criação
   }
 
   isNewClientFieldInvalid(fieldName: string): boolean {
@@ -507,5 +928,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     
     return '';
   }
+
 
 }

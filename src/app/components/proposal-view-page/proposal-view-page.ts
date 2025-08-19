@@ -183,6 +183,15 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
     return this.proposalService.getStatusColor(status);
   }
 
+  getProposalTypeText(type: string): string {
+    const types: { [key: string]: string } = {
+      'Full': 'Full',
+      'Pontual': 'Pontual',
+      'Individual': 'Individual'
+    };
+    return types[type] || type;
+  }
+
   canEditProposal(): boolean {
     return this.proposal ? this.proposalService.canEditProposal(this.proposal) : false;
   }

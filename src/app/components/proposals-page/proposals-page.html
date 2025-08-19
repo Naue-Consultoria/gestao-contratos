@@ -43,6 +43,7 @@
           <tr>
             <th>Número da Proposta</th>
             <th>Cliente</th>
+            <th>Tipo</th>
             <th>Status</th>
             <th>Valor Total</th>
             <th>Validade</th>
@@ -70,6 +71,10 @@
 
             <td>
               <span class="client-name">{{ proposal.clientName }}</span>
+            </td>
+
+            <td>
+              <span class="type-badge">{{ getProposalTypeText(proposal.raw.type) }}</span>
             </td>
 
             <td>

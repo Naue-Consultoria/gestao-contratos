@@ -9,7 +9,6 @@ export interface ProposalServiceItem {
   service_id: number; // Added service_id
   service_name?: string;
   service_description?: string;
-  quantity: number;
   unit_value: number;
   total_value: number;
   created_at?: string;
@@ -20,7 +19,7 @@ export interface Proposal {
   proposal_number: string;
   client_id: number;
   client_type?: 'pf' | 'pj' | '';
-  proposal_type: 'consultoria_corporativa' | 'mentoria' | 'prestacao_servicos' | 'r_s';
+  type: 'Full' | 'Pontual' | 'Individual';
   client_name: string;
   client_document: string;
   client_email: string;
@@ -61,7 +60,7 @@ export interface Proposal {
 
 export interface CreateProposalData {
   client_id: number;
-  proposal_type: 'consultoria_corporativa' | 'mentoria' | 'prestacao_servicos' | 'r_s';
+  type: 'Full' | 'Pontual' | 'Individual';
   client_name: string;
   client_document: string;
   client_email: string;
@@ -77,7 +76,6 @@ export interface CreateProposalData {
   validity_days?: number;
   services: {
     service_id: number;
-    quantity: number;
     unit_value: number;
     total_value?: number; // Optional since backend calculates it
   }[];
@@ -295,7 +293,7 @@ export class ProposalService {
       errors.push('CEP do cliente é obrigatório e deve ter pelo menos 8 caracteres');
     }
 
-    if (!proposalData.proposal_type) {
+    if (!proposalData.type) {
       errors.push('Tipo de proposta é obrigatório');
     }
 
@@ -307,9 +305,6 @@ export class ProposalService {
       proposalData.services.forEach((service, index) => {
         if (!service.service_id) {
           errors.push(`Serviço ${index + 1}: Serviço é obrigatório`);
-        }
-        if (service.quantity && service.quantity < 1) {
-          errors.push(`Serviço ${index + 1}: Quantidade deve ser maior que zero`);
         }
         if (service.unit_value && service.unit_value < 0) {
           errors.push(`Serviço ${index + 1}: Valor unitário não pode ser negativo`);

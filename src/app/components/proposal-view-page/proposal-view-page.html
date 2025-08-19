@@ -70,8 +70,7 @@
                 <p *ngIf="service.service_description" class="service-description">{{ service.service_description }}</p>
               </div>
               <div class="service-values">
-                <span class="service-total-value">{{ formatCurrency(service.total_value) }}</span>
-                <span class="service-unit-details">{{ service.quantity }} x {{ formatCurrency(service.unit_value) }}</span>
+                <span class="service-total-value">{{ formatCurrency(service.unit_value) }}</span>
               </div>
             </div>
           </div>
@@ -124,12 +123,19 @@
         <div class="info-card">
           <h2 class="card-title">
             <i class="fas fa-info-circle"></i>
-            Status
+            Informações
           </h2>
           <div class="status-badge-container">
             <span class="status-badge" [style.background-color]="getStatusColor(proposal.status)">
               {{ getStatusText(proposal.status) }}
             </span>
+          </div>
+          <div class="meta-item" style="margin-top: 15px;">
+            <i class="fas fa-tag"></i>
+            <div>
+              <label>Tipo</label>
+              <span>{{ getProposalTypeText(proposal.type) }}</span>
+            </div>
           </div>
           
           <!-- Public Link Section -->

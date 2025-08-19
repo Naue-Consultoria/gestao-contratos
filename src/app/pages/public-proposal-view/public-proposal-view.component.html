@@ -311,11 +311,12 @@
                   </td>
                   
                   <td class="col-duration">
-                    <div class="duration-info" *ngIf="service.service.duration_amount">
+                    <div class="duration-info" *ngIf="service.service.duration_unit && (service.service.duration_amount || service.service.duration_unit === 'Projeto')">
                       <i class="fas fa-clock"></i>
-                      <span>{{ service.service.duration_amount }} {{ service.service.duration_unit }}</span>
+                      <span *ngIf="service.service.duration_unit === 'Projeto'">{{ service.service.duration_unit }}</span>
+                      <span *ngIf="service.service.duration_unit !== 'Projeto'">{{ service.service.duration_amount }} {{ service.service.duration_unit }}</span>
                     </div>
-                    <div class="duration-info not-specified" *ngIf="!service.service.duration_amount">
+                    <div class="duration-info not-specified" *ngIf="!service.service.duration_unit || (!service.service.duration_amount && service.service.duration_unit !== 'Projeto')">
                       <i class="fas fa-minus"></i>
                       <span>A definir</span>
                     </div>
