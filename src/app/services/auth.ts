@@ -127,10 +127,9 @@ export class AuthService {
   forgotPassword(email: string): Observable<ForgotPasswordResponse> {
     return this.http.post<ForgotPasswordResponse>(`${this.API_URL}/forgot-password`, { email }).pipe(
       tap(response => {
-        console.log('✅ Solicitação de recuperação enviada');
+        // Solicitação enviada
       }),
       catchError(error => {
-        console.error('❌ Erro ao solicitar recuperação:', error);
         return throwError(() => error);
       })
     );

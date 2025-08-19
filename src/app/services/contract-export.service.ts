@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
-import { jsPDF } from 'jspdf';
-import { saveAs } from 'file-saver';
+// Lazy load heavy dependencies
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +7,13 @@ import { saveAs } from 'file-saver';
 export class ContractExportService {
 
   async exportToDocx(contract: any, templateId: string): Promise<void> {
-    const doc = this.createDocxDocument(contract, templateId);
+    // Lazy load docx dependencies
+    const [{ Document, Packer }, { saveAs }] = await Promise.all([
+      import('docx'),
+      import('file-saver')
+    ]);
+    
+    const doc = await this.createDocxDocument(contract, templateId);
     
     const blob = await Packer.toBlob(doc);
     const fileName = this.generateFileName(contract, templateId, 'docx');
@@ -18,6 +22,9 @@ export class ContractExportService {
   }
 
   async exportToPdf(contract: any, templateId: string): Promise<void> {
+    // Lazy load jsPDF dependency
+    const { jsPDF } = await import('jspdf');
+    
     const content = this.generatePdfContent(contract, templateId);
     const pdf = new jsPDF('p', 'mm', 'a4');
     
@@ -99,7 +106,8 @@ export class ContractExportService {
     pdf.save(fileName);
   }
 
-  private createDocxDocument(contract: any, templateId: string): Document {
+  private async createDocxDocument(contract: any, templateId: string): Promise<any> {
+    const { Document, Paragraph, TextRun, HeadingLevel, AlignmentType } = await import('docx');
     const content = this.generateDocumentContent(contract, templateId);
     
     return new Document({

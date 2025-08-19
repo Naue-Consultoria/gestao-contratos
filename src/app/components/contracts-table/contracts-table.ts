@@ -329,19 +329,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  exportToPDF() {
-    this.modalService.showInfo(
-      'A funcionalidade de exportar para PDF será implementada em breve.',
-      'Em Desenvolvimento'
-    );
-  }
-
-  exportToExcel() {
-    this.modalService.showInfo(
-      'A funcionalidade de exportar para Excel será implementada em breve.',
-      'Em Desenvolvimento'
-    );
-  }
+  // Funções removidas - funcionalidade implementada via modal de exportação
 
   // Novos métodos para dropdown e exportação
   toggleDropdown(contractId: number, event: MouseEvent) {

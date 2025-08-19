@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Chart, registerables } from 'chart.js';
+import type { Chart } from 'chart.js';
 import { Router } from '@angular/router';
 import { ContractService } from '../../services/contract';
 import { ServiceService } from '../../services/service';
@@ -8,7 +8,7 @@ import { ClientService } from '../../services/client';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { forkJoin } from 'rxjs';
 
-Chart.register(...registerables);
+// Lazy load Chart.js
 
 interface StatCard {
   id: string;
@@ -123,15 +123,15 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
   ngAfterViewInit() {
     // Aguardar um pouco para garantir que o DOM esteja pronto
-    setTimeout(() => {
-      this.initCharts();
+    setTimeout(async () => {
+      await this.initCharts();
     }, 100);
 
     this.themeObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {
-          setTimeout(() => {
-            this.initCharts();
+          setTimeout(async () => {
+            await this.initCharts();
           }, 100);
         }
       });
@@ -351,14 +351,18 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
 
-  private initCharts() {
+  private async initCharts() {
+    // Lazy load Chart.js
+    const { Chart, registerables } = await import('chart.js');
+    Chart.register(...registerables);
+    
     if (this.contractsChart) {
       this.contractsChart.destroy();
     }
     this.initContractsChart();
   }
 
-  private initContractsChart() {
+  private async initContractsChart() {
     const canvas = document.getElementById('contractsChart') as HTMLCanvasElement;
     if (!canvas) return;
 
@@ -369,6 +373,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     const textColor = isDarkMode ? '#e5e7eb' : '#374151';
     const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 59, 43, 0.08)';
 
+    const { Chart } = await import('chart.js');
     this.contractsChart = new Chart(ctx, {
       type: 'line',
       data: this.monthlyContractsData,

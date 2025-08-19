@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Chart, registerables, ChartConfiguration } from 'chart.js';
+import type { Chart, ChartConfiguration } from 'chart.js';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
@@ -14,7 +14,7 @@ import {
 } from '../../services/analytics';
 import { ContractService } from '../../services/contract';
 
-Chart.register(...registerables);
+// Lazy load Chart.js
 
 interface DetailedMetric extends MetricData {
   trend: number;
@@ -53,11 +53,11 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     this.loadAnalyticsData();
   }
 
-  ngAfterViewInit() {
+  async ngAfterViewInit() {
     // Inicializar charts após a view estar pronta
-    setTimeout(() => {
+    setTimeout(async () => {
       if (this.analyticsData) {
-        this.initializeCharts();
+        await this.initializeCharts();
       }
     }, 100);
   }
@@ -131,7 +131,14 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   /**
    * Inicializar charts
    */
-  private initializeCharts() {
+  private async initializeCharts() {
+    // Lazy load Chart.js
+    const { Chart, registerables } = await import('chart.js');
+    Chart.register(...registerables);
+    
+    // Assign Chart to class property for use in other methods
+    (window as any).Chart = Chart;
+    
     this.initConversionGauge();
     this.initContractsDonut();
     this.initServicesByUserChart();
@@ -151,6 +158,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
     const conversionRate = this.analyticsData.general.conversionRate;
 
+    const Chart = (window as any).Chart;
     this.charts['conversionGauge'] = new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -187,6 +195,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const { activeContracts, completedContracts } = this.analyticsData.general;
     const suspendedContracts = Math.max(0, this.analyticsData.general.totalContracts - activeContracts - completedContracts);
 
+    const Chart = (window as any).Chart;
     this.charts['contractsDonut'] = new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -205,7 +214,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (context) => {
+              label: (context: any) => {
                 const label = context.label || '';
                 const value = context.parsed || 0;
                 return `${label}: ${value}`;
@@ -296,6 +305,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const labels = data.map((user: any) => user.userName);
     const values = data.map((user: any) => user.totalServices);
 
+    const Chart = (window as any).Chart;
     this.charts['servicesByUserChart'] = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -331,7 +341,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
             borderColor: '#e5e7eb',
             borderWidth: 1,
             callbacks: {
-              label: (context) => {
+              label: (context: any) => {
                 const user = data[context.dataIndex];
                 return `${user.totalServices} serviços`;
               }
@@ -373,6 +383,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const labels = data.map((item: any) => item.month);
     const values = data.map((item: any) => item.completed);
 
+    const Chart = (window as any).Chart;
     this.charts['completedServicesChart'] = new Chart(ctx, {
       type: 'line',
       data: {
@@ -443,6 +454,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       '#f97316', '#ef4444', '#06b6d4', '#84cc16', '#f43f5e'
     ];
 
+    const Chart = (window as any).Chart;
     this.charts['topServicesChart'] = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -470,7 +482,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
             borderColor: '#e5e7eb',
             borderWidth: 1,
             callbacks: {
-              label: (context) => {
+              label: (context: any) => {
                 const service = data[context.dataIndex];
                 return `${service.contractCount} contratos - ${this.formatCurrency(service.totalValue)}`;
               }
