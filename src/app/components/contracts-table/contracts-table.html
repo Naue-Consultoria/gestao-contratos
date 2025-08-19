@@ -184,12 +184,30 @@
             </td>
             <td>
               <div class="action-buttons-cell">
-                <button class="action-btn edit" (click)="editContract(contract.id, $event)" title="Editar">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="action-btn delete" (click)="deleteContract(contract.id, $event)" title="Excluir">
-                  <i class="fas fa-trash"></i>
-                </button>
+                <div class="dropdown-container">
+                  <button class="action-btn dropdown-toggle" (click)="toggleDropdown(contract.id, $event)" title="Ações">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="dropdown-menu" *ngIf="openDropdownId === contract.id" [class.show]="openDropdownId === contract.id">
+                    <button class="dropdown-item" (click)="viewContract(contract.id, $event)">
+                      <i class="fas fa-eye"></i>
+                      Visualizar
+                    </button>
+                    <button class="dropdown-item" (click)="editContract(contract.id, $event)">
+                      <i class="fas fa-edit"></i>
+                      Editar
+                    </button>
+                    <button class="dropdown-item" (click)="openExportModal(contract, $event)">
+                      <i class="fas fa-download"></i>
+                      Exportar
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item delete" (click)="deleteContract(contract.id, $event)">
+                      <i class="fas fa-trash"></i>
+                      Excluir
+                    </button>
+                  </div>
+                </div>
               </div>
             </td>
           </tr>
@@ -268,9 +286,17 @@
             </div>
           </div>
           <div class="table-card-actions">
+            <button class="btn-sm btn-view" (click)="viewContract(contract.id, $event)">
+              <i class="fas fa-eye"></i>
+              Ver
+            </button>
             <button class="btn-sm btn-primary" (click)="editContract(contract.id, $event)">
               <i class="fas fa-edit"></i>
               Editar
+            </button>
+            <button class="btn-sm btn-export" (click)="openExportModal(contract, $event)">
+              <i class="fas fa-download"></i>
+              Exportar
             </button>
             <button class="btn-sm btn-danger" (click)="deleteContract(contract.id, $event)">
               <i class="fas fa-trash"></i>
@@ -281,4 +307,11 @@
       </div>
     </div>
   </div>
+  
+  <!-- Export Modal -->
+  <app-contract-export-modal
+    [isVisible]="showExportModal"
+    [contract]="selectedContract"
+    (onClose)="closeExportModal()">
+  </app-contract-export-modal>
 </div>

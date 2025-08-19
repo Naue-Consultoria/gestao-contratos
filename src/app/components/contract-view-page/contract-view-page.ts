@@ -6,11 +6,12 @@ import { ContractServicesManagerComponent } from '../contract-services-manager/c
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../services/auth';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
+import { ContractExportModalComponent } from '../contract-export-modal/contract-export-modal.component';
 
 @Component({
   selector: 'app-contract-view-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, ContractServicesManagerComponent, BreadcrumbComponent],
+  imports: [CommonModule, RouterModule, ContractServicesManagerComponent, BreadcrumbComponent, ContractExportModalComponent],
   templateUrl: './contract-view-page.html',
   styleUrls: ['./contract-view-page.css']
 })
@@ -20,6 +21,7 @@ export class ContractViewPageComponent implements OnInit {
   canEdit = false;
   currentUserId: number;
   isAdmin = false;
+  showExportModal = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -223,5 +225,13 @@ export class ContractViewPageComponent implements OnInit {
     } else {
       console.error('❌ Cannot reload: no contract or contract ID');
     }
+  }
+
+  openExportModal() {
+    this.showExportModal = true;
+  }
+
+  closeExportModal() {
+    this.showExportModal = false;
   }
 }

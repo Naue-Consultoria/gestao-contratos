@@ -5,6 +5,20 @@
 /* Page Header */
 .page-header {
   margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
 .page-title {
@@ -447,6 +461,30 @@
   box-shadow: 0 4px 12px rgba(14, 155, 113, 0.3);
 }
 
+.btn-secondary {
+  background: white;
+  color: #0e9b71;
+  border: 1px solid #0e9b71;
+}
+
+.btn-secondary:hover {
+  background: #0e9b71;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 155, 113, 0.2);
+}
+
+:host-context(body.dark-mode) .btn-secondary {
+  background: var(--dark-card);
+  color: #0e9b71;
+  border-color: #0e9b71;
+}
+
+:host-context(body.dark-mode) .btn-secondary:hover {
+  background: #0e9b71;
+  color: white;
+}
+
 /* Responsive Design */
 
 /* Optimized for 1280x800 resolution */
@@ -515,6 +553,13 @@
   
   .page-header {
     margin-bottom: 1.5rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .header-actions {
+    justify-content: flex-start;
   }
   
   .page-title {

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +11,7 @@ import {
 import { ClientService } from '../../services/client';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ContractStatsCardsComponent } from '../contract-stats-cards/contract-stats-cards';
+import { ContractExportModalComponent } from '../contract-export-modal/contract-export-modal.component';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { SearchService } from '../../services/search.service'; // Import the new service
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -38,7 +39,7 @@ interface ContractDisplay {
 @Component({
   selector: 'app-contracts-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent, ContractStatsCardsComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, ContractStatsCardsComponent, ContractExportModalComponent],
   templateUrl: './contracts-table.html',
   styleUrls: ['./contracts-table.css'],
 })
@@ -75,6 +76,9 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   isLoading = false;
   error = '';
   currentTab: 'all' | 'Full' | 'Pontual' | 'Individual' = 'all';
+  openDropdownId: number | null = null;
+  showExportModal = false;
+  selectedContract: any = null;
 
   private handleRefresh = () => this.loadInitialData();
 
@@ -337,5 +341,114 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       'A funcionalidade de exportar para Excel será implementada em breve.',
       'Em Desenvolvimento'
     );
+  }
+
+  // Novos métodos para dropdown e exportação
+  toggleDropdown(contractId: number, event: MouseEvent) {
+    event.stopPropagation();
+    if (this.openDropdownId === contractId) {
+      this.openDropdownId = null;
+    } else {
+      this.openDropdownId = contractId;
+      // Posicionar o dropdown após abrir
+      setTimeout(() => this.positionDropdown(event), 0);
+    }
+  }
+
+  private positionDropdown(event: MouseEvent) {
+    const button = (event.target as HTMLElement).closest('.dropdown-toggle') as HTMLElement;
+    if (!button) return;
+
+    const buttonRect = button.getBoundingClientRect();
+    
+    // Aguardar o dropdown ser renderizado
+    setTimeout(() => {
+      const dropdown = document.querySelector('.dropdown-menu.show') as HTMLElement;
+      if (!dropdown) return;
+
+      // Resetar estilos inline anteriores
+      dropdown.style.position = 'fixed';
+      dropdown.style.left = '';
+      dropdown.style.right = '';
+      dropdown.style.top = '';
+      dropdown.style.bottom = '';
+
+      // Obter dimensões do dropdown
+      const dropdownRect = dropdown.getBoundingClientRect();
+      const dropdownHeight = dropdown.offsetHeight;
+      const dropdownWidth = dropdown.offsetWidth;
+
+      // Calcular espaços disponíveis
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      const spaceBelow = viewportHeight - buttonRect.bottom;
+      const spaceAbove = buttonRect.top;
+      const spaceRight = viewportWidth - buttonRect.left;
+
+      // Posicionar horizontalmente
+      if (spaceRight >= dropdownWidth) {
+        // Alinhar à esquerda do botão
+        dropdown.style.left = `${buttonRect.left}px`;
+      } else {
+        // Alinhar à direita da viewport
+        dropdown.style.right = `${viewportWidth - buttonRect.right}px`;
+      }
+
+      // Posicionar verticalmente
+      if (spaceBelow >= dropdownHeight + 10) {
+        // Abrir para baixo
+        dropdown.style.top = `${buttonRect.bottom + 8}px`;
+        dropdown.classList.remove('dropup');
+      } else if (spaceAbove >= dropdownHeight + 10) {
+        // Abrir para cima
+        dropdown.style.bottom = `${viewportHeight - buttonRect.top + 8}px`;
+        dropdown.classList.add('dropup');
+      } else {
+        // Se não houver espaço suficiente, abrir para baixo com scroll
+        dropdown.style.top = `${buttonRect.bottom + 8}px`;
+        dropdown.style.maxHeight = `${spaceBelow - 20}px`;
+        dropdown.style.overflowY = 'auto';
+        dropdown.classList.remove('dropup');
+      }
+    }, 10);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    // Fecha o dropdown se clicar fora dele
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown-container')) {
+      this.openDropdownId = null;
+    }
+  }
+
+  viewContract(contractId: number, event: MouseEvent) {
+    event.stopPropagation();
+    this.openDropdownId = null;
+    this.router.navigate(['/home/contratos/visualizar', contractId]);
+  }
+
+  async openExportModal(contract: ContractDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    this.openDropdownId = null;
+    
+    // Carregar o contrato completo com todos os dados
+    try {
+      const response = await firstValueFrom(
+        this.contractService.getContract(contract.id)
+      );
+      if (response?.contract) {
+        this.selectedContract = response.contract;
+        this.showExportModal = true;
+      }
+    } catch (error) {
+      console.error('Erro ao carregar contrato para exportação:', error);
+      this.modalService.showError('Não foi possível carregar os dados do contrato.');
+    }
+  }
+
+  closeExportModal() {
+    this.showExportModal = false;
+    this.selectedContract = null;
   }
 }
