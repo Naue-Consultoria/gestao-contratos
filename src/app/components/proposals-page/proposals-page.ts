@@ -130,7 +130,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       this.modalService.showError('A funcionalidade de criar propostas ainda não está implementada no backend.');
       return;
     }
-    this.router.navigate(['/home/proposals/new']);
+    this.router.navigate(['/home/propostas/nova']);
   }
 
   editProposal(id: number) {
@@ -138,7 +138,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       this.modalService.showError('A funcionalidade de editar propostas ainda não está implementada no backend.');
       return;
     }
-    this.router.navigate(['/home/proposals/edit', id]);
+    this.router.navigate(['/home/propostas/editar', id]);
   }
 
   viewProposal(id: number) {
@@ -146,7 +146,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       this.modalService.showError('A funcionalidade de visualizar propostas ainda não está implementada no backend.');
       return;
     }
-    this.router.navigate(['/home/proposals/view', id]);
+    this.router.navigate(['/home/propostas/visualizar', id]);
   }
 
   async duplicateProposal(proposal: ProposalDisplay, event: MouseEvent) {

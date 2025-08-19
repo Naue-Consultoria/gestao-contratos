@@ -278,7 +278,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   generateReport() {
     // Navegar para página de relatórios
-    this.router.navigate(['/home/reports']);
+    this.router.navigate(['/home/relatorios']);
   }
 
   /**

@@ -98,12 +98,12 @@ export class NewUserPageComponent implements OnInit {
         }
       } else {
         this.toastr.error('Usuário não encontrado');
-        this.router.navigate(['/home/users']);
+        this.router.navigate(['/home/usuarios']);
       }
     } catch (error) {
       console.error('❌ Erro ao carregar usuário:', error);
       this.toastr.error('Erro ao carregar dados do usuário');
-      this.router.navigate(['/home/users']);
+      this.router.navigate(['/home/usuarios']);
     }
   }
 
@@ -162,7 +162,7 @@ export class NewUserPageComponent implements OnInit {
       }
 
       window.dispatchEvent(new CustomEvent('refreshUsers'));
-      this.router.navigate(['/home/users']);
+      this.router.navigate(['/home/usuarios']);
     } catch (error: any) {
       console.error('❌ Erro ao salvar usuário:', error);
       this.errorMessage = error.error?.message || 'Erro ao salvar usuário. Tente novamente.';
@@ -186,7 +186,7 @@ export class NewUserPageComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/home/users']);
+    this.router.navigate(['/home/usuarios']);
   }
 
   getPageTitle(): string {

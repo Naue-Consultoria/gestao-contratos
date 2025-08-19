@@ -189,11 +189,11 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   }
 
   openNewUserPage() {
-    this.router.navigate(['/home/users/new']);
+    this.router.navigate(['/home/usuarios/novo']);
   }
 
   editUser(userId: number) {
-    this.router.navigate(['/home/users/edit', userId]);
+    this.router.navigate(['/home/usuarios/editar', userId]);
   }
 
   trackByUserId(index: number, user: User): number {

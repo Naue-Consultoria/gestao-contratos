@@ -34,31 +34,31 @@ export class SidebarComponent {
       title: 'PRINCIPAL',
       items: [
         { id: 'dashboard', icon: 'fas fa-chart-line', text: 'Dashboard', route: '/home/dashboard' },
-        { id: 'routines', icon: 'fas fa-calendar-check', text: 'Rotinas', route: '/home/routines' },
-        { id: 'services', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/services' },
-        { id: 'clients', icon: 'fas fa-users', text: 'Clientes', route: '/home/clients' },
-        { id: 'proposals', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/proposals' },
-        { id: 'contracts', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contracts' }
+        { id: 'rotinas', icon: 'fas fa-calendar-check', text: 'Rotinas', route: '/home/rotinas' },
+        { id: 'servicos', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/servicos' },
+        { id: 'clientes', icon: 'fas fa-users', text: 'Clientes', route: '/home/clientes' },
+        { id: 'propostas', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/propostas' },
+        { id: 'contratos', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contratos' }
       ]
     },
     {
       title: 'ANÁLISES',
       items: [
-        { id: 'reports', icon: 'fas fa-chart-bar', text: 'Relatórios', route: '/home/reports' },
+        { id: 'relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios', route: '/home/relatorios' },
         { id: 'analytics', icon: 'fas fa-chart-pie', text: 'Analytics', route: '/home/analytics' }
       ]
     },
     {
       title: 'CONFIGURAÇÕES',
       items: [
-        { id: 'users', icon: 'fas fa-users', text: 'Usuários', route: '/home/users', adminOnly: true },
-        { id: 'settings', icon: 'fas fa-cog', text: 'Configurações', route: '/home/settings' }
+        { id: 'usuarios', icon: 'fas fa-users', text: 'Usuários', route: '/home/usuarios', adminOnly: true },
+        { id: 'configuracoes', icon: 'fas fa-cog', text: 'Configurações', route: '/home/configuracoes' }
       ]
     },
     {
       title: 'AJUDA',
       items: [
-        { id: 'help', icon: 'fas fa-question-circle', text: 'Suporte', route: '/home/help' }
+        { id: 'ajuda', icon: 'fas fa-question-circle', text: 'Suporte', route: '/home/ajuda' }
       ]
     }
   ];

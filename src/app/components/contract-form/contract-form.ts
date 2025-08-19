@@ -243,7 +243,7 @@ export class ContractFormComponent implements OnInit {
       }
     } catch (error) {
       this.modalService.showError('Erro ao carregar contrato');
-      this.router.navigate(['/home/contracts']);
+      this.router.navigate(['/home/contratos']);
     } finally {
       this.isLoading = false;
     }
@@ -488,7 +488,7 @@ export class ContractFormComponent implements OnInit {
         await firstValueFrom(this.contractService.createContract(createData));
         this.modalService.showSuccess('Contrato criado com sucesso!', 'Sucesso');
       }
-      this.router.navigate(['/home/contracts']);
+      this.router.navigate(['/home/contratos']);
     } catch (error: any) {
       this.modalService.showError(error.error?.message || 'Erro ao salvar o contrato.', 'Erro');
     } finally {
@@ -497,7 +497,7 @@ export class ContractFormComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/home/contracts']);
+    this.router.navigate(['/home/contratos']);
   }
 
   enableEdit() {

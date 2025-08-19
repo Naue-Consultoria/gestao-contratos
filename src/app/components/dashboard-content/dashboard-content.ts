@@ -483,12 +483,12 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   navigateToActivities(): void {
-    this.router.navigate(['/home/routines']);
+    this.router.navigate(['/home/rotinas']);
   }
 
   navigateToContract(contractId?: number): void {
     if (contractId) {
-      this.router.navigate(['/home/contracts/view', contractId]);
+      this.router.navigate(['/home/contratos/visualizar', contractId]);
     }
   }
 
@@ -501,12 +501,12 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
   executeQuickAction(action: string) {
     const routes: { [key: string]: string } = {
-      'newProposal': '/home/proposals/new',
-      'newContract': '/home/contracts/new',
-      'newClient': '/home/clients/new',
-      'newService': '/home/services/new',
-      'generateReport': '/home/reports',
-      'routines': '/home/routines'
+      'newProposal': '/home/propostas/nova',
+      'newContract': '/home/contratos/novo',
+      'newClient': '/home/clientes/novo',
+      'newService': '/home/servicos/novo',
+      'generateReport': '/home/relatorios',
+      'routines': '/home/rotinas'
     };
     
     if (routes[action]) this.router.navigate([routes[action]]);

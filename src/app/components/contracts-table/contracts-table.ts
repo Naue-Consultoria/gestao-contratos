@@ -257,14 +257,14 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   openNewContractPage() {
-    this.router.navigate(['/home/contracts/new']);
+    this.router.navigate(['/home/contratos/novo']);
   }
 
   editContract(id: number, event?: MouseEvent) {
     if (event) {
       event.stopPropagation();
     }
-    this.router.navigate(['/home/contracts/edit', id]);
+    this.router.navigate(['/home/contratos/editar', id]);
   }
 
   formatTotalValue(): string {

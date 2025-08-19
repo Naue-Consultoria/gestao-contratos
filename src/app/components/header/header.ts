@@ -134,7 +134,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   
   navigateToSettings(event: Event): void {
     event.preventDefault();
-    this.router.navigate(['/home/settings']);
+    this.router.navigate(['/home/configuracoes']);
     this.closeUserMenu();
   }
   

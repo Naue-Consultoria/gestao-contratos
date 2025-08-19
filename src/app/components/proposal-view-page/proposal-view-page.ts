@@ -72,11 +72,11 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
   }
 
   editProposal() {
-    this.router.navigate(['/home/proposals/edit', this.proposalId]);
+    this.router.navigate(['/home/propostas/editar', this.proposalId]);
   }
 
   backToProposals() {
-    this.router.navigate(['/home/proposals']);
+    this.router.navigate(['/home/propostas']);
   }
 
   async duplicateProposal() {
@@ -87,7 +87,7 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
         const response = await firstValueFrom(this.proposalService.duplicateProposal(this.proposalId));
         if (response && response.success) {
           this.modalService.showSuccess('Proposta duplicada com sucesso!');
-          this.router.navigate(['/home/proposals/edit', response.data.id]);
+          this.router.navigate(['/home/propostas/editar', response.data.id]);
         }
       } catch (error: any) {
         console.error('❌ Error duplicating proposal:', error);
@@ -107,7 +107,7 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
       try {
         await firstValueFrom(this.proposalService.deleteProposal(this.proposalId));
         this.modalService.showSuccess('Proposta excluída com sucesso!');
-        this.router.navigate(['/home/proposals']);
+        this.router.navigate(['/home/propostas']);
       } catch (error: any) {
         console.error('❌ Error deleting proposal:', error);
         if (error?.status === 500 || error?.status === 404) {

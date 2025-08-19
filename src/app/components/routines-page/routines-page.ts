@@ -151,7 +151,7 @@ export class RoutinesPageComponent implements OnInit {
 
 
   viewContractDetails(id: number) {
-    this.router.navigate(['/home/routines', id]);
+    this.router.navigate(['/home/rotinas', id]);
   }
 
 

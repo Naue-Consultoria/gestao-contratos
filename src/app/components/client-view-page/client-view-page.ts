@@ -188,12 +188,12 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
 
   editClient() {
     if (this.client) {
-      this.router.navigate(['/home/clients/edit', this.client.id]);
+      this.router.navigate(['/home/clientes/editar', this.client.id]);
     }
   }
 
   viewContract(contractId: number) {
-    this.router.navigate(['/home/contracts/view', contractId]);
+    this.router.navigate(['/home/contratos/visualizar', contractId]);
   }
 
   getInitials(name: string): string {

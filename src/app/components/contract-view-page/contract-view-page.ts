@@ -52,7 +52,7 @@ export class ContractViewPageComponent implements OnInit {
       this.loadContract(parseInt(contractId));
     } else {
       this.toastr.error('ID do contrato não encontrado');
-      this.router.navigate(['/home/contracts']);
+      this.router.navigate(['/home/contratos']);
     }
   }
 
@@ -68,7 +68,7 @@ export class ContractViewPageComponent implements OnInit {
         if (!response || !response.contract) {
           console.error('❌ Invalid response structure');
           this.toastr.error('Dados do contrato inválidos');
-          this.router.navigate(['/home/contracts']);
+          this.router.navigate(['/home/contratos']);
           return;
         }
         
@@ -95,7 +95,7 @@ export class ContractViewPageComponent implements OnInit {
         console.error('❌ Error loading contract:', error);
         this.toastr.error('Erro ao carregar contrato: ' + (error.message || 'Erro desconhecido'));
         this.isLoading = false;
-        this.router.navigate(['/home/contracts']);
+        this.router.navigate(['/home/contratos']);
       }
     });
   }
@@ -136,7 +136,7 @@ export class ContractViewPageComponent implements OnInit {
 
   editContract() {
     if (this.contract) {
-      this.router.navigate(['/home/contracts/edit', this.contract.id]);
+      this.router.navigate(['/home/contratos/editar', this.contract.id]);
     }
   }
 

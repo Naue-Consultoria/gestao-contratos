@@ -180,7 +180,7 @@ export class NewClientPageComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/home/clients']);
+    this.router.navigate(['/home/clientes']);
   }
 
   getPageTitle(): string {

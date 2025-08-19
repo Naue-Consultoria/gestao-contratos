@@ -813,7 +813,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
             // Redirecionar para a lista de propostas após um delay
             setTimeout(() => {
               if (!this.isModal) {
-                this.router.navigate(['/home/proposals']);
+                this.router.navigate(['/home/propostas']);
               }
             }, 1500);
           }
@@ -871,7 +871,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       this.onCancel.emit();
     } else {
       // Se não é modal, redirecionar para a lista de propostas
-      this.router.navigate(['/home/proposals']);
+      this.router.navigate(['/home/propostas']);
     }
   }
 

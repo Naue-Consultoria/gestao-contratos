@@ -87,112 +87,112 @@ export const routes: Routes = [
 
       // Gestão de contratos
       {
-        path: 'contracts',
+        path: 'contratos',
         component: ContractsTableComponent,
         title: 'Contratos - NAUE Consultoria',
       },
       
       // Novo contrato
       {
-        path: 'contracts/new',
+        path: 'contratos/novo',
         component: ContractFormComponent,
         title: 'Novo Contrato - NAUE Consultoria',
       },
       
       // Visualizar contrato
       {
-        path: 'contracts/view/:id',
+        path: 'contratos/visualizar/:id',
         component: ContractViewPageComponent,
         title: 'Visualizar Contrato - NAUE Consultoria',
       },
       
       // Editar contrato
       {
-        path: 'contracts/edit/:id',
+        path: 'contratos/editar/:id',
         component: ContractFormComponent,
         title: 'Editar Contrato - NAUE Consultoria',
       },
 
       // Gestão de clientes
       {
-        path: 'clients',
+        path: 'clientes',
         component: ClientsTableComponent,
         title: 'Clientes - NAUE Consultoria',
       },
       
       // Novo cliente
       {
-        path: 'clients/new',
+        path: 'clientes/novo',
         component: NewClientPageComponent,
         title: 'Novo Cliente - NAUE Consultoria',
       },
       
       // Visualizar cliente
       {
-        path: 'clients/view/:id',
+        path: 'clientes/visualizar/:id',
         component: ClientViewPageComponent,
         title: 'Detalhes do Cliente - NAUE Consultoria',
       },
       
       // Editar cliente
       {
-        path: 'clients/edit/:id',
+        path: 'clientes/editar/:id',
         component: NewClientPageComponent,
         title: 'Editar Cliente - NAUE Consultoria',
       },
 
       // Gestão de serviços
       {
-        path: 'services',
+        path: 'servicos',
         component: ServicesTableComponent,
         title: 'Serviços - NAUE Consultoria',
       },
       
       // Novo serviço
       {
-        path: 'services/new',
+        path: 'servicos/novo',
         component: ServiceFormComponent,
         title: 'Novo Serviço - NAUE Consultoria',
       },
       
       // Editar serviço
       {
-        path: 'services/edit/:id',
+        path: 'servicos/editar/:id',
         component: ServiceFormComponent,
         title: 'Editar Serviço - NAUE Consultoria',
       },
 
       // Gestão de propostas
       {
-        path: 'proposals',
+        path: 'propostas',
         component: ProposalsPageComponent,
         title: 'Propostas - NAUE Consultoria',
       },
       
       // Nova proposta
       {
-        path: 'proposals/new',
+        path: 'propostas/nova',
         component: ProposalFormComponent,
         title: 'Nova Proposta - NAUE Consultoria',
       },
       
       // Visualizar proposta
       {
-        path: 'proposals/view/:id',
+        path: 'propostas/visualizar/:id',
         component: ProposalViewPageComponent,
         title: 'Visualizar Proposta - NAUE Consultoria',
       },
       
       // Editar proposta
       {
-        path: 'proposals/edit/:id',
+        path: 'propostas/editar/:id',
         component: ProposalFormComponent,
         title: 'Editar Proposta - NAUE Consultoria',
       },
 
       // Relatórios
       {
-        path: 'reports',
+        path: 'relatorios',
         component: ReportsPage,
         title: 'Relatórios - NAUE Consultoria',
       },
@@ -206,21 +206,21 @@ export const routes: Routes = [
 
       // Rotinas
       {
-        path: 'routines',
+        path: 'rotinas',
         component: RoutinesPageComponent,
         title: 'Rotinas - NAUE Consultoria',
       },
       
       // Visualizar contrato via rotinas
       {
-        path: 'routines/:id',
+        path: 'rotinas/:id',
         component: ContractViewPageComponent,
         title: 'Detalhes do Contrato - NAUE Consultoria',
       },
 
       // Gestão de usuários
       {
-        path: 'users',
+        path: 'usuarios',
         component: UsersPageComponent,
         canActivate: [AdminGuard], // Protege a rota para apenas administradores
         title: 'Usuários - NAUE Consultoria',
@@ -228,7 +228,7 @@ export const routes: Routes = [
       
       // Novo usuário
       {
-        path: 'users/new',
+        path: 'usuarios/novo',
         component: NewUserPageComponent,
         canActivate: [AdminGuard],
         title: 'Novo Usuário - NAUE Consultoria',
@@ -236,7 +236,7 @@ export const routes: Routes = [
       
       // Editar usuário
       {
-        path: 'users/edit/:id',
+        path: 'usuarios/editar/:id',
         component: NewUserPageComponent,
         canActivate: [AdminGuard],
         title: 'Editar Usuário - NAUE Consultoria',
@@ -244,17 +244,48 @@ export const routes: Routes = [
 
       // Configurações do sistema
       {
-        path: 'settings',
+        path: 'configuracoes',
         component: SettingsPageComponent,
         title: 'Configurações - NAUE Consultoria',
       },
 
       // Ajuda e suporte
       {
-        path: 'help',
+        path: 'ajuda',
         component: HelpPageComponent,
         title: 'Ajuda - NAUE Consultoria',
       },
+
+      // Redirecionamentos para compatibilidade com rotas antigas
+      { path: 'contracts', redirectTo: 'contratos', pathMatch: 'full' },
+      { path: 'contracts/new', redirectTo: 'contratos/novo', pathMatch: 'full' },
+      { path: 'contracts/view/:id', redirectTo: 'contratos/visualizar/:id', pathMatch: 'full' },
+      { path: 'contracts/edit/:id', redirectTo: 'contratos/editar/:id', pathMatch: 'full' },
+      
+      { path: 'clients', redirectTo: 'clientes', pathMatch: 'full' },
+      { path: 'clients/new', redirectTo: 'clientes/novo', pathMatch: 'full' },
+      { path: 'clients/view/:id', redirectTo: 'clientes/visualizar/:id', pathMatch: 'full' },
+      { path: 'clients/edit/:id', redirectTo: 'clientes/editar/:id', pathMatch: 'full' },
+      
+      { path: 'services', redirectTo: 'servicos', pathMatch: 'full' },
+      { path: 'services/new', redirectTo: 'servicos/novo', pathMatch: 'full' },
+      { path: 'services/edit/:id', redirectTo: 'servicos/editar/:id', pathMatch: 'full' },
+      
+      { path: 'proposals', redirectTo: 'propostas', pathMatch: 'full' },
+      { path: 'proposals/new', redirectTo: 'propostas/nova', pathMatch: 'full' },
+      { path: 'proposals/view/:id', redirectTo: 'propostas/visualizar/:id', pathMatch: 'full' },
+      { path: 'proposals/edit/:id', redirectTo: 'propostas/editar/:id', pathMatch: 'full' },
+      
+      { path: 'reports', redirectTo: 'relatorios', pathMatch: 'full' },
+      { path: 'routines', redirectTo: 'rotinas', pathMatch: 'full' },
+      { path: 'routines/:id', redirectTo: 'rotinas/:id', pathMatch: 'full' },
+      
+      { path: 'users', redirectTo: 'usuarios', pathMatch: 'full' },
+      { path: 'users/new', redirectTo: 'usuarios/novo', pathMatch: 'full' },
+      { path: 'users/edit/:id', redirectTo: 'usuarios/editar/:id', pathMatch: 'full' },
+      
+      { path: 'settings', redirectTo: 'configuracoes', pathMatch: 'full' },
+      { path: 'help', redirectTo: 'ajuda', pathMatch: 'full' },
     ],
   },
 

@@ -79,11 +79,11 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
   }
   
   openNewServicePage() {
-    this.router.navigate(['/home/services/new']);
+    this.router.navigate(['/home/servicos/novo']);
   }
 
   editService(id: number) {
-    this.router.navigate(['/home/services/edit', id]);
+    this.router.navigate(['/home/servicos/editar', id]);
   }
 
   async toggleServiceStatus(service: ServiceDisplay, event: MouseEvent) {

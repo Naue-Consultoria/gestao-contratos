@@ -74,7 +74,7 @@ export class ServiceFormComponent implements OnInit {
     } catch (error) {
       console.error('❌ Error loading service:', error);
       this.modalService.showNotification('Erro ao carregar serviço', false);
-      this.router.navigate(['/home/services']);
+      this.router.navigate(['/home/servicos']);
     } finally {
       this.isLoading = false;
     }
@@ -128,7 +128,7 @@ export class ServiceFormComponent implements OnInit {
       
       window.dispatchEvent(new CustomEvent('refreshServices'));
       
-      this.router.navigate(['/home/services']);
+      this.router.navigate(['/home/servicos']);
     } catch (error: any) {
       console.error('❌ Error saving service:', error);
       const errorMessage = error?.error?.error || 'Erro ao salvar serviço';
@@ -139,7 +139,7 @@ export class ServiceFormComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/home/services']);
+    this.router.navigate(['/home/servicos']);
   }
 
   onDurationUnitChange() {

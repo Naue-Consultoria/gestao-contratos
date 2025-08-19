@@ -259,15 +259,15 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
   }
 
   openNewClientPage() {
-    this.router.navigate(['/home/clients/new']);
+    this.router.navigate(['/home/clientes/novo']);
   }
 
   viewClient(id: number) {
-    this.router.navigate(['/home/clients/view', id]);
+    this.router.navigate(['/home/clientes/visualizar', id]);
   }
 
   editClient(id: number) {
-    this.router.navigate(['/home/clients/edit', id]);
+    this.router.navigate(['/home/clientes/editar', id]);
   }
 
   toggleDropdown(clientId: number, event: MouseEvent) {
