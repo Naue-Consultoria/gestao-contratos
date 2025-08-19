@@ -21,100 +21,106 @@ export class BreadcrumbService {
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Dashboard' }
     ],
-    '/home/contracts': [
+    // Novas rotas em português - Contratos
+    '/home/contratos': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Contratos', url: '/home/contracts' }
+      { label: 'Contratos', url: '/home/contratos' }
     ],
-    '/home/contracts/new': [
+    '/home/contratos/novo': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Contratos', url: '/home/contracts' },
+      { label: 'Contratos', url: '/home/contratos' },
       { label: 'Novo Contrato' }
     ],
-    '/home/contracts/edit': [
+    '/home/contratos/editar': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Contratos', url: '/home/contracts' },
+      { label: 'Contratos', url: '/home/contratos' },
       { label: 'Editar Contrato' }
     ],
-    '/home/contracts/view': [
+    '/home/contratos/visualizar': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Contratos', url: '/home/contracts' },
+      { label: 'Contratos', url: '/home/contratos' },
       { label: 'Visualizar Contrato' }
     ],
-    '/home/clients': [
+    // Novas rotas em português - Clientes
+    '/home/clientes': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Clientes', url: '/home/clients' }
+      { label: 'Clientes', url: '/home/clientes' }
     ],
-    '/home/clients/new': [
+    '/home/clientes/novo': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Clientes', url: '/home/clients' },
+      { label: 'Clientes', url: '/home/clientes' },
       { label: 'Novo Cliente' }
     ],
-    '/home/clients/view': [
+    '/home/clientes/visualizar': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Clientes', url: '/home/clients' },
+      { label: 'Clientes', url: '/home/clientes' },
       { label: 'Detalhes do Cliente' }
     ],
-    '/home/clients/edit': [
+    '/home/clientes/editar': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Clientes', url: '/home/clients' },
+      { label: 'Clientes', url: '/home/clientes' },
       { label: 'Editar Cliente' }
     ],
-    '/home/services': [
+    // Novas rotas em português - Serviços
+    '/home/servicos': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Serviços', url: '/home/services' }
+      { label: 'Serviços', url: '/home/servicos' }
     ],
-    '/home/services/new': [
+    '/home/servicos/novo': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Serviços', url: '/home/services' },
+      { label: 'Serviços', url: '/home/servicos' },
       { label: 'Novo Serviço' }
     ],
-    '/home/services/edit': [
+    '/home/servicos/editar': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Serviços', url: '/home/services' },
+      { label: 'Serviços', url: '/home/servicos' },
       { label: 'Editar Serviço' }
     ],
-    '/home/proposals': [
+    // Novas rotas em português - Propostas
+    '/home/propostas': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Propostas', url: '/home/proposals' }
+      { label: 'Propostas', url: '/home/propostas' }
     ],
-    '/home/proposals/new': [
+    '/home/propostas/nova': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Propostas', url: '/home/proposals' },
+      { label: 'Propostas', url: '/home/propostas' },
       { label: 'Nova Proposta' }
     ],
-    '/home/proposals/edit': [
+    '/home/propostas/editar': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Propostas', url: '/home/proposals' },
+      { label: 'Propostas', url: '/home/propostas' },
       { label: 'Editar Proposta' }
     ],
-    '/home/proposals/view': [
+    '/home/propostas/visualizar': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Propostas', url: '/home/proposals' },
+      { label: 'Propostas', url: '/home/propostas' },
       { label: 'Visualizar Proposta' }
     ],
-    '/home/users': [
+    // Novas rotas em português - Usuários
+    '/home/usuarios': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Usuários', url: '/home/users' }
+      { label: 'Usuários', url: '/home/usuarios' }
     ],
-    '/home/users/new': [
+    '/home/usuarios/novo': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Usuários', url: '/home/users' },
+      { label: 'Usuários', url: '/home/usuarios' },
       { label: 'Novo Usuário' }
     ],
-    '/home/users/edit': [
+    '/home/usuarios/editar': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Usuários', url: '/home/users' },
+      { label: 'Usuários', url: '/home/usuarios' },
       { label: 'Editar Usuário' }
     ],
+    // Outras rotas
     '/home/profile': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Meu Perfil' }
     ],
-    '/home/settings': [
+    '/home/configuracoes': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Configurações' }
     ],
-    '/home/reports': [
+    '/home/relatorios': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Relatórios' }
     ],
@@ -122,17 +128,17 @@ export class BreadcrumbService {
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Analytics' }
     ],
-    '/home/help': [
+    '/home/ajuda': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Ajuda' }
     ],
-    '/home/routines': [
+    '/home/rotinas': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Rotinas de Contratos' }
     ],
-    '/home/routines/view': [
+    '/home/rotinas/view': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Rotinas de Contratos', url: '/home/routines' },
+      { label: 'Rotinas de Contratos', url: '/home/rotinas' },
       { label: 'Detalhes do Contrato' }
     ],
     '/home/notifications': [
@@ -166,9 +172,9 @@ export class BreadcrumbService {
     // Procura rota com ID dinâmico
     const urlParts = cleanUrl.split('/');
     if (urlParts.length >= 3) {
-      // Para URLs como /home/contracts/edit/123
-      if (urlParts.length === 5 && urlParts[3] === 'edit') {
-        const baseRoute = `/${urlParts[1]}/${urlParts[2]}/edit`;
+      // Para URLs como /home/contratos/editar/123
+      if (urlParts.length === 5 && urlParts[3] === 'editar') {
+        const baseRoute = `/${urlParts[1]}/${urlParts[2]}/editar`;
         if (this.routeMap[baseRoute]) {
           const breadcrumbs = [...this.routeMap[baseRoute]];
           breadcrumbs[breadcrumbs.length - 1].label = `Editar ${this.getEntityName(urlParts[2])} #${urlParts[4]}`;
@@ -177,9 +183,9 @@ export class BreadcrumbService {
         }
       }
 
-      // Para URLs como /home/contracts/view/123
-      if (urlParts.length === 5 && urlParts[3] === 'view') {
-        const baseRoute = `/${urlParts[1]}/${urlParts[2]}/view`;
+      // Para URLs como /home/contratos/visualizar/123
+      if (urlParts.length === 5 && urlParts[3] === 'visualizar') {
+        const baseRoute = `/${urlParts[1]}/${urlParts[2]}/visualizar`;
         if (this.routeMap[baseRoute]) {
           const breadcrumbs = [...this.routeMap[baseRoute]];
           breadcrumbs[breadcrumbs.length - 1].label = `Visualizar ${this.getEntityName(urlParts[2])} #${urlParts[4]}`;
@@ -188,11 +194,11 @@ export class BreadcrumbService {
         }
       }
       
-      // Para URLs como /home/routines/123 (detalhes do contrato)
-      if (urlParts.length === 4 && urlParts[2] === 'routines' && !isNaN(Number(urlParts[3]))) {
+      // Para URLs como /home/rotinas/123 (detalhes do contrato)
+      if (urlParts.length === 4 && urlParts[2] === 'rotinas' && !isNaN(Number(urlParts[3]))) {
         const breadcrumbs: any[] = [
           { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-          { label: 'Rotinas de Contratos', url: '/home/routines' },
+          { label: 'Rotinas de Contratos', url: '/home/rotinas' },
           { label: `Detalhes do Contrato #${urlParts[3]}` }
         ];
         this.setBreadcrumbs(breadcrumbs);
@@ -230,6 +236,12 @@ export class BreadcrumbService {
 
   private getEntityName(entity: string): string {
     const entityMap: { [key: string]: string } = {
+      'contratos': 'Contrato',
+      'clientes': 'Cliente',
+      'servicos': 'Serviço',
+      'propostas': 'Proposta',
+      'usuarios': 'Usuário',
+      // Manter mapeamento antigo para compatibilidade
       'contracts': 'Contrato',
       'clients': 'Cliente',
       'services': 'Serviço',
@@ -241,18 +253,28 @@ export class BreadcrumbService {
 
   private getSectionName(section: string): string {
     const sectionMap: { [key: string]: string } = {
+      'contratos': 'Contratos',
+      'clientes': 'Clientes',
+      'servicos': 'Serviços',
+      'propostas': 'Propostas',
+      'usuarios': 'Usuários',
+      'rotinas': 'Rotinas de Contratos',
+      'dashboard': 'Dashboard',
+      'analytics': 'Analytics',
+      'relatorios': 'Relatórios',
+      'notifications': 'Notificações',
+      'configuracoes': 'Configurações',
+      'profile': 'Meu Perfil',
+      'ajuda': 'Ajuda',
+      // Manter mapeamento antigo para compatibilidade
       'contracts': 'Contratos',
       'clients': 'Clientes',
       'services': 'Serviços',
       'proposals': 'Propostas',
       'users': 'Usuários',
       'routines': 'Rotinas de Contratos',
-      'dashboard': 'Dashboard',
-      'analytics': 'Analytics',
       'reports': 'Relatórios',
-      'notifications': 'Notificações',
       'settings': 'Configurações',
-      'profile': 'Meu Perfil',
       'help': 'Ajuda'
     };
     return sectionMap[section] || '';
