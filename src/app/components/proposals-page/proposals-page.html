@@ -178,3 +178,15 @@
   (onClose)="onSendModalClose()"
   (onProposalSent)="onProposalSent($event)">
 </app-send-proposal-modal>
+
+<!-- Delete Confirmation Modal -->
+<app-delete-confirmation-modal
+  [isVisible]="showDeleteModal"
+  [title]="'Confirmar Exclusão de Proposta'"
+  [message]="'Tem certeza que deseja excluir esta proposta? Esta ação não pode ser desfeita.'"
+  [itemName]="selectedProposalForDeletion ? selectedProposalForDeletion.proposalNumber + ' - ' + selectedProposalForDeletion.clientName : ''"
+  [isDeleting]="isDeleting"
+  [deleteButtonText]="'Excluir Proposta'"
+  (onConfirm)="confirmDeleteProposal()"
+  (onCancel)="cancelDeleteProposal()">
+</app-delete-confirmation-modal>

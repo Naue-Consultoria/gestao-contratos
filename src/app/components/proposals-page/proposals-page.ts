@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { ProposalService, Proposal, PrepareProposalData } from '../../services/proposal';
 import { SendProposalModalComponent } from '../send-proposal-modal/send-proposal-modal';
+import { DeleteConfirmationModalComponent } from '../delete-confirmation-modal/delete-confirmation-modal.component';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ProposalStatsCardsComponent } from '../proposal-stats-cards/proposal-stats-cards';
@@ -25,7 +26,7 @@ interface ProposalDisplay {
 @Component({
   selector: 'app-proposals-page',
   standalone: true,
-  imports: [CommonModule, SendProposalModalComponent, BreadcrumbComponent, ProposalStatsCardsComponent],
+  imports: [CommonModule, SendProposalModalComponent, DeleteConfirmationModalComponent, BreadcrumbComponent, ProposalStatsCardsComponent],
   templateUrl: './proposals-page.html',
   styleUrls: ['./proposals-page.css']
 })
@@ -42,6 +43,11 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   // Send Proposal Modal
   showSendModal = false;
   selectedProposalForSending: Proposal | null = null;
+
+  // Delete Confirmation Modal
+  showDeleteModal = false;
+  selectedProposalForDeletion: ProposalDisplay | null = null;
+  isDeleting = false;
 
   // Dropdown control
   activeDropdownId: number | null = null;
@@ -164,23 +170,41 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  async deleteProposal(proposal: ProposalDisplay, event: MouseEvent) {
+  deleteProposal(proposal: ProposalDisplay, event: MouseEvent) {
     event.stopPropagation();
+    this.selectedProposalForDeletion = proposal;
+    this.showDeleteModal = true;
+  }
+
+  confirmDeleteProposal() {
+    if (!this.selectedProposalForDeletion) return;
     
-    if (confirm(`Deseja excluir a proposta de "${proposal.clientName}" (${proposal.proposalNumber})?`)) {
-      try {
-        await firstValueFrom(this.proposalService.deleteProposal(proposal.id));
+    this.isDeleting = true;
+    
+    firstValueFrom(this.proposalService.deleteProposal(this.selectedProposalForDeletion.id))
+      .then(() => {
         this.modalService.showSuccess('Proposta excluída com sucesso!');
+        this.showDeleteModal = false;
+        this.selectedProposalForDeletion = null;
         this.loadData();
-      } catch (error: any) {
+      })
+      .catch((error: any) => {
         console.error('❌ Error deleting proposal:', error);
         if (error?.status === 500 || error?.status === 404) {
           this.modalService.showError('Funcionalidade de excluir propostas ainda não implementada no backend.');
         } else {
           this.modalService.showError('Não foi possível excluir a proposta.');
         }
-      }
-    }
+      })
+      .finally(() => {
+        this.isDeleting = false;
+      });
+  }
+
+  cancelDeleteProposal() {
+    this.showDeleteModal = false;
+    this.selectedProposalForDeletion = null;
+    this.isDeleting = false;
   }
 
   async generatePDF(proposal: ProposalDisplay, event: MouseEvent) {

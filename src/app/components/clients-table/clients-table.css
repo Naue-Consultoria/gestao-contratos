@@ -279,10 +279,9 @@
 
 /* Table */
 .table-wrapper {
-  overflow-x: auto;
+  overflow: visible;
   border-radius: 10px;
   border: 1px solid var(--border-gray);
-  overflow: visible;
 }
 
 table {
@@ -609,16 +608,14 @@ tr:last-child td {
 }
 
 .dropdown-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 8px);
+  position: fixed;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border: 1px solid var(--border-gray);
-  z-index: 1000;
+  z-index: 9999;
   min-width: 150px;
-  overflow: hidden;
+  overflow: visible;
   animation: fadeInDropdown 0.2s ease-out;
 }
 

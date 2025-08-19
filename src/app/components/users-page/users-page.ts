@@ -6,6 +6,7 @@ import { ProfilePictureService } from '../../services/profile-picture.service';
 import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
+import { DeleteConfirmationModalComponent } from '../delete-confirmation-modal/delete-confirmation-modal.component';
 
 interface User {
   id: number;
@@ -24,7 +25,7 @@ interface User {
 @Component({
   selector: 'app-users-page',
   standalone: true,
-  imports: [CommonModule, BreadcrumbComponent],
+  imports: [CommonModule, BreadcrumbComponent, DeleteConfirmationModalComponent],
   templateUrl: './users-page.html',
   styleUrls: ['./users-page.css']
 })
@@ -40,6 +41,12 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   error = '';
   currentFilter: 'active' | 'inactive' | 'all' = 'active';
   openDropdownId: number | null = null;
+
+  // Delete Confirmation Modal
+  showDeleteModal = false;
+  selectedUserForDeletion: User | null = null;
+  isDeleting = false;
+  deleteMode: 'hard' | 'soft' | null = null;
 
   ngOnInit() {
     this.loadUsers();
@@ -229,8 +236,35 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleDropdown(userId: number) {
+  toggleDropdown(userId: number, event?: MouseEvent) {
     this.openDropdownId = this.openDropdownId === userId ? null : userId;
+    
+    if (this.openDropdownId === userId && event) {
+      // Position dropdown after DOM update
+      setTimeout(() => this.positionDropdown(event), 0);
+    }
+  }
+  
+  private positionDropdown(event: MouseEvent) {
+    const button = event.target as HTMLElement;
+    const container = button.closest('.dropdown-container');
+    const dropdown = container?.querySelector('.dropdown-menu') as HTMLElement;
+    if (!dropdown) return;
+    
+    const rect = button.getBoundingClientRect();
+    const dropdownHeight = 200; // Approximate dropdown height
+    const windowHeight = window.innerHeight;
+    
+    // Check if dropdown would go off-screen at bottom
+    const shouldShowAbove = rect.bottom + dropdownHeight > windowHeight;
+    
+    if (shouldShowAbove) {
+      dropdown.style.top = `${rect.top - dropdownHeight}px`;
+    } else {
+      dropdown.style.top = `${rect.bottom + 4}px`;
+    }
+    
+    dropdown.style.left = `${rect.right - 180}px`; // 180px = min-width
   }
 
   closeDropdown() {
@@ -263,41 +297,83 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  async deleteUser(userId: number, userName: string) {
+  deleteUser(userId: number, userName: string) {
     this.closeDropdown();
-    // First, ask for a permanent delete
-    const hardDeleteConfirmation = confirm(`Você deseja EXCLUIR PERMANENTEMENTE o usuário "${userName}"?
-
-⚠️ Esta ação é irreversível e o usuário não poderá ser recuperado.
-
-Clique em "OK" para a exclusão permanente.`);
-
-    if (hardDeleteConfirmation) {
-      try {
-        await firstValueFrom(this.userService.hardDeleteUser(userId));
-        this.toastr.success('Usuário excluído permanentemente!');
-        this.loadUsers(); // Refresh list
-      } catch (error: any) {
-        this.toastr.error(error.error?.error || 'Erro ao excluir permanentemente o usuário.');
-      }
-      return; // End the function here
+    const user = this.users.find(u => u.id === userId);
+    if (user) {
+      this.selectedUserForDeletion = user;
+      this.deleteMode = 'hard'; // Começar com exclusão permanente
+      this.showDeleteModal = true;
     }
+  }
 
-    // If the user cancelled the hard delete, ask for a soft delete
-    const softDeleteConfirmation = confirm(`Você deseja DESATIVAR e ANONIMIZAR o usuário "${userName}"?
-
-Esta ação manterá o histórico do usuário, mas impedirá seu acesso ao sistema.
-
-Clique em "OK" para desativar e anonimizar.`);
-
-    if (softDeleteConfirmation) {
-      try {
-        await firstValueFrom(this.userService.softDeleteUser(userId));
-        this.toastr.info('Usuário desativado e anonimizado.');
+  confirmDeleteUser() {
+    if (!this.selectedUserForDeletion) return;
+    
+    this.isDeleting = true;
+    
+    const deletePromise = this.deleteMode === 'hard' 
+      ? firstValueFrom(this.userService.hardDeleteUser(this.selectedUserForDeletion.id))
+      : firstValueFrom(this.userService.softDeleteUser(this.selectedUserForDeletion.id));
+    
+    deletePromise
+      .then(() => {
+        if (this.deleteMode === 'hard') {
+          this.toastr.success('Usuário excluído permanentemente!');
+        } else {
+          this.toastr.info('Usuário desativado e anonimizado.');
+        }
+        this.showDeleteModal = false;
+        this.selectedUserForDeletion = null;
+        this.deleteMode = null;
         this.loadUsers();
-      } catch (error: any) {
-        this.toastr.error(error.error?.error || 'Erro ao desativar o usuário.');
-      }
+      })
+      .catch((error: any) => {
+        const errorMessage = this.deleteMode === 'hard' 
+          ? 'Erro ao excluir permanentemente o usuário.'
+          : 'Erro ao desativar o usuário.';
+        this.toastr.error(error.error?.error || errorMessage);
+      })
+      .finally(() => {
+        this.isDeleting = false;
+      });
+  }
+
+  cancelDeleteUser() {
+    // Se cancelou a exclusão permanente, perguntar sobre soft delete
+    if (this.deleteMode === 'hard') {
+      this.deleteMode = 'soft';
+      return; // Manter modal aberto mas mudar para soft delete
     }
+    
+    // Se cancelou o soft delete também, fechar modal
+    this.showDeleteModal = false;
+    this.selectedUserForDeletion = null;
+    this.deleteMode = null;
+    this.isDeleting = false;
+  }
+
+  getDeleteModalTitle(): string {
+    return this.deleteMode === 'hard' 
+      ? 'Confirmar Exclusão Permanente' 
+      : 'Confirmar Desativação de Usuário';
+  }
+
+  getDeleteModalMessage(): string {
+    return this.deleteMode === 'hard'
+      ? 'Tem certeza que deseja excluir permanentemente este usuário? Esta ação é irreversível e o usuário não poderá ser recuperado.'
+      : 'Tem certeza que deseja desativar e anonimizar este usuário? Esta ação manterá o histórico do usuário, mas impedirá seu acesso ao sistema.';
+  }
+
+  getDeleteButtonText(): string {
+    return this.deleteMode === 'hard' 
+      ? 'Excluir Permanentemente' 
+      : 'Desativar Usuário';
+  }
+
+  getCancelButtonText(): string {
+    return this.deleteMode === 'hard' 
+      ? 'Desativar ao invés' 
+      : 'Cancelar';
   }
 }

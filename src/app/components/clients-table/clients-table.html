@@ -146,3 +146,15 @@
     </div>
   </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<app-delete-confirmation-modal
+  [isVisible]="showDeleteModal"
+  [title]="getDeleteModalTitle()"
+  [message]="getDeleteModalMessage()"
+  [itemName]="selectedClientForDeletion ? selectedClientForDeletion.name + ' (' + selectedClientForDeletion.document + ')' : ''"
+  [isDeleting]="isDeleting"
+  [deleteButtonText]="getDeleteButtonText()"
+  (onConfirm)="confirmDeleteClient()"
+  (onCancel)="cancelDeleteClient()">
+</app-delete-confirmation-modal>

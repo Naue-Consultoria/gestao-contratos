@@ -91,7 +91,7 @@
               <div class="dropdown-container" [class.open]="user.id === openDropdownId">
                 <button class="action-btn dropdown-toggle" 
                         title="Mais ações"
-                        (click)="toggleDropdown(user.id); $event.stopPropagation()">
+                        (click)="toggleDropdown(user.id, $event); $event.stopPropagation()">
                   <i class="fas fa-ellipsis-v"></i>
                 </button>
                 <div class="dropdown-menu" *ngIf="user.id === openDropdownId">
@@ -132,3 +132,16 @@
     </div>
   </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<app-delete-confirmation-modal
+  [isVisible]="showDeleteModal"
+  [title]="getDeleteModalTitle()"
+  [message]="getDeleteModalMessage()"
+  [itemName]="selectedUserForDeletion ? selectedUserForDeletion.name + ' (' + selectedUserForDeletion.email + ')' : ''"
+  [isDeleting]="isDeleting"
+  [deleteButtonText]="getDeleteButtonText()"
+  [cancelButtonText]="getCancelButtonText()"
+  (onConfirm)="confirmDeleteUser()"
+  (onCancel)="cancelDeleteUser()">
+</app-delete-confirmation-modal>

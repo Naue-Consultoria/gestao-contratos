@@ -6,6 +6,7 @@ import { ModalService } from '../../services/modal.service';
 import { ClientService, ApiClient } from '../../services/client';
 import { ContractService } from '../../services/contract';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
+import { DeleteConfirmationModalComponent } from '../delete-confirmation-modal/delete-confirmation-modal.component';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { environment } from '../../../environments/environment';
@@ -32,7 +33,7 @@ interface ClientDisplay {
 @Component({
   selector: 'app-clients-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, DeleteConfirmationModalComponent],
   templateUrl: './clients-table.html',
   styleUrls: ['./clients-table.css'],
 })
@@ -59,6 +60,12 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
   isLoading = true;
   error = '';
   dropdownOpen: number | null = null;
+
+  // Delete Confirmation Modal
+  showDeleteModal = false;
+  selectedClientForDeletion: ClientDisplay | null = null;
+  isDeleting = false;
+  deleteMode: 'soft' | 'hard' | null = null;
 
   ngOnInit() {
     this.loadData();
@@ -125,45 +132,75 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
     });
   }
 
-  async softDeleteClient(client: ClientDisplay, event: MouseEvent) {
+  softDeleteClient(client: ClientDisplay, event: MouseEvent) {
     event.stopPropagation();
-    if (
-      confirm(
-        `Tem certeza que deseja DESATIVAR o cliente "${client.name}"? O cliente sairá da lista principal, mas o histórico será mantido.`
-      )
-    ) {
-      try {
-        await firstValueFrom(this.clientService.deleteClient(client.id));
-        this.modalService.showSuccess('Cliente desativado com sucesso!');
-        this.loadData();
-      } catch (error) {
-        this.modalService.showError('Não foi possível desativar o cliente.');
-      }
-    }
+    this.selectedClientForDeletion = client;
+    this.deleteMode = 'soft';
+    this.showDeleteModal = true;
   }
 
-  async hardDeleteClient(client: ClientDisplay, event: MouseEvent) {
+  hardDeleteClient(client: ClientDisplay, event: MouseEvent) {
     event.stopPropagation();
-    const confirmation = prompt(
-      `Esta ação é irreversível e excluirá PERMANENTEMENTE o cliente "${client.name}" e todos os dados associados. Para confirmar, digite o nome do cliente:`
-    );
-    if (confirmation === client.name) {
-      try {
-        await firstValueFrom(
-          this.clientService.deleteClientPermanent(client.id)
-        );
-        this.modalService.showSuccess('Cliente excluído permanentemente!');
+    this.selectedClientForDeletion = client;
+    this.deleteMode = 'hard';
+    this.showDeleteModal = true;
+  }
+
+  confirmDeleteClient() {
+    if (!this.selectedClientForDeletion) return;
+    
+    this.isDeleting = true;
+    
+    const deletePromise = this.deleteMode === 'soft' 
+      ? firstValueFrom(this.clientService.deleteClient(this.selectedClientForDeletion.id))
+      : firstValueFrom(this.clientService.deleteClientPermanent(this.selectedClientForDeletion.id));
+    
+    deletePromise
+      .then(() => {
+        if (this.deleteMode === 'soft') {
+          this.modalService.showSuccess('Cliente desativado com sucesso!');
+        } else {
+          this.modalService.showSuccess('Cliente excluído permanentemente!');
+        }
+        this.showDeleteModal = false;
+        this.selectedClientForDeletion = null;
+        this.deleteMode = null;
         this.loadData();
-      } catch (error) {
-        this.modalService.showError(
-          'Não foi possível excluir o cliente permanentemente.'
-        );
-      }
-    } else if (confirmation !== null) {
-      this.modalService.showWarning(
-        'O nome digitado não confere. A exclusão foi cancelada.'
-      );
-    }
+      })
+      .catch((error: any) => {
+        const errorMessage = this.deleteMode === 'soft' 
+          ? 'Não foi possível desativar o cliente.'
+          : 'Não foi possível excluir o cliente permanentemente.';
+        this.modalService.showError(errorMessage);
+      })
+      .finally(() => {
+        this.isDeleting = false;
+      });
+  }
+
+  cancelDeleteClient() {
+    this.showDeleteModal = false;
+    this.selectedClientForDeletion = null;
+    this.deleteMode = null;
+    this.isDeleting = false;
+  }
+
+  getDeleteModalTitle(): string {
+    return this.deleteMode === 'soft' 
+      ? 'Confirmar Desativação de Cliente' 
+      : 'Confirmar Exclusão Permanente';
+  }
+
+  getDeleteModalMessage(): string {
+    return this.deleteMode === 'soft'
+      ? 'Tem certeza que deseja desativar este cliente? O cliente sairá da lista principal, mas o histórico será mantido.'
+      : 'Tem certeza que deseja excluir permanentemente este cliente? Esta ação é irreversível e excluirá todos os dados associados.';
+  }
+
+  getDeleteButtonText(): string {
+    return this.deleteMode === 'soft' 
+      ? 'Desativar Cliente' 
+      : 'Excluir Permanentemente';
   }
 
   private mapApiClientToTableClient(
@@ -236,6 +273,32 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
   toggleDropdown(clientId: number, event: MouseEvent) {
     event.stopPropagation();
     this.dropdownOpen = this.dropdownOpen === clientId ? null : clientId;
+    
+    if (this.dropdownOpen === clientId) {
+      // Position dropdown after DOM update
+      setTimeout(() => this.positionDropdown(event), 0);
+    }
+  }
+  
+  private positionDropdown(event: MouseEvent) {
+    const button = event.target as HTMLElement;
+    const dropdown = button.closest('.dropdown')?.querySelector('.dropdown-menu') as HTMLElement;
+    if (!dropdown) return;
+    
+    const rect = button.getBoundingClientRect();
+    const dropdownHeight = 200; // Approximate dropdown height
+    const windowHeight = window.innerHeight;
+    
+    // Check if dropdown would go off-screen at bottom
+    const shouldShowAbove = rect.bottom + dropdownHeight > windowHeight;
+    
+    if (shouldShowAbove) {
+      dropdown.style.top = `${rect.top - dropdownHeight}px`;
+    } else {
+      dropdown.style.top = `${rect.bottom + 8}px`;
+    }
+    
+    dropdown.style.left = `${rect.right - 150}px`; // 150px = min-width
   }
 
   closeDropdown() {
