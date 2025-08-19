@@ -15,7 +15,7 @@
           "options": {
             "browser": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "src/polyfills.ts"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
@@ -53,6 +53,9 @@
                 "scripts": true,
                 "styles": true,
                 "fonts": true
+              },
+              "define": {
+                "global": "globalThis"
               },
               "outputHashing": "all",
               "sourceMap": false,
