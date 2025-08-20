@@ -100,104 +100,198 @@ export class ContractExportService {
     try {
       console.log('🔄 Carregando módulo file-saver...');
       
-      const module = await import('file-saver');
+      let saveAsFunction;
       
-      if (!module.saveAs) {
-        console.error('❌ saveAs não encontrado no módulo file-saver');
-        throw new Error('Módulo file-saver incompleto');
+      try {
+        // Primeira tentativa: import normal
+        const module = await import('file-saver');
+        console.log('📦 Módulo file-saver carregado:', Object.keys(module));
+        
+        // Verificar diferentes formas de acessar saveAs
+        if (module.saveAs) {
+          saveAsFunction = module.saveAs;
+        } else if (module.default && module.default.saveAs) {
+          saveAsFunction = module.default.saveAs;
+        } else if (module.default && typeof module.default === 'function') {
+          saveAsFunction = module.default;
+        } else {
+          throw new Error('saveAs não encontrado no módulo');
+        }
+        
+      } catch (importError) {
+        console.log('⚠️ Tentativa de import falhou, usando fallback nativo...');
+        
+        // Fallback: implementar download nativo
+        saveAsFunction = this.createNativeDownloadFunction();
       }
       
-      console.log('✅ Módulo file-saver carregado com sucesso');
-      return module;
+      console.log('✅ Função de salvamento carregada com sucesso');
+      return { saveAs: saveAsFunction };
+      
     } catch (error) {
       console.error('❌ Erro ao carregar módulo file-saver:', error);
-      throw new Error('Não foi possível carregar o módulo de salvamento de arquivos');
+      
+      // Último fallback: função nativa
+      console.log('🔄 Usando função de download nativa como último recurso...');
+      return { saveAs: this.createNativeDownloadFunction() };
     }
   }
 
-  async exportToPdf(contract: any, templateId: string): Promise<void> {
-    // Lazy load jsPDF dependency
-    const { jsPDF } = await import('jspdf');
-    
-    const content = this.generatePdfContent(contract, templateId);
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    
-    // Configurações da página
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 20;
-    const lineHeight = 7;
-    let currentY = margin;
-    
-    // Função para adicionar texto com quebra de linha
-    const addText = (text: string, fontSize: number = 10, isBold: boolean = false) => {
-      pdf.setFontSize(fontSize);
-      pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
-      
-      const lines = pdf.splitTextToSize(text, pageWidth - 2 * margin);
-      
-      for (const line of lines) {
-        if (currentY > pageHeight - margin) {
-          pdf.addPage();
-          currentY = margin;
+  private createNativeDownloadFunction(): (blob: Blob, fileName: string) => void {
+    return (blob: Blob, fileName: string) => {
+      try {
+        console.log('📥 Usando download nativo para:', fileName);
+        
+        // Criar URL do blob
+        const url = window.URL.createObjectURL(blob);
+        
+        // Criar elemento de link temporário
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.style.display = 'none';
+        
+        // Adicionar ao DOM, clicar e remover
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Limpar URL do blob
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+        }, 100);
+        
+        console.log('✅ Download nativo concluído');
+        
+      } catch (error) {
+        console.error('❌ Erro no download nativo:', error);
+        
+        // Fallback final: tentar abrir em nova aba
+        try {
+          const url = window.URL.createObjectURL(blob);
+          window.open(url, '_blank');
+          console.log('✅ Arquivo aberto em nova aba');
+        } catch (finalError) {
+          console.error('❌ Todas as tentativas de download falharam:', finalError);
+          alert('Não foi possível baixar o arquivo. Tente novamente ou use um navegador diferente.');
         }
-        
-        pdf.text(line, margin, currentY);
-        currentY += lineHeight;
       }
-      
-      currentY += lineHeight * 0.5; // Espaçamento extra entre parágrafos
     };
-    
-    // Função para adicionar texto com partes em negrito
-    const addTextWithParts = (parts: any[], fontSize: number = 10) => {
-      pdf.setFontSize(fontSize);
-      let currentX = margin;
+  }
+
+  async exportToPdf(contract: any, templateId: string): Promise<void> {
+    try {
+      console.log('🔄 Iniciando exportação PDF...');
       
-      for (const part of parts) {
-        pdf.setFont('helvetica', part.bold ? 'bold' : 'normal');
-        const textWidth = pdf.getTextWidth(part.text);
+      // Lazy load jsPDF dependency with error handling
+      const jsPDFModule = await this.loadJsPDFModule();
+      const jsPDF = jsPDFModule.jsPDF;
+      
+      const content = this.generatePdfContent(contract, templateId);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+    
+      // Configurações da página
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20;
+      const lineHeight = 7;
+      let currentY = margin;
+    
+      // Função para adicionar texto com quebra de linha
+      const addText = (text: string, fontSize: number = 10, isBold: boolean = false) => {
+        pdf.setFontSize(fontSize);
+        pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
         
-        // Verificar se precisa quebrar linha
-        if (currentX + textWidth > pageWidth - margin) {
-          currentY += lineHeight;
-          currentX = margin;
-          
+        const lines = pdf.splitTextToSize(text, pageWidth - 2 * margin);
+        
+        for (const line of lines) {
           if (currentY > pageHeight - margin) {
             pdf.addPage();
             currentY = margin;
           }
+          
+          pdf.text(line, margin, currentY);
+          currentY += lineHeight;
         }
         
-        pdf.text(part.text, currentX, currentY);
-        currentX += textWidth;
+        currentY += lineHeight * 0.5; // Espaçamento extra entre parágrafos
+      };
+      
+      // Função para adicionar texto com partes em negrito
+      const addTextWithParts = (parts: any[], fontSize: number = 10) => {
+        pdf.setFontSize(fontSize);
+        let currentX = margin;
+        
+        for (const part of parts) {
+          pdf.setFont('helvetica', part.bold ? 'bold' : 'normal');
+          const textWidth = pdf.getTextWidth(part.text);
+          
+          // Verificar se precisa quebrar linha
+          if (currentX + textWidth > pageWidth - margin) {
+            currentY += lineHeight;
+            currentX = margin;
+            
+            if (currentY > pageHeight - margin) {
+              pdf.addPage();
+              currentY = margin;
+            }
+          }
+          
+          pdf.text(part.text, currentX, currentY);
+          currentX += textWidth;
+        }
+        
+        currentY += lineHeight * 1.5;
+      };
+      
+      // Gerar conteúdo
+      for (const section of content) {
+        if (section.type === 'title') {
+          currentY += lineHeight;
+          addText(section.text, 16, true);
+          currentY += lineHeight;
+        } else if (section.type === 'heading') {
+          currentY += lineHeight * 0.5;
+          addText(section.text, 12, true);
+        } else if (section.type === 'spacing') {
+          currentY += lineHeight;
+        } else if (section.type === 'signature') {
+          addText(section.text, 10, section.bold || false);
+        } else if (section.type === 'paragraph' && section.parts) {
+          addTextWithParts(section.parts, 10);
+        } else {
+          addText(section.text, 10, false);
+        }
+      }
+    
+      const fileName = this.generateFileName(contract, templateId, 'pdf');
+      pdf.save(fileName);
+      console.log('✅ Exportação PDF concluída');
+      
+    } catch (error) {
+      console.error('❌ Erro na exportação PDF:', error);
+      throw new Error('Erro ao exportar PDF. Tente novamente.');
+    }
+  }
+
+  private async loadJsPDFModule(): Promise<any> {
+    try {
+      console.log('🔄 Carregando módulo jsPDF...');
+      
+      const module = await import('jspdf');
+      
+      if (!module.jsPDF) {
+        console.error('❌ jsPDF não encontrado no módulo');
+        throw new Error('Módulo jsPDF incompleto');
       }
       
-      currentY += lineHeight * 1.5;
-    };
-    
-    // Gerar conteúdo
-    for (const section of content) {
-      if (section.type === 'title') {
-        currentY += lineHeight;
-        addText(section.text, 16, true);
-        currentY += lineHeight;
-      } else if (section.type === 'heading') {
-        currentY += lineHeight * 0.5;
-        addText(section.text, 12, true);
-      } else if (section.type === 'spacing') {
-        currentY += lineHeight;
-      } else if (section.type === 'signature') {
-        addText(section.text, 10, section.bold || false);
-      } else if (section.type === 'paragraph' && section.parts) {
-        addTextWithParts(section.parts, 10);
-      } else {
-        addText(section.text, 10, false);
-      }
+      console.log('✅ Módulo jsPDF carregado com sucesso');
+      return module;
+      
+    } catch (error) {
+      console.error('❌ Erro ao carregar módulo jsPDF:', error);
+      throw new Error('Não foi possível carregar o módulo de exportação PDF');
     }
-    
-    const fileName = this.generateFileName(contract, templateId, 'pdf');
-    pdf.save(fileName);
   }
 
   private async createDocxDocument(contract: any, templateId: string, docxModule: any): Promise<any> {
