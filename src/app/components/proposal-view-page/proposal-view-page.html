@@ -20,15 +20,16 @@
   <!-- Proposal Content -->
   <div *ngIf="proposal && !isLoading && !error" class="proposal-container">
     <div class="proposal-header">
-      <div class="header-left">
-        <img src="logoNaue.png" alt="Logo da Empresa" class="company-logo">
-        <div class="header-title">
-          <h1>Proposta Comercial</h1>
-          <p>{{ proposal.proposal_number }}</p>
+      <div class="proposal-header-content">
+        <div class="header-left">
+          <img src="logoNaue.png" alt="Logo da Empresa" class="company-logo">
+          <div class="header-title">
+            <h1>Proposta Comercial</h1>
+            <p>{{ proposal.proposal_number }}</p>
+          </div>
         </div>
-      </div>
-      <div class="header-right">
-        <div class="proposal-actions">
+        <div class="header-right">
+          <div class="proposal-actions">
           <button *ngIf="canEditProposal()" class="action-btn edit-btn" (click)="editProposal()" title="Editar Proposta">
             <i class="fas fa-edit"></i>
           </button>
@@ -50,6 +51,7 @@
           <button *ngIf="canEditProposal()" class="action-btn delete-btn" (click)="deleteProposal()" title="Excluir Proposta">
             <i class="fas fa-trash"></i>
           </button>
+          </div>
         </div>
       </div>
     </div>

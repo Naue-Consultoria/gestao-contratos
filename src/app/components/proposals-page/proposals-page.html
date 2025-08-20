@@ -56,7 +56,7 @@
             *ngFor="let proposal of proposals"
             class="clickable"
             [class.expired]="proposal.isExpired"
-            (click)="editProposal(proposal.id)"
+            (click)="viewProposal(proposal.id)"
           >
             <td>
               <div class="proposal-info">
