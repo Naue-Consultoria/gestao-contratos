@@ -1,258 +1,189 @@
-<div class="page">
-  <!-- Loading -->
-  <div *ngIf="isLoading" class="loading-container">
-    <i class="fas fa-spinner fa-spin"></i>
-    Carregando proposta...
+<div class="page-header">
+  <h1 class="page-title">Detalhes da Proposta</h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="!isLoading && !proposal && error">
+  <div class="error-icon">
+    <i class="fas fa-exclamation-triangle"></i>
   </div>
+  <h3>Proposta não encontrada</h3>
+  <p>Não foi possível carregar os dados da proposta.</p>
+  <button class="btn btn-primary" (click)="backToProposals()">
+    <i class="fas fa-arrow-left"></i> Voltar para Propostas
+  </button>
+</div>
 
-  <!-- Error -->
-  <div *ngIf="error && !isLoading" class="error-container">
-    <div class="error-message">
-      <i class="fas fa-exclamation-circle"></i>
-      {{ error }}
-    </div>
-    <button class="btn btn-primary" (click)="backToProposals()">
-      <i class="fas fa-arrow-left"></i>
-      Voltar para Propostas
-    </button>
-  </div>
-
-  <!-- Proposal Content -->
-  <div *ngIf="proposal && !isLoading && !error" class="proposal-container">
-    <div class="proposal-header">
-      <div class="proposal-header-content">
-        <div class="header-left">
-          <img src="logoNaue.png" alt="Logo da Empresa" class="company-logo">
-          <div class="header-title">
-            <h1>Proposta Comercial</h1>
-            <p>{{ proposal.proposal_number }}</p>
-          </div>
-        </div>
-        <div class="header-right">
-          <div class="proposal-actions">
-          <button *ngIf="canEditProposal()" class="action-btn edit-btn" (click)="editProposal()" title="Editar Proposta">
-            <i class="fas fa-edit"></i>
-          </button>
-          <button class="action-btn duplicate-btn" (click)="duplicateProposal()" title="Duplicar Proposta">
-            <i class="fas fa-copy"></i>
-          </button>
-          <button class="action-btn pdf-btn" (click)="generatePDF()" title="Gerar PDF">
-            <i class="fas fa-file-pdf"></i>
-          </button>
-          <button *ngIf="canGeneratePublicLink()" class="action-btn generate-link-btn" (click)="generatePublicLink()" title="Gerar Link Público">
-            <i class="fas fa-share-alt"></i>
-          </button>
-          <button *ngIf="hasPublicLink()" class="action-btn link-btn" (click)="copyPublicLink()" title="Copiar Link Público">
-            <i class="fas fa-link"></i>
-          </button>
-          <button *ngIf="canSignProposal()" class="action-btn sign-btn" (click)="signProposal()" title="Assinar Proposta">
-            <i class="fas fa-signature"></i>
-          </button>
-          <button *ngIf="canEditProposal()" class="action-btn delete-btn" (click)="deleteProposal()" title="Excluir Proposta">
-            <i class="fas fa-trash"></i>
-          </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="proposal-body">
-      <div class="main-content">
-        <!-- Services Card -->
-        <div class="info-card">
-          <h2 class="card-title">
-            <i class="fas fa-cogs"></i>
-            Serviços da Proposta
-          </h2>
-          
-          <div *ngIf="proposal.services && proposal.services.length > 0" class="services-list">
-            <div class="service-item" *ngFor="let service of proposal.services">
-              <div class="service-details">
-                <h3 class="service-name">{{ service.service_name || 'Serviço ' + service.service_id }}</h3>
-                <p *ngIf="service.service_description" class="service-description">{{ service.service_description }}</p>
-              </div>
-              <div class="service-values">
-                <span class="service-total-value">{{ formatCurrency(service.unit_value) }}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div *ngIf="!proposal.services || proposal.services.length === 0" class="empty-services">
-            <i class="fas fa-info-circle"></i>
-            <span>Nenhum serviço adicionado a esta proposta</span>
-          </div>
-          
-          <div class="services-total">
-            <span>Total</span>
-            <strong>{{ formatCurrency(proposal.total_value) }}</strong>
-          </div>
-        </div>
-
-        <!-- Notes Card -->
-        <div *ngIf="proposal.notes" class="info-card">
-          <h2 class="card-title">
-            <i class="fas fa-sticky-note"></i>
-            Observações
-          </h2>
-          <div class="notes-content">
-            {{ proposal.notes }}
-          </div>
-        </div>
-
-        <!-- Signature Information (if signed) -->
-        <div *ngIf="proposal.signed_at" class="info-card signature-card">
-          <h2 class="card-title">
-            <i class="fas fa-signature"></i>
-            Informações da Assinatura
-          </h2>
-          <div class="signature-info">
-            <div class="signature-date">
-              <i class="fas fa-calendar-check"></i>
-              Assinada em: {{ formatDate(proposal.signed_at) }}
-            </div>
-            <div *ngIf="proposal.signature_data" class="signature-preview">
-              <label>Assinatura:</label>
-              <div class="signature-image">
-                <img [src]="proposal.signature_data" alt="Assinatura do cliente">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="sidebar">
-        <!-- Status Card -->
-        <div class="info-card">
-          <h2 class="card-title">
-            <i class="fas fa-info-circle"></i>
-            Informações
-          </h2>
-          <div class="status-badge-container">
-            <span class="status-badge" [style.background-color]="getStatusColor(proposal.status)">
-              {{ getStatusText(proposal.status) }}
-            </span>
-          </div>
-          <div class="meta-item" style="margin-top: 15px;">
-            <i class="fas fa-tag"></i>
-            <div>
-              <label>Tipo</label>
-              <span>{{ getProposalTypeText(proposal.type) }}</span>
-            </div>
-          </div>
-          
-          <!-- Public Link Section -->
-          <div *ngIf="hasPublicLink()" class="public-link-section">
-            <div class="link-info">
-              <i class="fas fa-link"></i>
-              <span>Link público disponível</span>
-            </div>
-            <div class="link-actions">
-              <button class="btn btn-sm btn-outline" (click)="copyPublicLink()">
-                <i class="fas fa-copy"></i>
-                Copiar Link
-              </button>
-            </div>
-          </div>
-          
-          <!-- Generate Link Action -->
-          <div *ngIf="canGeneratePublicLink()" class="generate-link-section">
-            <div class="action-info">
-              <i class="fas fa-info-circle"></i>
-              <span>Gere um link público para enviar esta proposta</span>
-            </div>
-            <button class="btn btn-sm btn-primary" (click)="generatePublicLink()">
-              <i class="fas fa-share-alt"></i>
-              Gerar Link de Envio
-            </button>
-          </div>
-          <div class="meta-grid">
-            <div class="meta-item">
-              <i class="fas fa-calendar-alt"></i>
-              <div>
-                <label>Criada em</label>
-                <span>{{ formatDate(proposal.created_at) }}</span>
-              </div>
-            </div>
-            <div class="meta-item" *ngIf="proposal.end_date">
-              <i class="fas fa-clock"></i>
-              <div>
-                <label>Válida até</label>
-                <span>{{ formatDate(proposal.end_date) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Client Information Card -->
-        <div class="info-card">
-          <h2 class="card-title">
-            <i class="fas fa-user"></i>
-            Informações do Cliente
-          </h2>
-          <div class="info-list">
-            <div class="info-item">
-              <label>Nome:</label>
-              <span>{{ proposal.client_name || 'Não informado' }}</span>
-            </div>
-            <div class="info-item">
-              <label>Email:</label>
-              <span>{{ proposal.client_email || 'Não informado' }}</span>
-            </div>
-            <div class="info-item" *ngIf="proposal.client_phone">
-              <label>Telefone:</label>
-              <span>{{ proposal.client_phone }}</span>
-            </div>
-            <div class="info-item" *ngIf="proposal.client_document">
-              <label>Documento:</label>
-              <span>{{ proposal.client_document }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Client Address Card -->
-        <div class="info-card">
-          <h2 class="card-title">
-            <i class="fas fa-map-marker-alt"></i>
-            Endereço do Cliente
-          </h2>
-          <div class="info-list">
-            <div class="info-item">
-              <label>Rua:</label>
-              <span>{{ proposal.client_street || 'Não informado' }}, {{ proposal.client_number || 'S/N' }}</span>
-            </div>
-            <div class="info-item" *ngIf="proposal.client_complement">
-              <label>Complemento:</label>
-              <span>{{ proposal.client_complement }}</span>
-            </div>
-            <div class="info-item">
-              <label>Bairro:</label>
-              <span>{{ proposal.client_neighborhood || 'Não informado' }}</span>
-            </div>
-            <div class="info-item">
-              <label>Cidade:</label>
-              <span>{{ proposal.client_city || 'Não informado' }}</span>
-            </div>
-            <div class="info-item">
-              <label>CEP:</label>
-              <span>{{ proposal.client_zipcode || 'Não informado' }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Call to Action -->
-    <div *ngIf="canSignProposal()" class="cta-container">
-      <div class="cta-card">
-        <div class="cta-content">
-          <h3>Pronto para começar?</h3>
-          <p>Revise os detalhes da proposta e assine para firmar nossa parceria.</p>
-        </div>
-        <button class="btn btn-success btn-lg" (click)="signProposal()">
-          <i class="fas fa-signature"></i>
-          Assinar Proposta
+<!-- Main Content -->
+<div class="content" *ngIf="!isLoading && proposal && !error">
+  
+  <!-- Unified Proposal Details Section -->
+  <div class="proposal-details-unified">
+    <!-- Proposal Overview Header -->
+    <div class="proposal-overview-header">
+      <!-- Action Buttons -->
+      <div class="proposal-actions">
+        <button class="btn-action-header" (click)="editProposal()" *ngIf="canEditProposal()" title="Editar Proposta">
+          <i class="fas fa-edit"></i>
+          Editar
+        </button>
+        <button class="btn-action-header" (click)="generatePDF()" title="Gerar PDF">
+          <i class="fas fa-file-pdf"></i>
+          PDF
+        </button>
+        <button class="btn-action-header" *ngIf="canGeneratePublicLink()" (click)="generatePublicLink()" title="Gerar Link Público">
+          <i class="fas fa-share-alt"></i>
+          Compartilhar
+        </button>
+        <button class="btn-action-header" *ngIf="hasPublicLink()" (click)="copyPublicLink()" title="Copiar Link Público">
+          <i class="fas fa-link"></i>
+          Copiar Link
+        </button>
+        <button class="btn-action-header delete" *ngIf="canEditProposal()" (click)="deleteProposal()" title="Excluir Proposta">
+          <i class="fas fa-trash"></i>
         </button>
       </div>
+      
+      <!-- Primary Info -->
+      <div class="primary-info">
+        <div class="proposal-header">
+          <div class="proposal-logo-section">
+            <div class="company-logo-wrapper">
+              <img src="logoNaue.png" alt="NAUE Consultoria" class="company-logo">
+            </div>
+          </div>
+          <div class="proposal-info">
+            <h2 class="proposal-number">{{ proposal.proposal_number }}</h2>
+            <div class="proposal-badges">
+              <span class="status-badge" [attr.data-status]="proposal.status">
+                {{ getStatusText(proposal.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Meta Information -->
+      <div class="meta-info">
+        <div class="info-group">
+          <span class="info-label">Cliente</span>
+          <span class="info-value">{{ getClientName() || 'Não informado' }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">E-mail</span>
+          <span class="info-value">{{ getClientEmail() || 'Não informado' }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Telefone</span>
+          <span class="info-value">{{ getClientPhone() || 'Não informado' }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Data de Criação</span>
+          <span class="info-value">{{ formatDate(proposal.created_at) }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Válida Até</span>
+          <span class="info-value">{{ proposal.end_date ? formatDate(proposal.end_date) : 'Não definido' }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Total de Serviços</span>
+          <span class="info-value">{{ proposal.services.length || 0 }} item(s)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="proposal-content">
+      
+      <!-- Services Section -->
+      <section class="content-section">
+        <h3 class="section-title">
+          <i class="fas fa-cogs"></i>
+          Serviços da Proposta
+        </h3>
+        
+        <!-- Services Grid -->
+        <div class="services-grid" *ngIf="proposal.services && proposal.services.length > 0">
+          <div *ngFor="let service of proposal.services; let i = index" class="service-card">
+            <div class="service-card-header">
+              <div class="service-number">{{ i + 1 }}</div>
+              <div class="service-name">{{ service.service_name || 'Serviço ' + service.service_id }}</div>
+            </div>
+            
+            <div class="service-card-body">
+              <div class="service-description" *ngIf="service.service_description">
+                {{ service.service_description }}
+              </div>
+              
+              <div class="service-pricing">
+                <div class="service-detail">
+                  <span class="detail-label">Valor Unitário:</span>
+                  <span class="detail-value">{{ formatCurrency(service.unit_value) }}</span>
+                </div>
+                
+                <div class="service-detail highlight">
+                  <span class="detail-label">Total:</span>
+                  <span class="detail-value">{{ formatCurrency(service.total_value) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div *ngIf="!proposal.services || proposal.services.length === 0" class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-cogs"></i>
+          </div>
+          <h4>Nenhum serviço encontrado</h4>
+          <p>Esta proposta ainda não possui serviços cadastrados.</p>
+        </div>
+        
+        <!-- Services Summary -->
+        <div class="services-summary" *ngIf="proposal.services && proposal.services.length > 0">
+          <div class="summary-card">
+            <div class="summary-icon">
+              <i class="fas fa-calculator"></i>
+            </div>
+            <div class="summary-content">
+              <div class="summary-label">Valor Total da Proposta</div>
+              <div class="summary-value">{{ formatCurrency(proposal.total_value) }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Signature Section -->
+      <section class="content-section" *ngIf="proposal.status === 'signed'">
+        <h3 class="section-title">
+          <i class="fas fa-signature"></i>
+          Assinatura Digital
+        </h3>
+        
+        <div class="signature-card">
+          <div class="signature-info" *ngIf="proposal.signed_at">
+            <i class="fas fa-calendar-check"></i>
+            <span>Assinada em {{ formatDate(proposal.signed_at) }}</span>
+          </div>
+          
+          <div class="signature-display" *ngIf="proposal.signature_data">
+            <label>Assinatura do Cliente:</label>
+            <div class="signature-image">
+              <img [src]="proposal.signature_data" alt="Assinatura Digital" />
+            </div>
+          </div>
+        </div>
+      </section>
+      
     </div>
   </div>
+  
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="isLoading">
+  <div class="loading-spinner"></div>
+  <p>Carregando proposta...</p>
 </div>

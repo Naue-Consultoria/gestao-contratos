@@ -4,11 +4,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { ProposalService, Proposal } from '../../services/proposal';
 import { ModalService } from '../../services/modal.service';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-proposal-view-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BreadcrumbComponent],
   templateUrl: './proposal-view-page.html',
   styleUrls: ['./proposal-view-page.css']
 })
@@ -24,6 +25,7 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
   isLoading = true;
   error = '';
   isEditMode = false;
+  activeTab = 'services';
 
   ngOnInit() {
     const id = this.route.snapshot.params['id'];
@@ -53,6 +55,14 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
       
       if (response && response.success) {
         this.proposal = response.data;
+        console.log('🔍 Proposal data received:', this.proposal);
+        console.log('🔍 Client info direct fields:', {
+          client_name: this.proposal?.client_name,
+          client_email: this.proposal?.client_email,
+          client_phone: this.proposal?.client_phone
+        });
+        console.log('🔍 Client nested object:', this.proposal?.client);
+        console.log('🔍 All proposal keys:', Object.keys(this.proposal || {}));
       } else {
         this.error = 'Proposta não encontrada';
       }
@@ -79,26 +89,6 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
     this.router.navigate(['/home/propostas']);
   }
 
-  async duplicateProposal() {
-    if (!this.proposal) return;
-
-    if (confirm(`Deseja duplicar a proposta "${this.proposal.proposal_number}"?`)) {
-      try {
-        const response = await firstValueFrom(this.proposalService.duplicateProposal(this.proposalId));
-        if (response && response.success) {
-          this.modalService.showSuccess('Proposta duplicada com sucesso!');
-          this.router.navigate(['/home/propostas/editar', response.data.id]);
-        }
-      } catch (error: any) {
-        console.error('❌ Error duplicating proposal:', error);
-        if (error?.status === 500 || error?.status === 404) {
-          this.modalService.showError('Funcionalidade de duplicar propostas ainda não implementada no backend.');
-        } else {
-          this.modalService.showError('Não foi possível duplicar a proposta.');
-        }
-      }
-    }
-  }
 
   async deleteProposal() {
     if (!this.proposal) return;
@@ -208,12 +198,6 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
     return !!(this.proposal && this.proposal.unique_link);
   }
 
-  canSignProposal(): boolean {
-    if (!this.proposal) return false;
-    const isSent = this.proposal.status === 'sent';
-    const isNotExpired = !this.isProposalExpired();
-    return isSent && isNotExpired;
-  }
 
   async generatePublicLink(): Promise<void> {
     if (!this.proposal) return;
@@ -241,31 +225,72 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
       false;
   }
 
-  async signProposal(): Promise<void> {
-    if (!this.proposal) return;
-
-    const confirmed = confirm(
-      `Confirma a assinatura da proposta ${this.proposal.proposal_number}?\n\n` +
-      `Valor total: ${this.formatCurrency(this.proposal.total_value)}\n\n` +
-      'Esta ação não pode ser desfeita.'
-    );
-
-    if (!confirmed) return;
-
-    try {
-      const response = await firstValueFrom(this.proposalService.signProposal(this.proposalId));
-      if (response && response.success) {
-        this.modalService.showSuccess('Proposta assinada com sucesso!');
-        // Recarregar a proposta para mostrar o novo status
-        await this.loadProposal();
-      }
-    } catch (error: any) {
-      console.error('❌ Error signing proposal:', error);
-      if (error?.status === 500 || error?.status === 404) {
-        this.modalService.showError('Funcionalidade de assinatura ainda não implementada no backend.');
-      } else {
-        this.modalService.showError('Não foi possível assinar a proposta.');
-      }
-    }
+  isTabActive(tabName: string): boolean {
+    return this.activeTab === tabName;
   }
+
+  setActiveTab(tabName: string): void {
+    this.activeTab = tabName;
+  }
+
+  getClientName(): string {
+    if (!this.proposal) return '';
+    
+    // Primeiro tenta client_name (campo direto)
+    if (this.proposal.client_name) {
+      return this.proposal.client_name;
+    }
+    
+    // Depois tenta o objeto client aninhado
+    if (this.proposal.client?.name) {
+      return this.proposal.client.name;
+    }
+    
+    return '';
+  }
+
+  getClientEmail(): string {
+    if (!this.proposal) return '';
+    
+    // Primeiro tenta client_email (campo direto)
+    if (this.proposal.client_email) {
+      return this.proposal.client_email;
+    }
+    
+    // Tenta o objeto client aninhado
+    if ((this.proposal as any).client?.email) {
+      return (this.proposal as any).client.email;
+    }
+    
+    // Tenta outras possibilidades
+    if ((this.proposal as any).email) {
+      return (this.proposal as any).email;
+    }
+    
+    console.log('❌ Client email not found in proposal data');
+    return '';
+  }
+
+  getClientPhone(): string {
+    if (!this.proposal) return '';
+    
+    // Primeiro tenta client_phone (campo direto)
+    if (this.proposal.client_phone) {
+      return this.proposal.client_phone;
+    }
+    
+    // Tenta o objeto client aninhado
+    if ((this.proposal as any).client?.phone) {
+      return (this.proposal as any).client.phone;
+    }
+    
+    // Tenta outras possibilidades
+    if ((this.proposal as any).phone) {
+      return (this.proposal as any).phone;
+    }
+    
+    console.log('❌ Client phone not found in proposal data');
+    return '';
+  }
+
 }
