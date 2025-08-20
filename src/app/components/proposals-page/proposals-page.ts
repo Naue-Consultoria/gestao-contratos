@@ -293,22 +293,23 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         
         if (publicUrl) {
           // Copiar automaticamente para a área de transferência
-          try {
-            await navigator.clipboard.writeText(publicUrl);
-            this.modalService.showSuccess(`Link público gerado e copiado para a área de transferência!\n\n${publicUrl}`);
-          } catch (error) {
-            // Fallback para navegadores antigos
-            const textArea = document.createElement('textarea');
-            textArea.value = publicUrl;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            this.modalService.showSuccess(`Link público gerado e copiado!\n\n${publicUrl}`);
-          }
+          const copySuccess = await this.copyLinkToClipboard(publicUrl);
           
-          // Recarregar a lista para mostrar o novo status
-          this.loadData();
+          if (copySuccess) {
+            // Se copiou com sucesso, atualizar o status da proposta
+            const statusUpdateSuccess = await this.updateProposalStatusToSent(proposal.id);
+            
+            if (statusUpdateSuccess) {
+              this.modalService.showSuccess(`Link público gerado e copiado para a área de transferência!\n\n${publicUrl}`);
+            } else {
+              this.modalService.showWarning(`Link público gerado e copiado para a área de transferência!\n\n${publicUrl}\n\nAviso: O status da proposta pode não ter sido atualizado automaticamente.`);
+            }
+            
+            // Recarregar a lista para mostrar o novo status
+            this.loadData();
+          } else {
+            this.modalService.showError('Link gerado, mas não foi possível copiá-lo para a área de transferência.');
+          }
         } else {
           this.modalService.showError('Erro ao gerar link público.');
         }
@@ -318,6 +319,52 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     } catch (error: any) {
       console.error('❌ Error generating public link:', error);
       this.modalService.showError('Não foi possível gerar o link público.');
+    }
+  }
+
+  /**
+   * Função auxiliar para copiar link para a área de transferência
+   */
+  private async copyLinkToClipboard(url: string): Promise<boolean> {
+    try {
+      await navigator.clipboard.writeText(url);
+      return true;
+    } catch (error) {
+      // Fallback para navegadores antigos
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        document.body.appendChild(textArea);
+        textArea.select();
+        const success = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return success;
+      } catch (fallbackError) {
+        console.error('❌ Erro ao copiar link:', error, fallbackError);
+        return false;
+      }
+    }
+  }
+
+  /**
+   * Função auxiliar para atualizar o status da proposta para "Enviada"
+   */
+  private async updateProposalStatusToSent(proposalId: number): Promise<boolean> {
+    try {
+      const statusResponse = await firstValueFrom(
+        this.proposalService.updateProposalStatus(proposalId, 'sent')
+      );
+      
+      if (statusResponse && statusResponse.success) {
+        console.log('✅ Status da proposta atualizado para "Enviada"');
+        return true;
+      } else {
+        console.error('⚠️ Aviso: Não foi possível atualizar o status da proposta:', statusResponse?.message);
+        return false;
+      }
+    } catch (statusError: any) {
+      console.error('⚠️ Erro ao atualizar status da proposta:', statusError);
+      return false;
     }
   }
 
