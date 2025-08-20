@@ -10,25 +10,22 @@ export class ContractExportService {
     try {
       console.log('🔄 Iniciando exportação DOCX...');
       
-      // Lazy load docx dependencies with better error handling
-      const [docxModule, fileSaverModule] = await Promise.all([
-        this.loadDocxModule(),
-        this.loadFileSaverModule()
-      ]);
+      // Carregar módulo DOCX sem dependência do Buffer
+      const docxModule = await this.loadDocxModuleForBrowser();
+      console.log('✅ Módulo DOCX carregado');
       
-      console.log('✅ Módulos carregados com sucesso');
-      
+      // Criar documento DOCX
       const doc = await this.createDocxDocument(contract, templateId, docxModule);
       console.log('✅ Documento DOCX criado');
       
-      const blob = await docxModule.Packer.toBlob(doc);
-      console.log('✅ Blob gerado');
+      // Converter para Blob usando API nativa do navegador
+      const blob = await this.convertDocxToBlob(doc, docxModule);
+      console.log('✅ Blob gerado com sucesso');
       
+      // Download do arquivo
       const fileName = this.generateFileName(contract, templateId, 'docx');
-      console.log('📄 Nome do arquivo:', fileName);
-      
-      fileSaverModule.saveAs(blob, fileName);
-      console.log('✅ Exportação concluída');
+      await this.downloadBlob(blob, fileName);
+      console.log('✅ Exportação DOCX concluída');
       
     } catch (error) {
       console.error('❌ Erro na exportação DOCX:', error);
@@ -37,195 +34,169 @@ export class ContractExportService {
       console.log('🔄 Tentando fallback para PDF...');
       try {
         await this.exportToPdf(contract, templateId);
-        alert('Não foi possível exportar como DOCX. O arquivo foi exportado como PDF.');
+        this.showUserNotification('Não foi possível exportar como DOCX. O arquivo foi exportado como PDF.');
       } catch (pdfError) {
         console.error('❌ Erro no fallback PDF:', pdfError);
-        throw new Error('Erro ao exportar documento. Tente novamente ou entre em contato com o suporte.');
+        this.showUserNotification('Erro ao exportar documento. Tente novamente ou atualize a página.');
+        throw new Error('Falha completa na exportação de documentos');
       }
     }
   }
 
-  private async loadDocxModule(): Promise<any> {
+  /**
+   * Carrega módulo DOCX sem dependências do Node.js/Buffer
+   */
+  private async loadDocxModuleForBrowser(): Promise<any> {
     try {
-      console.log('🔄 Carregando módulo DOCX...');
+      console.log('🔄 Carregando módulo DOCX para navegador...');
       
-      // Garantir que Buffer está disponível antes de carregar DOCX
-      await this.ensureBufferAvailable();
-      
-      // Tentar diferentes formas de importar o módulo
-      let module;
-      
-      try {
-        // Primeira tentativa: import normal
-        module = await import('docx');
-      } catch (firstError) {
-        console.log('⚠️ Primeira tentativa falhou, tentando alternativa...');
-        
-        try {
-          // Segunda tentativa: import com timeout
-          module = await Promise.race([
-            import('docx'),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Timeout ao carregar módulo')), 10000)
-            )
-          ]);
-        } catch (secondError) {
-          console.log('⚠️ Segunda tentativa falhou, tentando carregamento síncrono...');
-          
-          // Terceira tentativa: verificar se já está carregado globalmente
-          if (typeof window !== 'undefined' && (window as any).docx) {
-            module = (window as any).docx;
-          } else {
-            throw new Error('Todas as tentativas de carregamento falharam');
-          }
-        }
-      }
+      const module = await import('docx');
       
       // Verificar se os componentes necessários estão disponíveis
       const requiredComponents = ['Document', 'Packer', 'Paragraph', 'TextRun', 'HeadingLevel', 'AlignmentType'];
-      const missingComponents = requiredComponents.filter(comp => !module[comp]);
+      const missingComponents = requiredComponents.filter(comp => !(module as any)[comp]);
       
       if (missingComponents.length > 0) {
-        console.error('❌ Componentes faltando:', missingComponents);
-        throw new Error(`Módulo DOCX incompleto. Faltam: ${missingComponents.join(', ')}`);
+        throw new Error(`Componentes DOCX faltando: ${missingComponents.join(', ')}`);
       }
       
-      console.log('✅ Módulo DOCX carregado com sucesso');
+      console.log('✅ Módulo DOCX carregado para navegador');
       return module;
       
     } catch (error) {
       console.error('❌ Erro ao carregar módulo DOCX:', error);
-      throw new Error('Não foi possível carregar o módulo de exportação DOCX. Verifique sua conexão e tente novamente.');
+      throw new Error('Não foi possível carregar a biblioteca de exportação DOCX');
     }
   }
 
-  private async ensureBufferAvailable(): Promise<void> {
+  /**
+   * Converte documento DOCX para Blob usando APIs nativas do navegador
+   */
+  private async convertDocxToBlob(doc: any, docxModule: any): Promise<Blob> {
     try {
-      console.log('🔄 Verificando disponibilidade do Buffer...');
+      console.log('🔄 Convertendo documento para Blob...');
       
-      // Importar Buffer se não estiver disponível
-      if (typeof globalThis !== 'undefined' && !(globalThis as any).Buffer) {
-        const { Buffer } = await import('buffer');
-        (globalThis as any).Buffer = Buffer;
-        (globalThis as any).global = globalThis;
+      // Usar Packer.toBlob que é uma API nativa do navegador
+      const blob = await docxModule.Packer.toBlob(doc);
+      
+      if (!(blob instanceof Blob)) {
+        throw new Error('Falha ao gerar Blob do documento DOCX');
       }
       
-      if (typeof window !== 'undefined' && !(window as any).Buffer) {
-        const { Buffer } = await import('buffer');
-        (window as any).Buffer = Buffer;
-        
-        // Garantir que isBuffer funciona
-        if (!Buffer.isBuffer || typeof Buffer.isBuffer !== 'function') {
-          Buffer.isBuffer = function(obj: any): obj is Buffer {
-            if (obj == null) return false;
-            if (obj instanceof Buffer) return true;
-            if (obj && typeof obj === 'object' && 
-                typeof obj.constructor === 'function' &&
-                obj.constructor.name === 'Buffer') {
-              return true;
-            }
-            return obj instanceof Uint8Array && obj.constructor.name === 'Buffer';
-          };
-        }
-      }
-      
-      // Verificar se Buffer.isBuffer está funcionando
-      const { Buffer } = await import('buffer');
-      const testBuffer = Buffer.from('test');
-      if (!Buffer.isBuffer(testBuffer)) {
-        throw new Error('Buffer.isBuffer não está funcionando corretamente');
-      }
-      
-      console.log('✅ Buffer configurado e funcionando corretamente');
+      console.log('✅ Conversão para Blob bem-sucedida, tamanho:', blob.size, 'bytes');
+      return blob;
       
     } catch (error) {
-      console.error('❌ Erro ao configurar Buffer:', error);
-      throw new Error('Não foi possível configurar o Buffer para exportação DOCX');
+      console.error('❌ Erro na conversão para Blob:', error);
+      
+      // Fallback: tentar usar toBase64 e converter para Blob
+      try {
+        console.log('🔄 Tentando fallback com base64...');
+        const base64String = await docxModule.Packer.toBase64String(doc);
+        
+        // Converter base64 para Uint8Array
+        const binaryString = atob(base64String);
+        const bytes = new Uint8Array(binaryString.length);
+        
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        // Criar Blob a partir do Uint8Array
+        const blob = new Blob([bytes], { 
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+        });
+        
+        console.log('✅ Fallback base64 bem-sucedido, tamanho:', blob.size, 'bytes');
+        return blob;
+        
+      } catch (fallbackError) {
+        console.error('❌ Fallback base64 também falhou:', fallbackError);
+        throw new Error('Não foi possível converter documento para formato de download');
+      }
     }
   }
 
-  private async loadFileSaverModule(): Promise<any> {
+  /**
+   * Faz download do Blob usando APIs nativas do navegador
+   */
+  private async downloadBlob(blob: Blob, fileName: string): Promise<void> {
     try {
-      console.log('🔄 Carregando módulo file-saver...');
+      console.log('🔄 Iniciando download:', fileName);
       
-      let saveAsFunction;
-      
+      // Primeira tentativa: usar file-saver se disponível
       try {
-        // Primeira tentativa: import normal
-        const module = await import('file-saver');
-        console.log('📦 Módulo file-saver carregado:', Object.keys(module));
-        
-        // Verificar diferentes formas de acessar saveAs
-        if (module.saveAs) {
-          saveAsFunction = module.saveAs;
-        } else if (module.default && module.default.saveAs) {
-          saveAsFunction = module.default.saveAs;
-        } else if (module.default && typeof module.default === 'function') {
-          saveAsFunction = module.default;
-        } else {
-          throw new Error('saveAs não encontrado no módulo');
+        const fileSaver = await import('file-saver');
+        if (fileSaver.saveAs) {
+          fileSaver.saveAs(blob, fileName);
+          console.log('✅ Download via file-saver');
+          return;
         }
-        
-      } catch (importError) {
-        console.log('⚠️ Tentativa de import falhou, usando fallback nativo...');
-        
-        // Fallback: implementar download nativo
-        saveAsFunction = this.createNativeDownloadFunction();
+      } catch (fileSaverError) {
+        console.log('⚠️ file-saver não disponível, usando método nativo');
       }
       
-      console.log('✅ Função de salvamento carregada com sucesso');
-      return { saveAs: saveAsFunction };
+      // Fallback: usar APIs nativas do navegador
+      this.downloadBlobNative(blob, fileName);
+      console.log('✅ Download via API nativa');
       
     } catch (error) {
-      console.error('❌ Erro ao carregar módulo file-saver:', error);
-      
-      // Último fallback: função nativa
-      console.log('🔄 Usando função de download nativa como último recurso...');
-      return { saveAs: this.createNativeDownloadFunction() };
+      console.error('❌ Erro no download:', error);
+      throw new Error('Não foi possível fazer download do arquivo');
     }
   }
 
-  private createNativeDownloadFunction(): (blob: Blob, fileName: string) => void {
-    return (blob: Blob, fileName: string) => {
+  /**
+   * Download usando APIs nativas do navegador (sem dependências externas)
+   */
+  private downloadBlobNative(blob: Blob, fileName: string): void {
+    try {
+      // Criar URL do Blob
+      const url = URL.createObjectURL(blob);
+      
+      // Criar elemento de link temporário
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.style.display = 'none';
+      
+      // Adicionar ao DOM, clicar e remover
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Limpar URL após um pequeno delay
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+    } catch (error) {
+      console.error('❌ Erro no download nativo:', error);
+      
+      // Último recurso: abrir em nova aba
       try {
-        console.log('📥 Usando download nativo para:', fileName);
-        
-        // Criar URL do blob
-        const url = window.URL.createObjectURL(blob);
-        
-        // Criar elemento de link temporário
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName;
-        link.style.display = 'none';
-        
-        // Adicionar ao DOM, clicar e remover
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Limpar URL do blob
-        setTimeout(() => {
-          window.URL.revokeObjectURL(url);
-        }, 100);
-        
-        console.log('✅ Download nativo concluído');
-        
-      } catch (error) {
-        console.error('❌ Erro no download nativo:', error);
-        
-        // Fallback final: tentar abrir em nova aba
-        try {
-          const url = window.URL.createObjectURL(blob);
-          window.open(url, '_blank');
-          console.log('✅ Arquivo aberto em nova aba');
-        } catch (finalError) {
-          console.error('❌ Todas as tentativas de download falharam:', finalError);
-          alert('Não foi possível baixar o arquivo. Tente novamente ou use um navegador diferente.');
+        const url = URL.createObjectURL(blob);
+        const newWindow = window.open(url, '_blank');
+        if (!newWindow) {
+          throw new Error('Popup bloqueado');
         }
+        console.log('✅ Arquivo aberto em nova aba');
+      } catch (finalError) {
+        console.error('❌ Todas as tentativas falharam:', finalError);
+        throw new Error('Não foi possível fazer download. Verifique se popups estão habilitados.');
       }
-    };
+    }
   }
+
+  /**
+   * Mostra notificação para o usuário
+   */
+  private showUserNotification(message: string): void {
+    // Usar alert simples por enquanto - pode ser substituído por toast/modal
+    alert(message);
+  }
+
+
 
   async exportToPdf(contract: any, templateId: string): Promise<void> {
     try {

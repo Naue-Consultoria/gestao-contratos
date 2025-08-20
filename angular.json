@@ -51,8 +51,6 @@
               ],
               "allowedCommonJsDependencies": [
                 "buffer",
-                "base64-js",
-                "ieee754", 
                 "file-saver",
                 "docx",
                 "jspdf",
@@ -67,8 +65,7 @@
                 "fonts": true
               },
               "define": {
-                "global": "globalThis",
-                "Buffer": "buffer"
+                "global": "globalThis"
               },
               "outputHashing": "all",
               "sourceMap": false,
