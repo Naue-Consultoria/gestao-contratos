@@ -49,13 +49,24 @@
                   "maximumError": "40kB"
                 }
               ],
+              "allowedCommonJsDependencies": [
+                "buffer",
+                "file-saver",
+                "docx",
+                "jspdf",
+                "html2canvas",
+                "canvg",
+                "rgbcolor",
+                "raf"
+              ],
               "optimization": {
                 "scripts": true,
                 "styles": true,
                 "fonts": true
               },
               "define": {
-                "global": "globalThis"
+                "global": "globalThis",
+                "Buffer": "buffer"
               },
               "outputHashing": "all",
               "sourceMap": false,

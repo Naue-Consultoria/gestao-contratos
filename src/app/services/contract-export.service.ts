@@ -7,18 +7,112 @@ import { Injectable } from '@angular/core';
 export class ContractExportService {
 
   async exportToDocx(contract: any, templateId: string): Promise<void> {
-    // Lazy load docx dependencies
-    const [{ Document, Packer }, { saveAs }] = await Promise.all([
-      import('docx'),
-      import('file-saver')
-    ]);
-    
-    const doc = await this.createDocxDocument(contract, templateId);
-    
-    const blob = await Packer.toBlob(doc);
-    const fileName = this.generateFileName(contract, templateId, 'docx');
-    
-    saveAs(blob, fileName);
+    try {
+      console.log('🔄 Iniciando exportação DOCX...');
+      
+      // Lazy load docx dependencies with better error handling
+      const [docxModule, fileSaverModule] = await Promise.all([
+        this.loadDocxModule(),
+        this.loadFileSaverModule()
+      ]);
+      
+      console.log('✅ Módulos carregados com sucesso');
+      
+      const doc = await this.createDocxDocument(contract, templateId, docxModule);
+      console.log('✅ Documento DOCX criado');
+      
+      const blob = await docxModule.Packer.toBlob(doc);
+      console.log('✅ Blob gerado');
+      
+      const fileName = this.generateFileName(contract, templateId, 'docx');
+      console.log('📄 Nome do arquivo:', fileName);
+      
+      fileSaverModule.saveAs(blob, fileName);
+      console.log('✅ Exportação concluída');
+      
+    } catch (error) {
+      console.error('❌ Erro na exportação DOCX:', error);
+      
+      // Fallback para PDF se DOCX falhar
+      console.log('🔄 Tentando fallback para PDF...');
+      try {
+        await this.exportToPdf(contract, templateId);
+        alert('Não foi possível exportar como DOCX. O arquivo foi exportado como PDF.');
+      } catch (pdfError) {
+        console.error('❌ Erro no fallback PDF:', pdfError);
+        throw new Error('Erro ao exportar documento. Tente novamente ou entre em contato com o suporte.');
+      }
+    }
+  }
+
+  private async loadDocxModule(): Promise<any> {
+    try {
+      console.log('🔄 Carregando módulo DOCX...');
+      
+      // Tentar diferentes formas de importar o módulo
+      let module;
+      
+      try {
+        // Primeira tentativa: import normal
+        module = await import('docx');
+      } catch (firstError) {
+        console.log('⚠️ Primeira tentativa falhou, tentando alternativa...');
+        
+        try {
+          // Segunda tentativa: import com timeout
+          module = await Promise.race([
+            import('docx'),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout ao carregar módulo')), 10000)
+            )
+          ]);
+        } catch (secondError) {
+          console.log('⚠️ Segunda tentativa falhou, tentando carregamento síncrono...');
+          
+          // Terceira tentativa: verificar se já está carregado globalmente
+          if (typeof window !== 'undefined' && (window as any).docx) {
+            module = (window as any).docx;
+          } else {
+            throw new Error('Todas as tentativas de carregamento falharam');
+          }
+        }
+      }
+      
+      // Verificar se os componentes necessários estão disponíveis
+      const requiredComponents = ['Document', 'Packer', 'Paragraph', 'TextRun', 'HeadingLevel', 'AlignmentType'];
+      const missingComponents = requiredComponents.filter(comp => !module[comp]);
+      
+      if (missingComponents.length > 0) {
+        console.error('❌ Componentes faltando:', missingComponents);
+        throw new Error(`Módulo DOCX incompleto. Faltam: ${missingComponents.join(', ')}`);
+      }
+      
+      console.log('✅ Módulo DOCX carregado com sucesso');
+      return module;
+      
+    } catch (error) {
+      console.error('❌ Erro ao carregar módulo DOCX:', error);
+      throw new Error('Não foi possível carregar o módulo de exportação DOCX. Verifique sua conexão e tente novamente.');
+    }
+  }
+
+  private async loadFileSaverModule(): Promise<any> {
+    try {
+      console.log('🔄 Carregando módulo file-saver...');
+      
+      const module = await import('file-saver');
+      
+      if (!module.saveAs) {
+        console.error('❌ saveAs não encontrado no módulo file-saver');
+        throw new Error('Módulo file-saver incompleto');
+      }
+      
+      console.log('✅ Módulo file-saver carregado com sucesso');
+      return module;
+    } catch (error) {
+      console.error('❌ Erro ao carregar módulo file-saver:', error);
+      throw new Error('Não foi possível carregar o módulo de salvamento de arquivos');
+    }
   }
 
   async exportToPdf(contract: any, templateId: string): Promise<void> {
@@ -106,8 +200,8 @@ export class ContractExportService {
     pdf.save(fileName);
   }
 
-  private async createDocxDocument(contract: any, templateId: string): Promise<any> {
-    const { Document, Paragraph, TextRun, HeadingLevel, AlignmentType } = await import('docx');
+  private async createDocxDocument(contract: any, templateId: string, docxModule: any): Promise<any> {
+    const { Document, Paragraph, TextRun, HeadingLevel, AlignmentType } = docxModule;
     const content = this.generateDocumentContent(contract, templateId);
     
     return new Document({
