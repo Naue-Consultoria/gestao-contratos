@@ -87,28 +87,28 @@ export class PublicProposalService {
    * Selecionar serviços da proposta
    */
   selectServices(token: string, data: ServiceSelectionData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/select-services/${token}`, data);
+    return this.http.post(`${this.apiUrl}/${token}/services`, data);
   }
 
   /**
    * Assinar proposta eletronicamente
    */
   signProposal(token: string, data: SignatureData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/sign/${token}`, data);
+    return this.http.post(`${this.apiUrl}/${token}/sign`, data);
   }
 
   /**
    * Confirmar proposta (finalizar processo)
    */
   confirmProposal(token: string, data: ConfirmationData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/confirm/${token}`, data);
+    return this.http.post(`${this.apiUrl}/${token}/confirm`, data);
   }
 
   /**
    * Rejeitar proposta
    */
   rejectProposal(token: string, reason?: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/reject/${token}`, { rejection_reason: reason });
+    return this.http.post(`${this.apiUrl}/${token}/reject`, { rejection_reason: reason });
   }
 
   /**
