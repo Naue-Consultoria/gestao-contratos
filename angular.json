@@ -51,6 +51,8 @@
               ],
               "allowedCommonJsDependencies": [
                 "buffer",
+                "base64-js",
+                "ieee754", 
                 "file-saver",
                 "docx",
                 "jspdf",

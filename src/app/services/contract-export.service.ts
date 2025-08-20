@@ -49,6 +49,9 @@ export class ContractExportService {
     try {
       console.log('🔄 Carregando módulo DOCX...');
       
+      // Garantir que Buffer está disponível antes de carregar DOCX
+      await this.ensureBufferAvailable();
+      
       // Tentar diferentes formas de importar o módulo
       let module;
       
@@ -93,6 +96,51 @@ export class ContractExportService {
     } catch (error) {
       console.error('❌ Erro ao carregar módulo DOCX:', error);
       throw new Error('Não foi possível carregar o módulo de exportação DOCX. Verifique sua conexão e tente novamente.');
+    }
+  }
+
+  private async ensureBufferAvailable(): Promise<void> {
+    try {
+      console.log('🔄 Verificando disponibilidade do Buffer...');
+      
+      // Importar Buffer se não estiver disponível
+      if (typeof globalThis !== 'undefined' && !(globalThis as any).Buffer) {
+        const { Buffer } = await import('buffer');
+        (globalThis as any).Buffer = Buffer;
+        (globalThis as any).global = globalThis;
+      }
+      
+      if (typeof window !== 'undefined' && !(window as any).Buffer) {
+        const { Buffer } = await import('buffer');
+        (window as any).Buffer = Buffer;
+        
+        // Garantir que isBuffer funciona
+        if (!Buffer.isBuffer || typeof Buffer.isBuffer !== 'function') {
+          Buffer.isBuffer = function(obj: any): obj is Buffer {
+            if (obj == null) return false;
+            if (obj instanceof Buffer) return true;
+            if (obj && typeof obj === 'object' && 
+                typeof obj.constructor === 'function' &&
+                obj.constructor.name === 'Buffer') {
+              return true;
+            }
+            return obj instanceof Uint8Array && obj.constructor.name === 'Buffer';
+          };
+        }
+      }
+      
+      // Verificar se Buffer.isBuffer está funcionando
+      const { Buffer } = await import('buffer');
+      const testBuffer = Buffer.from('test');
+      if (!Buffer.isBuffer(testBuffer)) {
+        throw new Error('Buffer.isBuffer não está funcionando corretamente');
+      }
+      
+      console.log('✅ Buffer configurado e funcionando corretamente');
+      
+    } catch (error) {
+      console.error('❌ Erro ao configurar Buffer:', error);
+      throw new Error('Não foi possível configurar o Buffer para exportação DOCX');
     }
   }
 
