@@ -156,74 +156,175 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   private loadDashboardData() {
     console.log('Iniciando carregamento dos dados do dashboard...');
     
-    // Buscar dados de contratos, serviços e clientes em paralelo
-    forkJoin({
-      contractStats: this.contractService.getStats(),
-      serviceStats: this.serviceService.getStats(),
-      clientsData: this.clientService.getClients()
-    }).subscribe({
-      next: (response) => {
-        console.log('Dados recebidos:', response);
-        const totalClients = response.clientsData.total || 0;
-        this.updateStatCards(response.contractStats.stats, response.serviceStats.stats, totalClients);
-      },
-      error: (error) => {
-        console.error('Erro ao carregar dados do dashboard:', error);
-        // Usar dados com valores zerados em caso de erro
-        this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
-      }
-    });
+    // Se for admin, carregar dados gerais como antes
+    if (this.authService.isAdmin()) {
+      // Buscar dados de contratos, serviços e clientes em paralelo
+      forkJoin({
+        contractStats: this.contractService.getStats(),
+        serviceStats: this.serviceService.getStats(),
+        clientsData: this.clientService.getClients()
+      }).subscribe({
+        next: (response) => {
+          console.log('Dados gerais recebidos:', response);
+          const totalClients = response.clientsData.total || 0;
+          this.updateStatCards(response.contractStats.stats, response.serviceStats.stats, totalClients);
+        },
+        error: (error) => {
+          console.error('Erro ao carregar dados do dashboard:', error);
+          // Usar dados com valores zerados em caso de erro
+          this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
+        }
+      });
+    } else {
+      // Para usuários normais, carregar apenas contratos vinculados ao usuário
+      this.loadUserSpecificData();
+    }
   }
 
   private loadChartData() {
-    // Buscar contratos para gerar dados do gráfico
-    this.contractService.getContracts().subscribe({
-      next: (response) => {
-        this.generateChartData(response.contracts);
-        if (this.contractsChart) {
-          this.contractsChart.destroy();
+    if (this.authService.isAdmin()) {
+      // Para admin, carregar dados de todos os contratos como antes
+      this.contractService.getContracts().subscribe({
+        next: (response) => {
+          this.generateChartData(response.contracts);
+          if (this.contractsChart) {
+            this.contractsChart.destroy();
+          }
+          this.initContractsChart();
+        },
+        error: (error) => {
+          console.error('Erro ao carregar dados do gráfico:', error);
+          // Usar dados mock em caso de erro
+          this.generateMockChartData();
+          if (this.contractsChart) {
+            this.contractsChart.destroy();
+          }
+          this.initContractsChart();
         }
-        this.initContractsChart();
-      },
-      error: (error) => {
-        console.error('Erro ao carregar dados do gráfico:', error);
-        // Usar dados mock em caso de erro
-        this.generateMockChartData();
-        if (this.contractsChart) {
-          this.contractsChart.destroy();
+      });
+    } else {
+      // Para usuários normais, carregar dados apenas dos seus contratos
+      this.contractService.getContracts().subscribe({
+        next: (response) => {
+          const userContracts = response.contracts || [];
+          this.generateUserChartData(userContracts);
+          if (this.contractsChart) {
+            this.contractsChart.destroy();
+          }
+          this.initContractsChart();
+        },
+        error: (error) => {
+          console.error('Erro ao carregar dados do gráfico do usuário:', error);
+          // Usar dados zerados em caso de erro
+          this.generateEmptyChartData();
+          if (this.contractsChart) {
+            this.contractsChart.destroy();
+          }
+          this.initContractsChart();
         }
-        this.initContractsChart();
-      }
-    });
+      });
+    }
   }
 
   private loadRecentActivities() {
     console.log('Carregando atividades recentes dos serviços...');
     
-    this.contractService.getRecentServiceActivities(10).subscribe({
-      next: (response) => {
-        console.log('Atividades recebidas:', response);
-        if (response.success && response.activities) {
-          this.recentActivities = response.activities.map((activity: any) => ({
-            id: activity.id,
-            time: activity.time,
-            title: activity.title,
-            description: activity.description,
-            type: 'service',
-            status: activity.status,
-            category: activity.category,
-            value: activity.value,
-            duration: activity.duration,
-            contractId: activity.contractId,
-            serviceId: activity.serviceId
-          }));
+    if (this.authService.isAdmin()) {
+      // Para admin, carregar todas as atividades como antes
+      this.contractService.getRecentServiceActivities(10).subscribe({
+        next: (response) => {
+          console.log('Atividades recebidas:', response);
+          if (response.success && response.activities) {
+            this.recentActivities = response.activities.map((activity: any) => ({
+              id: activity.id,
+              time: activity.time,
+              title: activity.title,
+              description: activity.description,
+              type: 'service',
+              status: activity.status,
+              category: activity.category,
+              value: activity.value,
+              duration: activity.duration,
+              contractId: activity.contractId,
+              serviceId: activity.serviceId
+            }));
+          }
+        },
+        error: (error) => {
+          console.error('Erro ao carregar atividades recentes:', error);
+          // Manter atividades mock em caso de erro para demonstração
         }
+      });
+    } else {
+      // Para usuários normais, carregar apenas atividades dos seus contratos
+      this.loadUserActivities();
+    }
+  }
+
+  private loadUserActivities() {
+    console.log('Carregando atividades dos contratos do usuário...');
+    
+    // Buscar contratos do usuário primeiro
+    this.contractService.getContracts().subscribe({
+      next: (response) => {
+        const userContracts = response.contracts || [];
+        const userActivities: Activity[] = [];
+        
+        // Converter serviços dos contratos do usuário em atividades
+        userContracts.forEach(contract => {
+          if (contract.contract_services) {
+            contract.contract_services.forEach((service: any) => {
+              const timeAgo = this.calculateTimeAgo(service.updated_at || contract.created_at);
+              
+              userActivities.push({
+                id: service.id,
+                time: timeAgo,
+                title: service.service.name,
+                description: `Contrato: ${contract.contract_number} - Cliente: ${contract.client.name}`,
+                type: 'service',
+                status: service.status || 'not_started',
+                category: service.service.category,
+                value: service.total_value,
+                duration: service.service.duration ? `${service.service.duration} dias` : undefined,
+                contractId: contract.id,
+                serviceId: service.service.id
+              });
+            });
+          }
+        });
+        
+        // Ordenar por data mais recente e limitar a 10
+        this.recentActivities = userActivities
+          .sort((a, b) => b.id! - a.id!)
+          .slice(0, 10);
+          
+        console.log('Atividades do usuário carregadas:', this.recentActivities);
       },
       error: (error) => {
-        console.error('Erro ao carregar atividades recentes:', error);
-        // Manter atividades mock em caso de erro para demonstração
+        console.error('Erro ao carregar atividades do usuário:', error);
+        this.recentActivities = [];
       }
     });
+  }
+
+  private calculateTimeAgo(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffHours < 1) {
+      return 'Há poucos minutos';
+    } else if (diffHours < 24) {
+      return `Há ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+    } else if (diffDays === 1) {
+      return 'Ontem';
+    } else if (diffDays < 7) {
+      return `Há ${diffDays} dias`;
+    } else {
+      return date.toLocaleDateString('pt-BR');
+    }
   }
 
   private generateChartData(contracts: any[]) {
@@ -262,6 +363,61 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     this.monthlyContractsData.labels = months;
     this.monthlyContractsData.datasets[0].data = createdData;
     this.monthlyContractsData.datasets[1].data = activeData;
+  }
+
+  private generateUserChartData(contracts: any[]) {
+    // Obter últimos 6 meses para dados do usuário
+    const months = [];
+    const myContractsData = [];
+    const myServicesData = [];
+    
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const monthKey = date.toISOString().substring(0, 7); // YYYY-MM
+      const monthLabel = date.toLocaleDateString('pt-BR', { month: 'short' });
+      
+      months.push(monthLabel);
+      
+      // Contar contratos do usuário criados no mês
+      const contractsInMonth = contracts.filter(contract => {
+        const contractDate = new Date(contract.created_at).toISOString().substring(0, 7);
+        return contractDate === monthKey;
+      }).length;
+      
+      // Contar serviços do usuário ativos/concluídos no mês
+      let servicesInMonth = 0;
+      contracts.forEach(contract => {
+        if (contract.contract_services) {
+          contract.contract_services.forEach((service: any) => {
+            const serviceDate = service.updated_at ? new Date(service.updated_at).toISOString().substring(0, 7) : monthKey;
+            if (serviceDate === monthKey && (service.status === 'in_progress' || service.status === 'completed')) {
+              servicesInMonth++;
+            }
+          });
+        }
+      });
+      
+      myContractsData.push(contractsInMonth);
+      myServicesData.push(servicesInMonth);
+    }
+    
+    this.monthlyContractsData.labels = months;
+    this.monthlyContractsData.datasets[0].data = myContractsData;
+    this.monthlyContractsData.datasets[0].label = 'Meus Contratos';
+    this.monthlyContractsData.datasets[1].data = myServicesData;
+    this.monthlyContractsData.datasets[1].label = 'Meus Serviços';
+  }
+
+  private generateEmptyChartData() {
+    const months = ['Ago', 'Set', 'Out', 'Nov', 'Dez', 'Jan'];
+    const emptyData = [0, 0, 0, 0, 0, 0];
+    
+    this.monthlyContractsData.labels = months;
+    this.monthlyContractsData.datasets[0].data = emptyData;
+    this.monthlyContractsData.datasets[0].label = 'Meus Contratos';
+    this.monthlyContractsData.datasets[1].data = emptyData;
+    this.monthlyContractsData.datasets[1].label = 'Meus Serviços';
   }
 
   private generateMockChartData() {
@@ -592,16 +748,106 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     return action.id;
   }
 
+  private loadUserSpecificData() {
+    console.log('Carregando dados específicos do usuário...');
+    
+    // Buscar apenas contratos vinculados ao usuário logado
+    this.contractService.getContracts().subscribe({
+      next: (response) => {
+        console.log('Contratos do usuário recebidos:', response);
+        const userContracts = response.contracts || [];
+        
+        // Calcular estatísticas baseadas nos contratos do usuário
+        const userStats = this.calculateUserStats(userContracts);
+        
+        // Atualizar cards com dados específicos do usuário
+        this.updateUserStatCards(userStats, userContracts.length);
+      },
+      error: (error) => {
+        console.error('Erro ao carregar contratos do usuário:', error);
+        // Usar dados zerados em caso de erro
+        this.updateUserStatCards({ myContracts: 0, myActiveServices: 0, myCompletedServices: 0 }, 0);
+      }
+    });
+  }
+
+  private calculateUserStats(contracts: any[]) {
+    const myContracts = contracts.length;
+    let myActiveServices = 0;
+    let myCompletedServices = 0;
+    
+    contracts.forEach(contract => {
+      if (contract.contract_services) {
+        contract.contract_services.forEach((service: any) => {
+          if (service.status === 'in_progress' || service.status === 'scheduled') {
+            myActiveServices++;
+          } else if (service.status === 'completed') {
+            myCompletedServices++;
+          }
+        });
+      }
+    });
+    
+    return { myContracts, myActiveServices, myCompletedServices };
+  }
+
+  private updateUserStatCards(userStats: any, totalContracts: number) {
+    this.statCards = [
+      { 
+        id: 'my-contracts',
+        label: 'Meus Contratos', 
+        value: userStats.myContracts || 0, 
+        change: userStats.myContracts === 0 ? 'Nenhum contrato vinculado' : `${userStats.myContracts} contrato${userStats.myContracts > 1 ? 's' : ''} vinculado${userStats.myContracts > 1 ? 's' : ''}`,
+        changeType: 'positive', 
+        icon: 'fas fa-file-contract', 
+        progress: userStats.myContracts === 0 ? 0 : Math.min((userStats.myContracts / 10) * 100, 100),
+        color: '#003b2b', 
+        bgColor: 'rgba(14, 155, 113, 0.15)' 
+      },
+      { 
+        id: 'my-active-services',
+        label: 'Serviços Ativos', 
+        value: userStats.myActiveServices || 0, 
+        change: userStats.myActiveServices === 0 ? 'Nenhum serviço ativo' : 'Serviços em andamento/agendados',
+        changeType: 'positive', 
+        icon: 'fas fa-tasks', 
+        progress: userStats.myActiveServices === 0 ? 0 : Math.min((userStats.myActiveServices / 20) * 100, 100), 
+        color: '#003b2b', 
+        bgColor: 'rgba(14, 155, 113, 0.15)' 
+      },
+      { 
+        id: 'my-completed-services',
+        label: 'Serviços Concluídos', 
+        value: userStats.myCompletedServices || 0, 
+        change: userStats.myCompletedServices === 0 ? 'Nenhum serviço concluído' : 'Serviços finalizados',
+        changeType: 'positive', 
+        icon: 'fas fa-check-circle', 
+        progress: userStats.myCompletedServices === 0 ? 0 : Math.min((userStats.myCompletedServices / 30) * 100, 100),
+        color: '#003b2b', 
+        bgColor: 'rgba(14, 155, 113, 0.15)' 
+      },
+      { 
+        id: 'my-progress',
+        label: 'Progresso Geral', 
+        value: userStats.myActiveServices + userStats.myCompletedServices === 0 ? '0%' : `${Math.round((userStats.myCompletedServices / (userStats.myActiveServices + userStats.myCompletedServices)) * 100)}%`, 
+        change: 'Percentual de conclusão',
+        changeType: 'positive', 
+        icon: 'fas fa-chart-pie', 
+        progress: userStats.myActiveServices + userStats.myCompletedServices === 0 ? 0 : Math.round((userStats.myCompletedServices / (userStats.myActiveServices + userStats.myCompletedServices)) * 100),
+        color: '#003b2b', 
+        bgColor: 'rgba(14, 155, 113, 0.15)' 
+      }
+    ];
+  }
+
   private filterQuickActionsByRole() {
     // Se for admin, manter todas as ações
     if (this.authService.isAdmin()) {
       return;
     }
     
-    // Para usuários normais, manter apenas rotinas
-    this.quickActions = this.quickActions.filter(action => 
-      action.id === 'routines'
-    );
+    // Para usuários normais, remover todos os quick actions
+    this.quickActions = [];
   }
 
   // Métodos para responsividade do gráfico
