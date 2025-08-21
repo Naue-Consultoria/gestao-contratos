@@ -191,3 +191,11 @@
   (onConfirm)="confirmDeleteProposal()"
   (onCancel)="cancelDeleteProposal()">
 </app-delete-confirmation-modal>
+
+<!-- Convert to Contract Modal -->
+<app-proposal-to-contract-modal
+  [isOpen]="showConvertModal"
+  [proposal]="selectedProposalForConversion"
+  (close)="closeConvertModal()"
+  (converted)="onConversionCompleted($event)">
+</app-proposal-to-contract-modal>

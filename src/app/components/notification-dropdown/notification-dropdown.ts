@@ -43,10 +43,6 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
       notifications => {
         this.notifications = notifications.filter(n => n.persistent);
         
-        // Para teste, se tiver poucas notificações, criar algumas para demonstrar o scroll
-        if (this.notifications.length < 8) {
-          this.createTestNotifications();
-        }
         
         // Inicialmente mostrar apenas as primeiras para permitir scroll
         this.maxItemsToShow = 5;
@@ -56,23 +52,6 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
     );
   }
   
-  private createTestNotifications() {
-    const testNotifications: Notification[] = [];
-    for (let i = 1; i <= 15; i++) {
-      testNotifications.push({
-        id: `test-${i}`,
-        title: `Notificação de Teste ${i}`,
-        message: `Esta é uma notificação de teste número ${i} para testar o scroll infinito.`,
-        type: 'info',
-        icon: 'fas fa-info-circle',
-        timestamp: new Date(Date.now() - i * 60000),
-        isRead: i % 3 === 0,
-        persistent: true,
-        priority: 'normal'
-      });
-    }
-    this.notifications = [...this.notifications, ...testNotifications];
-  }
   
   ngOnDestroy() {
     this.subscription?.unsubscribe();

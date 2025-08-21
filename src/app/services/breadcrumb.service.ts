@@ -199,7 +199,7 @@ export class BreadcrumbService {
         const breadcrumbs: any[] = [
           { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
           { label: 'Rotinas de Contratos', url: '/home/rotinas' },
-          { label: `Detalhes do Contrato #${urlParts[3]}` }
+          { label: `Detalhes da Rotina #${urlParts[3]}` }
         ];
         this.setBreadcrumbs(breadcrumbs);
         return;

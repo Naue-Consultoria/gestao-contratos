@@ -234,7 +234,7 @@ export const routes: Routes = [
         path: 'rotinas/:id',
         component: ContractViewPageComponent,
         canActivate: [UserGuard],
-        title: 'Detalhes do Contrato - NAUE Consultoria',
+        title: 'Detalhes da Rotina - NAUE Consultoria',
       },
 
       // Gestão de usuários

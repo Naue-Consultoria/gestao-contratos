@@ -220,6 +220,16 @@ export class ProposalService {
   }
 
   /**
+   * Marcar proposta como convertida
+   */
+  markAsConverted(id: number, contractId: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/mark-converted`, { 
+      converted_to_contract_id: contractId,
+      status: 'converted'
+    });
+  }
+
+  /**
    * Atualizar lista local de propostas
    */
   refreshProposals(filters?: ProposalFilters): void {

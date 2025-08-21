@@ -84,6 +84,7 @@ export class NotificationService {
     private websocketService: WebsocketService
   ) {
     this.loadNotificationsFromStorage();
+    this.removeTestNotifications(); // Remove notificações de teste ao inicializar
     this.fetchUserNotifications();
     this.fetchUnreadCount();
     this.listenForRealTimeNotifications();
@@ -227,6 +228,13 @@ export class NotificationService {
 
   clearHistory(): void {
     this.notificationHistory.next([]);
+    this.updateUnreadCount();
+    this.saveNotificationsToStorage();
+  }
+
+  removeTestNotifications(): void {
+    const history = this.notificationHistory.value.filter(n => !n.id.startsWith('test-'));
+    this.notificationHistory.next(history);
     this.updateUnreadCount();
     this.saveNotificationsToStorage();
   }
