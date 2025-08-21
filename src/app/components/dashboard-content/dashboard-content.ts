@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ContractService } from '../../services/contract';
 import { ServiceService } from '../../services/service';
 import { ClientService } from '../../services/client';
+import { AuthService } from '../../services/auth';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { forkJoin } from 'rxjs';
 
@@ -109,12 +110,15 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     private router: Router,
     private contractService: ContractService,
     private serviceService: ServiceService,
-    private clientService: ClientService
+    private clientService: ClientService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
     // Inicializar com dados zerados
     this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
+    // Filtrar quick actions baseado no role do usuário
+    this.filterQuickActionsByRole();
     // Carregar dados reais
     this.loadDashboardData();
     this.loadChartData();
@@ -586,6 +590,18 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
   trackByActionId(index: number, action: QuickAction): string {
     return action.id;
+  }
+
+  private filterQuickActionsByRole() {
+    // Se for admin, manter todas as ações
+    if (this.authService.isAdmin()) {
+      return;
+    }
+    
+    // Para usuários normais, manter apenas rotinas
+    this.quickActions = this.quickActions.filter(action => 
+      action.id === 'routines'
+    );
   }
 
   // Métodos para responsividade do gráfico

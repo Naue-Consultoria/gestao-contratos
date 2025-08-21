@@ -27,6 +27,7 @@ import { RoutinesPageComponent } from './components/routines-page/routines-page'
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
+import { UserGuard } from './guards/user-guard';
 
 export const routes: Routes = [
   {
@@ -89,6 +90,7 @@ export const routes: Routes = [
       {
         path: 'contratos',
         component: ContractsTableComponent,
+        canActivate: [UserGuard],
         title: 'Contratos - NAUE Consultoria',
       },
       
@@ -96,6 +98,7 @@ export const routes: Routes = [
       {
         path: 'contratos/novo',
         component: ContractFormComponent,
+        canActivate: [UserGuard],
         title: 'Novo Contrato - NAUE Consultoria',
       },
       
@@ -103,6 +106,7 @@ export const routes: Routes = [
       {
         path: 'contratos/visualizar/:id',
         component: ContractViewPageComponent,
+        canActivate: [UserGuard],
         title: 'Visualizar Contrato - NAUE Consultoria',
       },
       
@@ -110,6 +114,7 @@ export const routes: Routes = [
       {
         path: 'contratos/editar/:id',
         component: ContractFormComponent,
+        canActivate: [UserGuard],
         title: 'Editar Contrato - NAUE Consultoria',
       },
 
@@ -117,6 +122,7 @@ export const routes: Routes = [
       {
         path: 'clientes',
         component: ClientsTableComponent,
+        canActivate: [UserGuard],
         title: 'Clientes - NAUE Consultoria',
       },
       
@@ -124,6 +130,7 @@ export const routes: Routes = [
       {
         path: 'clientes/novo',
         component: NewClientPageComponent,
+        canActivate: [UserGuard],
         title: 'Novo Cliente - NAUE Consultoria',
       },
       
@@ -131,6 +138,7 @@ export const routes: Routes = [
       {
         path: 'clientes/visualizar/:id',
         component: ClientViewPageComponent,
+        canActivate: [UserGuard],
         title: 'Detalhes do Cliente - NAUE Consultoria',
       },
       
@@ -138,6 +146,7 @@ export const routes: Routes = [
       {
         path: 'clientes/editar/:id',
         component: NewClientPageComponent,
+        canActivate: [UserGuard],
         title: 'Editar Cliente - NAUE Consultoria',
       },
 
@@ -145,6 +154,7 @@ export const routes: Routes = [
       {
         path: 'servicos',
         component: ServicesTableComponent,
+        canActivate: [UserGuard],
         title: 'Serviços - NAUE Consultoria',
       },
       
@@ -152,6 +162,7 @@ export const routes: Routes = [
       {
         path: 'servicos/novo',
         component: ServiceFormComponent,
+        canActivate: [UserGuard],
         title: 'Novo Serviço - NAUE Consultoria',
       },
       
@@ -159,6 +170,7 @@ export const routes: Routes = [
       {
         path: 'servicos/editar/:id',
         component: ServiceFormComponent,
+        canActivate: [UserGuard],
         title: 'Editar Serviço - NAUE Consultoria',
       },
 
@@ -166,6 +178,7 @@ export const routes: Routes = [
       {
         path: 'propostas',
         component: ProposalsPageComponent,
+        canActivate: [UserGuard],
         title: 'Propostas - NAUE Consultoria',
       },
       
@@ -173,6 +186,7 @@ export const routes: Routes = [
       {
         path: 'propostas/nova',
         component: ProposalFormComponent,
+        canActivate: [UserGuard],
         title: 'Nova Proposta - NAUE Consultoria',
       },
       
@@ -180,6 +194,7 @@ export const routes: Routes = [
       {
         path: 'propostas/visualizar/:id',
         component: ProposalViewPageComponent,
+        canActivate: [UserGuard],
         title: 'Visualizar Proposta - NAUE Consultoria',
       },
       
@@ -187,6 +202,7 @@ export const routes: Routes = [
       {
         path: 'propostas/editar/:id',
         component: ProposalFormComponent,
+        canActivate: [UserGuard],
         title: 'Editar Proposta - NAUE Consultoria',
       },
 
@@ -194,6 +210,7 @@ export const routes: Routes = [
       {
         path: 'relatorios',
         component: ReportsPage,
+        canActivate: [UserGuard],
         title: 'Relatórios - NAUE Consultoria',
       },
 
@@ -201,6 +218,7 @@ export const routes: Routes = [
       {
         path: 'analytics',
         component: AnalyticsPageComponent,
+        canActivate: [UserGuard],
         title: 'Analytics - NAUE Consultoria',
       },
 
@@ -215,6 +233,7 @@ export const routes: Routes = [
       {
         path: 'rotinas/:id',
         component: ContractViewPageComponent,
+        canActivate: [UserGuard],
         title: 'Detalhes do Contrato - NAUE Consultoria',
       },
 
