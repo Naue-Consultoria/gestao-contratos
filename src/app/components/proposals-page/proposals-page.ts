@@ -512,6 +512,57 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     doc.setTextColor(0, 0, 0);
   }
 
+  async convertToContract(proposal: ProposalDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    
+    // Confirmação antes de converter
+    const confirmed = confirm(
+      `Tem certeza que deseja converter a proposta "${proposal.proposalNumber}" em contrato?\n\n` +
+      `Esta ação criará um novo contrato baseado nos dados desta proposta.`
+    );
+    
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.proposalService.convertToContract(proposal.id)
+      );
+      
+      if (response && response.success) {
+        this.modalService.showSuccess(
+          `Proposta convertida em contrato com sucesso!\n` +
+          `Contrato criado: ${response.data.contract_number || 'Novo contrato'}`
+        );
+        
+        // Recarregar a lista para mostrar o status atualizado
+        this.loadData();
+        
+        // Opcional: Navegar para o contrato criado
+        if (response.data.contract_id) {
+          const goToContract = confirm('Deseja visualizar o contrato criado?');
+          if (goToContract) {
+            this.router.navigate(['/contracts', response.data.contract_id]);
+          }
+        }
+      } else {
+        this.modalService.showError('Não foi possível converter a proposta em contrato.');
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Error converting proposal to contract:', error);
+      
+      if (error?.status === 500 || error?.status === 404) {
+        this.modalService.showError('Funcionalidade de conversão de propostas ainda não está implementada no backend.');
+      } else if (error?.status === 400) {
+        this.modalService.showError('Esta proposta não pode ser convertida em contrato. Verifique se ela está assinada.');
+      } else {
+        this.modalService.showError('Erro ao converter proposta em contrato. Tente novamente.');
+      }
+    }
+  }
+
   openSendProposalModal(proposal: ProposalDisplay, event: MouseEvent) {
     event.stopPropagation();
     

@@ -213,6 +213,13 @@ export class ProposalService {
   }
 
   /**
+   * Converter proposta em contrato
+   */
+  convertToContract(id: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${id}/convert-to-contract`, {});
+  }
+
+  /**
    * Atualizar lista local de propostas
    */
   refreshProposals(filters?: ProposalFilters): void {

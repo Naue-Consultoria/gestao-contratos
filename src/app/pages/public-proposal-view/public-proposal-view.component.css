@@ -39,7 +39,7 @@
 
 .hero-content {
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: 1fr 550px;
   gap: 4rem;
   align-items: center;
   position: relative;
@@ -73,7 +73,7 @@
 }
 
 .company-name {
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: 800;
   color: white;
   margin: 0;
@@ -82,14 +82,14 @@
 
 .company-tagline {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 1rem;
+  font-size: 1.2rem;
   margin: 0;
   font-weight: 500;
 }
 
 .hero-description {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 1.25rem;
+  font-size: 1.4rem;
   line-height: 1.7;
   margin: 2rem 0 3rem;
   max-width: 600px;
@@ -120,7 +120,7 @@
 }
 
 .stat-number {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 900;
   color: white;
   display: block;
@@ -129,7 +129,7 @@
 }
 
 .stat-text {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
   text-transform: uppercase;
@@ -151,12 +151,12 @@
 }
 
 .ceo-photo {
-  width: 300px;
-  height: 300px;
+  width: 450px;
+  height: 450px;
   border-radius: 50%;
   object-fit: cover;
-  border: 6px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  border: 8px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   transition: transform 0.3s ease;
 }
 
@@ -1447,6 +1447,57 @@
   width: 16px;
 }
 
+.social-media {
+  margin-top: 2rem;
+}
+
+.social-media h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: white;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+}
+
+.social-link:hover {
+  transform: translateY(-2px);
+}
+
+.social-link.instagram {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: white;
+}
+
+.social-link.instagram:hover {
+  box-shadow: 0 8px 25px rgba(240, 148, 51, 0.4);
+}
+
+.social-link.linkedin {
+  background: #0077b5;
+  color: white;
+}
+
+.social-link.linkedin:hover {
+  background: #005885;
+  box-shadow: 0 8px 25px rgba(0, 119, 181, 0.4);
+}
+
 
 .footer-bottom {
   padding-top: 2rem;
@@ -1473,8 +1524,8 @@
   }
   
   .ceo-photo {
-    width: 250px;
-    height: 250px;
+    width: 350px;
+    height: 350px;
   }
   
   .company-stats {
@@ -1494,11 +1545,11 @@
   }
   
   .company-name {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
   
   .hero-description {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
   
   .company-stats {

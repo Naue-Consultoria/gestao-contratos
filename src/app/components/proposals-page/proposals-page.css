@@ -32,6 +32,19 @@
     color: white !important;
 }
 
+.convert-btn {
+    background-color: #ff8c00 !important;
+    color: white !important;
+}
+
+.convert-btn:hover {
+    background-color: #e67700 !important;
+}
+
+.convert-btn i {
+    color: white !important;
+}
+
 /* Estilos para os modais customizados */
 .client-data-form .form-group {
     margin-bottom: 1rem;

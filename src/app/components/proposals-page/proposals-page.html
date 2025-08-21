@@ -114,6 +114,16 @@
                   <i class="fas fa-link"></i>
                 </button>
 
+                <!-- Botão Converter em Contrato - só para propostas assinadas -->
+                <button
+                  *ngIf="proposal.raw.status === 'signed'"
+                  class="action-btn convert-btn"
+                  (click)="convertToContract(proposal, $event)"
+                  title="Converter em Contrato"
+                >
+                  <i class="fas fa-file-contract"></i>
+                </button>
+
                 <!-- Dropdown Menu com 3 pontos -->
                 <div class="dropdown" [class.open]="proposal.id === activeDropdownId">
                   <button
