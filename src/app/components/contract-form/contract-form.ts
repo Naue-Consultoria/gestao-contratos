@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { ContractService, CreateContractRequest, UpdateContractRequest, ContractServiceItem, ContractInstallment, ApiContractInstallment } from '../../services/contract';
+import { ContractService, CreateContractRequest, UpdateContractRequest, ContractServiceItem, ContractInstallment, ApiContractInstallment, UserAssignment } from '../../services/contract';
 import { ClientService, ApiClient } from '../../services/client';
 import { ServiceService, ApiService } from '../../services/service';
 import { ModalService } from '../../services/modal.service';
@@ -93,7 +93,6 @@ export class ContractFormComponent implements OnInit {
   firstInstallmentDate: string = '';
   
   availableRoles = [
-    { value: 'owner', label: 'Proprietário' },
     { value: 'editor', label: 'Editor' },
     { value: 'viewer', label: 'Visualizador' }
   ];
@@ -272,6 +271,14 @@ export class ContractFormComponent implements OnInit {
     }
   }
 
+  onRoleChangeLocal(assignedUser: AssignedUser, newRole: string): void {
+    if (this.isEditMode && this.contractId) {
+      this.onRoleChange(assignedUser, newRole);
+    } else {
+      assignedUser.role = newRole as 'owner' | 'editor' | 'viewer';
+    }
+  }
+
   async onRoleChange(assignedUser: AssignedUser, newRole: string) {
     if (!this.contractId) return;
 
@@ -287,7 +294,25 @@ export class ContractFormComponent implements OnInit {
   }
 
   getRoleLabel(roleValue: string): string {
-    return this.availableRoles.find(r => r.value === roleValue)?.label || roleValue;
+    const allRoles = [
+      { value: 'owner', label: 'Proprietário' },
+      { value: 'editor', label: 'Editor' },
+      { value: 'viewer', label: 'Visualizador' }
+    ];
+    return allRoles.find(r => r.value === roleValue)?.label || roleValue;
+  }
+
+  async applyUserPermissions(contractId: number): Promise<void> {
+    for (const assignedUser of this.assignedUsers) {
+      try {
+        await firstValueFrom(
+          this.contractService.updateUserRole(contractId, assignedUser.user.id, assignedUser.role)
+        );
+      } catch (error) {
+        console.error(`Erro ao aplicar permissão para usuário ${assignedUser.user.name}:`, error);
+        // Não exibir erro para o usuário pois o contrato já foi criado
+      }
+    }
   }
 
   get filteredServices(): ApiService[] {
@@ -403,7 +428,7 @@ export class ContractFormComponent implements OnInit {
                         name: userToAdd.name,
                         email: userToAdd.email
                     },
-                    role: 'viewer' 
+                    role: 'editor' 
                 });
             }
         }
@@ -485,7 +510,13 @@ export class ContractFormComponent implements OnInit {
           installment_count: this.formData.installment_count || 1,
           installments: this.contractInstallments,
         };
-        await firstValueFrom(this.contractService.createContract(createData));
+        const createdContract = await firstValueFrom(this.contractService.createContract(createData));
+        
+        // Aplicar permissões personalizadas após criação
+        if (createdContract.contract?.id) {
+          await this.applyUserPermissions(createdContract.contract.id);
+        }
+        
         this.modalService.showSuccess('Contrato criado com sucesso!', 'Sucesso');
       }
       this.router.navigate(['/home/contratos']);

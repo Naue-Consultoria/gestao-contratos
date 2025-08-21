@@ -16,6 +16,11 @@ export interface ContractInstallment {
   notes?: string | null;
 }
 
+export interface UserAssignment {
+  user_id: number;
+  role: 'owner' | 'editor' | 'viewer';
+}
+
 export interface ApiContractInstallment {
   id: number;
   installment_number: number;

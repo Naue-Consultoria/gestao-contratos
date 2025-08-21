@@ -750,6 +750,22 @@
   background: rgba(0, 59, 43, 0.04);
 }
 
+.activity-card.clickable {
+  cursor: pointer;
+}
+
+.activity-card.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.12);
+  border-color: rgba(0, 59, 43, 0.15);
+  background: rgba(0, 59, 43, 0.06);
+}
+
+.activity-card.clickable:active {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 59, 43, 0.08);
+}
+
 .activity-card:last-child {
   margin-bottom: 0;
 }
@@ -2088,6 +2104,25 @@
   display: flex;
   align-items: center;
   margin-left: auto;
+}
+
+.activity-action .action-indicator {
+  color: #003b2b;
+  padding: 0.375rem;
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.activity-card.clickable:hover .action-indicator {
+  opacity: 1;
+  background: rgba(0, 59, 43, 0.1);
 }
 
 .action-btn {

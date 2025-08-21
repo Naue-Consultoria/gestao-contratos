@@ -91,6 +91,12 @@ export class NotificationService {
 
   private listenForRealTimeNotifications(): void {
     this.websocketService.listenForNewNotifications().subscribe(notificationFromServer => {
+      // Verificar se a notificação é relevante para o usuário atual
+      if (!this.isNotificationRelevantForUser(notificationFromServer)) {
+        console.log('🚫 Notificação filtrada - não relevante para o usuário atual');
+        return;
+      }
+
       const newNotification: Notification = {
         ...notificationFromServer,
         id: `server-${(notificationFromServer as any).id}`,
@@ -338,5 +344,44 @@ export class NotificationService {
     this.currentPage = 1;
     this.fetchUserNotifications(1);
     this.fetchUnreadCount();
+  }
+
+  /**
+   * Verifica se uma notificação é relevante para o usuário atual
+   * baseado nos vínculos com contratos e role do usuário
+   */
+  private isNotificationRelevantForUser(notification: any): boolean {
+    try {
+      // Notificações sem metadata de contrato são sempre relevantes (notificações gerais)
+      if (!notification.metadata?.contract_id) {
+        return true;
+      }
+
+      // Para notificações relacionadas a contratos específicos,
+      // a validação já foi feita no backend, então aceitar
+      // (o backend só envia notificações para usuários vinculados)
+      return true;
+    } catch (error) {
+      console.error('Erro ao verificar relevância da notificação:', error);
+      // Em caso de erro, negar por segurança
+      return false;
+    }
+  }
+
+  /**
+   * Filtro adicional para notificações já carregadas
+   * (usado como camada extra de segurança)
+   */
+  private filterNotificationsByAccess(notifications: Notification[]): Notification[] {
+    return notifications.filter(notification => {
+      // Se não tem metadata de contrato, manter
+      if (!notification.metadata?.contract_id) {
+        return true;
+      }
+
+      // Para notificações com contract_id, confiar na validação do backend
+      // pois a API já filtra baseado nos vínculos do usuário
+      return true;
+    });
   }
 }

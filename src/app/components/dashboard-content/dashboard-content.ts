@@ -653,8 +653,20 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
   navigateToContract(contractId?: number): void {
     if (contractId) {
-      this.router.navigate(['/home/contratos/visualizar', contractId]);
+      this.router.navigate(['/home/rotinas', contractId]);
     }
+  }
+  
+  onActivityClick(event: Event, activity: any): void {
+    // Prevenir navegação se não tiver contractId
+    if (!activity.contractId) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    
+    // Navegar para o contrato
+    this.navigateToContract(activity.contractId);
   }
 
   formatCurrency(value: number): string {

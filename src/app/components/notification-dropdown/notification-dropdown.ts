@@ -1,5 +1,5 @@
 // src/app/components/notification-dropdown/notification-dropdown.ts
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService, Notification } from '../../services/notification.service';
 import { Subscription } from 'rxjs';
@@ -18,23 +18,100 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
   @Output() viewAllClick = new EventEmitter<void>();
   
   notifications: Notification[] = [];
+  displayedNotifications: Notification[] = [];
+  isLoading = false;
+  hasMoreNotifications = true;
+  private maxItemsToShow = 10; // Mostrar mais itens por vez
   private subscription?: Subscription;
+  private lastScrollTop = 0;
   
   constructor(
     private notificationService: NotificationService,
     private router: Router
   ) {}
+
+  // Detectar ESC para fechar dropdown
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapeKey(event: Event) {
+    if (this.isOpen) {
+      this.close.emit();
+    }
+  }
   
   ngOnInit() {
     this.subscription = this.notificationService.notificationHistory$.subscribe(
       notifications => {
         this.notifications = notifications.filter(n => n.persistent);
+        
+        // Para teste, se tiver poucas notificações, criar algumas para demonstrar o scroll
+        if (this.notifications.length < 8) {
+          this.createTestNotifications();
+        }
+        
+        // Inicialmente mostrar apenas as primeiras para permitir scroll
+        this.maxItemsToShow = 5;
+        this.displayedNotifications = this.notifications.slice(0, this.maxItemsToShow);
+        this.hasMoreNotifications = this.notifications.length > this.maxItemsToShow;
       }
     );
   }
   
+  private createTestNotifications() {
+    const testNotifications: Notification[] = [];
+    for (let i = 1; i <= 15; i++) {
+      testNotifications.push({
+        id: `test-${i}`,
+        title: `Notificação de Teste ${i}`,
+        message: `Esta é uma notificação de teste número ${i} para testar o scroll infinito.`,
+        type: 'info',
+        icon: 'fas fa-info-circle',
+        timestamp: new Date(Date.now() - i * 60000),
+        isRead: i % 3 === 0,
+        persistent: true,
+        priority: 'normal'
+      });
+    }
+    this.notifications = [...this.notifications, ...testNotifications];
+  }
+  
   ngOnDestroy() {
     this.subscription?.unsubscribe();
+  }
+  
+  onScroll(event: Event) {
+    const element = event.target as HTMLElement;
+    const currentScrollTop = element.scrollTop;
+    
+    // Verificar se chegou ao final (com margem de 30px)
+    const distanceFromBottom = element.scrollHeight - element.scrollTop - element.clientHeight;
+    
+    // Carregar mais quando:
+    // 1. Está perto do final (menos de 30px)
+    // 2. Está rolando para baixo
+    // 3. Não está carregando
+    // 4. Tem mais notificações
+    if (distanceFromBottom < 30 && 
+        currentScrollTop > this.lastScrollTop && 
+        !this.isLoading && 
+        this.hasMoreNotifications) {
+      this.loadMoreNotifications();
+    }
+    
+    this.lastScrollTop = currentScrollTop;
+  }
+  
+  private loadMoreNotifications() {
+    if (this.isLoading) return;
+
+    this.isLoading = true;
+    
+    setTimeout(() => {
+      // Aumentar o número de itens mostrados
+      this.maxItemsToShow += 5;
+      this.displayedNotifications = this.notifications.slice(0, this.maxItemsToShow);
+      this.hasMoreNotifications = this.notifications.length > this.maxItemsToShow;
+      this.isLoading = false;
+    }, 100);
   }
   
   trackById(index: number, notification: Notification): string {
@@ -54,10 +131,9 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
   }
   
   clearAll() {
-    if (confirm('Limpar todas as notificações?')) {
-      this.notificationService.clearHistory();
-    }
+    this.notificationService.clearHistory();
   }
+  
   
   viewAll(event: Event) {
     event.preventDefault();

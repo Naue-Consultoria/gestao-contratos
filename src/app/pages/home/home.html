@@ -13,12 +13,17 @@
   (logout)="logout()">
 </app-header>
 
-<div class="notification-dropdown-wrapper" *ngIf="isNotificationOpen">
-  <app-notification-dropdown
-    [isOpen]="isNotificationOpen"
-    (close)="isNotificationOpen = false"
-    (viewAllClick)="openNotificationCenter()">
-  </app-notification-dropdown>
+<!-- Notification Dropdown Overlay -->
+<div class="notification-dropdown-overlay" 
+     *ngIf="isNotificationOpen" 
+     (click)="isNotificationOpen = false">
+  <div class="notification-dropdown-wrapper">
+    <app-notification-dropdown
+      [isOpen]="isNotificationOpen"
+      (close)="isNotificationOpen = false"
+      (viewAllClick)="openNotificationCenter()">
+    </app-notification-dropdown>
+  </div>
 </div>
 
 <!-- Notification Center -->

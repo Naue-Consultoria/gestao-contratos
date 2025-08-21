@@ -338,10 +338,9 @@
                             <select 
                                 class="form-control" 
                                 [ngModel]="assignedUser.role"
-                                (ngModelChange)="onRoleChange(assignedUser, $event)"
+                                (ngModelChange)="onRoleChangeLocal(assignedUser, $event)"
                                 [name]="'role_' + assignedUser.user.id"
-                                [disabled]="!isEditMode"
-                                title="{{ isEditMode ? 'Alterar permissão' : 'É preciso salvar o contrato para definir permissões' }}">
+                                title="Alterar permissão do usuário">
                                 <option *ngFor="let role of availableRoles" [value]="role.value">
                                     {{ role.label }}
                                 </option>

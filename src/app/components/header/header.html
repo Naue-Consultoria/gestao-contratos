@@ -26,17 +26,13 @@
     <div class="header-actions">
 
       <button
-        class="notification-btn tooltip"
+        class="notification-btn"
         (click)="toggleNotifications.emit()"
         [class.has-notifications]="unreadNotificationsCount > 0"
       >
         <i class="fas fa-bell"></i>
         <span class="notification-badge" *ngIf="unreadNotificationsCount > 0">
           {{ unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount }}
-        </span>
-        <span class="tooltiptext">
-          {{ unreadNotificationsCount > 0 ? unreadNotificationsCount + '
-          notificações não lidas' : 'Notificações' }}
         </span>
       </button>
 

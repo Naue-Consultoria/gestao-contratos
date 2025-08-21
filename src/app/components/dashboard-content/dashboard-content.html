@@ -96,7 +96,10 @@
       </div>
 
       <div class="activities-list">
-        <div class="activity-card" *ngFor="let activity of getDisplayedActivities()">
+        <div class="activity-card" 
+             *ngFor="let activity of getDisplayedActivities()"
+             [class.clickable]="activity.contractId"
+             (click)="onActivityClick($event, activity)">
           <div 
             class="activity-icon"
             [style.background-color]="getActivityColor(activity.type) + '20'"
@@ -134,14 +137,11 @@
             </div>
           </div>
           
-          <!-- Botão de ação para serviços -->
-          <div class="activity-action" *ngIf="activity.type === 'service'">
-            <button 
-              class="action-btn"
-              (click)="navigateToContract(activity.contractId)"
-              title="Ver contrato">
+          <!-- Ícone de navegação para atividades com contractId -->
+          <div class="activity-action" *ngIf="activity.contractId">
+            <div class="action-indicator" title="Clique para ver o contrato">
               <i class="fa fa-arrow-right" aria-hidden="true"></i>
-            </button>
+            </div>
           </div>
         </div>
       </div>

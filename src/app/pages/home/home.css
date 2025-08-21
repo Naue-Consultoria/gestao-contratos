@@ -2024,3 +2024,44 @@ input[type="radio"] {
     display: none;
   }
 }
+
+/* ==========================================
+   NOTIFICATION DROPDOWN OVERLAY
+   ========================================== */
+
+.notification-dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 999;
+  opacity: 1;
+  visibility: visible;
+}
+
+.notification-dropdown-wrapper {
+  position: fixed;
+  top: 77px;
+  right: 120px;
+  z-index: 1000;
+}
+
+@media (max-width: 768px) {
+  .notification-dropdown-wrapper {
+    right: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .notification-dropdown-wrapper {
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+  
+  .notification-dropdown-wrapper app-notification-dropdown {
+    width: 100%;
+  }
+}
