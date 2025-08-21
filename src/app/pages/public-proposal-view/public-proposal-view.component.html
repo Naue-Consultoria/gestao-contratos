@@ -459,53 +459,25 @@
                 </textarea>
               </div>
             </div>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <!-- Action Buttons -->
-    <section class="actions-section" *ngIf="proposal.status === 'sent' && !proposalExpired">
-      <div class="section-container">
-        <div class="actions-wrapper">
-          <div class="requirements-check" *ngIf="!canSignProposal()">
-            <h4>Para prosseguir, complete:</h4>
-            <div class="requirement-list">
-              <div class="requirement-item" [class.completed]="signatureForm.get('client_name')?.valid">
-                <i class="fas" [class.fa-check-circle]="signatureForm.get('client_name')?.valid" [class.fa-circle]="!signatureForm.get('client_name')?.valid"></i>
-                <span>Nome completo</span>
-              </div>
-              <div class="requirement-item" [class.completed]="signatureForm.get('client_email')?.valid">
-                <i class="fas" [class.fa-check-circle]="signatureForm.get('client_email')?.valid" [class.fa-circle]="!signatureForm.get('client_email')?.valid"></i>
-                <span>Email válido</span>
-              </div>
-              <div class="requirement-item" [class.completed]="signatureDrawn">
-                <i class="fas" [class.fa-check-circle]="signatureDrawn" [class.fa-circle]="!signatureDrawn"></i>
-                <span>Assinatura digital</span>
-              </div>
-              <div class="requirement-item" [class.completed]="hasSelectedServices()">
-                <i class="fas" [class.fa-check-circle]="hasSelectedServices()" [class.fa-circle]="!hasSelectedServices()"></i>
-                <span>Pelo menos um serviço selecionado</span>
+            
+            <!-- Submit Button -->
+            <div class="form-submit-section">
+              <button 
+                type="button"
+                class="btn-submit-signature" 
+                [disabled]="!canSignProposal() || isSubmitting"
+                (click)="signProposal()">
+                <i *ngIf="!isSubmitting" class="fas fa-signature"></i>
+                <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+                <span *ngIf="!isSubmitting">Aceitar e Assinar Proposta</span>
+                <span *ngIf="isSubmitting">Processando assinatura...</span>
+              </button>
+              
+              <div class="requirements-hint" *ngIf="!canSignProposal()">
+                <p>Complete todos os campos obrigatórios e adicione sua assinatura digital para prosseguir</p>
               </div>
             </div>
-          </div>
-          
-          <div class="action-buttons">
-            <button 
-              class="btn-primary-large" 
-              [disabled]="!canSignProposal() || isSubmitting"
-              (click)="signProposal()">
-              <i *ngIf="!isSubmitting" class="fas fa-signature"></i>
-              <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
-              <span *ngIf="!isSubmitting">Aceitar e Assinar Proposta</span>
-              <span *ngIf="isSubmitting">Processando assinatura...</span>
-            </button>
-            
-            <button class="btn-secondary-large" (click)="rejectProposal()" [disabled]="isSubmitting">
-              <i class="fas fa-times"></i>
-              <span>Recusar Proposta</span>
-            </button>
-          </div>
+          </form>
         </div>
       </div>
     </section>

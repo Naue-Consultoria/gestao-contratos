@@ -1035,6 +1035,58 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
+/* Form Submit Section */
+.form-submit-section {
+  margin-top: 3rem;
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 2px solid #e2e8f0;
+}
+
+.btn-submit-signature {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #003b2b 0%, #005540 100%);
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 600;
+  padding: 1rem 3rem;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 59, 43, 0.3);
+  min-width: 300px;
+}
+
+.btn-submit-signature:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 59, 43, 0.4);
+  background: linear-gradient(135deg, #004d37 0%, #006650 100%);
+}
+
+.btn-submit-signature:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-submit-signature i {
+  font-size: 1.25rem;
+}
+
+.requirements-hint {
+  margin-top: 1rem;
+}
+
+.requirements-hint p {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
 .signature-form-container {
   max-width: 900px;
   margin: 0 auto;
