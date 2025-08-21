@@ -491,24 +491,33 @@
 }
 
 /* Signature Section */
-.signature-card {
-  background: var(--green-50);
-  border: 1px solid var(--success);
-  border-radius: 12px;
-  padding: 1.5rem;
-}
-
 .signature-info {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  color: var(--success);
+  margin-top: 1.5rem;
+  color: #003b2b;
   font-weight: 600;
+  font-size: 0.9rem;
+}
+
+:host-context(body.dark-mode) .signature-info {
+  color: #10d07a;
+}
+
+.signature-info i {
+  font-size: 1rem;
+  color: #003b2b;
+}
+
+:host-context(body.dark-mode) .signature-info i {
+  color: #10d07a;
 }
 
 .signature-display {
   text-align: center;
+  margin-top: 1.5rem;
 }
 
 .signature-display label {
@@ -526,11 +535,109 @@
   padding: 1rem;
   display: inline-block;
   max-width: 400px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+:host-context(body.dark-mode) .signature-image {
+  background: var(--dark-card);
+  border-color: var(--dark-border);
 }
 
 .signature-image img {
   max-width: 100%;
   height: auto;
+}
+
+/* Signer Data */
+.signer-data {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(0, 59, 43, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 59, 43, 0.15);
+}
+
+:host-context(body.dark-mode) .signer-data {
+  background: rgba(0, 59, 43, 0.12);
+  border-color: rgba(0, 59, 43, 0.25);
+}
+
+.signer-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  color: #003b2b;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+:host-context(body.dark-mode) .signer-title {
+  color: #10d07a;
+}
+
+.signer-title i {
+  font-size: 1.125rem;
+  color: #003b2b;
+}
+
+:host-context(body.dark-mode) .signer-title i {
+  color: #10d07a;
+}
+
+.signer-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.signer-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.signer-detail .detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+:host-context(body.dark-mode) .signer-detail .detail-label {
+  color: #ccc;
+}
+
+.signer-detail .detail-value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  padding: 0.75rem;
+  background: var(--white);
+  border-radius: 6px;
+  border: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .signer-detail .detail-value {
+  color: var(--dark-text);
+  background: var(--dark-card);
+  border-color: var(--dark-border);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .signature-image {
+    max-width: 100%;
+  }
+  
+  .signer-data {
+    padding: 1.25rem;
+  }
+  
+  .signer-details {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Buttons */

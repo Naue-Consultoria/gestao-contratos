@@ -162,18 +162,50 @@
           Assinatura Digital
         </h3>
         
-        <div class="signature-card">
-          <div class="signature-info" *ngIf="proposal.signed_at">
-            <i class="fas fa-calendar-check"></i>
-            <span>Assinada em {{ formatDate(proposal.signed_at) }}</span>
-          </div>
-          
-          <div class="signature-display" *ngIf="proposal.signature_data">
-            <label>Assinatura do Cliente:</label>
-            <div class="signature-image">
-              <img [src]="proposal.signature_data" alt="Assinatura Digital" />
+        <!-- Dados do Signatário -->
+        <div class="signer-data" *ngIf="proposal.signer_name || proposal.signer_email">
+          <h4 class="signer-title">
+            <i class="fas fa-user-pen"></i>
+            Dados do Signatário
+          </h4>
+          <div class="signer-details">
+            <div class="signer-detail" *ngIf="proposal.signer_name">
+              <span class="detail-label">Nome:</span>
+              <span class="detail-value">{{ proposal.signer_name }}</span>
+            </div>
+            
+            <div class="signer-detail" *ngIf="proposal.signer_email">
+              <span class="detail-label">E-mail:</span>
+              <span class="detail-value">{{ proposal.signer_email }}</span>
+            </div>
+            
+            <div class="signer-detail" *ngIf="proposal.signer_phone">
+              <span class="detail-label">Telefone:</span>
+              <span class="detail-value">{{ proposal.signer_phone }}</span>
+            </div>
+            
+            <div class="signer-detail" *ngIf="proposal.signer_document">
+              <span class="detail-label">Documento:</span>
+              <span class="detail-value">{{ proposal.signer_document }}</span>
+            </div>
+            
+            <div class="signer-detail" *ngIf="proposal.signer_observations">
+              <span class="detail-label">Observações:</span>
+              <span class="detail-value">{{ proposal.signer_observations }}</span>
             </div>
           </div>
+        </div>
+        
+        <div class="signature-display" *ngIf="proposal.signature_data">
+          <label>Assinatura Digital:</label>
+          <div class="signature-image">
+            <img [src]="proposal.signature_data" alt="Assinatura Digital" />
+          </div>
+        </div>
+        
+        <div class="signature-info" *ngIf="proposal.signed_at">
+          <i class="fas fa-calendar-check"></i>
+          <span>Assinada em {{ formatDate(proposal.signed_at) }}</span>
         </div>
       </section>
       

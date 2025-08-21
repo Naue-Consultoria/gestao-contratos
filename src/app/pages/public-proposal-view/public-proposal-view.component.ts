@@ -553,4 +553,78 @@ export class PublicProposalViewComponent implements OnInit {
       this.carouselTransform = `-${currentIndex * 200}px`;
     }, 3000);
   }
+
+  // === MÉTODOS DE MÁSCARA ===
+
+  onPhoneInput(event: any): void {
+    let value = event.target.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+    
+    if (value.length <= 11) {
+      if (value.length <= 2) {
+        value = value.replace(/(\d{0,2})/, '($1');
+      } else if (value.length <= 6) {
+        value = value.replace(/(\d{2})(\d{0,4})/, '($1) $2');
+      } else if (value.length <= 10) {
+        value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+      } else {
+        value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+      }
+    }
+    
+    event.target.value = value;
+    this.signatureForm.patchValue({ client_phone: value });
+  }
+
+  onPhoneKeyPress(event: any): boolean {
+    const char = String.fromCharCode(event.which);
+    // Permite apenas números
+    if (!/[0-9]/.test(char)) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
+  }
+
+  onDocumentInput(event: any): void {
+    let value = event.target.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+    
+    if (value.length <= 11) {
+      // CPF: 000.000.000-00
+      if (value.length <= 3) {
+        value = value.replace(/(\d{0,3})/, '$1');
+      } else if (value.length <= 6) {
+        value = value.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+      } else if (value.length <= 9) {
+        value = value.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+      } else {
+        value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+      }
+    } else {
+      // CNPJ: 00.000.000/0000-00
+      if (value.length <= 2) {
+        value = value.replace(/(\d{0,2})/, '$1');
+      } else if (value.length <= 5) {
+        value = value.replace(/(\d{2})(\d{0,3})/, '$1.$2');
+      } else if (value.length <= 8) {
+        value = value.replace(/(\d{2})(\d{3})(\d{0,3})/, '$1.$2.$3');
+      } else if (value.length <= 12) {
+        value = value.replace(/(\d{2})(\d{3})(\d{3})(\d{0,4})/, '$1.$2.$3/$4');
+      } else {
+        value = value.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, '$1.$2.$3/$4-$5');
+      }
+    }
+    
+    event.target.value = value;
+    this.signatureForm.patchValue({ client_document: value });
+  }
+
+  onDocumentKeyPress(event: any): boolean {
+    const char = String.fromCharCode(event.which);
+    // Permite apenas números
+    if (!/[0-9]/.test(char)) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
+  }
 }

@@ -383,7 +383,10 @@
                     id="client_phone" 
                     formControlName="client_phone"
                     class="field-input"
-                    placeholder="(11) 99999-9999">
+                    placeholder="(11) 99999-9999"
+                    maxlength="15"
+                    (input)="onPhoneInput($event)"
+                    (keypress)="onPhoneKeyPress($event)">
                 </div>
 
                 <div class="form-field">
@@ -393,7 +396,10 @@
                     id="client_document" 
                     formControlName="client_document"
                     class="field-input"
-                    placeholder="000.000.000-00">
+                    placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                    maxlength="18"
+                    (input)="onDocumentInput($event)"
+                    (keypress)="onDocumentKeyPress($event)">
                 </div>
               </div>
             </div>

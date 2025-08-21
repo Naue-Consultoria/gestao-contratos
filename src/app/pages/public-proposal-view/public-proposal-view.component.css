@@ -674,7 +674,8 @@
   border-radius: 30px;
   font-weight: 600;
   font-size: 0.875rem;
-  letter-spacing: 0.025em;\n  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;

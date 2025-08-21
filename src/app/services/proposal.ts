@@ -38,6 +38,11 @@ export interface Proposal {
   signed_at?: string;
   signature_data?: string;
   client_ip?: string;
+  signer_name?: string;
+  signer_email?: string;
+  signer_phone?: string;
+  signer_document?: string;
+  signer_observations?: string;
   status: 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted';
   converted_to_contract_id?: number;
   converted_at?: string;

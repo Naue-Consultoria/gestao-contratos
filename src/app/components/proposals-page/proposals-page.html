@@ -96,15 +96,6 @@
             </td>
             <td>
               <div class="action-buttons">
-                <!-- Botão de Visualizar - sempre visível -->
-                <button
-                  class="action-btn"
-                  (click)="viewProposal(proposal.id); $event.stopPropagation()"
-                  title="Visualizar"
-                >
-                  <i class="fas fa-eye"></i>
-                </button>
-
                 <!-- Botão de Link Público/Gerar Link - condicional -->
                 <button
                   *ngIf="proposal.raw.status === 'draft'"
