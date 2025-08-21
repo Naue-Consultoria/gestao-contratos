@@ -201,47 +201,22 @@
   <!-- Main Proposal Content -->
   <div *ngIf="!isLoading && proposal" class="proposal-content">
     
-    <!-- Proposal Header -->
-    <section class="proposal-header-section">
+    <!-- Unified Proposal Section -->
+    <section class="proposal-unified-section">
       <div class="section-container">
-        <div class="proposal-intro">
-          <div class="proposal-badge">
-            <i class="fas fa-file-contract"></i>
-            <span>Proposta Personalizada</span>
-          </div>
-          <h2 class="proposal-main-title">Sua Proposta Sob Medida</h2>
-          <p class="proposal-intro-text">
-            Preparamos especialmente para você uma proposta detalhada com os melhores serviços 
-            para o sucesso do seu projeto imobiliário.
+
+        <div class="proposal-intro-compact">
+          <h1 class="proposal-title">Sua Proposta Sob Medida</h1>
+          <p class="proposal-subtitle">
+            Preparamos especialmente para você uma seleção de serviços personalizados para o sucesso do seu projeto imobiliário.
+            Selecione os serviços que melhor atendem às suas necessidades.
           </p>
-          
-          <div class="proposal-status-info">
+          <div class="proposal-status-bar">
             <div class="status-indicator" [ngClass]="'status-' + proposal.status">
               <span class="status-dot"></span>
               <span class="status-text">{{ getStatusText(proposal.status) }}</span>
             </div>
-            
-            <div class="validity-info" *ngIf="!proposalExpired && daysUntilExpiration !== null">
-              <i class="fas fa-clock"></i>
-              <span *ngIf="daysUntilExpiration > 0">Válida por {{ daysUntilExpiration }} dias</span>
-              <span *ngIf="daysUntilExpiration === 0" class="expiring-today">Expira hoje</span>
-            </div>
-            
-            <div class="validity-info expired" *ngIf="proposalExpired">
-              <i class="fas fa-exclamation-triangle"></i>
-              <span>Proposta expirada</span>
-            </div>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Services Selection Section -->
-    <section class="services-selection-section">
-      <div class="section-container">
-        <div class="section-header">
-          <h2 class="section-title">Serviços Propostos</h2>
-          <p class="section-subtitle">Selecione os serviços que melhor atendem às suas necessidades</p>
         </div>
         
         <div class="services-table-wrapper">

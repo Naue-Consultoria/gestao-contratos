@@ -24,16 +24,19 @@ export interface PublicProposalService {
 
 export interface PublicProposal {
   id: number;
+  proposal_number?: string;
   title: string;
   description?: string;
   status: string;
   total_value: number;
   valid_until?: string;
+  end_date?: string;
   observations?: string;
   sent_at: string;
   client_name?: string;
   client_email?: string;
   signed_at?: string;
+  signature_data?: string;
   accepted_value?: number;
   client: {
     name: string;
@@ -152,17 +155,19 @@ export class PublicProposalService {
    * Verificar se proposta está expirada
    */
   isProposalExpired(proposal: PublicProposal): boolean {
-    if (!proposal.valid_until) return false;
-    return new Date(proposal.valid_until) < new Date();
+    const dateField = proposal.end_date || proposal.valid_until;
+    if (!dateField) return false;
+    return new Date(dateField) < new Date();
   }
 
   /**
    * Obter dias restantes até expiração
    */
   getDaysUntilExpiration(proposal: PublicProposal): number | null {
-    if (!proposal.valid_until) return null;
+    const dateField = proposal.end_date || proposal.valid_until;
+    if (!dateField) return null;
     
-    const validDate = new Date(proposal.valid_until);
+    const validDate = new Date(dateField);
     const today = new Date();
     const diffTime = validDate.getTime() - today.getTime();
     const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
