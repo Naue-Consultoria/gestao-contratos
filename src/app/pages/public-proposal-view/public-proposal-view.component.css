@@ -709,9 +709,9 @@
 }
 
 .status-signed {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #003b2b 0%, #005540 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.3);
 }
 
 .status-dot {

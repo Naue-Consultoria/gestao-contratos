@@ -243,6 +243,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     const statusColors: { [key: string]: string } = {
       'draft': '#6c757d',
       'sent': '#007bff',
+      'signed': '#003b2b',
       'accepted': '#28a745',
       'rejected': '#dc3545',
       'expired': '#fd7e14'

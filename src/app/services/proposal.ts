@@ -332,7 +332,7 @@ export class ProposalService {
     const colors: { [key: string]: string } = {
       'draft': '#6b7280', // Cinza
       'sent': '#3b82f6', // Azul
-      'signed': '#10b981', // Verde (novo status)
+      'signed': '#003b2b', // Verde escuro da marca
       'rejected': '#ef4444', // Vermelho
       'expired': '#f59e0b', // Amarelo
       'converted': '#6366f1' // Roxo (novo status)

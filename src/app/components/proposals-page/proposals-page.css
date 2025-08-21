@@ -20,12 +20,16 @@
 }
 
 .link-btn {
-    background-color: #17a2b8 !important;
+    background-color: #003b2b !important;
     color: white !important;
 }
 
 .link-btn:hover {
-    background-color: #138496 !important;
+    background-color: #002a20 !important;
+}
+
+.link-btn i {
+    color: white !important;
 }
 
 /* Estilos para os modais customizados */

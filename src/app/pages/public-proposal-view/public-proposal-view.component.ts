@@ -526,6 +526,7 @@ export class PublicProposalViewComponent implements OnInit {
     const texts: { [key: string]: string } = {
       'draft': 'Rascunho',
       'sent': 'Enviada',
+      'signed': 'Assinada',
       'accepted': 'Aceita',
       'rejected': 'Rejeitada',
       'expired': 'Expirada'
