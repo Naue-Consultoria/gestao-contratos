@@ -1,0 +1,121 @@
+<div class="page-header">
+  <h1 class="page-title">Detalhes da Rotina</h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="!isLoading && !contract && error">
+  <div class="error-icon">
+    <i class="fas fa-exclamation-triangle"></i>
+  </div>
+  <h3>Rotina não encontrada</h3>
+  <p>Não foi possível carregar os dados da rotina.</p>
+  <button class="btn btn-primary" (click)="backToRoutines()">
+    <i class="fas fa-arrow-left"></i> Voltar para Rotinas
+  </button>
+</div>
+
+<!-- Main Content -->
+<div class="content" *ngIf="!isLoading && contract && !error">
+  
+  <!-- Unified Routine Details Section -->
+  <div class="routine-details-unified">
+    <!-- Routine Overview Header -->
+    <div class="routine-overview-header">
+      
+      <!-- Primary Info -->
+      <div class="primary-info">
+        <div class="routine-header">
+          <div class="routine-logo-section">
+            <div class="company-logo-wrapper">
+              <img src="logoNaue.png" alt="NAUE Consultoria" class="company-logo">
+            </div>
+          </div>
+          <div class="routine-info">
+            <h2 class="routine-number">{{ contract.contract_number }}</h2>
+            <div class="routine-badges">
+              <span class="type-badge">{{ contract.type }}</span>
+              <span class="status-badge" [attr.data-status]="contract.status">
+                {{ getStatusText(contract.status) }}
+              </span>
+            </div>
+            
+            <!-- Assigned Users below contract name -->
+            <div class="users-in-routine-info" *ngIf="contract.assigned_users && contract.assigned_users.length > 0">
+              <span class="users-label-routine">Equipe:</span>
+              <div class="users-list-routine">
+                <div *ngFor="let assignment of contract.assigned_users" class="user-item-routine">
+                  <div class="user-avatar-tiny">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <span class="user-name-routine">{{ assignment.user.name }}</span>
+                  <span class="user-role-routine">({{ getRoleText(assignment.role) }})</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Side Information -->
+        <div class="right-side-info">
+          <!-- Contract Information -->
+          <div class="contract-meta-info">
+            <div class="info-group-inline">
+              <span class="info-label-inline">Cliente:</span>
+              <span class="info-value-inline">{{ getClientName() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="routine-content">
+      
+      <!-- Tasks Section -->
+      <section class="content-section">
+        <h3 class="section-title">
+          <i class="fas fa-tasks"></i>
+          Tarefas da Rotina
+        </h3>
+        
+        <app-contract-services-manager
+          [services]="contract.contract_services || []"
+          [contractId]="contract.id"
+          [canEdit]="canEdit"
+          (serviceUpdated)="onServiceUpdated()">
+        </app-contract-services-manager>
+        
+        <!-- Empty State -->
+        <div *ngIf="!contract.contract_services || contract.contract_services.length === 0" class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-tasks"></i>
+          </div>
+          <h4>Nenhuma tarefa encontrada</h4>
+          <p>Esta rotina ainda não possui tarefas cadastradas.</p>
+        </div>
+      </section>
+
+
+      <!-- Notes Section -->
+      <section class="content-section" *ngIf="contract.notes">
+        <h3 class="section-title">
+          <i class="fas fa-sticky-note"></i>
+          Observações
+        </h3>
+        
+        <div class="notes-display">
+          <p class="notes-text">{{ contract.notes }}</p>
+        </div>
+      </section>
+      
+    </div>
+  </div>
+  
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="isLoading">
+  <div class="loading-spinner"></div>
+  <p>Carregando rotina...</p>
+</div>

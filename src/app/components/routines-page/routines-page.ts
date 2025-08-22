@@ -109,8 +109,8 @@ export class RoutinesPageComponent implements OnInit {
         this.prepareClientsList();
       }
     } catch (error) {
-      console.error('Erro ao carregar rotinas de contratos:', error);
-      this.error = 'Erro ao carregar rotinas de contratos';
+      console.error('Erro ao carregar rotinas:', error);
+      this.error = 'Erro ao carregar rotinas';
     } finally {
       this.isLoading = false;
     }
@@ -151,7 +151,7 @@ export class RoutinesPageComponent implements OnInit {
 
 
   viewContractDetails(id: number) {
-    this.router.navigate(['/home/rotinas', id]);
+    this.router.navigate(['/home/rotinas/visualizar', id]);
   }
 
 

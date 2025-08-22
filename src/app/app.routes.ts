@@ -24,6 +24,7 @@ import { NewUserPageComponent } from './components/new-user-page/new-user-page';
 import { SettingsPageComponent } from './components/settings-page/settings-page';
 import { HelpPageComponent } from './components/help-page/help-page';
 import { RoutinesPageComponent } from './components/routines-page/routines-page';
+import { RoutineViewPageComponent } from './components/routine-view-page/routine-view-page';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -226,13 +227,14 @@ export const routes: Routes = [
       {
         path: 'rotinas',
         component: RoutinesPageComponent,
+        canActivate: [UserGuard],
         title: 'Rotinas - NAUE Consultoria',
       },
       
-      // Visualizar contrato via rotinas
+      // Visualizar rotina
       {
-        path: 'rotinas/:id',
-        component: ContractViewPageComponent,
+        path: 'rotinas/visualizar/:id',
+        component: RoutineViewPageComponent,
         canActivate: [UserGuard],
         title: 'Detalhes da Rotina - NAUE Consultoria',
       },
@@ -297,7 +299,8 @@ export const routes: Routes = [
       
       { path: 'reports', redirectTo: 'relatorios', pathMatch: 'full' },
       { path: 'routines', redirectTo: 'rotinas', pathMatch: 'full' },
-      { path: 'routines/:id', redirectTo: 'rotinas/:id', pathMatch: 'full' },
+      { path: 'routines/:id', redirectTo: 'rotinas/visualizar/:id', pathMatch: 'full' },
+      { path: 'rotinas/:id', redirectTo: 'rotinas/visualizar/:id', pathMatch: 'full' },
       
       { path: 'users', redirectTo: 'usuarios', pathMatch: 'full' },
       { path: 'users/new', redirectTo: 'usuarios/novo', pathMatch: 'full' },

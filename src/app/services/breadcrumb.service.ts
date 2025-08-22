@@ -134,12 +134,12 @@ export class BreadcrumbService {
     ],
     '/home/rotinas': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Rotinas de Contratos' }
+      { label: 'Rotinas' }
     ],
-    '/home/rotinas/view': [
+    '/home/rotinas/visualizar': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Rotinas de Contratos', url: '/home/rotinas' },
-      { label: 'Detalhes do Contrato' }
+      { label: 'Rotinas', url: '/home/rotinas' },
+      { label: 'Detalhes da Rotina' }
     ],
     '/home/notifications': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
@@ -194,11 +194,11 @@ export class BreadcrumbService {
         }
       }
       
-      // Para URLs como /home/rotinas/123 (detalhes do contrato)
+      // Para URLs como /home/rotinas/123 (detalhes da rotina - redirecionamento antigo)
       if (urlParts.length === 4 && urlParts[2] === 'rotinas' && !isNaN(Number(urlParts[3]))) {
         const breadcrumbs: any[] = [
           { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-          { label: 'Rotinas de Contratos', url: '/home/rotinas' },
+          { label: 'Rotinas', url: '/home/rotinas' },
           { label: `Detalhes da Rotina #${urlParts[3]}` }
         ];
         this.setBreadcrumbs(breadcrumbs);
@@ -258,7 +258,7 @@ export class BreadcrumbService {
       'servicos': 'Serviços',
       'propostas': 'Propostas',
       'usuarios': 'Usuários',
-      'rotinas': 'Rotinas de Contratos',
+      'rotinas': 'Rotinas',
       'dashboard': 'Dashboard',
       'analytics': 'Analytics',
       'relatorios': 'Relatórios',
@@ -272,7 +272,7 @@ export class BreadcrumbService {
       'services': 'Serviços',
       'proposals': 'Propostas',
       'users': 'Usuários',
-      'routines': 'Rotinas de Contratos',
+      'routines': 'Rotinas',
       'reports': 'Relatórios',
       'settings': 'Configurações',
       'help': 'Ajuda'

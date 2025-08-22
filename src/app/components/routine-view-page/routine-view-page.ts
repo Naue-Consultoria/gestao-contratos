@@ -3,21 +3,21 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { ContractService, ApiContract } from '../../services/contract';
+import { ContractServicesManagerComponent } from '../contract-services-manager/contract-services-manager';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../services/auth';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
-import { ContractExportModalComponent } from '../contract-export-modal/contract-export-modal.component';
 import { ModalService } from '../../services/modal.service';
 import { jsPDF } from 'jspdf';
 
 @Component({
-  selector: 'app-contract-view-page',
+  selector: 'app-routine-view-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, BreadcrumbComponent, ContractExportModalComponent],
-  templateUrl: './contract-view-page.html',
-  styleUrls: ['./contract-view-page.css']
+  imports: [CommonModule, RouterModule, ContractServicesManagerComponent, BreadcrumbComponent],
+  templateUrl: './routine-view-page.html',
+  styleUrls: ['./routine-view-page.css']
 })
-export class ContractViewPageComponent implements OnInit, OnDestroy {
+export class RoutineViewPageComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private contractService = inject(ContractService);
@@ -25,6 +25,7 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private modalService = inject(ModalService);
   private subscriptions = new Subscription();
+
   contract: ApiContract | null = null;
   contractId: number = 0;
   isLoading = true;
@@ -32,7 +33,6 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
   canEdit = false;
   currentUserId: number;
   isAdmin = false;
-  showExportModal = false;
 
   constructor() {
     // Recuperar informações do usuário do localStorage
@@ -52,20 +52,20 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
-  }
-
   ngOnInit() {
     const id = this.route.snapshot.params['id'];
     if (!id) {
-      this.error = 'ID do contrato não fornecido';
+      this.error = 'ID da rotina não fornecido';
       this.isLoading = false;
       return;
     }
 
     this.contractId = parseInt(id, 10);
     this.loadContract();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 
   async loadContract() {
@@ -77,7 +77,7 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
       
       if (response && response.contract) {
         this.contract = response.contract;
-        console.log('🔍 Contract data received:', this.contract);
+        console.log('🔍 Routine data received:', this.contract);
         
         // Garantir que contract_services seja um array
         if (!this.contract.contract_services) {
@@ -91,17 +91,17 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
         
         this.checkEditPermissions();
       } else {
-        this.error = 'Contrato não encontrado';
+        this.error = 'Rotina não encontrada';
       }
     } catch (error: any) {
-      console.error('❌ Error loading contract:', error);
+      console.error('❌ Error loading routine:', error);
       
       if (error?.status === 404) {
-        this.error = 'Contrato não encontrado';
+        this.error = 'Rotina não encontrada';
       } else if (error?.status === 500) {
         this.error = 'Erro interno do servidor';
       } else {
-        this.error = 'Erro ao carregar contrato';
+        this.error = 'Erro ao carregar rotina';
       }
     } finally {
       this.isLoading = false;
@@ -124,28 +124,35 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     this.canEdit = userAssignment && ['owner', 'editor'].includes(userAssignment.role || '');
   }
 
-
   formatDate(date: string | null): string {
     return this.contractService.formatDate(date);
   }
 
   getStatusColor(status: string): string {
-    return this.contractService.getStatusColor(status);
+    const colorMap: { [key: string]: string } = {
+      'active': '#047857',
+      'completed': '#0369a1',
+      'cancelled': '#dc2626',
+      'suspended': '#ca8a04'
+    };
+    return colorMap[status] || '#6b7280';
   }
 
   getStatusText(status: string): string {
     return this.contractService.getStatusText(status);
   }
 
-  getTypeIcon(type: string): string {
-    return this.contractService.getTypeIcon(type);
+  editRoutine() {
+    if (this.contract) {
+      // Redirecionar para edição de contrato, mas mantendo contexto de rotina
+      this.router.navigate(['/home/contratos/editar', this.contract.id], { 
+        queryParams: { returnTo: 'rotinas' } 
+      });
+    }
   }
 
-
-  editContract() {
-    if (this.contract) {
-      this.router.navigate(['/home/contratos/editar', this.contract.id]);
-    }
+  backToRoutines() {
+    this.router.navigate(['/home/rotinas']);
   }
 
   getClientName(): string {
@@ -178,24 +185,6 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     // Final fallback
     console.log('❌ Client not identified');
     return 'Cliente não identificado';
-  }
-
-  getClientEmail(): string {
-    if (!this.contract?.client) {
-      return 'E-mail não informado';
-    }
-    
-    const client = this.contract.client as any;
-    return client.email || 'E-mail não informado';
-  }
-
-  getClientPhone(): string {
-    if (!this.contract?.client) {
-      return 'Telefone não informado';
-    }
-    
-    const client = this.contract.client as any;
-    return client.phone || 'Telefone não informado';
   }
 
   getContractDuration(): string {
@@ -240,28 +229,9 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     return iconMap[status] || 'fas fa-circle';
   }
 
-  backToContracts() {
-    this.router.navigate(['/home/contratos']);
-  }
-
-  async deleteContract() {
-    if (!this.contract) return;
-
-    if (confirm(`Deseja excluir o contrato "${this.contract.contract_number}"?\n\nEsta ação não pode ser desfeita.`)) {
-      try {
-        await firstValueFrom(this.contractService.deleteContractPermanent(this.contractId));
-        this.modalService.showSuccess('Contrato excluído com sucesso!');
-        this.router.navigate(['/home/contratos']);
-      } catch (error: any) {
-        console.error('❌ Error deleting contract:', error);
-        this.modalService.showError('Não foi possível excluir o contrato.');
-      }
-    }
-  }
-
   async generatePDF() {
     if (!this.contract) {
-      this.modalService.showError('Nenhum contrato carregado para gerar PDF.');
+      this.modalService.showError('Nenhuma rotina carregada para gerar PDF.');
       return;
     }
 
@@ -281,7 +251,7 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
-      doc.text('CONTRATO DE SERVIÇOS', margin, 22);
+      doc.text('ROTINA DE TRABALHO', margin, 22);
       
       currentY = 50;
       doc.setTextColor(0, 0, 0);
@@ -294,7 +264,7 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
       currentY += 8;
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
-      doc.text(`Contrato: ${this.contract.contract_number}`, margin + 8, currentY);
+      doc.text(`Rotina: ${this.contract.contract_number}`, margin + 8, currentY);
       
       currentY += 7;
       doc.setFont('helvetica', 'normal');
@@ -318,9 +288,9 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
         currentY += 10;
       }
 
-      // === DADOS DO CONTRATO ===
+      // === DADOS DA ROTINA ===
       currentY += 10;
-      this.addSectionHeader(doc, 'DADOS DO CONTRATO', currentY, margin, pageWidth);
+      this.addSectionHeader(doc, 'DADOS DA ROTINA', currentY, margin, pageWidth);
       currentY += 15;
 
       this.addInfoRow(doc, 'Tipo:', this.contract.type, currentY, margin);
@@ -334,57 +304,63 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
         currentY += 10;
       }
 
-      // === SERVIÇOS ===
+      this.addInfoRow(doc, 'Duração:', this.getContractDuration(), currentY, margin);
+      currentY += 10;
+
+      // === SERVIÇOS/TAREFAS ===
       if (this.contract.contract_services && this.contract.contract_services.length > 0) {
         currentY += 10;
-        this.addSectionHeader(doc, 'SERVIÇOS DO CONTRATO', currentY, margin, pageWidth);
+        this.addSectionHeader(doc, 'TAREFAS DA ROTINA', currentY, margin, pageWidth);
         currentY += 15;
 
         this.contract.contract_services.forEach((contractService, index) => {
-          const serviceHeight = 25;
+          const serviceHeight = 30;
 
           if (currentY + serviceHeight > pageHeight - 40) {
             doc.addPage();
             currentY = margin + 20;
           }
 
-          // Box para cada serviço
+          // Box para cada tarefa
           doc.setFillColor(252, 253, 254);
           doc.setDrawColor(229, 231, 235);
           doc.roundedRect(margin, currentY, pageWidth - (margin * 2), serviceHeight, 2, 2, 'FD');
 
-          // Nome do serviço
+          // Nome da tarefa
           doc.setFontSize(11);
           doc.setFont('helvetica', 'bold');
           doc.setTextColor(0, 59, 43);
           doc.text(`${index + 1}. ${contractService.service.name}`, margin + 5, currentY + 8);
           
-          // Categoria e valor
+          // Status da tarefa
           doc.setTextColor(0, 0, 0);
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(9);
-          doc.text(`Categoria: ${contractService.service.category}`, margin + 5, currentY + 15);
+          doc.text(`Status: ${this.getTaskStatusText(contractService.status || 'not_started')}`, margin + 5, currentY + 15);
           
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(0, 59, 43);
-          doc.setFontSize(10);
-          doc.text(`Valor: ${this.formatCurrency(contractService.total_value)}`, margin + 5, currentY + 22);
+          // Data agendada se existir
+          if (contractService.scheduled_start_date) {
+            doc.text(`Agendado para: ${this.formatDate(contractService.scheduled_start_date)}`, margin + 5, currentY + 22);
+          }
           
           currentY += serviceHeight + 8;
           doc.setTextColor(0, 0, 0);
         });
       }
 
-      // === VALOR TOTAL ===
-      currentY += 10;
-      
-      doc.setFillColor(0, 59, 43);
-      doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 20, 5, 5, 'F');
-      
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`VALOR TOTAL: ${this.formatCurrency(this.contract.total_value)}`, margin + 10, currentY + 13);
+      // === EQUIPE RESPONSÁVEL ===
+      if (this.contract.assigned_users && this.contract.assigned_users.length > 0) {
+        currentY += 10;
+        this.addSectionHeader(doc, 'EQUIPE RESPONSÁVEL', currentY, margin, pageWidth);
+        currentY += 15;
+
+        this.contract.assigned_users.forEach((assignment) => {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`• ${assignment.user.name} (${this.getRoleText(assignment.role)})`, margin + 5, currentY);
+          currentY += 8;
+        });
+      }
 
       // === RODAPÉ ===
       currentY = pageHeight - 20;
@@ -395,14 +371,14 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
       doc.text(`Página 1 de ${doc.getNumberOfPages()}`, pageWidth - margin - 20, currentY);
       
       // Salvar o PDF
-      const fileName = `contrato-${this.contract.contract_number.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+      const fileName = `rotina-${this.contract.contract_number.replace(/\s+/g, '-').toLowerCase()}.pdf`;
       doc.save(fileName);
       
       this.modalService.showSuccess('PDF gerado com sucesso!');
 
     } catch (error: any) {
       console.error('❌ Error generating PDF:', error);
-      this.modalService.showError('Erro ao gerar o PDF do contrato.');
+      this.modalService.showError('Erro ao gerar o PDF da rotina.');
     }
   }
 
@@ -427,6 +403,16 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     doc.text(value, margin + 35, y);
   }
 
+  getTaskStatusText(status: string): string {
+    const statusMap: { [key: string]: string } = {
+      'not_started': 'Não iniciada',
+      'scheduled': 'Agendada',
+      'in_progress': 'Em andamento',
+      'completed': 'Concluída'
+    };
+    return statusMap[status] || status;
+  }
+
   formatCurrency(value: number | null | undefined): string {
     if (value === null || value === undefined) return 'R$ 0,00';
     return new Intl.NumberFormat('pt-BR', {
@@ -435,30 +421,18 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     }).format(value);
   }
 
-  canEditContract(): boolean {
-    return this.canEdit;
-  }
-
-  canDeleteContract(): boolean {
+  canEditRoutine(): boolean {
     return this.canEdit;
   }
 
   onServiceUpdated() {
-    // Recarregar o contrato quando um serviço for atualizado
-    console.log('🔄 Service updated, reloading contract...');
+    // Recarregar a rotina quando um serviço for atualizado
+    console.log('🔄 Service updated, reloading routine...');
     if (this.contract && this.contract.id) {
       this.contractId = this.contract.id;
       this.loadContract();
     } else {
-      console.error('❌ Cannot reload: no contract or contract ID');
+      console.error('❌ Cannot reload: no routine or routine ID');
     }
-  }
-
-  openExportModal() {
-    this.showExportModal = true;
-  }
-
-  closeExportModal() {
-    this.showExportModal = false;
   }
 }
