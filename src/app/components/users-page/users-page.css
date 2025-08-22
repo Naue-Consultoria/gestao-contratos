@@ -232,13 +232,28 @@
 }
 
 .permission-admin {
-  background-color: #e6f3ff;
-  color: #2563eb;
+  background-color: rgba(0, 59, 43, 0.1);
+  color: var(--primary-green-dark);
+  border: 1px solid rgba(0, 59, 43, 0.2);
 }
 
 .permission-colaborador {
-  background-color: #f0e6ff;
-  color: #7c3aed;
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Dark mode support for permission badges */
+:host-context(body.dark-mode) .permission-admin {
+  background-color: rgba(0, 59, 43, 0.2);
+  color: #22c55e;
+  border-color: rgba(0, 59, 43, 0.3);
+}
+
+:host-context(body.dark-mode) .permission-colaborador {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 /* Status Badge */

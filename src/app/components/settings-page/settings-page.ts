@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { firstValueFrom } from 'rxjs';
-import { NotificationService } from '../../services/notification.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 @Component({
@@ -24,13 +23,6 @@ export class SettingsPageComponent implements OnInit {
     dataCriacao: null as Date | null
   };
   
-  notificacoes = {
-    email: true,
-    contratoVencendo: true,
-    novoContrato: true,
-    pagamentoPendente: true,
-    relatorioMensal: false,
-  };
   
   seguranca = {
     ultimaAlteracaoSenha: null as Date | null
@@ -38,13 +30,11 @@ export class SettingsPageComponent implements OnInit {
   
   tabs = [
     { id: 'general', label: 'Geral', icon: 'fas fa-cog' },
-    { id: 'notifications', label: 'Notificações', icon: 'fas fa-bell' },
     { id: 'security', label: 'Segurança', icon: 'fas fa-shield-alt' }
   ];
   
   private router = inject(Router);
   private authService = inject(AuthService);
-  private notificationService = inject(NotificationService);
 
   ngOnInit() {
     this.loadCurrentUser();
@@ -75,10 +65,6 @@ export class SettingsPageComponent implements OnInit {
     this.activeTab = tabId;
   }
   
-  salvarNotificacoes() {
-    console.log('Salvando notificações:', this.notificacoes);
-    this.notificationService.success('Preferências de notificação salvas!', 'Sucesso');
-  }
   
   alterarSenha() {
     this.router.navigate(['/change-password']);
