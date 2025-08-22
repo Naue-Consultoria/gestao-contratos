@@ -28,10 +28,6 @@
           <i class="fas fa-edit"></i>
           Editar
         </button>
-        <button class="btn-action-header" (click)="generatePDF()" title="Gerar PDF">
-          <i class="fas fa-file-pdf"></i>
-          PDF
-        </button>
         <button class="btn-action-header" (click)="openExportModal()" title="Exportar Contrato">
           <i class="fas fa-download"></i>
           Exportar
@@ -59,7 +55,6 @@
             </div>
           </div>
         </div>
-        
       </div>
       
       <!-- Meta Information -->
@@ -69,12 +64,12 @@
           <span class="info-value">{{ getClientName() || 'Não informado' }}</span>
         </div>
         <div class="info-group">
-          <span class="info-label">Tipo</span>
-          <span class="info-value">{{ contract.type }}</span>
+          <span class="info-label">E-mail</span>
+          <span class="info-value">{{ getClientEmail() || 'Não informado' }}</span>
         </div>
         <div class="info-group">
-          <span class="info-label">Data de Criação</span>
-          <span class="info-value">{{ formatDate(contract.created_at) }}</span>
+          <span class="info-label">Telefone</span>
+          <span class="info-value">{{ getClientPhone() || 'Não informado' }}</span>
         </div>
         <div class="info-group">
           <span class="info-label">Data de Início</span>

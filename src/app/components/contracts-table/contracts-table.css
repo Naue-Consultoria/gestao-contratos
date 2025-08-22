@@ -333,6 +333,8 @@
     /* Custom scrollbar styling */
     scrollbar-width: thin;
     scrollbar-color: rgba(14, 155, 113, 0.3) rgba(0, 0, 0, 0.05);
+    /* Ensure dropdowns can appear above */
+    isolation: auto;
 }
 
 /* Indicador visual de scroll (só aparece quando necessário) */
@@ -409,6 +411,8 @@
     width: 100%;
     border-collapse: collapse;
     min-width: 1200px; /* Força scroll horizontal em telas menores */
+    position: relative;
+    z-index: 1;
 }
 
 .contracts-table th,
@@ -451,11 +455,20 @@
 
 
 .contracts-table tr:hover {
-    background-color: rgba(14, 155, 113, 0.03);
+    background-color: rgba(14, 155, 113, 0.05);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(14, 155, 113, 0.1);
+    transition: all 0.2s ease;
+}
+
+.contracts-table tr:has(.dropdown-menu.show) {
+    transform: none !important;
 }
 
 :host-context(body.dark-mode) .contracts-table tr:hover {
-    background-color: rgba(14, 155, 113, 0.05);
+    background-color: rgba(14, 155, 113, 0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(14, 155, 113, 0.15);
 }
 
 .contracts-table tr:last-child td {
@@ -626,6 +639,8 @@
 .action-buttons-cell {
     display: flex;
     gap: 0.5rem;
+    overflow: visible;
+    position: relative;
 }
 
 .action-btn {
@@ -797,6 +812,7 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     transform: translateY(-4px);
     border-color: var(--primary-green);
+    transition: all 0.3s ease;
 }
 
 .table-card-header {
@@ -958,6 +974,12 @@
 .dropdown-container {
     position: relative;
     display: inline-block;
+    isolation: isolate;
+}
+
+.dropdown-container:has(.dropdown-menu.show) {
+    z-index: 999999;
+    position: relative;
 }
 
 .action-btn.dropdown-toggle {
@@ -997,20 +1019,24 @@
     background: white;
     border: 1px solid var(--border-gray);
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
     min-width: 180px;
-    z-index: 9999;
+    max-width: 220px;
+    z-index: 999999;
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px) scale(0.95);
     pointer-events: none;
-    transition: all 0.2s ease;
+    transition: all 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform-origin: top left;
 }
 
 .dropdown-menu.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     pointer-events: auto;
 }
+
+/* Backdrop removido - causava problemas com scroll */
 
 .dropdown-menu.dropup {
     transform-origin: bottom center;

@@ -267,7 +267,9 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   editContract(id: number, event?: MouseEvent) {
     if (event) {
       event.stopPropagation();
+      event.preventDefault();
     }
+    this.openDropdownId = null;
     this.router.navigate(['/home/contratos/editar', id]);
   }
 
@@ -308,6 +310,8 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
   async deleteContract(contractId: number, event: MouseEvent) {
     event.stopPropagation();
+    event.preventDefault();
+    this.openDropdownId = null;
     const contractToDelete = this.contracts.find((c) => c.id === contractId);
     if (!contractToDelete) return;
 
@@ -334,6 +338,8 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   // Novos métodos para dropdown e exportação
   toggleDropdown(contractId: number, event: MouseEvent) {
     event.stopPropagation();
+    event.preventDefault();
+    
     if (this.openDropdownId === contractId) {
       this.openDropdownId = null;
     } else {
@@ -347,70 +353,77 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     const button = (event.target as HTMLElement).closest('.dropdown-toggle') as HTMLElement;
     if (!button) return;
 
+    // Obter a posição do botão na viewport IMEDIATAMENTE
     const buttonRect = button.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     
+    // Posição absoluta na página (não relativa à viewport)
+    const absoluteTop = buttonRect.top + scrollTop;
+    const absoluteLeft = buttonRect.left + scrollLeft;
+
     // Aguardar o dropdown ser renderizado
     setTimeout(() => {
-      const dropdown = document.querySelector('.dropdown-menu.show') as HTMLElement;
+      const dropdown = button.parentElement?.querySelector('.dropdown-menu') as HTMLElement;
       if (!dropdown) return;
 
-      // Resetar estilos inline anteriores
-      dropdown.style.position = 'fixed';
-      dropdown.style.left = '';
-      dropdown.style.right = '';
-      dropdown.style.top = '';
-      dropdown.style.bottom = '';
-
-      // Obter dimensões do dropdown
-      const dropdownRect = dropdown.getBoundingClientRect();
-      const dropdownHeight = dropdown.offsetHeight;
-      const dropdownWidth = dropdown.offsetWidth;
-
-      // Calcular espaços disponíveis
-      const viewportHeight = window.innerHeight;
       const viewportWidth = window.innerWidth;
-      const spaceBelow = viewportHeight - buttonRect.bottom;
-      const spaceAbove = buttonRect.top;
-      const spaceRight = viewportWidth - buttonRect.left;
+      const viewportHeight = window.innerHeight;
+      
+      // Posição inicial - abaixo do botão (fixa na viewport)
+      let top = buttonRect.bottom + 4;
+      let left = buttonRect.left;
 
-      // Posicionar horizontalmente
-      if (spaceRight >= dropdownWidth) {
-        // Alinhar à esquerda do botão
-        dropdown.style.left = `${buttonRect.left}px`;
-      } else {
-        // Alinhar à direita da viewport
-        dropdown.style.right = `${viewportWidth - buttonRect.right}px`;
+      // Verificar se precisa ajustar horizontalmente
+      const dropdownWidth = 180;
+      if (left + dropdownWidth > viewportWidth - 20) {
+        left = buttonRect.right - dropdownWidth;
       }
 
-      // Posicionar verticalmente
-      if (spaceBelow >= dropdownHeight + 10) {
-        // Abrir para baixo
-        dropdown.style.top = `${buttonRect.bottom + 8}px`;
-        dropdown.classList.remove('dropup');
-      } else if (spaceAbove >= dropdownHeight + 10) {
-        // Abrir para cima
-        dropdown.style.bottom = `${viewportHeight - buttonRect.top + 8}px`;
-        dropdown.classList.add('dropup');
+      // Verificar se precisa ajustar verticalmente  
+      const dropdownHeight = 140;
+      if (top + dropdownHeight > viewportHeight - 20) {
+        top = buttonRect.top - dropdownHeight - 4;
+        dropdown.style.transformOrigin = 'bottom left';
       } else {
-        // Se não houver espaço suficiente, abrir para baixo com scroll
-        dropdown.style.top = `${buttonRect.bottom + 8}px`;
-        dropdown.style.maxHeight = `${spaceBelow - 20}px`;
-        dropdown.style.overflowY = 'auto';
-        dropdown.classList.remove('dropup');
+        dropdown.style.transformOrigin = 'top left';
       }
-    }, 10);
+
+      // Aplicar posicionamento fixo na viewport
+      dropdown.style.top = `${Math.max(10, top)}px`;
+      dropdown.style.left = `${Math.max(10, left)}px`;
+    }, 0);
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     // Fecha o dropdown se clicar fora dele
     const target = event.target as HTMLElement;
-    if (!target.closest('.dropdown-container')) {
+    if (!target.closest('.dropdown-container') && !target.closest('.dropdown-menu')) {
       this.openDropdownId = null;
     }
   }
 
+  @HostListener('window:scroll')
+  @HostListener('document:scroll')
+  onScroll() {
+    // Fecha o dropdown quando houver scroll
+    this.openDropdownId = null;
+  }
+
   viewContract(contractId: number, event: MouseEvent) {
+    // Evitar navegação se clicou em botões de ação ou dentro de dropdowns
+    const target = event.target as HTMLElement;
+    
+    if (target.closest('.action-buttons-cell') || 
+        target.closest('.dropdown-container') || 
+        target.closest('.table-card-actions') ||
+        target.closest('.dropdown-menu') ||
+        target.classList.contains('dropdown-toggle') ||
+        target.classList.contains('action-btn')) {
+      return;
+    }
+    
     event.stopPropagation();
     this.openDropdownId = null;
     this.router.navigate(['/home/contratos/visualizar', contractId]);
@@ -418,6 +431,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
   async openExportModal(contract: ContractDisplay, event: MouseEvent) {
     event.stopPropagation();
+    event.preventDefault();
     this.openDropdownId = null;
     
     // Carregar o contrato completo com todos os dados
