@@ -43,6 +43,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     } else if (shouldAddToken) {
       // Se deveria ter token mas não tem, redirecionar para login
       console.warn('🔑 Token ausente ou inválido - redirecionando para login');
+      console.warn('🔍 URL da requisição:', req.url);
+      console.warn('🔍 Token atual:', token);
       router.navigate(['/login']);
       return throwError(() => new Error('Token não encontrado'));
     }
@@ -56,7 +58,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
       // Erro 401 - Token inválido ou expirado
       if (error.status === 401 && !isPublicRoute) {
-        console.log('🔄 Token inválido - fazendo logout');
         authService.logout().subscribe(() => {
           router.navigate(['/login']);
         });
@@ -64,7 +65,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
       // Erro 403 - Acesso negado (só redireciona se não for rota pública)
       if (error.status === 403 && !isPublicRoute) {
-        console.log('🚫 Acesso negado');
         router.navigate(['/home/dashboard']);
       }
 

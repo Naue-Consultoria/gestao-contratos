@@ -189,17 +189,14 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
       'contract_services'
     ];
     
-    console.log('🔍 Searching for services in proposal...');
     
     for (const property of possibleServiceProperties) {
       if (proposalAny[property] && Array.isArray(proposalAny[property]) && proposalAny[property].length > 0) {
-        console.log(`✅ Found services in proposal.${property}:`, proposalAny[property]);
         return proposalAny[property];
       }
     }
     
     // If no services found, log all array properties for debugging
-    console.log('🔍 All array properties in proposal:');
     for (const key in proposalAny) {
       if (Array.isArray(proposalAny[key])) {
         console.log(`  - ${key}: Array(${proposalAny[key].length})`, proposalAny[key]);

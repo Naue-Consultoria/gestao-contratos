@@ -11,12 +11,16 @@
 }
 
 .generate-link-btn {
-    background-color: #6f42c1 !important;
+    background-color: var(--primary-green-dark) !important;
     color: white !important;
 }
 
 .generate-link-btn:hover {
-    background-color: #5a32a0 !important;
+    background-color: var(--primary-green-darker) !important;
+}
+
+.generate-link-btn i {
+    color: white !important;
 }
 
 .link-btn {

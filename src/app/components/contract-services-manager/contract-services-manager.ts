@@ -1,7 +1,9 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ContractService, ApiContractService, ServiceComment } from '../../services/contract';
+import { RoutineService } from '../../services/routine.service';
 import { AttachmentService, ServiceCommentAttachment, AttachmentUploadProgress } from '../../services/attachment.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -42,13 +44,16 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
 
   constructor(
     private contractService: ContractService,
+    private routineService: RoutineService,
     private attachmentService: AttachmentService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private router: Router
   ) {}
 
   ngOnInit() {
+    
     // Inicializar status dos serviços se não existir e ordenar alfabeticamente
-    this.services.forEach(service => {
+    this.services.forEach((service, index) => {
       if (!service.status) {
         service.status = 'not_started';
       }
@@ -356,6 +361,35 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
 
   getAttachmentsCount(commentId: number): number {
     return this.attachments[commentId]?.length || 0;
+  }
+
+  async navigateToServiceTracking(service: ApiContractService, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    console.log('🚀 Navegando para service tracking:', service);
+    console.log('🔍 Service ID:', service.id);
+    console.log('🔍 Contract ID:', this.contractId);
+
+    try {
+      // Buscar a rotina pelo serviceId (contract_service_id)
+      const routine = await this.routineService.getRoutineByContractServiceId(service.id).toPromise();
+      
+      if (routine && routine.id) {
+        // Se a rotina existe, navegar com o routine.id
+        this.router.navigate(['/home/rotinas', routine.id, 'servico', service.id]);
+      } else {
+        // Se não existe rotina, mostrar erro ao invés de usar fallback
+        console.error('❌ Rotina não encontrada para o serviço:', service.id);
+        alert('Erro: Não foi possível encontrar a rotina para este serviço. Por favor, verifique se a rotina foi criada corretamente.');
+        return;
+      }
+    } catch (error) {
+      console.error('❌ Erro ao buscar rotina:', error);
+      alert('Erro ao buscar rotina. Por favor, tente novamente.');
+      return;
+    }
   }
 
   // Novas funções para comentários com anexos

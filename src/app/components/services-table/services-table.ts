@@ -12,7 +12,6 @@ interface ServiceDisplay {
   name: string;
   category: string;
   duration: string;
-  description?: string;
   isActive: boolean;
   raw: ApiService;
 }
@@ -143,8 +142,7 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
       const searchLower = this.searchTerm.toLowerCase().trim();
       filtered = filtered.filter(service =>
         service.name.toLowerCase().includes(searchLower) ||
-        service.category.toLowerCase().includes(searchLower) ||
-        (service.description && service.description.toLowerCase().includes(searchLower))
+        service.category.toLowerCase().includes(searchLower)
       );
     }
 

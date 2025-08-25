@@ -7,7 +7,7 @@
       <div class="col-actions">Acompanhamento</div>
     </div>
     
-    <div *ngFor="let service of services" class="service-row" [class.expanded]="showComments[service.id]">
+    <div *ngFor="let service of services" class="service-row">
       <div class="col-service">
         <div class="service-info">
           <h4 class="service-name">{{ service.service.name }}</h4>
@@ -42,216 +42,17 @@
       </div>
       
       <div class="col-actions">
-        <div class="comments-summary">
+        <div class="tracking-action">
           <button 
             type="button"
-            (click)="toggleComments(service.id)"
-            class="comments-toggle-modern"
-            [class.active]="showComments[service.id]">
-            <div class="comments-icon-wrapper">
-              <i class="fas fa-comment-dots"></i>
-              <span class="comments-count-badge" *ngIf="comments[service.id] && comments[service.id].length > 0">
-                {{ comments[service.id].length }}
-              </span>
+            (click)="navigateToServiceTracking(service, $event)"
+            class="tracking-btn"
+            title="Acompanhar serviço">
+            <div class="tracking-icon-wrapper">
+              <i class="fas fa-chart-line"></i>
             </div>
-            <span class="comments-label" *ngIf="(comments[service.id]?.length || 0) > 0">
-              {{ (comments[service.id].length || 0) + ' nota(s)' }}
-            </span>
+            <span class="tracking-label">Acompanhar</span>
           </button>
-        </div>
-      </div>
-      
-      <!-- Modern Comments Section -->
-      <div *ngIf="showComments[service.id]" class="service-comments-modern">
-        
-        <!-- Comments Header -->
-        <div class="comments-header">
-          <div class="comments-title">
-            <i class="fas fa-sticky-note"></i>
-            <h4>Registros do Serviço</h4>
-          </div>
-          <div class="comments-stats">
-            <span class="comments-count">{{ (comments[service.id] || []).length }} nota(s)</span>
-          </div>
-        </div>
-
-        <!-- Add Comment Card (Always Visible) -->
-        <div class="add-comment-card">
-          <div class="add-comment-header">
-            <div class="user-avatar">
-              <i class="fas fa-user-circle"></i>
-            </div>
-            <div class="add-comment-form">
-              <textarea 
-                [(ngModel)]="newComments[service.id]"
-                placeholder="Adicionar nova nota sobre este serviço..."
-                class="modern-textarea"
-                rows="3"
-                [class.expanded]="(newComments[service.id] || '').trim() || (newCommentFiles[service.id] || []).length > 0">
-              </textarea>
-              
-              <!-- File Attachments Preview -->
-              <div class="attachments-preview" *ngIf="(newCommentFiles[service.id]?.length || 0) > 0">
-                <div class="attachments-preview-header">
-                  <i class="fas fa-paperclip"></i>
-                  <span>{{ newCommentFiles[service.id].length }} arquivo(s) anexado(s)</span>
-                </div>
-                <div class="attachments-preview-list">
-                  <div *ngFor="let file of newCommentFiles[service.id]; let i = index" class="attachment-preview-item">
-                    <i [class]="getFileIconFromFile(file)"></i>
-                    <span class="file-name">{{ file.name }}</span>
-                    <button type="button" (click)="removePendingFile(service.id, i)" class="remove-attachment">
-                      <i class="fas fa-times"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Comment Actions -->
-          <div class="comment-form-actions" 
-               *ngIf="(newComments[service.id] || '').trim() || (newCommentFiles[service.id] || []).length > 0">
-            <div class="actions-left">
-              <input 
-                type="file" 
-                #fileInputNew
-                (change)="onNewCommentFileSelected($event, service.id)"
-                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
-                class="file-input"
-                multiple>
-              <button type="button" (click)="fileInputNew.click()" class="btn-attach-modern">
-                <i class="fas fa-paperclip"></i>
-                Anexar arquivos
-              </button>
-            </div>
-            <div class="actions-right">
-              <button 
-                type="button"
-                (click)="clearNewComment(service.id)"
-                class="btn-cancel-modern">
-                Cancelar
-              </button>
-              <button 
-                type="button"
-                (click)="addCommentWithFiles(service.id)"
-                [disabled]="(!(newComments[service.id] || '').trim() && (!newCommentFiles[service.id] || newCommentFiles[service.id].length === 0)) || isAddingComment[service.id]"
-                class="btn-send-modern"
-                [class.loading]="isAddingComment[service.id]">
-                <i class="fas fa-paper-plane" *ngIf="!isAddingComment[service.id]"></i>
-                <i class="fas fa-spinner fa-spin" *ngIf="isAddingComment[service.id]"></i>
-                {{ isAddingComment[service.id] ? 'Publicando...' : 'Publicar nota' }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Loading State -->
-        <div *ngIf="loadingComments[service.id]" class="loading-comments-modern">
-          <div class="loading-spinner">
-            <i class="fas fa-spinner fa-spin"></i>
-          </div>
-          <span>Carregando notas...</span>
-        </div>
-
-        <!-- Comments List -->
-        <div class="comments-list-modern" *ngIf="!loadingComments[service.id]">
-          
-          <!-- Empty State -->
-          <div *ngIf="!comments[service.id] || comments[service.id].length === 0" class="no-comments-modern">
-            <div class="no-comments-icon">
-              <i class="fas fa-sticky-note"></i>
-            </div>
-            <h5>Nenhuma nota ainda</h5>
-            <p>Seja o primeiro a adicionar uma observação sobre este serviço</p>
-          </div>
-
-          <!-- Comment Cards -->
-          <div *ngFor="let comment of comments[service.id] || []" class="comment-card">
-            
-            <!-- Comment Header -->
-            <div class="comment-card-header">
-              <div class="comment-author-info">
-                <div class="author-avatar">
-                  <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="author-details">
-                  <span class="author-name">{{ comment.user.name }}</span>
-                  <span class="comment-timestamp">{{ formatCommentDate(comment.created_at) }}</span>
-                </div>
-              </div>
-              <div class="comment-actions-menu" *ngIf="canEditComment(comment)">
-                <button type="button" (click)="startEditComment(comment)" class="btn-action-menu" title="Editar">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button type="button" (click)="deleteComment(service.id, comment)" class="btn-action-menu delete" title="Excluir">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Comment Body -->
-            <div class="comment-card-body" *ngIf="!editingComment[comment.id]">
-              <div class="comment-text">
-                <p>{{ comment.comment }}</p>
-              </div>
-              
-              <!-- Attachments -->
-              <div *ngIf="hasAttachments(comment.id)" class="comment-attachments-modern">
-                <div class="attachments-section-header">
-                  <i class="fas fa-paperclip"></i>
-                  <span>{{ getAttachmentsCount(comment.id) }} anexo(s)</span>
-                </div>
-                
-                <div class="attachments-grid">
-                  <div *ngFor="let attachment of attachments[comment.id]" class="attachment-card">
-                    <div class="attachment-icon">
-                      <i [class]="getFileIcon(attachment.mime_type)"></i>
-                    </div>
-                    <div class="attachment-details">
-                      <span class="attachment-name">{{ attachment.original_name }}</span>
-                      <span class="attachment-size">{{ formatFileSize(attachment.file_size) }}</span>
-                    </div>
-                    <div class="attachment-actions">
-                      <button type="button" 
-                              (click)="downloadAttachment(attachment)" 
-                              class="btn-attachment-action"
-                              title="Baixar">
-                        <i class="fas fa-download"></i>
-                      </button>
-                      <button type="button" 
-                              *ngIf="canEditAttachment(attachment)"
-                              (click)="deleteAttachment(attachment)" 
-                              class="btn-attachment-action delete"
-                              title="Excluir">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Edit Mode -->
-            <div class="comment-edit-modern" *ngIf="editingComment[comment.id]">
-              <textarea 
-                [(ngModel)]="editingComment[comment.id]"
-                class="edit-textarea-modern"
-                rows="4"
-                placeholder="Editar nota...">
-              </textarea>
-              <div class="edit-actions-modern">
-                <button type="button" (click)="cancelEditComment(comment.id)" class="btn-edit-cancel">
-                  Cancelar
-                </button>
-                <button type="button" (click)="updateComment(comment)" class="btn-edit-save">
-                  <i class="fas fa-save"></i>
-                  Salvar alterações
-                </button>
-              </div>
-            </div>
-          </div>
-          
         </div>
       </div>
     </div>

@@ -25,6 +25,7 @@ import { SettingsPageComponent } from './components/settings-page/settings-page'
 import { HelpPageComponent } from './components/help-page/help-page';
 import { RoutinesPageComponent } from './components/routines-page/routines-page';
 import { RoutineViewPageComponent } from './components/routine-view-page/routine-view-page';
+import { ServiceTrackingPageComponent } from './components/service-tracking-page/service-tracking-page';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -237,6 +238,14 @@ export const routes: Routes = [
         component: RoutineViewPageComponent,
         canActivate: [UserGuard],
         title: 'Detalhes da Rotina - NAUE Consultoria',
+      },
+
+      // Acompanhamento de serviço
+      {
+        path: 'rotinas/:routineId/servico/:serviceId',
+        component: ServiceTrackingPageComponent,
+        canActivate: [UserGuard],
+        title: 'Acompanhamento de Serviço - NAUE Consultoria',
       },
 
       // Gestão de usuários

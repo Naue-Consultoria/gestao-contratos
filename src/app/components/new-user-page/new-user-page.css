@@ -387,7 +387,8 @@ select.form-control {
 
 .btn-primary {
   background-color: var(--naue-green);
-  color: #1a1a1a;
+  color: 
+  white;
 }
 
 .btn-primary:hover:not(:disabled) {

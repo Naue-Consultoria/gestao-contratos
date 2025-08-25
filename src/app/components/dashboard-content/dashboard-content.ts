@@ -154,7 +154,6 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   private loadDashboardData() {
-    console.log('Iniciando carregamento dos dados do dashboard...');
     
     // Se for admin, carregar dados gerais como antes
     if (this.authService.isAdmin()) {
@@ -165,7 +164,6 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
         clientsData: this.clientService.getClients()
       }).subscribe({
         next: (response) => {
-          console.log('Dados gerais recebidos:', response);
           const totalClients = response.clientsData.total || 0;
           this.updateStatCards(response.contractStats.stats, response.serviceStats.stats, totalClients);
         },
@@ -227,13 +225,11 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   private loadRecentActivities() {
-    console.log('Carregando atividades recentes dos serviços...');
     
     if (this.authService.isAdmin()) {
       // Para admin, carregar todas as atividades como antes
       this.contractService.getRecentServiceActivities(10).subscribe({
         next: (response) => {
-          console.log('Atividades recebidas:', response);
           if (response.success && response.activities) {
             this.recentActivities = response.activities.map((activity: any) => ({
               id: activity.id,
@@ -262,7 +258,6 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   private loadUserActivities() {
-    console.log('Carregando atividades dos contratos do usuário...');
     
     // Buscar contratos do usuário primeiro
     this.contractService.getContracts().subscribe({
@@ -298,7 +293,6 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
           .sort((a, b) => b.id! - a.id!)
           .slice(0, 10);
           
-        console.log('Atividades do usuário carregadas:', this.recentActivities);
       },
       error: (error) => {
         console.error('Erro ao carregar atividades do usuário:', error);
@@ -761,12 +755,10 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   private loadUserSpecificData() {
-    console.log('Carregando dados específicos do usuário...');
     
     // Buscar apenas contratos vinculados ao usuário logado
     this.contractService.getContracts().subscribe({
       next: (response) => {
-        console.log('Contratos do usuário recebidos:', response);
         const userContracts = response.contracts || [];
         
         // Calcular estatísticas baseadas nos contratos do usuário
@@ -865,7 +857,6 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   // Métodos para responsividade do gráfico
   expandChart() {
     // Implementar modal de gráfico expandido
-    console.log('Expandindo gráfico...');
   }
 
   downloadChart() {

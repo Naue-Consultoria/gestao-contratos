@@ -624,7 +624,6 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       );
       
       if (statusResponse && statusResponse.success) {
-        console.log('✅ Status da proposta atualizado para "Enviada"');
         return true;
       } else {
         console.error('⚠️ Aviso: Não foi possível atualizar o status da proposta:', statusResponse?.message);

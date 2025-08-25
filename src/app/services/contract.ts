@@ -70,6 +70,7 @@ export interface UpdateContractRequest {
 
 export interface ApiContractService {
   id: number;
+  contract_id?: number;
   unit_value: number;
   total_value: number;
   scheduled_start_date?: string | null;
@@ -273,6 +274,12 @@ export class ContractService {
   }
 
   // Métodos para serviços do contrato
+  getContractServiceById(serviceId: number): Observable<ApiContractService> {
+    return this.http.get<ApiContractService>(`${this.API_URL}/services/${serviceId}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
   updateContractService(serviceId: number, data: { status?: string; scheduled_start_date?: string | null }): Observable<any> {
     return this.http.patch(`${this.API_URL}/services/${serviceId}`, data, {
       headers: this.getAuthHeaders()

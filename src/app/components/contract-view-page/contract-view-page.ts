@@ -164,14 +164,12 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     // For PF (Pessoa Física)
     if (client.clients_pf && client.clients_pf.length > 0) {
       const pfName = client.clients_pf[0].full_name || 'Nome não informado';
-      console.log('✅ PF name found:', pfName);
       return pfName;
     }
     
     // For PJ (Pessoa Jurídica)  
     if (client.clients_pj && client.clients_pj.length > 0) {
       const pjName = client.clients_pj[0].company_name || client.clients_pj[0].trade_name || 'Empresa não informada';
-      console.log('✅ PJ name found:', pjName);
       return pjName;
     }
     

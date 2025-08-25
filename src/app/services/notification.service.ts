@@ -94,7 +94,6 @@ export class NotificationService {
     this.websocketService.listenForNewNotifications().subscribe(notificationFromServer => {
       // Verificar se a notificação é relevante para o usuário atual
       if (!this.isNotificationRelevantForUser(notificationFromServer)) {
-        console.log('🚫 Notificação filtrada - não relevante para o usuário atual');
         return;
       }
 

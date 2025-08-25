@@ -147,6 +147,20 @@ export class PublicProposalViewComponent implements OnInit {
       });
   }
 
+  private async loadProposalSync(): Promise<void> {
+    try {
+      const response = await this.publicProposalService.getProposalByToken(this.token).toPromise();
+      if (response?.success) {
+        this.proposal = response.data;
+        this.checkProposalStatus();
+        // Não inicializar seleção de serviços novamente após assinatura
+      }
+    } catch (error) {
+      console.error('Erro ao recarregar proposta:', error);
+      // Não mostrar erro aqui para não interromper o fluxo
+    }
+  }
+
   private checkProposalStatus(): void {
     if (!this.proposal) return;
 
@@ -408,6 +422,8 @@ export class PublicProposalViewComponent implements OnInit {
       const response = await this.publicProposalService.signProposal(this.token, signatureData).toPromise();
       if (response?.success) {
         this.toastr.success('Proposta assinada com sucesso!');
+        // Recarregar os dados da proposta para refletir o novo status
+        await this.loadProposalSync();
         this.currentStep = 'confirming';
       }
     } catch (error) {
@@ -429,6 +445,8 @@ export class PublicProposalViewComponent implements OnInit {
       
       if (response?.success) {
         this.toastr.success('Proposta confirmada com sucesso!');
+        // Recarregar os dados da proposta para refletir o status final
+        await this.loadProposalSync();
         this.currentStep = 'completed';
       }
     } catch (error) {
@@ -449,6 +467,8 @@ export class PublicProposalViewComponent implements OnInit {
         const response = await this.publicProposalService.rejectProposal(this.token, reason || '').toPromise();
         if (response?.success) {
           this.toastr.success('Proposta rejeitada');
+          // Recarregar os dados da proposta para refletir o status de rejeitada
+          await this.loadProposalSync();
           this.currentStep = 'rejected';
         }
       } catch (error) {

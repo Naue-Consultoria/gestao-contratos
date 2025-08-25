@@ -180,7 +180,6 @@ export class ClientAttachmentsComponent implements OnInit, OnDestroy {
         this.uploadProgress = Math.round(overallProgress);
         
         if (progress.status === 'completed') {
-          console.log(`✅ Arquivo ${currentFile.name} enviado com sucesso`);
           this.currentUploadIndex++;
           
           // Upload do próximo arquivo

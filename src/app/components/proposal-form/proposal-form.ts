@@ -119,7 +119,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
         // Filtrar apenas serviços ativos
         this.services = (data.services.services || []).filter(service => service.is_active);
         this.availableServices = [...this.services];
-        console.log('✅ Dados carregados:', {
           clients: this.clients.length,
           services: this.services.length,
           availableServices: this.availableServices.length
@@ -174,7 +173,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       };
     }).filter(service => service.id);
     
-    console.log('✅ Serviços carregados na edição:', this.selectedServices.map(s => ({
       name: s.name,
       duration: s.duration,
       duration_unit: s.duration_unit
@@ -208,7 +206,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       category: service.category || 'Geral'
     });
     
-    console.log('✅ Serviço adicionado:', {
       name: service.name,
       duration_amount: service.duration_amount,
       duration_unit: service.duration_unit,
@@ -459,7 +456,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          console.log('✅ Client created successfully:', response);
           this.clients.push(response.client);
           this.proposalForm.get('client_id')?.setValue(response.client.id);
           this.showNewClientForm = false;
@@ -532,13 +528,11 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       minimalData.business_segment = 'A definir';
     }
 
-    console.log('🔄 Alternative strategy 1 - Minimal payload:', JSON.stringify(minimalData, null, 2));
 
     this.clientService.createClient(minimalData)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          console.log('✅ Alternative strategy 1 succeeded:', response);
           this.clients.push(response.client);
           this.proposalForm.get('client_id')?.setValue(response.client.id);
           this.showNewClientForm = false;
@@ -583,13 +577,11 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     // Explicitly remove email field
     delete (emailsArrayData as any).email;
 
-    console.log('🔄 Alternative strategy 2 - emails array for PJ:', JSON.stringify(emailsArrayData, null, 2));
 
     this.clientService.createClient(emailsArrayData)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          console.log('✅ Alternative strategy 2 succeeded:', response);
           this.clients.push(response.client);
           this.proposalForm.get('client_id')?.setValue(response.client.id);
           this.showNewClientForm = false;
@@ -650,7 +642,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          console.log('✅ Simplified client created successfully:', response);
           this.clients.push(response.client);
           this.proposalForm.get('client_id')?.setValue(response.client.id);
           this.showNewClientForm = false;

@@ -203,8 +203,12 @@ textarea.form-control {
 
 .btn-primary {
     background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-    color: var(--white);
+    color: var(--white) !important;
     box-shadow: 0 4px 12px rgba(14, 155, 113, 0.3);
+}
+
+.btn-primary span {
+    color: var(--white) !important;
 }
 
 .btn-primary:hover {

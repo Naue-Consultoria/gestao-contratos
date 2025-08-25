@@ -141,6 +141,11 @@ export class BreadcrumbService {
       { label: 'Rotinas', url: '/home/rotinas' },
       { label: 'Detalhes da Rotina' }
     ],
+    '/home/rotinas/servico': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Rotinas', url: '/home/rotinas' },
+      { label: 'Acompanhamento de Serviço' }
+    ],
     '/home/notifications': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Notificações' }

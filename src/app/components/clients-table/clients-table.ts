@@ -168,9 +168,15 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
         this.loadData();
       })
       .catch((error: any) => {
-        const errorMessage = this.deleteMode === 'soft' 
-          ? 'Não foi possível desativar o cliente.'
-          : 'Não foi possível excluir o cliente permanentemente.';
+        // Verificar se temos uma mensagem de erro específica do backend
+        let errorMessage: string;
+        if (error?.error?.message) {
+          errorMessage = error.error.message;
+        } else {
+          errorMessage = this.deleteMode === 'soft' 
+            ? 'Não foi possível desativar o cliente.'
+            : 'Não foi possível excluir o cliente permanentemente.';
+        }
         this.modalService.showError(errorMessage);
       })
       .finally(() => {

@@ -141,7 +141,7 @@ export class AuthService {
       password
     }).pipe(
       tap(response => {
-        console.log('✅ Senha resetada com sucesso');
+        // Password reset successful
       }),
       catchError(error => {
         console.error('❌ Erro ao resetar senha:', error);
@@ -153,7 +153,7 @@ export class AuthService {
   validateResetCode(code: string): Observable<any> {
     return this.http.post(`${this.API_URL}/validate-reset-code`, { token: code }).pipe(
       tap(response => {
-        console.log('✅ Código validado');
+        // Reset code validated
       }),
       catchError(error => {
         console.error('❌ Código inválido:', error);
