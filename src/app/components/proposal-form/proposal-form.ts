@@ -119,10 +119,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
         // Filtrar apenas serviços ativos
         this.services = (data.services.services || []).filter(service => service.is_active);
         this.availableServices = [...this.services];
-          clients: this.clients.length,
-          services: this.services.length,
-          availableServices: this.availableServices.length
-        });
         this.isLoading = false;
       },
       error: (error) => {
@@ -173,11 +169,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       };
     }).filter(service => service.id);
     
-      name: s.name,
-      duration: s.duration,
-      duration_unit: s.duration_unit
-    })));
-
     // Atualização concluída - serviços carregados
   }
 
@@ -204,15 +195,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       duration: service.duration_amount || null,
       duration_unit: service.duration_unit || null,
       category: service.category || 'Geral'
-    });
-    
-      name: service.name,
-      duration_amount: service.duration_amount,
-      duration_unit: service.duration_unit,
-      mapped: {
-        duration: service.duration_amount || null,
-        duration_unit: service.duration_unit || null
-      }
     });
     
     // Atualizar valor total
@@ -373,14 +355,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
   // Debug method
   debugComponent(): void {
-    console.log('🔍 DEBUG - Estado atual do componente:');
-    console.log('- isLoading:', this.isLoading);
-    console.log('- showServiceModal:', this.showServiceModal);
-    console.log('- availableServices:', this.availableServices.length);
-    console.log('- selectedServices:', this.selectedServices.length);
-    console.log('- clients:', this.clients.length);
-    console.log('- services:', this.services.length);
-    console.log('- proposalForm valid:', this.proposalForm.valid);
   }
 
   toggleNewClientForm(): void {
@@ -407,8 +381,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     const formValue = this.newClientForm.value;
     const clientType = formValue.client_type;
     
-    console.log('📝 Form values:', formValue);
-    console.log('🔍 Client type:', clientType);
     
     // Build comprehensive client data with ALL potentially required fields
     const clientData: CreateClientRequest = {
@@ -482,14 +454,11 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
           
           // Tratamento específico por tipo de erro
           if (error.status === 429) {
-            console.log('⏳ Rate limit atingido, aguardando...');
             this.isCreatingClient = false;
             this.toastr.error('Muitas tentativas. Aguarde alguns segundos antes de tentar novamente.', 'Limite de Tentativas');
           } else if (error.status === 400) {
-            console.log('🔄 Tentando estratégias alternativas para erro 400...');
             this.tryAlternativeClientCreation(formValue, clientType);
           } else if (error.status === 500) {
-            console.log('🔄 Tentando com payload simplificado para erro 500...');
             this.trySimplifiedClientCreation(formValue, clientType);
           } else {
             this.isCreatingClient = false;
@@ -710,12 +679,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    console.log('🚀 Iniciando envio da proposta');
-    console.log('📝 Dados do formulário:', this.proposalForm.value);
-    console.log('🔧 Serviços selecionados:', this.selectedServices);
     
     if (this.proposalForm.invalid) {
-      console.log('❌ Formulário inválido:', this.proposalForm.errors);
       this.markFormGroupTouched(this.proposalForm);
       this.toastr.error('Preencha todos os campos obrigatórios');
       return;
@@ -723,7 +688,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
     // Validar se há pelo menos um serviço
     if (this.selectedServices.length === 0) {
-      console.log('❌ Nenhum serviço selecionado');
       this.toastr.error('Adicione pelo menos um serviço');
       return;
     }
@@ -734,7 +698,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     );
 
     if (invalidServices.length > 0) {
-      console.log('❌ Serviços com valores inválidos:', invalidServices);
       this.toastr.error('Todos os serviços devem ter um valor válido');
       return;
     }
@@ -782,7 +745,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       }))
     };
 
-    console.log('📤 Dados enviados para backend:', JSON.stringify(formData, null, 2));
 
     const operation = this.isEditMode 
       ? this.proposalService.updateProposal(this.proposalId!, formData)
