@@ -484,14 +484,24 @@ export class ServiceTrackingPageComponent implements OnInit {
   }
 
   downloadAttachment(attachment: any) {
-    // Implementar download do anexo
+    console.log('Iniciando download do anexo:', attachment);
+    
     this.attachmentService.downloadAttachment(attachment.id).subscribe({
       next: (blob) => {
+        console.log('Blob recebido, tamanho:', blob.size);
+        
+        if (blob.size === 0) {
+          this.toastr.error('Arquivo vazio recebido');
+          return;
+        }
+        
         // Criar URL para o blob e iniciar download
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.download = attachment.original_name;
+        link.style.display = 'none';
+        
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -501,7 +511,17 @@ export class ServiceTrackingPageComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erro ao baixar anexo:', error);
-        this.toastr.error('Erro ao baixar o arquivo');
+        
+        let errorMessage = 'Erro ao baixar o arquivo';
+        if (error.status === 404) {
+          errorMessage = 'Arquivo não encontrado';
+        } else if (error.status === 403) {
+          errorMessage = 'Sem permissão para baixar este arquivo';
+        } else if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        }
+        
+        this.toastr.error(errorMessage);
       }
     });
   }

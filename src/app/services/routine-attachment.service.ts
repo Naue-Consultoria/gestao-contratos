@@ -136,10 +136,16 @@ export class RoutineAttachmentService {
    * Baixar um anexo
    */
   downloadAttachment(attachmentId: number): Observable<Blob> {
+    const token = localStorage.getItem('token');
+    const headers = {
+      'Authorization': `Bearer ${token}`
+    };
+
     return this.http.get(
       `${this.apiUrl}/attachments/${attachmentId}/download`,
       { 
-        responseType: 'blob'
+        responseType: 'blob',
+        headers: headers
       }
     );
   }
