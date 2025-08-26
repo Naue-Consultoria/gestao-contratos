@@ -306,7 +306,16 @@ export class ServiceTrackingPageComponent implements OnInit {
       this.isLoadingComments = true;
       const comments = await this.routineService.getRoutineComments(this.routine.id).toPromise();
       if (comments) {
+        // Debug: verificar se os anexos estão vindo do backend
+        console.log('Comentários carregados:', comments);
         this.comments = comments;
+        
+        // Verificar cada comentário e seus anexos
+        this.comments.forEach(comment => {
+          if (comment.has_attachments) {
+            console.log(`Comentário ${comment.id} tem anexos:`, comment.attachments);
+          }
+        });
       }
     } catch (error) {
       console.error('Erro ao carregar comentários:', error);
@@ -357,12 +366,17 @@ export class ServiceTrackingPageComponent implements OnInit {
       const newComment = await this.routineService.addComment(this.routine.id!, this.newComment.trim()).toPromise();
       
       if (newComment) {
-        // Adicionar comentário à lista
-        this.comments.push(newComment);
-        
-        // Se houver arquivos selecionados, fazer upload
+        // Se houver arquivos selecionados, fazer upload primeiro
         if (this.selectedFiles.length > 0 && newComment.id) {
+          // Adicionar comentário temporariamente sem anexos
+          newComment.attachments = [];
+          this.comments.push(newComment);
+          
+          // Fazer upload dos arquivos
           await this.uploadAttachments(newComment.id);
+        } else {
+          // Adicionar comentário sem anexos
+          this.comments.push(newComment);
         }
         
         // Limpar formulário
@@ -388,21 +402,45 @@ export class ServiceTrackingPageComponent implements OnInit {
   }
 
   async uploadAttachments(commentId: number) {
+    let uploadedCount = 0;
+    const totalFiles = this.selectedFiles.length;
+    
     for (const file of this.selectedFiles) {
       try {
         const uploadKey = `${commentId}_${file.name}`;
         this.uploadProgress[uploadKey] = 0;
         
         this.attachmentService.uploadFile(commentId, file).subscribe({
-          next: (progress) => {
+          next: async (progress) => {
+            console.log('Progress update:', progress);
             this.uploadProgress[uploadKey] = progress.progress;
+            
             if (progress.status === 'completed') {
-              // Atualizar flag has_attachments no comentário
+              console.log('Upload completed, attachment data:', progress.attachment);
+              
+              // Atualizar o comentário com o novo anexo
               const comment = this.comments.find(c => c.id === commentId);
               if (comment) {
+                console.log('Found comment to update:', comment);
                 comment.has_attachments = true;
+                if (!comment.attachments) {
+                  comment.attachments = [];
+                }
+                comment.attachments.push(progress.attachment);
+                console.log('Updated comment with attachment:', comment);
+              } else {
+                console.error('Comment not found for ID:', commentId);
               }
+              
               delete this.uploadProgress[uploadKey];
+              uploadedCount++;
+              
+              // Se todos os arquivos foram enviados, recarregar os comentários para garantir sincronização
+              if (uploadedCount === totalFiles) {
+                console.log('All files uploaded, reloading comments...');
+                await this.loadComments();
+              }
+              
               this.toastr.success(`Arquivo ${file.name} enviado com sucesso!`);
             }
           },

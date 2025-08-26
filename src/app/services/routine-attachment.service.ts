@@ -84,12 +84,15 @@ export class RoutineAttachmentService {
     }
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', file, file.name);
+
+    console.log('Enviando arquivo:', file.name, 'Tamanho:', file.size);
 
     return new Observable(observer => {
       this.http.post(`${this.apiUrl}/comments/${commentId}/upload`, formData, {
         reportProgress: true,
         observe: 'events'
+        // Não definir headers aqui - o interceptor cuida disso
       }).subscribe({
         next: (event) => {
           if (event.type === HttpEventType.UploadProgress && event.total) {
@@ -99,10 +102,11 @@ export class RoutineAttachmentService {
               status: 'uploading'
             });
           } else if (event.type === HttpEventType.Response) {
+            const response = event.body as any;
             observer.next({
               progress: 100,
               status: 'completed',
-              attachment: event.body
+              attachment: response.attachment || response
             });
             observer.complete();
           }

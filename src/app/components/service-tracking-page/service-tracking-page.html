@@ -203,7 +203,7 @@
               <div class="comment-body">
                 {{ comment.comment }}
               </div>
-              <div class="comment-attachments" *ngIf="comment.has_attachments && comment.attachments && comment.attachments.length > 0">
+              <div class="comment-attachments" *ngIf="comment.attachments && comment.attachments.length > 0">
                 <div class="attachments-header">
                   <i class="fas fa-paperclip"></i>
                   <span>Arquivos anexados ({{ comment.attachments.length }})</span>
