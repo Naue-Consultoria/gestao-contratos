@@ -215,6 +215,12 @@
   color: #718096;
 }
 
+.user-cargo {
+  font-size: 0.75rem;
+  color: #0e9b71;
+  font-weight: 500;
+}
+
 /* Email */
 .user-email {
   color: #4a5568;

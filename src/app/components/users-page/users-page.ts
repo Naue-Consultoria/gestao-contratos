@@ -20,6 +20,7 @@ interface User {
   avatarGradient: string;
   profilePictureUrl?: string;
   hasProfilePicture?: boolean;
+  cargo?: string;
 }
 
 @Component({
@@ -116,7 +117,8 @@ export class UsersPageComponent implements OnInit, OnDestroy {
       initials: initials,
       profilePictureUrl: undefined,
       avatarGradient: this.generateGradient(apiUser.name || apiUser.email),
-      hasProfilePicture: !!(apiUser.profile_picture_path) // Nova propriedade
+      hasProfilePicture: !!(apiUser.profile_picture_path), // Nova propriedade
+      cargo: apiUser.cargo
     };
   }
 

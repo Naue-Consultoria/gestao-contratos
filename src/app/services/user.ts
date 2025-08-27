@@ -8,6 +8,7 @@ export interface CreateUserRequest {
   password: string;
   name: string;
   role: 'admin' | 'user';
+  cargo?: string;
 }
 
 export interface UpdateUserRequest {
@@ -16,6 +17,7 @@ export interface UpdateUserRequest {
   role?: 'admin' | 'user';
   password?: string;
   is_active?: boolean;
+  cargo?: string;
 }
 
 export interface ApiUser {
@@ -31,6 +33,7 @@ export interface ApiUser {
   login_count?: number;
   profile_picture_path?: string;
   profile_picture_uploaded_at?: string;
+  cargo?: string;
 }
 
 export interface AssignableUser {
@@ -38,6 +41,7 @@ export interface AssignableUser {
   name: string;
   email: string;
   profile_picture_path?: string;
+  cargo?: string;
 }
 
 export interface UsersResponse {

@@ -61,6 +61,16 @@
             <option value="admin">Administrador</option>
           </select>
         </div>
+
+        <div class="form-group">
+          <label class="form-label">Cargo</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="userData.cargo"
+            name="cargo"
+            placeholder="Ex: Gerente, Analista, Diretor">
+        </div>
       </div>
 
       <div class="info-box" *ngIf="!isEditMode">

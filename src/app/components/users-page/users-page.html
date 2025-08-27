@@ -64,7 +64,7 @@
               <img *ngIf="user.profilePictureUrl" [src]="user.profilePictureUrl" alt="Foto de perfil" class="user-profile-picture">
               <div class="user-info">
                 <div class="user-name">{{ user.name }}</div>
-                <div class="user-role">{{ user.role }}</div>
+                <div class="user-cargo" *ngIf="user.cargo">{{ user.cargo }}</div>
               </div>
             </div>
           </td>

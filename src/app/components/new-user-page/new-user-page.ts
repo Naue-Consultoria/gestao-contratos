@@ -13,6 +13,7 @@ interface UserData {
   email: string;
   role: string;
   isActive: boolean;
+  cargo?: string;
 }
 
 @Component({
@@ -34,7 +35,8 @@ export class NewUserPageComponent implements OnInit {
     name: '',
     email: '',
     role: 'user',
-    isActive: true
+    isActive: true,
+    cargo: ''
   };
 
   // UI states
@@ -82,7 +84,8 @@ export class NewUserPageComponent implements OnInit {
           name: user.name || '',
           email: user.email || '',
           role: user.role_name || 'user',
-          isActive: user.is_active !== false
+          isActive: user.is_active !== false,
+          cargo: user.cargo || ''
         };
         
         // Load profile picture if exists
@@ -123,6 +126,7 @@ export class NewUserPageComponent implements OnInit {
         name: this.userData.name,
         email: this.userData.email,
         role: this.userData.role,
+        cargo: this.userData.cargo
       };
 
       if (this.isEditMode && this.editingUserId) {
