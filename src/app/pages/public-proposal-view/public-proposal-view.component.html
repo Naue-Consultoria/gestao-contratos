@@ -8,18 +8,13 @@
         <div class="hero-left">
           <div class="company-branding">
             <div class="logo-container">
-              <img src="/logoNaue.png" alt="NAUE Consultoria" class="company-logo">
+              <img src="/iconNaue.jpg" alt="NAUE Consultoria" class="company-logo">
             </div>
             <div class="company-info">
               <h1 class="company-name">NAUE Consultoria</h1>
-              <p class="company-tagline">Especialistas em Mercado Imobiliário</p>
+              <p class="company-tagline">Primeira consultoria especializada em mercado<br>imobiliário doBrasil.</p>
             </div>
           </div>
-          
-          <p class="hero-description">
-            Com metodologia própria e comprovada, transformamos mais de 1.500 líderes e centenas de 
-            construtoras, incorporadoras, loteadoras e imobiliárias em referências de mercado.
-          </p>
           
           <!-- Company Stats -->
           <div class="company-stats">
@@ -48,18 +43,6 @@
               <img src="/naue.jpg" alt="Mariana Naue" class="ceo-photo" (error)="onImageError($event)">
               <div class="ceo-title">CEO & FUNDADORA</div>
             </div>
-            <div class="ceo-quote">
-              <div class="quote-mark">
-                <i class="fas fa-quote-left"></i>
-              </div>
-              <p class="quote-text">
-                "Mariana Naue criou a primeira consultoria especializada em mercado imobiliário do Brasil"
-              </p>
-              <div class="quote-author">
-                <strong>Mariana Naue</strong>
-                <span>CEO & Fundadora</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -70,7 +53,7 @@
   <section class="benefits-section">
     <div class="section-container">
       <div class="section-header">
-        <h2 class="section-title">Por que escolher a NAUE?</h2>
+        <h2 class="section-title">Nossos Heads</h2>
         <p class="section-subtitle">Somos pioneiros e referência em consultoria imobiliária no Brasil</p>
       </div>
       
@@ -148,40 +131,52 @@
       
       <div class="partners-showcase">
         <div class="partners-carousel">
-          <div class="carousel-track" [style.transform]="'translateX(' + carouselTransform + ')'">
-            <div class="partner-logo" *ngFor="let client of clients">
-              <div class="logo-placeholder">
-                <span class="logo-text">NAUE</span>
-                <span class="logo-subtext">Consultoria</span>
-              </div>
+          <div class="carousel-track">
+            <div class="partner-logo">
+              <img src="/clientes-logos/Logo-Lopes-Consultoria-de-Imoveis-2020.png" alt="Lopes Consultoria">
             </div>
-          </div>
-        </div>
-        
-        <div class="testimonials-container">
-          <div class="testimonial-item">
-            <div class="testimonial-content">
-              <i class="fas fa-quote-left testimonial-quote-icon"></i>
-              <p class="testimonial-text">
-                "A NAUE foi fundamental para o sucesso do nosso empreendimento. Sua análise precisa nos permitiu tomar decisões assertivas."
-              </p>
-              <div class="testimonial-author">
-                <strong>João Silva</strong>
-                <span>CEO, Construtora ABC</span>
-              </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/Logo-CMO-Construtora.webp" alt="CMO Construtora">
             </div>
-          </div>
-          
-          <div class="testimonial-item">
-            <div class="testimonial-content">
-              <i class="fas fa-quote-left testimonial-quote-icon"></i>
-              <p class="testimonial-text">
-                "Profissionalismo e conhecimento técnico excepcionais. Recomendo a NAUE para qualquer projeto no mercado imobiliário."
-              </p>
-              <div class="testimonial-author">
-                <strong>Maria Santos</strong>
-                <span>Diretora, Incorporadora XYZ</span>
-              </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/ADEMI-GO.webp" alt="ADEMI GO">
+            </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/grupo-meta.png" alt="Grupo Meta">
+            </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/NATO0419_CERNE_ASSINATURA-VISUAL_VERTICAL_AZUL_RGB-qmunx53wv2p0t48avgy5hbhaz90fzpy8ovp4t49xla.png" alt="Cerne">
+            </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/cropped-Logo-Parquis.png" alt="Parquis">
+            </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/Logo-casa-modelo_01.webp" alt="Casa Modelo">
+            </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/serenincorporadora_logo.jpg" alt="Seren Incorporadora">
+            </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/citysolucoesurbanas_logo.jpg" alt="City Soluções Urbanas">
+            </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/LOGO-IMÓVEIS-2-1.png-scaled.webp" alt="Imóveis">
+            </div>
+            <!-- Logos duplicadas para animação contínua -->
+            <div class="partner-logo">
+              <img src="/clientes-logos/Logo-Lopes-Consultoria-de-Imoveis-2020.png" alt="Lopes Consultoria">
+            </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/Logo-CMO-Construtora.webp" alt="CMO Construtora">
+            </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/ADEMI-GO.webp" alt="ADEMI GO">
+            </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/grupo-meta.png" alt="Grupo Meta">
+            </div>
+            <div class="partner-logo">
+              <img src="/clientes-logos/NATO0419_CERNE_ASSINATURA-VISUAL_VERTICAL_AZUL_RGB-qmunx53wv2p0t48avgy5hbhaz90fzpy8ovp4t49xla.png" alt="Cerne">
             </div>
           </div>
         </div>
