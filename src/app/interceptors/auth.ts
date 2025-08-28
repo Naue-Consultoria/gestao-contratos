@@ -14,7 +14,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     '/auth/forgot-password',
     '/auth/reset-password',
     '/auth/validate-reset-token',
-    '/public/proposals'
+    '/api/auth/',
+    '/public/proposals',
+    '/api/public/proposals'
   ];
 
   // Verificar se deve adicionar token

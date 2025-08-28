@@ -23,7 +23,7 @@
             </h2>
             <div class="client-name" *ngIf="proposal">
               <!-- Debug: {{ proposal | json }} -->
-              {{ proposal.client?.trade_name || proposal.client?.name || 'Cliente' }}
+              {{ proposal.client.trade_name || proposal.client.name || 'Cliente' }}
             </div>
           </div>
           

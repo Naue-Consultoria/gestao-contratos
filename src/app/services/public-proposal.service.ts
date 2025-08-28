@@ -84,7 +84,11 @@ export class PublicProposalService {
     data: PublicProposal;
     message?: string;
   }> {
-    return this.http.get<any>(`${this.apiUrl}/${token}`);
+    const url = `${this.apiUrl}/${token}`;
+    console.log('🔍 Fazendo chamada para:', url);
+    console.log('🔍 Environment:', environment);
+    console.log('🔍 Token:', token);
+    return this.http.get<any>(url);
   }
 
   /**
