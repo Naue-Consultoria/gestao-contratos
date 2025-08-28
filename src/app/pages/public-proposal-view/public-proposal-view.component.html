@@ -204,7 +204,13 @@
                [class.is-dragging]="isDragging"
                [style.transform]="currentTransform">
             <div *ngFor="let client of clients; let i = index" class="partner-logo">
-              <img [src]="client.logo" [alt]="client.name" (error)="onClientLogoError($event)" draggable="false">
+              <img [src]="client.logo" 
+                   [alt]="client.name" 
+                   (error)="onClientLogoError($event)" 
+                   draggable="false"
+                   width="120"
+                   height="80"
+                   loading="lazy">
             </div>
           </div>
         </div>
@@ -322,8 +328,8 @@
     <section class="signature-section" *ngIf="proposal.status === 'sent' && !proposalExpired">
       <div class="section-container">
         <div class="section-header">
-          <h2 class="section-title">Assinatura Digital</h2>
-          <p class="section-subtitle">Complete seus dados e assine digitalmente para aceitar a proposta</p>
+          <h2 class="section-title">Finalize Sua Proposta</h2>
+          <p class="section-subtitle">Preencha os dados abaixo e assine digitalmente para confirmar sua aceitação. Este é o último passo para iniciarmos nossa parceria de sucesso.</p>
         </div>
         
         <div class="signature-form-container">
