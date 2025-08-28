@@ -231,35 +231,20 @@
         <div class="proposal-intro-compact">
           <h1 class="proposal-title">Seu Investimento Estratégico</h1>
           <p class="proposal-subtitle">
-            Uma proposta estratégica feita para transformar sua empresa.
+            Conheça em detalhes cada serviço que será desenvolvido para impulsionar seu negócio. 
+            Cada solução foi pensada estrategicamente para gerar resultados concretos e transformar sua empresa.
           </p>
         </div>
         
         <div class="services-table-wrapper">
-          <div class="table-controls">
-            <div class="bulk-selection">
-              <input 
-                type="checkbox" 
-                id="select-all-services"
-                [checked]="areAllServicesSelected()"
-                [indeterminate]="areSomeServicesSelected()"
-                (change)="toggleAllServices($event)">
-              <label for="select-all-services">Selecionar todos os serviços</label>
-            </div>
-            <div class="services-counter">
-              {{ getSelectedServicesCount() }} de {{ proposal.services.length }} serviços selecionados
-            </div>
-          </div>
-          
           <div class="services-table-container">
             <table class="services-table">
               <thead>
                 <tr>
                   <th class="col-select">Seleção</th>
                   <th class="col-service">Serviço</th>
-                  <th class="col-category">Categoria</th>
                   <th class="col-duration">Duração</th>
-                  <th class="col-value">Valor</th>
+                  <th class="col-value">Investimento</th>
                 </tr>
               </thead>
               <tbody>
@@ -285,8 +270,7 @@
                   <td class="col-service">
                     <div class="service-details">
                       <h4 class="service-name">{{ service.service.name }}</h4>
-                      <p class="service-description" *ngIf="service.service.description">
-                        {{ service.service.description }}
+                      <p class="service-description" *ngIf="service.service.description" [innerHTML]="formatDescription(service.service.description)">
                       </p>
                       <div class="service-meta" *ngIf="service.quantity > 1">
                         <span class="quantity-badge">{{ service.quantity }}x unidades</span>
@@ -294,12 +278,6 @@
                     </div>
                   </td>
                   
-                  <td class="col-category">
-                    <div class="category-tag">
-                      <i class="fas fa-tag"></i>
-                      <span>{{ service.service.category }}</span>
-                    </div>
-                  </td>
                   
                   <td class="col-duration">
                     <div class="duration-info" *ngIf="service.service.duration_unit && (service.service.duration_amount || service.service.duration_unit === 'Projeto')">
@@ -327,17 +305,13 @@
           </div>
           
           <div class="services-summary">
-            <div class="summary-card">
-              <div class="summary-info">
-                <div class="selected-count">
-                  <i class="fas fa-check-circle"></i>
-                  <span>{{ getSelectedServicesCount() }} serviços selecionados</span>
-                </div>
-              </div>
-              <div class="summary-total">
-                <div class="total-label">Valor Total</div>
-                <div class="total-amount">{{ formatCurrency(getSelectedTotal()) }}</div>
-              </div>
+            <div class="selected-count">
+              <i class="fas fa-check-circle"></i>
+              <span>{{ getSelectedServicesCount() }} serviços selecionados</span>
+            </div>
+            <div class="summary-total">
+              <div class="total-label">Investimento Total</div>
+              <div class="total-amount">{{ formatCurrency(getSelectedTotal()) }}</div>
             </div>
           </div>
         </div>

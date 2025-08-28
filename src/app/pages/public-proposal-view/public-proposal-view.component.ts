@@ -55,7 +55,7 @@ export class PublicProposalViewComponent implements OnInit {
     'J.Virgilio.png',
     'JSI-incoubr.png',
     'Juntos.png',
-    'LOGO-IMÓVEIS-2-1.png-scaled.webp',
+    'virtoImoveis.webp',
     'Logo-CMO-Construtora.webp',
     'Logo-Lopes-Consultoria-de-Imoveis-2020.png',
     'Logo-casa-modelo_01.webp',
@@ -93,7 +93,6 @@ export class PublicProposalViewComponent implements OnInit {
     'grupo-meta.png',
     'grupoMaua.png',
     'grupo_meta_go_logo.jpg',
-    'haura_principal_branco (1).png',
     'haura_principal_preto (1).png',
     'hausz.png',
     'haut.webp',
@@ -630,6 +629,20 @@ export class PublicProposalViewComponent implements OnInit {
     }
   }
 
+  formatDescription(description: string): string {
+    if (!description) return '';
+    // Divide a descrição em frases usando pontos finais
+    const sentences = description.split(/\.\s+/).filter(sentence => sentence.trim() !== '');
+    
+    // Se há apenas uma frase, retorna com ponto de tópico
+    if (sentences.length <= 1) {
+      return `• ${description}`;
+    }
+    
+    // Adiciona ponto de tópico para cada frase
+    return sentences.map(sentence => `• ${sentence.trim()}.`).join('<br><br>');
+  }
+
   getServiceValue(service: ProposalServiceItem): number {
     // First try unit_value from proposal data, then custom_value, then service.value
     const value = service.unit_value || service.custom_value || service.service?.value || 0;
@@ -718,7 +731,7 @@ export class PublicProposalViewComponent implements OnInit {
       'J.Virgilio': 'J. Virgílio',
       'JSI-incoubr': 'JSI Incorporações',
       'Juntos': 'Juntos',
-      'LOGO-IMÓVEIS-2-1.png-scaled': 'Imóveis',
+      'virtoImoveis': 'Imóveis',
       'Logo-CMO-Construtora': 'CMO Construtora',
       'Logo-Lopes-Consultoria-de-Imoveis-2020': 'Lopes Consultoria',
       'Logo-casa-modelo_01': 'Casa Modelo',
@@ -756,7 +769,6 @@ export class PublicProposalViewComponent implements OnInit {
       'grupo-meta': 'Grupo Meta',
       'grupoMaua': 'Grupo Mauá',
       'grupo_meta_go_logo': 'Grupo Meta GO',
-      'haura_principal_branco (1)': 'Haura',
       'haura_principal_preto (1)': 'Haura',
       'hausz': 'Hausz',
       'haut': 'Haut',
