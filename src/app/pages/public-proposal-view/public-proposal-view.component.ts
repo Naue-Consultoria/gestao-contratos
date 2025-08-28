@@ -193,10 +193,10 @@ export class PublicProposalViewComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
-    // Initialize signature canvas when signing step is reached
-    if (this.currentStep === 'signing') {
+    // Initialize signature canvas after view is ready
+    setTimeout(() => {
       this.initializeSignatureCanvas();
-    }
+    }, 500);
   }
 
   ngOnDestroy(): void {
@@ -427,19 +427,24 @@ export class PublicProposalViewComponent implements OnInit {
 
   initializeSignatureCanvas(): void {
     setTimeout(() => {
-      if (this.signatureCanvas) {
+      if (this.signatureCanvas && this.signatureCanvas.nativeElement) {
         const canvas = this.signatureCanvas.nativeElement;
+        const rect = canvas.getBoundingClientRect();
+        
+        // Set canvas actual size to match CSS size
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        
         this.signatureContext = canvas.getContext('2d');
         
         if (this.signatureContext) {
-          canvas.width = canvas.offsetWidth;
-          canvas.height = 200;
           this.signatureContext.strokeStyle = '#000000';
           this.signatureContext.lineWidth = 2;
           this.signatureContext.lineCap = 'round';
+          this.signatureContext.lineJoin = 'round';
         }
       }
-    }, 100);
+    }, 200);
   }
 
   startDrawing(event: MouseEvent): void {
