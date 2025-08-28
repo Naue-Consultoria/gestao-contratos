@@ -18,6 +18,7 @@ export interface UpdateUserRequest {
   password?: string;
   is_active?: boolean;
   cargo?: string;
+  show_in_team?: boolean;
 }
 
 export interface ApiUser {
@@ -34,6 +35,7 @@ export interface ApiUser {
   profile_picture_path?: string;
   profile_picture_uploaded_at?: string;
   cargo?: string;
+  show_in_team?: boolean;
 }
 
 export interface AssignableUser {
@@ -51,6 +53,19 @@ export interface UsersResponse {
 export interface CreateUserResponse {
   message: string;
   user: ApiUser;
+}
+
+export interface TeamMember {
+  id: number | string;
+  name: string;
+  cargo?: string;
+  profile_picture_path?: string;
+  profile_picture_url?: string;
+  is_fixed?: boolean;
+}
+
+export interface TeamMembersResponse {
+  teamMembers: TeamMember[];
 }
 
 @Injectable({
@@ -119,5 +134,14 @@ export class UserService {
 
   deleteProfilePicture(userId: number): Observable<any> {
     return this.http.delete(`${this.API_URL}/${userId}/profile-picture`);
+  }
+
+  // Team visibility methods
+  updateTeamVisibility(userId: number, showInTeam: boolean): Observable<any> {
+    return this.http.patch(`${this.API_URL}/${userId}/team-visibility`, { show_in_team: showInTeam });
+  }
+
+  getTeamMembers(): Observable<TeamMembersResponse> {
+    return this.http.get<TeamMembersResponse>(`${this.API_URL}/team-members`);
   }
 }

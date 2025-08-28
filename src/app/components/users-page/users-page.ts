@@ -21,6 +21,7 @@ interface User {
   profilePictureUrl?: string;
   hasProfilePicture?: boolean;
   cargo?: string;
+  show_in_team?: boolean;
 }
 
 @Component({
@@ -118,7 +119,8 @@ export class UsersPageComponent implements OnInit, OnDestroy {
       profilePictureUrl: undefined,
       avatarGradient: this.generateGradient(apiUser.name || apiUser.email),
       hasProfilePicture: !!(apiUser.profile_picture_path), // Nova propriedade
-      cargo: apiUser.cargo
+      cargo: apiUser.cargo,
+      show_in_team: !!apiUser.show_in_team
     };
   }
 
@@ -234,6 +236,25 @@ export class UsersPageComponent implements OnInit, OnDestroy {
       } catch (error) {
         console.error('❌ Erro ao resetar senha:', error);
         this.toastr.error('Erro ao resetar senha do usuário');
+      }
+    }
+  }
+
+  async toggleTeamVisibility(user: User) {
+    this.closeDropdown();
+    const action = user.show_in_team ? 'remover da' : 'adicionar à';
+    const confirmMessage = `Tem certeza que deseja ${action} equipe pública o usuário ${user.name}?`;
+    
+    if (confirm(confirmMessage)) {
+      try {
+        const newVisibility = !user.show_in_team;
+        await this.userService.updateTeamVisibility(user.id, newVisibility).toPromise();
+        
+        this.toastr.success(`Usuário ${newVisibility ? 'adicionado à' : 'removido da'} equipe pública com sucesso!`);
+        this.loadUsers();
+      } catch (error) {
+        console.error('❌ Erro ao alterar visibilidade na equipe:', error);
+        this.toastr.error(`Erro ao ${action} equipe pública`);
       }
     }
   }

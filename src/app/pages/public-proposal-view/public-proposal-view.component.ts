@@ -14,6 +14,11 @@ import {
   ConfirmationData
 } from '../../services/public-proposal.service';
 
+import { 
+  PublicTeamService, 
+  PublicTeamMember 
+} from '../../services/public-team.service';
+
 type ProposalServiceItem = PublicProposalService;
 
 @Component({
@@ -26,28 +31,115 @@ type ProposalServiceItem = PublicProposalService;
 export class PublicProposalViewComponent implements OnInit {
   currentYear = new Date().getFullYear();
   @ViewChild('signatureCanvas', { static: false }) signatureCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('carouselTrack', { static: false }) carouselTrack!: ElementRef<HTMLDivElement>;
 
   // Landing page properties
-  clients = [
-    { name: 'MRV', logo: '/mrv.png' },
-    { name: 'Cyrela', logo: '/cyrela.png' },
-    { name: 'Tenda', logo: '/tenda.png' },
-    { name: 'Even', logo: '/even.png' },
-    { name: 'Direcional', logo: '/direcional.png' },
-    { name: 'Plano&Plano', logo: '/plano.png' },
-    { name: 'Melnick', logo: '/melnick.png' },
-    // Duplicate for seamless carousel
-    { name: 'MRV', logo: '/mrv.png' },
-    { name: 'Cyrela', logo: '/cyrela.png' },
-    { name: 'Tenda', logo: '/tenda.png' },
-    { name: 'Even', logo: '/even.png' },
-    { name: 'Direcional', logo: '/direcional.png' },
-    { name: 'Plano&Plano', logo: '/plano.png' },
-    { name: 'Melnick', logo: '/melnick.png' },
+  clients: { name: string, logo: string }[] = [];
+  
+  // Lista completa de logos de clientes disponíveis
+  private clientLogos = [
+    'A.Madeira.png',
+    'ADEMI-GO.webp',
+    'BlackHaus.jpg',
+    'BpImoveis.png',
+    'BrDU.png',
+    'CGA.jpg',
+    'CIR_Imobiliaria.png',
+    'Climatiza.png',
+    'EBM.png',
+    'Elmo-inc.jpg',
+    'GrupoNB.png',
+    'GrupoReal.png',
+    'Habitat.png',
+    'Hopp.png',
+    'J.Virgilio.png',
+    'JSI-incoubr.png',
+    'Juntos.png',
+    'LOGO-IMÓVEIS-2-1.png-scaled.webp',
+    'Logo-CMO-Construtora.webp',
+    'Logo-Lopes-Consultoria-de-Imoveis-2020.png',
+    'Logo-casa-modelo_01.webp',
+    'Mava.png',
+    'NATO0419_CERNE_ASSINATURA-VISUAL_VERTICAL_AZUL_RGB-qmunx53wv2p0t48avgy5hbhaz90fzpy8ovp4t49xla.png',
+    'O-.png',
+    'Palme.png',
+    'Q.png',
+    'QS.jpg',
+    'RDiniz.png',
+    'SB Engenharia.png',
+    'Somos.jpg',
+    'Séren.png',
+    'TRL.png',
+    'Tandoor.png',
+    'TopConstrutora.png',
+    'URBS One - Assinaturas_Separadas-01 (1).png',
+    'URBS infinity P cima (1).png',
+    'UrbsTrend.png',
+    'VictorTomé.webp',
+    'VilaBrasil.png',
+    'WM.png',
+    'aestra.jpg',
+    'audicenter.jpg',
+    'brix.png',
+    'casaDecor.png',
+    'cir--600.png',
+    'city.webp',
+    'cropped-Logo-Parquis.png',
+    'engemerit.jpg',
+    'facilita.png',
+    'fariasConstrutora.png',
+    'flor_de_anis.png',
+    'g2-houserpng.webp',
+    'grupo-meta.png',
+    'grupoMaua.png',
+    'grupo_meta_go_logo.jpg',
+    'haura_principal_branco (1).png',
+    'haura_principal_preto (1).png',
+    'hausz.png',
+    'haut.webp',
+    'highpar.jpg',
+    'huna.png',
+    'logo-adao.png',
+    'logo_imperio-das-pickups_tH5BfH.png',
+    'logosartocrmpng.webp',
+    'lusah.png',
+    'margilTransportes.png',
+    'moinho.png',
+    'monacoAutopecas.png',
+    'myBroker.webp',
+    'nitida.png',
+    'nobreImobiliaria.png',
+    'nobre_principal_creci_azulevermelho  (1).png',
+    'piacentini-favicon.png',
+    'prestacon.png',
+    'raizUrbana.png',
+    'realize.png',
+    'rich-preview-gaas.jpg',
+    'sosvida.png',
+    'sousaAndrade.png',
+    'tapajos.webp',
+    'trigobel.png',
+    'value.png',
+    'vincer.png',
+    'yuta.png',
+    'z+z.jpg'
   ];
   
-  carouselTransform = '0px';
-  private carouselInterval: any;
+  carouselProgress = 0;
+  isManualControl = false;
+  isDragging = false;
+  currentTransform = '';
+  
+  private progressInterval: any;
+  private manualControlTimeout: any;
+  private startX = 0;
+  private currentX = 0;
+  private initialTransformX = 0;
+  private animationId = 0;
+
+  // Team members
+  teamMembers: PublicTeamMember[] = [];
+  teamLoading = false;
 
   proposal: PublicProposal | null = null;
   signatureForm!: FormGroup;
@@ -80,6 +172,7 @@ export class PublicProposalViewComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private publicProposalService: PublicProposalServiceAPI,
+    private publicTeamService: PublicTeamService,
     private toastr: ToastrService
   ) {
     this.initializeForms();
@@ -94,7 +187,9 @@ export class PublicProposalViewComponent implements OnInit {
       return;
     }
 
+    this.initializeClientLogos();
     this.initializeCarousel();
+    this.loadTeamMembers();
     this.loadProposal();
   }
 
@@ -108,8 +203,13 @@ export class PublicProposalViewComponent implements OnInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    if (this.carouselInterval) {
-      clearInterval(this.carouselInterval);
+    
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+    }
+    
+    if (this.manualControlTimeout) {
+      clearTimeout(this.manualControlTimeout);
     }
   }
 
@@ -143,6 +243,23 @@ export class PublicProposalViewComponent implements OnInit {
           console.error('Erro ao carregar proposta:', error);
           this.toastr.error('Proposta não encontrada ou link expirado');
           this.isLoading = false;
+        }
+      });
+  }
+
+  private loadTeamMembers(): void {
+    this.teamLoading = true;
+    this.publicTeamService.getTeamMembers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.teamMembers = response.teamMembers || [];
+          this.teamLoading = false;
+        },
+        error: (error) => {
+          console.error('Erro ao carregar membros da equipe:', error);
+          this.teamMembers = [];
+          this.teamLoading = false;
         }
       });
   }
@@ -557,8 +674,9 @@ export class PublicProposalViewComponent implements OnInit {
   // === LANDING PAGE METHODS ===
 
   onImageError(event: any): void {
-    // Fallback para quando a imagem naue.jpg não existir
-    event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1hcmlhbmEgTmF1ZTwvdGV4dD48L3N2Zz4=';
+    // Hide the image so the avatar with initials will show instead
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
   }
 
   onClientLogoError(event: any): void {
@@ -566,12 +684,238 @@ export class PublicProposalViewComponent implements OnInit {
     event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIiBzdHJva2U9IiNkZGQiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG-yPSJtaWRkbGUiIGR5PSIuM2VtIj5DbGllbnRlPC90ZXh0Pjwvc3ZnPg==';
   }
 
+  private initializeClientLogos(): void {
+    // Converte a lista de arquivos em objetos cliente
+    this.clients = this.clientLogos.map(logoFile => ({
+      name: this.getClientNameFromLogo(logoFile),
+      logo: `/cliente-logos/${logoFile}`
+    }));
+    
+    // Duplica a lista para criar um efeito de carousel contínuo
+    this.clients = [...this.clients, ...this.clients];
+  }
+
+  private getClientNameFromLogo(logoFile: string): string {
+    // Remove extensão do arquivo
+    const name = logoFile.replace(/\.[^/.]+$/, "");
+    
+    // Mapeia nomes específicos conhecidos para uma melhor exibição
+    const nameMap: { [key: string]: string } = {
+      'A.Madeira': 'A. Madeira',
+      'ADEMI-GO': 'ADEMI GO',
+      'BlackHaus': 'Black Haus',
+      'BpImoveis': 'BP Imóveis',
+      'BrDU': 'BrDU',
+      'CGA': 'CGA',
+      'CIR_Imobiliaria': 'CIR Imobiliária',
+      'Climatiza': 'Climatiza',
+      'EBM': 'EBM',
+      'Elmo-inc': 'Elmo Incorporações',
+      'GrupoNB': 'Grupo NB',
+      'GrupoReal': 'Grupo Real',
+      'Habitat': 'Habitat',
+      'Hopp': 'Hopp',
+      'J.Virgilio': 'J. Virgílio',
+      'JSI-incoubr': 'JSI Incorporações',
+      'Juntos': 'Juntos',
+      'LOGO-IMÓVEIS-2-1.png-scaled': 'Imóveis',
+      'Logo-CMO-Construtora': 'CMO Construtora',
+      'Logo-Lopes-Consultoria-de-Imoveis-2020': 'Lopes Consultoria',
+      'Logo-casa-modelo_01': 'Casa Modelo',
+      'Mava': 'Mava',
+      'NATO0419_CERNE_ASSINATURA-VISUAL_VERTICAL_AZUL_RGB-qmunx53wv2p0t48avgy5hbhaz90fzpy8ovp4t49xla': 'Cerne',
+      'O-': 'O+',
+      'Palme': 'Palme',
+      'Q': 'Q Incorporações',
+      'QS': 'QS',
+      'RDiniz': 'R. Diniz',
+      'SB Engenharia': 'SB Engenharia',
+      'Somos': 'Somos',
+      'Séren': 'Séren',
+      'TRL': 'TRL',
+      'Tandoor': 'Tandoor',
+      'TopConstrutora': 'Top Construtora',
+      'URBS One - Assinaturas_Separadas-01 (1)': 'URBS One',
+      'URBS infinity P cima (1)': 'URBS Infinity',
+      'UrbsTrend': 'URBS Trend',
+      'VictorTomé': 'Victor Tomé',
+      'VilaBrasil': 'Vila Brasil',
+      'WM': 'WM',
+      'aestra': 'Aestra',
+      'audicenter': 'Audicenter',
+      'brix': 'Brix',
+      'casaDecor': 'Casa Decor',
+      'cir--600': 'CIR',
+      'city': 'City',
+      'cropped-Logo-Parquis': 'Parquis',
+      'engemerit': 'Engemerit',
+      'facilita': 'Facilita',
+      'fariasConstrutora': 'Farias Construtora',
+      'flor_de_anis': 'Flor de Anis',
+      'g2-houserpng': 'G2 House',
+      'grupo-meta': 'Grupo Meta',
+      'grupoMaua': 'Grupo Mauá',
+      'grupo_meta_go_logo': 'Grupo Meta GO',
+      'haura_principal_branco (1)': 'Haura',
+      'haura_principal_preto (1)': 'Haura',
+      'hausz': 'Hausz',
+      'haut': 'Haut',
+      'highpar': 'Highpar',
+      'huna': 'Huna',
+      'logo-adao': 'Adão',
+      'logo_imperio-das-pickups_tH5BfH': 'Império das Pickups',
+      'logosartocrmpng': 'Sarto CRM',
+      'lusah': 'Lusah',
+      'margilTransportes': 'Margil Transportes',
+      'moinho': 'Moinho',
+      'monacoAutopecas': 'Monaco Autopeças',
+      'myBroker': 'My Broker',
+      'nitida': 'Nítida',
+      'nobreImobiliaria': 'Nobre Imobiliária',
+      'nobre_principal_creci_azulevermelho  (1)': 'Nobre',
+      'piacentini-favicon': 'Piacentini',
+      'prestacon': 'Prestacon',
+      'raizUrbana': 'Raiz Urbana',
+      'realize': 'Realize',
+      'rich-preview-gaas': 'GAAS',
+      'sosvida': 'SOS Vida',
+      'sousaAndrade': 'Sousa Andrade',
+      'tapajos': 'Tapajós',
+      'trigobel': 'Trigobel',
+      'value': 'Value',
+      'vincer': 'Vincer',
+      'yuta': 'Yuta',
+      'z+z': 'Z+Z'
+    };
+    
+    return nameMap[name] || name.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+
   private initializeCarousel(): void {
-    let currentIndex = 0;
-    this.carouselInterval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % this.clients.length;
-      this.carouselTransform = `-${currentIndex * 200}px`;
+    this.startProgressAnimation();
+  }
+
+  private startProgressAnimation(): void {
+    // Simula o progresso baseado na animação CSS
+    const animationDuration = 180000; // 180s da animação CSS
+    const updateInterval = 100; // Atualiza a cada 100ms
+    let elapsed = 0;
+
+    this.progressInterval = setInterval(() => {
+      if (!this.isManualControl) {
+        elapsed += updateInterval;
+        this.carouselProgress = (elapsed % animationDuration) / animationDuration * 100;
+      }
+    }, updateInterval);
+  }
+
+  // Controles simplificados
+  scrollCarousel(direction: 'prev' | 'next'): void {
+    this.isManualControl = true;
+    
+    // Simula uma mudança no progresso
+    if (direction === 'next') {
+      this.carouselProgress = Math.min(100, this.carouselProgress + 10);
+    } else {
+      this.carouselProgress = Math.max(0, this.carouselProgress - 10);
+    }
+
+    // Remove controle manual após um tempo
+    if (this.manualControlTimeout) {
+      clearTimeout(this.manualControlTimeout);
+    }
+    
+    this.manualControlTimeout = setTimeout(() => {
+      this.isManualControl = false;
     }, 3000);
+  }
+
+  pauseCarousel(): void {
+    this.isManualControl = true;
+  }
+
+  resumeCarousel(): void {
+    if (this.manualControlTimeout) {
+      clearTimeout(this.manualControlTimeout);
+    }
+    
+    this.manualControlTimeout = setTimeout(() => {
+      this.isManualControl = false;
+    }, 1000);
+  }
+
+  // Mouse drag methods
+  startDrag(event: MouseEvent): void {
+    this.isDragging = true;
+    this.startX = event.clientX;
+    this.initialTransformX = this.getCurrentTransformValue();
+    this.pauseCarousel();
+    event.preventDefault();
+  }
+
+  onDrag(event: MouseEvent): void {
+    if (!this.isDragging) return;
+    
+    this.currentX = event.clientX;
+    const deltaX = this.currentX - this.startX;
+    const newTransformX = this.initialTransformX + deltaX;
+    
+    this.currentTransform = `translateX(${newTransformX}px)`;
+    event.preventDefault();
+  }
+
+  endDrag(): void {
+    if (!this.isDragging) return;
+    
+    this.isDragging = false;
+    this.currentTransform = '';
+    
+    // Retomar o carousel após um delay
+    setTimeout(() => {
+      this.resumeCarousel();
+    }, 1000);
+  }
+
+  // Touch methods
+  startTouch(event: TouchEvent): void {
+    this.isDragging = true;
+    this.startX = event.touches[0].clientX;
+    this.initialTransformX = this.getCurrentTransformValue();
+    this.pauseCarousel();
+  }
+
+  onTouchMove(event: TouchEvent): void {
+    if (!this.isDragging) return;
+    
+    this.currentX = event.touches[0].clientX;
+    const deltaX = this.currentX - this.startX;
+    const deltaY = Math.abs(event.touches[0].clientY - event.touches[0].clientY);
+    
+    // Se o movimento é mais horizontal que vertical, prevenir scroll da página
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      event.preventDefault();
+    }
+    
+    const newTransformX = this.initialTransformX + deltaX;
+    this.currentTransform = `translateX(${newTransformX}px)`;
+  }
+
+  endTouch(): void {
+    if (!this.isDragging) return;
+    
+    this.isDragging = false;
+    this.currentTransform = '';
+    
+    // Retomar o carousel após um delay
+    setTimeout(() => {
+      this.resumeCarousel();
+    }, 1000);
+  }
+
+  private getCurrentTransformValue(): number {
+    // Extrair o valor atual da transform do elemento
+    // Para simplificar, começamos do 0 cada vez que começamos a arrastar
+    return 0;
   }
 
   // === MÉTODOS DE MÁSCARA ===
@@ -646,5 +990,32 @@ export class PublicProposalViewComponent implements OnInit {
       return false;
     }
     return true;
+  }
+
+  // === MÉTODOS DA EQUIPE ===
+
+  getTeamMemberPhotoUrl(member: PublicTeamMember): string {
+    if (member.is_fixed || member.profile_picture_url) {
+      return member.profile_picture_url || '/naue.jpg';
+    }
+    if (member.profile_picture_path && typeof member.id === 'number') {
+      return this.publicTeamService.getProfilePictureUrl(member.id);
+    }
+    return '';
+  }
+
+  getTeamMemberInitials(name: string): string {
+    if (!name) return 'NN';
+    
+    const words = name.split(' ').filter(word => word.length > 0);
+    
+    if (words.length === 0) return 'NN';
+    if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+    
+    return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+  }
+
+  trackByMemberId(index: number, member: PublicTeamMember): number | string {
+    return member.id;
   }
 }

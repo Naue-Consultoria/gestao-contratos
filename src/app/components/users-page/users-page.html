@@ -105,6 +105,11 @@
                     <i class="fas fa-key"></i>
                     Resetar senha
                   </button>
+                  <button class="dropdown-item" 
+                          (click)="toggleTeamVisibility(user); $event.stopPropagation()">
+                    <i [class]="user.show_in_team ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                    {{ user.show_in_team ? 'Remover da equipe pública' : 'Adicionar à equipe pública' }}
+                  </button>
                   <div class="dropdown-divider"></div>
                   <button class="dropdown-item danger" 
                           (click)="deleteUser(user.id, user.name); $event.stopPropagation()">

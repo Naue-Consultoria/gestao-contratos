@@ -40,6 +40,7 @@ export interface PublicProposal {
   accepted_value?: number;
   client: {
     name: string;
+    trade_name?: string;
     headquarters?: string;
     market_sector?: string;
   };

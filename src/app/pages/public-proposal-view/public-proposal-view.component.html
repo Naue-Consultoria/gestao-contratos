@@ -12,29 +12,21 @@
             </div>
             <div class="company-info">
               <h1 class="company-name">NAUE Consultoria</h1>
-              <p class="company-tagline">Primeira consultoria especializada em mercado<br>imobiliário doBrasil.</p>
+              <p class="company-tagline">Primeira consultoria especializada em mercado<br>imobiliário do Brasil.</p>
             </div>
           </div>
           
-          <!-- Company Stats -->
-          <div class="company-stats">
-            <div class="stat-item">
-              <div class="stat-number">+15</div>
-              <div class="stat-text">Anos no Mercado</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number">+1500</div>
-              <div class="stat-text">Líderes Transformados</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number">+100</div>
-              <div class="stat-text">Empresas Atendidas</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number">380%</div>
-              <div class="stat-text">ROI em 18 Meses</div>
+          <!-- Proposal Info -->
+          <div class="proposal-info">
+            <h2 class="proposal-type">
+              Proposta <span class="outline-text" data-text="Estratégica">Estratégica</span><span class="green-dot">.</span>
+            </h2>
+            <div class="client-name" *ngIf="proposal">
+              <!-- Debug: {{ proposal | json }} -->
+              {{ proposal.client?.trade_name || proposal.client?.name || 'Cliente' }}
             </div>
           </div>
+          
         </div>
         
         <div class="hero-right">
@@ -49,73 +41,139 @@
     </div>
   </section>
 
-  <!-- Why Choose NAUE Section -->
-  <section class="benefits-section">
+  <!-- About Section -->
+  <section class="about-section">
     <div class="section-container">
-      <div class="section-header">
-        <h2 class="section-title">Nossos Heads</h2>
-        <p class="section-subtitle">Somos pioneiros e referência em consultoria imobiliária no Brasil</p>
+      <div class="about-content">
+        <!-- Left Side: Statistics Cards -->
+        <div class="about-left">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-number">+15</div>
+              <div class="stat-text">Anos no Mercado</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">+1500</div>
+              <div class="stat-text">Líderes Transformados</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">+100</div>
+              <div class="stat-text">Empresas Atendidas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">380%</div>
+              <div class="stat-text">ROI em 18 Meses</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Center: Brazil Map -->
+        <div class="about-center">
+          <div class="brazil-map">
+            <img src="/estados.png" alt="Mapa do Brasil - Estados" class="map-image" (error)="onImageError($event)">
+          </div>
+        </div>
+        
+        <!-- Right Side: Presence Info -->
+        <div class="about-right">
+          <div class="presence-section">
+            <h3 class="presence-title">Presença Nacional</h3>
+            <div class="locations-list">
+              <div class="location-item">1. Espírito Santo-ES</div>
+              <div class="location-item">2. Goiás-GO</div>
+              <div class="location-item">3. Mato Grosso-MT</div>
+              <div class="location-item">4. Paraíba-PB</div>
+              <div class="location-item">5. Pernambuco-PE</div>
+              <div class="location-item">6. Paraná-PR</div>
+              <div class="location-item">7. Rio de Janeiro-RJ</div>
+              <div class="location-item">8. Tocantins-TO</div>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div class="benefits-grid">
-        <div class="benefit-item">
-          <div class="benefit-icon">
-            <i class="fas fa-trophy"></i>
-          </div>
-          <h3 class="benefit-title">Pioneirismo</h3>
-          <p class="benefit-description">
-            Primeira consultoria especializada em mercado imobiliário do Brasil, com metodologia própria e comprovada.
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="team-section">
+    <div class="section-container">
+      <div class="team-content">
+        <!-- Section Header -->
+        <div class="team-header">
+          <h2 class="team-title">
+            <span class="no-wrap">Nosso Time de <span class="highlight-text">Especialistas</span></span>
+          </h2>
+          <p class="team-subtitle">
+            Profissionais altamente qualificados e experientes, dedicados ao sucesso do seu projeto imobiliário
           </p>
         </div>
         
-        <div class="benefit-item featured">
-          <div class="benefit-icon">
-            <i class="fas fa-chart-line"></i>
+        <!-- Team Members Grid -->
+        <div class="team-grid-container">
+          <!-- Loading State -->
+          <div *ngIf="teamLoading" class="team-loading">
+            <div class="loading-spinner"></div>
+            <p>Carregando nossa equipe de especialistas...</p>
           </div>
-          <h3 class="benefit-title">Resultados Comprovados</h3>
-          <p class="benefit-description">
-            Mais lucro em negócios gerados para nossos clientes ao longo de 15 anos de atuação.
-          </p>
-        </div>
-        
-        <div class="benefit-item">
-          <div class="benefit-icon">
-            <i class="fas fa-users"></i>
+          
+          <!-- Team Grid -->
+          <div class="team-members-grid" *ngIf="!teamLoading && teamMembers.length > 0">
+            <div *ngFor="let member of teamMembers; trackBy: trackByMemberId" 
+                 class="specialist-card">
+              
+              <!-- Photo Section -->
+              <div class="specialist-photo-section">
+                <div class="photo-frame">
+                  <img *ngIf="getTeamMemberPhotoUrl(member)" 
+                       [src]="getTeamMemberPhotoUrl(member)" 
+                       [alt]="member.name"
+                       class="specialist-photo"
+                       (error)="onImageError($event)">
+                  <div *ngIf="!getTeamMemberPhotoUrl(member)" class="photo-placeholder">
+                    <div class="initials-avatar">
+                      {{ getTeamMemberInitials(member.name) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Info Section -->
+              <div class="specialist-info">
+                <h3 class="specialist-name">{{ member.name }}</h3>
+                <p class="specialist-position" *ngIf="member.cargo">{{ member.cargo }}</p>
+                <p class="specialist-position" *ngIf="!member.cargo && member.is_fixed">CEO & Fundadora</p>
+              </div>
+            </div>
           </div>
-          <h3 class="benefit-title">Equipe Especializada</h3>
-          <p class="benefit-description">
-            Time de consultores com profundo conhecimento do mercado imobiliário e formação técnica específica.
-          </p>
-        </div>
-        
-        <div class="benefit-item">
-          <div class="benefit-icon">
-            <i class="fas fa-lightbulb"></i>
+          
+          <!-- Empty State -->
+          <div *ngIf="!teamLoading && teamMembers.length === 0" class="team-empty-state">
+            <div class="empty-illustration">
+              <div class="empty-icon">
+                <i class="fas fa-user-friends"></i>
+              </div>
+              <div class="empty-dots">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <h3>Equipe de Especialistas</h3>
+            <p>Nossa equipe altamente qualificada está sendo preparada para apresentação.<br>
+               Em breve você conhecerá todos os profissionais dedicados ao seu sucesso.</p>
+            <div class="empty-features">
+              <div class="feature-item">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Altamente Qualificados</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-award"></i>
+                <span>Experiência Comprovada</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-handshake"></i>
+                <span>Foco em Resultados</span>
+              </div>
+            </div>
           </div>
-          <h3 class="benefit-title">Soluções Personalizadas</h3>
-          <p class="benefit-description">
-            Cada projeto é único. Desenvolvemos estratégias sob medida para as necessidades específicas de cada cliente.
-          </p>
-        </div>
-        
-        <div class="benefit-item">
-          <div class="benefit-icon">
-            <i class="fas fa-handshake"></i>
-          </div>
-          <h3 class="benefit-title">Parceria de Sucesso</h3>
-          <p class="benefit-description">
-            Acompanhamos nossos clientes em toda a jornada, garantindo resultados sustentáveis e duradouros.
-          </p>
-        </div>
-        
-        <div class="benefit-item">
-          <div class="benefit-icon">
-            <i class="fas fa-shield-alt"></i>
-          </div>
-          <h3 class="benefit-title">Garantia de Qualidade</h3>
-          <p class="benefit-description">
-            Nossos processos são auditados e certificados, garantindo a máxima qualidade em todas as entregas.
-          </p>
         </div>
       </div>
     </div>
@@ -130,53 +188,23 @@
       </div>
       
       <div class="partners-showcase">
-        <div class="partners-carousel">
-          <div class="carousel-track">
-            <div class="partner-logo">
-              <img src="/clientes-logos/Logo-Lopes-Consultoria-de-Imoveis-2020.png" alt="Lopes Consultoria">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/Logo-CMO-Construtora.webp" alt="CMO Construtora">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/ADEMI-GO.webp" alt="ADEMI GO">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/grupo-meta.png" alt="Grupo Meta">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/NATO0419_CERNE_ASSINATURA-VISUAL_VERTICAL_AZUL_RGB-qmunx53wv2p0t48avgy5hbhaz90fzpy8ovp4t49xla.png" alt="Cerne">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/cropped-Logo-Parquis.png" alt="Parquis">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/Logo-casa-modelo_01.webp" alt="Casa Modelo">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/serenincorporadora_logo.jpg" alt="Seren Incorporadora">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/citysolucoesurbanas_logo.jpg" alt="City Soluções Urbanas">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/LOGO-IMÓVEIS-2-1.png-scaled.webp" alt="Imóveis">
-            </div>
-            <!-- Logos duplicadas para animação contínua -->
-            <div class="partner-logo">
-              <img src="/clientes-logos/Logo-Lopes-Consultoria-de-Imoveis-2020.png" alt="Lopes Consultoria">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/Logo-CMO-Construtora.webp" alt="CMO Construtora">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/ADEMI-GO.webp" alt="ADEMI GO">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/grupo-meta.png" alt="Grupo Meta">
-            </div>
-            <div class="partner-logo">
-              <img src="/clientes-logos/NATO0419_CERNE_ASSINATURA-VISUAL_VERTICAL_AZUL_RGB-qmunx53wv2p0t48avgy5hbhaz90fzpy8ovp4t49xla.png" alt="Cerne">
+        <div class="partners-carousel" 
+             (mouseenter)="pauseCarousel()" 
+             (mouseleave)="resumeCarousel()"
+             (mousedown)="startDrag($event)"
+             (mousemove)="onDrag($event)"
+             (mouseup)="endDrag()"
+             (mouseleave)="endDrag()"
+             (touchstart)="startTouch($event)"
+             (touchmove)="onTouchMove($event)"
+             (touchend)="endTouch()">
+          
+          <!-- Carousel Track -->
+          <div class="carousel-track"
+               [class.is-dragging]="isDragging"
+               [style.transform]="currentTransform">
+            <div *ngFor="let client of clients; let i = index" class="partner-logo">
+              <img [src]="client.logo" [alt]="client.name" (error)="onClientLogoError($event)" draggable="false">
             </div>
           </div>
         </div>
@@ -201,17 +229,10 @@
       <div class="section-container">
 
         <div class="proposal-intro-compact">
-          <h1 class="proposal-title">Sua Proposta Sob Medida</h1>
+          <h1 class="proposal-title">Seu Investimento Estratégico</h1>
           <p class="proposal-subtitle">
-            Preparamos especialmente para você uma seleção de serviços personalizados para o sucesso do seu projeto imobiliário.
-            Selecione os serviços que melhor atendem às suas necessidades.
+            Uma proposta estratégica feita para transformar sua empresa.
           </p>
-          <div class="proposal-status-bar">
-            <div class="status-indicator" [ngClass]="'status-' + proposal.status">
-              <span class="status-dot"></span>
-              <span class="status-text">{{ getStatusText(proposal.status) }}</span>
-            </div>
-          </div>
         </div>
         
         <div class="services-table-wrapper">
