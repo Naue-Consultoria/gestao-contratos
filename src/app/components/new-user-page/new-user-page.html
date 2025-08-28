@@ -1,109 +1,198 @@
-<div class="page-header">
-  <h1 class="page-title">{{ isEditMode ? 'Editar Usuário' : 'Novo Usuário' }}</h1>
-  <app-breadcrumb></app-breadcrumb>
-</div>
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEditMode ? 'Editar Usuário' : 'Novo Usuário' }}</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
 
-<div class="table-container">
+  <div class="user-form-container">
   <div class="error-message" *ngIf="errorMessage">
     <i class="fas fa-exclamation-circle"></i>
     <span>{{ errorMessage }}</span>
   </div>
 
   <form class="user-form" (ngSubmit)="saveUser()" #userForm="ngForm">
-    <div class="form-section">
-      <h2 class="section-title">
-        <i class="fas fa-info-circle"></i>
-        Informações Básicas
-      </h2>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">
-            Nome Completo <span class="required">*</span>
-          </label>
-          <input 
-            type="text" 
-            class="form-control" 
-            [(ngModel)]="userData.name"
-            name="name"
-            placeholder="Digite o nome completo"
-            [class.error]="errors['name']"
-            required>
-          <span class="field-error" *ngIf="errors['name']">{{ errors['name'] }}</span>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">
-            Email <span class="required">*</span>
-          </label>
-          <input 
-            type="email" 
-            class="form-control" 
-            [(ngModel)]="userData.email"
-            name="email"
-            placeholder="email@exemplo.com"
-            [class.error]="errors['email']"
-            [disabled]="isEditMode"
-            required>
-          <span class="field-error" *ngIf="errors['email']">{{ errors['email'] }}</span>
-        </div>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Perfil de Acesso</label>
-          <select 
-            class="form-control" 
-            [(ngModel)]="userData.role"
-            name="role">
-            <option value="" disabled>Selecione um perfil</option>
-            <option value="user">Usuário</option>
-            <option value="admin">Administrador</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Cargo</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            [(ngModel)]="userData.cargo"
-            name="cargo"
-            placeholder="Ex: Gerente, Analista, Diretor">
-        </div>
-      </div>
-
-      <div class="info-box" *ngIf="!isEditMode">
-          <p>Ao criar um novo usuário, uma senha temporária segura será gerada e enviada para o e-mail cadastrado. O usuário será solicitado a criar uma nova senha em seu primeiro login.</p>
-      </div>
-    </div>
-    
-    <div class="form-section">
-      <h2 class="section-title">
-        <i class="fas fa-user-circle"></i>
-        Foto de Perfil (Opcional)
-      </h2>
-      <div class="form-grid">
-        <div class="form-group">
-          <div class="profile-picture-upload">
-            <div class="current-picture" *ngIf="profilePictureUrl">
-              <img [src]="profilePictureUrl" alt="Foto de perfil atual" class="profile-preview">
-              <button type="button" class="remove-picture-btn" (click)="removeProfilePicture()" [disabled]="isLoading">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-            <div class="upload-area">
-              <input type="file" 
-                     id="profilePicture" 
-                     accept="image/*" 
-                     (change)="onProfilePictureSelected($event)"
-                     [disabled]="isLoading"
-                     #fileInput>
-              <label for="profilePicture" class="upload-label">
-                <i class="fas fa-camera"></i>
-                {{ profilePictureUrl ? 'Alterar foto' : 'Selecionar foto' }}
+    <div class="form-layout">
+      <!-- Coluna Principal -->
+      <div class="main-column">
+        <div class="form-card">
+          <div class="card-header">
+            <i class="fas fa-user"></i>
+            <h2>Dados Pessoais</h2>
+          </div>
+          
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">
+                Nome Completo <span class="required">*</span>
               </label>
+              <input 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="userData.name"
+                name="name"
+                placeholder="Digite o nome completo do usuário"
+                [class.error]="errors['name']"
+                required>
+              <span class="field-error" *ngIf="errors['name']">{{ errors['name'] }}</span>
             </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                Email Corporativo <span class="required">*</span>
+              </label>
+              <input 
+                type="email" 
+                class="form-control" 
+                [(ngModel)]="userData.email"
+                name="email"
+                placeholder="usuario@naue.com.br"
+                [class.error]="errors['email']"
+                [disabled]="isEditMode"
+                required>
+              <span class="field-error" *ngIf="errors['email']">{{ errors['email'] }}</span>
+              <span class="form-hint" *ngIf="isEditMode">
+                <i class="fas fa-info-circle"></i>
+                O email não pode ser alterado após o cadastro
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Cargo/Função</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="userData.cargo"
+                name="cargo"
+                placeholder="Ex: Gerente de Projetos, Analista de Contratos">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="card-header">
+            <i class="fas fa-shield-alt"></i>
+            <h2>Configurações de Acesso</h2>
+          </div>
+          
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Perfil de Acesso</label>
+              <div class="radio-group">
+                <label class="radio-option" [class.selected]="userData.role === 'user'">
+                  <input 
+                    type="radio" 
+                    name="role" 
+                    value="user"
+                    [(ngModel)]="userData.role">
+                  <div class="radio-content">
+                    <span class="radio-title">
+                      <i class="fas fa-user"></i>
+                      Usuário Padrão
+                    </span>
+                    <span class="radio-description">
+                      Acesso aos contratos atribuídos, visualização de relatórios básicos
+                    </span>
+                  </div>
+                </label>
+                
+                <label class="radio-option" [class.selected]="userData.role === 'admin'">
+                  <input 
+                    type="radio" 
+                    name="role" 
+                    value="admin"
+                    [(ngModel)]="userData.role">
+                  <div class="radio-content">
+                    <span class="radio-title">
+                      <i class="fas fa-user-shield"></i>
+                      Administrador
+                    </span>
+                    <span class="radio-description">
+                      Acesso total ao sistema, gestão de usuários e configurações
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="alert-info" *ngIf="!isEditMode">
+              <i class="fas fa-lock"></i>
+              <div class="alert-content">
+                <strong>Senha de Acesso</strong>
+                <p>Uma senha temporária segura será gerada automaticamente e enviada por email. O usuário deverá alterá-la no primeiro acesso.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coluna Lateral -->
+      <div class="side-column">
+        <div class="form-card">
+          <div class="card-header">
+            <i class="fas fa-camera"></i>
+            <h2>Foto de Perfil</h2>
+          </div>
+          
+          <div class="card-body">
+            <div class="profile-upload-container">
+              <div class="profile-picture-preview" *ngIf="!profilePictureUrl">
+                <div class="avatar-placeholder">
+                  <i class="fas fa-user"></i>
+                </div>
+              </div>
+              
+              <div class="profile-picture-preview" *ngIf="profilePictureUrl">
+                <img [src]="profilePictureUrl" alt="Foto de perfil">
+                <button 
+                  type="button" 
+                  class="remove-picture-btn" 
+                  (click)="removeProfilePicture()" 
+                  [disabled]="isLoading"
+                  title="Remover foto">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              
+              <div class="upload-controls">
+                <input 
+                  type="file" 
+                  id="profilePicture" 
+                  accept="image/*" 
+                  (change)="onProfilePictureSelected($event)"
+                  [disabled]="isLoading"
+                  #fileInput>
+                <label for="profilePicture" class="upload-button">
+                  <i class="fas fa-upload"></i>
+                  {{ profilePictureUrl ? 'Alterar Foto' : 'Enviar Foto' }}
+                </label>
+                <p class="upload-hint">
+                  JPG, PNG ou GIF • Máx. 2MB
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card info-card">
+          <div class="card-header">
+            <i class="fas fa-info-circle"></i>
+            <h2>Informações</h2>
+          </div>
+          <div class="card-body">
+            <ul class="info-list">
+              <li>
+                <i class="fas fa-check-circle"></i>
+                O usuário receberá um email de boas-vindas
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                Senha temporária válida por 24 horas
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                Acesso imediato após confirmação
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -120,11 +209,12 @@
       <button 
         type="submit" 
         class="btn btn-primary"
-        [disabled]="isLoading">
+        [disabled]="isLoading || !userForm.form.valid">
         <i class="fas fa-check" *ngIf="!isLoading"></i>
         <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
-        {{ isEditMode ? 'Atualizar' : 'Salvar' }}
+        {{ isEditMode ? 'Salvar Alterações' : 'Criar Usuário' }}
       </button>
     </div>
   </form>
+  </div>
 </div>
