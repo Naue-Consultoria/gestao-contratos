@@ -40,13 +40,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           'Authorization': `Bearer ${token}`
         }
       });
-    } else if (shouldAddToken) {
-      // Se deveria ter token mas não tem, redirecionar para login
-      console.warn('🔑 Token ausente ou inválido - redirecionando para login');
-      console.warn('🔍 URL da requisição:', req.url);
-      console.warn('🔍 Token atual:', token);
-      router.navigate(['/login']);
-      return throwError(() => new Error('Token não encontrado'));
     }
   }
 
