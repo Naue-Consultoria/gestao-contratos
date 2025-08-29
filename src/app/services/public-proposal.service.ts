@@ -85,9 +85,6 @@ export class PublicProposalService {
     message?: string;
   }> {
     const url = `${this.apiUrl}/${token}`;
-    console.log('🔍 Fazendo chamada para:', url);
-    console.log('🔍 Environment:', environment);
-    console.log('🔍 Token:', token);
     return this.http.get<any>(url);
   }
 
