@@ -318,6 +318,15 @@
             <div class="summary-total">
               <div class="total-label">Investimento Total</div>
               <div class="total-amount">{{ formatCurrency(getSelectedTotal()) }}</div>
+              <div class="discount-note" *ngIf="paymentType !== 'vista'">*desconto de 6% para pagamento à vista</div>
+              <div class="discount-info" *ngIf="canGetDiscount()">
+                <i class="fas fa-tag"></i>
+                <span>Desconto de 6% aplicado!</span>
+              </div>
+              <div class="discount-unavailable" *ngIf="paymentType === 'vista' && !areAllServicesSelected()">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Selecione todos os serviços para o desconto</span>
+              </div>
             </div>
           </div>
         </div>
@@ -396,6 +405,121 @@
                     maxlength="18"
                     (input)="onDocumentInput($event)"
                     (keypress)="onDocumentKeyPress($event)">
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Options -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i class="fas fa-credit-card"></i>
+                Opções de Pagamento
+              </h3>
+              
+              <!-- Warning when not all services selected -->
+              <div class="discount-warning" *ngIf="!areAllServicesSelected()">
+                <i class="fas fa-info-circle"></i>
+                <strong>Atenção:</strong> O desconto de 6% no pagamento à vista só é válido quando todos os serviços da proposta são selecionados.
+              </div>
+              
+              <div class="payment-options">
+                <!-- Payment Type Selection -->
+                <div class="payment-type-selection">
+                  <label class="field-label">Forma de Pagamento *</label>
+                  <div class="payment-type-cards">
+                    <div class="payment-type-card" 
+                         [class.selected]="paymentType === 'vista'"
+                         [class.has-discount]="canGetDiscount()"
+                         (click)="onPaymentTypeChange('vista')">
+                      <div class="card-header">
+                        <input type="radio" 
+                               name="payment_type" 
+                               [checked]="paymentType === 'vista'"
+                               (change)="onPaymentTypeChange('vista')">
+                        <span class="card-title">À Vista</span>
+                        <span class="discount-badge" *ngIf="areAllServicesSelected()">6% OFF</span>
+                      </div>
+                      <div class="card-content">
+                        <div class="price-display">
+                          <span class="original-price" *ngIf="getBaseTotal() > 0 && areAllServicesSelected()">
+                            De: {{ formatCurrency(getBaseTotal()) }}
+                          </span>
+                          <span class="final-price">
+                            {{ formatCurrency(areAllServicesSelected() ? getBaseTotal() * 0.94 : getBaseTotal()) }}
+                          </span>
+                        </div>
+                        <div class="savings" *ngIf="areAllServicesSelected()">
+                          Economia de {{ formatCurrency(getBaseTotal() * 0.06) }}
+                        </div>
+                        <div class="no-discount-info" *ngIf="!areAllServicesSelected()">
+                          <small>Desconto disponível apenas com todos os serviços</small>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="payment-type-card" 
+                         [class.selected]="paymentType === 'prazo'"
+                         (click)="onPaymentTypeChange('prazo')">
+                      <div class="card-header">
+                        <input type="radio" 
+                               name="payment_type" 
+                               [checked]="paymentType === 'prazo'"
+                               (change)="onPaymentTypeChange('prazo')">
+                        <span class="card-title">A Prazo</span>
+                      </div>
+                      <div class="card-content">
+                        <div class="price-display">
+                          <span class="final-price">
+                            {{ formatCurrency(getBaseTotal()) }}
+                          </span>
+                        </div>
+                        <div class="installments-info" *ngIf="paymentType === 'prazo'">
+                          Em até {{ proposal.max_installments || 12 }}x sem juros
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Payment Method Selection -->
+                <div class="payment-method-selection">
+                  <label class="field-label">Método de Pagamento *</label>
+                  <div class="payment-methods">
+                    <label class="payment-method-option" 
+                           *ngFor="let method of getAvailablePaymentMethods()">
+                      <input type="radio" 
+                             name="payment_method" 
+                             [value]="method.value"
+                             [checked]="paymentMethod === method.value"
+                             (change)="onPaymentMethodChange(method.value)">
+                      <span class="method-label">
+                        <i [class]="method.icon"></i>
+                        {{ method.label }}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+                
+                <!-- Installments Selection (only for installable payment methods) -->
+                <div class="installments-selection" *ngIf="paymentType === 'prazo' && isPaymentMethodInstallable(paymentMethod)">
+                  <label for="installments" class="field-label">Número de Parcelas</label>
+                  <div class="installments-select-wrapper">
+                    <select 
+                      id="installments"
+                      name="installments"
+                      class="installments-select"
+                      [value]="installments || ''"
+                      (change)="onInstallmentsChange($event)">
+                      <option value="" disabled>Selecione o número de parcelas</option>
+                      <option *ngFor="let i of getInstallmentOptions()" [value]="i">
+                        {{ i }}x {{ i === 1 ? 'à vista' : 'mensais' }} - 
+                        {{ formatCurrency(getSelectedTotal() / i) }}
+                        {{ i === 1 ? ' (total)' : '' }}
+                      </option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                  
                 </div>
               </div>
             </div>

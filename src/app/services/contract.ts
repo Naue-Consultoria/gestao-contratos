@@ -42,6 +42,7 @@ export interface CreateContractRequest {
   end_date?: string | null;
   status?: 'active' | 'completed' | 'cancelled' | 'suspended';
   services: ContractServiceItem[];
+  total_value?: number;
   notes?: string | null;
   assigned_users?: number[];
   payment_method?: string | null;

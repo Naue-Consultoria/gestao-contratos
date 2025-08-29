@@ -90,29 +90,22 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
     if (!this.proposal?.id) return;
     
     try {
-      console.log('🔧 Fetching complete proposal data for ID:', this.proposal.id);
       const response = await firstValueFrom(this.proposalService.getProposal(this.proposal.id));
       
       if (response.success && response.data) {
-        console.log('🔧 Complete proposal fetched:', response.data);
-        console.log('🔧 Complete proposal services:', response.data.services);
-        console.log('🔧 Complete proposal keys:', Object.keys(response.data));
         
         // Update the proposal with complete data
         this.proposal = response.data;
         
+        // Puxar dados de pagamento da proposta para o contrato
+        this.initializePaymentDataFromProposal();
+        
         // Check all possible service properties
         const proposalAny = this.proposal as any;
-        console.log('🔧 Checking proposal_services:', proposalAny.proposal_services);
-        console.log('🔧 Checking service_items:', proposalAny.service_items);
-        console.log('🔧 Checking items:', proposalAny.items);
-        console.log('🔧 Checking proposalServices:', proposalAny.proposalServices);
-        console.log('🔧 Checking servicesList:', proposalAny.servicesList);
         
         // Log the full structure to identify the correct path
         for (const key in proposalAny) {
           if (Array.isArray(proposalAny[key])) {
-            console.log(`🔧 Found array property "${key}":`, proposalAny[key]);
           }
         }
       } else {
@@ -144,6 +137,18 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
 
   formatCurrency(value: number): string {
     return this.contractService.formatValue(value);
+  }
+
+  getProposalFinalValue(): number {
+    if (!this.proposal) return 0;
+    
+    // Se há pagamento à vista com final_value definido, usar esse valor
+    if (this.proposal.payment_type === 'vista' && this.proposal.final_value && this.proposal.final_value > 0) {
+      return this.proposal.final_value;
+    }
+    
+    // Caso contrário, usar o total_value
+    return this.proposal.total_value || 0;
   }
 
   getClientName(): string {
@@ -353,8 +358,10 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
         return;
       }
       
+      // Calcular o valor total correto da proposta (com desconto se aplicável)
+      const proposalFinalValue = this.getProposalFinalValue();
+      
       const services: ContractServiceItem[] = proposalServices.map(service => {
-        console.log('🔄 Individual service:', service);
         return {
           service_id: service.service_id,
           unit_value: service.unit_value || 0
@@ -371,6 +378,7 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
         start_date: this.contractData.start_date,
         end_date: this.contractData.end_date || null,
         services: services,
+        total_value: proposalFinalValue, // Usar o valor correto com desconto se aplicável
         notes: this.contractData.notes || null,
         assigned_users: assignedUserIds,
         payment_method: this.contractData.payment_method || null,
@@ -379,6 +387,8 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
         installment_count: this.contractData.installment_count,
         installments: this.contractInstallments
       };
+
+      console.log('🚀 Enviando request para criar contrato:', contractRequest);
 
       // Create the contract
       const contractResponse = await firstValueFrom(
@@ -437,6 +447,28 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
     } catch (error) {
       console.error('Error updating proposal status:', error);
       // Don't fail the whole conversion for status update errors
+    }
+  }
+
+  private initializePaymentDataFromProposal(): void {
+    if (!this.proposal) return;
+
+
+    // Puxar método de pagamento
+    if (this.proposal.payment_method) {
+      this.contractData.payment_method = this.proposal.payment_method;
+    }
+
+    // Puxar número de parcelas
+    if (this.proposal.installments && this.proposal.installments >= 1) {
+      this.contractData.installment_count = this.proposal.installments;
+    }
+
+    // Se há desconto à vista, atualizar o valor total da proposta
+    if (this.proposal.payment_type === 'vista' && this.proposal.discount_applied && this.proposal.discount_applied > 0) {
+      
+      // Usar o final_value que contém o valor com desconto
+      const finalValue = this.getProposalFinalValue();
     }
   }
 }

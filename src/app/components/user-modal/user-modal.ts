@@ -51,15 +51,12 @@ export class UserModal implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log('🔍 UserModal ngOnChanges:', changes); // Debug
     
     if (changes['isOpen'] && this.isOpen) {
-      console.log('🔍 Modal opened with editingUser:', this.editingUser); // Debug
       this.setupForm();
     }
     
     if (changes['editingUser']) {
-      console.log('🔍 EditingUser changed:', changes['editingUser']); // Debug
       this.setupForm();
     }
   }
@@ -69,9 +66,6 @@ export class UserModal implements OnInit, OnChanges {
    */
   private setupForm() {
     this.isEditMode = !!this.editingUser;
-    
-    console.log('🔍 Setup form - isEditMode:', this.isEditMode); // Debug
-    console.log('🔍 Setup form - editingUser:', this.editingUser); // Debug
     
     if (this.isEditMode && this.editingUser) {
       // Modo edição - pré-popular dados
@@ -88,7 +82,6 @@ export class UserModal implements OnInit, OnChanges {
       if (this.isOpen && !this.userData.password) {
         this.generatePassword();
       }
-      console.log('🔍 Reset form for create mode'); // Debug
     }
   }
 

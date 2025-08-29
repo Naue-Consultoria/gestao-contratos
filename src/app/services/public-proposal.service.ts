@@ -38,6 +38,7 @@ export interface PublicProposal {
   signed_at?: string;
   signature_data?: string;
   accepted_value?: number;
+  max_installments?: number;
   client: {
     name: string;
     trade_name?: string;
@@ -62,6 +63,12 @@ export interface SignatureData {
   client_email: string;
   client_phone?: string;
   client_document?: string;
+  client_observations?: string;
+  payment_type?: 'vista' | 'prazo';
+  payment_method?: string;
+  installments?: number;
+  final_value?: number;
+  discount_applied?: number;
 }
 
 export interface ConfirmationData {

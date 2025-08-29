@@ -17,12 +17,8 @@ export class MustChangePasswordGuard implements CanActivate {
   ): boolean {
     const user = this.authService.getUser();
     
-    console.log('🔍 MustChangePasswordGuard - User:', user);
-    console.log('🔍 MustChangePasswordGuard - must_change_password:', user?.must_change_password);
-    
     // Se o usuário precisa trocar a senha
     if (user?.must_change_password === true) {
-      console.log('🔄 Redirecionando para change-password');
       
       // Se já está na página de troca de senha, permite
       if (state.url.includes('/change-password')) {
@@ -34,8 +30,6 @@ export class MustChangePasswordGuard implements CanActivate {
       return false;
     }
     
-    // Se não precisa trocar senha, permite acesso
-    console.log('✅ Usuário não precisa trocar senha');
     return true;
   }
 }

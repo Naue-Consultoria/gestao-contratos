@@ -75,7 +75,6 @@ export class UserGuard implements CanActivate {
 
     // Se é admin, permitir acesso total
     if (this.authService.isAdmin()) {
-      console.log('✅ Acesso liberado - Usuário é admin');
       return true;
     }
 
@@ -91,10 +90,6 @@ export class UserGuard implements CanActivate {
     const isDynamicRoute = this.checkDynamicRoutes(currentUrl);
 
     if (isAllowedRoute || isDynamicRoute) {
-      console.log('✅ Acesso liberado - Rota permitida para usuário');
-      console.log('🔍 Rota atual:', currentUrl);
-      console.log('🔍 isAllowedRoute:', isAllowedRoute);
-      console.log('🔍 isDynamicRoute:', isDynamicRoute);
       return true;
     }
 

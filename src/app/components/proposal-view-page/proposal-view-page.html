@@ -143,17 +143,82 @@
         <!-- Services Summary -->
         <div class="services-summary" *ngIf="proposal.services && proposal.services.length > 0">
           <div class="summary-card">
-            <div class="summary-icon">
-              <i class="fas fa-calculator"></i>
-            </div>
             <div class="summary-content">
-              <div class="summary-label">Valor Total da Proposta</div>
-              <div class="summary-value">{{ formatCurrency(proposal.total_value) }}</div>
+              <!-- Estrutura detalhada para pagamento à vista com desconto -->
+              <ng-container *ngIf="hasDiscount()">
+                <!-- Valor Original -->
+                <div class="summary-row">
+                  <span class="summary-label">Valor Original:</span>
+                  <span class="summary-value-line strike-through">{{ formatCurrency(getOriginalValue()) }}</span>
+                </div>
+                
+                <!-- Desconto à Vista -->
+                <div class="summary-row discount-row">
+                  <span class="summary-label discount-label">Desconto à Vista:</span>
+                  <span class="summary-discount-value">- {{ formatCurrency(proposal.discount_applied) }}</span>
+                </div>
+                
+                <!-- Valor Total Final -->
+                <div class="summary-row total-row">
+                  <span class="summary-label total-label">Valor Total da Proposta:</span>
+                  <span class="summary-final-value">{{ formatCurrency(proposal.total_value) }}</span>
+                </div>
+              </ng-container>
+              
+              <!-- Estrutura simples para propostas sem desconto (parcelado ou à vista sem desconto) -->
+              <ng-container *ngIf="!hasDiscount()">
+                <div class="summary-row total-row">
+                  <span class="summary-label total-label">Valor Total da Proposta:</span>
+                  <span class="summary-final-value">{{ formatCurrency(proposal.total_value) }}</span>
+                </div>
+              </ng-container>
             </div>
           </div>
         </div>
       </section>
 
+      <!-- Payment Information Section -->
+      <section class="content-section" *ngIf="proposal.status === 'signed' && hasPaymentInfo()">
+        <h3 class="section-title">
+          <i class="fas fa-credit-card"></i>
+          Informações de Pagamento
+        </h3>
+        
+        <!-- Dados de Pagamento -->
+        <div class="payment-data">
+          <div class="payment-details">
+            <!-- Tipo de Pagamento -->
+            <div class="payment-detail" *ngIf="proposal.payment_type">
+              <span class="detail-label">Tipo de Pagamento:</span>
+              <span class="detail-value">{{ getPaymentTypeText(proposal.payment_type) }}</span>
+            </div>
+            
+            <!-- Método de Pagamento -->
+            <div class="payment-detail" *ngIf="proposal.payment_method">
+              <span class="detail-label">Método de Pagamento:</span>
+              <span class="detail-value">{{ proposal.payment_method }}</span>
+            </div>
+            
+            <!-- Número de Parcelas (apenas para pagamento parcelado) -->
+            <div class="payment-detail" *ngIf="proposal.installments && proposal.payment_type === 'prazo'">
+              <span class="detail-label">Parcelas:</span>
+              <span class="detail-value">{{ proposal.installments }}x</span>
+            </div>
+            
+            <!-- Desconto Aplicado -->
+            <div class="payment-detail" *ngIf="proposal.discount_applied && proposal.discount_applied > 0">
+              <span class="detail-label">Desconto Aplicado:</span>
+              <span class="detail-value discount">{{ formatCurrency(proposal.discount_applied) }}</span>
+            </div>
+            
+            <!-- Valor por Parcela (apenas para pagamento parcelado) -->
+            <div class="payment-detail" *ngIf="proposal.installments && proposal.installments > 1 && proposal.final_value && proposal.payment_type === 'prazo'">
+              <span class="detail-label">Valor por Parcela:</span>
+              <span class="detail-value">{{ formatCurrency(proposal.final_value / proposal.installments) }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <!-- Signature Section -->
       <section class="content-section" *ngIf="proposal.status === 'signed'">

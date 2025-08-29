@@ -123,7 +123,7 @@
 
 /* Seção de serviços - Container principal SEM SCROLL */
 .right-column .form-section:first-child {
-  height: 656.77px !important;
+  height: 769.53px !important;
   display: flex !important;
   flex-direction: column !important;
   position: relative !important;
@@ -405,9 +405,9 @@ textarea.form-control {
   overflow-y: auto !important;
   overflow-x: hidden !important;
   /* Altura fixa */
-  height: 436px !important;
-  max-height: 436px !important;
-  min-height: 436px !important;
+  height: 548.76px !important;
+  max-height: 548.76px !important;
+  min-height: 548.76px !important;
   /* Garantir que os cards não encolham */
   align-items: stretch !important;
   flex-shrink: 0 !important;

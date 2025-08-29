@@ -93,6 +93,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       type: ['Full', Validators.required],
       end_date: [''],
       observations: [''],
+      max_installments: [12, [Validators.required, Validators.min(1), Validators.max(24)]],
     });
 
     this.newClientForm = this.fb.group({
@@ -152,7 +153,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       client_id: proposal.client_id,
       type: proposal.type || 'Full',
       end_date: proposal.end_date ? proposal.end_date.split('T')[0] : '',
-      observations: proposal.notes || ''
+      observations: proposal.notes || '',
+      max_installments: proposal.max_installments || 12
     });
 
     // Carregar serviços da proposta
@@ -738,6 +740,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       client_state: selectedClient.state || '',
       client_zipcode: selectedClient.zipcode || '',
       end_date: this.proposalForm.value.end_date || null,
+      max_installments: this.proposalForm.value.max_installments || 12,
       validity_days: 30, // Valor padrão
       services: this.selectedServices.map(service => ({
         service_id: service.id,

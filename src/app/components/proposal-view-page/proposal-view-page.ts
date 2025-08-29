@@ -541,4 +541,52 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
     return '';
   }
 
+  // === PAYMENT INFORMATION METHODS ===
+  
+  hasPaymentInfo(): boolean {
+    if (!this.proposal) return false;
+    
+    return !!(
+      this.proposal.payment_type ||
+      this.proposal.payment_method ||
+      this.proposal.installments ||
+      this.proposal.final_value ||
+      (this.proposal.discount_applied && this.proposal.discount_applied > 0)
+    );
+  }
+
+  getPaymentTypeText(paymentType: string): string {
+    switch (paymentType) {
+      case 'vista':
+        return 'À Vista';
+      case 'prazo':
+        return 'Parcelado';
+      default:
+        return paymentType;
+    }
+  }
+
+  getOriginalValue(): number {
+    if (!this.proposal) return 0;
+    
+    // Se há desconto, o valor original é total_value + discount_applied
+    // porque o total_value foi atualizado com o desconto
+    if (this.hasDiscount()) {
+      return this.proposal.total_value + (this.proposal.discount_applied || 0);
+    }
+    
+    // Se não há desconto, o total_value é o valor original
+    return this.proposal.total_value;
+  }
+
+  hasDiscount(): boolean {
+    if (!this.proposal) return false;
+    
+    return !!(
+      this.proposal.payment_type === 'vista' && 
+      this.proposal.discount_applied && 
+      this.proposal.discount_applied > 0
+    );
+  }
+
 }

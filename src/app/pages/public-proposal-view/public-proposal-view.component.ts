@@ -158,6 +158,26 @@ export class PublicProposalViewComponent implements OnInit {
   serviceNotes: Map<number, string> = new Map();
   clientObservations = '';
   
+  // Dados de pagamento
+  paymentType: 'vista' | 'prazo' = 'prazo';
+  paymentMethod: string = '';
+  installments: number | null = null;
+  discountPercentage = 6; // 6% de desconto para pagamento à vista
+  
+  // Métodos de pagamento (baseados nos contratos)
+  paymentMethods = {
+    vista: [
+      { value: 'PIX', label: 'PIX', icon: 'fas fa-qrcode' },
+      { value: 'Cartão de Débito', label: 'Cartão de Débito', icon: 'fas fa-credit-card' },
+      { value: 'Transferência', label: 'Transferência Bancária', icon: 'fas fa-exchange-alt' }
+    ],
+    prazo: [
+      { value: 'Boleto', label: 'Boleto Bancário', icon: 'fas fa-barcode' },
+      { value: 'Cartão de Crédito', label: 'Cartão de Crédito', icon: 'fas fa-credit-card' },
+      { value: 'Cheque', label: 'Cheque', icon: 'fas fa-money-check' }
+    ]
+  };
+  
   // Dados de assinatura
   signatureDrawn = false;
   private signatureContext: CanvasRenderingContext2D | null = null;
@@ -218,7 +238,10 @@ export class PublicProposalViewComponent implements OnInit {
       client_email: ['', [Validators.required, Validators.email]],
       client_phone: [''],
       client_document: [''],
-      client_observations: ['']
+      client_observations: [''],
+      payment_type: ['prazo', Validators.required],
+      payment_method: ['', Validators.required],
+      installments: [null]
     });
 
     this.confirmationForm = this.fb.group({
@@ -233,6 +256,11 @@ export class PublicProposalViewComponent implements OnInit {
         next: (response) => {
           if (response.success) {
             this.proposal = response.data;
+            console.log('📋 Proposta carregada:', {
+              proposal_number: this.proposal.proposal_number,
+              max_installments: this.proposal.max_installments,
+              total_value: this.proposal.total_value
+            });
             this.checkProposalStatus();
             this.initializeServiceSelection();
           }
@@ -537,7 +565,12 @@ export class PublicProposalViewComponent implements OnInit {
 
       const signatureData: SignatureData = {
         signature_data: signatureDataUrl,
-        ...this.signatureForm.value
+        ...this.signatureForm.value,
+        final_value: this.getSelectedTotal() || 0,
+        payment_type: this.paymentType || 'prazo',
+        payment_method: this.paymentMethod || '',
+        installments: this.installments && this.installments >= 1 ? this.installments : 1,
+        discount_applied: this.getDiscountAmount() || 0
       };
 
       const response = await this.publicProposalService.signProposal(this.token, signatureData).toPromise();
@@ -610,11 +643,122 @@ export class PublicProposalViewComponent implements OnInit {
   getSelectedTotal(): number {
     if (!this.proposal) return 0;
     
+    const baseTotal = this.proposal.services
+      .filter(service => this.selectedServices.get(service.service_id))
+      .reduce((total, service) => {
+        return total + this.getServiceTotal(service);
+      }, 0);
+    
+    // Aplicar desconto apenas se pagamento à vista E todos os serviços estiverem selecionados
+    if (this.paymentType === 'vista' && this.areAllServicesSelected()) {
+      return baseTotal * (1 - this.discountPercentage / 100);
+    }
+    
+    return baseTotal;
+  }
+  
+  getBaseTotal(): number {
+    if (!this.proposal) return 0;
+    
     return this.proposal.services
       .filter(service => this.selectedServices.get(service.service_id))
       .reduce((total, service) => {
         return total + this.getServiceTotal(service);
       }, 0);
+  }
+  
+  getDiscountAmount(): number {
+    // Desconto só se aplica se pagamento à vista E todos os serviços selecionados
+    if (this.paymentType === 'vista' && this.areAllServicesSelected()) {
+      return this.getBaseTotal() * (this.discountPercentage / 100);
+    }
+    return 0;
+  }
+  
+  canGetDiscount(): boolean {
+    return this.paymentType === 'vista' && this.areAllServicesSelected();
+  }
+  
+  onPaymentTypeChange(type: 'vista' | 'prazo'): void {
+    this.paymentType = type;
+    this.signatureForm.patchValue({ payment_type: type });
+    
+    if (type === 'vista') {
+      this.installments = 1;
+      this.signatureForm.patchValue({ installments: 1 });
+    } else {
+      // Resetar para placeholder quando muda para prazo
+      this.installments = null;
+      this.signatureForm.patchValue({ installments: null });
+    }
+    
+    // Limpar método de pagamento se não for compatível com o novo tipo
+    const availableMethods = this.getAvailablePaymentMethods().map(m => m.value);
+    if (this.paymentMethod && !availableMethods.includes(this.paymentMethod)) {
+      this.paymentMethod = '';
+      this.signatureForm.patchValue({ payment_method: '' });
+    }
+  }
+  
+  onPaymentMethodChange(method: string): void {
+    this.paymentMethod = method;
+    this.signatureForm.patchValue({ payment_method: method });
+    
+    // Resetar parcelas se o método não permite parcelamento
+    if (!this.isPaymentMethodInstallable(method) && this.installments && this.installments > 1) {
+      this.installments = 1;
+      this.signatureForm.patchValue({ installments: 1 });
+    }
+  }
+  
+  getAvailablePaymentMethods(): { value: string, label: string, icon: string }[] {
+    return this.paymentMethods[this.paymentType] || [];
+  }
+  
+  isPaymentMethodInstallable(method: string): boolean {
+    return method === 'Cartão de Crédito' || method === 'Boleto';
+  }
+  
+  getInstallmentOptions(): number[] {
+    // Garantir que max_installments seja um número válido e não exceda 12
+    let maxInstallments = this.proposal?.max_installments || 12;
+    
+    // Validação adicional para garantir limites sensatos
+    if (maxInstallments < 1) maxInstallments = 1;
+    if (maxInstallments > 24) maxInstallments = 24; // Aumentei para 24 conforme constraints do BD
+    
+    const options = [];
+    for (let i = 1; i <= maxInstallments; i++) {
+      options.push(i);
+    }
+    
+    return options;
+  }
+  
+  onInstallmentsChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const value = parseInt(target.value, 10);
+    const maxInstallments = this.proposal?.max_installments || 12;
+    
+    // Validar se o valor está dentro do limite permitido
+    if (!isNaN(value) && value > 0 && value <= maxInstallments) {
+      this.installments = value;
+    } else {
+      this.installments = null;
+      if (value > maxInstallments) {
+        this.toastr.error(`Número máximo de parcelas para esta proposta é ${maxInstallments}`);
+      }
+    }
+    
+    this.signatureForm.patchValue({ installments: this.installments });
+  }
+  
+  
+  getInstallmentValue(): number {
+    if (this.paymentType === 'prazo' && this.installments && this.installments > 1) {
+      return this.getSelectedTotal() / this.installments;
+    }
+    return this.getSelectedTotal();
   }
 
   formatCurrency(value: number): string {

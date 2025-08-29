@@ -24,14 +24,8 @@ export class AdminGuard implements CanActivate {
 
     // Verificar se é admin
     if (this.authService.isAdmin()) {
-      console.log('✅ Acesso liberado - Usuário é admin');
       return true;
     }
-
-    // Se não é admin, redirecionar para dashboard com mensagem
-    console.log('❌ Acesso negado - Usuário não é admin');
-    console.log('🔍 User role:', this.authService.getUser()?.role);
-    console.log('🔍 User role_id:', this.authService.getUser()?.role_id);
     
     // Redirecionar para dashboard
     this.router.navigate(['/home/dashboard']);
