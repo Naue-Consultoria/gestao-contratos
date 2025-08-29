@@ -62,10 +62,7 @@ export class UserGuard implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): boolean {
-    
-    console.log('🔍 UserGuard executando para:', state.url);
-    
+  ): boolean {    
     // Verificar se está autenticado
     if (!this.authService.isAuthenticated()) {
       console.log('❌ Usuário não autenticado');
