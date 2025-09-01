@@ -595,7 +595,8 @@
                 (click)="signProposal()">
                 <i *ngIf="!isSubmitting" class="fas fa-signature"></i>
                 <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
-                <span *ngIf="!isSubmitting">Aceitar e Assinar Proposta</span>
+                <span *ngIf="!isSubmitting && areAllServicesSelected()">Aceitar e Assinar Proposta</span>
+                <span *ngIf="!isSubmitting && !areAllServicesSelected()">Assinar Contraproposta</span>
                 <span *ngIf="isSubmitting">Processando assinatura...</span>
               </button>
               

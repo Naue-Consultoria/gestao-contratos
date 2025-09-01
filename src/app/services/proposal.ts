@@ -11,6 +11,8 @@ export interface ProposalServiceItem {
   service_description?: string;
   unit_value: number;
   total_value: number;
+  selected_by_client?: boolean;
+  client_notes?: string;
   created_at?: string;
 }
 
@@ -43,7 +45,7 @@ export interface Proposal {
   signer_phone?: string;
   signer_document?: string;
   signer_observations?: string;
-  status: 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted';
+  status: 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta';
   converted_to_contract_id?: number;
   converted_at?: string;
   notes?: string;
@@ -364,7 +366,8 @@ export class ProposalService {
       'signed': '#003b2b', // Verde escuro da marca
       'rejected': '#ef4444', // Vermelho
       'expired': '#f59e0b', // Amarelo
-      'converted': '#6366f1' // Roxo (novo status)
+      'converted': '#6366f1', // Roxo (novo status)
+      'contraproposta': '#ef4444' // Vermelho para contraproposta
     };
     return colors[status] || '#6b7280';
   }
@@ -379,7 +382,8 @@ export class ProposalService {
       'signed': 'Assinada',
       'rejected': 'Rejeitada',
       'expired': 'Expirada',
-      'converted': 'Convertida'
+      'converted': 'Convertida',
+      'contraproposta': 'Contraproposta'
     };
     return texts[status] || status;
   }

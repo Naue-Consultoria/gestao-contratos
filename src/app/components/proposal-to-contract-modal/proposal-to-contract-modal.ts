@@ -142,6 +142,20 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
   getProposalFinalValue(): number {
     if (!this.proposal) return 0;
     
+    // Se for contraproposta, calcular valor apenas dos serviços selecionados
+    if (this.proposal.status === 'contraproposta') {
+      const selectedServices = this.getProposalServices();
+      const totalValue = selectedServices.reduce((sum: number, service: any) => {
+        return sum + (service.total_value || 0);
+      }, 0);
+      
+      // Aplicar desconto se houver pagamento à vista
+      if (this.proposal.payment_type === 'vista' && this.proposal.discount_applied && this.proposal.discount_applied > 0) {
+        return totalValue - this.proposal.discount_applied;
+      }
+      return totalValue;
+    }
+    
     // Se há pagamento à vista com final_value definido, usar esse valor
     if (this.proposal.payment_type === 'vista' && this.proposal.final_value && this.proposal.final_value > 0) {
       return this.proposal.final_value;
@@ -197,6 +211,10 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
     
     for (const property of possibleServiceProperties) {
       if (proposalAny[property] && Array.isArray(proposalAny[property]) && proposalAny[property].length > 0) {
+        // Se for contraproposta, filtrar apenas serviços selecionados
+        if (this.proposal.status === 'contraproposta') {
+          return proposalAny[property].filter((service: any) => service.selected_by_client === true);
+        }
         return proposalAny[property];
       }
     }

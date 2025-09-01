@@ -140,6 +140,17 @@ export class RoutineService {
   }
 
   /**
+   * Criar nova rotina para um serviço do contrato
+   */
+  createRoutine(routineData: Omit<ServiceRoutine, 'id' | 'created_at' | 'updated_at'>): Observable<{success: boolean, data: ServiceRoutine, message?: string}> {
+    return this.http.post<{success: boolean, data: ServiceRoutine, message?: string}>(
+      this.apiUrl,
+      routineData,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
    * Helper methods for status
    */
   getRoutineStatusColor(status: string): string {

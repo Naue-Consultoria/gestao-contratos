@@ -115,6 +115,15 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Calcular valor total baseado no status
+    let totalValue = apiProposal.total_value || 0;
+    if (apiProposal.status === 'contraproposta' && apiProposal.services) {
+      // Para contrapropostas, calcular apenas o valor dos serviços selecionados
+      totalValue = apiProposal.services
+        .filter((service: any) => service.selected_by_client === true)
+        .reduce((sum: number, service: any) => sum + (service.total_value || 0), 0);
+    }
+
     return {
       id: apiProposal.id,
       proposalNumber: apiProposal.proposal_number,
@@ -122,7 +131,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       companyName: clientName,
       status: apiProposal.status,
       statusText: this.proposalService.getStatusText(apiProposal.status),
-      totalValue: this.proposalService.formatCurrency(apiProposal.total_value || 0),
+      totalValue: this.proposalService.formatCurrency(totalValue),
       validUntil: apiProposal.end_date ? this.formatDate(apiProposal.end_date) : 'Sem prazo',
       createdAt: this.formatDate(apiProposal.created_at),
       isExpired: this.proposalService.isProposalExpired(apiProposal),
@@ -455,7 +464,8 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       'signed': '#003b2b',
       'accepted': '#28a745',
       'rejected': '#dc3545',
-      'expired': '#fd7e14'
+      'expired': '#fd7e14',
+      'contraproposta': '#dc3545'  // Vermelho para contraproposta
     };
     return statusColors[status] || '#6c757d';
   }

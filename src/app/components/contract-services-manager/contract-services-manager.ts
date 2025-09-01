@@ -374,20 +374,45 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
 
     try {
       // Buscar a rotina pelo serviceId (contract_service_id)
-      const routine = await this.routineService.getRoutineByContractServiceId(service.id).toPromise();
+      let routine = await this.routineService.getRoutineByContractServiceId(service.id).toPromise();
+      
+      if (!routine || !routine.id) {
+        // Se não existe rotina, criar uma automaticamente
+        console.log('⚠️ Rotina não encontrada para serviço', service.id, '- criando automaticamente...');
+        
+        try {
+          const newRoutine = await this.routineService.createRoutine({
+            contract_service_id: service.id,
+            status: 'not_started',
+            scheduled_date: null,
+            notes: null
+          }).toPromise();
+          
+          if (newRoutine && newRoutine.success && newRoutine.data) {
+            routine = newRoutine.data;
+            console.log('✅ Rotina criada com sucesso:', routine.id);
+          } else {
+            console.error('❌ Falha ao criar rotina automaticamente');
+            alert('Erro: Não foi possível criar a rotina para este serviço. Por favor, tente novamente.');
+            return;
+          }
+        } catch (createError) {
+          console.error('❌ Erro ao criar rotina automaticamente:', createError);
+          alert('Erro: Não foi possível criar a rotina para este serviço. Por favor, tente novamente.');
+          return;
+        }
+      }
       
       if (routine && routine.id) {
-        // Se a rotina existe, navegar com o routine.id
+        // Navegar para a rotina
         this.router.navigate(['/home/rotinas', routine.id, 'servico', service.id]);
       } else {
-        // Se não existe rotina, mostrar erro ao invés de usar fallback
-        console.error('❌ Rotina não encontrada para o serviço:', service.id);
-        alert('Erro: Não foi possível encontrar a rotina para este serviço. Por favor, verifique se a rotina foi criada corretamente.');
-        return;
+        console.error('❌ Rotina ainda não disponível após tentativa de criação');
+        alert('Erro: Não foi possível acessar a rotina. Por favor, tente novamente.');
       }
     } catch (error) {
-      console.error('❌ Erro ao buscar rotina:', error);
-      alert('Erro ao buscar rotina. Por favor, tente novamente.');
+      console.error('❌ Erro ao buscar/criar rotina:', error);
+      alert('Erro ao acessar rotina. Por favor, tente novamente.');
       return;
     }
   }

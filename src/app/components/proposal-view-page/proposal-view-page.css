@@ -249,6 +249,11 @@
   border-color: rgba(107, 114, 128, 0.5);
 }
 
+.status-badge[data-status="contraproposta"] {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
 /* Meta Info */
 .meta-info {
   display: grid;

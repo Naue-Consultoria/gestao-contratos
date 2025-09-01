@@ -69,6 +69,7 @@ export interface SignatureData {
   installments?: number;
   final_value?: number;
   discount_applied?: number;
+  is_counterproposal?: boolean;
 }
 
 export interface ConfirmationData {

@@ -558,19 +558,32 @@ export class PublicProposalViewComponent implements OnInit {
       const canvas = this.signatureCanvas.nativeElement;
       const signatureDataUrl = canvas.toDataURL();
 
-      const signatureData: SignatureData = {
+      // Preparar dados dos serviços selecionados
+      const selectedServicesData = this.proposal?.services?.map(service => ({
+        service_id: service.service_id,
+        selected: this.isServiceSelected(service.service_id),
+        client_notes: this.serviceNotes.get(service.service_id) || ''
+      })) || [];
+
+      const signatureData: SignatureData & { selected_services?: any[] } = {
         signature_data: signatureDataUrl,
         ...this.signatureForm.value,
         final_value: this.getSelectedTotal() || 0,
         payment_type: this.paymentType || 'prazo',
         payment_method: this.paymentMethod || '',
         installments: this.installments && this.installments >= 1 ? this.installments : 1,
-        discount_applied: this.getDiscountAmount() || 0
+        discount_applied: this.getDiscountAmount() || 0,
+        is_counterproposal: !this.areAllServicesSelected(),
+        selected_services: selectedServicesData
       };
 
       const response = await this.publicProposalService.signProposal(this.token, signatureData).toPromise();
       if (response?.success) {
-        this.toastr.success('Proposta assinada com sucesso!');
+        if (signatureData.is_counterproposal) {
+          this.toastr.success('Contraproposta assinada com sucesso! Aguarde retorno da empresa.');
+        } else {
+          this.toastr.success('Proposta assinada com sucesso!');
+        }
         // Recarregar os dados da proposta para refletir o novo status
         await this.loadProposalSync();
         this.currentStep = 'confirming';
@@ -823,7 +836,8 @@ export class PublicProposalViewComponent implements OnInit {
       'signed': 'Assinada',
       'accepted': 'Aceita',
       'rejected': 'Rejeitada',
-      'expired': 'Expirada'
+      'expired': 'Expirada',
+      'contraproposta': 'Contraproposta'
     };
     return texts[status] || status;
   }
