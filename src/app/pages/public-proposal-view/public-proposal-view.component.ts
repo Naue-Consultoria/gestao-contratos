@@ -243,13 +243,13 @@ export class PublicProposalViewComponent implements OnInit {
 
     if (client?.type === 'PJ' && company) {
         clientName = company.trade_name || company.company_name || '';
-        clientEmail = company.email || '';
-        clientPhone = company.phone || '';
+        clientEmail = client.email || '';
+        clientPhone = client.phone || '';
         clientDocument = company.cnpj || '';
     } else if (client?.type === 'PF' && person) {
         clientName = person.full_name || '';
-        clientEmail = person.email || '';
-        clientPhone = person.phone || '';
+        clientEmail = client.email || '';
+        clientPhone = client.phone || '';
         clientDocument = person.cpf || '';
     }
 

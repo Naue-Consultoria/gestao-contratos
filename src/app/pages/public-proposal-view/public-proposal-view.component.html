@@ -19,7 +19,10 @@
               <span class="outline-text" data-text="Proposta">Proposta Estratégica</span><span class="green-dot">.</span>
             </h2>
             <div class="client-name" *ngIf="proposal">
-              {{ proposal.client.company.trade_name || proposal.client.company.company_name || 'Cliente' }}
+              {{ (proposal.client.type === 'PJ' && proposal.client.company) ? 
+                  (proposal.client.company.trade_name || proposal.client.company.company_name) : 
+                  (proposal.client.type === 'PF' && proposal.client.person) ? 
+                  proposal.client.person.full_name : 'Cliente' }}
             </div>
           </div>
           

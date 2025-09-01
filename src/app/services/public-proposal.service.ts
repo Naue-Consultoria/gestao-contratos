@@ -40,10 +40,26 @@ export interface PublicProposal {
   accepted_value?: number;
   max_installments?: number;
   client: {
-    name: string;
-    trade_name?: string;
-    headquarters?: string;
-    market_sector?: string;
+    id: number;
+    email: string;
+    phone?: string;
+    street: string;
+    number: string;
+    complement?: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    zipcode: string;
+    type?: 'PJ' | 'PF';
+    company?: {
+      company_name: string;
+      trade_name?: string;
+      cnpj: string;
+    };
+    person?: {
+      full_name: string;
+      cpf: string;
+    };
   };
   services: PublicProposalService[];
 }
