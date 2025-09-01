@@ -60,7 +60,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     totalValueActive: 0,
     totalValueAll: 0,
     averageValue: 0,
-    typeStats: { Full: 0, Pontual: 0, Individual: 0 },
+    typeStats: { Full: 0, Pontual: 0, Individual: 0, 'Recrutamento & Seleção': 0 },
     averageDuration: 0,
   };
 
@@ -75,7 +75,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   clients: any[] = [];
   isLoading = false;
   error = '';
-  currentTab: 'all' | 'Full' | 'Pontual' | 'Individual' = 'all';
+  currentTab: 'all' | 'Full' | 'Pontual' | 'Individual' | 'Recrutamento & Seleção' = 'all';
   openDropdownId: number | null = null;
   showExportModal = false;
   selectedContract: any = null;
@@ -211,6 +211,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
         Full: apiContracts.filter((c) => c.type === 'Full').length,
         Pontual: apiContracts.filter((c) => c.type === 'Pontual').length,
         Individual: apiContracts.filter((c) => c.type === 'Individual').length,
+        'Recrutamento & Seleção': apiContracts.filter((c) => c.type === 'Recrutamento & Seleção').length,
       },
       averageDuration: 0,
     };
@@ -248,7 +249,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     this.loadContracts(); // Simply reload contracts with the new filters
   }
 
-  changeTab(tab: 'all' | 'Full' | 'Pontual' | 'Individual') {
+  changeTab(tab: 'all' | 'Full' | 'Pontual' | 'Individual' | 'Recrutamento & Seleção') {
     this.currentTab = tab;
     this.applyFilters();
   }

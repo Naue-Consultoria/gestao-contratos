@@ -62,7 +62,7 @@ export class ContractFormComponent implements OnInit {
   formData: any = {
     contract_number: '',
     client_id: null as number | null,
-    type: 'Full' as 'Full' | 'Pontual' | 'Individual',
+    type: 'Full' as 'Full' | 'Pontual' | 'Individual' | 'Recrutamento & Seleção',
     status: 'active' as 'active' | 'completed' | 'cancelled' | 'suspended',
     start_date: '',
     end_date: '',
@@ -83,7 +83,7 @@ export class ContractFormComponent implements OnInit {
   availableServices: ApiService[] = [];
   selectedServices: SelectedService[] = [];
   clients: ApiClient[] = [];
-  contractTypes = ['Full', 'Pontual', 'Individual'];
+  contractTypes = ['Full', 'Pontual', 'Individual', 'Recrutamento & Seleção'];
   assignedUsers: AssignedUser[] = [];
   paymentMethods = this.contractService.getPaymentMethods();
   
@@ -613,6 +613,10 @@ export class ContractFormComponent implements OnInit {
 
   isServiceSelected(serviceId: number): boolean {
     return this.selectedServices.some((s) => s.service_id === serviceId);
+  }
+
+  hasSelectedServices(): boolean {
+    return this.selectedServices.length > 0;
   }
 
   isPaymentMethodInstallable(paymentMethod: string): boolean {

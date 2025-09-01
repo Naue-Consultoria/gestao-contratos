@@ -194,7 +194,6 @@ export class PublicProposalViewComponent implements OnInit {
     private publicTeamService: PublicTeamService,
     private toastr: ToastrService
   ) {
-    this.initializeForms();
   }
 
   ngOnInit(): void {
@@ -232,20 +231,41 @@ export class PublicProposalViewComponent implements OnInit {
     }
   }
 
-  private initializeForms(): void {
+  private initializeForms(proposal: PublicProposal | null): void {
+    const client = proposal?.client;
+    const company = client?.company;
+    const person = client?.person;
+
+    let clientName = '';
+    let clientEmail = '';
+    let clientPhone = '';
+    let clientDocument = '';
+
+    if (client?.type === 'PJ' && company) {
+        clientName = company.trade_name || company.company_name || '';
+        clientEmail = company.email || '';
+        clientPhone = company.phone || '';
+        clientDocument = company.cnpj || '';
+    } else if (client?.type === 'PF' && person) {
+        clientName = person.full_name || '';
+        clientEmail = person.email || '';
+        clientPhone = person.phone || '';
+        clientDocument = person.cpf || '';
+    }
+
     this.signatureForm = this.fb.group({
-      client_name: ['', [Validators.required, Validators.minLength(2)]],
-      client_email: ['', [Validators.required, Validators.email]],
-      client_phone: [''],
-      client_document: [''],
-      client_observations: [''],
-      payment_type: ['prazo', Validators.required],
-      payment_method: ['', Validators.required],
-      installments: [null]
+        client_name: [clientName, [Validators.required, Validators.minLength(2)]],
+        client_email: [clientEmail, [Validators.required, Validators.email]],
+        client_phone: [clientPhone],
+        client_document: [clientDocument],
+        client_observations: [''],
+        payment_type: ['prazo', Validators.required],
+        payment_method: ['', Validators.required],
+        installments: [null]
     });
 
     this.confirmationForm = this.fb.group({
-      client_observations: ['']
+        client_observations: ['']
     });
   }
 
@@ -256,6 +276,7 @@ export class PublicProposalViewComponent implements OnInit {
         next: (response) => {
           if (response.success) {
             this.proposal = response.data;
+            this.initializeForms(this.proposal);
             this.checkProposalStatus();
             this.initializeServiceSelection();
           }

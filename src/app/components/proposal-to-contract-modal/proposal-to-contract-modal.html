@@ -25,17 +25,17 @@
             <span class="value">{{ proposal?.type }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Valor Total:</span>
-            <span class="value">{{ formatCurrency(getProposalFinalValue()) }}</span>
+            <span class="label">Valor Total{{ proposal?.status === 'contraproposta' ? ' (Serviços Selecionados)' : '' }}:</span>
+            <span class="value" [class.counterproposal-value]="proposal?.status === 'contraproposta'">{{ formatCurrency(getProposalFinalValue()) }}</span>
           </div>
         </div>
       </div>
 
       <!-- Serviços da Proposta -->
-      <div class="proposal-services" *ngIf="proposal?.services && (proposal?.services?.length || 0) > 0">
-        <h3>Serviços Incluídos</h3>
+      <div class="proposal-services" *ngIf="getProposalServices().length > 0">
+        <h3>Serviços Incluídos {{ proposal?.status === 'contraproposta' ? '(Selecionados pelo Cliente)' : '' }}</h3>
         <div class="services-grid">
-          <div *ngFor="let service of proposal?.services" class="service-item">
+          <div *ngFor="let service of getProposalServices()" class="service-item">
             <div class="service-header">
               <span class="service-name">{{ service.service_name }}</span>
               <span class="service-value">{{ formatCurrency(service.total_value || 0) }}</span>

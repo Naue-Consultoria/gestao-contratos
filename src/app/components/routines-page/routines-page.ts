@@ -120,7 +120,8 @@ export class RoutinesPageComponent implements OnInit {
     const types: { [key: string]: string } = {
       'Full': 'Contrato Full',
       'Pontual': 'Contrato Pontual', 
-      'Individual': 'Mentoria Individual'
+      'Individual': 'Mentoria Individual',
+      'Recrutamento & Seleção': 'Recrutamento & Seleção'
     };
     return types[type] || type;
   }

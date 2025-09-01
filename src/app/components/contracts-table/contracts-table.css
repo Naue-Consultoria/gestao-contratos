@@ -521,6 +521,11 @@
     color: #10b981;
 }
 
+.type-badge[data-type="Recrutamento & Seleção"] {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
 
 /* Date Info */
 .date-info {

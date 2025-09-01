@@ -37,7 +37,7 @@ export interface ApiContractInstallment {
 export interface CreateContractRequest {
   contract_number?: string;
   client_id: number;
-  type: 'Full' | 'Pontual' | 'Individual';
+  type: 'Full' | 'Pontual' | 'Individual' | 'Recrutamento & Seleção';
   start_date: string;
   end_date?: string | null;
   status?: 'active' | 'completed' | 'cancelled' | 'suspended';
@@ -55,7 +55,7 @@ export interface CreateContractRequest {
 export interface UpdateContractRequest {
   contract_number?: string;
   client_id?: number;
-  type?: 'Full' | 'Pontual' | 'Individual';
+  type?: 'Full' | 'Pontual' | 'Individual' | 'Recrutamento & Seleção';
   start_date?: string;
   end_date?: string | null;
   status?: 'active' | 'completed' | 'cancelled' | 'suspended';
@@ -88,7 +88,7 @@ export interface ApiContractService {
 export interface ApiContract {
   id: number;
   contract_number: string;
-  type: 'Full' | 'Pontual' | 'Individual';
+  type: 'Full' | 'Pontual' | 'Individual' | 'Recrutamento & Seleção';
   start_date: string;
   end_date: string | null;
   status: 'active' | 'completed' | 'cancelled' | 'suspended';
@@ -140,6 +140,7 @@ export interface ContractStats {
     Full: number;
     Pontual: number;
     Individual: number;
+    'Recrutamento & Seleção': number;
   };
   averageDuration: number;
 }
@@ -269,7 +270,7 @@ export class ContractService {
 
   getTypeIcon(type: string): string {
     const icons: { [key: string]: string } = {
-      'Full': 'fas fa-building', 'Pontual': 'fas fa-calendar-check', 'Individual': 'fas fa-user'
+      'Full': 'fas fa-building', 'Pontual': 'fas fa-calendar-check', 'Individual': 'fas fa-user', 'Recrutamento & Seleção': 'fas fa-users'
     };
     return icons[type] || 'fas fa-file-contract';
   }

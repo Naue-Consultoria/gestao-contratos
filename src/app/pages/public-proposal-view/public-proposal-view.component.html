@@ -7,11 +7,8 @@
       <div class="hero-content">
         <div class="hero-left">
           <div class="company-branding">
-            <div class="logo-container">
-              <img src="/iconNaue.jpg" alt="NAUE Consultoria" class="company-logo">
-            </div>
             <div class="company-info">
-              <h1 class="company-name">NAUE Consultoria</h1>
+              <img src="/logoNaueNeg.png" alt="NAUE Consultoria" class="company-logo">
               <p class="company-tagline">Primeira consultoria especializada em mercado<br>imobiliário do Brasil.</p>
             </div>
           </div>
@@ -19,10 +16,10 @@
           <!-- Proposal Info -->
           <div class="proposal-info">
             <h2 class="proposal-type">
-              Proposta <span class="outline-text" data-text="Estratégica">Estratégica</span><span class="green-dot">.</span>
+              <span class="outline-text" data-text="Proposta">Proposta Estratégica</span><span class="green-dot">.</span>
             </h2>
             <div class="client-name" *ngIf="proposal">
-              {{ proposal.client.trade_name || proposal.client.name || 'Cliente' }}
+              {{ proposal.client.company.trade_name || proposal.client.company.company_name || 'Cliente' }}
             </div>
           </div>
           

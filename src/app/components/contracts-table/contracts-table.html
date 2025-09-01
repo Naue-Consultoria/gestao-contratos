@@ -25,6 +25,10 @@
       Mentorias Individuais
       <span class="tab-count">{{ stats.typeStats.Individual }}</span>
     </div>
+    <div class="tab" [class.active]="currentTab === 'Recrutamento & Seleção'" (click)="changeTab('Recrutamento & Seleção')">
+      Recrutamento & Seleção
+      <span class="tab-count">{{ stats.typeStats['Recrutamento & Seleção'] }}</span>
+    </div>
   </div>
 
   <!-- Main Content -->

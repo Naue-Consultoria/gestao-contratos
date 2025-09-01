@@ -21,7 +21,7 @@ export interface Proposal {
   proposal_number: string;
   client_id: number;
   client_type?: 'pf' | 'pj' | '';
-  type: 'Full' | 'Pontual' | 'Individual';
+  type: 'Full' | 'Pontual' | 'Individual' | 'Recrutamento & Seleção';
   client_name: string;
   client_document: string;
   client_email: string;
@@ -65,6 +65,15 @@ export interface Proposal {
     headquarters?: string;
     market_sector?: string;
     description?: string;
+    type?: 'PF' | 'PJ';
+    company?: {
+      trade_name?: string;
+      company_name?: string;
+    };
+    person?: {
+      name?: string;
+      document?: string;
+    };
   };
   services: ProposalServiceItem[];
   created_by_user?: { name: string };
@@ -73,7 +82,7 @@ export interface Proposal {
 
 export interface CreateProposalData {
   client_id: number;
-  type: 'Full' | 'Pontual' | 'Individual';
+  type: 'Full' | 'Pontual' | 'Individual' | 'Recrutamento & Seleção';
   client_name: string;
   client_document: string;
   client_email: string;

@@ -357,13 +357,19 @@
         </div>
       </div>
 
+      <!-- Aviso quando não há serviços selecionados -->
+      <div class="alert alert-warning" *ngIf="!hasSelectedServices() && !isEditMode">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>Selecione pelo menos um serviço para criar o contrato.</span>
+      </div>
+
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isSaving">
           <i class="fas fa-arrow-left"></i>
           Voltar
         </button>
         
-        <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving || !hasSelectedServices()">
           <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
           <i class="fas fa-save" *ngIf="!isSaving"></i>
           {{ isEditMode ? 'Atualizar' : 'Criar' }} Contrato

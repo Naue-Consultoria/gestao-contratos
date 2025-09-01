@@ -414,7 +414,8 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
     const types: { [key: string]: string } = {
       'Full': 'Full',
       'Pontual': 'Pontual',
-      'Individual': 'Individual'
+      'Individual': 'Individual',
+      'Recrutamento & Seleção': 'Recrutamento & Seleção'
     };
     return types[type] || type;
   }
@@ -472,73 +473,34 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
 
   getClientName(): string {
     if (!this.proposal) return '';
-    
-    // Primeiro tenta client_name (campo direto)
-    if (this.proposal.client_name) {
-      return this.proposal.client_name;
+
+    const client = (this.proposal as any).client;
+
+    if (!client) {
+        return this.proposal.client_name || '';
     }
-    
-    // Depois tenta o objeto client aninhado
-    if (this.proposal.client?.name) {
-      return this.proposal.client.name;
+
+    if (client.type === 'PJ' && client.company) {
+        return client.company.trade_name || client.company.company_name || '';
     }
-    
-    // Tenta clients_pf ou clients_pj se existirem
-    if (this.proposal.client && typeof this.proposal.client === 'object') {
-      const client = this.proposal.client as any;
-      if (client.clients_pf?.full_name) {
-        return client.clients_pf.full_name;
-      }
-      if (client.clients_pj?.company_name) {
-        return client.clients_pj.company_name;
-      }
+
+    if (client.type === 'PF' && client.person) {
+        return client.person.full_name || '';
     }
-    
-    return '';
+
+    return this.proposal.client_name || client.name || '';
   }
 
   getClientEmail(): string {
     if (!this.proposal) return '';
-    
-    // Primeiro tenta client_email (campo direto)
-    if (this.proposal.client_email) {
-      return this.proposal.client_email;
-    }
-    
-    // Tenta o objeto client aninhado
-    if ((this.proposal as any).client?.email) {
-      return (this.proposal as any).client.email;
-    }
-    
-    // Tenta outras possibilidades
-    if ((this.proposal as any).email) {
-      return (this.proposal as any).email;
-    }
-    
-    console.log('❌ Client email not found in proposal data');
-    return '';
+    const client = (this.proposal as any).client;
+    return client?.company?.email || client?.person?.email || this.proposal.client_email || '';
   }
 
   getClientPhone(): string {
     if (!this.proposal) return '';
-    
-    // Primeiro tenta client_phone (campo direto)
-    if (this.proposal.client_phone) {
-      return this.proposal.client_phone;
-    }
-    
-    // Tenta o objeto client aninhado
-    if ((this.proposal as any).client?.phone) {
-      return (this.proposal as any).client.phone;
-    }
-    
-    // Tenta outras possibilidades
-    if ((this.proposal as any).phone) {
-      return (this.proposal as any).phone;
-    }
-    
-    console.log('❌ Client phone not found in proposal data');
-    return '';
+    const client = (this.proposal as any).client;
+    return client?.company?.phone || client?.person?.phone || this.proposal.client_phone || '';
   }
 
   // === PAYMENT INFORMATION METHODS ===

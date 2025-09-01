@@ -181,7 +181,8 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
     const typeMap: { [key: string]: string } = {
       'Full': 'Completo',
       'Pontual': 'Pontual',
-      'Individual': 'Individual'
+      'Individual': 'Individual',
+      'Recrutamento & Seleção': 'Recrutamento & Seleção'
     };
     return typeMap[type] || type;
   }

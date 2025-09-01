@@ -104,8 +104,10 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
         const proposalAny = this.proposal as any;
         
         // Log the full structure to identify the correct path
+        console.log('🔍 Proposal structure after loading complete data:');
         for (const key in proposalAny) {
           if (Array.isArray(proposalAny[key])) {
+            console.log(`  - ${key}: Array(${proposalAny[key].length})`, proposalAny[key]);
           }
         }
       } else {

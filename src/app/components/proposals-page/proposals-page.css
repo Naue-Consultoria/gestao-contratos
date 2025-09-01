@@ -319,6 +319,26 @@
     color: #495057;
 }
 
+.type-badge[data-type="Full"] {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.type-badge[data-type="Pontual"] {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.type-badge[data-type="Individual"] {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.type-badge[data-type="Recrutamento & Seleção"] {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
 /* Value Amount */
 .value-amount {
     font-weight: 600;

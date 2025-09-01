@@ -348,6 +348,16 @@
   color: #ef4444;
 }
 
+/* Estilos para contrapropostas */
+.counterproposal-value {
+  color: #dc3545 !important;
+  font-weight: 600 !important;
+}
+
+:host-context(body.dark-mode) .counterproposal-value {
+  color: #ff6b7a !important;
+}
+
 .form-control {
   width: 100%;
   padding: 0.75rem 1rem;

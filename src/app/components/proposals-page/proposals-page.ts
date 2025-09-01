@@ -105,14 +105,19 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   }
 
   private mapApiProposalToTableProposal(apiProposal: any): ProposalDisplay {
-    // Extrair nome do cliente baseado no tipo (PF ou PJ)
     let clientName = 'Cliente não identificado';
-    if (apiProposal.client) {
-      if (apiProposal.client.clients_pf) {
-        clientName = apiProposal.client.clients_pf.full_name;
-      } else if (apiProposal.client.clients_pj) {
-        clientName = apiProposal.client.clients_pj.company_name;
-      }
+    const client = apiProposal.client;
+
+    if (client) {
+        if (client.type === 'PJ' && client.company) {
+            clientName = client.company.trade_name || client.company.company_name || apiProposal.client_name || '';
+        } else if (client.type === 'PF' && client.person) {
+            clientName = client.person.full_name || apiProposal.client_name || '';
+        } else {
+            clientName = apiProposal.client_name || client.name || '';
+        }
+    } else if (apiProposal.client_name) {
+        clientName = apiProposal.client_name;
     }
 
     // Calcular valor total baseado no status
@@ -452,7 +457,8 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     const types: { [key: string]: string } = {
       'Full': 'Full',
       'Pontual': 'Pontual',
-      'Individual': 'Individual'
+      'Individual': 'Individual',
+      'Recrutamento & Seleção': 'Recrutamento & Seleção'
     };
     return types[type] || type || 'Full';
   }
@@ -485,23 +491,33 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   }
 
   private getClientName(proposal: any): string {
-    if (proposal.client) {
-      if (proposal.client.client_pf && proposal.client.client_pf.full_name) {
-        return proposal.client.client_pf.full_name;
-      }
-      if (proposal.client.client_pj && proposal.client.client_pj.company_name) {
-        return proposal.client.client_pj.company_name;
-      }
+    if (!proposal) return 'Cliente não informado';
+
+    const client = proposal.client;
+
+    if (!client) {
+        return proposal.client_name || 'Cliente não informado';
     }
-    return 'Cliente não informado';
+
+    if (client.type === 'PJ' && client.company) {
+        return client.company.trade_name || client.company.company_name || proposal.client_name || '';
+    }
+
+    if (client.type === 'PF' && client.person) {
+        return client.person.full_name || proposal.client_name || '';
+    }
+
+    return proposal.client_name || client.name || 'Cliente não informado';
   }
 
   private getClientEmail(proposal: any): string {
-    return proposal.client?.email || '';
+    if (!proposal) return '';
+    return proposal.client?.company?.email || proposal.client?.person?.email || proposal.client_email || '';
   }
 
   private getClientPhone(proposal: any): string {
-    return proposal.client?.phone || '';
+    if (!proposal) return '';
+    return proposal.client?.company?.phone || proposal.client?.person?.phone || proposal.client_phone || '';
   }
 
   private addSectionHeader(doc: any, title: string, y: number, margin: number, pageWidth: number): void {
