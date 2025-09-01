@@ -22,7 +22,6 @@
               Proposta <span class="outline-text" data-text="Estratégica">Estratégica</span><span class="green-dot">.</span>
             </h2>
             <div class="client-name" *ngIf="proposal">
-              <!-- Debug: {{ proposal | json }} -->
               {{ proposal.client.trade_name || proposal.client.name || 'Cliente' }}
             </div>
           </div>
@@ -124,12 +123,15 @@
               <!-- Photo Section -->
               <div class="specialist-photo-section">
                 <div class="photo-frame">
-                  <img *ngIf="getTeamMemberPhotoUrl(member)" 
+                  <img *ngIf="getTeamMemberPhotoUrl(member) && getTeamMemberPhotoUrl(member) !== ''" 
                        [src]="getTeamMemberPhotoUrl(member)" 
                        [alt]="member.name"
                        class="specialist-photo"
-                       (error)="onImageError($event)">
-                  <div *ngIf="!getTeamMemberPhotoUrl(member)" class="photo-placeholder">
+                       (error)="onImageError($event)"
+                       style="display: block;">
+                  <div *ngIf="!getTeamMemberPhotoUrl(member) || getTeamMemberPhotoUrl(member) === ''" 
+                       class="photo-placeholder" 
+                       style="display: flex !important;">
                     <div class="initials-avatar">
                       {{ getTeamMemberInitials(member.name) }}
                     </div>

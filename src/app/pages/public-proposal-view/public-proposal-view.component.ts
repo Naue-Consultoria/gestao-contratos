@@ -256,11 +256,6 @@ export class PublicProposalViewComponent implements OnInit {
         next: (response) => {
           if (response.success) {
             this.proposal = response.data;
-            console.log('📋 Proposta carregada:', {
-              proposal_number: this.proposal.proposal_number,
-              max_installments: this.proposal.max_installments,
-              total_value: this.proposal.total_value
-            });
             this.checkProposalStatus();
             this.initializeServiceSelection();
           }
@@ -839,6 +834,15 @@ export class PublicProposalViewComponent implements OnInit {
     // Hide the image so the avatar with initials will show instead
     const img = event.target as HTMLImageElement;
     img.style.display = 'none';
+    
+    // Force the parent element to show the placeholder
+    const photoFrame = img.parentElement;
+    if (photoFrame) {
+      const placeholder = photoFrame.querySelector('.photo-placeholder');
+      if (placeholder) {
+        (placeholder as HTMLElement).style.display = 'flex';
+      }
+    }
   }
 
   onClientLogoError(event: any): void {
@@ -1156,12 +1160,22 @@ export class PublicProposalViewComponent implements OnInit {
   // === MÉTODOS DA EQUIPE ===
 
   getTeamMemberPhotoUrl(member: PublicTeamMember): string {
-    if (member.is_fixed || member.profile_picture_url) {
-      return member.profile_picture_url || '/naue.jpg';
+    // Se é usuário fixo (CEO), usar a URL fixa
+    if (member.is_fixed && member.profile_picture_url) {
+      return member.profile_picture_url;
     }
-    if (member.profile_picture_path && typeof member.id === 'number') {
+    
+    // Se tem URL direta definida
+    if (member.profile_picture_url) {
+      return member.profile_picture_url;
+    }
+    
+    // Se tem caminho de arquivo e ID válido (numérico)
+    if (member.profile_picture_path && typeof member.id === 'number' && member.id > 0) {
       return this.publicTeamService.getProfilePictureUrl(member.id);
     }
+    
+    // Retorna string vazia se não há foto disponível
     return '';
   }
 

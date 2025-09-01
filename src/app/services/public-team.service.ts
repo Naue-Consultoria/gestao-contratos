@@ -31,8 +31,8 @@ export class PublicTeamService {
   getProfilePictureUrl(userId: number | string): string {
     if (typeof userId === 'string') {
       // For fixed CEO user, return the fixed image
-      return '/naue.jpg';
+      return '/naue2.jpg';
     }
-    return `${this.API_URL}/${userId}/profile-picture`;
+    return `${this.API_URL}/${userId}/team-profile-picture`;
   }
 }
