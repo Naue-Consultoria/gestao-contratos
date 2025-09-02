@@ -71,6 +71,10 @@ export class ContractFormComponent implements OnInit {
     expected_payment_date: '',
     payment_status: 'pendente' as 'pago' | 'pendente',
     installment_count: 1,
+    barter_type: null as 'percentage' | 'value' | null,
+    barter_value: null as number | null,
+    barter_percentage: null as number | null,
+    secondary_payment_method: '',
   };
 
   contractStatuses = [
@@ -111,6 +115,13 @@ export class ContractFormComponent implements OnInit {
   showServiceModal = false;
   serviceSearchTerm = '';
   serviceCategoryFilter = '';
+  
+  // Propriedades para Permuta
+  showBarterOptions = false;
+  remainingValue = 0;
+  secondaryInstallmentCount = 1;
+  secondaryInstallments: ContractInstallment[] = [];
+  secondaryFirstInstallmentDate = '';
 
   ngOnInit() {
     this.currentUserId = this.authService.getUser()?.id ?? null;
@@ -218,7 +229,17 @@ export class ContractFormComponent implements OnInit {
           expected_payment_date: contract.expected_payment_date ? contract.expected_payment_date.split('T')[0] : '',
           payment_status: contract.payment_status || 'pendente',
           installment_count: contract.installment_count || 1,
+          barter_type: contract.barter_type || null,
+          barter_value: contract.barter_value || null,
+          barter_percentage: contract.barter_percentage || null,
+          secondary_payment_method: contract.secondary_payment_method || '',
         };
+        
+        // Se tiver permuta, mostrar as opções
+        if (contract.payment_method === 'Permuta') {
+          this.showBarterOptions = true;
+          this.calculateRemainingValue();
+        }
         this.selectedServices = contract.contract_services.map((cs: any) => ({
           service_id: cs.service.id,
           name: cs.service.name,
@@ -472,6 +493,13 @@ export class ContractFormComponent implements OnInit {
           unit_value: s.unit_value,
         })
       );
+      
+      // Se houver permuta com valor restante e parcelamento, combinar as parcelas
+      let finalInstallments = this.contractInstallments;
+      if (this.formData.payment_method === 'Permuta' && this.remainingValue > 0 && this.secondaryInstallments.length > 0) {
+        finalInstallments = this.secondaryInstallments;
+        this.formData.installment_count = this.secondaryInstallmentCount;
+      }
 
       if (this.isEditMode && this.contractId) {
         const updateData: UpdateContractRequest = {
@@ -488,7 +516,11 @@ export class ContractFormComponent implements OnInit {
           expected_payment_date: this.formData.expected_payment_date || null,
           payment_status: this.formData.payment_status,
           installment_count: this.formData.installment_count || 1,
-          installments: this.contractInstallments,
+          installments: finalInstallments,
+          barter_type: this.formData.barter_type || null,
+          barter_value: this.formData.barter_value || null,
+          barter_percentage: this.formData.barter_percentage || null,
+          secondary_payment_method: this.formData.secondary_payment_method || null,
         };
         await firstValueFrom(
           this.contractService.updateContract(this.contractId, updateData)
@@ -508,7 +540,11 @@ export class ContractFormComponent implements OnInit {
           expected_payment_date: this.formData.expected_payment_date || null,
           payment_status: this.formData.payment_status,
           installment_count: this.formData.installment_count || 1,
-          installments: this.contractInstallments,
+          installments: finalInstallments,
+          barter_type: this.formData.barter_type || null,
+          barter_value: this.formData.barter_value || null,
+          barter_percentage: this.formData.barter_percentage || null,
+          secondary_payment_method: this.formData.secondary_payment_method || null,
         };
         const createdContract = await firstValueFrom(this.contractService.createContract(createData));
         
@@ -602,13 +638,87 @@ export class ContractFormComponent implements OnInit {
   }
 
   onPaymentMethodChange() {
-    // Resetar parcelamento se forma de pagamento não permitir
-    if (!this.isPaymentMethodInstallable(this.formData.payment_method)) {
-      this.formData.installment_count = 1;
+    // Se for Permuta, mostrar opções de permuta
+    if (this.formData.payment_method === 'Permuta') {
+      this.showBarterOptions = true;
+      this.formData.barter_type = 'percentage'; // Default
+      this.formData.installment_count = 1; // Permuta não permite parcelamento direto
       this.contractInstallments = [];
-      // Resetar data prevista para pagamento quando não há parcelamento
-      this.formData.expected_payment_date = '';
+      this.setDefaultSecondaryFirstInstallmentDate();
+    } else {
+      // Resetar campos de permuta
+      this.showBarterOptions = false;
+      this.formData.barter_type = null;
+      this.formData.barter_value = null;
+      this.formData.barter_percentage = null;
+      this.formData.secondary_payment_method = '';
+      this.remainingValue = 0;
+      this.secondaryInstallmentCount = 1;
+      this.secondaryInstallments = [];
+      this.secondaryFirstInstallmentDate = '';
+      
+      // Resetar parcelamento se forma de pagamento não permitir
+      if (!this.isPaymentMethodInstallable(this.formData.payment_method)) {
+        this.formData.installment_count = 1;
+        this.contractInstallments = [];
+        // Resetar data prevista para pagamento quando não há parcelamento
+        this.formData.expected_payment_date = '';
+      }
     }
+  }
+  
+  onBarterTypeChange() {
+    // Resetar valores quando mudar o tipo
+    this.formData.barter_value = null;
+    this.formData.barter_percentage = null;
+    this.calculateRemainingValue();
+  }
+  
+  calculateRemainingValue() {
+    const totalValue = this.getTotalValue();
+    let barterAmount = 0;
+    
+    if (this.formData.barter_type === 'percentage' && this.formData.barter_percentage) {
+      // Limitar porcentagem a 100%
+      if (this.formData.barter_percentage > 100) {
+        this.formData.barter_percentage = 100;
+      } else if (this.formData.barter_percentage < 0) {
+        this.formData.barter_percentage = 0;
+      }
+      barterAmount = (totalValue * this.formData.barter_percentage) / 100;
+    } else if (this.formData.barter_type === 'value' && this.formData.barter_value) {
+      // Limitar valor ao total do contrato
+      if (this.formData.barter_value > totalValue) {
+        this.formData.barter_value = totalValue;
+        this.modalService.showWarning('O valor da permuta não pode ser maior que o valor total do contrato');
+      } else if (this.formData.barter_value < 0) {
+        this.formData.barter_value = 0;
+      }
+      barterAmount = this.formData.barter_value;
+    }
+    
+    // Garantir que o valor da permuta não exceda o valor total
+    barterAmount = Math.min(barterAmount, totalValue);
+    this.remainingValue = Math.max(0, totalValue - barterAmount);
+    
+    // Se não houver valor restante, limpar forma de pagamento secundária
+    if (this.remainingValue === 0) {
+      this.formData.secondary_payment_method = '';
+      this.secondaryInstallmentCount = 1;
+      this.secondaryInstallments = [];
+    } else {
+      // Se houver valor restante e forma de pagamento secundária for parcelável, gerar parcelas
+      if (this.formData.secondary_payment_method && 
+          this.isPaymentMethodInstallable(this.formData.secondary_payment_method) && 
+          this.secondaryInstallmentCount > 1 &&
+          this.secondaryFirstInstallmentDate) {
+        this.generateSecondaryInstallments();
+      }
+    }
+  }
+  
+  onBarterValueChange() {
+    this.calculateRemainingValue();
   }
 
   isServiceSelected(serviceId: number): boolean {
@@ -621,5 +731,55 @@ export class ContractFormComponent implements OnInit {
 
   isPaymentMethodInstallable(paymentMethod: string): boolean {
     return this.contractService.isPaymentMethodInstallable(paymentMethod);
+  }
+  
+  // Métodos para parcelamento secundário (valor restante após permuta)
+  onSecondaryPaymentMethodChange() {
+    // Resetar parcelamento secundário se não permitir
+    if (!this.isPaymentMethodInstallable(this.formData.secondary_payment_method)) {
+      this.secondaryInstallmentCount = 1;
+      this.secondaryInstallments = [];
+    } else if (!this.secondaryFirstInstallmentDate) {
+      this.setDefaultSecondaryFirstInstallmentDate();
+    }
+  }
+  
+  setDefaultSecondaryFirstInstallmentDate() {
+    if (!this.secondaryFirstInstallmentDate) {
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      this.secondaryFirstInstallmentDate = nextMonth.toISOString().split('T')[0];
+    }
+  }
+  
+  onSecondaryInstallmentCountChange(count: number) {
+    this.secondaryInstallmentCount = count;
+    
+    if (count > 1 && this.remainingValue > 0 && this.secondaryFirstInstallmentDate) {
+      this.generateSecondaryInstallments();
+    } else if (count === 1) {
+      this.secondaryInstallments = [];
+    }
+  }
+  
+  onSecondaryFirstInstallmentDateChange(date: string) {
+    this.secondaryFirstInstallmentDate = date;
+    
+    if (this.secondaryInstallmentCount > 1 && this.remainingValue > 0 && date) {
+      this.generateSecondaryInstallments();
+    }
+  }
+  
+  generateSecondaryInstallments() {
+    if (this.remainingValue <= 0 || this.secondaryInstallmentCount <= 1 || !this.secondaryFirstInstallmentDate) {
+      return;
+    }
+
+    this.secondaryInstallments = this.contractService.generateInstallments(
+      this.remainingValue,
+      this.secondaryInstallmentCount,
+      this.secondaryFirstInstallmentDate,
+      30 // intervalo padrão de 30 dias
+    );
   }
 }

@@ -406,9 +406,16 @@ export class ContractExportService {
     
     const services = contract.contract_services?.map((cs: any) => cs.service?.name || 'Serviço').join(', ') || '[SERVICOS]';
     
-    // Verificar se é parcelado e formatar as parcelas
-    const isInstallment = this.isContractInstallment(contract);
-    const installmentText = isInstallment ? this.formatInstallments(contract) : '';
+    // Verificar forma de pagamento e formatar adequadamente
+    let paymentText = '';
+    if (this.hasBarterPayment(contract)) {
+      // Se tem permuta, usar formatação especial
+      paymentText = this.formatBarterInfo(contract);
+    } else {
+      // Forma de pagamento tradicional
+      const isInstallment = this.isContractInstallment(contract);
+      paymentText = isInstallment ? this.formatInstallments(contract) : '';
+    }
     
     // Log para debug
     console.log('📊 Dados do contrato:', {
@@ -419,18 +426,23 @@ export class ContractExportService {
       startDate,
       endDate,
       services,
-      isInstallment,
-      installmentCount: contract.installment_count,
-      installments: contract.installments
+      paymentMethod: contract.payment_method,
+      hasBarterPayment: this.hasBarterPayment(contract),
+      barterInfo: this.hasBarterPayment(contract) ? {
+        type: contract.barter_type,
+        value: contract.barter_value,
+        percentage: contract.barter_percentage,
+        secondaryMethod: contract.secondary_payment_method
+      } : null
     });
     
     switch (templateId) {
       case 'consultoria-pj':
-        return this.getConsultoriaPJContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, installmentText);
+        return this.getConsultoriaPJContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, paymentText);
       case 'consultoria-pf':
-        return this.getConsultoriaPFContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, installmentText);
+        return this.getConsultoriaPFContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, paymentText);
       case 'recrutamento':
-        return this.getRecrutamentoContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, installmentText);
+        return this.getRecrutamentoContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, paymentText);
       default:
         return [];
     }
@@ -440,7 +452,7 @@ export class ContractExportService {
     return this.generateDocumentContent(contract, templateId);
   }
 
-  private getConsultoriaPJContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string, installmentText: string): any[] {
+  private getConsultoriaPJContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string, paymentText: string): any[] {
     return [
       {
         type: 'title',
@@ -524,7 +536,7 @@ export class ContractExportService {
       },
       {
         type: 'paragraph',
-        text: `3.2. O pagamento será efetuado conforme cronograma financeiro acordado entre as partes, mediante apresentação de nota fiscal de serviços.${installmentText}`
+        text: `3.2. O pagamento será efetuado conforme cronograma financeiro acordado entre as partes, mediante apresentação de nota fiscal de serviços.${paymentText}`
       },
       {
         type: 'heading',
@@ -672,7 +684,7 @@ export class ContractExportService {
     ];
   }
 
-  private getConsultoriaPFContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string, installmentText: string): any[] {
+  private getConsultoriaPFContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string, paymentText: string): any[] {
     return [
       {
         type: 'title',
@@ -756,7 +768,7 @@ export class ContractExportService {
       },
       {
         type: 'paragraph',
-        text: `3.2. O pagamento será efetuado mediante transferência bancária ou PIX, conforme dados bancários fornecidos pela CONTRATADA.${installmentText}`
+        text: `3.2. O pagamento será efetuado mediante transferência bancária ou PIX, conforme dados bancários fornecidos pela CONTRATADA.${paymentText}`
       },
       {
         type: 'heading',
@@ -872,7 +884,7 @@ export class ContractExportService {
     ];
   }
 
-  private getRecrutamentoContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string, installmentText: string): any[] {
+  private getRecrutamentoContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string, paymentText: string): any[] {
     return [
       {
         type: 'title',
@@ -1024,7 +1036,7 @@ export class ContractExportService {
       },
       {
         type: 'paragraph',
-        text: `3.2. O pagamento será efetuado conforme cronograma acordado entre as partes, mediante apresentação de nota fiscal de serviços.${installmentText}`
+        text: `3.2. O pagamento será efetuado conforme cronograma acordado entre as partes, mediante apresentação de nota fiscal de serviços.${paymentText}`
       },
       {
         type: 'heading',
@@ -1299,5 +1311,66 @@ export class ContractExportService {
     }).join('\n');
 
     return `\n\nPARCELAMENTO:\n${formattedInstallments}`;
+  }
+
+  // Métodos para lidar com informações de permuta
+  private hasBarterPayment(contract: any): boolean {
+    return contract.payment_method === 'Permuta' && contract.barter_type;
+  }
+
+  private getBarterAmount(contract: any): number {
+    if (!this.hasBarterPayment(contract)) return 0;
+    
+    if (contract.barter_type === 'percentage' && contract.barter_percentage) {
+      return (contract.total_value * contract.barter_percentage) / 100;
+    } else if (contract.barter_type === 'value' && contract.barter_value) {
+      return Math.min(contract.barter_value, contract.total_value);
+    }
+    
+    return 0;
+  }
+
+  private getRemainingValueAfterBarter(contract: any): number {
+    if (!this.hasBarterPayment(contract)) return contract.total_value;
+    
+    const barterAmount = this.getBarterAmount(contract);
+    return Math.max(0, contract.total_value - barterAmount);
+  }
+
+  private formatBarterInfo(contract: any): string {
+    if (!this.hasBarterPayment(contract)) return '';
+
+    const barterAmount = this.getBarterAmount(contract);
+    const remainingValue = this.getRemainingValueAfterBarter(contract);
+    
+    let barterDetails = '';
+    if (contract.barter_type === 'percentage') {
+      barterDetails = `${contract.barter_percentage}% do valor total`;
+    } else if (contract.barter_type === 'value') {
+      barterDetails = `valor fixo de ${this.formatCurrency(contract.barter_value)}`;
+    }
+
+    let paymentInfo = `\n\nDETALHES DO PAGAMENTO:\n`;
+    paymentInfo += `• Forma de pagamento principal: Permuta (${barterDetails})\n`;
+    paymentInfo += `• Valor total do contrato: ${this.formatCurrency(contract.total_value)}\n`;
+    paymentInfo += `• Valor abatido por permuta: ${this.formatCurrency(barterAmount)}`;
+
+    if (remainingValue > 0) {
+      paymentInfo += `\n• Valor restante a pagar: ${this.formatCurrency(remainingValue)}`;
+      
+      if (contract.secondary_payment_method) {
+        paymentInfo += `\n• Forma de pagamento do valor restante: ${contract.secondary_payment_method}`;
+        
+        // Se o valor restante for parcelado
+        if (contract.installment_count > 1 && contract.installments) {
+          const installmentsText = this.formatInstallments(contract);
+          paymentInfo += installmentsText.replace('PARCELAMENTO:', '\nPARCELAMENTO DO VALOR RESTANTE:');
+        }
+      }
+    } else {
+      paymentInfo += `\n• O valor total será pago integralmente através de permuta.`;
+    }
+
+    return paymentInfo;
   }
 }

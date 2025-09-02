@@ -50,6 +50,10 @@ export interface CreateContractRequest {
   payment_status?: 'pago' | 'pendente';
   installment_count?: number;
   installments?: ContractInstallment[];
+  barter_type?: 'percentage' | 'value' | null;
+  barter_value?: number | null;
+  barter_percentage?: number | null;
+  secondary_payment_method?: string | null;
 }
 
 export interface UpdateContractRequest {
@@ -67,6 +71,10 @@ export interface UpdateContractRequest {
   payment_status?: 'pago' | 'pendente';
   installment_count?: number;
   installments?: ContractInstallment[];
+  barter_type?: 'percentage' | 'value' | null;
+  barter_value?: number | null;
+  barter_percentage?: number | null;
+  secondary_payment_method?: string | null;
 }
 
 export interface ApiContractService {
@@ -103,6 +111,10 @@ export interface ApiContract {
   installment_count?: number;
   installment_value?: number | null;
   installments?: ApiContractInstallment[];
+  barter_type?: 'percentage' | 'value' | null;
+  barter_value?: number | null;
+  barter_percentage?: number | null;
+  secondary_payment_method?: string | null;
   client: {
     id: number;
     name: string;
@@ -386,6 +398,7 @@ export class ContractService {
       { value: 'Cartão de Débito', label: 'Cartão de Débito' },
       { value: 'Dinheiro', label: 'Dinheiro' },
       { value: 'Cheque', label: 'Cheque' },
+      { value: 'Permuta', label: 'Permuta' },
       { value: 'Outros', label: 'Outros' }
     ];
   }

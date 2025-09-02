@@ -184,6 +184,104 @@
         </div>
       </section>
 
+      <!-- Payment Information Section -->
+      <section class="content-section">
+        <h3 class="section-title">
+          <i class="fas fa-credit-card"></i>
+          Informações de Pagamento
+        </h3>
+        
+        <div class="payment-info-grid">
+          
+          <!-- Card Principal: Valor Total e Status -->
+          <div class="payment-card main-payment">
+            <div class="payment-card-header">
+              <div class="payment-label">Valor Total</div>
+              <div class="payment-value total">{{ formatCurrency(contract.total_value) }}</div>
+            </div>
+            <div class="payment-details">
+              <div class="detail-item">
+                <span class="detail-label">Forma de Pagamento:</span>
+                <span class="detail-value">{{ contract.payment_method || 'Não informado' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value" [class.paid]="contract.payment_status === 'pago'" 
+                     [class.pending]="contract.payment_status === 'pendente'">
+                  {{ contract.payment_status === 'pago' ? 'Pago' : 'Pendente' }}
+                </span>
+              </div>
+              <div class="detail-item" *ngIf="contract && contract.expected_payment_date">
+                <span class="detail-label">Data Prevista:</span>
+                <span class="detail-value">{{ formatDate(contract.expected_payment_date) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Específico: Informações de Permuta -->
+          <div class="payment-card barter-payment" *ngIf="contract && contract.payment_method === 'Permuta' && contract.barter_type">
+            <div class="payment-card-header">
+              <div class="payment-label">Detalhes da Permuta</div>
+              <div class="payment-value barter">
+                {{ contract.barter_type === 'percentage' ? contract.barter_percentage + '%' : 'Valor Fixo' }}
+              </div>
+            </div>
+            <div class="payment-details">
+              <div class="detail-item" *ngIf="contract.barter_type === 'percentage'">
+                <span class="detail-label">Porcentagem aplicada:</span>
+                <span class="detail-value">{{ contract.barter_percentage }}% do total</span>
+              </div>
+              <div class="detail-item" *ngIf="contract.barter_type === 'value'">
+                <span class="detail-label">Valor da permuta:</span>
+                <span class="detail-value">{{ formatCurrency(contract.barter_value) }}</span>
+              </div>
+              <div class="detail-item highlight-row">
+                <span class="detail-label">Valor abatido:</span>
+                <span class="detail-value highlight">{{ formatCurrency(getBarterAmount()) }}</span>
+              </div>
+              <div class="detail-item highlight-row" *ngIf="getRemainingValue() > 0">
+                <span class="detail-label">Valor restante a pagar:</span>
+                <span class="detail-value highlight">{{ formatCurrency(getRemainingValue()) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Complementar: Pagamento do Valor Restante -->
+          <div class="payment-card secondary-payment" *ngIf="contract && contract.secondary_payment_method">
+            <div class="payment-card-header">
+              <div class="payment-label">Pagamento do Restante</div>
+              <div class="payment-value">{{ contract.secondary_payment_method }}</div>
+            </div>
+            <div class="payment-details">
+              <div class="detail-item">
+                <span class="detail-label">Valor a pagar:</span>
+                <span class="detail-value">{{ formatCurrency(getRemainingValue()) }}</span>
+              </div>
+              <div class="detail-item" *ngIf="contract && contract.installment_count && contract.installment_count > 1">
+                <span class="detail-label">Parcelamento:</span>
+                <span class="detail-value">{{ contract.installment_count }}x de {{ formatCurrency(getInstallmentValue()) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Adicional: Parcelamento (quando não há permuta) -->
+          <div class="payment-card installment-payment" *ngIf="contract && contract.installment_count && contract.installment_count > 1 && contract.payment_method && contract.payment_method !== 'Permuta'">
+            <div class="payment-card-header">
+              <div class="payment-label">Parcelamento</div>
+              <div class="payment-value">{{ contract.installment_count }}x</div>
+            </div>
+            <div class="payment-details">
+              <div class="detail-item">
+                <span class="detail-label">Valor de cada parcela:</span>
+                <span class="detail-value">{{ formatCurrency(getInstallmentValue()) }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        
+      </section>
+
       <!-- Assigned Users Section -->
       <section class="content-section" *ngIf="contract.assigned_users && contract.assigned_users.length > 0">
         <h3 class="section-title">

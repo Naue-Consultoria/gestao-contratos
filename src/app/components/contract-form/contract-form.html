@@ -154,6 +154,141 @@
                 </span>
               </div>
             </div>
+            
+            <!-- Campos de Permuta -->
+            <div *ngIf="showBarterOptions" class="barter-section">
+              <div class="form-group">
+                <label class="form-label">Tipo de Permuta</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input 
+                      type="radio" 
+                      name="barterType" 
+                      value="percentage"
+                      [(ngModel)]="formData.barter_type"
+                      (ngModelChange)="onBarterTypeChange()"
+                      [disabled]="isLoading">
+                    <span>Porcentagem</span>
+                  </label>
+                  <label class="radio-label">
+                    <input 
+                      type="radio" 
+                      name="barterType" 
+                      value="value"
+                      [(ngModel)]="formData.barter_type"
+                      (ngModelChange)="onBarterTypeChange()"
+                      [disabled]="isLoading">
+                    <span>Valor em R$</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-group" *ngIf="formData.barter_type === 'percentage'">
+                <label class="form-label">Porcentagem de Permuta (%)</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  [(ngModel)]="formData.barter_percentage"
+                  (ngModelChange)="onBarterValueChange()"
+                  name="barterPercentage"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  placeholder="0"
+                  [disabled]="isLoading">
+                <span class="help-text">
+                  <i class="fas fa-info-circle"></i>
+                  Valor da permuta: {{ formatCurrency((getTotalValue() * (formData.barter_percentage || 0)) / 100) }}
+                </span>
+              </div>
+              
+              <div class="form-group" *ngIf="formData.barter_type === 'value'">
+                <label class="form-label">Valor da Permuta (R$)</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="formData.barter_value"
+                  (ngModelChange)="onBarterValueChange()"
+                  name="barterValue"
+                  placeholder="0,00"
+                  appCurrencyMask
+                  [disabled]="isLoading">
+                <span class="help-text">
+                  <i class="fas fa-info-circle"></i>
+                  Máximo permitido: {{ formatCurrency(getTotalValue()) }}
+                </span>
+              </div>
+              
+              <div class="form-group" *ngIf="remainingValue > 0">
+                <label class="form-label">Forma de Pagamento do Valor Restante <span class="required">*</span></label>
+                <select 
+                  class="form-control select-input" 
+                  [(ngModel)]="formData.secondary_payment_method"
+                  (ngModelChange)="onSecondaryPaymentMethodChange()"
+                  name="secondaryPaymentMethod"
+                  [disabled]="isLoading"
+                  required>
+                  <option value="">Selecione...</option>
+                  <option *ngFor="let method of paymentMethods" [value]="method.value" 
+                    [disabled]="method.value === 'Permuta'">
+                    {{ method.label }}
+                  </option>
+                </select>
+                <span class="help-text">
+                  <i class="fas fa-info-circle"></i>
+                  Escolha como será pago o valor restante de {{ formatCurrency(remainingValue) }}
+                </span>
+              </div>
+              
+              <!-- Parcelamento do valor restante -->
+              <div *ngIf="remainingValue > 0 && isPaymentMethodInstallable(formData.secondary_payment_method)" class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Número de Parcelas do Valor Restante</label>
+                  <select 
+                    class="form-control select-input" 
+                    [(ngModel)]="secondaryInstallmentCount" 
+                    (ngModelChange)="onSecondaryInstallmentCountChange($event)"
+                    name="secondaryInstallmentCount"
+                    [disabled]="isLoading">
+                    <option value="1">À vista</option>
+                    <option *ngFor="let i of [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]" [value]="i">
+                      {{ i }}x de {{ formatCurrency(remainingValue / i) }}
+                    </option>
+                  </select>
+                </div>
+                
+                <div class="form-group" *ngIf="secondaryInstallmentCount > 1">
+                  <label class="form-label">Primeira Parcela</label>
+                  <input 
+                    type="date" 
+                    class="form-control" 
+                    [(ngModel)]="secondaryFirstInstallmentDate"
+                    (ngModelChange)="onSecondaryFirstInstallmentDateChange($event)"
+                    name="secondaryFirstInstallmentDate"
+                    [disabled]="isLoading">
+                </div>
+              </div>
+              
+              <!-- Info cards no final da seção de permuta -->
+              <div class="remaining-value-info" *ngIf="formData.barter_type">
+                <div class="info-card">
+                  <div class="info-label">Valor Total do Contrato</div>
+                  <div class="info-value">{{ formatCurrency(getTotalValue()) }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Valor da Permuta</div>
+                  <div class="info-value">
+                    {{ formatCurrency(formData.barter_type === 'percentage' ? 
+                      (getTotalValue() * (formData.barter_percentage || 0)) / 100 : 
+                      (formData.barter_value || 0)) }}
+                  </div>
+                </div>
+                <div class="info-card highlight">
+                  <div class="info-label">Valor Restante a Pagar</div>
+                  <div class="info-value">{{ formatCurrency(remainingValue) }}</div>
+                </div>
+              </div>
+            </div>
 
             <!-- Campos de Parcelamento Integrados -->
             <div *ngIf="isPaymentMethodInstallable(formData.payment_method)" class="form-grid">

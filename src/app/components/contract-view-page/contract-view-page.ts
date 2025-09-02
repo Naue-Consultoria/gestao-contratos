@@ -244,6 +244,44 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     };
     return roleMap[role] || role;
   }
+  
+  // Métodos para cálculos de permuta
+  getBarterAmount(): number {
+    if (!this.contract || this.contract.payment_method !== 'Permuta') return 0;
+    
+    if (this.contract.barter_type === 'percentage' && this.contract.barter_percentage) {
+      return (this.contract.total_value * this.contract.barter_percentage) / 100;
+    } else if (this.contract.barter_type === 'value' && this.contract.barter_value) {
+      return Math.min(this.contract.barter_value, this.contract.total_value);
+    }
+    
+    return 0;
+  }
+  
+  getRemainingValue(): number {
+    if (!this.contract) return 0;
+    
+    if (this.contract.payment_method === 'Permuta') {
+      const barterAmount = this.getBarterAmount();
+      return Math.max(0, this.contract.total_value - barterAmount);
+    }
+    
+    return this.contract.total_value;
+  }
+  
+  getInstallmentValue(): number {
+    if (!this.contract || !this.contract.installment_count || this.contract.installment_count <= 1) {
+      return 0;
+    }
+    
+    // Se tem permuta, calcular parcela do valor restante
+    if (this.contract.payment_method === 'Permuta') {
+      return this.getRemainingValue() / this.contract.installment_count;
+    }
+    
+    // Senão, calcular parcela do valor total
+    return this.contract.total_value / this.contract.installment_count;
+  }
 
   getStatusIcon(status: string): string {
     const iconMap: { [key: string]: string } = {

@@ -518,6 +518,158 @@
   margin-top: 2rem;
 }
 
+/* Payment Information Section */
+.payment-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.payment-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+:host-context(body.dark-mode) .payment-card {
+  background: var(--dark-card-bg);
+  border-color: var(--dark-border);
+}
+
+/* Card Específico: Principal */
+.payment-card.main-payment {
+  border-left: 4px solid var(--primary-green);
+}
+
+.payment-card.main-payment .payment-value.total {
+  color: var(--primary-green);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Card Específico: Permuta */
+.payment-card.barter-payment {
+  border-left: 4px solid var(--primary-green);
+}
+
+.payment-card.barter-payment .payment-value.barter {
+  color: var(--primary-green);
+  font-weight: 700;
+}
+
+/* Card Específico: Pagamento Secundário */
+.payment-card.secondary-payment {
+  border-left: 4px solid var(--primary-green-alt);
+}
+
+/* Card Específico: Parcelamento */
+.payment-card.installment-payment {
+  border-left: 4px solid #3b82f6;
+}
+
+.payment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+:host-context(body.dark-mode) .payment-card-header {
+  border-bottom-color: var(--dark-border);
+}
+
+.payment-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+:host-context(body.dark-mode) .payment-label {
+  color: var(--dark-text-muted);
+}
+
+.payment-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .payment-value {
+  color: var(--dark-text);
+}
+
+.payment-details .detail-value.paid {
+  color: #10b981;
+}
+
+.payment-details .detail-value.pending {
+  color: var(--primary-green);
+}
+
+.payment-details {
+  margin-top: 0;
+}
+
+.payment-details .detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.payment-details .detail-item.highlight-row {
+  background: rgba(0, 59, 43, 0.05);
+  margin: 0 -1.25rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+}
+
+:host-context(body.dark-mode) .payment-details .detail-item.highlight-row {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.payment-details .detail-item:not(:last-child) {
+  border-bottom: 1px solid #f8f9fa;
+}
+
+:host-context(body.dark-mode) .payment-details .detail-item:not(:last-child) {
+  border-bottom-color: var(--dark-border);
+}
+
+.payment-details .detail-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+:host-context(body.dark-mode) .payment-details .detail-label {
+  color: var(--dark-text-muted);
+}
+
+.payment-details .detail-value {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+:host-context(body.dark-mode) .payment-details .detail-value {
+  color: var(--dark-text);
+}
+
+.payment-details .detail-value.highlight {
+  color: var(--primary-green);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+
 .summary-card {
   background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
   border-radius: 12px;

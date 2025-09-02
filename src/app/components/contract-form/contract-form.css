@@ -624,6 +624,140 @@ textarea.form-control {
   white-space: nowrap;
 }
 
+/* Estilos para Permuta */
+.barter-section {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.radio-group {
+  display: flex;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+}
+
+.radio-label input[type="radio"] {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.radio-label span {
+  cursor: pointer;
+}
+
+.remaining-value-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.info-card {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.info-card.highlight {
+  background: #ecfdf5;
+  border-color: #10b981;
+}
+
+.info-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.info-card.highlight .info-value {
+  color: #10b981;
+}
+
+.help-text {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.help-text i {
+  margin-right: 4px;
+}
+
+/* Preview das parcelas */
+.installments-preview {
+  margin-top: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.preview-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-title i {
+  color: #6b7280;
+}
+
+.installments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.installment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+}
+
+.installment-number {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.installment-date {
+  color: #374151;
+}
+
+.installment-value {
+  font-weight: 600;
+  color: var(--naue-primary);
+}
+
 /* Resumo total - fixado no rodapé da form-section */
 .right-column .form-section:first-child .contract-total-summary {
   background: linear-gradient(135deg, var(--naue-primary) 0%, var(--naue-primary-hover) 100%);
