@@ -399,10 +399,13 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
       // Prepare user assignments
       const assignedUserIds = this.assignedUsers.map(u => u.user.id);
 
+      // Map proposal type to valid contract type
+      const contractType = this.mapProposalTypeToContractType(this.proposal.type);
+      
       // Create contract request
       const contractRequest: CreateContractRequest = {
         client_id: this.proposal.client_id,
-        type: this.proposal.type,
+        type: contractType,
         start_date: this.contractData.start_date,
         end_date: this.contractData.end_date || null,
         services: services,
@@ -513,5 +516,31 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
   onCancelViewContract(): void {
     this.showViewContractModal = false;
     this.close.emit();
+  }
+  
+  /**
+   * Maps proposal type to a valid contract type
+   * Valid contract types: 'Full', 'Pontual', 'Individual'
+   */
+  private mapProposalTypeToContractType(proposalType: string): 'Full' | 'Pontual' | 'Individual' | 'Recrutamento & Seleção' {
+    // Default mapping - adjust as needed based on your business rules
+    switch (proposalType?.toLowerCase()) {
+      case 'recrutamento & seleção':
+      case 'recrutamento e seleção':
+      case 'recruitment':
+        return 'Recrutamento & Seleção';
+      case 'consultoria':
+      case 'consulting':
+        return 'Pontual';
+      case 'full':
+        return 'Full';
+      case 'pontual':
+        return 'Pontual';
+      case 'individual':
+        return 'Individual';
+      default:
+        console.warn('⚠️ Tipo de proposta não reconhecido:', proposalType, '- usando Individual como padrão');
+        return 'Individual';
+    }
   }
 }

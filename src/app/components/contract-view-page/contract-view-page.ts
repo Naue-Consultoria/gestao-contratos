@@ -129,6 +129,46 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     return this.contractService.formatDate(date);
   }
 
+  // Verificar se um serviço foi adicionado após a criação do contrato (aditivo)
+  isAdditiveService(service: any): boolean {
+    if (!service?.created_at || !this.contract?.created_at) {
+      console.log('Missing dates:', { 
+        serviceCreatedAt: service?.created_at, 
+        contractCreatedAt: this.contract?.created_at 
+      });
+      return false;
+    }
+    
+    // Abordagem robusta: Comparar apenas datas (dia/mês/ano) ignorando horas
+    const serviceDate = new Date(service.created_at);
+    const contractDate = new Date(this.contract.created_at);
+    
+    console.log('Date comparison:', {
+      serviceDate: service.created_at,
+      contractDate: this.contract.created_at,
+      serviceDateParsed: serviceDate,
+      contractDateParsed: contractDate
+    });
+    
+    // Zerar as horas para comparar apenas datas
+    serviceDate.setHours(0, 0, 0, 0);
+    contractDate.setHours(0, 0, 0, 0);
+    
+    // Se o serviço foi criado em uma data posterior ao contrato
+    const daysDiff = Math.floor((serviceDate.getTime() - contractDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    console.log('Days difference:', daysDiff, 'Is additive:', daysDiff > 0);
+    
+    // Um serviço é aditivo se foi criado pelo menos 1 dia após o contrato
+    return daysDiff > 0;
+  }
+
+  // Formatar data de quando o serviço foi adicionado
+  getServiceAddedDate(service: any): string {
+    if (!service.created_at) return '';
+    return new Date(service.created_at).toLocaleDateString('pt-BR');
+  }
+
   getStatusColor(status: string): string {
     return this.contractService.getStatusColor(status);
   }
@@ -382,7 +422,14 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
-      doc.text(`VALOR TOTAL: ${this.formatCurrency(this.contract.total_value)}`, margin + 10, currentY + 13);
+      // Mostrar breakdown de valores se há serviços cancelados
+      if (this.hasCancelledServices()) {
+        doc.text(`VALOR ORIGINAL: ${this.formatCurrency(this.contract.total_value)}`, margin + 10, currentY + 8);
+        doc.text(`SERVIÇOS CANCELADOS: -${this.formatCurrency(this.getCancelledServicesValue())}`, margin + 10, currentY + 13);
+        doc.text(`VALOR ATUAL: ${this.formatCurrency(this.getAdjustedTotalValue())}`, margin + 10, currentY + 18);
+      } else {
+        doc.text(`VALOR TOTAL: ${this.formatCurrency(this.contract.total_value)}`, margin + 10, currentY + 13);
+      }
 
       // === RODAPÉ ===
       currentY = pageHeight - 20;
@@ -431,6 +478,54 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
+  }
+
+  // Calcular valor total considerando serviços cancelados
+  getAdjustedTotalValue(): number {
+    if (!this.contract?.contract_services) return this.contract?.total_value || 0;
+    
+    let totalValue = this.contract.total_value || 0;
+    let cancelledValue = 0;
+    
+    this.contract.contract_services.forEach(service => {
+      const serviceStatus = this.getServiceStatus(service);
+      if (serviceStatus === 'cancelled') {
+        cancelledValue += service.total_value || 0;
+      }
+    });
+    
+    return Math.max(0, totalValue - cancelledValue);
+  }
+
+  // Calcular valor total dos serviços cancelados
+  getCancelledServicesValue(): number {
+    if (!this.contract?.contract_services) return 0;
+    
+    let cancelledValue = 0;
+    
+    this.contract.contract_services.forEach(service => {
+      const serviceStatus = this.getServiceStatus(service);
+      if (serviceStatus === 'cancelled') {
+        cancelledValue += service.total_value || 0;
+      }
+    });
+    
+    return cancelledValue;
+  }
+
+  // Verificar se há serviços cancelados
+  hasCancelledServices(): boolean {
+    return this.getCancelledServicesValue() > 0;
+  }
+
+  // Obter status do serviço (considerando rotinas se existirem)
+  getServiceStatus(service: any): string {
+    // Se há dados de rotina, usar o status da rotina
+    if (service.service_routines && service.service_routines.length > 0) {
+      return service.service_routines[0].status || 'not_started';
+    }
+    // Caso contrário, usar o status do serviço do contrato
+    return service.status || 'not_started';
   }
 
   canEditContract(): boolean {

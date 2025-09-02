@@ -406,7 +406,8 @@ export class RoutineViewPageComponent implements OnInit, OnDestroy {
       'not_started': 'Não iniciada',
       'scheduled': 'Agendada',
       'in_progress': 'Em andamento',
-      'completed': 'Concluída'
+      'completed': 'Concluída',
+      'cancelled': 'Cancelada'
     };
     return statusMap[status] || status;
   }

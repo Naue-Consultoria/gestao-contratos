@@ -1124,3 +1124,30 @@
 .gap-2 { gap: 1rem; }
 .gap-3 { gap: 1.5rem; }
 .gap-4 { gap: 2rem; }
+
+/* =================== STATUS SPECIFIC STYLES =================== */
+/* Status badges with specific colors */
+.status-badge.cancelled {
+  background-color: #ef4444 !important;
+  color: var(--white);
+}
+
+.status-badge.not-started {
+  background-color: #6b7280 !important;
+  color: var(--white);
+}
+
+.status-badge.scheduled {
+  background-color: #3b82f6 !important;
+  color: var(--white);
+}
+
+.status-badge.in-progress {
+  background-color: #f59e0b !important;
+  color: var(--white);
+}
+
+.status-badge.completed {
+  background-color: #10b981 !important;
+  color: var(--white);
+}

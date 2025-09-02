@@ -2460,3 +2460,89 @@
     font-size: 15px;
   }
 }
+
+/* =================== VIEW MODE STYLES =================== */
+
+/* Status display in view mode */
+.status-display {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.status-display .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-display .status-badge i {
+  font-size: 11px;
+}
+
+/* Date display in view mode */
+.date-display {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.date-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--green-50);
+  border-radius: 6px;
+  color: var(--naue-black);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.date-text i {
+  color: var(--naue-primary);
+  font-size: 12px;
+}
+
+.date-text.no-date {
+  background: var(--gray-100);
+  color: var(--text-gray);
+}
+
+.date-text.no-date i {
+  color: var(--text-gray);
+}
+
+/* Responsive adjustments for view mode */
+@media (max-width: 768px) {
+  .status-display .status-badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  
+  .date-text {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-display .status-badge {
+    font-size: 10px;
+    padding: 3px 6px;
+    gap: 3px;
+  }
+  
+  .date-text {
+    font-size: 11px;
+    padding: 3px 6px;
+    gap: 3px;
+  }
+}

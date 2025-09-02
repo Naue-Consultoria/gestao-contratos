@@ -33,7 +33,7 @@ export class ServiceTrackingPageComponent implements OnInit {
   canEdit = false;
 
   // Propriedades do formulário de controle
-  selectedStatus: 'not_started' | 'scheduled' | 'in_progress' | 'completed' = 'not_started';
+  selectedStatus: 'not_started' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled' = 'not_started';
   selectedDate = '';
   routineNotes = '';
   isSaving = false;
@@ -53,7 +53,8 @@ export class ServiceTrackingPageComponent implements OnInit {
     { value: 'not_started', label: 'Não iniciado', color: '#6c757d', icon: 'fas fa-pause' },
     { value: 'scheduled', label: 'Agendado', color: '#17a2b8', icon: 'fas fa-calendar-check' },
     { value: 'in_progress', label: 'Em andamento', color: '#ffc107', icon: 'fas fa-play' },
-    { value: 'completed', label: 'Finalizado', color: '#28a745', icon: 'fas fa-check' }
+    { value: 'completed', label: 'Finalizado', color: '#28a745', icon: 'fas fa-check' },
+    { value: 'cancelled', label: 'Cancelado', color: '#dc3545', icon: 'fas fa-times-circle' }
   ];
 
   constructor() {}

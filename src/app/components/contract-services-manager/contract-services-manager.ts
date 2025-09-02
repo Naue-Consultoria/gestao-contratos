@@ -18,6 +18,7 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
   @Input() services: ApiContractService[] = [];
   @Input() contractId!: number;
   @Input() canEdit: boolean = false;
+  @Input() viewOnly: boolean = false; // Força modo somente leitura
   @Output() serviceUpdated = new EventEmitter<void>();
 
   selectedService: ApiContractService | null = null;
@@ -39,7 +40,8 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
     { value: 'not_started', label: 'Não iniciado' },
     { value: 'scheduled', label: 'Agendado' },
     { value: 'in_progress', label: 'Em andamento' },
-    { value: 'completed', label: 'Finalizado' }
+    { value: 'completed', label: 'Finalizado' },
+    { value: 'cancelled', label: 'Cancelado' }
   ];
 
   constructor(
@@ -49,6 +51,11 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
     private toastr: ToastrService,
     private router: Router
   ) {}
+
+  // Helper para determinar se os campos devem estar em modo de edição
+  isEditMode(): boolean {
+    return this.canEdit && !this.viewOnly;
+  }
 
   ngOnInit() {
     
@@ -103,6 +110,37 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
 
   getStatusIcon(status: string | undefined): string {
     return this.contractService.getServiceStatusIcon(status || 'not_started');
+  }
+
+  // Métodos para obter status da rotina (quando aplicável)
+  getRoutineStatus(service: ApiContractService): string {
+    // Se estamos em modo de visualização de rotinas
+    if (this.viewOnly) {
+      // Se há dados de rotina, usar o status da rotina
+      if ((service as any).service_routines && (service as any).service_routines.length > 0) {
+        return (service as any).service_routines[0].status;
+      }
+      // Se não há rotina mas há status do serviço, usar esse (para compatibilidade)
+      return service.status || 'not_started';
+    }
+    
+    // Para modo de edição (contratos), sempre usar o status do contract_service
+    return service.status || 'not_started';
+  }
+
+  getRoutineDate(service: ApiContractService): string | null {
+    // Primeiro, verificar se estamos em modo de visualização de rotinas
+    if (this.viewOnly) {
+      // Se há dados de rotina, usar a data da rotina
+      if ((service as any).service_routines && (service as any).service_routines.length > 0) {
+        return (service as any).service_routines[0].scheduled_date || null;
+      }
+      // Se não há rotina mas há data do serviço, usar essa (para compatibilidade)
+      return service.scheduled_start_date || null;
+    }
+    
+    // Para modo de edição (contratos), sempre usar a data do contract_service
+    return service.scheduled_start_date || null;
   }
 
   updateServiceStatus(service: ApiContractService, newStatus: string | undefined) {

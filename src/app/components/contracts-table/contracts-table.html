@@ -125,8 +125,12 @@
             </td>
             <td>
               <div class="client-info">
-                <i class="fas fa-user-circle"></i>
-                {{ contract.clientName }}
+                <div class="client-name-container">
+                  <span class="client-name">{{ contract.clientName }}</span>
+                  <span class="client-trade-name" *ngIf="contract.clientTradeName">
+                    {{ contract.clientTradeName }}
+                  </span>
+                </div>
               </div>
             </td>
             <td>
@@ -146,6 +150,10 @@
             <td>
               <div class="contract-value">
                 <span class="value-amount">{{ contract.totalValue }}</span>
+                <span *ngIf="hasCancelledServices(contract.raw)" class="cancelled-indicator" 
+                      [title]="'Original: ' + contractService.formatValue(contract.raw.total_value) + ' | Cancelados: ' + contractService.formatValue(getCancelledServicesValue(contract.raw)) + ' | Atual: ' + contract.totalValue">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </span>
               </div>
             </td>
             <td>
@@ -227,7 +235,14 @@
           <div class="table-card-content">
             <div class="table-card-row">
               <span class="table-card-label">Cliente:</span>
-              <span class="table-card-value">{{ contract.clientName }}</span>
+              <span class="table-card-value">
+                <div class="client-name-container">
+                  <span class="client-name">{{ contract.clientName }}</span>
+                  <span class="client-trade-name" *ngIf="contract.clientTradeName">
+                    {{ contract.clientTradeName }}
+                  </span>
+                </div>
+              </span>
             </div>
             <div class="table-card-row">
               <span class="table-card-label">Tipo:</span>
@@ -250,6 +265,10 @@
               <span class="table-card-label">Valor Total:</span>
               <span class="table-card-value">
                 <span class="value-amount">{{ contract.totalValue }}</span>
+                <span *ngIf="hasCancelledServices(contract.raw)" class="cancelled-indicator" 
+                      [title]="'Original: ' + contractService.formatValue(contract.raw.total_value) + ' | Cancelados: ' + contractService.formatValue(getCancelledServicesValue(contract.raw)) + ' | Atual: ' + contract.totalValue">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </span>
               </span>
             </div>
             <div class="table-card-row">

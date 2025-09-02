@@ -323,7 +323,8 @@ export class ContractService {
       'not_started': '#6b7280',
       'scheduled': '#3b82f6',
       'in_progress': '#f59e0b',
-      'completed': '#10b981'
+      'completed': '#10b981',
+      'cancelled': '#ef4444'
     };
     return colors[status] || '#6b7280';
   }
@@ -333,7 +334,8 @@ export class ContractService {
       'not_started': 'Não iniciado',
       'scheduled': 'Agendado',
       'in_progress': 'Em andamento',
-      'completed': 'Finalizado'
+      'completed': 'Finalizado',
+      'cancelled': 'Cancelado'
     };
     return texts[status] || status;
   }
@@ -343,7 +345,8 @@ export class ContractService {
       'not_started': 'fas fa-circle',
       'scheduled': 'fas fa-calendar-alt',
       'in_progress': 'fas fa-spinner',
-      'completed': 'fas fa-check-circle'
+      'completed': 'fas fa-check-circle',
+      'cancelled': 'fas fa-times-circle'
     };
     return icons[status] || 'fas fa-circle';
   }

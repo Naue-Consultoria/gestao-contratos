@@ -103,6 +103,16 @@
             <div class="service-card-header">
               <div class="service-number">{{ i + 1 }}</div>
               <div class="service-name">{{ service.service.name || 'Serviço ' + service.service.id }}</div>
+              <div class="service-badges">
+                <div *ngIf="isAdditiveService(service)" class="additive-container">
+                  <span class="additive-badge">
+                    Aditivo
+                  </span>
+                  <span class="additive-date">
+                    {{ getServiceAddedDate(service) }}
+                  </span>
+                </div>
+              </div>
             </div>
             
             <div class="service-card-body">
@@ -118,7 +128,10 @@
                 
                 <div class="service-detail highlight">
                   <span class="detail-label">Total:</span>
-                  <span class="detail-value">{{ formatCurrency(service.total_value) }}</span>
+                  <span class="detail-value" [class.cancelled-service]="getServiceStatus(service) === 'cancelled'">
+                    {{ formatCurrency(service.total_value) }}
+                    <span *ngIf="getServiceStatus(service) === 'cancelled'" class="cancelled-label">(Cancelado)</span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -142,7 +155,27 @@
             </div>
             <div class="summary-content">
               <div class="summary-label">Valor Total do Contrato</div>
-              <div class="summary-value">{{ formatCurrency(contract.total_value) }}</div>
+              
+              <!-- Mostrar valor original quando há cancelamentos -->
+              <div *ngIf="hasCancelledServices()" class="summary-breakdown">
+                <div class="original-value">
+                  <span class="original-label">Valor Original:</span>
+                  <span class="original-amount">{{ formatCurrency(contract.total_value) }}</span>
+                </div>
+                <div class="cancelled-value">
+                  <span class="cancelled-label">Serviços Cancelados:</span>
+                  <span class="cancelled-amount">- {{ formatCurrency(getCancelledServicesValue()) }}</span>
+                </div>
+                <div class="adjusted-value">
+                  <span class="adjusted-label">Valor Atual:</span>
+                  <span class="adjusted-amount">{{ formatCurrency(getAdjustedTotalValue()) }}</span>
+                </div>
+              </div>
+              
+              <!-- Mostrar apenas valor normal quando não há cancelamentos -->
+              <div *ngIf="!hasCancelledServices()" class="summary-value">
+                {{ formatCurrency(contract.total_value) }}
+              </div>
             </div>
           </div>
         </div>

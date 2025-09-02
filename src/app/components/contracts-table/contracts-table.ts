@@ -21,6 +21,7 @@ interface ContractDisplay {
   id: number;
   contractNumber: string;
   clientName: string;
+  clientTradeName?: string;
   type: string;
   startDate: string;
   endDate: string;
@@ -46,7 +47,7 @@ interface ContractDisplay {
 })
 export class ContractsTableComponent implements OnInit, OnDestroy {
   private modalService = inject(ModalService);
-  private contractService = inject(ContractService);
+  public contractService = inject(ContractService);
   private clientService = inject(ClientService);
   private router = inject(Router);
   private searchService = inject(SearchService);
@@ -203,14 +204,14 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       suspended: apiContracts.filter((c) => c.status === 'suspended').length,
       totalValueActive: apiContracts
         .filter((c) => c.status === 'active')
-        .reduce((sum, c) => sum + (c.total_value || 0), 0),
+        .reduce((sum, c) => sum + this.getAdjustedContractValue(c), 0),
       totalValueAll: apiContracts.reduce(
-        (sum, c) => sum + (c.total_value || 0),
+        (sum, c) => sum + this.getAdjustedContractValue(c),
         0
       ),
       averageValue:
         apiContracts.length > 0
-          ? apiContracts.reduce((sum, c) => sum + (c.total_value || 0), 0) /
+          ? apiContracts.reduce((sum, c) => sum + this.getAdjustedContractValue(c), 0) /
             apiContracts.length
           : 0,
       typeStats: {
@@ -226,11 +227,13 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   private mapContractToDisplay(contract: ApiContract): ContractDisplay {
     const client = this.clients.find(c => c.id === contract.client.id);
     const clientName = client ? client.name : (contract.client?.name || 'Cliente não encontrado');
+    const clientTradeName = client && client.type === 'PJ' && client.trade_name && client.trade_name !== client.company_name ? client.trade_name : undefined;
 
     return {
       id: contract.id,
       contractNumber: contract.contract_number,
       clientName: clientName,
+      clientTradeName: clientTradeName,
       type: contract.type,
       startDate: this.contractService.formatDate(contract.start_date),
       endDate: this.contractService.formatDate(contract.end_date || null),
@@ -238,7 +241,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
         contract.start_date,
         contract.end_date
       )} dias`,
-      totalValue: this.contractService.formatValue(contract.total_value || 0),
+      totalValue: this.contractService.formatValue(this.getAdjustedContractValue(contract)),
       status: this.contractService.getStatusText(contract.status),
       statusColor: this.contractService.getStatusColor(contract.status),
       servicesCount: contract.contract_services?.length || 0,
@@ -473,5 +476,58 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   closeExportModal() {
     this.showExportModal = false;
     this.selectedContract = null;
+  }
+
+  // Calcular valor ajustado de um contrato considerando serviços cancelados
+  getAdjustedContractValue(contract: ApiContract): number {
+    if (!contract.contract_services) return contract.total_value || 0;
+    
+    let totalValue = contract.total_value || 0;
+    let cancelledValue = 0;
+    
+    contract.contract_services.forEach(service => {
+      const serviceStatus = this.getServiceStatus(service);
+      if (serviceStatus === 'cancelled') {
+        cancelledValue += service.total_value || 0;
+      }
+    });
+    
+    return Math.max(0, totalValue - cancelledValue);
+  }
+
+  // Obter status do serviço (considerando rotinas se existirem)
+  getServiceStatus(service: any): string {
+    // Se há dados de rotina, usar o status da rotina
+    if (service.service_routines && service.service_routines.length > 0) {
+      return service.service_routines[0].status || 'not_started';
+    }
+    // Caso contrário, usar o status do serviço do contrato
+    return service.status || 'not_started';
+  }
+
+  // Verificar se um contrato possui serviços cancelados
+  hasCancelledServices(contract: ApiContract): boolean {
+    if (!contract.contract_services) return false;
+    
+    return contract.contract_services.some(service => {
+      const serviceStatus = this.getServiceStatus(service);
+      return serviceStatus === 'cancelled';
+    });
+  }
+
+  // Calcular valor total dos serviços cancelados de um contrato
+  getCancelledServicesValue(contract: ApiContract): number {
+    if (!contract.contract_services) return 0;
+    
+    let cancelledValue = 0;
+    
+    contract.contract_services.forEach(service => {
+      const serviceStatus = this.getServiceStatus(service);
+      if (serviceStatus === 'cancelled') {
+        cancelledValue += service.total_value || 0;
+      }
+    });
+    
+    return cancelledValue;
   }
 }

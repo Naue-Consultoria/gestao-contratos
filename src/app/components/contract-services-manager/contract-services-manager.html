@@ -16,28 +16,48 @@
       </div>
       
       <div class="col-status">
-        <div class="status-controls">
+        <!-- Edit Mode -->
+        <div class="status-controls" *ngIf="isEditMode()">
           <select 
             [(ngModel)]="service.status" 
             (ngModelChange)="updateServiceStatus(service, $event)"
-            [disabled]="!canEdit"
             class="status-select">
             <option *ngFor="let status of serviceStatuses" [value]="status.value">
               {{ status.label }}
             </option>
           </select>
         </div>
+        
+        <!-- View Mode -->
+        <div class="status-display" *ngIf="!isEditMode()">
+          <span class="status-badge" [style.background-color]="getStatusColor(getRoutineStatus(service))">
+            <i [class]="getStatusIcon(getRoutineStatus(service))"></i>
+            {{ getStatusText(getRoutineStatus(service)) }}
+          </span>
+        </div>
       </div>
       
       <div class="col-date">
-        <div class="date-controls">
+        <!-- Edit Mode -->
+        <div class="date-controls" *ngIf="isEditMode()">
           <input 
             type="date" 
             [value]="service.scheduled_start_date || ''"
             (change)="updateServiceDate(service, $event)"
-            [disabled]="!canEdit"
             class="date-input"
             placeholder="Selecionar data">
+        </div>
+        
+        <!-- View Mode -->
+        <div class="date-display" *ngIf="!isEditMode()">
+          <span class="date-text" *ngIf="getRoutineDate(service)">
+            <i class="fas fa-calendar-alt"></i>
+            {{ formatDate(getRoutineDate(service)) }}
+          </span>
+          <span class="date-text no-date" *ngIf="!getRoutineDate(service)">
+            <i class="fas fa-calendar"></i>
+            Não agendado
+          </span>
         </div>
       </div>
       

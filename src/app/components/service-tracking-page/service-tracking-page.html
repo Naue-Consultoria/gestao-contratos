@@ -86,9 +86,6 @@
               class="control-input"
               [(ngModel)]="selectedDate"
               [disabled]="!canEdit">
-            <small class="control-help" *ngIf="selectedDate">
-              Agendado para: {{ formatDate(selectedDate) }}
-            </small>
           </div>
 
           <!-- Routine Notes -->

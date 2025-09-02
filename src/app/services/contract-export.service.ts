@@ -406,6 +406,10 @@ export class ContractExportService {
     
     const services = contract.contract_services?.map((cs: any) => cs.service?.name || 'Serviço').join(', ') || '[SERVICOS]';
     
+    // Verificar se é parcelado e formatar as parcelas
+    const isInstallment = this.isContractInstallment(contract);
+    const installmentText = isInstallment ? this.formatInstallments(contract) : '';
+    
     // Log para debug
     console.log('📊 Dados do contrato:', {
       clientName,
@@ -414,16 +418,19 @@ export class ContractExportService {
       totalValue,
       startDate,
       endDate,
-      services
+      services,
+      isInstallment,
+      installmentCount: contract.installment_count,
+      installments: contract.installments
     });
     
     switch (templateId) {
       case 'consultoria-pj':
-        return this.getConsultoriaPJContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services);
+        return this.getConsultoriaPJContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, installmentText);
       case 'consultoria-pf':
-        return this.getConsultoriaPFContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services);
+        return this.getConsultoriaPFContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, installmentText);
       case 'recrutamento':
-        return this.getRecrutamentoContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services);
+        return this.getRecrutamentoContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, installmentText);
       default:
         return [];
     }
@@ -433,7 +440,7 @@ export class ContractExportService {
     return this.generateDocumentContent(contract, templateId);
   }
 
-  private getConsultoriaPJContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string): any[] {
+  private getConsultoriaPJContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string, installmentText: string): any[] {
     return [
       {
         type: 'title',
@@ -517,11 +524,7 @@ export class ContractExportService {
       },
       {
         type: 'paragraph',
-        text: '3.2. O pagamento será efetuado conforme cronograma financeiro acordado entre as partes, mediante apresentação de nota fiscal de serviços.'
-      },
-      {
-        type: 'paragraph',
-        text: '3.3. Em caso de atraso no pagamento, incidirão juros de mora de 1% ao mês e multa de 2% sobre o valor em atraso.'
+        text: `3.2. O pagamento será efetuado conforme cronograma financeiro acordado entre as partes, mediante apresentação de nota fiscal de serviços.${installmentText}`
       },
       {
         type: 'heading',
@@ -669,7 +672,7 @@ export class ContractExportService {
     ];
   }
 
-  private getConsultoriaPFContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string): any[] {
+  private getConsultoriaPFContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string, installmentText: string): any[] {
     return [
       {
         type: 'title',
@@ -753,11 +756,7 @@ export class ContractExportService {
       },
       {
         type: 'paragraph',
-        text: '3.2. O pagamento será efetuado mediante transferência bancária ou PIX, conforme dados bancários fornecidos pela CONTRATADA.'
-      },
-      {
-        type: 'paragraph',
-        text: '3.3. Em caso de atraso no pagamento, incidirão juros de mora de 1% ao mês sobre o valor em atraso.'
+        text: `3.2. O pagamento será efetuado mediante transferência bancária ou PIX, conforme dados bancários fornecidos pela CONTRATADA.${installmentText}`
       },
       {
         type: 'heading',
@@ -873,7 +872,7 @@ export class ContractExportService {
     ];
   }
 
-  private getRecrutamentoContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string): any[] {
+  private getRecrutamentoContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string, installmentText: string): any[] {
     return [
       {
         type: 'title',
@@ -1025,11 +1024,7 @@ export class ContractExportService {
       },
       {
         type: 'paragraph',
-        text: '3.2. O pagamento será efetuado conforme cronograma acordado entre as partes, mediante apresentação de nota fiscal de serviços.'
-      },
-      {
-        type: 'paragraph',
-        text: '3.3. Em caso de atraso no pagamento, incidirão juros de mora de 1% ao mês e multa de 2% sobre o valor em atraso.'
+        text: `3.2. O pagamento será efetuado conforme cronograma acordado entre as partes, mediante apresentação de nota fiscal de serviços.${installmentText}`
       },
       {
         type: 'heading',
@@ -1195,7 +1190,9 @@ export class ContractExportService {
   private formatDate(dateString: string): string {
     if (!dateString) return '[DATA]';
     
-    const date = new Date(dateString);
+    // Se a data está no formato YYYY-MM-DD, adicionar T00:00:00 para garantir que seja interpretada como local
+    const normalizedDateString = dateString.includes('T') ? dateString : `${dateString}T00:00:00`;
+    const date = new Date(normalizedDateString);
     return date.toLocaleDateString('pt-BR');
   }
 
@@ -1276,5 +1273,31 @@ export class ContractExportService {
     }
     
     return 'Cliente não identificado';
+  }
+
+  private isContractInstallment(contract: any): boolean {
+    return contract.installment_count > 1 || (contract.installments && contract.installments.length > 0);
+  }
+
+  private formatInstallments(contract: any): string {
+    if (!this.isContractInstallment(contract) || !contract.installments) {
+      return '';
+    }
+
+    const installments = contract.installments;
+    if (!Array.isArray(installments) || installments.length === 0) {
+      return '';
+    }
+
+    // Formatar as parcelas
+    const formattedInstallments = installments.map((installment: any, index: number) => {
+      const dueDate = this.formatDate(installment.due_date);
+      const amount = this.formatCurrency(installment.amount || 0);
+      const installmentNumber = installment.installment_number || (index + 1);
+      
+      return `${installmentNumber}ª parcela: ${amount} - Vencimento: ${dueDate}`;
+    }).join('\n');
+
+    return `\n\nPARCELAMENTO:\n${formattedInstallments}`;
   }
 }

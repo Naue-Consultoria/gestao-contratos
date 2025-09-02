@@ -488,8 +488,20 @@
     gap: 0.5rem;
 }
 
-.client-info i {
-    color: var(--text-gray);
+.client-name-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.client-name {
+    font-weight: 600;
+}
+
+.client-trade-name {
+    font-size: 0.8rem;
+    color: #0a6254;
+    font-weight: 500;
 }
 
 /* Contract Type */
@@ -583,6 +595,23 @@
 
 :host-context(body.dark-mode) .value-amount {
     color: #13c99d;
+}
+
+/* Indicador de serviços cancelados */
+.cancelled-indicator {
+    margin-left: 0.5rem;
+    color: #ef4444;
+    font-size: 0.75rem;
+    cursor: help;
+}
+
+.cancelled-indicator i {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }
 
 /* End Date */
