@@ -55,7 +55,7 @@ html {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
 }
 
 .logo-container {
@@ -74,7 +74,6 @@ html {
   width: 160px;
   height: 160px;
   object-fit: contain;
-  border-radius: 16px;
   flex-shrink: 0;
 }
 
@@ -103,6 +102,32 @@ html {
   line-height: 1.4;
   white-space: nowrap;
   max-width: none;
+}
+
+.company-tagline-centered {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.5rem;
+  margin: 1.5rem 0 0.5rem 0;
+  font-weight: 300;
+  line-height: 1.4;
+  text-align: left;
+  width: 100%;
+  max-width: none;
+  align-self: stretch;
+}
+
+/* Hide mobile line break on desktop */
+.mobile-break {
+  display: none;
+}
+
+/* Desktop/Mobile Table Visibility */
+.desktop-view {
+  display: block;
+}
+
+.mobile-view {
+  display: none;
 }
 
 .hero-description {
@@ -303,7 +328,7 @@ html {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  max-width: 650px;
+  max-width: 500px;
 }
 
 .stat-card {
@@ -311,7 +336,7 @@ html {
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px;
-  padding: 3.5rem 2.5rem;
+  padding: 2.5rem 2rem;
   text-align: center;
   transition: all 0.3s ease;
   position: relative;
@@ -342,7 +367,7 @@ html {
 }
 
 .stat-number {
-  font-size: 3.2rem;
+  font-size: 2.4rem;
   font-weight: 900;
   color: white;
   display: block;
@@ -351,17 +376,12 @@ html {
 }
 
 .stat-text {
-  font-size: 1.3rem;
+  font-size: 1rem;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   line-height: 1.3;
-}
-
-/* Ajuste específico para o card 380% */
-.stat-card:nth-child(4) .stat-number {
-  font-size: 2.8rem;
 }
 
 /* Center - Map */
@@ -488,38 +508,25 @@ html {
   .stats-grid {
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    max-width: 350px;
+    max-width: 280px;
   }
   
   .stat-card {
-    padding: 2rem 1.5rem;
-    min-height: 120px;
+    padding: 1rem;
+    min-height: 80px;
   }
   
   .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
   
   .stat-label {
-    font-size: 0.75rem;
+    font-size: 0.5rem;
   }
   
-  /* Ajustar especificamente o card "+1500 Líderes Transformados" */
-  .stat-card:nth-child(2) {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-  
-  .stat-card:nth-child(2) .stat-number {
-    font-size: 2rem;
-  }
-  
+  /* Reduzir especificamente o texto "+1500 Líderes Transformados" */
   .stat-card:nth-child(2) .stat-text {
-    font-size: 1rem;
-    margin-top: 0.3rem;
+    font-size: 0.7rem;
   }
   
   .map-image {
@@ -583,23 +590,19 @@ html {
   .stats-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
-    max-width: 900px;
+    max-width: 800px;
   }
   
   .stat-card {
-    padding: 1.8rem;
+    padding: 1.2rem;
   }
   
   .stat-number {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
   }
   
   .stat-text {
-    font-size: 1rem;
-  }
-  
-  .stat-card:nth-child(4) .stat-number {
-    font-size: 1.2rem;
+    font-size: 0.75rem;
   }
 }
 
@@ -647,23 +650,19 @@ html {
   .stats-grid {
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    max-width: 480px;
+    max-width: 400px;
   }
   
   .stat-card {
-    padding: 1.5rem;
+    padding: 1rem;
   }
   
   .stat-number {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
   }
   
   .stat-text {
-    font-size: 0.9rem;
-  }
-  
-  .stat-card:nth-child(4) .stat-number {
-    font-size: 1.6rem;
+    font-size: 0.7rem;
   }
   
   .presence-section {
@@ -696,23 +695,19 @@ html {
   .stats-grid {
     grid-template-columns: 1fr;
     gap: 0.8rem;
-    max-width: 320px;
+    max-width: 280px;
   }
   
   .stat-card {
-    padding: 1.3rem;
+    padding: 1rem;
   }
   
   .stat-number {
-    font-size: 1.6rem;
+    font-size: 1.3rem;
   }
   
   .stat-text {
-    font-size: 0.8rem;
-  }
-  
-  .stat-card:nth-child(4) .stat-number {
-    font-size: 1.4rem;
+    font-size: 0.65rem;
   }
   
   .presence-section {
@@ -1059,32 +1054,6 @@ html {
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2.5rem;
     max-width: 1200px;
-  }
-}
-
-@media (max-width: 1280px) {
-  .team-members-grid {
-    grid-template-columns: repeat(4, 280px);
-    gap: 1rem;
-    max-width: 1200px;
-  }
-  
-  .specialist-card {
-    padding: 1rem 1.2rem;
-    gap: 1rem;
-  }
-  
-  .photo-frame {
-    width: 90px;
-    height: 90px;
-  }
-  
-  .specialist-name {
-    font-size: 0.85rem;
-  }
-  
-  .specialist-position {
-    font-size: 0.7rem;
   }
 }
 
@@ -2986,6 +2955,15 @@ html {
   .hero-container,
   .section-container {
     padding: 0 1rem;
+  }
+  
+  /* Switch table visibility on mobile */
+  .desktop-view {
+    display: none;
+  }
+  
+  .mobile-view {
+    display: block;
   }
   
   .hero-section {

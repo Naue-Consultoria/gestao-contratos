@@ -9,9 +9,13 @@
           <div class="company-branding">
             <div class="company-info">
               <img src="/logoNaueNeg.png" alt="NAUE Consultoria" class="company-logo">
-              <p class="company-tagline">Primeira consultoria especializada em mercado imobiliário do Brasil.</p>
             </div>
           </div>
+          
+          <!-- Tagline centralizada -->
+          <p class="company-tagline-centered">
+            Primeira consultoria especializada em mercado<span class="mobile-break"><br></span> imobiliário do Brasil.
+          </p>
           
           <!-- Proposal Info -->
           <div class="proposal-info">
@@ -183,8 +187,8 @@
   <section class="partners-section">
     <div class="section-container">
       <div class="section-header">
-        <h2 class="section-title">Nossos Clientes Parceiros</h2>
-        <p class="section-subtitle">Empresas que confiam na NAUE Consultoria</p>
+        <h2 class="section-title">Nossos Clientes <span class="highlight-text">Parceiros</span></h2>
+        <p class="section-subtitle">Empresas que confiam na Naue Consultoria</p>
       </div>
       
       <div class="partners-showcase">
@@ -235,7 +239,7 @@
       <div class="section-container">
 
         <div class="proposal-intro-compact">
-          <h1 class="proposal-title">Seu Investimento Estratégico</h1>
+          <h1 class="proposal-title">Seu Investimento <span class="highlight-text">Estratégico</span></h1>
           <p class="proposal-subtitle">
             Conheça em detalhes cada serviço que será desenvolvido para impulsionar seu negócio. 
             Cada solução foi pensada estrategicamente para gerar resultados concretos e transformar sua empresa.
@@ -243,7 +247,8 @@
         </div>
         
         <div class="services-table-wrapper">
-          <div class="services-table-container">
+          <!-- Desktop Table View -->
+          <div class="services-table-container desktop-view">
             <table class="services-table">
               <thead>
                 <tr>
@@ -276,8 +281,18 @@
                   <td class="col-service">
                     <div class="service-details">
                       <h4 class="service-name">{{ service.service.name }}</h4>
-                      <p class="service-description" *ngIf="service.service.description" [innerHTML]="formatDescription(service.service.description)">
+                      <p class="service-description" 
+                         *ngIf="service.service.description" 
+                         [innerHTML]="formatDescription(service.service.description)"
+                         [class.expanded]="isDescriptionExpanded(service.service_id)">
                       </p>
+                      <button class="expand-button" 
+                              *ngIf="service.service.description"
+                              [class.expanded]="isDescriptionExpanded(service.service_id)"
+                              (click)="toggleDescription(service.service_id)">
+                        <span>{{ isDescriptionExpanded(service.service_id) ? 'Ver menos' : 'Ver mais' }}</span>
+                        <i class="fas fa-chevron-down"></i>
+                      </button>
                       <div class="service-meta" *ngIf="service.quantity > 1">
                         <span class="quantity-badge">{{ service.quantity }}x unidades</span>
                       </div>
@@ -309,8 +324,104 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Mobile Card View -->
+          <div class="services-mobile-view mobile-view">
+            <div 
+              *ngFor="let service of proposal.services; let i = index"
+              class="service-card-mobile"
+              [class.selected]="isServiceSelected(service.service_id)"
+              [class.unselected]="!isServiceSelected(service.service_id)">
+              
+              <!-- Card Header with Checkbox and Title -->
+              <div class="service-card-header">
+                <div class="service-checkbox-mobile">
+                  <input 
+                    type="checkbox" 
+                    [id]="'service-mobile-' + service.service_id"
+                    [checked]="isServiceSelected(service.service_id)"
+                    (change)="toggleService(service.service_id)">
+                  <label [for]="'service-mobile-' + service.service_id" class="checkbox-label-mobile">
+                    <span class="checkmark-mobile"></span>
+                  </label>
+                </div>
+                <div class="service-title-mobile">
+                  <h4 class="service-name-mobile">{{ service.service.name }}</h4>
+                  <div class="service-meta-mobile" *ngIf="service.quantity > 1">
+                    <span class="quantity-badge-mobile">{{ service.quantity }}x unidades</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Content -->
+              <div class="service-card-content">
+                <!-- Description -->
+                <div class="service-description-mobile" *ngIf="service.service.description">
+                  <p [innerHTML]="formatDescription(service.service.description)"
+                     [class.expanded]="isDescriptionExpanded(service.service_id)">
+                  </p>
+                  <button class="expand-button-mobile" 
+                          [class.expanded]="isDescriptionExpanded(service.service_id)"
+                          (click)="toggleDescription(service.service_id)">
+                    <span>{{ isDescriptionExpanded(service.service_id) ? 'Ver menos' : 'Ver mais' }}</span>
+                    <i class="fas fa-chevron-down"></i>
+                  </button>
+                </div>
+
+                <!-- Duration and Value Info -->
+                <div class="service-info-mobile">
+                  <div class="duration-mobile">
+                    <span class="label-mobile">Duração:</span>
+                    <div class="value-mobile">
+                      <div *ngIf="service.service.duration_unit && (service.service.duration_amount || service.service.duration_unit === 'Projeto')">
+                        <i class="fas fa-clock"></i>
+                        <span *ngIf="service.service.duration_unit === 'Projeto'">{{ service.service.duration_unit }}</span>
+                        <span *ngIf="service.service.duration_unit !== 'Projeto'">{{ service.service.duration_amount }} {{ service.service.duration_unit }}</span>
+                      </div>
+                      <div *ngIf="!service.service.duration_unit || (!service.service.duration_amount && service.service.duration_unit !== 'Projeto')">
+                        <i class="fas fa-minus"></i>
+                        <span>A definir</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="investment-mobile">
+                    <span class="label-mobile">Investimento:</span>
+                    <div class="value-mobile">
+                      <div class="total-value-mobile">{{ formatCurrency(getServiceTotal(service)) }}</div>
+                      <div class="unit-value-mobile" *ngIf="service.quantity > 1">
+                        {{ formatCurrency(getServiceValue(service)) }} cada
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           
-          <div class="services-summary">
+          <!-- Desktop Summary -->
+          <div class="services-summary desktop-summary">
+            <div class="selected-count">
+              <i class="fas fa-check-circle"></i>
+              <span>{{ getSelectedServicesCount() }} serviços selecionados</span>
+            </div>
+            <div class="summary-total">
+              <div class="total-label">Investimento Total</div>
+              <div class="total-amount">{{ formatCurrency(getSelectedTotal()) }}</div>
+              <div class="discount-note" *ngIf="paymentType !== 'vista'">*desconto de 6% para pagamento à vista</div>
+              <div class="discount-info" *ngIf="canGetDiscount()">
+                <i class="fas fa-tag"></i>
+                <span>Desconto de 6% aplicado!</span>
+              </div>
+              <div class="discount-unavailable" *ngIf="paymentType === 'vista' && !areAllServicesSelected()">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Selecione todos os serviços para o desconto</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile Summary -->
+          <div class="services-summary mobile-summary">
             <div class="selected-count">
               <i class="fas fa-check-circle"></i>
               <span>{{ getSelectedServicesCount() }} serviços selecionados</span>
@@ -337,7 +448,7 @@
     <section class="signature-section" *ngIf="proposal.status === 'sent' && !proposalExpired">
       <div class="section-container">
         <div class="section-header">
-          <h2 class="section-title">Finalize Sua Proposta</h2>
+          <h2 class="section-title">Finalize Sua <span class="highlight-text">Proposta</span></h2>
           <p class="section-subtitle">Preencha os dados abaixo e assine digitalmente para confirmar sua aceitação. Este é o último passo para iniciarmos nossa parceria de sucesso.</p>
         </div>
         
@@ -474,7 +585,7 @@
                           </span>
                         </div>
                         <div class="installments-info" *ngIf="paymentType === 'prazo'">
-                          Em até {{ proposal.max_installments || 12 }}x sem juros
+                          Em até {{ proposal.max_installments || 12 }}x de {{ formatCurrency(getBaseTotal() / (proposal.max_installments || 12)) }} sem juros
                         </div>
                       </div>
                     </div>
@@ -616,7 +727,6 @@
           <div class="footer-logo">
             <img src="/logoNaue.png" alt="NAUE Consultoria" class="footer-logo-img">
           </div>
-          <h4>NAUE Consultoria</h4>
           <p>Transformando o mercado imobiliário brasileiro com excelência e inovação</p>
         </div>
         

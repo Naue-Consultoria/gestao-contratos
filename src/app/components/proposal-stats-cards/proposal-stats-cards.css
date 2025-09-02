@@ -602,3 +602,8 @@
     align-items: center;
   }
 }
+
+/* Ajuste específico para o card "Valor em Aberto" */
+.stat-card:nth-child(4) .stat-value {
+  font-size: 2.2rem !important;
+}

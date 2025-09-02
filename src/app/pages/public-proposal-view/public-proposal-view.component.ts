@@ -158,6 +158,9 @@ export class PublicProposalViewComponent implements OnInit {
   serviceNotes: Map<number, string> = new Map();
   clientObservations = '';
   
+  // Controle de expansão de descrições (para mobile)
+  expandedDescriptions: Map<number, boolean> = new Map();
+  
   // Dados de pagamento
   paymentType: 'vista' | 'prazo' = 'prazo';
   paymentMethod: string = '';
@@ -359,6 +362,17 @@ export class PublicProposalViewComponent implements OnInit {
 
   updateServiceNote(serviceId: number, note: string): void {
     this.serviceNotes.set(serviceId, note);
+  }
+  
+  // === MÉTODOS PARA EXPANSÃO DE DESCRIÇÕES (MOBILE) ===
+  
+  toggleDescription(serviceId: number): void {
+    const current = this.expandedDescriptions.get(serviceId) || false;
+    this.expandedDescriptions.set(serviceId, !current);
+  }
+  
+  isDescriptionExpanded(serviceId: number): boolean {
+    return this.expandedDescriptions.get(serviceId) || false;
   }
 
   updateServiceNoteFromEvent(serviceId: number, event: Event): void {
