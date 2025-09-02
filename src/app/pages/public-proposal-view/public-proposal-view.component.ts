@@ -232,32 +232,12 @@ export class PublicProposalViewComponent implements OnInit {
   }
 
   private initializeForms(proposal: PublicProposal | null): void {
-    const client = proposal?.client;
-    const company = client?.company;
-    const person = client?.person;
-
-    let clientName = '';
-    let clientEmail = '';
-    let clientPhone = '';
-    let clientDocument = '';
-
-    if (client?.type === 'PJ' && company) {
-        clientName = company.trade_name || company.company_name || '';
-        clientEmail = client.email || '';
-        clientPhone = client.phone || '';
-        clientDocument = company.cnpj || '';
-    } else if (client?.type === 'PF' && person) {
-        clientName = person.full_name || '';
-        clientEmail = client.email || '';
-        clientPhone = client.phone || '';
-        clientDocument = person.cpf || '';
-    }
-
+    // Não preencher automaticamente - deixar campos vazios para o cliente preencher
     this.signatureForm = this.fb.group({
-        client_name: [clientName, [Validators.required, Validators.minLength(2)]],
-        client_email: [clientEmail, [Validators.required, Validators.email]],
-        client_phone: [clientPhone],
-        client_document: [clientDocument],
+        client_name: ['', [Validators.required, Validators.minLength(2)]],
+        client_email: ['', [Validators.required, Validators.email]],
+        client_phone: [''],
+        client_document: [''],
         client_observations: [''],
         payment_type: ['prazo', Validators.required],
         payment_method: ['', Validators.required],
