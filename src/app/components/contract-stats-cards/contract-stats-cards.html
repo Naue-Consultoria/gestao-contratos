@@ -24,7 +24,7 @@
         <i [class]="card.icon" [style.color]="card.color"></i>
       </div>
     </div>
-    <div class="stat-value" [attr.aria-live]="'polite'">{{ card.value }}</div>
+    <div class="stat-value" [class.value-card]="card.id === 'value'" [attr.aria-live]="'polite'">{{ card.value }}</div>
     <div class="stat-footer">
       <div class="stat-change" 
            [ngClass]="card.trend ? getTrendClass(card.trend) : ''"

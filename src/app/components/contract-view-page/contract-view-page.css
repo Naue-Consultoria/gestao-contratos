@@ -373,6 +373,7 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+  position: relative;
 }
 
 .service-badges {
@@ -404,6 +405,16 @@
 }
 
 .additive-date {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.additive-date-in-badge {
   font-size: 0.65rem;
   color: var(--text-muted);
   font-weight: 500;
@@ -422,6 +433,10 @@
 }
 
 :host-context(body.dark-mode) .additive-date {
+  color: var(--dark-text-muted);
+}
+
+:host-context(body.dark-mode) .additive-date-in-badge {
   color: var(--dark-text-muted);
 }
 

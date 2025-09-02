@@ -490,6 +490,10 @@
   line-height: 1.2;
 }
 
+.kpi-value.revenue-value {
+  font-size: 1.8rem;
+}
+
 .kpi-description {
   margin-bottom: 1rem;
 }

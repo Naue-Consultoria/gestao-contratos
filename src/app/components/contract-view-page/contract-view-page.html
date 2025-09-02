@@ -103,12 +103,15 @@
             <div class="service-card-header">
               <div class="service-number">{{ i + 1 }}</div>
               <div class="service-name">{{ service.service.name || 'Serviço ' + service.service.id }}</div>
+              <span class="additive-date" *ngIf="!isAdditiveService(service)">
+                {{ getServiceAddedDate(service) }}
+              </span>
               <div class="service-badges">
                 <div *ngIf="isAdditiveService(service)" class="additive-container">
                   <span class="additive-badge">
                     Aditivo
                   </span>
-                  <span class="additive-date">
+                  <span class="additive-date-in-badge">
                     {{ getServiceAddedDate(service) }}
                   </span>
                 </div>
@@ -239,3 +242,15 @@
   [contract]="contract"
   (onClose)="closeExportModal()">
 </app-contract-export-modal>
+
+<!-- Delete Confirmation Modal -->
+<app-delete-confirmation-modal
+  [isVisible]="showDeleteModal"
+  title="Confirmar Exclusão de Contrato"
+  message="Tem certeza que deseja excluir este contrato permanentemente? Esta ação não pode ser desfeita."
+  [itemName]="contract ? (contract.contract_number + ' (' + getClientName() + ')') : ''"
+  [isDeleting]="isDeleting"
+  deleteButtonText="Excluir Contrato"
+  (onConfirm)="confirmDeleteContract()"
+  (onCancel)="cancelDeleteContract()">
+</app-delete-confirmation-modal>

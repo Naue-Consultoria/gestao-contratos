@@ -7,13 +7,14 @@ import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../services/auth';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ContractExportModalComponent } from '../contract-export-modal/contract-export-modal.component';
+import { DeleteConfirmationModalComponent } from '../delete-confirmation-modal/delete-confirmation-modal.component';
 import { ModalService } from '../../services/modal.service';
 import { jsPDF } from 'jspdf';
 
 @Component({
   selector: 'app-contract-view-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, BreadcrumbComponent, ContractExportModalComponent],
+  imports: [CommonModule, RouterModule, BreadcrumbComponent, ContractExportModalComponent, DeleteConfirmationModalComponent],
   templateUrl: './contract-view-page.html',
   styleUrls: ['./contract-view-page.css']
 })
@@ -33,6 +34,8 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
   currentUserId: number;
   isAdmin = false;
   showExportModal = false;
+  showDeleteModal = false;
+  isDeleting = false;
 
   constructor() {
     // Recuperar informações do usuário do localStorage
@@ -256,19 +259,30 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     this.router.navigate(['/home/contratos']);
   }
 
-  async deleteContract() {
+  deleteContract() {
+    if (!this.contract) return;
+    this.showDeleteModal = true;
+  }
+
+  async confirmDeleteContract() {
     if (!this.contract) return;
 
-    if (confirm(`Deseja excluir o contrato "${this.contract.contract_number}"?\n\nEsta ação não pode ser desfeita.`)) {
-      try {
-        await firstValueFrom(this.contractService.deleteContractPermanent(this.contractId));
-        this.modalService.showSuccess('Contrato excluído com sucesso!');
-        this.router.navigate(['/home/contratos']);
-      } catch (error: any) {
-        console.error('❌ Error deleting contract:', error);
-        this.modalService.showError('Não foi possível excluir o contrato.');
-      }
+    this.isDeleting = true;
+    try {
+      await firstValueFrom(this.contractService.deleteContractPermanent(this.contractId));
+      this.modalService.showSuccess('Contrato excluído com sucesso!');
+      this.router.navigate(['/home/contratos']);
+    } catch (error: any) {
+      console.error('❌ Error deleting contract:', error);
+      this.modalService.showError('Não foi possível excluir o contrato.');
+    } finally {
+      this.isDeleting = false;
+      this.showDeleteModal = false;
     }
+  }
+
+  cancelDeleteContract() {
+    this.showDeleteModal = false;
   }
 
   async generatePDF() {
