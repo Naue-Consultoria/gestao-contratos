@@ -442,6 +442,31 @@ tr:last-child td {
     color: #22c55e;
 }
 
+.category-badge[data-category="Desenvolvimento"] {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+}
+
+.category-badge[data-category="Diagnóstico"] {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.category-badge[data-category="Gestão"] {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+.category-badge[data-category="Estratégia"] {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.category-badge[data-category="Geral"] {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
 /* Duration Info */
 .duration-info {
     display: flex;

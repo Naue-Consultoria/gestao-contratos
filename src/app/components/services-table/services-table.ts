@@ -124,10 +124,13 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
       'Diagnóstico': 'fas fa-stethoscope',
       'Desenvolvimento': 'fas fa-line-chart',
       'Gestão': 'fas fa-tasks',
-      'Estratégia': 'fas fa-bullseye'
+      'Estratégia': 'fas fa-bullseye',
+      'Geral': 'far fa-sticky-note'
     };
     return iconMap[category] || 'fas fa-concierge-bell';
   }
+
+
 
   private extractCategories() {
     const categories = new Set(this.services.map(service => service.category));
