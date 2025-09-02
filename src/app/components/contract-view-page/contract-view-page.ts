@@ -131,42 +131,16 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
 
   // Verificar se um serviço foi adicionado após a criação do contrato (aditivo)
   isAdditiveService(service: any): boolean {
-    if (!service?.created_at || !this.contract?.created_at) {
-      console.log('Missing dates:', { 
-        serviceCreatedAt: service?.created_at, 
-        contractCreatedAt: this.contract?.created_at 
-      });
-      return false;
-    }
-    
-    // Abordagem robusta: Comparar apenas datas (dia/mês/ano) ignorando horas
-    const serviceDate = new Date(service.created_at);
-    const contractDate = new Date(this.contract.created_at);
-    
-    console.log('Date comparison:', {
-      serviceDate: service.created_at,
-      contractDate: this.contract.created_at,
-      serviceDateParsed: serviceDate,
-      contractDateParsed: contractDate
-    });
-    
-    // Zerar as horas para comparar apenas datas
-    serviceDate.setHours(0, 0, 0, 0);
-    contractDate.setHours(0, 0, 0, 0);
-    
-    // Se o serviço foi criado em uma data posterior ao contrato
-    const daysDiff = Math.floor((serviceDate.getTime() - contractDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    console.log('Days difference:', daysDiff, 'Is additive:', daysDiff > 0);
-    
-    // Um serviço é aditivo se foi criado pelo menos 1 dia após o contrato
-    return daysDiff > 0;
+    // Usar o campo is_addendum do banco de dados
+    return service?.is_addendum === true;
   }
 
   // Formatar data de quando o serviço foi adicionado
   getServiceAddedDate(service: any): string {
-    if (!service.created_at) return '';
-    return new Date(service.created_at).toLocaleDateString('pt-BR');
+    // Usar addendum_date se disponível, senão usar created_at
+    const dateToUse = service.addendum_date || service.created_at;
+    if (!dateToUse) return '';
+    return new Date(dateToUse).toLocaleDateString('pt-BR');
   }
 
   getStatusColor(status: string): string {
