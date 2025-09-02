@@ -8,6 +8,8 @@ import { ContractService, CreateContractRequest, ContractServiceItem, ContractIn
 import { UserService } from '../../services/user';
 import { ModalService } from '../../services/modal.service';
 import { UserSelectionModalComponent } from '../user-selection-modal/user-selection-modal';
+import { ViewContractConfirmationModalComponent } from '../view-contract-confirmation-modal/view-contract-confirmation-modal.component';
+import { Router } from '@angular/router';
 
 interface AssignableUser {
   id: number;
@@ -38,7 +40,7 @@ interface ContractConversionData {
 @Component({
   selector: 'app-proposal-to-contract-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, UserSelectionModalComponent],
+  imports: [CommonModule, FormsModule, UserSelectionModalComponent, ViewContractConfirmationModalComponent],
   templateUrl: './proposal-to-contract-modal.html',
   styleUrls: ['./proposal-to-contract-modal.css']
 })
@@ -52,6 +54,7 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
   private proposalService = inject(ProposalService);
   private userService = inject(UserService);
   private modalService = inject(ModalService);
+  private router = inject(Router);
 
   contractData: ContractConversionData = {
     start_date: '',
@@ -72,6 +75,11 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
   paymentMethods = this.contractService.getPaymentMethods();
   contractInstallments: ContractInstallment[] = [];
   firstInstallmentDate: string = '';
+  
+  // Modal de confirmação para visualizar contrato
+  showViewContractModal = false;
+  createdContractId: number | null = null;
+  createdContractNumber = '';
 
   ngOnInit() {
     this.loadUsers();
@@ -422,16 +430,17 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
         // Update proposal status to converted
         await this.updateProposalStatus(this.proposal.id, contractResponse.contract.id);
 
-        this.modalService.showSuccess(
-          `Proposta convertida com sucesso!\nContrato criado: ${contractResponse.contract.contract_number}`
-        );
+        // Armazenar dados do contrato criado
+        this.createdContractId = contractResponse.contract.id;
+        this.createdContractNumber = contractResponse.contract.contract_number;
 
         this.converted.emit({
           contractId: contractResponse.contract.id,
           contractNumber: contractResponse.contract.contract_number
         });
 
-        this.close.emit();
+        // Mostrar modal de confirmação para visualizar contrato
+        this.showViewContractModal = true;
       } else {
         throw new Error('Contract ID not returned');
       }
@@ -490,5 +499,19 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
       // Usar o final_value que contém o valor com desconto
       const finalValue = this.getProposalFinalValue();
     }
+  }
+
+  onViewContract(): void {
+    this.showViewContractModal = false;
+    this.close.emit();
+    
+    if (this.createdContractId) {
+      this.router.navigate(['/contracts', this.createdContractId]);
+    }
+  }
+
+  onCancelViewContract(): void {
+    this.showViewContractModal = false;
+    this.close.emit();
   }
 }

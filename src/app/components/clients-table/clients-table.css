@@ -360,8 +360,20 @@ tr:last-child td {
   border-radius: 9px;
 }
 
+.client-name-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .client-name {
   font-weight: 600;
+}
+
+.client-trade-name {
+  font-size: 0.8rem;
+  color: #0a6254;
+  font-weight: 500;
 }
 
 .client-since {

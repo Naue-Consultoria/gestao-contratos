@@ -223,3 +223,12 @@
   (selectionConfirmed)="updateAssignedUsers($event)"
 >
 </app-user-selection-modal>
+
+<app-view-contract-confirmation-modal
+  [isVisible]="showViewContractModal"
+  [contractNumber]="createdContractNumber"
+  [contractId]="createdContractId"
+  (onViewContract)="onViewContract()"
+  (onCancel)="onCancelViewContract()"
+>
+</app-view-contract-confirmation-modal>

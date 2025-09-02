@@ -310,4 +310,16 @@
     [contract]="selectedContract"
     (onClose)="closeExportModal()">
   </app-contract-export-modal>
+
+  <!-- Delete Confirmation Modal -->
+  <app-delete-confirmation-modal
+    [isVisible]="showDeleteModal"
+    title="Confirmar Exclusão de Contrato"
+    message="Tem certeza que deseja excluir este contrato permanentemente? Esta ação não pode ser desfeita."
+    [itemName]="selectedContractForDeletion ? selectedContractForDeletion.contractNumber + ' (' + selectedContractForDeletion.clientName + ')' : ''"
+    [isDeleting]="isDeleting"
+    deleteButtonText="Excluir Contrato"
+    (onConfirm)="confirmDeleteContract()"
+    (onCancel)="cancelDeleteContract()">
+  </app-delete-confirmation-modal>
 </div>

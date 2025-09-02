@@ -79,7 +79,12 @@
                 <div class="client-logo" *ngIf="client.logo_path">
                   <img [src]="client.logoUrl" [alt]="client.name + ' logo'" />
                 </div>
-                <span class="client-name">{{ client.name }}</span>
+                <div class="client-name-container">
+                  <span class="client-name">{{ client.name }}</span>
+                  <span class="client-trade-name" *ngIf="client.type === 'PJ' && client.trade_name && client.trade_name !== client.company_name">
+                    {{ client.trade_name }}
+                  </span>
+                </div>
               </div>
             </td>
             <td>

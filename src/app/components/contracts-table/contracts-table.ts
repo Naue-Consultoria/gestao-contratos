@@ -12,6 +12,7 @@ import { ClientService } from '../../services/client';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ContractStatsCardsComponent } from '../contract-stats-cards/contract-stats-cards';
 import { ContractExportModalComponent } from '../contract-export-modal/contract-export-modal.component';
+import { DeleteConfirmationModalComponent } from '../delete-confirmation-modal/delete-confirmation-modal.component';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { SearchService } from '../../services/search.service'; // Import the new service
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -39,7 +40,7 @@ interface ContractDisplay {
 @Component({
   selector: 'app-contracts-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent, ContractStatsCardsComponent, ContractExportModalComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, ContractStatsCardsComponent, ContractExportModalComponent, DeleteConfirmationModalComponent],
   templateUrl: './contracts-table.html',
   styleUrls: ['./contracts-table.css'],
 })
@@ -79,6 +80,11 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   openDropdownId: number | null = null;
   showExportModal = false;
   selectedContract: any = null;
+  
+  // Modal de exclusão
+  showDeleteModal = false;
+  selectedContractForDeletion: ContractDisplay | null = null;
+  isDeleting = false;
 
   private handleRefresh = () => this.loadInitialData();
 
@@ -309,29 +315,43 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     ];
   }
 
-  async deleteContract(contractId: number, event: MouseEvent) {
+  deleteContract(contractId: number, event: MouseEvent) {
     event.stopPropagation();
     event.preventDefault();
     this.openDropdownId = null;
+    
     const contractToDelete = this.contracts.find((c) => c.id === contractId);
     if (!contractToDelete) return;
 
-    if (
-      confirm(
-        `Você tem certeza que deseja excluir o contrato ${contractToDelete.contractNumber} permanentemente?`
-      )
-    ) {
-      try {
-        await firstValueFrom(
-          this.contractService.deleteContractPermanent(contractId)
-        );
-        this.modalService.showSuccess('Contrato excluído com sucesso!');
-        this.loadInitialData();
-      } catch (error) {
-        console.error('❌ Error deleting contract:', error);
-        this.modalService.showError('Não foi possível excluir o contrato.');
-      }
+    this.selectedContractForDeletion = contractToDelete;
+    this.showDeleteModal = true;
+  }
+
+  async confirmDeleteContract() {
+    if (!this.selectedContractForDeletion) return;
+    
+    this.isDeleting = true;
+    
+    try {
+      await firstValueFrom(
+        this.contractService.deleteContractPermanent(this.selectedContractForDeletion.id)
+      );
+      this.modalService.showSuccess('Contrato excluído com sucesso!');
+      this.showDeleteModal = false;
+      this.selectedContractForDeletion = null;
+      this.loadInitialData();
+    } catch (error) {
+      console.error('❌ Error deleting contract:', error);
+      this.modalService.showError('Não foi possível excluir o contrato.');
+    } finally {
+      this.isDeleting = false;
     }
+  }
+
+  cancelDeleteContract() {
+    this.showDeleteModal = false;
+    this.selectedContractForDeletion = null;
+    this.isDeleting = false;
   }
 
   // Funções removidas - funcionalidade implementada via modal de exportação

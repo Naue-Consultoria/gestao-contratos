@@ -28,6 +28,8 @@ interface ClientDisplay {
   raw: ApiClient;
   logo_path?: string | null;
   logoUrl?: SafeUrl;
+  company_name?: string;
+  trade_name?: string;
 }
 
 @Component({
@@ -231,6 +233,8 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
       actionMenuOpen: false,
       raw: apiClient,
       logo_path: apiClient.logo_path,
+      company_name: apiClient.company_name,
+      trade_name: apiClient.trade_name,
     };
   }
 
