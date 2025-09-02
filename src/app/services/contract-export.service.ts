@@ -239,28 +239,10 @@ export class ContractExportService {
       // Função para adicionar texto com partes em negrito
       const addTextWithParts = (parts: any[], fontSize: number = 10) => {
         pdf.setFontSize(fontSize);
-        let currentX = margin;
         
-        for (const part of parts) {
-          pdf.setFont('helvetica', part.bold ? 'bold' : 'normal');
-          const textWidth = pdf.getTextWidth(part.text);
-          
-          // Verificar se precisa quebrar linha
-          if (currentX + textWidth > pageWidth - margin) {
-            currentY += lineHeight;
-            currentX = margin;
-            
-            if (currentY > pageHeight - margin) {
-              pdf.addPage();
-              currentY = margin;
-            }
-          }
-          
-          pdf.text(part.text, currentX, currentY);
-          currentX += textWidth;
-        }
-        
-        currentY += lineHeight * 1.5;
+        // Converter as partes em texto simples e usar a função addText que já funciona corretamente
+        const fullText = parts.map(part => part.text).join('');
+        addText(fullText, fontSize, false);
       };
       
       // Gerar conteúdo
