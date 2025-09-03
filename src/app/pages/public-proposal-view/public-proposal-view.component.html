@@ -10,6 +10,13 @@
             <div class="company-info">
               <img src="/logoNaueNeg.png" alt="NAUE Consultoria" class="company-logo">
             </div>
+            <!-- CEO image moved here for mobile layout -->
+            <div class="ceo-presentation mobile-ceo">
+              <div class="ceo-image-container">
+                <img src="/naue.jpg" alt="Mariana Naue" class="ceo-photo" (error)="onImageError($event)">
+                <div class="ceo-title">CEO & FUNDADORA</div>
+              </div>
+            </div>
           </div>
           
           <!-- Tagline centralizada -->
@@ -399,29 +406,8 @@
             </div>
           </div>
           
-          <!-- Desktop Summary -->
-          <div class="services-summary desktop-summary">
-            <div class="selected-count">
-              <i class="fas fa-check-circle"></i>
-              <span>{{ getSelectedServicesCount() }} serviços selecionados</span>
-            </div>
-            <div class="summary-total">
-              <div class="total-label">Investimento Total</div>
-              <div class="total-amount">{{ formatCurrency(getSelectedTotal()) }}</div>
-              <div class="discount-note" *ngIf="paymentType !== 'vista'">*desconto de 6% para pagamento à vista</div>
-              <div class="discount-info" *ngIf="canGetDiscount()">
-                <i class="fas fa-tag"></i>
-                <span>Desconto de 6% aplicado!</span>
-              </div>
-              <div class="discount-unavailable" *ngIf="paymentType === 'vista' && !areAllServicesSelected()">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>Selecione todos os serviços para o desconto</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Mobile Summary -->
-          <div class="services-summary mobile-summary">
+          <!-- Services Summary -->
+          <div class="services-summary">
             <div class="selected-count">
               <i class="fas fa-check-circle"></i>
               <span>{{ getSelectedServicesCount() }} serviços selecionados</span>
@@ -725,7 +711,7 @@
       <div class="footer-content">
         <div class="footer-brand">
           <div class="footer-logo">
-            <img src="/logoNaue.png" alt="NAUE Consultoria" class="footer-logo-img">
+            <img src="/logoNaueNeg.png" alt="NAUE Consultoria" class="footer-logo-img">
           </div>
           <p>Transformando o mercado imobiliário brasileiro com excelência e inovação</p>
         </div>

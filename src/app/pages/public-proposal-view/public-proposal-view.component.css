@@ -130,6 +130,21 @@ html {
   display: none;
 }
 
+/* Hide expand buttons on desktop */
+.desktop-view .expand-button {
+  display: none;
+}
+
+/* Hide mobile CEO on desktop */
+.mobile-ceo {
+  display: none !important;
+}
+
+/* Ensure hero-right is visible on desktop */
+.hero-right {
+  display: block;
+}
+
 .hero-description {
   color: rgba(255, 255, 255, 0.9);
   font-size: 1.6rem;
@@ -1710,12 +1725,9 @@ html {
 }
 
 .services-table-wrapper {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(15px);
+  background: transparent;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.15);
   margin-top: 0;
   position: relative;
   z-index: 1;
@@ -1776,11 +1788,6 @@ html {
   text-align: center;
   font-weight: 700;
   color: white;
-  border-bottom: 3px solid #064e3b;
-  font-size: 1.25rem;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  position: relative;
 }
 
 .col-select { 
@@ -1802,22 +1809,22 @@ html {
 
 
 .service-row {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(6, 95, 70, 0.2);
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
 }
 
 .service-row:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(6, 95, 70, 0.05);
 }
 
 .service-row.selected {
-  background: rgba(6, 95, 70, 0.1);
+  background: rgba(6, 95, 70, 0.15);
   border-left: 4px solid #047857;
 }
 
 .service-row.unselected {
-  background: rgba(255, 255, 255, 0.01);
+  background: transparent;
   opacity: 0.5;
   filter: grayscale(20%);
 }
@@ -1826,7 +1833,7 @@ html {
   padding: 2.5rem 2rem;
   vertical-align: middle;
   font-size: 1.05rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
 }
 
 .checkbox-wrapper {
@@ -1863,6 +1870,7 @@ html {
   letter-spacing: 0.5px;
   text-shadow: 0 2px 4px rgba(6, 95, 70, 0.3);
 }
+
 
 .service-description {
   color: rgba(255, 255, 255, 0.9);
@@ -1909,10 +1917,14 @@ html {
   font-size: 1.1rem;
   font-weight: 600;
   text-align: center;
-  background: rgba(255, 255, 255, 0.03);
+  background: transparent;
   border-radius: 10px;
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.duration-info i {
+  color: #10b981;
+  font-size: 1rem;
 }
 
 .duration-info.not-specified {
@@ -1925,12 +1937,12 @@ html {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
+  background: transparent;
   border-radius: 10px;
   padding: 1rem;
   margin: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 
 .total-value {
   font-size: 2rem;
@@ -2795,7 +2807,7 @@ html {
     linear-gradient(180deg, #04120c 0%, #061a12 50%, #082419 100%);
   color: white;
   padding: 4rem 0 2rem;
-  margin-top: 4rem;
+  margin-top: 0;
 }
 
 .footer-container {
@@ -2818,9 +2830,6 @@ html {
 .footer-logo {
   width: 50px;
   height: 50px;
-  background: white;
-  border-radius: 10px;
-  padding: 8px;
   margin-bottom: 1rem;
   display: inline-block;
 }
@@ -2970,6 +2979,187 @@ html {
     padding: 3rem 0 4rem;
   }
   
+  /* Signature Section Mobile */
+  .signature-section {
+    padding: 3rem 0;
+  }
+  
+  .signature-section .section-header .section-title {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .signature-section .section-header .section-subtitle {
+    font-size: 1.1rem;
+    padding: 0 1rem;
+  }
+  
+  .signature-form-container {
+    margin: 1rem;
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+  }
+  
+  /* Form Sections Mobile */
+  .form-section {
+    margin-bottom: 2rem;
+  }
+  
+  .form-section-title {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  /* Payment Cards Mobile */
+  .payment-type-cards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .payment-type-card {
+    padding: 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .final-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  
+  .discount-badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+  }
+  
+  /* Payment Methods Mobile */
+  .payment-methods {
+    gap: 1rem;
+  }
+  
+  .payment-method-option {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .method-label {
+    font-size: 1rem;
+  }
+  
+  /* Signature Canvas Mobile */
+  .signature-canvas-wrapper {
+    border-radius: 16px;
+    border-width: 2px;
+  }
+  
+  .signature-canvas {
+    height: 200px;
+    border-radius: 14px;
+  }
+  
+  .signature-instructions p {
+    font-size: 1rem;
+    text-align: center;
+  }
+  
+  .signature-actions {
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  /* Submit Button Mobile */
+  .btn-submit-signature {
+    width: 100%;
+    padding: 1.25rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 16px;
+    min-height: 60px;
+  }
+  
+  /* Requirements hint mobile */
+  .requirements-hint {
+    text-align: center;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+  
+  .requirements-hint p {
+    font-size: 0.9rem;
+    color: #dc2626;
+    margin: 0;
+  }
+  
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+  
+  .hero-right {
+    display: none;
+  }
+  
+  /* Company Branding Mobile Layout with CEO */
+  .company-branding {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .mobile-ceo {
+    display: flex !important;
+  }
+  
+  .ceo-presentation {
+    display: flex;
+    align-items: center;
+  }
+  
+  .ceo-image-container {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .ceo-photo {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .ceo-title {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .company-logo {
+    width: 120px;
+    height: 120px;
+  }
+  
+  /* Company Tagline Mobile Adjustments */
+  .company-tagline-centered {
+    font-size: 0.9rem;
+    text-align: center;
+    max-width: 280px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.4;
+  }
+  
   .company-name {
     font-size: 2.5rem;
   }
@@ -2991,6 +3181,373 @@ html {
     font-size: 1.4rem;
   }
   
+  /* About Section Mobile Improvements */
+  .about-content {
+    flex-direction: column;
+    gap: 3rem;
+  }
+  
+  .about-left {
+    order: 1;
+  }
+  
+  .about-center {
+    order: 2;
+  }
+  
+  .about-right {
+    order: 3;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  
+  .stat-card {
+    padding: 1.5rem 1rem;
+  }
+  
+  .map-image {
+    max-width: 300px;
+    height: auto;
+    margin: 0 auto;
+  }
+  
+  .locations-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    text-align: center;
+    justify-items: center;
+  }
+  
+  /* Team Section Mobile */
+  .team-members-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  
+  .specialist-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    gap: 1rem;
+    min-height: auto;
+  }
+  
+  .specialist-photo-section {
+    margin-bottom: 0;
+  }
+  
+  .specialist-photo-section .photo-frame {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .specialist-photo,
+  .initials-avatar {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .specialist-info {
+    text-align: center;
+  }
+  
+  .specialist-name {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .specialist-position {
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+  
+  /* Partners Section Mobile */
+  .partners-section {
+    padding: 6rem 0 4rem;
+    margin-top: -2rem;
+  }
+  
+  .partners-section .section-header {
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+  }
+  
+  .partners-section .section-title {
+    font-size: 2rem;
+    line-height: 1.3;
+  }
+  
+  .partners-section .section-subtitle {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  .partners-showcase {
+    margin-top: 2rem;
+  }
+  
+  .partners-carousel {
+    padding: 2rem 1rem 1.5rem;
+    margin: 0 1rem 2rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 16px;
+  }
+  
+  .carousel-track {
+    display: flex;
+    gap: 1.5rem;
+    min-width: fit-content;
+    padding: 0.5rem 0;
+  }
+  
+  .partner-logo {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    width: 120px;
+    height: 80px;
+  }
+  
+  .partner-logo img {
+    max-width: 100px;
+    max-height: 60px;
+    object-fit: contain;
+  }
+  
+  /* Strategic Investment Section Mobile */
+  .proposal-unified-section {
+    padding: 4rem 0 2rem;
+    margin-top: -2rem;
+  }
+  
+  .proposal-intro-compact {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+  }
+  
+  .proposal-title {
+    font-size: 2rem;
+    line-height: 1.3;
+    margin: 0 0 1rem;
+  }
+  
+  .proposal-title::after {
+    width: 60px;
+    height: 2px;
+    bottom: -8px;
+  }
+  
+  .proposal-subtitle {
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 100%;
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+  
+  /* Services Table Wrapper Mobile */
+  .services-table-wrapper {
+    margin: 2rem 1rem 0;
+    border-radius: 16px;
+    background: transparent;
+  }
+  
+  .services-mobile-view {
+    padding: 1.5rem 1rem;
+  }
+  
+  .service-card-mobile {
+    background: transparent;
+    border: 1px solid rgba(6, 95, 70, 0.3);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+  }
+  
+  .service-card-mobile:hover {
+    background: rgba(6, 95, 70, 0.05);
+    border-color: rgba(6, 95, 70, 0.5);
+    transform: translateY(-2px);
+  }
+  
+  .service-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .service-checkbox-mobile {
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+  }
+  
+  .service-title-mobile {
+    flex: 1;
+  }
+  
+  .service-name-mobile {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+    line-height: 1.3;
+  }
+  
+  .quantity-badge-mobile {
+    background: rgba(6, 95, 70, 0.3);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  
+  .service-card-content {
+    margin-top: 1rem;
+  }
+  
+  .service-description-mobile {
+    margin-bottom: 0.5rem;
+  }
+  
+  .service-description-mobile p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+    margin-bottom: 0;
+  }
+  
+  .service-description-mobile p.expanded {
+    max-height: 500px;
+    opacity: 1;
+    margin-bottom: 1rem;
+  }
+  
+  .expand-button-mobile {
+    background: rgba(6, 95, 70, 0.08);
+    border: 1px solid rgba(6, 95, 70, 0.2);
+    border-radius: 4px;
+    color: rgba(6, 95, 70, 0.9);
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-weight: 500;
+    margin-top: 0.75rem;
+    width: 100%;
+    min-height: 36px;
+    transition: all 0.2s ease;
+  }
+  
+  .expand-button-mobile:hover {
+    background: rgba(6, 95, 70, 0.12);
+    border-color: rgba(6, 95, 70, 0.3);
+    color: rgba(6, 95, 70, 1);
+  }
+  
+  .expand-button-mobile:active {
+    background: rgba(6, 95, 70, 0.15);
+    transform: scale(0.98);
+  }
+  
+  .expand-button-mobile i {
+    transition: transform 0.3s ease;
+    font-size: 0.7rem;
+  }
+  
+  .expand-button-mobile.expanded i {
+    transform: rotate(180deg);
+  }
+  
+  .expand-button-mobile.expanded {
+    background: rgba(6, 95, 70, 0.12);
+    border-color: rgba(6, 95, 70, 0.25);
+  }
+  
+  .service-info-mobile {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  
+  .duration-mobile,
+  .investment-mobile {
+    flex: 1;
+  }
+  
+  .label-mobile {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  
+  .value-mobile {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  
+  .total-value-mobile {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  
+  .unit-value-mobile {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+  }
+  
+  /* Remove duplicate - styles moved above */
+  
+  .service-card-header {
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .service-title-mobile {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .service-info-mobile {
+    gap: 1.5rem;
+  }
+  
+  .duration-mobile,
+  .investment-mobile {
+    flex: 1;
+    min-width: 120px;
+  }
+  
   .company-stats {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -3002,11 +3559,6 @@ html {
   
   .proposal-main-title {
     font-size: 2.25rem;
-  }
-  
-  .team-grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
   }
   
   .services-table th,
@@ -3021,6 +3573,8 @@ html {
   
   .signature-form-container {
     padding: 2rem;
+    margin: 1rem;
+    border-radius: 16px;
   }
   
   .action-buttons {
@@ -3047,6 +3601,53 @@ html {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+  }
+  
+  /* Services Summary Mobile */
+  .services-summary {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+  }
+  
+  .selected-count {
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .summary-total {
+    text-align: center;
+  }
+  
+  .total-amount {
+    font-size: 1.8rem;
+    margin: 0.5rem 0;
+  }
+  
+  /* Payment Type Cards Mobile */
+  .payment-type-cards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .payment-type-card {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  /* Payment Methods Mobile */
+  .payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .payment-method-option {
+    padding: 1rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
   }
 }
 
@@ -3094,8 +3695,60 @@ html {
     padding: 4rem 0;
   }
   
+  /* Stats Grid Adjustments for 1280x800 */
+  .stats-grid {
+    max-width: 480px;
+    gap: 1.25rem;
+  }
+  
+  .stat-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .stat-number {
+    font-size: 1.9rem;
+    line-height: 1;
+  }
+  
+  .stat-text {
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+  
   .team-section {
     padding: 4rem 0;
+  }
+  
+  /* Team Grid Adjustments for 1280x800 */
+  .team-members-grid {
+    grid-template-columns: repeat(3, 380px);
+    gap: 1.25rem;
+    max-width: 1200px;
+  }
+  
+  .specialist-card {
+    width: 380px;
+    padding: 1rem 2.5rem;
+    gap: 1.5rem;
+  }
+  
+  .specialist-photo-section .photo-frame {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .specialist-photo,
+  .initials-avatar {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .specialist-name {
+    font-size: 1.1rem;
+  }
+  
+  .specialist-position {
+    font-size: 0.9rem;
   }
   
   .services-table-wrapper {
@@ -3151,6 +3804,31 @@ html {
   .signature-form-container {
     max-width: 900px;
     padding: 2.5rem;
+  }
+  
+  /* Footer Mobile Centering */
+  .footer-contact {
+    text-align: center;
+  }
+  
+  .footer-contact h4 {
+    text-align: center;
+  }
+  
+  .contact-item {
+    justify-content: center;
+  }
+  
+  .social-media {
+    text-align: center;
+  }
+  
+  .social-media h5 {
+    text-align: center;
+  }
+  
+  .social-links {
+    justify-content: center;
   }
 }
 
@@ -3328,6 +4006,53 @@ html {
     padding: 2rem 0 2.5rem;
   }
   
+  .hero-content {
+    gap: 1.5rem;
+  }
+  
+  /* Hide original hero-right on small mobile */
+  .hero-right {
+    display: none;
+  }
+  
+  /* Show mobile CEO */
+  .mobile-ceo {
+    display: flex !important;
+  }
+  
+  /* Company Branding Small Mobile Layout */
+  .company-branding {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .company-logo {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .ceo-photo {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .ceo-title {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.7rem;
+  }
+  
+  /* Company Tagline Small Mobile */
+  .company-tagline-centered {
+    font-size: 0.85rem;
+    text-align: center;
+    max-width: 260px;
+    margin: 0 auto 1rem;
+    line-height: 1.3;
+  }
+  
   .company-name {
     font-size: 1.8rem;
     line-height: 1.2;
@@ -3361,6 +4086,183 @@ html {
     padding: 0.4rem 0.8rem;
   }
   
+  /* About Section Small Mobile */
+  .about-content {
+    gap: 2rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    padding: 1.25rem 1rem;
+  }
+  
+  .map-image {
+    max-width: 250px;
+  }
+  
+  .locations-list {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+    text-align: center;
+    justify-items: center;
+  }
+  
+  /* Team Section Small Mobile */
+  .team-members-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  
+  .specialist-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem 0.75rem;
+    gap: 0.75rem;
+    min-height: auto;
+  }
+  
+  .specialist-photo-section {
+    margin-bottom: 0;
+  }
+  
+  .specialist-photo-section .photo-frame {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .specialist-photo,
+  .initials-avatar {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .specialist-info {
+    text-align: center;
+  }
+  
+  .specialist-name {
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+    line-height: 1.2;
+  }
+  
+  .specialist-position {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    line-height: 1.2;
+  }
+  
+  /* Partners Section Small Mobile */
+  .partners-section {
+    padding: 5rem 0 3rem;
+    margin-top: -1.5rem;
+  }
+  
+  .partners-section .section-title {
+    font-size: 1.8rem;
+  }
+  
+  .partners-section .section-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .partners-carousel {
+    padding: 1.5rem 0.75rem 1rem;
+    margin: 0 0.75rem 1.5rem;
+    border-radius: 12px;
+  }
+  
+  .carousel-track {
+    gap: 1rem;
+  }
+  
+  .partner-logo {
+    background: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100px;
+    height: 70px;
+    padding: 0.75rem;
+  }
+  
+  .partner-logo img {
+    max-width: 80px;
+    max-height: 50px;
+  }
+  
+  /* Strategic Investment Section Small Mobile */
+  .proposal-unified-section {
+    padding: 3rem 0 1.5rem;
+    margin-top: -1.5rem;
+  }
+  
+  .proposal-intro-compact {
+    margin-bottom: 1.5rem;
+    padding: 0 0.75rem;
+  }
+  
+  .proposal-title {
+    font-size: 1.6rem;
+    line-height: 1.2;
+    margin: 0 0 0.75rem;
+  }
+  
+  .proposal-title::after {
+    width: 50px;
+    height: 2px;
+    bottom: -6px;
+  }
+  
+  .proposal-subtitle {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0.75rem auto;
+    padding: 0 0.5rem;
+  }
+  
+  /* Services Table Wrapper Small Mobile */
+  .services-table-wrapper {
+    margin: 1.5rem 0.75rem 0;
+    border-radius: 12px;
+  }
+  
+  .services-mobile-view {
+    padding: 1rem 0.75rem;
+  }
+  
+  .service-card-mobile {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: 10px;
+  }
+  
+  .service-card-header {
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .service-name-mobile {
+    font-size: 1rem;
+  }
+  
+  .service-description-mobile p {
+    font-size: 0.85rem;
+  }
+  
+  .service-info-mobile {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .total-value-mobile {
+    font-size: 1rem;
+  }
+  
   .proposal-intro-compact {
     padding: 2rem 0;
   }
@@ -3373,6 +4275,31 @@ html {
   .proposal-subtitle {
     font-size: 1rem;
     line-height: 1.5;
+  }
+  
+  /* Services Mobile Cards Small Screen */
+  .service-card-mobile {
+    margin-bottom: 0.75rem;
+  }
+  
+  .service-card-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .service-checkbox-mobile {
+    align-self: flex-start;
+  }
+  
+  .service-info-mobile {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .duration-mobile,
+  .investment-mobile {
+    min-width: auto;
   }
   
   .services-table-wrapper {
@@ -3407,9 +4334,10 @@ html {
   }
   
   .services-summary {
+    margin: 1rem 0;
+    padding: 1rem;
     flex-direction: column;
     gap: 1rem;
-    padding: 1rem;
     text-align: center;
   }
   
@@ -3419,6 +4347,34 @@ html {
   
   .total-amount {
     font-size: 1.5rem;
+  }
+  
+  /* Payment Form Small Mobile */
+  .signature-form-container {
+    margin: 0.75rem;
+    padding: 1.5rem;
+  }
+  
+  .form-section-title {
+    font-size: 1.2rem;
+  }
+  
+  .payment-type-cards {
+    gap: 0.75rem;
+  }
+  
+  .payment-type-card {
+    padding: 1.25rem;
+  }
+  
+  .signature-canvas {
+    height: 150px;
+  }
+  
+  .btn-submit-signature {
+    min-width: auto;
+    width: 100%;
+    padding: 1rem;
   }
   
   .signature-section {
@@ -3514,6 +4470,43 @@ html {
     font-size: 0.85rem;
   }
   
+  /* Enhanced signature section for small mobile */
+  .signature-section .section-header {
+    margin-bottom: 2rem;
+  }
+  
+  .signature-section .section-header .section-title {
+    font-size: 2rem;
+  }
+  
+  .discount-warning {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+  }
+  
+  .signature-instructions p {
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .signature-actions {
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .btn-secondary {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .signature-status {
+    font-size: 0.85rem;
+  }
+  
   .site-footer {
     padding: 3rem 0 1.5rem;
   }
@@ -3600,6 +4593,21 @@ html {
   .signature-canvas {
     height: 120px;
   }
+  
+  /* Enhanced landscape signature layout */
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .payment-type-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .signature-instructions p {
+    font-size: 0.85rem;
+  }
 }
 
 /* High DPI Displays */
@@ -3627,6 +4635,36 @@ html {
   
   .signature-canvas {
     touch-action: none;
+    cursor: crosshair;
+  }
+  
+  /* Enhanced touch targets */
+  .field-input,
+  .field-textarea {
+    min-height: 44px;
+  }
+  
+  .signature-actions button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .payment-type-card {
+    padding: 1.5rem;
+    border-width: 2px;
+  }
+  
+  .payment-method-option {
+    padding: 1rem;
+  }
+  
+  /* Larger signature canvas for touch */
+  .signature-canvas {
+    height: 220px;
+  }
+  
+  .signature-placeholder {
+    font-size: 1rem;
   }
   
   .services-table input[type="checkbox"] {
