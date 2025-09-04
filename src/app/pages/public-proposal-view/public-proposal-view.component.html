@@ -63,8 +63,8 @@
               <div class="stat-text">Anos no Mercado</div>
             </div>
             <div class="stat-card">
-              <div class="stat-number">+1500</div>
-              <div class="stat-text">Líderes Transformados</div>
+              <div class="stat-number">360°</div>
+              <div class="stat-text">Soluções completas</div>
             </div>
             <div class="stat-card">
               <div class="stat-number">+100</div>
@@ -87,14 +87,13 @@
           <div class="presence-section">
             <h3 class="presence-title">Presença Nacional</h3>
             <div class="locations-list">
-              <div class="location-item">1. Espírito Santo-ES</div>
-              <div class="location-item">2. Goiás-GO</div>
-              <div class="location-item">3. Mato Grosso-MT</div>
-              <div class="location-item">4. Paraíba-PB</div>
-              <div class="location-item">5. Pernambuco-PE</div>
-              <div class="location-item">6. Paraná-PR</div>
-              <div class="location-item">7. Rio de Janeiro-RJ</div>
-              <div class="location-item">8. Tocantins-TO</div>
+              <div class="location-item">1. Goiás-GO</div>
+              <div class="location-item">2. Mato Grosso-MT</div>
+              <div class="location-item">3. Paraíba-PB</div>
+              <div class="location-item">4. Pernambuco-PE</div>
+              <div class="location-item">5. Paraná-PR</div>
+              <div class="location-item">6. Rio de Janeiro-RJ</div>
+              <div class="location-item">7. Tocantins-TO</div>
             </div>
           </div>
         </div>
@@ -115,44 +114,64 @@
             Profissionais altamente qualificados e experientes, dedicados ao sucesso do seu projeto imobiliário
           </p>
         </div>
-        
-        <!-- Team Members Grid -->
-        <div class="team-grid-container">
+      </div>
+    </div>
+    
+    <!-- Team Members Carousel - Full Width -->
+    <div class="team-grid-container">
           <!-- Loading State -->
           <div *ngIf="teamLoading" class="team-loading">
             <div class="loading-spinner"></div>
             <p>Carregando nossa equipe de especialistas...</p>
           </div>
           
-          <!-- Team Grid -->
-          <div class="team-members-grid" *ngIf="!teamLoading && teamMembers.length > 0">
-            <div *ngFor="let member of teamMembers; trackBy: trackByMemberId" 
-                 class="specialist-card">
+          <!-- Team Carousel -->
+          <div class="team-carousel-container" *ngIf="!teamLoading && teamMembers.length > 0">
+            <div class="team-carousel"
+                 (mouseenter)="pauseTeamCarousel()"
+                 (mouseleave)="resumeTeamCarousel()"
+                 (mousedown)="startTeamDrag($event)"
+                 (mousemove)="onTeamDrag($event)"
+                 (mouseup)="endTeamDrag()"
+                 (mouseleave)="endTeamDrag()"
+                 (touchstart)="startTeamTouch($event)"
+                 (touchmove)="onTeamTouchMove($event)"
+                 (touchend)="endTeamTouch()">
               
-              <!-- Photo Section -->
-              <div class="specialist-photo-section">
-                <div class="photo-frame">
-                  <img *ngIf="getTeamMemberPhotoUrl(member) && getTeamMemberPhotoUrl(member) !== ''" 
-                       [src]="getTeamMemberPhotoUrl(member)" 
-                       [alt]="member.name"
-                       class="specialist-photo"
-                       (error)="onImageError($event)"
-                       style="display: block;">
-                  <div *ngIf="!getTeamMemberPhotoUrl(member) || getTeamMemberPhotoUrl(member) === ''" 
-                       class="photo-placeholder" 
-                       style="display: flex !important;">
-                    <div class="initials-avatar">
-                      {{ getTeamMemberInitials(member.name) }}
+              <!-- Carousel Track -->
+              <div class="team-carousel-track"
+                   [class.is-dragging]="isTeamDragging"
+                   [style.transform]="currentTeamTransform">
+                <div *ngFor="let member of duplicatedTeamMembers; trackBy: trackByMemberId" 
+                     class="specialist-card">
+                  
+                  <!-- Photo Section -->
+                  <div class="specialist-photo-section">
+                    <div class="photo-frame">
+                      <img *ngIf="getTeamMemberPhotoUrl(member) && getTeamMemberPhotoUrl(member) !== ''" 
+                           [src]="getTeamMemberPhotoUrl(member)" 
+                           [alt]="member.name"
+                           class="specialist-photo"
+                           (error)="onImageError($event)"
+                           style="display: block;"
+                           draggable="false">
+                      <div *ngIf="!getTeamMemberPhotoUrl(member) || getTeamMemberPhotoUrl(member) === ''" 
+                           class="photo-placeholder" 
+                           style="display: flex !important;">
+                        <div class="initials-avatar">
+                          {{ getTeamMemberInitials(member.name) }}
+                        </div>
+                      </div>
                     </div>
                   </div>
+                  
+                  <!-- Info Section -->
+                  <div class="specialist-info">
+                    <h3 class="specialist-name">{{ member.name }}</h3>
+                    <p class="specialist-position" *ngIf="member.cargo">{{ member.cargo }}</p>
+                    <p class="specialist-position" *ngIf="!member.cargo && member.is_fixed">CEO & Fundadora</p>
+                  </div>
                 </div>
-              </div>
-              
-              <!-- Info Section -->
-              <div class="specialist-info">
-                <h3 class="specialist-name">{{ member.name }}</h3>
-                <p class="specialist-position" *ngIf="member.cargo">{{ member.cargo }}</p>
-                <p class="specialist-position" *ngIf="!member.cargo && member.is_fixed">CEO & Fundadora</p>
               </div>
             </div>
           </div>
@@ -186,8 +205,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
   </section>
 
   <!-- Clients Partners Section -->

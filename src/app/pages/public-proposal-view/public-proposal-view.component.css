@@ -840,6 +840,46 @@ html {
   margin: 0 auto;
 }
 
+/* Team Carousel Styles */
+.team-carousel-container {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+}
+
+.team-carousel {
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.team-carousel.dragging {
+  cursor: grabbing;
+}
+
+.team-carousel-track {
+  display: flex;
+  gap: 1.5rem;
+  will-change: transform;
+  transition: none;
+}
+
+.team-carousel-track.is-dragging {
+  animation-play-state: paused;
+}
+
+@keyframes teamCarouselSlide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+
 /* Specialist Cards */
 .specialist-card {
   background: rgba(255, 255, 255, 0.08);
@@ -853,6 +893,10 @@ html {
   display: flex;
   align-items: center;
   gap: 2rem;
+  flex: 0 0 400px;
+  min-width: 400px;
+  max-width: 400px;
+  user-select: none;
 }
 
 .specialist-card:hover {
@@ -1137,9 +1181,21 @@ html {
     margin: 0 auto;
   }
   
+  .team-carousel-container {
+    overflow: visible;
+    padding: 0 2rem;
+  }
+  
+  .team-carousel-track {
+    gap: 1rem;
+  }
+  
   .specialist-card {
     min-height: 280px;
+    width: 350px;
+    padding: 1rem 2rem;
   }
+  
   
   .specialist-photo-section {
     padding: 2rem 2rem 0;
@@ -1329,7 +1385,7 @@ html {
   display: flex;
   gap: 3rem;
   width: max-content;
-  animation: scroll 180s linear infinite;
+  animation: scroll 80s linear infinite;
   transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -1363,15 +1419,16 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.9);
+  background: #FFFFFF;
   border-radius: 16px;
   padding: 1.5rem;
   transition: all 0.3s ease;
 }
 
 .partner-logo:hover {
-  background: rgba(255, 255, 255, 1);
+  background: #FFFFFF;
   transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .partner-logo img {
@@ -3316,7 +3373,7 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
+    background: #FFFFFF;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
     padding: 1rem;
@@ -4193,7 +4250,7 @@ html {
   }
   
   .partner-logo {
-    background: white;
+    background: #FFFFFF;
     border: 1px solid rgba(255, 255, 255, 0.2);
     width: 100px;
     height: 70px;

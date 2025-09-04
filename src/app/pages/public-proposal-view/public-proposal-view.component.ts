@@ -36,92 +36,26 @@ export class PublicProposalViewComponent implements OnInit {
   // Landing page properties
   clients: { name: string, logo: string }[] = [];
   
-  // Lista completa de logos de clientes disponíveis
+  // Lista filtrada de logos de clientes selecionados
   private clientLogos = [
-    'A.Madeira.png',
-    'ADEMI-GO.webp',
-    'BlackHaus.jpg',
-    'BpImoveis.png',
-    'BrDU.png',
-    'CGA.jpg',
-    'CIR_Imobiliaria.png',
-    'Climatiza.png',
-    'EBM.png',
-    'Elmo-inc.jpg',
-    'GrupoNB.png',
-    'GrupoReal.png',
-    'Habitat.png',
-    'Hopp.png',
-    'J.Virgilio.png',
-    'JSI-incoubr.png',
-    'Juntos.png',
-    'virtoImoveis.webp',
+    'city.webp',
     'Logo-CMO-Construtora.webp',
-    'Logo-Lopes-Consultoria-de-Imoveis-2020.png',
-    'Logo-casa-modelo_01.webp',
-    'Mava.png',
-    'NATO0419_CERNE_ASSINATURA-VISUAL_VERTICAL_AZUL_RGB-qmunx53wv2p0t48avgy5hbhaz90fzpy8ovp4t49xla.png',
-    'O-.png',
-    'Palme.png',
-    'Q.png',
-    'QS.jpg',
-    'RDiniz.png',
-    'SB Engenharia.png',
-    'Somos.jpg',
+    'logo-adao.png',
     'Séren.png',
-    'TRL.png',
-    'Tandoor.png',
+    'Habitat.png',
     'TopConstrutora.png',
+    'raizUrbana.png',
+    'Elmo-inc.jpg',
+    'myBroker.webp',
     'URBS One - Assinaturas_Separadas-01 (1).png',
     'URBS infinity P cima (1).png',
     'UrbsTrend.png',
-    'VictorTomé.webp',
-    'VilaBrasil.png',
-    'WM.png',
-    'aestra.jpg',
-    'audicenter.jpg',
-    'brix.png',
-    'casaDecor.png',
-    'cir--600.png',
-    'city.webp',
-    'cropped-Logo-Parquis.png',
-    'engemerit.jpg',
-    'facilita.png',
-    'fariasConstrutora.png',
-    'flor_de_anis.png',
-    'g2-houserpng.webp',
-    'grupo-meta.png',
-    'grupoMaua.png',
-    'grupo_meta_go_logo.jpg',
-    'haura_principal_preto (1).png',
-    'hausz.png',
     'haut.webp',
-    'highpar.jpg',
-    'huna.png',
-    'logo-adao.png',
-    'logo_imperio-das-pickups_tH5BfH.png',
-    'logosartocrmpng.webp',
-    'lusah.png',
-    'margilTransportes.png',
-    'moinho.png',
-    'monacoAutopecas.png',
-    'myBroker.webp',
-    'nitida.png',
-    'nobreImobiliaria.png',
-    'nobre_principal_creci_azulevermelho  (1).png',
-    'piacentini-favicon.png',
-    'prestacon.png',
-    'raizUrbana.png',
     'realize.png',
-    'rich-preview-gaas.jpg',
-    'sosvida.png',
-    'sousaAndrade.png',
-    'tapajos.webp',
-    'trigobel.png',
-    'value.png',
-    'vincer.png',
-    'yuta.png',
-    'z+z.jpg'
+    'haura_principal_preto (1).png',
+    'RDiniz.png',
+    'Logo-Lopes-Consultoria-de-Imoveis-2020.png',
+    'EBM.png'
   ];
   
   carouselProgress = 0;
@@ -138,7 +72,22 @@ export class PublicProposalViewComponent implements OnInit {
 
   // Team members
   teamMembers: PublicTeamMember[] = [];
+  duplicatedTeamMembers: PublicTeamMember[] = [];
   teamLoading = false;
+  
+  // Team carousel properties
+  teamCarouselProgress = 0;
+  isTeamManualControl = false;
+  isTeamDragging = false;
+  currentTeamTransform = '';
+  
+  private teamProgressInterval: any;
+  private teamManualControlTimeout: any;
+  private teamStartX = 0;
+  private teamCurrentX = 0;
+  private teamInitialTransformX = 0;
+  private teamAnimationId = 0;
+  private teamCurrentPosition = 0;
 
   proposal: PublicProposal | null = null;
   signatureForm!: FormGroup;
@@ -232,6 +181,18 @@ export class PublicProposalViewComponent implements OnInit {
     if (this.manualControlTimeout) {
       clearTimeout(this.manualControlTimeout);
     }
+    
+    if (this.teamProgressInterval) {
+      clearInterval(this.teamProgressInterval);
+    }
+    
+    if (this.teamManualControlTimeout) {
+      clearTimeout(this.teamManualControlTimeout);
+    }
+    
+    if (this.teamAnimationId) {
+      cancelAnimationFrame(this.teamAnimationId);
+    }
   }
 
   private initializeForms(proposal: PublicProposal | null): void {
@@ -280,6 +241,7 @@ export class PublicProposalViewComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.teamMembers = response.teamMembers || [];
+          this.initializeTeamCarousel();
           this.teamLoading = false;
         },
         error: (error) => {
@@ -896,90 +858,24 @@ export class PublicProposalViewComponent implements OnInit {
     
     // Mapeia nomes específicos conhecidos para uma melhor exibição
     const nameMap: { [key: string]: string } = {
-      'A.Madeira': 'A. Madeira',
-      'ADEMI-GO': 'ADEMI GO',
-      'BlackHaus': 'Black Haus',
-      'BpImoveis': 'BP Imóveis',
-      'BrDU': 'BrDU',
-      'CGA': 'CGA',
-      'CIR_Imobiliaria': 'CIR Imobiliária',
-      'Climatiza': 'Climatiza',
-      'EBM': 'EBM',
-      'Elmo-inc': 'Elmo Incorporações',
-      'GrupoNB': 'Grupo NB',
-      'GrupoReal': 'Grupo Real',
-      'Habitat': 'Habitat',
-      'Hopp': 'Hopp',
-      'J.Virgilio': 'J. Virgílio',
-      'JSI-incoubr': 'JSI Incorporações',
-      'Juntos': 'Juntos',
-      'virtoImoveis': 'Imóveis',
+      'city': 'City',
       'Logo-CMO-Construtora': 'CMO Construtora',
-      'Logo-Lopes-Consultoria-de-Imoveis-2020': 'Lopes Consultoria',
-      'Logo-casa-modelo_01': 'Casa Modelo',
-      'Mava': 'Mava',
-      'NATO0419_CERNE_ASSINATURA-VISUAL_VERTICAL_AZUL_RGB-qmunx53wv2p0t48avgy5hbhaz90fzpy8ovp4t49xla': 'Cerne',
-      'O-': 'O+',
-      'Palme': 'Palme',
-      'Q': 'Q Incorporações',
-      'QS': 'QS',
-      'RDiniz': 'R. Diniz',
-      'SB Engenharia': 'SB Engenharia',
-      'Somos': 'Somos',
+      'logo-adao': 'Adão',
       'Séren': 'Séren',
-      'TRL': 'TRL',
-      'Tandoor': 'Tandoor',
+      'Habitat': 'Habitat',
       'TopConstrutora': 'Top Construtora',
+      'raizUrbana': 'Raiz Urbana',
+      'Elmo-inc': 'Elmo Incorporações',
+      'myBroker': 'My Broker',
       'URBS One - Assinaturas_Separadas-01 (1)': 'URBS One',
       'URBS infinity P cima (1)': 'URBS Infinity',
       'UrbsTrend': 'URBS Trend',
-      'VictorTomé': 'Victor Tomé',
-      'VilaBrasil': 'Vila Brasil',
-      'WM': 'WM',
-      'aestra': 'Aestra',
-      'audicenter': 'Audicenter',
-      'brix': 'Brix',
-      'casaDecor': 'Casa Decor',
-      'cir--600': 'CIR',
-      'city': 'City',
-      'cropped-Logo-Parquis': 'Parquis',
-      'engemerit': 'Engemerit',
-      'facilita': 'Facilita',
-      'fariasConstrutora': 'Farias Construtora',
-      'flor_de_anis': 'Flor de Anis',
-      'g2-houserpng': 'G2 House',
-      'grupo-meta': 'Grupo Meta',
-      'grupoMaua': 'Grupo Mauá',
-      'grupo_meta_go_logo': 'Grupo Meta GO',
-      'haura_principal_preto (1)': 'Haura',
-      'hausz': 'Hausz',
       'haut': 'Haut',
-      'highpar': 'Highpar',
-      'huna': 'Huna',
-      'logo-adao': 'Adão',
-      'logo_imperio-das-pickups_tH5BfH': 'Império das Pickups',
-      'logosartocrmpng': 'Sarto CRM',
-      'lusah': 'Lusah',
-      'margilTransportes': 'Margil Transportes',
-      'moinho': 'Moinho',
-      'monacoAutopecas': 'Monaco Autopeças',
-      'myBroker': 'My Broker',
-      'nitida': 'Nítida',
-      'nobreImobiliaria': 'Nobre Imobiliária',
-      'nobre_principal_creci_azulevermelho  (1)': 'Nobre',
-      'piacentini-favicon': 'Piacentini',
-      'prestacon': 'Prestacon',
-      'raizUrbana': 'Raiz Urbana',
       'realize': 'Realize',
-      'rich-preview-gaas': 'GAAS',
-      'sosvida': 'SOS Vida',
-      'sousaAndrade': 'Sousa Andrade',
-      'tapajos': 'Tapajós',
-      'trigobel': 'Trigobel',
-      'value': 'Value',
-      'vincer': 'Vincer',
-      'yuta': 'Yuta',
-      'z+z': 'Z+Z'
+      'haura_principal_preto (1)': 'Haura',
+      'RDiniz': 'R. Diniz',
+      'Logo-Lopes-Consultoria-de-Imoveis-2020': 'Lopes Consultoria',
+      'EBM': 'EBM'
     };
     
     return nameMap[name] || name.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -991,7 +887,7 @@ export class PublicProposalViewComponent implements OnInit {
 
   private startProgressAnimation(): void {
     // Simula o progresso baseado na animação CSS
-    const animationDuration = 180000; // 180s da animação CSS
+    const animationDuration = 80000; // 80s da animação CSS (muito mais rápido)
     const updateInterval = 100; // Atualiza a cada 100ms
     let elapsed = 0;
 
@@ -1221,5 +1117,129 @@ export class PublicProposalViewComponent implements OnInit {
 
   trackByMemberId(index: number, member: PublicTeamMember): number | string {
     return member.id;
+  }
+
+  // === TEAM CAROUSEL METHODS ===
+
+  private initializeTeamCarousel(): void {
+    if (this.teamMembers.length > 0) {
+      // Criar muitas cópias para carrossel verdadeiramente infinito
+      const copies = 10; // Mais cópias = mais tempo sem reset
+      this.duplicatedTeamMembers = [];
+      for (let i = 0; i < copies; i++) {
+        this.duplicatedTeamMembers = [...this.duplicatedTeamMembers, ...this.teamMembers];
+      }
+      this.startInfiniteCarousel();
+    }
+  }
+
+  private startInfiniteCarousel(): void {
+    let position = 0;
+    const speed = 2; // pixels por frame (mais rápido)
+
+    const animate = () => {
+      if (!this.isTeamManualControl && !this.isTeamDragging) {
+        position += speed;
+        this.currentTeamTransform = `translateX(-${position}px)`;
+        
+        // Só resetar depois de MUITO tempo (com 10 cópias nunca vai ser visível)
+        if (position > 50000) { // Reset após 50.000 pixels (imperceptível)
+          position = 0;
+        }
+      }
+      
+      this.teamAnimationId = requestAnimationFrame(animate);
+    };
+    
+    animate();
+  }
+
+
+  pauseTeamCarousel(): void {
+    this.isTeamManualControl = true;
+  }
+
+  resumeTeamCarousel(): void {
+    if (this.teamManualControlTimeout) {
+      clearTimeout(this.teamManualControlTimeout);
+    }
+    
+    this.teamManualControlTimeout = setTimeout(() => {
+      this.isTeamManualControl = false;
+    }, 1000);
+  }
+
+  // Mouse drag methods para equipe
+  startTeamDrag(event: MouseEvent): void {
+    this.isTeamDragging = true;
+    this.teamStartX = event.clientX;
+    this.teamInitialTransformX = this.getCurrentTeamTransformValue();
+    this.pauseTeamCarousel();
+    event.preventDefault();
+  }
+
+  onTeamDrag(event: MouseEvent): void {
+    if (!this.isTeamDragging) return;
+    
+    this.teamCurrentX = event.clientX;
+    const deltaX = this.teamCurrentX - this.teamStartX;
+    const newTransformX = this.teamInitialTransformX + deltaX;
+    
+    this.currentTeamTransform = `translateX(${newTransformX}px)`;
+    event.preventDefault();
+  }
+
+  endTeamDrag(): void {
+    if (!this.isTeamDragging) return;
+    
+    this.isTeamDragging = false;
+    this.currentTeamTransform = '';
+    
+    // Retomar o carousel após um delay
+    setTimeout(() => {
+      this.resumeTeamCarousel();
+    }, 1000);
+  }
+
+  // Touch methods para equipe
+  startTeamTouch(event: TouchEvent): void {
+    this.isTeamDragging = true;
+    this.teamStartX = event.touches[0].clientX;
+    this.teamInitialTransformX = this.getCurrentTeamTransformValue();
+    this.pauseTeamCarousel();
+  }
+
+  onTeamTouchMove(event: TouchEvent): void {
+    if (!this.isTeamDragging) return;
+    
+    this.teamCurrentX = event.touches[0].clientX;
+    const deltaX = this.teamCurrentX - this.teamStartX;
+    const deltaY = Math.abs(event.touches[0].clientY - event.touches[0].clientY);
+    
+    // Se o movimento é mais horizontal que vertical, prevenir scroll da página
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      event.preventDefault();
+    }
+    
+    const newTransformX = this.teamInitialTransformX + deltaX;
+    this.currentTeamTransform = `translateX(${newTransformX}px)`;
+  }
+
+  endTeamTouch(): void {
+    if (!this.isTeamDragging) return;
+    
+    this.isTeamDragging = false;
+    this.currentTeamTransform = '';
+    
+    // Retomar o carousel após um delay
+    setTimeout(() => {
+      this.resumeTeamCarousel();
+    }, 1000);
+  }
+
+  private getCurrentTeamTransformValue(): number {
+    // Extrair o valor atual da transform do elemento
+    // Para simplificar, começamos do 0 cada vez que começamos a arrastar
+    return 0;
   }
 }
