@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
+import { DocumentMaskDirective } from '../../directives/document-mask.directive';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Subject, takeUntil, forkJoin, BehaviorSubject } from 'rxjs';
@@ -15,7 +16,7 @@ import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 @Component({
   selector: 'app-proposal-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, CurrencyMaskDirective, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, CurrencyMaskDirective, DocumentMaskDirective, BreadcrumbComponent],
   templateUrl: './proposal-form.html',
   styleUrls: ['./proposal-form.css'],
   animations: [
@@ -80,6 +81,11 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       this.isEditMode = true;
       this.loadProposal();
     }
+
+    // Observar mudanças no tipo de cliente para ajustar validações
+    this.newClientForm.get('client_type')?.valueChanges.subscribe(value => {
+      this.updateDocumentValidation(value);
+    });
   }
 
   ngOnDestroy(): void {
@@ -100,6 +106,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       client_type: ['', Validators.required],
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
+      cpf: [''],
+      cnpj: [''],
       trade_name: [''] // Apenas para PJ, opcional
     });
 
@@ -402,13 +410,13 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     if (clientType === 'pf') {
       // Pessoa Física - usa email único
       clientData.email = formValue.email || '';
-      clientData.cpf = '00000000000'; // CPF temporário com zeros
+      clientData.cpf = formValue.cpf?.replace(/\D/g, '') || '00000000000'; // Remove formatação do CPF
       clientData.full_name = formValue.name || '';
     } else {
       // Pessoa Jurídica - pode usar array de emails
       clientData.email = formValue.email || ''; // Tentar email único também
       clientData.emails = [formValue.email || '']; // E array de emails
-      clientData.cnpj = '00000000000000'; // CNPJ temporário com zeros
+      clientData.cnpj = formValue.cnpj?.replace(/\D/g, '') || '00000000000000'; // Remove formatação do CNPJ
       clientData.company_name = formValue.name || '';
       clientData.trade_name = formValue.trade_name || '';
       
@@ -486,12 +494,12 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
     if (clientType === 'pf') {
       minimalData.email = formValue.email || '';
-      minimalData.cpf = '00000000000';
+      minimalData.cpf = formValue.cpf?.replace(/\D/g, '') || '00000000000';
       minimalData.full_name = formValue.name || '';
     } else {
       // Try only with email field (not emails array) for PJ
       minimalData.email = formValue.email || '';
-      minimalData.cnpj = '00000000000000';
+      minimalData.cnpj = formValue.cnpj?.replace(/\D/g, '') || '00000000000000';
       minimalData.company_name = formValue.name || '';
       minimalData.trade_name = formValue.trade_name || '';
       minimalData.legal_representative = 'A definir';
@@ -537,7 +545,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       zipcode: '00000000',
       // Use emails array, NOT email field for PJ
       emails: [formValue.email || ''],
-      cnpj: '00000000000000',
+      cnpj: formValue.cnpj?.replace(/\D/g, '') || '00000000000000',
       company_name: formValue.name || '',
       trade_name: formValue.trade_name || '',
       legal_representative: 'A definir',
@@ -589,10 +597,10 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     }
 
     if (clientType === 'pf') {
-      simplifiedData.cpf = '00000000000'; // CPF com zeros para editar depois
+      simplifiedData.cpf = formValue.cpf?.replace(/\D/g, '') || '00000000000'; // CPF com zeros para editar depois
       simplifiedData.full_name = formValue.name || '';
     } else {
-      simplifiedData.cnpj = '00000000000000'; // CNPJ com zeros para editar depois
+      simplifiedData.cnpj = formValue.cnpj?.replace(/\D/g, '') || '00000000000000'; // CNPJ com zeros para editar depois
       simplifiedData.company_name = formValue.name || '';
       simplifiedData.trade_name = formValue.trade_name || '';
       // Campos adicionais mínimos para PJ
@@ -883,6 +891,27 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     }
     
     return '';
+  }
+
+  private updateDocumentValidation(clientType: string): void {
+    const cpfControl = this.newClientForm.get('cpf');
+    const cnpjControl = this.newClientForm.get('cnpj');
+
+    // Reset validators
+    cpfControl?.clearValidators();
+    cnpjControl?.clearValidators();
+
+    if (clientType === 'pf') {
+      // CPF é obrigatório para PF
+      cpfControl?.setValidators([Validators.required]);
+    } else if (clientType === 'pj') {
+      // CNPJ é obrigatório para PJ
+      cnpjControl?.setValidators([Validators.required]);
+    }
+
+    // Update validity
+    cpfControl?.updateValueAndValidity();
+    cnpjControl?.updateValueAndValidity();
   }
 
 
