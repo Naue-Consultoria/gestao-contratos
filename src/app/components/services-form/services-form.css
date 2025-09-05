@@ -726,6 +726,15 @@ textarea.form-control {
   outline-offset: 2px;
 }
 
+.ngx-editor-container {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.ngx-editor-container.error {
+  border-color: var(--color-danger);
+}
+
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
   * {

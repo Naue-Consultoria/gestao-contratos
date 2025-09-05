@@ -1,15 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ServiceService, CreateServiceRequest, UpdateServiceRequest } from '../../services/service';
 import { ModalService } from '../../services/modal.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
+import { NgxEditorModule, Editor, Toolbar } from 'ngx-editor';
 
 @Component({
   selector: 'app-service-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, NgxEditorModule],
   templateUrl: './services-form.html',
   styleUrls: ['./services-form.css']
 })
@@ -18,6 +19,12 @@ export class ServiceFormComponent implements OnInit {
   private modalService = inject(ModalService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+
+  editor!: Editor;
+  toolbar: Toolbar = [
+    ['bold', 'italic', 'underline'],
+    ['ordered_list', 'bullet_list'],
+  ];
 
   formData = {
     name: '',
@@ -46,6 +53,7 @@ export class ServiceFormComponent implements OnInit {
   errors: any = {};
 
   ngOnInit() {
+    this.editor = new Editor();
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode = true;
@@ -53,6 +61,11 @@ export class ServiceFormComponent implements OnInit {
       this.loadService();
     }
   }
+
+  ngOnDestroy() {
+    this.editor.destroy();
+  }
+
 
   async loadService() {
     if (!this.serviceId) return;
@@ -88,6 +101,10 @@ export class ServiceFormComponent implements OnInit {
     }
     if (this.formData.duration_unit !== 'Projeto' && (!this.formData.duration_amount || this.formData.duration_amount < 1)) {
       this.errors.duration = 'A duração deve ser de no mínimo 1';
+    }
+    const descriptionText = this.formData.description.replace(/<[^>]*>/g, '');
+    if (descriptionText.length > 10000) {
+      this.errors.description = 'A descrição não pode exceder 10000 caracteres.';
     }
     return Object.keys(this.errors).length === 0;
   }
@@ -154,4 +171,7 @@ export class ServiceFormComponent implements OnInit {
     return this.serviceService.formatDuration(this.formData.duration_amount, this.formData.duration_unit);
   }
 
+  get descriptionTextLength(): number {
+      return this.formData.description.replace(/<[^>]*>/g, '').length;
+  }
 }

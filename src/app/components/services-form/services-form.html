@@ -46,16 +46,18 @@
 
           <div class="form-group">
             <label class="form-label">Descrição</label>
-            <textarea 
-              class="form-control" 
-              [(ngModel)]="formData.description"
-              name="description"
-              rows="4"
-              placeholder="Descreva o serviço detalhadamente..."
-              [class.error]="errors.description"
-              maxlength="1000"></textarea>
+            <div class="ngx-editor-container" [class.error]="errors.description">
+              <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+              <ngx-editor
+                [editor]="editor"
+                [(ngModel)]="formData.description"
+                name="description"
+                [placeholder]="'Descreva o serviço detalhadamente...'"
+                [style]="{ height: '200px', 'overflow-y': 'auto' }"
+              ></ngx-editor>
+            </div>
             <div class="char-count">
-              {{ formData.description.length }}/1000 caracteres
+              {{ descriptionTextLength }}/10000 caracteres
             </div>
             <span class="error-message" *ngIf="errors.description">{{ errors.description }}</span>
           </div>
