@@ -374,6 +374,10 @@ export class ServiceTrackingPageComponent implements OnInit {
     return 0;
   }
 
+  getCompletedStagesCount(): number {
+    return this.serviceStages.filter(stage => stage.status === 'completed').length;
+  }
+
 
   async loadComments() {
     if (!this.routine?.id) {

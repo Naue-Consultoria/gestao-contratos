@@ -209,6 +209,57 @@
 
     <!-- Comments and History Column -->
     <div class="history-panel">
+      <!-- Horizontal Service Stages Section -->
+      <div class="panel-card stages-progress-card" *ngIf="serviceStages && serviceStages.length > 0">
+        <div class="panel-header">
+          <i class="fas fa-tasks"></i>
+          <h3>Progresso das Etapas</h3>
+        </div>
+        
+        <div class="panel-content">
+          <!-- Progress Bar -->
+          <div class="horizontal-progress-container">
+            <div class="progress-bar horizontal">
+              <div class="progress-fill" [style.width.%]="stageProgress"></div>
+            </div>
+            <span class="progress-text">{{ stageProgress }}% concluído</span>
+          </div>
+          
+          <!-- Horizontal Stages List -->
+          <div class="horizontal-stages-container">
+            <div 
+              *ngFor="let stage of serviceStages; let i = index" 
+              class="horizontal-stage-item"
+              [class.completed]="stage.status === 'completed'"
+              [class.pending]="stage.status === 'pending'">
+              
+              <!-- Stage Number -->
+              <div class="stage-number-display">{{ i + 1 }}</div>
+              
+              <!-- Stage Name -->
+              <div class="stage-name">{{ stage.name }}</div>
+              
+              <!-- Checkbox -->
+              <div class="stage-checkbox-container">
+                <input 
+                  type="checkbox" 
+                  [id]="'horizontal-stage-' + stage.id"
+                  [checked]="stage.status === 'completed'"
+                  [disabled]="!canEdit"
+                  (change)="toggleStageStatus(stage, $event)"
+                  class="stage-checkbox-input">
+                <label [for]="'horizontal-stage-' + stage.id" class="stage-checkbox-label">
+                  <i class="fas fa-check" *ngIf="stage.status === 'completed'"></i>
+                </label>
+              </div>
+              
+              <!-- Connection Line -->
+              <div class="stage-connection" *ngIf="i < serviceStages.length - 1"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="panel-card full-height">
         <div class="panel-header">
           <i class="fas fa-comments"></i>
