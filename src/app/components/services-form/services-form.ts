@@ -3,9 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ServiceService, CreateServiceRequest, UpdateServiceRequest } from '../../services/service';
+import { ServiceStageService, CreateServiceStageRequest } from '../../services/service-stage.service';
 import { ModalService } from '../../services/modal.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { NgxEditorModule, Editor, Toolbar } from 'ngx-editor';
+
+interface ServiceStageForm {
+  name: string;
+  description?: string;
+  sort_order: number;
+  error?: string;
+}
 
 @Component({
   selector: 'app-service-form',
@@ -14,8 +22,9 @@ import { NgxEditorModule, Editor, Toolbar } from 'ngx-editor';
   templateUrl: './services-form.html',
   styleUrls: ['./services-form.css']
 })
-export class ServiceFormComponent implements OnInit {
+export class ServiceFormComponent implements OnInit, OnDestroy {
   private serviceService = inject(ServiceService);
+  private serviceStageService = inject(ServiceStageService);
   private modalService = inject(ModalService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -51,6 +60,9 @@ export class ServiceFormComponent implements OnInit {
   isEditMode = false;
   serviceId: number | null = null;
   errors: any = {};
+
+  // Service stages properties
+  serviceStages: ServiceStageForm[] = [];
 
   ngOnInit() {
     this.editor = new Editor();
@@ -106,7 +118,11 @@ export class ServiceFormComponent implements OnInit {
     if (descriptionText.length > 10000) {
       this.errors.description = 'A descrição não pode exceder 10000 caracteres.';
     }
-    return Object.keys(this.errors).length === 0;
+    
+    // Validar etapas
+    const stagesValid = this.validateStages();
+    
+    return Object.keys(this.errors).length === 0 && stagesValid;
   }
 
   async save() {
@@ -129,6 +145,12 @@ export class ServiceFormComponent implements OnInit {
         };
         
         await this.serviceService.updateService(this.serviceId, updateData).toPromise();
+        
+        // Atualizar etapas se é modo de edição
+        if (this.serviceStages.length > 0) {
+          await this.createServiceStages(this.serviceId);
+        }
+        
         this.modalService.showNotification('Serviço atualizado com sucesso!', true);
       } else {
         const createData: CreateServiceRequest = {
@@ -139,7 +161,13 @@ export class ServiceFormComponent implements OnInit {
           description: this.formData.description || null
         };
         
-        await this.serviceService.createService(createData).toPromise();
+        const response = await this.serviceService.createService(createData).toPromise();
+        
+        // Se há etapas definidas, criar as etapas após criar o serviço
+        if (response?.service?.id && this.serviceStages.length > 0) {
+          await this.createServiceStages(response.service.id);
+        }
+        
         this.modalService.showNotification('Serviço criado com sucesso!', true);
       }
       
@@ -173,5 +201,57 @@ export class ServiceFormComponent implements OnInit {
 
   get descriptionTextLength(): number {
       return this.formData.description.replace(/<[^>]*>/g, '').length;
+  }
+
+  // Service stages methods
+  addStage() {
+    this.serviceStages.push({
+      name: '',
+      description: '',
+      sort_order: this.serviceStages.length + 1
+    });
+  }
+
+  removeStage(index: number) {
+    this.serviceStages.splice(index, 1);
+    // Reordenar sort_order
+    this.serviceStages.forEach((stage, i) => {
+      stage.sort_order = i + 1;
+    });
+  }
+
+
+  validateStages(): boolean {
+    let hasError = false;
+    
+    this.serviceStages.forEach(stage => {
+      stage.error = undefined;
+      if (!stage.name || stage.name.trim().length < 2) {
+        stage.error = 'Nome da etapa deve ter pelo menos 2 caracteres';
+        hasError = true;
+      }
+    });
+    
+    return !hasError;
+  }
+
+  async createServiceStages(serviceId: number) {
+    if (this.serviceStages.length === 0) return;
+    
+    try {
+      for (const stage of this.serviceStages) {
+        const stageData: CreateServiceStageRequest = {
+          service_id: serviceId,
+          name: stage.name.trim(),
+          description: stage.description?.trim() || null,
+          sort_order: stage.sort_order
+        };
+        
+        await this.serviceStageService.createStage(stageData).toPromise();
+      }
+    } catch (error) {
+      console.error('Erro ao criar etapas do serviço:', error);
+      this.modalService.showNotification('Erro ao criar algumas etapas do serviço', false);
+    }
   }
 }

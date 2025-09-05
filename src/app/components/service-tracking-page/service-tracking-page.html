@@ -43,6 +43,52 @@
     
     <!-- Control Panel Column -->
     <div class="control-panel">
+      <!-- Service Stages Progress -->
+      <div class="panel-card" *ngIf="serviceStages && serviceStages.length > 0">
+        <div class="panel-header">
+          <i class="fas fa-tasks"></i>
+          <h3>Etapas do Serviço</h3>
+        </div>
+        
+        <div class="panel-content">
+          <div class="stages-progress">
+            <div class="progress-bar-container">
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="stageProgress"></div>
+              </div>
+              <span class="progress-text">{{ stageProgress }}% concluído</span>
+            </div>
+            
+            <div class="stages-list">
+              <div 
+                *ngFor="let stage of serviceStages; let i = index" 
+                class="stage-item"
+                [class.completed]="stage.status === 'completed'"
+                [class.pending]="stage.status === 'pending'">
+                <div class="stage-checkbox">
+                  <input 
+                    type="checkbox" 
+                    [id]="'stage-' + stage.id"
+                    [checked]="stage.status === 'completed'"
+                    [disabled]="!canEdit"
+                    (change)="toggleStageStatus(stage, $event)">
+                  <label [for]="'stage-' + stage.id" class="checkbox-label">
+                    <i class="fas" 
+                       [ngClass]="stage.status === 'completed' ? 'fa-check-circle' : 'fa-circle'"
+                       [style.color]="stage.status === 'completed' ? '#28a745' : '#6c757d'"></i>
+                  </label>
+                </div>
+                <div class="stage-content">
+                  <div class="stage-name">{{ stage.name }}</div>
+                  <div class="stage-description" *ngIf="stage.description">{{ stage.description }}</div>
+                </div>
+                <div class="stage-connector" *ngIf="i < serviceStages.length - 1"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="panel-card">
         <div class="panel-header">
           <i class="fas fa-cog"></i>

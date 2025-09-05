@@ -12,118 +12,198 @@
 
   <!-- Form -->
   <div class="form-container" *ngIf="!isLoading">
-    <form (ngSubmit)="save()">
-      <div class="form-grid">
-        <!-- Basic Information Section -->
-        <div class="form-section">
-          <h2 class="section-title">
-            <i class="fas fa-info-circle"></i>
-            Informações Básicas
-          </h2>
+    <form (ngSubmit)="save()" class="service-form">
+      <div class="form-layout">
+        
+        <!-- COLUNA ESQUERDA - Informações Básicas -->
+        <div class="left-column">
           
-          <div class="form-group">
-            <label class="form-label required">Nome do Serviço</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              [(ngModel)]="formData.name"
-              name="name"
-              placeholder="Ex: Consultoria Estratégica"
-              [class.error]="errors.name"
-              maxlength="255">
-            <span class="error-message" *ngIf="errors.name">{{ errors.name }}</span>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Categoria</label>
-            <select 
-              class="form-control" 
-              [(ngModel)]="formData.category"
-              name="category">
-              <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Descrição</label>
-            <div class="ngx-editor-container" [class.error]="errors.description">
-              <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
-              <ngx-editor
-                [editor]="editor"
-                [(ngModel)]="formData.description"
-                name="description"
-                [placeholder]="'Descreva o serviço detalhadamente...'"
-                [style]="{ height: '200px', 'overflow-y': 'auto' }"
-              ></ngx-editor>
-            </div>
-            <div class="char-count">
-              {{ descriptionTextLength }}/10000 caracteres
-            </div>
-            <span class="error-message" *ngIf="errors.description">{{ errors.description }}</span>
-          </div>
-        </div>
-
-        <!-- Duration Section -->
-        <div class="form-section">
-          <h2 class="section-title">
-            <i class="fas fa-clock"></i>
-            Duração
-          </h2>
-
-          <div class="form-row">
-            <div class="form-group duration-amount" *ngIf="formData.duration_unit !== 'Projeto'">
-              <label class="form-label required">Quantidade</label>
+          <!-- Seção Informações Básicas -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-tag"></i>
+              Informações Básicas
+            </h3>
+            
+            <div class="form-group">
+              <label class="form-label required">Nome do Serviço</label>
               <input 
-                type="number" 
+                type="text" 
                 class="form-control" 
-                [(ngModel)]="formData.duration_amount"
-                name="duration_amount"
-                min="1"
-                placeholder="Ex: 30"
-                [class.error]="errors.duration">
-              <span class="error-message" *ngIf="errors.duration">{{ errors.duration }}</span>
+                [(ngModel)]="formData.name"
+                name="name"
+                placeholder="Ex: Consultoria Estratégica"
+                [class.error]="errors.name"
+                maxlength="255">
+              <span class="error-message" *ngIf="errors.name">{{ errors.name }}</span>
             </div>
 
-            <div class="form-group duration-unit">
-              <label class="form-label required">Tipo de Duração</label>
+            <div class="form-group">
+              <label class="form-label">Categoria</label>
               <select 
                 class="form-control" 
-                [(ngModel)]="formData.duration_unit"
-                name="duration_unit"
-                (change)="onDurationUnitChange()">
-                <option value="dias">Dias</option>
-                <option value="semanas">Semanas</option>
-                <option value="meses">Meses</option>
-                <option value="encontros">Encontros</option>
-                <option value="Projeto">Projeto</option>
+                [(ngModel)]="formData.category"
+                name="category">
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
               </select>
+              <div class="help-text">Categorize o serviço para melhor organização</div>
+            </div>
+
+            <div class="form-group" *ngIf="isEditMode">
+              <label class="form-label">Status do Serviço</label>
+              <div class="status-toggle-group">
+                <label class="toggle-switch">
+                  <input 
+                    type="checkbox" 
+                    [(ngModel)]="formData.is_active"
+                    name="is_active">
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-label">{{ formData.is_active ? 'Ativo' : 'Inativo' }}</span>
+                </label>
+                <div class="help-text">Serviços inativos não aparecem para seleção em novos contratos</div>
+              </div>
             </div>
           </div>
 
-          <div class="form-group" *ngIf="formData.duration_unit === 'Projeto'">
-            <p class="help-text">
-              <i class="fas fa-info-circle"></i>
-              Duração do tipo "Projeto" não requer especificação de tempo, pois varia conforme o escopo do projeto.
-            </p>
+          <!-- Seção Duração -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-clock"></i>
+              Duração e Prazo
+            </h3>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required">Tipo de Duração</label>
+                <select 
+                  class="form-control" 
+                  [(ngModel)]="formData.duration_unit"
+                  name="duration_unit"
+                  (change)="onDurationUnitChange()">
+                  <option value="dias">Dias</option>
+                  <option value="semanas">Semanas</option>
+                  <option value="meses">Meses</option>
+                  <option value="encontros">Encontros</option>
+                  <option value="Projeto">Projeto</option>
+                </select>
+              </div>
+
+              <div class="form-group" *ngIf="formData.duration_unit !== 'Projeto'">
+                <label class="form-label required">Quantidade</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  [(ngModel)]="formData.duration_amount"
+                  name="duration_amount"
+                  min="1"
+                  placeholder="Ex: 30"
+                  [class.error]="errors.duration">
+                <span class="error-message" *ngIf="errors.duration">{{ errors.duration }}</span>
+              </div>
+            </div>
+
+            <div class="form-group" *ngIf="formData.duration_unit === 'Projeto'">
+              <div class="help-text">
+                <i class="fas fa-info-circle"></i>
+                Duração do tipo "Projeto" não requer especificação de tempo, pois varia conforme o escopo do projeto.
+              </div>
+            </div>
           </div>
 
-          <div class="form-group" *ngIf="isEditMode">
-            <label class="form-label">Status</label>
-            <div class="status-toggle-group">
-              <label class="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  [(ngModel)]="formData.is_active"
-                  name="is_active">
-                <span class="toggle-slider"></span>
-                <span class="toggle-label">{{ formData.is_active ? 'Ativo' : 'Inativo' }}</span>
-              </label>
-              <p class="help-text">
-                Serviços inativos não aparecem para seleção em novos contratos
-              </p>
+          <!-- Seção Descrição -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-file-text"></i>
+              Descrição do Serviço
+            </h3>
+            
+            <div class="form-group">
+              <div class="ngx-editor-container" [class.error]="errors.description">
+                <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+                <ngx-editor
+                  [editor]="editor"
+                  [(ngModel)]="formData.description"
+                  name="description"
+                  [placeholder]="'Descreva detalhadamente o serviço: objetivos, metodologia, benefícios...'"
+                  [style]="{ height: '200px', 'overflow-y': 'auto' }"
+                ></ngx-editor>
+              </div>
+              <div class="char-count">
+                {{ descriptionTextLength }}/10000 caracteres
+              </div>
+              <span class="error-message" *ngIf="errors.description">{{ errors.description }}</span>
             </div>
           </div>
         </div>
+
+        <!-- COLUNA DIREITA - Etapas -->
+        <div class="right-column">
+          <div class="form-section">
+            <div class="section-header">
+              <h3 class="section-title">
+                <i class="fas fa-tasks"></i>
+                Etapas do Serviço
+              </h3>
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                (click)="addStage()"
+                [disabled]="isSaving"
+              >
+                <i class="fas fa-plus"></i>
+                Nova Etapa
+              </button>
+            </div>
+
+            <!-- Estado vazio -->
+            <div class="empty-stages" *ngIf="serviceStages.length === 0">
+              <div class="empty-icon">
+                <i class="fas fa-list-check"></i>
+              </div>
+              <h4>Nenhuma etapa definida</h4>
+              <p>As etapas ajudam a organizar e acompanhar o progresso durante a execução do serviço</p>
+              <button type="button" class="btn btn-primary btn-sm" (click)="addStage()">
+                <i class="fas fa-plus"></i>
+                Adicionar Primeira Etapa
+              </button>
+            </div>
+
+            <!-- Lista de etapas -->
+            <div class="stages-list" *ngIf="serviceStages.length > 0">
+              <div class="stage-item" *ngFor="let stage of serviceStages; let i = index">
+                <button type="button" class="btn-remove-stage" 
+                        (click)="removeStage(i)"
+                        title="Remover etapa">
+                  <i class="fas fa-trash"></i>
+                </button>
+                <div class="stage-header">
+                  <div class="stage-number">{{ i + 1 }}</div>
+                </div>
+                <div class="stage-content">
+                  <div class="form-group">
+                    <input 
+                      type="text" 
+                      class="form-control"
+                      [(ngModel)]="stage.name"
+                      name="stageName{{ i }}"
+                      placeholder="Nome da etapa"
+                      [class.error]="stage.error">
+                    <span class="error-message" *ngIf="stage.error">{{ stage.error }}</span>
+                  </div>
+                  <div class="form-group">
+                    <textarea 
+                      class="form-control"
+                      [(ngModel)]="stage.description"
+                      name="stageDescription{{ i }}"
+                      placeholder="Descrição da etapa (opcional)"
+                      rows="2"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
       </div>
 
 

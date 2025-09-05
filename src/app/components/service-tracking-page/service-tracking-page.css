@@ -1151,3 +1151,194 @@
   background-color: #10b981 !important;
   color: var(--white);
 }
+
+/* =================== SERVICE STAGES STYLES =================== */
+.stages-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.progress-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.progress-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-green);
+  min-width: fit-content;
+}
+
+.stages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.stage-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.stage-item:hover {
+  background-color: #f8fafc;
+}
+
+.stage-item.completed {
+  background-color: #f0f9f0;
+}
+
+.stage-item.pending {
+  background-color: #fafafa;
+}
+
+.stage-checkbox {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.stage-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.1s ease;
+}
+
+.checkbox-label:hover {
+  transform: scale(1.1);
+}
+
+.checkbox-label i {
+  font-size: 1.2rem;
+  transition: color 0.2s ease;
+}
+
+.stage-checkbox input:disabled + .checkbox-label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.stage-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stage-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.stage-description {
+  font-size: 0.875rem;
+  color: var(--text-gray);
+  line-height: 1.4;
+}
+
+.stage-item.completed .stage-name {
+  color: var(--primary-green);
+}
+
+.stage-item.completed .stage-description {
+  color: #666;
+}
+
+.stage-connector {
+  position: absolute;
+  left: 1.35rem;
+  top: 2.5rem;
+  width: 2px;
+  height: calc(100% - 1rem);
+  background-color: #e2e8f0;
+  z-index: 1;
+}
+
+.stage-item.completed .stage-connector {
+  background-color: var(--primary-green);
+}
+
+/* =================== MOBILE RESPONSIVENESS FOR STAGES =================== */
+@media (max-width: 768px) {
+  .stages-progress {
+    gap: 0.75rem;
+  }
+  
+  .progress-bar-container {
+    gap: 0.5rem;
+  }
+  
+  .progress-text {
+    font-size: 0.8rem;
+  }
+  
+  .stage-item {
+    padding: 0.5rem;
+    gap: 0.75rem;
+  }
+  
+  .stage-name {
+    font-size: 0.875rem;
+  }
+  
+  .stage-description {
+    font-size: 0.8rem;
+  }
+  
+  .checkbox-label i {
+    font-size: 1.1rem;
+  }
+  
+  .stage-connector {
+    left: 1.1rem;
+    top: 2.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stage-item {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  
+  .stage-connector {
+    left: 1rem;
+    top: 2rem;
+  }
+}

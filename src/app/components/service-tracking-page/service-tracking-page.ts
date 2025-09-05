@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ContractService, ApiContractService } from '../../services/contract';
 import { RoutineService, ServiceRoutine, RoutineComment } from '../../services/routine.service';
+import { ServiceStageService, ServiceStage, ServiceProgress } from '../../services/service-stage.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { BreadcrumbService, BreadcrumbItem } from '../../services/breadcrumb.service';
 import { ToastrService } from 'ngx-toastr';
@@ -22,6 +23,7 @@ export class ServiceTrackingPageComponent implements OnInit {
   private contractService = inject(ContractService);
   private breadcrumbService = inject(BreadcrumbService);
   private toastr = inject(ToastrService);
+  private serviceStageService = inject(ServiceStageService);
 
   routineId!: number;
   serviceId!: number;
@@ -31,6 +33,11 @@ export class ServiceTrackingPageComponent implements OnInit {
   isLoading = true;
   error: string | null = null;
   canEdit = false;
+
+  // Service stages properties
+  serviceStages: ServiceStage[] = [];
+  stageProgress = 0;
+  isLoadingStages = false;
 
   // Propriedades do formulário de controle
   selectedStatus: 'not_started' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled' = 'not_started';
@@ -149,11 +156,82 @@ export class ServiceTrackingPageComponent implements OnInit {
         this.loadComments();
       }
 
+      // Carregar etapas do serviço se disponível
+      if (this.service?.service?.id) {
+        this.loadServiceStages();
+      }
+
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       this.error = 'Erro ao carregar dados';
     } finally {
       this.isLoading = false;
+    }
+  }
+
+  async loadServiceStages() {
+    if (!this.service?.service?.id) return;
+
+    try {
+      this.isLoadingStages = true;
+      const response = await this.serviceStageService.getServiceStages(this.service.service.id).toPromise();
+      
+      if (response) {
+        this.serviceStages = response.stages;
+        this.stageProgress = response.progress.progressPercentage;
+        console.log('Etapas do serviço carregadas:', this.serviceStages);
+      }
+    } catch (error: any) {
+      console.error('Erro ao carregar etapas do serviço:', error);
+      // Se não houver etapas, vamos criar as etapas padrão
+      if (error.status === 404 || (error.error && error.error.error === 'Serviço não encontrado')) {
+        // Não mostrar erro se for porque não há etapas ainda
+        console.log('Nenhuma etapa encontrada para este serviço');
+      } else {
+        this.toastr.warning('Não foi possível carregar as etapas do serviço');
+      }
+    } finally {
+      this.isLoadingStages = false;
+    }
+  }
+
+  async toggleStageStatus(stage: ServiceStage, event: any) {
+    if (!this.canEdit) {
+      this.toastr.warning('Você não tem permissão para alterar as etapas');
+      // Reverter o checkbox
+      event.target.checked = stage.status === 'completed';
+      return;
+    }
+
+    const newStatus: 'pending' | 'completed' = event.target.checked ? 'completed' : 'pending';
+    
+    try {
+      const response = await this.serviceStageService.updateStageStatus(stage.id, newStatus).toPromise();
+      
+      if (response) {
+        // Atualizar o stage na lista
+        const stageIndex = this.serviceStages.findIndex(s => s.id === stage.id);
+        if (stageIndex !== -1) {
+          this.serviceStages[stageIndex] = response.stage;
+        }
+        
+        // Atualizar o progresso
+        if (response.progress) {
+          this.stageProgress = response.progress.progressPercentage;
+        } else {
+          // Calcular progresso localmente
+          this.stageProgress = this.serviceStageService.calculateProgress(this.serviceStages);
+        }
+        
+        const statusText = newStatus === 'completed' ? 'concluída' : 'pendente';
+        this.toastr.success(`Etapa "${stage.name}" marcada como ${statusText}!`);
+      }
+    } catch (error: any) {
+      console.error('Erro ao atualizar status da etapa:', error);
+      this.toastr.error('Erro ao atualizar status da etapa');
+      
+      // Reverter o checkbox
+      event.target.checked = stage.status === 'completed';
     }
   }
 

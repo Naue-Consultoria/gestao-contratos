@@ -765,16 +765,7 @@ export class PublicProposalViewComponent implements OnInit {
 
   formatDescription(description: string): string {
     if (!description) return '';
-    // Divide a descrição em frases usando pontos finais
-    const sentences = description.split(/\.\s+/).filter(sentence => sentence.trim() !== '');
-    
-    // Se há apenas uma frase, retorna com ponto de tópico
-    if (sentences.length <= 1) {
-      return `• ${description}`;
-    }
-    
-    // Adiciona ponto de tópico para cada frase
-    return sentences.map(sentence => `• ${sentence.trim()}.`).join('<br><br>');
+    return description;
   }
 
   getServiceValue(service: ProposalServiceItem): number {
