@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -13,6 +13,7 @@ interface ServiceStageForm {
   description?: string;
   sort_order: number;
   error?: string;
+  id?: number; // ID opcional para etapas existentes
 }
 
 @Component({
@@ -22,12 +23,13 @@ interface ServiceStageForm {
   templateUrl: './services-form.html',
   styleUrls: ['./services-form.css']
 })
-export class ServiceFormComponent implements OnInit, OnDestroy {
+export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
   private serviceService = inject(ServiceService);
   private serviceStageService = inject(ServiceStageService);
   private modalService = inject(ModalService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private elementRef = inject(ElementRef);
 
   editor!: Editor;
   toolbar: Toolbar = [
@@ -74,6 +76,20 @@ export class ServiceFormComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.adjustColumnHeights();
+    }, 100);
+  }
+
+  private adjustColumnHeights() {
+    const leftColumn = this.elementRef.nativeElement.querySelector('.left-column');
+    if (leftColumn) {
+      const leftHeight = leftColumn.offsetHeight;
+      this.elementRef.nativeElement.style.setProperty('--left-column-height', `${leftHeight}px`);
+    }
+  }
+
   ngOnDestroy() {
     this.editor.destroy();
   }
@@ -95,6 +111,9 @@ export class ServiceFormComponent implements OnInit, OnDestroy {
           description: service.description || '',
           is_active: service.is_active
         };
+
+        // Carregar etapas existentes
+        await this.loadServiceStages();
       }
     } catch (error) {
       console.error('❌ Error loading service:', error);
@@ -102,6 +121,27 @@ export class ServiceFormComponent implements OnInit, OnDestroy {
       this.router.navigate(['/home/servicos']);
     } finally {
       this.isLoading = false;
+    }
+  }
+
+  async loadServiceStages() {
+    if (!this.serviceId) return;
+
+    try {
+      const response = await this.serviceStageService.getServiceStages(this.serviceId).toPromise();
+      if (response && response.stages) {
+        // Converter ServiceStage para ServiceStageForm
+        this.serviceStages = response.stages.map(stage => ({
+          name: stage.name,
+          description: stage.description || '',
+          sort_order: stage.sort_order,
+          id: stage.id // Adicionar ID para poder fazer update/delete posteriormente
+        } as ServiceStageForm & { id: number }));
+        
+      }
+    } catch (error) {
+      console.error('❌ Error loading service stages:', error);
+      // Não mostrar erro para o usuário pois as etapas são opcionais
     }
   }
 
@@ -210,14 +250,29 @@ export class ServiceFormComponent implements OnInit, OnDestroy {
       description: '',
       sort_order: this.serviceStages.length + 1
     });
+    setTimeout(() => this.adjustColumnHeights(), 50);
   }
 
-  removeStage(index: number) {
+  async removeStage(index: number) {
+    const stageToRemove = this.serviceStages[index];
+    
+    // Se a etapa tem ID, significa que existe no backend e precisa ser deletada
+    if (stageToRemove.id && this.isEditMode) {
+      try {
+        await this.serviceStageService.deleteStage(stageToRemove.id).toPromise();
+      } catch (error) {
+        console.error('❌ Error deleting stage:', error);
+        this.modalService.showNotification('Erro ao remover etapa', false);
+        return; // Não remove da interface se falhou no backend
+      }
+    }
+    
     this.serviceStages.splice(index, 1);
     // Reordenar sort_order
     this.serviceStages.forEach((stage, i) => {
       stage.sort_order = i + 1;
     });
+    setTimeout(() => this.adjustColumnHeights(), 50);
   }
 
 
@@ -240,18 +295,31 @@ export class ServiceFormComponent implements OnInit, OnDestroy {
     
     try {
       for (const stage of this.serviceStages) {
-        const stageData: CreateServiceStageRequest = {
-          service_id: serviceId,
-          name: stage.name.trim(),
-          description: stage.description?.trim() || null,
-          sort_order: stage.sort_order
-        };
-        
-        await this.serviceStageService.createStage(stageData).toPromise();
+        if (stage.id) {
+          // Etapa existente - atualizar
+          const updateData = {
+            name: stage.name.trim(),
+            description: stage.description?.trim() || null,
+            sort_order: stage.sort_order
+          };
+          
+          await this.serviceStageService.updateStage(stage.id, updateData).toPromise();
+        } else {
+          // Nova etapa - criar
+          const stageData: CreateServiceStageRequest = {
+            service_id: serviceId,
+            name: stage.name.trim(),
+            description: stage.description?.trim() || null,
+            sort_order: stage.sort_order
+          };
+          
+          await this.serviceStageService.createStage(stageData).toPromise();
+        }
       }
     } catch (error) {
-      console.error('Erro ao criar etapas do serviço:', error);
-      this.modalService.showNotification('Erro ao criar algumas etapas do serviço', false);
+      console.error('Error processing service stages:', error);
+      this.modalService.showNotification('Erro ao salvar algumas etapas do serviço', false);
+      throw error;
     }
   }
 }
