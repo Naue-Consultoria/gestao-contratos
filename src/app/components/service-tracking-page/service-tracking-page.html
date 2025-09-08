@@ -34,6 +34,101 @@
           <i class="fas fa-tag"></i>
           {{ service.service.category || 'Geral' }}
         </span>
+        <span class="meta-item">
+          <i class="fas fa-hashtag"></i>
+          ID: {{ service.id }}
+        </span>
+        <span class="meta-item" *ngIf="service.updated_at">
+          <i class="fas fa-clock"></i>
+          Última atualização: {{ formatDate(service.updated_at) }}
+        </span>
+        <span class="meta-item" *ngIf="routine?.scheduled_date">
+          <i class="fas fa-calendar-check"></i>
+          Data prevista: {{ formatDate(routine?.scheduled_date) }}
+        </span>
+        <span class="meta-item" *ngIf="routine?.notes">
+          <i class="fas fa-sticky-note"></i>
+          {{ routine?.notes }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Controls Bar -->
+  <div class="service-controls-bar">
+    <div class="panel-card horizontal-controls">
+      <div class="panel-header">
+        <i class="fas fa-cog"></i>
+        <h3>Controles do Serviço</h3>
+      </div>
+      
+      <div class="panel-content horizontal-form">
+        <!-- Current Status Display -->
+        <div class="control-item">
+          <span class="control-label">Status Atual</span>
+          <div class="status-badge" [style.background-color]="getCurrentStatusInfo().color">
+            <i [class]="getCurrentStatusInfo().icon"></i>
+            <span>{{ getCurrentStatusInfo().label }}</span>
+          </div>
+        </div>
+
+        <!-- Status Update Form -->
+        <div class="control-item">
+          <label class="control-label">
+            <i class="fas fa-flag"></i>
+            Alterar Status
+          </label>
+          <select 
+            class="control-input"
+            [(ngModel)]="selectedStatus"
+            [disabled]="!canEdit">
+            <option *ngFor="let status of serviceStatuses" [value]="status.value">
+              {{ status.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Date Schedule Form -->
+        <div class="control-item">
+          <label class="control-label">
+            <i class="fas fa-calendar-alt"></i>
+            Data Agendada
+          </label>
+          <input 
+            type="date" 
+            class="control-input"
+            [(ngModel)]="selectedDate"
+            [disabled]="!canEdit">
+        </div>
+
+        <!-- Routine Notes -->
+        <div class="control-item notes-item">
+          <label class="control-label">
+            <i class="fas fa-sticky-note"></i>
+            Observações da Rotina
+          </label>
+          <textarea 
+            class="control-input"
+            [(ngModel)]="routineNotes"
+            [disabled]="!canEdit"
+            placeholder="Adicione observações sobre esta rotina..."
+            rows="2">
+          </textarea>
+        </div>
+
+        <!-- Save Button -->
+        <div class="control-item">
+          <button 
+            class="btn btn-primary"
+            (click)="saveServiceData()"
+            [disabled]="!canEdit || isSaving"
+            [class.saving]="isSaving">
+            <i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+            <span *ngIf="!isSaving && canEdit">Salvar</span>
+            <span *ngIf="isSaving">Salvando...</span>
+            <span *ngIf="!canEdit && !isSaving">Sem Permissão</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -88,177 +183,10 @@
           </div>
         </div>
       </div>
-
-      <div class="panel-card">
-        <div class="panel-header">
-          <i class="fas fa-cog"></i>
-          <h3>Controles do Serviço</h3>
-        </div>
-        
-        <div class="panel-content">
-          <!-- Current Status Display -->
-          <div class="status-display">
-            <span class="status-label">Status Atual</span>
-            <div class="status-badge" [style.background-color]="getCurrentStatusInfo().color">
-              <i [class]="getCurrentStatusInfo().icon"></i>
-              <span>{{ getCurrentStatusInfo().label }}</span>
-            </div>
-          </div>
-
-          <!-- Status Update Form -->
-          <div class="control-group">
-            <label class="control-label">
-              <i class="fas fa-flag"></i>
-              Alterar Status
-            </label>
-            <select 
-              class="control-input"
-              [(ngModel)]="selectedStatus"
-              [disabled]="!canEdit">
-              <option *ngFor="let status of serviceStatuses" [value]="status.value">
-                {{ status.label }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Date Schedule Form -->
-          <div class="control-group">
-            <label class="control-label">
-              <i class="fas fa-calendar-alt"></i>
-              Data Agendada
-            </label>
-            <input 
-              type="date" 
-              class="control-input"
-              [(ngModel)]="selectedDate"
-              [disabled]="!canEdit">
-          </div>
-
-          <!-- Routine Notes -->
-          <div class="control-group">
-            <label class="control-label">
-              <i class="fas fa-sticky-note"></i>
-              Observações da Rotina
-            </label>
-            <textarea 
-              class="control-input"
-              [(ngModel)]="routineNotes"
-              [disabled]="!canEdit"
-              placeholder="Adicione observações sobre esta rotina..."
-              rows="3">
-            </textarea>
-          </div>
-
-          <!-- Save Button -->
-          <div class="control-actions">
-            <button 
-              class="btn btn-primary btn-block"
-              (click)="saveServiceData()"
-              [disabled]="!canEdit || isSaving"
-              [class.saving]="isSaving">
-              <i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i>
-              <span *ngIf="!isSaving && canEdit">Salvar Alterações</span>
-              <span *ngIf="isSaving">Salvando...</span>
-              <span *ngIf="!canEdit && !isSaving">Sem Permissão para Editar</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Service Info Card -->
-      <div class="panel-card">
-        <div class="panel-header">
-          <i class="fas fa-info-circle"></i>
-          <h3>Informações do Serviço</h3>
-        </div>
-        
-        <div class="panel-content">
-          <div class="info-list">
-            <div class="info-row">
-              <span class="info-label">
-                <i class="fas fa-hashtag"></i>
-                ID do Serviço
-              </span>
-              <span class="info-value">{{ service.id }}</span>
-            </div>
-            <div class="info-row" *ngIf="service.updated_at">
-              <span class="info-label">
-                <i class="fas fa-clock"></i>
-                Última Atualização
-              </span>
-              <span class="info-value">{{ formatDate(service.updated_at) }}</span>
-            </div>
-            <div class="info-row" *ngIf="routine?.scheduled_date">
-              <span class="info-label">
-                <i class="fas fa-calendar-check"></i>
-                Data Prevista
-              </span>
-              <span class="info-value">{{ formatDate(routine?.scheduled_date) }}</span>
-            </div>
-            <div class="info-row" *ngIf="routine?.notes">
-              <span class="info-label">
-                <i class="fas fa-sticky-note"></i>
-                Observações
-              </span>
-              <span class="info-value">{{ routine?.notes }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Comments and History Column -->
     <div class="history-panel">
-      <!-- Horizontal Service Stages Section -->
-      <div class="panel-card stages-progress-card" *ngIf="serviceStages && serviceStages.length > 0">
-        <div class="panel-header">
-          <i class="fas fa-tasks"></i>
-          <h3>Progresso das Etapas</h3>
-        </div>
-        
-        <div class="panel-content">
-          <!-- Progress Bar -->
-          <div class="horizontal-progress-container">
-            <div class="progress-bar horizontal">
-              <div class="progress-fill" [style.width.%]="stageProgress"></div>
-            </div>
-            <span class="progress-text">{{ stageProgress }}% concluído</span>
-          </div>
-          
-          <!-- Horizontal Stages List -->
-          <div class="horizontal-stages-container">
-            <div 
-              *ngFor="let stage of serviceStages; let i = index" 
-              class="horizontal-stage-item"
-              [class.completed]="stage.status === 'completed'"
-              [class.pending]="stage.status === 'pending'">
-              
-              <!-- Stage Number -->
-              <div class="stage-number-display">{{ i + 1 }}</div>
-              
-              <!-- Stage Name -->
-              <div class="stage-name">{{ stage.name }}</div>
-              
-              <!-- Checkbox -->
-              <div class="stage-checkbox-container">
-                <input 
-                  type="checkbox" 
-                  [id]="'horizontal-stage-' + stage.id"
-                  [checked]="stage.status === 'completed'"
-                  [disabled]="!canEdit"
-                  (change)="toggleStageStatus(stage, $event)"
-                  class="stage-checkbox-input">
-                <label [for]="'horizontal-stage-' + stage.id" class="stage-checkbox-label">
-                  <i class="fas fa-check" *ngIf="stage.status === 'completed'"></i>
-                </label>
-              </div>
-              
-              <!-- Connection Line -->
-              <div class="stage-connection" *ngIf="i < serviceStages.length - 1"></div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div class="panel-card full-height">
         <div class="panel-header">

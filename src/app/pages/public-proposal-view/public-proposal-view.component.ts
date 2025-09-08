@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { 
   PublicProposalService as PublicProposalServiceAPI, 
@@ -144,7 +145,8 @@ export class PublicProposalViewComponent implements OnInit {
     private router: Router,
     private publicProposalService: PublicProposalServiceAPI,
     private publicTeamService: PublicTeamService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private sanitizer: DomSanitizer
   ) {
   }
 
@@ -763,9 +765,43 @@ export class PublicProposalViewComponent implements OnInit {
     }
   }
 
-  formatDescription(description: string): string {
-    if (!description) return '';
-    return description;
+  formatDescription(description: string): SafeHtml {
+    if (!description) return this.sanitizer.bypassSecurityTrustHtml('');
+    
+    // Processar linha por linha mantendo formatação original
+    const lines = description.split('\n');
+    const processedLines: string[] = [];
+    
+    for (const line of lines) {
+      // Linha vazia
+      if (!line.trim()) {
+        processedLines.push('<br>');
+        continue;
+      }
+      
+      // Detecta listas numeradas - só o número fica negrito
+      if (/^\d+\.\s+/.test(line)) {
+        const match = line.match(/^(\d+)\.\s+(.+)$/);
+        if (match) {
+          processedLines.push(`<div style="margin: 0.3rem 0; padding-left: 25px; position: relative; line-height: 1.6; font-weight: 400;"><span style="position: absolute; left: 0; font-weight: bold;">${match[1]}.</span> ${match[2]}</div>`);
+          continue;
+        }
+      }
+      
+      // Detecta bullets - só o símbolo fica negrito  
+      if (/^•\s+/.test(line)) {
+        const match = line.match(/^•\s+(.+)$/);
+        if (match) {
+          processedLines.push(`<div style="margin: 0.3rem 0; padding-left: 25px; position: relative; line-height: 1.6; font-weight: 400;"><span style="position: absolute; left: 0; font-weight: bold;">•</span> ${match[1]}</div>`);
+          continue;
+        }
+      }
+      
+      // Linha normal (incluindo títulos) - sem negrito automático
+      processedLines.push(`<div style="margin: 0.3rem 0; line-height: 1.6; font-weight: 400;">${line}</div>`);
+    }
+    
+    return this.sanitizer.bypassSecurityTrustHtml(processedLines.join(''));
   }
 
   getServiceValue(service: ProposalServiceItem): number {

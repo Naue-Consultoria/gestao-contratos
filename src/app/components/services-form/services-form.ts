@@ -180,7 +180,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
           duration_amount: this.formData.duration_unit === 'Projeto' ? null : this.formData.duration_amount,
           duration_unit: this.formData.duration_unit,
           category: this.formData.category,
-          description: this.formData.description || null,
+          description: this.formData.description,
           is_active: this.formData.is_active
         };
         
@@ -198,7 +198,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
           duration_amount: this.formData.duration_unit === 'Projeto' ? null : this.formData.duration_amount,
           duration_unit: this.formData.duration_unit,
           category: this.formData.category,
-          description: this.formData.description || null
+          description: this.formData.description
         };
         
         const response = await this.serviceService.createService(createData).toPromise();

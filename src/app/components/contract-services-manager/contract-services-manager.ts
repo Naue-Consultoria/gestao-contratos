@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ContractService, ApiContractService, ServiceComment } from '../../services/contract';
 import { RoutineService } from '../../services/routine.service';
 import { AttachmentService, ServiceCommentAttachment, AttachmentUploadProgress } from '../../services/attachment.service';
+import { ServiceStageService, ServiceProgress } from '../../services/service-stage.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -35,6 +36,10 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
   // Propriedades para novos comentários com arquivos
   newCommentFiles: { [serviceId: number]: File[] } = {};
   isAddingComment: { [serviceId: number]: boolean } = {};
+  
+  // Propriedades para progresso dos serviços
+  serviceProgresses: { [serviceId: number]: ServiceProgress } = {};
+  loadingProgresses: { [serviceId: number]: boolean } = {};
 
   serviceStatuses = [
     { value: 'not_started', label: 'Não iniciado' },
@@ -48,6 +53,7 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
     private contractService: ContractService,
     private routineService: RoutineService,
     private attachmentService: AttachmentService,
+    private serviceStageService: ServiceStageService,
     private toastr: ToastrService,
     private router: Router
   ) {}
@@ -72,6 +78,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
     
     // Ordenar serviços por nome alfabeticamente
     this.sortServices();
+    
+    // Carregar progresso dos serviços
+    this.loadServicesProgress();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -83,6 +92,7 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
         }
       });
       this.sortServices();
+      this.loadServicesProgress();
     }
   }
   
@@ -94,6 +104,144 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
     });
   }
 
+  // Método para calcular progresso das tarefas baseado nas etapas
+  getTasksProgress(): number {
+    if (!this.services || this.services.length === 0) {
+      return 0;
+    }
+
+    // Calcular progresso médio baseado nas etapas de cada serviço
+    let totalProgress = 0;
+    let servicesWithProgress = 0;
+
+    this.services.forEach(service => {
+      const progress = this.serviceProgresses[service.service.id];
+      if (progress !== undefined) {
+        totalProgress += progress.progressPercentage;
+        servicesWithProgress++;
+      } else if (!this.loadingProgresses[service.service.id]) {
+        // Se não está carregando e não tem progresso, assumir que não há etapas (0%)
+        totalProgress += 0;
+        servicesWithProgress++;
+      }
+    });
+
+    // Se ainda não carregou o progresso de nenhum serviço, usar método fallback
+    if (servicesWithProgress === 0) {
+      return this.getTasksProgressFallback();
+    }
+
+    // Calcular progresso médio ponderado
+    const averageProgress = totalProgress / servicesWithProgress;
+    return Math.round(averageProgress);
+  }
+
+  // Método fallback para calcular progresso baseado em status (usado até carregar as etapas)
+  private getTasksProgressFallback(): number {
+    if (!this.services || this.services.length === 0) {
+      return 0;
+    }
+
+    const completedTasks = this.services.filter(service => {
+      const status = this.getRoutineStatus(service);
+      return status === 'completed';
+    }).length;
+
+    return Math.round((completedTasks / this.services.length) * 100);
+  }
+
+  // Método para obter contagem de tarefas baseado nas etapas
+  getTasksCounts(): { completed: number; total: number } {
+    if (!this.services || this.services.length === 0) {
+      return { completed: 0, total: 0 };
+    }
+
+    let totalStages = 0;
+    let completedStages = 0;
+    let servicesWithProgress = 0;
+
+    this.services.forEach(service => {
+      const progress = this.serviceProgresses[service.service.id];
+      if (progress !== undefined) {
+        totalStages += progress.totalStages;
+        completedStages += progress.completedStages;
+        servicesWithProgress++;
+      } else if (!this.loadingProgresses[service.service.id]) {
+        // Se não está carregando e não tem progresso, assumir que não há etapas
+        totalStages += 0;
+        completedStages += 0;
+        servicesWithProgress++;
+      }
+    });
+
+    // Se ainda não carregou progresso de nenhum serviço, usar método fallback
+    if (servicesWithProgress === 0) {
+      return this.getTasksCountsFallback();
+    }
+
+    return { completed: completedStages, total: totalStages };
+  }
+
+  // Método fallback para contagem baseado em status
+  private getTasksCountsFallback(): { completed: number; total: number } {
+    const completed = this.services.filter(service => {
+      const status = this.getRoutineStatus(service);
+      return status === 'completed';
+    }).length;
+
+    return { completed, total: this.services.length };
+  }
+
+  // Método para carregar progresso de todos os serviços
+  loadServicesProgress() {
+    this.services.forEach(service => {
+      this.loadServiceProgress(service.service.id);
+    });
+  }
+
+  // Método para carregar progresso de um serviço específico
+  loadServiceProgress(serviceId: number) {
+    this.loadingProgresses[serviceId] = true;
+    
+    this.serviceStageService.getServiceProgress(serviceId).subscribe({
+      next: (response) => {
+        this.serviceProgresses[serviceId] = response.progress;
+        this.loadingProgresses[serviceId] = false;
+        // Forçar atualização da barra de progresso geral após carregar progresso individual
+        this.triggerProgressUpdate();
+      },
+      error: (error) => {
+        console.log(`Service ${serviceId} has no stages configured or error loading progress:`, error);
+        // Em caso de erro ou serviço sem etapas, assumir 0% de progresso
+        this.serviceProgresses[serviceId] = {
+          totalStages: 0,
+          completedStages: 0,
+          progressPercentage: 0,
+          stages: []
+        };
+        this.loadingProgresses[serviceId] = false;
+        this.triggerProgressUpdate();
+      }
+    });
+  }
+
+  // Método para forçar atualização da view (necessário para Angular detectar mudanças)
+  private triggerProgressUpdate() {
+    // Força detecção de mudanças para atualizar a barra de progresso
+    // Como os métodos getTasksProgress() e getTasksCounts() são chamados no template,
+    // esta chamada vazia força o Angular a recalcular os valores
+  }
+
+  // Método para obter progresso de um serviço
+  getServiceProgressPercentage(serviceId: number): number {
+    const progress = this.serviceProgresses[serviceId];
+    return progress ? progress.progressPercentage : 0;
+  }
+
+  // Método para verificar se está carregando progresso
+  isLoadingProgress(serviceId: number): boolean {
+    return this.loadingProgresses[serviceId] || false;
+  }
 
   formatDate(date: string | null | undefined): string {
     if (!date) return '-';

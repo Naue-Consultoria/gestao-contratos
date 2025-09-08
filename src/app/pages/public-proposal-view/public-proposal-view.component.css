@@ -1948,6 +1948,17 @@ html {
   position: relative;
 }
 
+/* Garantir que divs dentro da descrição tenham peso normal por padrão */
+.service-description div {
+  font-weight: 400 !important;
+}
+
+/* Apenas elementos com font-weight bold específico devem ser negrito */
+.service-description div[style*="font-weight: bold"] {
+  font-weight: bold !important;
+}
+
+
 
 .quantity-badge {
   background: rgba(6, 95, 70, 0.2);
@@ -3505,9 +3516,43 @@ html {
   }
   
   .service-description-mobile p.expanded {
-    max-height: 500px;
+    max-height: 200px;
     opacity: 1;
     margin-bottom: 1rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(6, 95, 70, 0.4) transparent;
+    padding-right: 8px;
+    font-weight: 400 !important;
+  }
+
+  /* Garantir que divs dentro da descrição mobile tenham peso normal */
+  .service-description-mobile p div {
+    font-weight: 400 !important;
+  }
+
+  /* Apenas elementos com font-weight bold específico devem ser negrito */
+  .service-description-mobile p div[style*="font-weight: bold"] {
+    font-weight: bold !important;
+  }
+
+
+  /* Scrollbar customizada para WebKit (Chrome, Safari) em mobile */
+  .service-description-mobile p.expanded::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .service-description-mobile p.expanded::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .service-description-mobile p.expanded::-webkit-scrollbar-thumb {
+    background: rgba(6, 95, 70, 0.4);
+    border-radius: 2px;
+  }
+
+  .service-description-mobile p.expanded::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 95, 70, 0.6);
   }
   
   .expand-button-mobile {

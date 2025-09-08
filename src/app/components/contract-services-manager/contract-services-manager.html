@@ -1,9 +1,29 @@
 <div class="services-manager">
+  <!-- Progress Bar Section -->
+  <div class="tasks-progress-section" *ngIf="services && services.length > 0">
+    <div class="progress-header">
+      <h3 class="progress-title">
+        <i class="fas fa-chart-line"></i>
+        Progresso das Tarefas
+      </h3>
+      <div class="progress-stats">
+        <span class="progress-text">{{ getTasksProgress() }}% concluído</span>
+        <span class="progress-count">({{ getTasksCounts().completed }}/{{ getTasksCounts().total }} etapas)</span>
+      </div>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="getTasksProgress()"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="services-table">
     <div class="table-header-row">
       <div class="col-service">Serviço</div>
       <div class="col-status">Status</div>
       <div class="col-date">Data Agendada</div>
+      <div class="col-progress">Progresso</div>
       <div class="col-actions">Acompanhamento</div>
     </div>
     
@@ -58,6 +78,20 @@
             <i class="fas fa-calendar"></i>
             Não agendado
           </span>
+        </div>
+      </div>
+      
+      <div class="col-progress">
+        <div class="progress-display">
+          <div *ngIf="isLoadingProgress(service.service.id)" class="progress-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+          </div>
+          <div *ngIf="!isLoadingProgress(service.service.id)" class="service-progress">
+            <div class="progress-bar-small">
+              <div class="progress-fill-small" [style.width.%]="getServiceProgressPercentage(service.service.id)"></div>
+            </div>
+            <span class="progress-percentage">{{ getServiceProgressPercentage(service.service.id) }}%</span>
+          </div>
         </div>
       </div>
       
