@@ -402,6 +402,17 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
     return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   }
 
+  stripHtmlTags(html: string | null | undefined): string {
+    if (!html) return '';
+    
+    // Criar um elemento temporário para remover as tags HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    // Retornar apenas o texto sem as tags
+    return tempDiv.textContent || tempDiv.innerText || '';
+  }
+
   getStatusText(status: string): string {
     return this.proposalService.getStatusText(status);
   }

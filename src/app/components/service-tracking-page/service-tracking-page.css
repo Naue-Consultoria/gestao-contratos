@@ -166,7 +166,7 @@
 
 .horizontal-form {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 1.5rem;
   flex-wrap: wrap;
   padding: 1.25rem 1.5rem !important;
@@ -177,6 +177,7 @@
   flex-direction: column;
   gap: 0.5rem;
   min-width: 0;
+  align-self: flex-start;
 }
 
 .control-item.notes-item {
@@ -197,6 +198,12 @@
   font-size: 0.875rem;
 }
 
+.control-item.notes-item .control-input {
+  resize: vertical;
+  min-height: 60px;
+  max-height: 120px;
+}
+
 .control-item .status-badge {
   margin-top: 0.25rem;
   font-size: 0.8rem;
@@ -204,10 +211,11 @@
 }
 
 .control-item button {
-  margin-top: 0.25rem;
+  margin-top: 1.7rem; /* Alinha com o topo dos inputs dos outros controles */
   padding: 0.5rem 0.875rem;
   font-size: 0.875rem;
   white-space: nowrap;
+  height: fit-content;
 }
 
 /* =================== MAIN GRID LAYOUT =================== */
@@ -826,7 +834,8 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-green-hover);
+  background: #059669; /* Verde um pouco mais escuro */
+  color: var(--white);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -925,14 +934,20 @@
 
   .horizontal-form {
     gap: 1rem;
+    align-items: flex-start;
   }
 
   .control-item {
     min-width: calc(50% - 0.5rem);
+    align-self: flex-start;
   }
 
   .control-item.notes-item {
     min-width: 100%;
+  }
+  
+  .control-item button {
+    margin-top: 1.5rem;
   }
   
   .main-grid {
@@ -980,14 +995,21 @@
     flex-direction: column;
     gap: 1rem;
     padding: 1rem !important;
+    align-items: stretch;
   }
 
   .control-item {
     min-width: 100%;
+    align-self: stretch;
   }
 
   .control-item .control-input {
     min-width: 100%;
+  }
+  
+  .control-item button {
+    margin-top: 0.5rem;
+    align-self: stretch;
   }
   
   .status-display {
@@ -1240,6 +1262,11 @@
   gap: 1rem;
 }
 
+.panel-card.full-height .stages-progress {
+  height: 831.66px; /* Mesma altura do painel de comentários */
+  max-height: 831.66px;
+}
+
 .progress-bar-container {
   display: flex;
   align-items: center;
@@ -1293,17 +1320,86 @@
   flex-direction: column;
   gap: 0.5rem;
   position: relative;
+  height: 750px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 197, 94, 0.4) #f1f5f9;
+}
+
+/* Scrollbar customizada para a lista de etapas */
+.stages-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.stages-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.stages-list::-webkit-scrollbar-thumb {
+  background: rgba(34, 197, 94, 0.5);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.stages-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 197, 94, 0.7);
 }
 
 .stage-item {
+  position: relative;
+  padding: 1rem;
+  padding-right: 3rem; /* Espaço extra para a checkbox */
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  background: var(--white);
+  margin-bottom: 0.5rem;
+}
+
+.stage-main-content {
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  padding: 1rem;
-  border-radius: 10px;
+  width: 100%;
+}
+
+.stage-checkbox {
+  position: absolute !important;
+  top: 0.75rem !important;
+  right: 0.75rem !important;
+  z-index: 10 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.stage-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--border-gray);
+  color: var(--text-gray);
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  border: 1px solid transparent;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stage-item.completed .stage-number {
+  background: linear-gradient(135deg, var(--primary-green), #065f46);
+  color: var(--white);
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
+}
+
+.stage-item.pending .stage-number {
+  background-color: #e2e8f0;
+  color: #64748b;
 }
 
 .stage-item:hover {
@@ -1337,33 +1433,43 @@
 }
 
 .stage-checkbox input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .checkbox-label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-  transition: transform 0.1s ease;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  transition: transform 0.1s ease !important;
+  width: 24px !important;
+  height: 24px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
 }
 
 .checkbox-label:hover {
-  transform: scale(1.1);
+  transform: scale(1.1) !important;
 }
 
 .checkbox-label i {
-  font-size: 1.3rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  font-size: 1.3rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .stage-checkbox input:disabled + .checkbox-label {
-  cursor: not-allowed;
-  opacity: 0.6;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
 }
 
 .stage-content {
@@ -1395,17 +1501,22 @@
 
 .stage-connector {
   position: absolute;
-  left: 1.35rem;
-  top: 2.5rem;
-  width: 2px;
-  height: calc(100% - 1rem);
-  background-color: #e2e8f0;
+  left: 2rem; /* Alinha com o centro do número da etapa (32px/2 + 1rem padding) */
+  top: 3rem; /* Começa na parte inferior do número */
+  width: 3px;
+  height: calc(100% - 1.5rem);
+  background: linear-gradient(to bottom, #e2e8f0 0%, #cbd5e0 100%);
   z-index: 1;
+  transition: all 0.3s ease;
+  border-radius: 1.5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .stage-item.completed .stage-connector {
-  background-color: var(--primary-green);
+  background: linear-gradient(to bottom, var(--primary-green) 0%, #065f46 100%);
+  box-shadow: 0 1px 3px rgba(34, 197, 94, 0.3);
 }
+
 
 /* =================== MOBILE RESPONSIVENESS FOR STAGES =================== */
 @media (max-width: 768px) {
@@ -1413,10 +1524,24 @@
     gap: 0.75rem;
   }
   
-  
   .stage-item {
-    padding: 0.5rem;
+    padding: 0.75rem;
+    padding-right: 2.5rem;
+  }
+  
+  .stage-main-content {
     gap: 0.75rem;
+  }
+  
+  .stage-checkbox {
+    top: 0.5rem !important;
+    right: 0.5rem !important;
+  }
+  
+  .stage-number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
   }
   
   .stage-name {
@@ -1427,26 +1552,61 @@
     font-size: 0.8rem;
   }
   
+  .checkbox-label {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  
   .checkbox-label i {
-    font-size: 1.1rem;
+    font-size: 1.1rem !important;
   }
   
   .stage-connector {
-    left: 1.1rem;
-    top: 2.2rem;
+    left: 1.65rem; /* Alinha com centro do número de 28px */
+    top: 2.6rem;
+    width: 2px;
+    height: calc(100% - 1.6rem);
   }
+  
 }
 
 @media (max-width: 480px) {
   .stage-item {
-    flex-direction: row;
-    align-items: flex-start;
+    padding: 0.75rem;
+    padding-right: 2rem;
+  }
+  
+  .stage-main-content {
+    gap: 0.75rem;
+  }
+  
+  .stage-checkbox {
+    top: 0.5rem !important;
+    right: 0.5rem !important;
+  }
+  
+  .stage-number {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+  
+  .checkbox-label {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  .checkbox-label i {
+    font-size: 1rem !important;
   }
   
   .stage-connector {
-    left: 1rem;
-    top: 2rem;
+    left: 1.5rem; /* Alinha com centro do número de 24px */
+    top: 2.4rem;
+    width: 2px;
+    height: calc(100% - 1.4rem);
   }
+  
 }
 
 /* =================== HORIZONTAL SERVICE STAGES STYLES =================== */

@@ -222,9 +222,6 @@ export class ServiceTrackingPageComponent implements OnInit {
           // Calcular progresso localmente
           this.stageProgress = this.serviceStageService.calculateProgress(this.serviceStages);
         }
-        
-        const statusText = newStatus === 'completed' ? 'concluída' : 'pendente';
-        this.toastr.success(`Etapa "${stage.name}" marcada como ${statusText}!`);
       }
     } catch (error: any) {
       console.error('Erro ao atualizar status da etapa:', error);

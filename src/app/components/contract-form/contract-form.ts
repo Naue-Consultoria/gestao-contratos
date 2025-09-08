@@ -274,7 +274,11 @@ export class ContractFormComponent implements OnInit {
       const response = await firstValueFrom(
         this.clientService.getClients({ is_active: true })
       );
-      if (response && response.clients) this.clients = response.clients;
+      if (response && response.clients) {
+        this.clients = response.clients.sort((a, b) => 
+          a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+        );
+      }
     } catch (error) {
       console.error('❌ Error loading clients:', error);
     }
@@ -286,7 +290,9 @@ export class ContractFormComponent implements OnInit {
         this.serviceService.getServices({ is_active: true })
       );
       if (response && response.services)
-        this.availableServices = response.services;
+        this.availableServices = response.services.sort((a, b) => 
+          a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+        );
     } catch (error) {
       console.error('❌ Error loading services:', error);
     }
@@ -352,7 +358,9 @@ export class ContractFormComponent implements OnInit {
       );
     }
 
-    return services;
+    return services.sort((a, b) => 
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+    );
   }
 
   formatDate(dateString: string): string {

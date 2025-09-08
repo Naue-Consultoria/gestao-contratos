@@ -127,7 +127,7 @@ export class PublicProposalViewComponent implements OnInit {
     prazo: [
       { value: 'Boleto', label: 'Boleto Bancário', icon: 'fas fa-barcode' },
       { value: 'Cartão de Crédito', label: 'Cartão de Crédito', icon: 'fas fa-credit-card' },
-      { value: 'Cheque', label: 'Cheque', icon: 'fas fa-money-check' }
+      { value: 'Pix Parcelado', label: 'Pix Parcelado', icon: 'fas fa-qrcode' }
     ]
   };
   
@@ -703,7 +703,7 @@ export class PublicProposalViewComponent implements OnInit {
   }
   
   isPaymentMethodInstallable(method: string): boolean {
-    return method === 'Cartão de Crédito' || method === 'Boleto';
+    return method === 'Cartão de Crédito' || method === 'Boleto' || method === 'Pix Parcelado';
   }
   
   getInstallmentOptions(): number[] {

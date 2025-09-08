@@ -139,7 +139,7 @@
     <!-- Control Panel Column -->
     <div class="control-panel">
       <!-- Service Stages Progress -->
-      <div class="panel-card" *ngIf="serviceStages && serviceStages.length > 0">
+      <div class="panel-card full-height" *ngIf="serviceStages && serviceStages.length > 0">
         <div class="panel-header">
           <i class="fas fa-tasks"></i>
           <h3>Etapas do Serviço</h3>
@@ -173,9 +173,14 @@
                        [style.color]="stage.status === 'completed' ? '#28a745' : '#6c757d'"></i>
                   </label>
                 </div>
-                <div class="stage-content">
-                  <div class="stage-name">{{ stage.name }}</div>
-                  <div class="stage-description" *ngIf="stage.description">{{ stage.description }}</div>
+                <div class="stage-main-content">
+                  <div class="stage-number">
+                    {{ i + 1 }}
+                  </div>
+                  <div class="stage-content">
+                    <div class="stage-name">{{ stage.name }}</div>
+                    <div class="stage-description" *ngIf="stage.description">{{ stage.description }}</div>
+                  </div>
                 </div>
                 <div class="stage-connector" *ngIf="i < serviceStages.length - 1"></div>
               </div>

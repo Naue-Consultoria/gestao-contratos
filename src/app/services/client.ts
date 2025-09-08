@@ -8,6 +8,7 @@ export interface CreateClientRequest {
   email?: string; // Para compatibilidade com PF
   emails?: string[]; // Para múltiplos emails em PJ
   phone?: string;
+  phones?: string[]; // Para múltiplos telefones
   street: string;
   number: string;
   complement?: string;
@@ -29,6 +30,7 @@ export interface UpdateClientRequest {
   email?: string; // Para compatibilidade com PF
   emails?: string[]; // Para múltiplos emails em PJ
   phone?: string;
+  phones?: string[]; // Para múltiplos telefones
   street?: string;
   number?: string;
   complement?: string;
@@ -52,6 +54,12 @@ export interface ClientEmail {
   is_primary: boolean;
 }
 
+export interface ClientPhone {
+  id: number;
+  phone: string;
+  is_primary: boolean;
+}
+
 export interface ApiClient {
   id: number;
   type: 'PF' | 'PJ';
@@ -60,6 +68,8 @@ export interface ApiClient {
   emails?: ClientEmail[]; // Lista de emails para PJ
   primary_email?: string; // Email primário extraído
   phone: string | null;
+  phones?: ClientPhone[]; // Lista de telefones
+  primary_phone?: string; // Telefone primário extraído
   street: string;
   number: string;
   complement: string | null;
@@ -424,5 +434,102 @@ export class ClientService {
     }
     
     return client.email ? [client.email] : [];
+  }
+
+  // ========== MÉTODOS PARA GERENCIAR TELEFONES ==========
+
+  /**
+   * Obter todos os telefones de um cliente
+   */
+  getClientPhones(clientId: number): Observable<{ success: boolean; phones: ClientPhone[] }> {
+    return this.http.get<{ success: boolean; phones: ClientPhone[] }>(
+      `${environment.apiUrl}/clients/${clientId}/phones`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Adicionar um novo telefone a um cliente
+   */
+  addClientPhone(clientId: number, phone: string, isPrimary = false): Observable<{ success: boolean; phone: ClientPhone; message: string }> {
+    return this.http.post<{ success: boolean; phone: ClientPhone; message: string }>(
+      `${environment.apiUrl}/clients/${clientId}/phones`,
+      { phone, is_primary: isPrimary },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Atualizar um telefone
+   */
+  updateClientPhone(phoneId: number, phone?: string, isPrimary?: boolean): Observable<{ success: boolean; phone: ClientPhone; message: string }> {
+    const updateData: any = {};
+    if (phone !== undefined) updateData.phone = phone;
+    if (isPrimary !== undefined) updateData.is_primary = isPrimary;
+
+    return this.http.put<{ success: boolean; phone: ClientPhone; message: string }>(
+      `${environment.apiUrl}/phones/${phoneId}`,
+      updateData,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Definir um telefone como primário
+   */
+  setPrimaryPhone(phoneId: number): Observable<{ success: boolean; phone: ClientPhone; message: string }> {
+    return this.http.put<{ success: boolean; phone: ClientPhone; message: string }>(
+      `${environment.apiUrl}/phones/${phoneId}/primary`,
+      {},
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Remover um telefone
+   */
+  removeClientPhone(phoneId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${environment.apiUrl}/phones/${phoneId}`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Substituir todos os telefones de um cliente
+   */
+  replaceAllPhones(clientId: number, phones: string[]): Observable<{ success: boolean; phones: ClientPhone[]; message: string }> {
+    return this.http.put<{ success: boolean; phones: ClientPhone[]; message: string }>(
+      `${environment.apiUrl}/clients/${clientId}/phones/replace`,
+      { phones },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * Obter o telefone primário de um cliente
+   */
+  getPrimaryPhone(client: ApiClient): string {
+    if (client.primary_phone) {
+      return client.primary_phone;
+    }
+    
+    if (client.phones && client.phones.length > 0) {
+      const primaryPhone = client.phones.find(p => p.is_primary);
+      return primaryPhone?.phone || client.phones[0].phone;
+    }
+    
+    return client.phone || '';
+  }
+
+  /**
+   * Obter todos os telefones de um cliente como array de strings
+   */
+  getAllPhones(client: ApiClient): string[] {
+    if (client.phones && client.phones.length > 0) {
+      return client.phones.map(p => p.phone);
+    }
+    
+    return client.phone ? [client.phone] : [];
   }
 }

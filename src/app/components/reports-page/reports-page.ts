@@ -59,7 +59,10 @@ export class ReportsPage implements OnInit {
   loadClients() {
     this.clientService.getClients().subscribe({
       next: (response: any) => {
-        this.clients = response?.clients || [];
+        const clients = response?.clients || [];
+        this.clients = clients.sort((a: any, b: any) => 
+          a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+        );
       },
       error: (error: any) => {
         console.error('Erro ao carregar clientes:', error);

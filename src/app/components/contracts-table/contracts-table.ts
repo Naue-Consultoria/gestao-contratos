@@ -126,7 +126,9 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       ]);
       if (statsResponse?.stats) this.stats = statsResponse.stats;
       if (clientsResponse?.clients)
-        this.clients = clientsResponse.clients;
+        this.clients = clientsResponse.clients.sort((a, b) => 
+          a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+        );
     } catch (e) {
       this.error = 'Não foi possível carregar os dados da página.';
     } finally {
@@ -143,7 +145,9 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
         firstValueFrom(this.clientService.getClients({ is_active: true })),
       ]);
       if (statsResponse?.stats) this.stats = statsResponse.stats;
-      if (clientsResponse?.clients) this.clients = clientsResponse.clients;
+      if (clientsResponse?.clients) this.clients = clientsResponse.clients.sort((a, b) => 
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+      );
 
       // Força o carregamento dos contratos
       await this.forceLoadContracts();

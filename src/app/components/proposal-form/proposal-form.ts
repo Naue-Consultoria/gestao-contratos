@@ -124,9 +124,13 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe({
       next: (data) => {
-        this.clients = data.clients.clients || [];
-        // Filtrar apenas serviços ativos
-        this.services = (data.services.services || []).filter(service => service.is_active);
+        this.clients = (data.clients.clients || []).sort((a, b) => 
+          a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+        );
+        // Filtrar apenas serviços ativos e ordenar alfabeticamente
+        this.services = (data.services.services || [])
+          .filter(service => service.is_active)
+          .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
         this.availableServices = [...this.services];
         this.isLoading = false;
       },
@@ -234,7 +238,9 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       );
     }
 
-    return services;
+    return services.sort((a, b) => 
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+    );
   }
 
   get serviceCategories(): string[] {

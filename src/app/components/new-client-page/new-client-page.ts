@@ -24,6 +24,9 @@ export class NewClientPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private sanitizer = inject(DomSanitizer);
   
+  // State
+  errorMessage: string = '';
+  
   // Form data
   formData: CreateClientRequest & { logo_url?: string | SafeUrl } = {
     type: 'PF',
@@ -51,6 +54,9 @@ export class NewClientPageComponent implements OnInit {
 
   // Email fields para PJ (múltiplos emails)
   emailFields: string[] = [''];
+  
+  // Phone fields (múltiplos telefones para todos os clientes)
+  phoneFields: string[] = [''];
   
   isLoading = false;
   isEditing = false;
@@ -98,10 +104,13 @@ export class NewClientPageComponent implements OnInit {
         legal_representative: client.legal_representative || ''
       };
 
-      // Carregat emails se for PJ
+      // Carregar emails se for PJ
       if (client.type === 'PJ') {
         this.loadClientEmails();
       }
+
+      // Carregar telefones para todos os tipos de cliente
+      this.loadClientPhones();
 
       if (client.logo_path) {
         this.loadLogo();
@@ -163,6 +172,12 @@ export class NewClientPageComponent implements OnInit {
         if (validEmails.length > 1) {
           await this.saveAdditionalEmails(clientId, validEmails);
         }
+      }
+
+      // Salvar telefones adicionais (se houver mais de um telefone)
+      const validPhones = this.phoneFields.filter(phone => phone.trim() !== '');
+      if (validPhones.length > 1) {
+        await this.saveAdditionalPhones(clientId, validPhones);
       }
       
       this.goBack();
@@ -284,6 +299,63 @@ export class NewClientPageComponent implements OnInit {
   }
 
   /**
+   * Adiciona um novo campo de telefone
+   */
+  addPhoneField() {
+    this.phoneFields.push('');
+  }
+
+  /**
+   * Remove um campo de telefone específico
+   */
+  removePhoneField(index: number) {
+    if (index > 0 && this.phoneFields.length > 1) {
+      this.phoneFields.splice(index, 1);
+    }
+  }
+
+  /**
+   * Valida um telefone específico
+   */
+  validatePhone(index: number) {
+    const phone = this.phoneFields[index];
+    if (phone && phone.trim() !== '') {
+      const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
+      if (!phoneRegex.test(phone)) {
+        this.modalService.showError(`Telefone ${index + 1} inválido. Use o formato (XX) XXXXX-XXXX`);
+      }
+    }
+  }
+
+  /**
+   * TrackBy function para o ngFor dos telefones
+   */
+  trackByPhoneIndex(index: number): number {
+    return index;
+  }
+
+  /**
+   * Carrega os telefones do cliente (para edição)
+   */
+  async loadClientPhones() {
+    if (!this.editingId) return;
+    
+    try {
+      const response = await firstValueFrom(this.clientService.getClientPhones(this.editingId));
+      if (response.success && response.phones.length > 0) {
+        this.phoneFields = response.phones.map(p => p.phone);
+      } else {
+        // Se não houver telefones específicos, usar o telefone do cliente
+        this.phoneFields = [this.formData.phone || ''];
+      }
+    } catch (error) {
+      console.error('Erro ao carregar telefones:', error);
+      // Usar o telefone padrão em caso de erro
+      this.phoneFields = [this.formData.phone || ''];
+    }
+  }
+
+  /**
    * Salva emails adicionais após criar/atualizar cliente
    */
   private async saveAdditionalEmails(clientId: number, allEmails: string[]): Promise<void> {
@@ -292,6 +364,19 @@ export class NewClientPageComponent implements OnInit {
       await firstValueFrom(this.clientService.replaceAllEmails(clientId, allEmails));
     } catch (error) {
       console.warn('Erro ao salvar emails adicionais:', error);
+      // Não exibe erro para o usuário pois o cliente já foi criado/atualizado com sucesso
+    }
+  }
+
+  /**
+   * Salva telefones adicionais após criar/atualizar cliente
+   */
+  private async saveAdditionalPhones(clientId: number, allPhones: string[]): Promise<void> {
+    try {
+      // Substitui todos os telefones do cliente
+      await firstValueFrom(this.clientService.replaceAllPhones(clientId, allPhones));
+    } catch (error) {
+      console.warn('Erro ao salvar telefones adicionais:', error);
       // Não exibe erro para o usuário pois o cliente já foi criado/atualizado com sucesso
     }
   }

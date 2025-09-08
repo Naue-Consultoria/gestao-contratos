@@ -46,14 +46,6 @@
   color: #065f46;
 }
 
-.progress-count {
-  font-size: 0.8rem;
-  color: var(--text-gray);
-  background: var(--white);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
-}
 
 .progress-bar-container {
   width: 100%;
