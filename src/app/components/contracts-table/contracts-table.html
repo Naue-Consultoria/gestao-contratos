@@ -36,14 +36,23 @@
     <!-- Filters and Actions -->
     <div class="table-header">
       <div class="filters-section">
-        <div class="search-box">
-          <i class="fas fa-search search-icon"></i>
+        <div class="search-box" [class.searching]="isSearching">
+          <i class="fas fa-search search-icon" *ngIf="!isSearching"></i>
+          <i class="fas fa-spinner fa-spin search-icon" *ngIf="isSearching"></i>
           <input 
             type="text" 
             class="search-input" 
-            placeholder="Buscar por número ou empresa..."
+            placeholder="Buscar por número, cliente ou empresa..."
             [(ngModel)]="filters.search"
-            (input)="applyFilters()">
+            (input)="onSearchInput()"
+            [disabled]="isLoading && !isSearching">
+          <button 
+            *ngIf="filters.search" 
+            class="clear-search-btn" 
+            (click)="clearSearch()"
+            title="Limpar busca">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
         
         <div class="filter-group">
@@ -92,9 +101,15 @@
       <!-- Empty State -->
       <div *ngIf="filteredContracts.length === 0 && !error" class="empty-state">
         <i class="fas fa-file-contract empty-icon"></i>
-        <h3>Nenhum contrato encontrado</h3>
-        <p *ngIf="filters.search || filters.status || filters.client_id">
-          Tente ajustar os filtros de busca
+        <h3 *ngIf="filters.search">Nenhum contrato encontrado para "{{ filters.search }}"</h3>
+        <h3 *ngIf="!filters.search && (filters.status || filters.client_id)">Nenhum contrato encontrado</h3>
+        <h3 *ngIf="!filters.search && !filters.status && !filters.client_id">Nenhum contrato cadastrado</h3>
+        
+        <p *ngIf="filters.search">
+          Tente buscar por outros termos ou <button class="link-button" (click)="clearSearch()">limpe a busca</button>
+        </p>
+        <p *ngIf="!filters.search && (filters.status || filters.client_id)">
+          Tente ajustar os filtros de busca ou <button class="link-button" (click)="clearFilters()">limpe todos os filtros</button>
         </p>
         <p *ngIf="!filters.search && !filters.status && !filters.client_id">
           Clique no botão "Novo Contrato" para criar o primeiro contrato

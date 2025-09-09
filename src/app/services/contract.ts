@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { PaymentMethod } from './payment-method.service';
 
 export interface ContractServiceItem {
   service_id: number;
@@ -46,6 +47,14 @@ export interface CreateContractRequest {
   notes?: string | null;
   assigned_users?: number[];
   payment_method?: string | null;
+  payment_method_1?: string | null;
+  payment_method_2?: string | null;
+  payment_method_1_value_type?: 'percentage' | 'value' | null;
+  payment_method_1_value?: number | null;
+  payment_method_1_percentage?: number | null;
+  payment_method_2_value_type?: 'percentage' | 'value' | null;
+  payment_method_2_value?: number | null;
+  payment_method_2_percentage?: number | null;
   expected_payment_date?: string | null;
   payment_status?: 'pago' | 'pendente';
   installment_count?: number;
@@ -67,6 +76,14 @@ export interface UpdateContractRequest {
   notes?: string | null;
   assigned_users?: number[];
   payment_method?: string | null;
+  payment_method_1?: string | null;
+  payment_method_2?: string | null;
+  payment_method_1_value_type?: 'percentage' | 'value' | null;
+  payment_method_1_value?: number | null;
+  payment_method_1_percentage?: number | null;
+  payment_method_2_value_type?: 'percentage' | 'value' | null;
+  payment_method_2_value?: number | null;
+  payment_method_2_percentage?: number | null;
   expected_payment_date?: string | null;
   payment_status?: 'pago' | 'pendente';
   installment_count?: number;
@@ -75,6 +92,14 @@ export interface UpdateContractRequest {
   barter_value?: number | null;
   barter_percentage?: number | null;
   secondary_payment_method?: string | null;
+}
+
+export interface ServiceStage {
+  id: number;
+  name: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  sort_order: number;
+  is_active: boolean;
 }
 
 export interface ApiContractService {
@@ -90,6 +115,7 @@ export interface ApiContractService {
     name: string;
     duration: number;
     category: string;
+    service_stages?: ServiceStage[];
   };
 }
 
@@ -115,6 +141,7 @@ export interface ApiContract {
   barter_value?: number | null;
   barter_percentage?: number | null;
   secondary_payment_method?: string | null;
+  payment_methods?: PaymentMethod[]; // Nova propriedade para formas de pagamento flexíveis
   client: {
     id: number;
     name: string;

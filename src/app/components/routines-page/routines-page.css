@@ -507,6 +507,64 @@
   }
 }
 
+/* Sort Dropdown */
+.sort-dropdown-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sort-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.sort-select {
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 180px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6,9 12,15 18,9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+}
+
+.sort-select:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #0e9b71;
+  box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
+}
+
+:host-context(body.dark-mode) .sort-select {
+  background: var(--dark-input);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e5e7eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6,9 12,15 18,9'></polyline></svg>");
+}
+
+:host-context(body.dark-mode) .sort-select:hover {
+  background-color: var(--dark-hover);
+}
+
+:host-context(body.dark-mode) .sort-select:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;
@@ -712,6 +770,129 @@
 }
 
 /* Schedule Section */
+/* Progress Section */
+.progress-section {
+  padding: 0 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.progress-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+}
+
+:host-context(body.dark-mode) .progress-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--dark-border);
+}
+
+.progress-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(14, 155, 113, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.progress-icon i {
+  color: #0e9b71;
+  font-size: 14px;
+}
+
+:host-context(body.dark-mode) .progress-icon {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+:host-context(body.dark-mode) .progress-icon i {
+  color: #10b981;
+}
+
+.progress-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.progress-label span:first-child {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .progress-label span:first-child {
+  color: var(--dark-text);
+}
+
+.progress-text {
+  font-size: 0.75rem;
+  color: var(--text-gray);
+  font-weight: 400;
+}
+
+:host-context(body.dark-mode) .progress-text {
+  color: var(--dark-text-secondary);
+}
+
+.progress-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+:host-context(body.dark-mode) .progress-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0e9b71, #10b981);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  min-width: 2px;
+}
+
+.progress-fill.completed {
+  background: linear-gradient(90deg, #059669, #10b981);
+}
+
+.progress-percentage {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  min-width: 32px;
+  text-align: right;
+}
+
+:host-context(body.dark-mode) .progress-percentage {
+  color: var(--dark-text);
+}
+
+/* Legacy schedule section styles for backward compatibility */
 .schedule-section {
   padding: 0 1.5rem;
   margin-bottom: 1.5rem;

@@ -65,7 +65,6 @@
             <th>Cidade/UF</th>
             <th>Documento</th>
             <th>Contratos</th>
-            <th>Desde</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -100,7 +99,6 @@
                 <span class="active" *ngIf="client.activeContracts > 0">({{ client.activeContracts }} ativos)</span>
               </div>
             </td>
-            <td>{{ client.since }}</td>
             <td>
               <div class="actions-cell">
                 <div class="dropdown" [class.active]="dropdownOpen === client.id">

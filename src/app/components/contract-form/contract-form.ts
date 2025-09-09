@@ -14,6 +14,7 @@ import { UserSelectionModalComponent } from '../user-selection-modal/user-select
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { InstallmentsManagerComponent } from '../installments-manager/installments-manager';
+import { PaymentMethodService } from '../../services/payment-method.service';
 
 interface SelectedService {
   service_id: number;
@@ -58,6 +59,7 @@ export class ContractFormComponent implements OnInit {
   private userService = inject(UserService);
   private authService = inject(AuthService);
   private breadcrumbService = inject(BreadcrumbService);
+  private paymentMethodService = inject(PaymentMethodService);
 
   formData: any = {
     contract_number: '',
@@ -68,6 +70,14 @@ export class ContractFormComponent implements OnInit {
     end_date: '',
     notes: '',
     payment_method: '',
+    payment_method_1: '',
+    payment_method_2: '',
+    payment_method_1_value_type: 'percentage' as 'percentage' | 'value',
+    payment_method_1_value: null as number | null,
+    payment_method_1_percentage: null as number | null,
+    payment_method_2_value_type: 'percentage' as 'percentage' | 'value',
+    payment_method_2_value: null as number | null,
+    payment_method_2_percentage: null as number | null,
     expected_payment_date: '',
     payment_status: 'pendente' as 'pago' | 'pendente',
     installment_count: 1,
@@ -90,6 +100,19 @@ export class ContractFormComponent implements OnInit {
   contractTypes = ['Full', 'Pontual', 'Individual', 'Recrutamento & Seleção'];
   assignedUsers: AssignedUser[] = [];
   paymentMethods = this.contractService.getPaymentMethods();
+  hasSecondPaymentMethod: boolean = false;
+  
+  // Sistema simples de múltiplas formas de pagamento
+  dynamicPaymentMethods: Array<{
+    payment_method: string;
+    value_type: 'percentage' | 'fixed_value';
+    percentage?: number;
+    fixed_value?: number;
+    installment_count?: number;
+    first_installment_date?: string;
+  }> = [
+    { payment_method: '', value_type: 'percentage', percentage: 100, installment_count: 1 }
+  ];
   
   // Propriedades para parcelamento
   contractInstallments: ContractInstallment[] = [];
@@ -226,6 +249,14 @@ export class ContractFormComponent implements OnInit {
           end_date: contract.end_date ? contract.end_date.split('T')[0] : '',
           notes: contract.notes || '',
           payment_method: contract.payment_method || '',
+          payment_method_1: contract.payment_method_1 || contract.payment_method || '',
+          payment_method_2: contract.payment_method_2 || contract.secondary_payment_method || '',
+          payment_method_1_value_type: contract.payment_method_1_value_type || 'percentage',
+          payment_method_1_value: contract.payment_method_1_value || null,
+          payment_method_1_percentage: contract.payment_method_1_percentage || null,
+          payment_method_2_value_type: contract.payment_method_2_value_type || 'percentage',
+          payment_method_2_value: contract.payment_method_2_value || null,
+          payment_method_2_percentage: contract.payment_method_2_percentage || null,
           expected_payment_date: contract.expected_payment_date ? contract.expected_payment_date.split('T')[0] : '',
           payment_status: contract.payment_status || 'pendente',
           installment_count: contract.installment_count || 1,
@@ -234,6 +265,9 @@ export class ContractFormComponent implements OnInit {
           barter_percentage: contract.barter_percentage || null,
           secondary_payment_method: contract.secondary_payment_method || '',
         };
+        
+        // Definir se tem segunda forma de pagamento
+        this.hasSecondPaymentMethod = !!(this.formData.payment_method_2);
         
         // Se tiver permuta, mostrar as opções
         if (contract.payment_method === 'Permuta') {
@@ -418,6 +452,9 @@ export class ContractFormComponent implements OnInit {
     
     this.formData.total_value = this.getTotalValue();
     
+    // Atualizar lógica de forma única quando valor total mudar
+    this.updateSinglePaymentMethodLogic();
+    
     // Recriar parcelas se necessário
     if (this.formData.installment_count > 1 && this.firstInstallmentDate) {
       this.generateInstallments();
@@ -520,7 +557,7 @@ export class ContractFormComponent implements OnInit {
           notes: this.formData.notes || null,
           status: this.formData.status,
           assigned_users: userIdsToSave,
-          payment_method: this.formData.payment_method || null,
+          payment_method: this.getMainPaymentMethod(),
           expected_payment_date: this.formData.expected_payment_date || null,
           payment_status: this.formData.payment_status,
           installment_count: this.formData.installment_count || 1,
@@ -544,7 +581,7 @@ export class ContractFormComponent implements OnInit {
           notes: this.formData.notes || null,
           services,
           assigned_users: userIdsToSave,
-          payment_method: this.formData.payment_method || null,
+          payment_method: this.getMainPaymentMethod(),
           expected_payment_date: this.formData.expected_payment_date || null,
           payment_status: this.formData.payment_status,
           installment_count: this.formData.installment_count || 1,
@@ -582,6 +619,39 @@ export class ContractFormComponent implements OnInit {
 
   formatCurrency(value: number): string {
     return this.contractService.formatValue(value);
+  }
+
+  calculateInstallmentValue(method: any): number {
+    if (!method.installment_count || method.installment_count <= 1) return 0;
+    
+    const totalValue = this.getTotalValue();
+    if (totalValue <= 0) return 0;
+    
+    let methodValue = 0;
+    if (method.value_type === 'percentage' && method.percentage) {
+      methodValue = (totalValue * method.percentage) / 100;
+    } else if (method.value_type === 'fixed_value' && method.fixed_value) {
+      methodValue = method.fixed_value;
+    }
+    
+    return methodValue / method.installment_count;
+  }
+
+  getInstallmentPreview(method: any, installmentCount: number): string {
+    const totalValue = this.getTotalValue();
+    if (totalValue <= 0) return 'R$ 0,00';
+    
+    let methodValue = 0;
+    if (method.value_type === 'percentage' && method.percentage) {
+      methodValue = (totalValue * method.percentage) / 100;
+    } else if (method.value_type === 'fixed_value' && method.fixed_value) {
+      methodValue = method.fixed_value;
+    } else {
+      return 'R$ --,--';
+    }
+    
+    const installmentValue = methodValue / installmentCount;
+    return this.formatCurrency(installmentValue);
   }
 
   getClientName(clientId: number | null): string {
@@ -646,33 +716,42 @@ export class ContractFormComponent implements OnInit {
   }
 
   onPaymentMethodChange() {
-    // Se for Permuta, mostrar opções de permuta
-    if (this.formData.payment_method === 'Permuta') {
+    // Atualizar compatibilidade com campo antigo
+    this.formData.payment_method = this.formData.payment_method_1;
+    
+    // Verificar se primeira forma é permuta
+    if (this.formData.payment_method_1 === 'Permuta') {
       this.showBarterOptions = true;
       this.formData.barter_type = 'percentage'; // Default
       this.formData.installment_count = 1; // Permuta não permite parcelamento direto
       this.contractInstallments = [];
       this.setDefaultSecondaryFirstInstallmentDate();
-    } else {
-      // Resetar campos de permuta
+    } else if (this.formData.payment_method_2 !== 'Permuta') {
+      // Resetar campos de permuta apenas se nenhuma das duas for permuta
       this.showBarterOptions = false;
       this.formData.barter_type = null;
       this.formData.barter_value = null;
       this.formData.barter_percentage = null;
-      this.formData.secondary_payment_method = '';
       this.remainingValue = 0;
       this.secondaryInstallmentCount = 1;
       this.secondaryInstallments = [];
       this.secondaryFirstInstallmentDate = '';
-      
-      // Resetar parcelamento se forma de pagamento não permitir
-      if (!this.isPaymentMethodInstallable(this.formData.payment_method)) {
-        this.formData.installment_count = 1;
-        this.contractInstallments = [];
-        // Resetar data prevista para pagamento quando não há parcelamento
-        this.formData.expected_payment_date = '';
-      }
     }
+    
+    // Se não permitir parcelamento, resetar para 1 parcela
+    if (!this.isPaymentMethodInstallable(this.formData.payment_method_1)) {
+      this.formData.installment_count = 1;
+      this.contractInstallments = [];
+      this.formData.expected_payment_date = '';
+    }
+
+    // Definir valor padrão se não tiver segunda forma
+    if (!this.hasSecondPaymentMethod && this.formData.payment_method_1) {
+      this.formData.payment_method_1_percentage = 100; // 100% se só tem uma forma
+      this.formData.payment_method_1_value = null;
+    }
+
+    this.calculateRemainingValue();
   }
   
   onBarterTypeChange() {
@@ -743,6 +822,20 @@ export class ContractFormComponent implements OnInit {
   
   // Métodos para parcelamento secundário (valor restante após permuta)
   onSecondaryPaymentMethodChange() {
+    // Atualizar compatibilidade com campo antigo
+    this.formData.secondary_payment_method = this.formData.payment_method_2;
+    
+    // Verificar se segunda forma é permuta
+    if (this.formData.payment_method_2 === 'Permuta') {
+      this.showBarterOptions = true;
+      this.calculateRemainingValue();
+    } else if (this.formData.payment_method_1 !== 'Permuta') {
+      this.showBarterOptions = false;
+      this.formData.barter_type = null;
+      this.formData.barter_value = null;
+      this.formData.barter_percentage = null;
+    }
+    
     // Resetar parcelamento secundário se não permitir
     if (!this.isPaymentMethodInstallable(this.formData.secondary_payment_method)) {
       this.secondaryInstallmentCount = 1;
@@ -759,6 +852,318 @@ export class ContractFormComponent implements OnInit {
       this.secondaryFirstInstallmentDate = nextMonth.toISOString().split('T')[0];
     }
   }
+
+  // Métodos para múltiplas formas de pagamento
+  buildPaymentMethodsArray(contract: any): string[] {
+    const methods: string[] = [];
+    if (contract.payment_method_1 || contract.payment_method) {
+      methods.push(contract.payment_method_1 || contract.payment_method);
+    }
+    if (contract.payment_method_2 || contract.secondary_payment_method) {
+      methods.push(contract.payment_method_2 || contract.secondary_payment_method);
+    }
+    return methods;
+  }
+
+  onSecondPaymentMethodToggle() {
+    if (!this.hasSecondPaymentMethod) {
+      // Limpar segunda forma de pagamento quando desabilitada
+      this.formData.payment_method_2 = '';
+      this.formData.secondary_payment_method = '';
+      this.formData.payment_method_2_value_type = 'percentage';
+      this.formData.payment_method_2_value = null;
+      this.formData.payment_method_2_percentage = null;
+      
+      // Se só tem uma forma, definir como 100%
+      if (this.formData.payment_method_1) {
+        this.formData.payment_method_1_percentage = 100;
+        this.formData.payment_method_1_value = null;
+      }
+    } else {
+      // Ao habilitar segunda forma, dividir igualmente por padrão
+      if (this.formData.payment_method_1) {
+        this.formData.payment_method_1_percentage = 50;
+        this.formData.payment_method_1_value = null;
+        this.formData.payment_method_1_value_type = 'percentage';
+        
+        this.formData.payment_method_2_value_type = 'percentage';
+        this.formData.payment_method_2_percentage = 50;
+        this.formData.payment_method_2_value = null;
+      }
+    }
+  }
+
+  addNewPaymentMethod() {
+    // Se é a primeira forma de pagamento, configurar para 100% ou valor total
+    if (this.dynamicPaymentMethods.length === 0) {
+      this.dynamicPaymentMethods.push({
+        payment_method: '',
+        value_type: 'percentage',
+        percentage: 100,
+        fixed_value: this.getTotalValue(),
+        installment_count: 1
+      });
+    } else {
+      // Se já há formas, redistribuir os valores
+      this.redistributePaymentValues();
+      this.dynamicPaymentMethods.push({
+        payment_method: '',
+        value_type: 'percentage',
+        percentage: 0,
+        installment_count: 1
+      });
+    }
+    
+    this.updateSinglePaymentMethodLogic();
+  }
+
+  removePaymentMethod(index: number) {
+    if (this.dynamicPaymentMethods.length > 1) {
+      this.dynamicPaymentMethods.splice(index, 1);
+      this.updateSinglePaymentMethodLogic();
+    }
+  }
+
+  // Nova lógica para forma única de pagamento
+  updateSinglePaymentMethodLogic() {
+    if (this.dynamicPaymentMethods.length === 1) {
+      const method = this.dynamicPaymentMethods[0];
+      const contractTotal = this.getTotalValue();
+      
+      // Se for percentual, travar em 100%
+      if (method.value_type === 'percentage') {
+        method.percentage = 100;
+      } else if (method.value_type === 'fixed_value') {
+        // Se for valor fixo, usar valor total do contrato
+        method.fixed_value = contractTotal;
+      }
+    }
+  }
+
+  redistributePaymentValues() {
+    // Redistributir valores quando adicionar nova forma
+    const totalMethods = this.dynamicPaymentMethods.length + 1;
+    const percentagePerMethod = Math.floor(100 / totalMethods);
+    
+    this.dynamicPaymentMethods.forEach((method, index) => {
+      if (method.value_type === 'percentage') {
+        method.percentage = percentagePerMethod;
+      }
+    });
+  }
+
+  getMainPaymentMethod(): string | null {
+    // Retorna o método de pagamento principal (da primeira forma configurada)
+    const firstMethod = this.dynamicPaymentMethods.find(method => method.payment_method);
+    return firstMethod?.payment_method || null;
+  }
+
+  setPaymentValueType(index: number, type: 'percentage' | 'fixed_value') {
+    const method = this.dynamicPaymentMethods[index];
+    if (!method) return;
+    
+    method.value_type = type;
+    
+    // Lógica especial para forma única de pagamento
+    if (this.dynamicPaymentMethods.length === 1) {
+      const contractTotal = this.getTotalValue();
+      
+      if (type === 'percentage') {
+        method.percentage = 100; // Sempre 100% para forma única
+        method.fixed_value = undefined;
+      } else if (type === 'fixed_value') {
+        method.fixed_value = contractTotal; // Valor total do contrato
+        method.percentage = undefined;
+      }
+    } else {
+      // Para múltiplas formas, limpar e deixar usuário configurar
+      if (type === 'percentage') {
+        method.fixed_value = undefined;
+        method.percentage = method.percentage || 0;
+      } else {
+        method.percentage = undefined;
+        method.fixed_value = method.fixed_value || 0;
+      }
+    }
+  }
+
+  calculatePaymentValue(method: any): number {
+    if (method.value_type === 'percentage' && method.percentage) {
+      return (this.getTotalValue() * method.percentage) / 100;
+    } else if (method.value_type === 'fixed_value' && method.fixed_value) {
+      return method.fixed_value;
+    }
+    return 0;
+  }
+
+  getTotalPaymentMethodsValue(): number {
+    return this.dynamicPaymentMethods.reduce((total, method) => {
+      return total + this.calculatePaymentValue(method);
+    }, 0);
+  }
+
+  getTotalPaymentMethodsPercentage(): number {
+    const totalValue = this.getTotalValue();
+    if (totalValue === 0) return 0;
+    
+    return (this.getTotalPaymentMethodsValue() / totalValue) * 100;
+  }
+
+  isInstallmentSupported(paymentMethod: string): boolean {
+    // Lista de métodos que suportam parcelamento
+    const installmentMethods = ['Cartão de Crédito', 'Boleto', 'À Prazo'];
+    return installmentMethods.includes(paymentMethod);
+  }
+
+  onPaymentInstallmentCountChange(methodIndex: number, installmentCount: number) {
+    this.dynamicPaymentMethods[methodIndex].installment_count = installmentCount;
+    console.log(`📅 Método ${methodIndex + 1}: ${installmentCount}x`);
+  }
+
+  onPaymentFirstInstallmentDateChange(methodIndex: number, date: string) {
+    this.dynamicPaymentMethods[methodIndex].first_installment_date = date;
+    console.log(`📅 Método ${methodIndex + 1} primeira parcela: ${date}`);
+  }
+
+  // Método removido - usando sistema simples interno
+  // onPaymentMethodsChanged(paymentMethods: PaymentMethod[]) { ... }
+
+  setPaymentMethod1Type(type: 'percentage' | 'value') {
+    this.formData.payment_method_1_value_type = type;
+    if (type === 'percentage') {
+      this.formData.payment_method_1_value = null;
+    } else {
+      this.formData.payment_method_1_percentage = null;
+    }
+    this.adjustSecondPaymentValue();
+  }
+
+  setPaymentMethod2Type(type: 'percentage' | 'value') {
+    this.formData.payment_method_2_value_type = type;
+    if (type === 'percentage') {
+      this.formData.payment_method_2_value = null;
+    } else {
+      this.formData.payment_method_2_percentage = null;
+    }
+    this.adjustFirstPaymentValue();
+  }
+
+  // Ajustar segunda forma baseada na primeira
+  adjustSecondPaymentValue() {
+    if (!this.hasSecondPaymentMethod || !this.formData.payment_method_2) return;
+    
+    const contractTotal = this.getTotalValue();
+    if (contractTotal <= 0) return;
+
+    let firstValue = 0;
+    
+    // Calcular valor da primeira forma
+    if (this.formData.payment_method_1_value_type === 'percentage' && this.formData.payment_method_1_percentage) {
+      firstValue = (contractTotal * this.formData.payment_method_1_percentage) / 100;
+    } else if (this.formData.payment_method_1_value_type === 'value' && this.formData.payment_method_1_value) {
+      firstValue = this.formData.payment_method_1_value;
+    } else {
+      return; // Não há valor definido na primeira forma
+    }
+
+    // Calcular valor restante para segunda forma
+    const remainingValue = contractTotal - firstValue;
+    
+    if (remainingValue <= 0) {
+      // Se primeira forma cobre tudo, zerar segunda
+      this.formData.payment_method_2_value = null;
+      this.formData.payment_method_2_percentage = null;
+      return;
+    }
+
+    // Ajustar segunda forma baseada no seu tipo
+    if (this.formData.payment_method_2_value_type === 'percentage') {
+      const remainingPercentage = (remainingValue / contractTotal) * 100;
+      this.formData.payment_method_2_percentage = Math.round(remainingPercentage * 100) / 100; // 2 casas decimais
+      this.formData.payment_method_2_value = null;
+    } else {
+      this.formData.payment_method_2_value = remainingValue;
+      this.formData.payment_method_2_percentage = null;
+    }
+  }
+
+  // Ajustar primeira forma baseada na segunda
+  adjustFirstPaymentValue() {
+    if (!this.hasSecondPaymentMethod || !this.formData.payment_method_1) return;
+    
+    const contractTotal = this.getTotalValue();
+    if (contractTotal <= 0) return;
+
+    let secondValue = 0;
+    
+    // Calcular valor da segunda forma
+    if (this.formData.payment_method_2_value_type === 'percentage' && this.formData.payment_method_2_percentage) {
+      secondValue = (contractTotal * this.formData.payment_method_2_percentage) / 100;
+    } else if (this.formData.payment_method_2_value_type === 'value' && this.formData.payment_method_2_value) {
+      secondValue = this.formData.payment_method_2_value;
+    } else {
+      return; // Não há valor definido na segunda forma
+    }
+
+    // Calcular valor restante para primeira forma
+    const remainingValue = contractTotal - secondValue;
+    
+    if (remainingValue <= 0) {
+      // Se segunda forma cobre tudo, zerar primeira
+      this.formData.payment_method_1_value = null;
+      this.formData.payment_method_1_percentage = null;
+      return;
+    }
+
+    // Ajustar primeira forma baseada no seu tipo
+    if (this.formData.payment_method_1_value_type === 'percentage') {
+      const remainingPercentage = (remainingValue / contractTotal) * 100;
+      this.formData.payment_method_1_percentage = Math.round(remainingPercentage * 100) / 100; // 2 casas decimais
+      this.formData.payment_method_1_value = null;
+    } else {
+      this.formData.payment_method_1_value = remainingValue;
+      this.formData.payment_method_1_percentage = null;
+    }
+  }
+
+  showPaymentSummary(): boolean {
+    return !!(this.formData.payment_method_1 && (
+      this.formData.payment_method_1_value || this.formData.payment_method_1_percentage ||
+      (this.hasSecondPaymentMethod && (this.formData.payment_method_2_value || this.formData.payment_method_2_percentage))
+    ));
+  }
+
+  getTotalConfiguredValue(): number {
+    let total = 0;
+    const contractTotal = this.getTotalValue();
+    
+    // Primeira forma de pagamento
+    if (this.formData.payment_method_1_value_type === 'percentage' && this.formData.payment_method_1_percentage) {
+      total += (contractTotal * this.formData.payment_method_1_percentage) / 100;
+    } else if (this.formData.payment_method_1_value_type === 'value' && this.formData.payment_method_1_value) {
+      total += this.formData.payment_method_1_value;
+    }
+    
+    // Segunda forma de pagamento
+    if (this.hasSecondPaymentMethod) {
+      if (this.formData.payment_method_2_value_type === 'percentage' && this.formData.payment_method_2_percentage) {
+        total += (contractTotal * this.formData.payment_method_2_percentage) / 100;
+      } else if (this.formData.payment_method_2_value_type === 'value' && this.formData.payment_method_2_value) {
+        total += this.formData.payment_method_2_value;
+      }
+    }
+    
+    return total;
+  }
+
+  isPaymentValuesValid(): boolean {
+    const contractTotal = this.getTotalValue();
+    const configuredTotal = this.getTotalConfiguredValue();
+    
+    // Tolerância de R$ 0,01 para problemas de arredondamento
+    return Math.abs(contractTotal - configuredTotal) <= 0.01;
+  }
+
   
   onSecondaryInstallmentCountChange(count: number) {
     this.secondaryInstallmentCount = count;

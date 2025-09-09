@@ -54,7 +54,8 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
     'Diagnóstico',
     'Desenvolvimento',
     'Gestão',
-    'Estratégia'
+    'Estratégia',
+    'Engenharia'
   ];
 
   isLoading = false;

@@ -156,12 +156,9 @@
               <label for="max_installments" class="form-label">Máximo de Parcelas <span class="required">*</span></label>
               <select id="max_installments" formControlName="max_installments" class="form-control" [class.error]="isFieldInvalid('max_installments')">
                 <option value="1">1x (somente à vista)</option>
-                <option value="2">Até 2x</option>
-                <option value="3">Até 3x</option>
-                <option value="6">Até 6x</option>
-                <option value="12">Até 12x</option>
-                <option value="18">Até 18x</option>
-                <option value="24">Até 24x</option>
+                <option *ngFor="let count of [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]" [value]="count">
+                  Até {{ count }}x
+                </option>
               </select>
               <div *ngIf="isFieldInvalid('max_installments')" class="error-message">Quantidade máxima de parcelas é obrigatória.</div>
               <div class="help-text">Define o número máximo de parcelas que o cliente poderá escolher no pagamento a prazo</div>

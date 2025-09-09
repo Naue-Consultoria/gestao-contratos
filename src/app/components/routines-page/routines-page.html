@@ -97,6 +97,21 @@
               </div>
             </div>
           </div>
+
+          <!-- Sorting Dropdown -->
+          <div class="sort-dropdown-wrapper">
+            <div class="sort-dropdown">
+              <select 
+                class="sort-select" 
+                [(ngModel)]="sortBy" 
+                (change)="onSortChange()"
+                title="Ordenar por">
+                <option *ngFor="let option of sortOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -155,26 +170,29 @@
             </div>
           </div>
 
-          <!-- Schedule Info -->
-          <div class="schedule-section">
-            <div class="schedule-item">
-              <div class="schedule-icon">
-                <i class="fas fa-calendar-check"></i>
+          <!-- Progress Info -->
+          <div class="progress-section">
+            <div class="progress-item">
+              <div class="progress-icon">
+                <i class="fas fa-tasks"></i>
               </div>
-              <div class="schedule-details">
-                <span class="schedule-label">Próximo vencimento</span>
-                <span class="schedule-date">{{ contract.nextDueDate }}</span>
+              <div class="progress-details">
+                <div class="progress-label">
+                  <span>Progresso Geral</span>
+                </div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar">
+                    <div class="progress-fill" 
+                         [style.width.%]="contract.progress.percentage"
+                         [class.completed]="contract.progress.percentage === 100">
+                    </div>
+                  </div>
+                  <span class="progress-percentage">{{ contract.progress.percentage }}%</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Progress Indicator -->
-          <div class="card-footer">
-            <div class="status-indicator active">
-              <span class="status-dot"></span>
-              <span class="status-text">Contrato ativo</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

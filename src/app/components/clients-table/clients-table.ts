@@ -22,7 +22,6 @@ interface ClientDisplay {
   contracts: number;
   activeContracts: number;
   totalValue: string;
-  since: string;
   gradient: string;
   actionMenuOpen: boolean;
   raw: ApiClient;
@@ -113,7 +112,7 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
         return this.mapApiClientToTableClient(apiClient, aggregates);
       });
 
-      this.filteredClients = [...this.clients];
+      this.filteredClients = [...this.clients].sort((a, b) => a.name.localeCompare(b.name));
       this.loadLogos(); // Carrega as logos após os dados dos clientes
     } catch (err) {
       console.error('❌ Error loading client data:', err);
@@ -216,7 +215,6 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
     aggregates?: { totalCount: number; activeCount: number; totalValue: number }
   ): ClientDisplay {
     const initials = this.getInitials(apiClient.name);
-    const since = new Date(apiClient.created_at).getFullYear().toString();
 
     return {
       id: apiClient.id,
@@ -228,7 +226,6 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
       contracts: aggregates?.totalCount || 0,
       activeContracts: aggregates?.activeCount || 0,
       totalValue: this.contractService.formatValue(aggregates?.totalValue || 0),
-      since: since,
       gradient: this.generateGradient(apiClient.name),
       actionMenuOpen: false,
       raw: apiClient,
@@ -336,7 +333,7 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
 
   filterClients() {
     if (!this.searchTerm.trim()) {
-      this.filteredClients = [...this.clients];
+      this.filteredClients = [...this.clients].sort((a, b) => a.name.localeCompare(b.name));
       return;
     }
 
@@ -348,7 +345,7 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
         client.location.toLowerCase().includes(term) ||
         client.type.toLowerCase().includes(term)
       );
-    });
+    }).sort((a, b) => a.name.localeCompare(b.name));
   }
 
   clearSearch() {

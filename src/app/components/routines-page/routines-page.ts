@@ -15,7 +15,11 @@ interface ContractRoutine {
   status: string;
   statusColor: string;
   servicesCount: number;
-  nextDueDate: string;
+  progress: {
+    completed: number;
+    total: number;
+    percentage: number;
+  };
   raw: ApiContract;
 }
 
@@ -46,6 +50,13 @@ export class RoutinesPageComponent implements OnInit {
   clientSearchTerm = '';
   availableClients: { name: string; count: number }[] = [];
   filteredClients: { name: string; count: number }[] = [];
+
+  // Sorting properties
+  sortBy: 'client-az' | 'contract-number' = 'client-az';
+  sortOptions = [
+    { value: 'client-az', label: 'Cliente A-Z' },
+    { value: 'contract-number', label: 'Número do Contrato' }
+  ];
 
 
   ngOnInit() {
@@ -97,13 +108,10 @@ export class RoutinesPageComponent implements OnInit {
             status: contract.status,
             statusColor: this.getStatusColor(contract.status),
             servicesCount: contract.contract_services?.length || 0,
-            nextDueDate: this.calculateNextDueDate(contract),
+            progress: this.calculateProgress(contract),
             raw: contract
-          }))
-          .sort((a, b) => {
-            // Ordenar por data de criação (mais recentes primeiro)
-            return new Date(b.raw.created_at).getTime() - new Date(a.raw.created_at).getTime();
-          });
+          }));
+
         
         this.filteredContracts = [...this.contracts];
         this.prepareClientsList();
@@ -137,19 +145,41 @@ export class RoutinesPageComponent implements OnInit {
   }
 
 
-  private calculateNextDueDate(contract: ApiContract): string {
-    // Lógica simplificada - pode ser expandida baseada nos serviços do contrato
-    const startDate = new Date(contract.start_date);
-    const nextMonth = new Date(startDate);
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    
-    return nextMonth.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+  private calculateProgress(contract: ApiContract): { completed: number; total: number; percentage: number } {
+    if (!contract.contract_services || contract.contract_services.length === 0) {
+      return { completed: 0, total: 0, percentage: 0 };
+    }
+
+    let totalSteps = 0;
+    let completedSteps = 0;
+
+    // Para cada serviço do contrato, contar suas etapas
+    contract.contract_services.forEach(service => {
+      // Se o serviço tem service_stages definidas, usar essas
+      if (service.service?.service_stages && service.service.service_stages.length > 0) {
+        totalSteps += service.service.service_stages.length;
+        completedSteps += service.service.service_stages.filter((stage: any) => stage.status === 'completed').length;
+      } else {
+        // Se não tem etapas específicas, usar o status do serviço como uma etapa única
+        totalSteps += 1;
+        if (service.status === 'completed') {
+          completedSteps += 1;
+        }
+      }
     });
+
+    const percentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+    
+    return {
+      completed: completedSteps,
+      total: totalSteps,
+      percentage
+    };
   }
 
+  onSortChange() {
+    this.applyFilters();
+  }
 
   viewContractDetails(id: number) {
     this.router.navigate(['/home/rotinas/visualizar', id]);
@@ -260,6 +290,13 @@ export class RoutinesPageComponent implements OnInit {
         
         return contractNumberMatch || clientNameMatch || typeMatch;
       });
+    }
+
+    // Apply sorting
+    if (this.sortBy === 'client-az') {
+      filtered.sort((a, b) => a.clientName.localeCompare(b.clientName));
+    } else if (this.sortBy === 'contract-number') {
+      filtered.sort((a, b) => a.contractNumber.localeCompare(b.contractNumber));
     }
 
     this.filteredContracts = filtered;

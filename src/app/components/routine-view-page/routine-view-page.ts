@@ -434,4 +434,54 @@ export class RoutineViewPageComponent implements OnInit, OnDestroy {
       console.error('❌ Cannot reload: no routine or routine ID');
     }
   }
+
+  getProgressSummary(): string {
+    if (!this.contract?.contract_services || this.contract.contract_services.length === 0) {
+      return '0/0 concluídas';
+    }
+
+    let totalSteps = 0;
+    let completedSteps = 0;
+
+    this.contract.contract_services.forEach(service => {
+      // Se o serviço tem service_stages definidas, usar essas
+      if (service.service?.service_stages && service.service.service_stages.length > 0) {
+        totalSteps += service.service.service_stages.length;
+        completedSteps += service.service.service_stages.filter((stage: any) => stage.status === 'completed').length;
+      } else {
+        // Se não tem etapas específicas, usar o status do serviço como uma etapa única
+        totalSteps += 1;
+        if (service.status === 'completed') {
+          completedSteps += 1;
+        }
+      }
+    });
+
+    return `${completedSteps}/${totalSteps} concluídas`;
+  }
+
+  getProgressPercentage(): number {
+    if (!this.contract?.contract_services || this.contract.contract_services.length === 0) {
+      return 0;
+    }
+
+    let totalSteps = 0;
+    let completedSteps = 0;
+
+    this.contract.contract_services.forEach(service => {
+      // Se o serviço tem service_stages definidas, usar essas
+      if (service.service?.service_stages && service.service.service_stages.length > 0) {
+        totalSteps += service.service.service_stages.length;
+        completedSteps += service.service.service_stages.filter((stage: any) => stage.status === 'completed').length;
+      } else {
+        // Se não tem etapas específicas, usar o status do serviço como uma etapa única
+        totalSteps += 1;
+        if (service.status === 'completed') {
+          completedSteps += 1;
+        }
+      }
+    });
+
+    return totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+  }
 }

@@ -76,6 +76,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   };
   clients: any[] = [];
   isLoading = false;
+  isSearching = false;
   error = '';
   currentTab: 'all' | 'Full' | 'Pontual' | 'Individual' | 'Recrutamento & Seleção' = 'all';
   openDropdownId: number | null = null;
@@ -106,11 +107,18 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
   private subscribeToSearch() {
     const searchSubscription = this.searchService.searchTerm$
-      .pipe(debounceTime(300), distinctUntilChanged())
+      .pipe(
+        debounceTime(500), // Aumentado para 500ms para reduzir requisições
+        distinctUntilChanged()
+      )
       .subscribe((term) => {
         this.filters.search = term;
-        // Só carrega contratos se houve mudança no termo e não está carregando
-        if (!this.isLoading && term !== undefined) {
+        // Indicador visual de que está buscando
+        if (term && term.trim()) {
+          this.isSearching = true;
+        }
+        // Carregar contratos
+        if (term !== undefined) {
           this.loadContracts();
         }
       });
@@ -161,34 +169,58 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     // Método para forçar carregamento sem verificar isLoading
     this.isLoading = true;
     this.error = '';
+    
     try {
+      // Filtros limpos e organizados
       const cleanFilters: any = {
-        search: this.filters.search,
+        search: this.filters.search?.trim(),
         status: this.filters.status,
         client_id: this.filters.client_id,
         type: this.currentTab === 'all' ? '' : this.currentTab,
       };
 
+      // Remove filtros vazios para otimizar query
+      Object.keys(cleanFilters).forEach(key => {
+        if (cleanFilters[key] === '' || cleanFilters[key] === null || cleanFilters[key] === undefined) {
+          delete cleanFilters[key];
+        }
+      });
+
+      console.log('🔍 Carregando contratos com filtros:', cleanFilters);
+
       const response = await firstValueFrom(
         this.contractService.getContracts(cleanFilters)
       );
       
-      // Limpa a lista antes de adicionar novos contratos
-      this.contracts = [];
-      this.filteredContracts = [];
+      if (response?.contracts) {
+        // Mapear contratos de forma otimizada
+        const mappedContracts = response.contracts.map((contract) =>
+          this.mapContractToDisplay(contract)
+        );
+        
+        this.contracts = mappedContracts;
+        this.filteredContracts = [...mappedContracts];
+        
+        console.log(`✅ Carregados ${mappedContracts.length} contratos`);
+      } else {
+        this.contracts = [];
+        this.filteredContracts = [];
+      }
       
-      // Mapeia e adiciona os contratos sem duplicação
-      const uniqueContracts = response.contracts.map((contract) =>
-        this.mapContractToDisplay(contract)
-      );
-      
-      this.contracts = uniqueContracts;
-      this.filteredContracts = [...uniqueContracts];
     } catch (error: any) {
-      this.error = 'Não foi possível carregar os contratos.';
-      console.error('❌ Error loading contracts:', error);
+      console.error('❌ Erro ao carregar contratos:', error);
+      
+      if (error.status === 400) {
+        this.error = 'Filtros de busca inválidos. Tente novamente.';
+      } else if (error.status === 500) {
+        this.error = 'Erro interno do servidor. Tente novamente em alguns instantes.';
+      } else {
+        this.error = 'Não foi possível carregar os contratos. Verifique sua conexão.';
+      }
+      
     } finally {
       this.isLoading = false;
+      this.isSearching = false;
     }
   }
 
@@ -272,6 +304,16 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     this.searchService.setSearchTerm(''); // Also clear the global search
     this.currentTab = 'all';
     this.applyFilters();
+  }
+
+  onSearchInput() {
+    // Apenas atualiza o searchService, que tem debounce
+    this.searchService.setSearchTerm(this.filters.search || '');
+  }
+
+  clearSearch() {
+    this.filters.search = '';
+    this.searchService.setSearchTerm('');
   }
 
   openNewContractPage() {
