@@ -119,7 +119,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     
     forkJoin({
       clients: this.clientService.getClients({}),
-      services: this.serviceService.getServices({ is_active: true })
+      services: this.serviceService.getServicesForContracts({ is_active: true })
     }).pipe(
       takeUntil(this.destroy$)
     ).subscribe({

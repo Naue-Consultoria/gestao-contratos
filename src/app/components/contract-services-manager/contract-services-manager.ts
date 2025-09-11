@@ -110,11 +110,20 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
       return 0;
     }
 
-    // Calcular progresso médio baseado nas etapas de cada serviço
+    // Filtrar serviços internos do cálculo de progresso
+    const nonInternalServices = this.services.filter(service => 
+      service.service.category !== 'Interno'
+    );
+
+    if (nonInternalServices.length === 0) {
+      return 0;
+    }
+
+    // Calcular progresso médio baseado nas etapas de cada serviço (excluindo internos)
     let totalProgress = 0;
     let servicesWithProgress = 0;
 
-    this.services.forEach(service => {
+    nonInternalServices.forEach(service => {
       const progress = this.serviceProgresses[service.service.id];
       if (progress !== undefined) {
         totalProgress += progress.progressPercentage;
@@ -142,12 +151,21 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
       return 0;
     }
 
-    const completedTasks = this.services.filter(service => {
+    // Filtrar serviços internos do cálculo de progresso
+    const nonInternalServices = this.services.filter(service => 
+      service.service.category !== 'Interno'
+    );
+
+    if (nonInternalServices.length === 0) {
+      return 0;
+    }
+
+    const completedTasks = nonInternalServices.filter(service => {
       const status = this.getRoutineStatus(service);
       return status === 'completed';
     }).length;
 
-    return Math.round((completedTasks / this.services.length) * 100);
+    return Math.round((completedTasks / nonInternalServices.length) * 100);
   }
 
   // Método para obter contagem de tarefas baseado nas etapas
@@ -156,11 +174,20 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
       return { completed: 0, total: 0 };
     }
 
+    // Filtrar serviços internos do cálculo de progresso
+    const nonInternalServices = this.services.filter(service => 
+      service.service.category !== 'Interno'
+    );
+
+    if (nonInternalServices.length === 0) {
+      return { completed: 0, total: 0 };
+    }
+
     let totalStages = 0;
     let completedStages = 0;
     let servicesWithProgress = 0;
 
-    this.services.forEach(service => {
+    nonInternalServices.forEach(service => {
       const progress = this.serviceProgresses[service.service.id];
       if (progress !== undefined) {
         totalStages += progress.totalStages;
@@ -184,12 +211,17 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
 
   // Método fallback para contagem baseado em status
   private getTasksCountsFallback(): { completed: number; total: number } {
-    const completed = this.services.filter(service => {
+    // Filtrar serviços internos do cálculo de progresso
+    const nonInternalServices = this.services.filter(service => 
+      service.service.category !== 'Interno'
+    );
+
+    const completed = nonInternalServices.filter(service => {
       const status = this.getRoutineStatus(service);
       return status === 'completed';
     }).length;
 
-    return { completed, total: this.services.length };
+    return { completed, total: nonInternalServices.length };
   }
 
   // Método para carregar progresso de todos os serviços

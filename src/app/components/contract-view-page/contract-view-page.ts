@@ -573,6 +573,15 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  getNonInternalServices() {
+    if (!this.contract?.contract_services) {
+      return [];
+    }
+    return this.contract.contract_services.filter(service => 
+      service.service?.category !== 'Interno'
+    );
+  }
+
   openExportModal() {
     this.showExportModal = true;
   }

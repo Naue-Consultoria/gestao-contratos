@@ -82,6 +82,17 @@ export class ServiceService {
     });
   }
 
+  getServicesForContracts(filters?: any): Observable<ServicesResponse> {
+    const contractFilters = {
+      ...filters,
+      exclude_internal: 'true'
+    };
+    return this.http.get<ServicesResponse>(this.API_URL, { 
+      params: contractFilters,
+      headers: this.getAuthHeaders() 
+    });
+  }
+
   getService(id: number): Observable<ServiceResponse> {
     return this.http.get<ServiceResponse>(`${this.API_URL}/${id}`, {
       headers: this.getAuthHeaders()

@@ -64,7 +64,7 @@
             <option value="suspended">Suspenso</option>
           </select>
           
-          <select class="filter-select" [(ngModel)]="filters.client_id" (change)="applyFilters()">
+          <select class="filter-select client-select" [(ngModel)]="filters.client_id" (change)="applyFilters()">
             <option [value]="null">Todos os clientes</option>
             <option *ngFor="let client of clients" [value]="client.id">{{ client.name }}</option>
           </select>

@@ -321,7 +321,7 @@ export class ContractFormComponent implements OnInit {
   async loadServices() {
     try {
       const response = await firstValueFrom(
-        this.serviceService.getServices({ is_active: true })
+        this.serviceService.getServicesForContracts({ is_active: true })
       );
       if (response && response.services)
         this.availableServices = response.services.sort((a, b) => 

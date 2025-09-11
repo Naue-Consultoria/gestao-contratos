@@ -81,7 +81,7 @@
         </div>
         <div class="info-group">
           <span class="info-label">Total de Serviços</span>
-          <span class="info-value">{{ contract.contract_services.length || 0 }} item(s)</span>
+          <span class="info-value">{{ getNonInternalServices().length || 0 }} item(s)</span>
         </div>
       </div>
     </div>
@@ -98,8 +98,8 @@
         </h3>
         
         <!-- Services Grid -->
-        <div class="services-grid" *ngIf="contract.contract_services && contract.contract_services.length > 0">
-          <div *ngFor="let service of contract.contract_services; let i = index" class="service-card">
+        <div class="services-grid" *ngIf="getNonInternalServices().length > 0">
+          <div *ngFor="let service of getNonInternalServices(); let i = index" class="service-card">
             <div class="service-card-header">
               <div class="service-number">{{ i + 1 }}</div>
               <div class="service-name">{{ service.service.name || 'Serviço ' + service.service.id }}</div>
@@ -142,7 +142,7 @@
         </div>
         
         <!-- Empty State -->
-        <div *ngIf="!contract.contract_services || contract.contract_services.length === 0" class="empty-state">
+        <div *ngIf="getNonInternalServices().length === 0" class="empty-state">
           <div class="empty-icon">
             <i class="fas fa-cogs"></i>
           </div>
@@ -151,7 +151,7 @@
         </div>
         
         <!-- Services Summary -->
-        <div class="services-summary" *ngIf="contract.contract_services && contract.contract_services.length > 0">
+        <div class="services-summary" *ngIf="getNonInternalServices().length > 0">
           <div class="summary-card">
             <div class="summary-icon">
               <i class="fas fa-calculator"></i>

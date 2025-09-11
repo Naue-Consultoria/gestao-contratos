@@ -150,11 +150,20 @@ export class RoutinesPageComponent implements OnInit {
       return { completed: 0, total: 0, percentage: 0 };
     }
 
+    // Filtrar serviços internos do cálculo de progresso
+    const nonInternalServices = contract.contract_services.filter(service => 
+      service.service?.category !== 'Interno'
+    );
+
+    if (nonInternalServices.length === 0) {
+      return { completed: 0, total: 0, percentage: 0 };
+    }
+
     let totalSteps = 0;
     let completedSteps = 0;
 
-    // Para cada serviço do contrato, contar suas etapas
-    contract.contract_services.forEach(service => {
+    // Para cada serviço do contrato (excluindo internos), contar suas etapas
+    nonInternalServices.forEach(service => {
       // Se o serviço tem service_stages definidas, usar essas
       if (service.service?.service_stages && service.service.service_stages.length > 0) {
         totalSteps += service.service.service_stages.length;

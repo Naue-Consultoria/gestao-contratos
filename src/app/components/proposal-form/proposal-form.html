@@ -26,7 +26,7 @@
             <div class="form-group">
               <label for="client_id" class="form-label">Cliente <span class="required">*</span></label>
               <div class="client-selection-row">
-                <select id="client_id" formControlName="client_id" class="form-control" [class.error]="isFieldInvalid('client_id')">
+                <select id="client_id" formControlName="client_id" class="form-control client-select" [class.error]="isFieldInvalid('client_id')">
                   <option value="" disabled>Selecione um cliente</option>
                   <option *ngFor="let client of clients" [value]="client.id">
                     {{ client.name }} <span *ngIf="client.headquarters" class="client-details">- {{ client.headquarters }}</span>

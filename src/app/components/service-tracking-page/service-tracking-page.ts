@@ -251,6 +251,14 @@ export class ServiceTrackingPageComponent implements OnInit {
       }
     ];
 
+    // Adicionar "Visualizar rotinas" com o ID do contrato
+    if (this.contract) {
+      breadcrumbs.push({
+        label: 'Visualizar rotinas',
+        url: `/home/rotinas/visualizar/${this.contract.id}`
+      });
+    }
+
     // Adicionar o nome do serviço como último item
     if (this.service && this.service.service) {
       breadcrumbs.push({

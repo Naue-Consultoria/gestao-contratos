@@ -445,3 +445,10 @@ button.delete .fas,
 button.delete .fa {
   color: #dc3545 !important; /* Vermelho para ícones de exclusão */
 }
+
+/* ========================================
+   CLIENT SELECT GLOBAL STYLES
+   ======================================== */
+.client-select option:not([value=""]):not([value="null"]):not([disabled]) {
+  text-transform: uppercase !important;
+}
