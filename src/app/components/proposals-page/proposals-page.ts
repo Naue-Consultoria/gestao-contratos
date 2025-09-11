@@ -16,6 +16,8 @@ interface ProposalDisplay {
   proposalNumber: string;
   clientName: string;
   companyName: string;
+  tradeName: string;
+  clientType: string;
   status: string;
   statusText: string;
   totalValue: string;
@@ -106,11 +108,17 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
 
   private mapApiProposalToTableProposal(apiProposal: any): ProposalDisplay {
     let clientName = 'Cliente não identificado';
+    let companyName = '';
+    let tradeName = '';
+    let clientType = '';
     const client = apiProposal.client;
 
     if (client) {
+        clientType = client.type || '';
         if (client.type === 'PJ' && client.company) {
-            clientName = client.company.trade_name || client.company.company_name || apiProposal.client_name || '';
+            tradeName = client.company.trade_name || '';
+            companyName = client.company.company_name || '';
+            clientName = tradeName || companyName || apiProposal.client_name || '';
         } else if (client.type === 'PF' && client.person) {
             clientName = client.person.full_name || apiProposal.client_name || '';
         } else {
@@ -133,7 +141,9 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       id: apiProposal.id,
       proposalNumber: apiProposal.proposal_number,
       clientName: clientName,
-      companyName: clientName,
+      companyName: companyName,
+      tradeName: tradeName,
+      clientType: clientType,
       status: apiProposal.status,
       statusText: this.proposalService.getStatusText(apiProposal.status),
       totalValue: this.proposalService.formatCurrency(totalValue),

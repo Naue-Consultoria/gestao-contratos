@@ -368,12 +368,18 @@ tr:last-child td {
 
 .client-name {
   font-weight: 600;
+  text-transform: uppercase;
 }
 
 .client-trade-name {
   font-size: 0.8rem;
   color: #0a6254;
   font-weight: 500;
+  text-transform: uppercase;
+}
+
+.client-location {
+  text-transform: uppercase;
 }
 
 .client-since {

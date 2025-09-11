@@ -545,12 +545,21 @@
 
 .client-name {
     font-weight: 600;
+    text-transform: uppercase;
+}
+
+.client-company-name {
+    font-size: 0.8rem;
+    color: #0a6254;
+    font-weight: 500;
+    text-transform: uppercase;
 }
 
 .client-trade-name {
     font-size: 0.8rem;
     color: #0a6254;
     font-weight: 500;
+    text-transform: uppercase;
 }
 
 /* Contract Type */

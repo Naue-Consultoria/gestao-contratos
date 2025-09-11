@@ -142,8 +142,8 @@
               <div class="client-info">
                 <div class="client-name-container">
                   <span class="client-name">{{ contract.clientName }}</span>
-                  <span class="client-trade-name" *ngIf="contract.clientTradeName">
-                    {{ contract.clientTradeName }}
+                  <span class="client-company-name" *ngIf="contract.clientType === 'PJ' && contract.clientCompanyName && contract.clientTradeName && contract.clientTradeName !== contract.clientCompanyName">
+                    {{ contract.clientCompanyName }}
                   </span>
                 </div>
               </div>
@@ -254,8 +254,8 @@
               <span class="table-card-value">
                 <div class="client-name-container">
                   <span class="client-name">{{ contract.clientName }}</span>
-                  <span class="client-trade-name" *ngIf="contract.clientTradeName">
-                    {{ contract.clientTradeName }}
+                  <span class="client-company-name" *ngIf="contract.clientType === 'PJ' && contract.clientCompanyName && contract.clientTradeName && contract.clientTradeName !== contract.clientCompanyName">
+                    {{ contract.clientCompanyName }}
                   </span>
                 </div>
               </span>

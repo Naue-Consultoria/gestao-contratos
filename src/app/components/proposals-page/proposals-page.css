@@ -279,14 +279,34 @@
     text-decoration: line-through;
 }
 
+/* Client Name Container */
+.client-name-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
 /* Client Name */
 .client-name {
     font-weight: 500;
     color: var(--text-dark);
+    text-transform: uppercase;
 }
 
 :host-context(body.dark-mode) .client-name {
     color: var(--dark-text);
+}
+
+/* Client Company Name (Razão Social) */
+.client-company-name {
+    font-size: 0.8rem;
+    color: #0a6254;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+:host-context(body.dark-mode) .client-company-name {
+    color: var(--primary-green);
 }
 
 /* Company Name */

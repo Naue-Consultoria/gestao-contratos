@@ -22,6 +22,8 @@ interface ContractDisplay {
   contractNumber: string;
   clientName: string;
   clientTradeName?: string;
+  clientCompanyName?: string;
+  clientType?: string;
   type: string;
   startDate: string;
   endDate: string;
@@ -262,14 +264,32 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
   private mapContractToDisplay(contract: ApiContract): ContractDisplay {
     const client = this.clients.find(c => c.id === contract.client.id);
-    const clientName = client ? client.name : (contract.client?.name || 'Cliente não encontrado');
-    const clientTradeName = client && client.type === 'PJ' && client.trade_name && client.trade_name !== client.company_name ? client.trade_name : undefined;
+    let clientName = 'Cliente não encontrado';
+    let clientTradeName = '';
+    let clientCompanyName = '';
+    let clientType = '';
+
+    if (client) {
+      clientType = client.type || '';
+      if (client.type === 'PJ') {
+        clientTradeName = client.trade_name || '';
+        clientCompanyName = client.company_name || '';
+        // Priorizar trade_name sobre company_name
+        clientName = clientTradeName || clientCompanyName || client.name || '';
+      } else {
+        clientName = client.name || '';
+      }
+    } else if (contract.client?.name) {
+      clientName = contract.client.name;
+    }
 
     return {
       id: contract.id,
       contractNumber: contract.contract_number,
       clientName: clientName,
       clientTradeName: clientTradeName,
+      clientCompanyName: clientCompanyName,
+      clientType: clientType,
       type: contract.type,
       startDate: this.contractService.formatDate(contract.start_date),
       endDate: this.contractService.formatDate(contract.end_date || null),

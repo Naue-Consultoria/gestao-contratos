@@ -70,7 +70,12 @@
             </td>
 
             <td>
-              <span class="client-name">{{ proposal.clientName }}</span>
+              <div class="client-name-container">
+                <span class="client-name">{{ proposal.clientName }}</span>
+                <span class="client-company-name" *ngIf="proposal.clientType === 'PJ' && proposal.companyName && proposal.tradeName && proposal.tradeName !== proposal.companyName">
+                  {{ proposal.companyName }}
+                </span>
+              </div>
             </td>
 
             <td>
