@@ -810,6 +810,30 @@ textarea.form-control {
   gap: 16px;
 }
 
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+
+.form-row .form-group {
+  margin-bottom: 0;
+}
+
+.form-row .form-control {
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.form-group-name {
+  flex: 2;
+}
+
+.form-group-category {
+  flex: 1;
+}
+
 .form-group {
   margin-bottom: 16px;
 }

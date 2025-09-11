@@ -178,7 +178,10 @@
                     {{ i + 1 }}
                   </div>
                   <div class="stage-content">
-                    <div class="stage-name">{{ stage.name }}</div>
+                    <div class="stage-header-info">
+                      <div class="stage-name">{{ stage.name }}</div>
+                      <div class="stage-category" *ngIf="stage.category">{{ stage.category }}</div>
+                    </div>
                     <div class="stage-description" *ngIf="stage.description">{{ stage.description }}</div>
                   </div>
                 </div>

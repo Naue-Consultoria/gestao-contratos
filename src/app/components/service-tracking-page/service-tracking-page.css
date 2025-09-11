@@ -1912,3 +1912,50 @@
     display: none;
   }
 }
+
+/* =================== STAGE CATEGORY STYLES =================== */
+.stage-header-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.stage-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-dark);
+  text-transform: uppercase;
+}
+
+.stage-category {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #0a6254;
+  background-color: rgba(10, 98, 84, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+  border: 1px solid rgba(10, 98, 84, 0.2);
+}
+
+.stage-item.completed .stage-name {
+  color: var(--primary-green);
+}
+
+.stage-item.completed .stage-category {
+  color: var(--primary-green);
+  background-color: rgba(14, 155, 113, 0.1);
+  border-color: rgba(14, 155, 113, 0.2);
+}
+
+/* Dark mode support */
+:host-context(body.dark-mode) .stage-name {
+  color: var(--dark-text);
+}
+
+:host-context(body.dark-mode) .stage-category {
+  color: #0a6254;
+  background-color: rgba(10, 98, 84, 0.2);
+  border-color: rgba(10, 98, 84, 0.3);
+}

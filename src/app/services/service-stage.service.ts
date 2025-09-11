@@ -8,6 +8,7 @@ export interface ServiceStage {
   service_id: number;
   name: string;
   description: string | null;
+  category: string | null;
   sort_order: number;
   status: 'pending' | 'completed';
   is_active: boolean;
@@ -28,12 +29,14 @@ export interface CreateServiceStageRequest {
   service_id: number;
   name: string;
   description?: string | null;
+  category?: string | null;
   sort_order?: number;
 }
 
 export interface UpdateServiceStageRequest {
   name?: string;
   description?: string | null;
+  category?: string | null;
   sort_order?: number;
   status?: 'pending' | 'completed';
   is_active?: boolean;

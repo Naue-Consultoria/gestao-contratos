@@ -11,6 +11,7 @@ import { NgxEditorModule, Editor, Toolbar } from 'ngx-editor';
 interface ServiceStageForm {
   name: string;
   description?: string;
+  category?: string;
   sort_order: number;
   error?: string;
   id?: number; // ID opcional para etapas existentes
@@ -135,6 +136,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
         this.serviceStages = response.stages.map(stage => ({
           name: stage.name,
           description: stage.description || '',
+          category: stage.category || '',
           sort_order: stage.sort_order,
           id: stage.id // Adicionar ID para poder fazer update/delete posteriormente
         } as ServiceStageForm & { id: number }));
@@ -249,6 +251,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
     this.serviceStages.push({
       name: '',
       description: '',
+      category: '',
       sort_order: this.serviceStages.length + 1
     });
     setTimeout(() => this.adjustColumnHeights(), 50);
@@ -301,6 +304,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
           const updateData = {
             name: stage.name.trim(),
             description: stage.description?.trim() || null,
+            category: stage.category?.trim() || null,
             sort_order: stage.sort_order
           };
           
@@ -311,6 +315,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
             service_id: serviceId,
             name: stage.name.trim(),
             description: stage.description?.trim() || null,
+            category: stage.category?.trim() || null,
             sort_order: stage.sort_order
           };
           
