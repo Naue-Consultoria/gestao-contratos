@@ -93,7 +93,8 @@ export class RoutinesPageComponent implements OnInit {
         
         if (clientsResponse && clientsResponse.clients) {
           clientsResponse.clients.forEach((client: any) => {
-            const name = client.company_name || client.full_name || 'Cliente sem nome';
+            // Priorizar nome fantasia para PJ, depois nome completo para PF
+            const name = client.trade_name || client.company_name || client.full_name || 'Cliente sem nome';
             clientsMap.set(client.id, name);
           });
         }

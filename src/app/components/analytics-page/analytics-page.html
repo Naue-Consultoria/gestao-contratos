@@ -211,6 +211,25 @@
           </div>
         </div>
 
+        <!-- Porcentagem de Conclusão por Cliente -->
+        <div class="chart-card full-width">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-percent"></i>
+              Taxa de Conclusão por Cliente
+            </h4>
+            <small class="chart-subtitle">Soma geral da porcentagem de conclusão de todos os contratos</small>
+          </div>
+          <div class="chart-wrapper client-completion-wrapper">
+            <canvas id="clientCompletionChart" *ngIf="analyticsData.clientCompletionData && analyticsData.clientCompletionData.length > 0"></canvas>
+            <div *ngIf="!analyticsData.clientCompletionData || analyticsData.clientCompletionData.length === 0" class="no-data-message">
+              <i class="fas fa-info-circle"></i>
+              <p>Nenhum dado de conclusão por cliente disponível ainda</p>
+              <small>Os dados aparecerão quando houver clientes com serviços em andamento ou concluídos</small>
+            </div>
+          </div>
+        </div>
+
         <!-- Serviços Mais Contratados -->
         <div class="chart-card full-width">
           <div class="chart-header">

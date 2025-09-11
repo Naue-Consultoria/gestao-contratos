@@ -174,9 +174,9 @@ export class RoutineViewPageComponent implements OnInit, OnDestroy {
       return pfName;
     }
     
-    // For PJ (Pessoa Jurídica)  
+    // For PJ (Pessoa Jurídica) - Priorizar nome fantasia
     if (client.clients_pj && client.clients_pj.length > 0) {
-      const pjName = client.clients_pj[0].company_name || client.clients_pj[0].trade_name || 'Empresa não informada';
+      const pjName = client.clients_pj[0].trade_name || client.clients_pj[0].company_name || 'Empresa não informada';
       return pjName;
     }
     
@@ -494,21 +494,25 @@ export class RoutineViewPageComponent implements OnInit, OnDestroy {
       const serviceNameA = a.service?.name || '';
       const serviceNameB = b.service?.name || '';
       
-      console.log('🔍 Ordenando serviços:', serviceNameA, 'vs', serviceNameB);
+      // Definir prioridades numéricas para garantir ordem correta
+      const getPriority = (serviceName: string): number => {
+        if (serviceName === 'Entrada de Cliente') return 1;
+        if (serviceName === 'Encerramento') return 2;
+        return 3; // Todos os outros serviços
+      };
       
-      // "Entrada de Cliente" sempre primeiro
-      if (serviceNameA === 'Entrada de Cliente') return -1;
-      if (serviceNameB === 'Entrada de Cliente') return 1;
+      const priorityA = getPriority(serviceNameA);
+      const priorityB = getPriority(serviceNameB);
       
-      // "Encerramento" sempre segundo
-      if (serviceNameA === 'Encerramento') return -1;
-      if (serviceNameB === 'Encerramento') return 1;
+      // Se as prioridades são diferentes, ordenar por prioridade
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
       
-      // Outros serviços em ordem alfabética
+      // Se as prioridades são iguais (ambos são serviços normais), ordenar alfabeticamente
       return serviceNameA.localeCompare(serviceNameB);
     });
 
-    console.log('✅ Serviços ordenados:', ordered.map(s => s.service?.name));
     return ordered;
   }
 }

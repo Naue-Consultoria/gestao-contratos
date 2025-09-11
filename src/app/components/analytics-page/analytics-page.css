@@ -727,6 +727,19 @@
   height: 300px;
 }
 
+/* Altura específica para gráfico de conclusão por cliente */
+.client-completion-wrapper {
+  height: auto !important;
+  min-height: 400px;
+  max-height: none !important;
+  overflow-y: auto;
+}
+
+#clientCompletionChart {
+  height: auto !important;
+  max-height: none !important;
+}
+
 .chart-wrapper canvas {
   width: 100% !important;
   height: 100% !important;

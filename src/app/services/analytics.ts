@@ -128,6 +128,16 @@ export interface TopService {
   totalValue: number;
 }
 
+export interface ClientCompletionData {
+  clientId: number;
+  clientName: string;
+  totalServices: number;
+  completedServices: number;
+  completionPercentage: number;
+  activeContracts: number;
+  totalContracts: number;
+}
+
 export interface AnalyticsData {
   general: GeneralStats;
   services: ServiceAnalytics[];
@@ -138,6 +148,7 @@ export interface AnalyticsData {
   servicesByUser?: ServicesByUser[];
   completedServices?: CompletedService[];
   topServices?: TopService[];
+  clientCompletionData?: ClientCompletionData[];
   period?: string;
   generatedAt?: string;
 }

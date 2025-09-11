@@ -143,6 +143,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     this.initContractsDonut();
     this.initServicesByUserChart();
     this.initCompletedServicesChart();
+    this.initClientCompletionChart();
     this.initTopServicesChart();
   }
 
@@ -431,6 +432,224 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
         }
       }
     });
+  }
+
+  /**
+   * Gráfico de taxa de conclusão por cliente
+   */
+  private initClientCompletionChart() {
+    const canvas = document.getElementById('clientCompletionChart') as HTMLCanvasElement;
+    if (!canvas) {
+      this.showChartError('clientCompletionChart', 'Canvas não encontrado');
+      return;
+    }
+
+    // Ajustar altura dinamicamente baseada no número de clientes
+    const clientCount = this.analyticsData?.clientCompletionData?.length || 0;
+    const minHeight = 400;
+    const heightPerClient = 40; // 40px por cliente
+    const dynamicHeight = Math.max(minHeight, clientCount * heightPerClient);
+    
+    canvas.style.height = `${dynamicHeight}px`;
+    canvas.parentElement!.style.height = `${dynamicHeight}px`;
+
+    // Destruir chart existente se houver
+    if (this.charts['clientCompletionChart']) {
+      this.charts['clientCompletionChart'].destroy();
+      delete this.charts['clientCompletionChart'];
+    }
+    
+    if (!this.analyticsData?.clientCompletionData) {
+      this.showChartError('clientCompletionChart', 'Dados não disponíveis');
+      return;
+    }
+    
+    if (this.analyticsData.clientCompletionData.length === 0) {
+      this.showChartError('clientCompletionChart', 'Nenhum dado de cliente encontrado');
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      this.showChartError('clientCompletionChart', 'Erro ao obter contexto do canvas');
+      return;
+    }
+
+    try {
+      const data = this.analyticsData.clientCompletionData; // TODOS os clientes
+      
+      const labels = data.map((client: any, index: number) => {
+        let name = client.clientName || `Cliente #${client.clientId || index + 1}`;
+        
+        // Remover prefixos desnecessários
+        if (name.startsWith('Cliente #') && client.clientId) {
+          name = `Cliente #${client.clientId}`;
+        }
+        
+        // Truncar nomes muito longos para melhor visualização
+        const finalName = name.length > 30 ? name.substring(0, 30) + '...' : name;
+        return finalName;
+      });
+      
+      const completionValues = data.map((client: any) => {
+        const percentage = client.completionPercentage || 0;
+        // Garantir que seja um número válido e entre 0-100
+        const validPercentage = Math.max(0, Math.min(100, percentage));
+        // Para valores muito baixos (mas > 0), garantir altura mínima visível
+        return validPercentage === 0 ? 0 : Math.max(validPercentage, 2);
+      });
+
+      // Todas as barras em cinza
+      const colors = completionValues.map(() => '#6b7280'); // Cinza para todas as barras
+
+      const Chart = (window as any).Chart;
+      if (!Chart) {
+        this.showChartError('clientCompletionChart', 'Chart.js não carregado');
+        return;
+      }
+
+      this.charts['clientCompletionChart'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Taxa de Conclusão (%)',
+            data: completionValues,
+            backgroundColor: colors,
+            borderColor: '#ffffff',
+            borderWidth: 1,
+            borderRadius: 6,
+            borderSkipped: false,
+            barThickness: 'flex',
+            maxBarThickness: 35,
+            minBarLength: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y', // Barras horizontais
+          layout: {
+            padding: {
+              left: 10,
+              right: 10,
+              top: 10,
+              bottom: 10
+            }
+          },
+          plugins: {
+            legend: { 
+              display: false 
+            },
+            tooltip: {
+              backgroundColor: '#fff',
+              titleColor: '#374151',
+              bodyColor: '#374151',
+              borderColor: '#e5e7eb',
+              borderWidth: 1,
+              titleFont: {
+                size: 14,
+                weight: 'bold'
+              },
+              bodyFont: {
+                size: 12
+              },
+              callbacks: {
+                title: (context: any) => {
+                  const client = data[context[0].dataIndex];
+                  return client.clientName || 'Cliente';
+                },
+                label: (context: any) => {
+                  const client = data[context.dataIndex];
+                  return [
+                    `📊 ${client.completionPercentage || 0}% concluído`,
+                    `📋 ${client.activeContracts || 0} contratos ativos`
+                  ];
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { 
+                color: 'rgba(0, 0, 0, 0.05)',
+                drawBorder: false
+              },
+              ticks: { 
+                color: '#6b7280',
+                font: {
+                  size: 11
+                },
+                stepSize: 10,
+                callback: function(value: any) {
+                  return value + '%';
+                }
+              },
+              beginAtZero: true,
+              min: 0,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Taxa de Conclusão (%)',
+                color: '#6b7280',
+                font: {
+                  size: 12,
+                  weight: 'bold'
+                }
+              }
+            },
+            y: {
+              grid: { 
+                display: false 
+              },
+              ticks: { 
+                color: '#6b7280',
+                font: {
+                  size: 11
+                },
+                maxRotation: 0,
+                callback: function(value: any, index: any) {
+                  const label = labels[index];
+                  // Limitar ainda mais o tamanho no eixo Y
+                  return label && label.length > 25 ? label.substring(0, 25) + '...' : label;
+                }
+              }
+            }
+          },
+          animation: {
+            duration: 1000,
+            easing: 'easeInOutQuart'
+          }
+        }
+      });
+      
+    } catch (error: any) {
+      this.showChartError('clientCompletionChart', `Erro ao criar gráfico: ${error?.message || 'Erro desconhecido'}`);
+    }
+  }
+
+  /**
+   * Mostrar mensagem de erro no lugar do gráfico
+   */
+  private showChartError(chartId: string, message: string) {
+    const canvas = document.getElementById(chartId) as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Limpar o canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Configurar texto
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Desenhar mensagem de erro
+    ctx.fillText(message, canvas.width / 2, canvas.height / 2 - 10);
+    ctx.fillText('Verifique os dados ou recarregue a página', canvas.width / 2, canvas.height / 2 + 10);
   }
 
   /**
