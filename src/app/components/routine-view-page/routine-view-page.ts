@@ -484,4 +484,31 @@ export class RoutineViewPageComponent implements OnInit, OnDestroy {
 
     return totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
   }
+
+  getOrderedServices() {
+    if (!this.contract?.contract_services) {
+      return [];
+    }
+
+    const ordered = [...this.contract.contract_services].sort((a, b) => {
+      const serviceNameA = a.service?.name || '';
+      const serviceNameB = b.service?.name || '';
+      
+      console.log('🔍 Ordenando serviços:', serviceNameA, 'vs', serviceNameB);
+      
+      // "Entrada de Cliente" sempre primeiro
+      if (serviceNameA === 'Entrada de Cliente') return -1;
+      if (serviceNameB === 'Entrada de Cliente') return 1;
+      
+      // "Encerramento" sempre segundo
+      if (serviceNameA === 'Encerramento') return -1;
+      if (serviceNameB === 'Encerramento') return 1;
+      
+      // Outros serviços em ordem alfabética
+      return serviceNameA.localeCompare(serviceNameB);
+    });
+
+    console.log('✅ Serviços ordenados:', ordered.map(s => s.service?.name));
+    return ordered;
+  }
 }
