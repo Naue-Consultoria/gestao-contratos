@@ -180,6 +180,62 @@
       </h3>
       
       <div class="charts-grid">
+        <!-- Porcentagem de Conclusão por Cliente - PRIMEIRO GRÁFICO -->
+        <div class="chart-card full-width">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-percent"></i>
+              Taxa de Conclusão por Cliente
+            </h4>
+          </div>
+          <div class="chart-wrapper client-completion-wrapper">
+            <canvas id="clientCompletionChart" *ngIf="analyticsData.clientCompletionData && analyticsData.clientCompletionData.length > 0"></canvas>
+            <div *ngIf="!analyticsData.clientCompletionData || analyticsData.clientCompletionData.length === 0" class="no-data-message">
+              <i class="fas fa-info-circle"></i>
+              <p>Nenhum dado de conclusão por cliente disponível ainda</p>
+              <small>Os dados aparecerão quando houver clientes com serviços em andamento ou concluídos</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Taxa de Conclusão por Contrato - SEGUNDO GRÁFICO -->
+        <div class="chart-card full-width">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-file-contract"></i>
+              Taxa de Conclusão por Contrato
+            </h4>
+            
+            <!-- Filtro de Cliente -->
+            <div class="chart-filter" *ngIf="availableClients.length > 0">
+              <label for="clientFilter">
+                <i class="fas fa-filter"></i>
+                Filtrar por cliente:
+              </label>
+              <select 
+                id="clientFilter" 
+                class="filter-select"
+                [value]="selectedClientId || ''"
+                (change)="onClientFilterChangeEvent($event)">
+                <option value="">Todos os clientes</option>
+                <option 
+                  *ngFor="let client of availableClients" 
+                  [value]="client.id">
+                  {{ client.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="chart-wrapper contract-completion-wrapper">
+            <canvas id="contractCompletionChart" *ngIf="analyticsData.contractCompletionData && analyticsData.contractCompletionData.length > 0"></canvas>
+            <div *ngIf="!analyticsData.contractCompletionData || analyticsData.contractCompletionData.length === 0" class="no-data-message">
+              <i class="fas fa-info-circle"></i>
+              <p>Nenhum dado de conclusão por contrato disponível ainda</p>
+              <small>Os dados aparecerão quando houver contratos ativos com serviços em andamento</small>
+            </div>
+          </div>
+        </div>
+
         <!-- Distribuição de Serviços por Usuário -->
         <div class="chart-card">
           <div class="chart-header">
@@ -208,25 +264,6 @@
           </div>
           <div class="chart-wrapper">
             <canvas id="completedServicesChart"></canvas>
-          </div>
-        </div>
-
-        <!-- Porcentagem de Conclusão por Cliente -->
-        <div class="chart-card full-width">
-          <div class="chart-header">
-            <h4 class="chart-title">
-              <i class="fas fa-percent"></i>
-              Taxa de Conclusão por Cliente
-            </h4>
-            <small class="chart-subtitle">Soma geral da porcentagem de conclusão de todos os contratos</small>
-          </div>
-          <div class="chart-wrapper client-completion-wrapper">
-            <canvas id="clientCompletionChart" *ngIf="analyticsData.clientCompletionData && analyticsData.clientCompletionData.length > 0"></canvas>
-            <div *ngIf="!analyticsData.clientCompletionData || analyticsData.clientCompletionData.length === 0" class="no-data-message">
-              <i class="fas fa-info-circle"></i>
-              <p>Nenhum dado de conclusão por cliente disponível ainda</p>
-              <small>Os dados aparecerão quando houver clientes com serviços em andamento ou concluídos</small>
-            </div>
           </div>
         </div>
 

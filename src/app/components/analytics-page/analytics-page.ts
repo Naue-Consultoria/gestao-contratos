@@ -10,7 +10,8 @@ import {
   AnalyticsData, 
   AnalyticsPeriodFilter,
   ServiceAnalytics,
-  MetricData
+  MetricData,
+  ContractCompletionData
 } from '../../services/analytics';
 import { ContractService } from '../../services/contract';
 
@@ -39,6 +40,10 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   selectedPeriod: 'week' | 'month' | 'quarter' | 'year' = 'month';
   revenuePeriod = '6';
   lastUpdated: Date = new Date();
+
+  // Filtro para gráfico de contratos
+  selectedClientId: number | null = null;
+  availableClients: {id: number, name: string}[] = [];
 
   // Dados de analytics
   analyticsData: AnalyticsData | null = null;
@@ -86,6 +91,9 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
       // Calcular progresso de receita uma vez
       this.calculateRevenueProgress();
+
+      // Extrair clientes disponíveis para o filtro
+      this.extractAvailableClients();
 
       // Inicializar charts
       setTimeout(() => this.initializeCharts(), 100);
@@ -141,9 +149,10 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     
     this.initConversionGauge();
     this.initContractsDonut();
+    this.initClientCompletionChart(); // Primeiro gráfico da seção Analytics Detalhados
+    this.initContractCompletionChart(); // Novo gráfico de conclusão por contratos
     this.initServicesByUserChart();
     this.initCompletedServicesChart();
-    this.initClientCompletionChart();
     this.initTopServicesChart();
   }
 
@@ -730,6 +739,255 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
         }
       }
     });
+  }
+
+  /**
+   * Extrair clientes disponíveis dos dados de contratos
+   */
+  private extractAvailableClients() {
+    if (!this.analyticsData?.contractCompletionData) {
+      this.availableClients = [];
+      return;
+    }
+
+    const clientsMap = new Map<number, string>();
+    
+    this.analyticsData.contractCompletionData.forEach(contract => {
+      if (!clientsMap.has(contract.clientId)) {
+        clientsMap.set(contract.clientId, contract.clientName);
+      }
+    });
+
+    this.availableClients = Array.from(clientsMap.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /**
+   * Filtrar contratos por cliente e excluir contratos com 0% de conclusão
+   */
+  private getFilteredContractData(): ContractCompletionData[] {
+    if (!this.analyticsData?.contractCompletionData) return [];
+    
+    let filteredData = this.analyticsData.contractCompletionData;
+    
+    // Filtrar por cliente se selecionado
+    if (this.selectedClientId !== null) {
+      filteredData = filteredData.filter(
+        contract => contract.clientId === this.selectedClientId
+      );
+    }
+    
+    // Excluir contratos com 0% de conclusão
+    return filteredData.filter(
+      contract => (contract.completionPercentage || 0) > 0
+    );
+  }
+
+  /**
+   * Alterar filtro de cliente via evento
+   */
+  onClientFilterChangeEvent(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    const value = selectElement.value;
+    const clientId = value ? +value : null;
+    this.onClientFilterChange(clientId);
+  }
+
+  /**
+   * Alterar filtro de cliente
+   */
+  onClientFilterChange(clientId: number | null) {
+    this.selectedClientId = clientId;
+    // Reinicializar apenas o gráfico de contratos
+    if (this.charts['contractCompletionChart']) {
+      this.charts['contractCompletionChart'].destroy();
+      delete this.charts['contractCompletionChart'];
+    }
+    setTimeout(() => this.initContractCompletionChart(), 100);
+  }
+
+  /**
+   * Gráfico de taxa de conclusão por contrato
+   */
+  private initContractCompletionChart() {
+    const canvas = document.getElementById('contractCompletionChart') as HTMLCanvasElement;
+    if (!canvas) {
+      this.showChartError('contractCompletionChart', 'Canvas não encontrado');
+      return;
+    }
+
+    // Destruir chart existente se houver
+    if (this.charts['contractCompletionChart']) {
+      this.charts['contractCompletionChart'].destroy();
+      delete this.charts['contractCompletionChart'];
+    }
+
+    if (!this.analyticsData?.contractCompletionData) {
+      this.showChartError('contractCompletionChart', 'Dados não disponíveis');
+      return;
+    }
+
+    const data = this.getFilteredContractData();
+    
+    if (data.length === 0) {
+      this.showChartError('contractCompletionChart', 'Nenhum contrato encontrado para o filtro selecionado');
+      return;
+    }
+
+    // Ajustar altura dinamicamente baseada no número de contratos
+    const minHeight = 400;
+    const heightPerContract = 50;
+    const dynamicHeight = Math.max(minHeight, data.length * heightPerContract);
+    
+    canvas.style.height = `${dynamicHeight}px`;
+    canvas.parentElement!.style.height = `${dynamicHeight}px`;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      this.showChartError('contractCompletionChart', 'Erro ao obter contexto do canvas');
+      return;
+    }
+
+    try {
+      const labels = data.map((contract: any) => {
+        const contractLabel = `${contract.contractNumber} - ${contract.clientName}`;
+        return contractLabel.length > 40 ? contractLabel.substring(0, 40) + '...' : contractLabel;
+      });
+      
+      const completionValues = data.map((contract: any) => {
+        const percentage = contract.completionPercentage || 0;
+        const validPercentage = Math.max(0, Math.min(100, percentage));
+        return validPercentage === 0 ? 0 : Math.max(validPercentage, 2);
+      });
+
+      // Todas as barras em cinza
+      const colors = completionValues.map(() => '#6b7280'); // Cinza para todas as barras
+
+      const Chart = (window as any).Chart;
+      if (!Chart) {
+        this.showChartError('contractCompletionChart', 'Chart.js não carregado');
+        return;
+      }
+
+      this.charts['contractCompletionChart'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Taxa de Conclusão (%)',
+            data: completionValues,
+            backgroundColor: colors,
+            borderColor: '#ffffff',
+            borderWidth: 1,
+            borderRadius: 6,
+            borderSkipped: false,
+            barThickness: 'flex',
+            maxBarThickness: 40,
+            minBarLength: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          layout: {
+            padding: {
+              left: 10,
+              right: 10,
+              top: 10,
+              bottom: 10
+            }
+          },
+          plugins: {
+            legend: { 
+              display: false 
+            },
+            tooltip: {
+              backgroundColor: '#fff',
+              titleColor: '#374151',
+              bodyColor: '#374151',
+              borderColor: '#e5e7eb',
+              borderWidth: 1,
+              titleFont: {
+                size: 14,
+                weight: 'bold'
+              },
+              bodyFont: {
+                size: 12
+              },
+              callbacks: {
+                title: (context: any) => {
+                  const contract = data[context[0].dataIndex];
+                  return `${contract.contractNumber} - ${contract.clientName}`;
+                },
+                label: (context: any) => {
+                  const contract = data[context.dataIndex];
+                  return [
+                    `📊 ${contract.completionPercentage || 0}% concluído`,
+                    `📋 ${contract.totalServices || 0} etapas totais`,
+                    `✅ ${contract.completedServices || 0} etapas concluídas`
+                  ];
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { 
+                color: 'rgba(0, 0, 0, 0.05)',
+                drawBorder: false
+              },
+              ticks: { 
+                color: '#6b7280',
+                font: {
+                  size: 11
+                },
+                stepSize: 10,
+                callback: function(value: any) {
+                  return value + '%';
+                }
+              },
+              beginAtZero: true,
+              min: 0,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Taxa de Conclusão (%)',
+                color: '#6b7280',
+                font: {
+                  size: 12,
+                  weight: 'bold'
+                }
+              }
+            },
+            y: {
+              grid: { 
+                display: false 
+              },
+              ticks: { 
+                color: '#6b7280',
+                font: {
+                  size: 11
+                },
+                maxRotation: 0,
+                callback: function(value: any, index: any) {
+                  const label = labels[index];
+                  return label && label.length > 30 ? label.substring(0, 30) + '...' : label;
+                }
+              }
+            }
+          },
+          animation: {
+            duration: 1000,
+            easing: 'easeInOutQuart'
+          }
+        }
+      });
+      
+    } catch (error: any) {
+      this.showChartError('contractCompletionChart', `Erro ao criar gráfico: ${error?.message || 'Erro desconhecido'}`);
+    }
   }
 
 }
