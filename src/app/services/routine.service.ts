@@ -19,6 +19,7 @@ export interface RoutineComment {
   user_id: number;
   comment: string;
   has_attachments: boolean;
+  service_stage_id?: number | null;
   created_at: string;
   user?: {
     id: number;
@@ -26,6 +27,11 @@ export interface RoutineComment {
     email: string;
   };
   attachments?: RoutineAttachment[];
+  referenced_stage?: {
+    id: number;
+    name: string;
+    category?: string;
+  };
 }
 
 export interface RoutineAttachment {
@@ -100,10 +106,15 @@ export class RoutineService {
   /**
    * Adicionar comentário à rotina
    */
-  addComment(routineId: number, comment: string): Observable<RoutineComment> {
+  addComment(routineId: number, comment: string, serviceStageId?: number): Observable<RoutineComment> {
+    const payload: any = { comment };
+    if (serviceStageId) {
+      payload.service_stage_id = serviceStageId;
+    }
+    
     return this.http.post<RoutineComment>(
       `${this.apiUrl}/${routineId}/comments`, 
-      { comment },
+      payload,
       { headers: this.getAuthHeaders() }
     );
   }

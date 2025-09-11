@@ -216,6 +216,9 @@
                 <div class="comment-author">
                   <i class="fas fa-user-circle"></i>
                   <span>{{ comment.user ? comment.user.name : 'Usuário' }}</span>
+                  <span class="comment-stage-ref" *ngIf="comment.referenced_stage">
+                    {{ comment.referenced_stage.name }}{{ comment.referenced_stage.category ? ' (' + comment.referenced_stage.category + ')' : '' }}
+                  </span>
                 </div>
                 <div class="comment-actions">
                   <span class="comment-date">
@@ -308,14 +311,31 @@
                   multiple
                   (change)="onFileSelect($event)"
                   accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv">
-                <button 
-                  class="btn-attachment"
-                  [disabled]="!canEdit || isSendingComment"
-                  (click)="fileInput.click()"
-                  title="Adicionar anexo">
-                  <i class="fas fa-paperclip"></i>
-                  <span class="attachment-count" *ngIf="selectedFiles.length > 0">{{ selectedFiles.length }}</span>
-                </button>
+                
+                <div class="left-actions">
+                  <button 
+                    class="btn-attachment"
+                    [disabled]="!canEdit || isSendingComment"
+                    (click)="fileInput.click()"
+                    title="Adicionar anexo">
+                    <i class="fas fa-paperclip"></i>
+                    <span class="attachment-count" *ngIf="selectedFiles.length > 0">{{ selectedFiles.length }}</span>
+                  </button>
+                  
+                  <!-- Stage Reference Selection -->
+                  <select 
+                    *ngIf="serviceStages && serviceStages.length > 0"
+                    class="stage-reference-select-inline"
+                    [(ngModel)]="selectedStageId"
+                    [disabled]="!canEdit || isSendingComment"
+                    title="Referenciar etapa (opcional)">
+                    <option [value]="null">🏷️ Etapa</option>
+                    <option *ngFor="let stage of serviceStages" [value]="stage.id">
+                      {{ stage.name }}{{ stage.category ? ' (' + stage.category + ')' : '' }}
+                    </option>
+                  </select>
+                </div>
+                
                 <button 
                   class="btn-send"
                   (click)="sendComment()"

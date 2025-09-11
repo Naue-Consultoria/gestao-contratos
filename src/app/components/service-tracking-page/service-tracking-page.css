@@ -539,6 +539,23 @@
   align-items: center;
 }
 
+.left-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comment-stage-ref {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #0a6254;
+  background-color: rgba(10, 98, 84, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+  margin-left: 0.5rem;
+}
+
 .btn-attachment {
   display: flex;
   align-items: center;
@@ -1958,4 +1975,46 @@
   color: #0a6254;
   background-color: rgba(10, 98, 84, 0.2);
   border-color: rgba(10, 98, 84, 0.3);
+}
+
+/* =================== COMMENT STAGE REFERENCE STYLES =================== */
+.stage-reference-select-inline {
+  height: 36px;
+  padding: 0 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  background: white;
+  color: var(--text-dark);
+  min-width: 120px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.stage-reference-select-inline:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 2px rgba(14, 155, 113, 0.1);
+}
+
+.stage-reference-select-inline:hover {
+  border-color: #cbd5e0;
+  background-color: #f7fafc;
+}
+
+
+/* Dark mode support for comment stage references */
+:host-context(body.dark-mode) .stage-reference-select-inline {
+  background: var(--dark-bg-secondary);
+  border-color: #444;
+  color: var(--dark-text);
+}
+
+:host-context(body.dark-mode) .stage-reference-select-inline:hover {
+  border-color: #555;
+  background-color: #333;
+}
+
+:host-context(body.dark-mode) .comment-stage-ref {
+  background-color: rgba(10, 98, 84, 0.15);
 }

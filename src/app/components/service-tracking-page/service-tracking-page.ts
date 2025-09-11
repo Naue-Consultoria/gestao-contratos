@@ -48,6 +48,7 @@ export class ServiceTrackingPageComponent implements OnInit {
   // Propriedades de comentários
   comments: RoutineComment[] = [];
   newComment = '';
+  selectedStageId: number | null = null;
   isLoadingComments = false;
   isSendingComment = false;
   selectedFiles: File[] = [];
@@ -443,7 +444,7 @@ export class ServiceTrackingPageComponent implements OnInit {
       this.isSendingComment = true;
       
       // Enviar comentário para a rotina
-      const newComment = await this.routineService.addComment(this.routine.id!, this.newComment.trim()).toPromise();
+      const newComment = await this.routineService.addComment(this.routine.id!, this.newComment.trim(), this.selectedStageId || undefined).toPromise();
       
       if (newComment) {
         // Se houver arquivos selecionados, fazer upload primeiro
@@ -461,6 +462,7 @@ export class ServiceTrackingPageComponent implements OnInit {
         
         // Limpar formulário
         this.newComment = '';
+        this.selectedStageId = null;
         this.selectedFiles = [];
         this.toastr.success('Comentário adicionado com sucesso');
         
