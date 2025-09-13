@@ -254,21 +254,8 @@
           </div>
         </div>
 
-        <!-- Serviços Concluídos ao Longo do Tempo -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h4 class="chart-title">
-              <i class="fas fa-check-circle"></i>
-              Serviços Concluídos
-            </h4>
-          </div>
-          <div class="chart-wrapper">
-            <canvas id="completedServicesChart"></canvas>
-          </div>
-        </div>
-
         <!-- Serviços Mais Contratados -->
-        <div class="chart-card full-width">
+        <div class="chart-card">
           <div class="chart-header">
             <h4 class="chart-title">
               <i class="fas fa-trophy"></i>
@@ -279,7 +266,7 @@
             <canvas id="topServicesChart" *ngIf="analyticsData.topServices && analyticsData.topServices.length > 0"></canvas>
             <div *ngIf="!analyticsData.topServices || analyticsData.topServices.length === 0" class="no-data-message">
               <i class="fas fa-info-circle"></i>
-              <p>Nenhum dado de serviços disponível ainda</p>
+              <p>Nenhum dados de serviços disponível ainda</p>
               <small>Os dados aparecerão quando houver contratos com serviços vinculados</small>
             </div>
           </div>

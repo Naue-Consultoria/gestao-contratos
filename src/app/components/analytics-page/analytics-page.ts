@@ -152,7 +152,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     this.initClientCompletionChart(); // Primeiro gráfico da seção Analytics Detalhados
     this.initContractCompletionChart(); // Novo gráfico de conclusão por contratos
     this.initServicesByUserChart();
-    this.initCompletedServicesChart();
     this.initTopServicesChart();
   }
 
@@ -323,16 +322,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
         datasets: [{
           label: 'Serviços',
           data: values,
-          backgroundColor: [
-            '#0A8060',
-            '#6366f1',
-            '#f59e0b',
-            '#8b5cf6',
-            '#10b981',
-            '#f97316',
-            '#ef4444',
-            '#06b6d4'
-          ],
+          backgroundColor: data.map(() => '#0A8060'), // Todas as barras em verde escuro
           borderColor: '#ffffff',
           borderWidth: 2,
           borderRadius: 8,
@@ -379,69 +369,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  /**
-   * Gráfico de serviços concluídos ao longo do tempo
-   */
-  private initCompletedServicesChart() {
-    const canvas = document.getElementById('completedServicesChart') as HTMLCanvasElement;
-    if (!canvas || !this.analyticsData?.completedServices) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const data = this.analyticsData.completedServices;
-    const labels = data.map((item: any) => item.month);
-    const values = data.map((item: any) => item.completed);
-
-    const Chart = (window as any).Chart;
-    this.charts['completedServicesChart'] = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Serviços Concluídos',
-          data: values,
-          borderColor: '#0A8060',
-          backgroundColor: 'rgba(10, 128, 96, 0.1)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#0A8060',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 2,
-          pointRadius: 6,
-          pointHoverRadius: 8
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#fff',
-            titleColor: '#374151',
-            bodyColor: '#374151',
-            borderColor: '#e5e7eb',
-            borderWidth: 1
-          }
-        },
-        scales: {
-          x: {
-            grid: { color: 'rgba(0, 0, 0, 0.05)' },
-            ticks: { color: '#6b7280' }
-          },
-          y: {
-            grid: { color: 'rgba(0, 0, 0, 0.05)' },
-            ticks: { 
-              color: '#6b7280',
-              stepSize: 1
-            },
-            beginAtZero: true
-          }
-        }
-      }
-    });
-  }
 
   /**
    * Gráfico de taxa de conclusão por cliente
@@ -671,16 +598,18 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const data = this.analyticsData.topServices.slice(0, 10); // Top 10
+    // Filtrar serviços excluindo "Entrada de Cliente" e "Encerramento"
+    const filteredServices = this.analyticsData.topServices.filter((service: any) => 
+      service.name !== 'Entrada de Cliente' && service.name !== 'Encerramento'
+    );
+    
+    const data = filteredServices.slice(0, 10); // Top 10 após filtrar
     if (data.length === 0) return;
     const labels = data.map((service: any) => service.name);
     const values = data.map((service: any) => service.contractCount);
 
-    // Cores categorizadas
-    const colors = [
-      '#0A8060', '#6366f1', '#f59e0b', '#8b5cf6', '#10b981',
-      '#f97316', '#ef4444', '#06b6d4', '#84cc16', '#f43f5e'
-    ];
+    // Todas as barras com verde escuro do sistema
+    const colors = data.map(() => '#0A8060');
 
     const Chart = (window as any).Chart;
     this.charts['topServicesChart'] = new Chart(ctx, {
