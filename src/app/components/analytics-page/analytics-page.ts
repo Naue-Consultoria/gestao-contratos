@@ -322,7 +322,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
         datasets: [{
           label: 'Serviços',
           data: values,
-          backgroundColor: data.map(() => '#0A8060'), // Todas as barras em verde escuro
+          backgroundColor: data.map(() => '#065f46'), // Todas as barras em verde mais escuro
           borderColor: '#ffffff',
           borderWidth: 2,
           borderRadius: 8,
@@ -380,26 +380,22 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
-    // Ajustar altura dinamicamente baseada no número de clientes
-    const clientCount = this.analyticsData?.clientCompletionData?.length || 0;
-    const minHeight = 400;
-    const heightPerClient = 40; // 40px por cliente
-    const dynamicHeight = Math.max(minHeight, clientCount * heightPerClient);
-    
-    canvas.style.height = `${dynamicHeight}px`;
-    canvas.parentElement!.style.height = `${dynamicHeight}px`;
+    // Altura fixa padronizada para ambos os gráficos
+    const fixedHeight = 400;
+    canvas.style.height = `${fixedHeight}px`;
+    canvas.parentElement!.style.height = `${fixedHeight}px`;
 
     // Destruir chart existente se houver
     if (this.charts['clientCompletionChart']) {
       this.charts['clientCompletionChart'].destroy();
       delete this.charts['clientCompletionChart'];
     }
-    
+
     if (!this.analyticsData?.clientCompletionData) {
       this.showChartError('clientCompletionChart', 'Dados não disponíveis');
       return;
     }
-    
+
     if (this.analyticsData.clientCompletionData.length === 0) {
       this.showChartError('clientCompletionChart', 'Nenhum dado de cliente encontrado');
       return;
@@ -412,31 +408,38 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     try {
-      const data = this.analyticsData.clientCompletionData; // TODOS os clientes
-      
+      const data = this.analyticsData.clientCompletionData.slice(0, 8); // Limitar a 8 itens
+
       const labels = data.map((client: any, index: number) => {
         let name = client.clientName || `Cliente #${client.clientId || index + 1}`;
-        
+
         // Remover prefixos desnecessários
         if (name.startsWith('Cliente #') && client.clientId) {
           name = `Cliente #${client.clientId}`;
         }
-        
-        // Truncar nomes muito longos para melhor visualização
+
+        // Truncar nomes para padronização
         const finalName = name.length > 30 ? name.substring(0, 30) + '...' : name;
         return finalName;
       });
-      
+
       const completionValues = data.map((client: any) => {
         const percentage = client.completionPercentage || 0;
-        // Garantir que seja um número válido e entre 0-100
         const validPercentage = Math.max(0, Math.min(100, percentage));
-        // Para valores muito baixos (mas > 0), garantir altura mínima visível
         return validPercentage === 0 ? 0 : Math.max(validPercentage, 2);
       });
 
-      // Todas as barras em cinza
-      const colors = completionValues.map(() => '#6b7280'); // Cinza para todas as barras
+      // Cores padronizadas baseadas na porcentagem
+      const colors = data.map((client: any) => {
+        const percentage = client.completionPercentage || 0;
+        if (percentage < 40) {
+          return '#6b7280'; // Cinza
+        } else if (percentage >= 40 && percentage <= 80) {
+          return '#065f46'; // Verde mais escuro
+        } else {
+          return '#3b82f6'; // Azul
+        }
+      });
 
       const Chart = (window as any).Chart;
       if (!Chart) {
@@ -453,36 +456,37 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
             data: completionValues,
             backgroundColor: colors,
             borderColor: '#ffffff',
-            borderWidth: 1,
-            borderRadius: 6,
+            borderWidth: 2,
+            borderRadius: 8,
             borderSkipped: false,
             barThickness: 'flex',
-            maxBarThickness: 35,
-            minBarLength: 2
+            maxBarThickness: 30,
+            minBarLength: 5
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          indexAxis: 'y', // Barras horizontais
+          indexAxis: 'y',
           layout: {
             padding: {
-              left: 10,
-              right: 10,
-              top: 10,
-              bottom: 10
+              left: 15,
+              right: 15,
+              top: 15,
+              bottom: 15
             }
           },
           plugins: {
-            legend: { 
-              display: false 
+            legend: {
+              display: false
             },
             tooltip: {
-              backgroundColor: '#fff',
+              backgroundColor: '#ffffff',
               titleColor: '#374151',
               bodyColor: '#374151',
               borderColor: '#e5e7eb',
               borderWidth: 1,
+              cornerRadius: 8,
               titleFont: {
                 size: 14,
                 weight: 'bold'
@@ -507,16 +511,18 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
           },
           scales: {
             x: {
-              grid: { 
-                color: 'rgba(0, 0, 0, 0.05)',
-                drawBorder: false
+              grid: {
+                color: 'rgba(0, 0, 0, 0.08)',
+                drawBorder: false,
+                lineWidth: 1
               },
-              ticks: { 
+              ticks: {
                 color: '#6b7280',
                 font: {
-                  size: 11
+                  size: 11,
+                  weight: '500'
                 },
-                stepSize: 10,
+                stepSize: 20,
                 callback: function(value: any) {
                   return value + '%';
                 }
@@ -535,30 +541,30 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
               }
             },
             y: {
-              grid: { 
-                display: false 
+              grid: {
+                display: false
               },
-              ticks: { 
+              ticks: {
                 color: '#6b7280',
                 font: {
-                  size: 11
+                  size: 11,
+                  weight: '500'
                 },
                 maxRotation: 0,
                 callback: function(value: any, index: any) {
                   const label = labels[index];
-                  // Limitar ainda mais o tamanho no eixo Y
                   return label && label.length > 25 ? label.substring(0, 25) + '...' : label;
                 }
               }
             }
           },
           animation: {
-            duration: 1000,
+            duration: 1200,
             easing: 'easeInOutQuart'
           }
         }
       });
-      
+
     } catch (error: any) {
       this.showChartError('clientCompletionChart', `Erro ao criar gráfico: ${error?.message || 'Erro desconhecido'}`);
     }
@@ -608,8 +614,8 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const labels = data.map((service: any) => service.name);
     const values = data.map((service: any) => service.contractCount);
 
-    // Todas as barras com verde escuro do sistema
-    const colors = data.map(() => '#0A8060');
+    // Todas as barras com verde mais escuro do sistema
+    const colors = data.map(() => '#065f46');
 
     const Chart = (window as any).Chart;
     this.charts['topServicesChart'] = new Chart(ctx, {
@@ -746,6 +752,11 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
+    // Altura fixa padronizada para ambos os gráficos
+    const fixedHeight = 400;
+    canvas.style.height = `${fixedHeight}px`;
+    canvas.parentElement!.style.height = `${fixedHeight}px`;
+
     // Destruir chart existente se houver
     if (this.charts['contractCompletionChart']) {
       this.charts['contractCompletionChart'].destroy();
@@ -757,20 +768,12 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
-    const data = this.getFilteredContractData();
-    
+    const data = this.getFilteredContractData().slice(0, 8); // Limitar a 8 itens
+
     if (data.length === 0) {
       this.showChartError('contractCompletionChart', 'Nenhum contrato encontrado para o filtro selecionado');
       return;
     }
-
-    // Ajustar altura dinamicamente baseada no número de contratos
-    const minHeight = 400;
-    const heightPerContract = 50;
-    const dynamicHeight = Math.max(minHeight, data.length * heightPerContract);
-    
-    canvas.style.height = `${dynamicHeight}px`;
-    canvas.parentElement!.style.height = `${dynamicHeight}px`;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -781,17 +784,26 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     try {
       const labels = data.map((contract: any) => {
         const contractLabel = `${contract.contractNumber} - ${contract.clientName}`;
-        return contractLabel.length > 40 ? contractLabel.substring(0, 40) + '...' : contractLabel;
+        return contractLabel.length > 30 ? contractLabel.substring(0, 30) + '...' : contractLabel;
       });
-      
+
       const completionValues = data.map((contract: any) => {
         const percentage = contract.completionPercentage || 0;
         const validPercentage = Math.max(0, Math.min(100, percentage));
         return validPercentage === 0 ? 0 : Math.max(validPercentage, 2);
       });
 
-      // Todas as barras em cinza
-      const colors = completionValues.map(() => '#6b7280'); // Cinza para todas as barras
+      // Cores padronizadas baseadas na porcentagem
+      const colors = data.map((contract: any) => {
+        const percentage = contract.completionPercentage || 0;
+        if (percentage < 40) {
+          return '#6b7280'; // Cinza
+        } else if (percentage >= 40 && percentage <= 80) {
+          return '#065f46'; // Verde mais escuro
+        } else {
+          return '#3b82f6'; // Azul
+        }
+      });
 
       const Chart = (window as any).Chart;
       if (!Chart) {
@@ -808,12 +820,12 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
             data: completionValues,
             backgroundColor: colors,
             borderColor: '#ffffff',
-            borderWidth: 1,
-            borderRadius: 6,
+            borderWidth: 2,
+            borderRadius: 8,
             borderSkipped: false,
             barThickness: 'flex',
-            maxBarThickness: 40,
-            minBarLength: 2
+            maxBarThickness: 30,
+            minBarLength: 5
           }]
         },
         options: {
@@ -822,22 +834,23 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
           indexAxis: 'y',
           layout: {
             padding: {
-              left: 10,
-              right: 10,
-              top: 10,
-              bottom: 10
+              left: 15,
+              right: 15,
+              top: 15,
+              bottom: 15
             }
           },
           plugins: {
-            legend: { 
-              display: false 
+            legend: {
+              display: false
             },
             tooltip: {
-              backgroundColor: '#fff',
+              backgroundColor: '#ffffff',
               titleColor: '#374151',
               bodyColor: '#374151',
               borderColor: '#e5e7eb',
               borderWidth: 1,
+              cornerRadius: 8,
               titleFont: {
                 size: 14,
                 weight: 'bold'
@@ -863,16 +876,18 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
           },
           scales: {
             x: {
-              grid: { 
-                color: 'rgba(0, 0, 0, 0.05)',
-                drawBorder: false
+              grid: {
+                color: 'rgba(0, 0, 0, 0.08)',
+                drawBorder: false,
+                lineWidth: 1
               },
-              ticks: { 
+              ticks: {
                 color: '#6b7280',
                 font: {
-                  size: 11
+                  size: 11,
+                  weight: '500'
                 },
-                stepSize: 10,
+                stepSize: 20,
                 callback: function(value: any) {
                   return value + '%';
                 }
@@ -891,29 +906,30 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
               }
             },
             y: {
-              grid: { 
-                display: false 
+              grid: {
+                display: false
               },
-              ticks: { 
+              ticks: {
                 color: '#6b7280',
                 font: {
-                  size: 11
+                  size: 11,
+                  weight: '500'
                 },
                 maxRotation: 0,
                 callback: function(value: any, index: any) {
                   const label = labels[index];
-                  return label && label.length > 30 ? label.substring(0, 30) + '...' : label;
+                  return label && label.length > 25 ? label.substring(0, 25) + '...' : label;
                 }
               }
             }
           },
           animation: {
-            duration: 1000,
+            duration: 1200,
             easing: 'easeInOutQuart'
           }
         }
       });
-      
+
     } catch (error: any) {
       this.showChartError('contractCompletionChart', `Erro ao criar gráfico: ${error?.message || 'Erro desconhecido'}`);
     }

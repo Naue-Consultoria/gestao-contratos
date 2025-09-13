@@ -179,27 +179,10 @@
         Analytics Detalhados
       </h3>
       
-      <div class="charts-grid">
-        <!-- Porcentagem de Conclusão por Cliente - PRIMEIRO GRÁFICO -->
-        <div class="chart-card full-width">
-          <div class="chart-header">
-            <h4 class="chart-title">
-              <i class="fas fa-percent"></i>
-              Taxa de Conclusão por Cliente
-            </h4>
-          </div>
-          <div class="chart-wrapper client-completion-wrapper">
-            <canvas id="clientCompletionChart" *ngIf="analyticsData.clientCompletionData && analyticsData.clientCompletionData.length > 0"></canvas>
-            <div *ngIf="!analyticsData.clientCompletionData || analyticsData.clientCompletionData.length === 0" class="no-data-message">
-              <i class="fas fa-info-circle"></i>
-              <p>Nenhum dado de conclusão por cliente disponível ainda</p>
-              <small>Os dados aparecerão quando houver clientes com serviços em andamento ou concluídos</small>
-            </div>
-          </div>
-        </div>
-
-        <!-- Taxa de Conclusão por Contrato - SEGUNDO GRÁFICO -->
-        <div class="chart-card full-width">
+      <!-- Gráficos de Conclusão - Lado a Lado -->
+      <div class="completion-charts-container">
+        <!-- Taxa de Conclusão por Contrato - ESQUERDA -->
+        <div class="chart-card half-width">
           <div class="chart-header">
             <h4 class="chart-title">
               <i class="fas fa-file-contract"></i>
@@ -208,10 +191,6 @@
             
             <!-- Filtro de Cliente -->
             <div class="chart-filter" *ngIf="availableClients.length > 0">
-              <label for="clientFilter">
-                <i class="fas fa-filter"></i>
-                Filtrar por cliente:
-              </label>
               <select 
                 id="clientFilter" 
                 class="filter-select"
@@ -236,6 +215,26 @@
           </div>
         </div>
 
+        <!-- Taxa de Conclusão por Cliente - DIREITA -->
+        <div class="chart-card half-width">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-percent"></i>
+              Taxa de Conclusão por Cliente
+            </h4>
+          </div>
+          <div class="chart-wrapper client-completion-wrapper">
+            <canvas id="clientCompletionChart" *ngIf="analyticsData.clientCompletionData && analyticsData.clientCompletionData.length > 0"></canvas>
+            <div *ngIf="!analyticsData.clientCompletionData || analyticsData.clientCompletionData.length === 0" class="no-data-message">
+              <i class="fas fa-info-circle"></i>
+              <p>Nenhum dado de conclusão por cliente disponível ainda</p>
+              <small>Os dados aparecerão quando houver clientes com serviços em andamento ou concluídos</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
         <!-- Distribuição de Serviços por Usuário -->
         <div class="chart-card">
           <div class="chart-header">
