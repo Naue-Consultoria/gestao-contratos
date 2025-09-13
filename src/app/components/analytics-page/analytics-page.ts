@@ -499,7 +499,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
           layout: {
             padding: {
               left: 15,
-              right: 15,
+              right: 50,
               top: 15,
               bottom: 15
             }
@@ -536,6 +536,10 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 }
               }
             }
+          },
+          onHover: (event: any, activeElements: any) => {
+            const chart = event.chart;
+            chart.canvas.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
           },
           scales: {
             x: {
@@ -588,7 +592,31 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
           },
           animation: {
             duration: 1200,
-            easing: 'easeInOutQuart'
+            easing: 'easeInOutQuart',
+            onComplete: () => {
+              const chart = this.charts['clientCompletionChart'];
+              if (!chart) return;
+
+              const ctx = chart.ctx;
+              ctx.font = 'bold 12px Arial';
+              ctx.fillStyle = '#374151';
+              ctx.textAlign = 'left';
+              ctx.textBaseline = 'middle';
+
+              chart.data.datasets.forEach((dataset: any, i: number) => {
+                const meta = chart.getDatasetMeta(i);
+                meta.data.forEach((bar: any, index: number) => {
+                  const client = data[index];
+                  const percentage = client.completionPercentage || 0;
+                  const text = percentage.toFixed(0) + '%';
+
+                  const x = bar.x + 5;
+                  const y = bar.y;
+
+                  ctx.fillText(text, x, y);
+                });
+              });
+            }
           }
         }
       });
@@ -899,7 +927,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
           layout: {
             padding: {
               left: 15,
-              right: 15,
+              right: 50,
               top: 15,
               bottom: 15
             }
@@ -937,6 +965,10 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 }
               }
             }
+          },
+          onHover: (event: any, activeElements: any) => {
+            const chart = event.chart;
+            chart.canvas.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
           },
           scales: {
             x: {
@@ -989,7 +1021,31 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
           },
           animation: {
             duration: 1200,
-            easing: 'easeInOutQuart'
+            easing: 'easeInOutQuart',
+            onComplete: () => {
+              const chart = this.charts['contractCompletionChart'];
+              if (!chart) return;
+
+              const ctx = chart.ctx;
+              ctx.font = 'bold 12px Arial';
+              ctx.fillStyle = '#374151';
+              ctx.textAlign = 'left';
+              ctx.textBaseline = 'middle';
+
+              chart.data.datasets.forEach((dataset: any, i: number) => {
+                const meta = chart.getDatasetMeta(i);
+                meta.data.forEach((bar: any, index: number) => {
+                  const contract = data[index];
+                  const percentage = contract.completionPercentage || 0;
+                  const text = percentage.toFixed(0) + '%';
+
+                  const x = bar.x + 5;
+                  const y = bar.y;
+
+                  ctx.fillText(text, x, y);
+                });
+              });
+            }
           }
         }
       });
