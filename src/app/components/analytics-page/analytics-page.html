@@ -222,6 +222,22 @@
               <i class="fas fa-percent"></i>
               Taxa de Conclusão por Cliente
             </h4>
+
+            <!-- Filtro de Cliente -->
+            <div class="chart-filter" *ngIf="availableClients.length > 0">
+              <select
+                id="clientFilterForClients"
+                class="filter-select"
+                [value]="selectedClientIdForClients || ''"
+                (change)="onClientFilterForClientsChangeEvent($event)">
+                <option value="">Todos os clientes</option>
+                <option
+                  *ngFor="let client of availableClients"
+                  [value]="client.id">
+                  {{ client.name }}
+                </option>
+              </select>
+            </div>
           </div>
           <div class="chart-wrapper client-completion-wrapper">
             <canvas id="clientCompletionChart" *ngIf="analyticsData.clientCompletionData && analyticsData.clientCompletionData.length > 0"></canvas>

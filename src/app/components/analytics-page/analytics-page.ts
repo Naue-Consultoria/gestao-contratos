@@ -43,6 +43,8 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   // Filtro para gráfico de contratos
   selectedClientId: number | null = null;
+  // Filtro para gráfico de clientes
+  selectedClientIdForClients: number | null = null;
   availableClients: {id: number, name: string}[] = [];
 
   // Dados de analytics
@@ -408,7 +410,29 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     try {
-      const data = this.analyticsData.clientCompletionData.slice(0, 8); // Limitar a 8 itens
+      const allData = this.analyticsData.clientCompletionData;
+
+      // Se não há filtro de cliente específico, mostrar apenas clientes com progresso > 0%
+      // Se há filtro específico, mostrar o cliente mesmo com 0%
+      let filteredData;
+      if (this.selectedClientIdForClients !== null) {
+        // Cliente específico selecionado - mostrar mesmo com 0%
+        filteredData = allData.filter((client: any) => client.clientId === this.selectedClientIdForClients);
+      } else {
+        // Nenhum cliente específico - mostrar apenas com progresso > 0%
+        filteredData = allData.filter((client: any) => (client.completionPercentage || 0) > 0);
+      }
+
+      // Se não há dados após o filtro, mostrar mensagem apropriada
+      if (filteredData.length === 0) {
+        const message = this.selectedClientIdForClients !== null
+          ? 'O cliente selecionado ainda não tem nenhum progresso em seu(s) contrato(s)'
+          : 'Nenhum cliente com progresso encontrado';
+        this.showChartError('clientCompletionChart', message);
+        return;
+      }
+
+      const data = filteredData.slice(0, 8); // Limitar a 8 itens
 
       const labels = data.map((client: any, index: number) => {
         let name = client.clientName || `Cliente #${client.clientId || index + 1}`;
@@ -426,6 +450,10 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       const completionValues = data.map((client: any) => {
         const percentage = client.completionPercentage || 0;
         const validPercentage = Math.max(0, Math.min(100, percentage));
+        // Se o cliente foi especificamente selecionado e tem 0%, mostrar uma barra pequena mas visível
+        if (validPercentage === 0 && this.selectedClientIdForClients !== null) {
+          return 1; // 1% para ser visível
+        }
         return validPercentage === 0 ? 0 : Math.max(validPercentage, 2);
       });
 
@@ -582,16 +610,20 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
     // Limpar o canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     // Configurar texto
     ctx.fillStyle = '#6b7280';
     ctx.font = '14px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    
-    // Desenhar mensagem de erro
-    ctx.fillText(message, canvas.width / 2, canvas.height / 2 - 10);
-    ctx.fillText('Verifique os dados ou recarregue a página', canvas.width / 2, canvas.height / 2 + 10);
+
+    // Desenhar mensagem principal
+    ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+
+    // Só mostrar a mensagem adicional se não for sobre progresso de cliente
+    if (!message.includes('progresso em seu(s) contrato(s)')) {
+      ctx.fillText('Verifique os dados ou recarregue a página', canvas.width / 2, canvas.height / 2 + 20);
+    }
   }
 
   /**
@@ -699,28 +731,30 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * Filtrar contratos por cliente e excluir contratos com 0% de conclusão
+   * Filtrar contratos por cliente e aplicar lógica de 0% de conclusão
    */
   private getFilteredContractData(): ContractCompletionData[] {
     if (!this.analyticsData?.contractCompletionData) return [];
-    
+
     let filteredData = this.analyticsData.contractCompletionData;
-    
+
     // Filtrar por cliente se selecionado
     if (this.selectedClientId !== null) {
       filteredData = filteredData.filter(
         contract => contract.clientId === this.selectedClientId
       );
+      // Se cliente específico selecionado, mostrar contratos mesmo com 0%
+      return filteredData;
     }
-    
-    // Excluir contratos com 0% de conclusão
+
+    // Se nenhum cliente específico, excluir contratos com 0% de conclusão
     return filteredData.filter(
       contract => (contract.completionPercentage || 0) > 0
     );
   }
 
   /**
-   * Alterar filtro de cliente via evento
+   * Alterar filtro de cliente via evento (para gráfico de contratos)
    */
   onClientFilterChangeEvent(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
@@ -730,7 +764,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * Alterar filtro de cliente
+   * Alterar filtro de cliente (para gráfico de contratos)
    */
   onClientFilterChange(clientId: number | null) {
     this.selectedClientId = clientId;
@@ -740,6 +774,29 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       delete this.charts['contractCompletionChart'];
     }
     setTimeout(() => this.initContractCompletionChart(), 100);
+  }
+
+  /**
+   * Alterar filtro de cliente via evento (para gráfico de clientes)
+   */
+  onClientFilterForClientsChangeEvent(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    const value = selectElement.value;
+    const clientId = value ? +value : null;
+    this.onClientFilterForClientsChange(clientId);
+  }
+
+  /**
+   * Alterar filtro de cliente (para gráfico de clientes)
+   */
+  onClientFilterForClientsChange(clientId: number | null) {
+    this.selectedClientIdForClients = clientId;
+    // Reinicializar apenas o gráfico de clientes
+    if (this.charts['clientCompletionChart']) {
+      this.charts['clientCompletionChart'].destroy();
+      delete this.charts['clientCompletionChart'];
+    }
+    setTimeout(() => this.initClientCompletionChart(), 100);
   }
 
   /**
@@ -771,7 +828,10 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const data = this.getFilteredContractData().slice(0, 8); // Limitar a 8 itens
 
     if (data.length === 0) {
-      this.showChartError('contractCompletionChart', 'Nenhum contrato encontrado para o filtro selecionado');
+      const message = this.selectedClientId !== null
+        ? 'O cliente selecionado ainda não possui contratos'
+        : 'Nenhum contrato com progresso encontrado';
+      this.showChartError('contractCompletionChart', message);
       return;
     }
 
@@ -790,6 +850,10 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       const completionValues = data.map((contract: any) => {
         const percentage = contract.completionPercentage || 0;
         const validPercentage = Math.max(0, Math.min(100, percentage));
+        // Se um cliente foi especificamente selecionado e contrato tem 0%, mostrar uma barra pequena mas visível
+        if (validPercentage === 0 && this.selectedClientId !== null) {
+          return 1; // 1% para ser visível
+        }
         return validPercentage === 0 ? 0 : Math.max(validPercentage, 2);
       });
 
