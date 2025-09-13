@@ -46,6 +46,7 @@
             <th>Tipo</th>
             <th>Status</th>
             <th>Valor Total</th>
+            <th>SLA</th>
             <th>Validade</th>
             <th>Criada em</th>
             <th>Ações</th>
@@ -92,6 +93,16 @@
             </td>
             <td>
               <span class="value-amount">{{ proposal.totalValue }}</span>
+            </td>
+            <td>
+              <span 
+                class="sla-badge" 
+                [class.sla-signed]="proposal.status === 'signed'"
+                [class.sla-sent]="proposal.status === 'sent'"
+                *ngIf="proposal.sla !== '-'">
+                {{ proposal.sla }}
+              </span>
+              <span class="sla-empty" *ngIf="proposal.sla === '-'">-</span>
             </td>
             <td>
               <span class="validity-date">{{ proposal.validUntil }}</span>

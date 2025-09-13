@@ -24,6 +24,7 @@ interface ProposalDisplay {
   validUntil: string;
   createdAt: string;
   isExpired: boolean;
+  sla: string;
   raw: Proposal;
 }
 
@@ -150,6 +151,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       validUntil: apiProposal.end_date ? this.formatDate(apiProposal.end_date) : 'Sem prazo',
       createdAt: this.formatDate(apiProposal.created_at),
       isExpired: this.proposalService.isProposalExpired(apiProposal),
+      sla: this.calculateSLA(apiProposal),
       raw: apiProposal
     };
   }
@@ -484,6 +486,41 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       'contraproposta': '#dc3545'  // Vermelho para contraproposta
     };
     return statusColors[status] || '#6c757d';
+  }
+
+  private calculateSLA(proposal: any): string {
+    if (!proposal.created_at) return '-';
+    
+    const createdDate = new Date(proposal.created_at);
+    let endDate: Date;
+    
+    // Para propostas assinadas, usar a data de assinatura
+    if (proposal.status === 'signed' && proposal.signed_at) {
+      endDate = new Date(proposal.signed_at);
+    } 
+    // Para propostas enviadas, usar a data atual
+    else if (proposal.status === 'sent') {
+      endDate = new Date();
+    } 
+    // Para outros status, não mostrar SLA
+    else {
+      return '-';
+    }
+    
+    // Calcular diferença em milissegundos
+    const timeDiff = endDate.getTime() - createdDate.getTime();
+    
+    // Converter para dias (24h = 1 dia)
+    const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    
+    // Retornar formatado
+    if (daysDiff === 0) {
+      return '0 dia';
+    } else if (daysDiff === 1) {
+      return '1 dia';
+    } else {
+      return `${daysDiff} dias`;
+    }
   }
 
   private formatDate(dateString: string | null | undefined): string {
