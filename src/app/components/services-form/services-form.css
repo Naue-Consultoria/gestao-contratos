@@ -1050,6 +1050,20 @@ textarea.form-control {
   padding-right: 35px;
 }
 
+/* Stages footer with add button */
+.stages-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #e1e4e8;
+  margin-top: auto;
+}
+
+.btn-add-stage {
+  /* Remove custom styling to use default .btn.btn-primary.btn-sm styles */
+}
+
 /* ========================================
    RESPONSIVE DESIGN
    ======================================== */

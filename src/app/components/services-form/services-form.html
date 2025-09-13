@@ -211,6 +211,19 @@
                 </div>
               </div>
             </div>
+
+            <!-- Botão Nova Etapa no canto inferior direito -->
+            <div class="stages-footer">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm btn-add-stage"
+                (click)="addStage()"
+                [disabled]="isSaving"
+              >
+                <i class="fas fa-plus"></i>
+                Nova Etapa
+              </button>
+            </div>
           </div>
         </div>
         
