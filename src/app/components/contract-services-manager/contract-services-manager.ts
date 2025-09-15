@@ -65,7 +65,7 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     
-    // Inicializar status dos serviços se não existir e ordenar alfabeticamente
+    // Inicializar status dos serviços se não existir e ordenar com prioridade personalizada
     this.services.forEach((service, index) => {
       if (!service.status) {
         service.status = 'not_started';
@@ -76,7 +76,7 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
       }
     });
     
-    // Ordenar serviços por nome alfabeticamente
+    // Ordenar serviços com prioridade personalizada: "Entrada de Cliente" primeiro, "Encerramento" segundo, resto alfabético
     this.sortServices();
     
     // Carregar progresso dos serviços
@@ -95,12 +95,30 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
       this.loadServicesProgress();
     }
   }
+
   
   private sortServices() {
     this.services.sort((a, b) => {
-      const nameA = a.service.name.toLowerCase();
-      const nameB = b.service.name.toLowerCase();
-      return nameA.localeCompare(nameB, 'pt-BR');
+      const serviceNameA = a.service?.name || '';
+      const serviceNameB = b.service?.name || '';
+
+      // Definir prioridades numéricas para garantir ordem correta
+      const getPriority = (serviceName: string): number => {
+        if (serviceName === 'Entrada de Cliente') return 1;
+        if (serviceName === 'Encerramento') return 2;
+        return 3; // Todos os outros serviços
+      };
+
+      const priorityA = getPriority(serviceNameA);
+      const priorityB = getPriority(serviceNameB);
+
+      // Se as prioridades são diferentes, ordenar por prioridade
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+
+      // Se as prioridades são iguais (ambos são serviços normais), ordenar alfabeticamente
+      return serviceNameA.localeCompare(serviceNameB, 'pt-BR', { sensitivity: 'base' });
     });
   }
 
@@ -234,7 +252,7 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
   // Método para carregar progresso de um serviço específico
   loadServiceProgress(serviceId: number) {
     this.loadingProgresses[serviceId] = true;
-    
+
     this.serviceStageService.getServiceProgress(serviceId).subscribe({
       next: (response) => {
         this.serviceProgresses[serviceId] = response.progress;

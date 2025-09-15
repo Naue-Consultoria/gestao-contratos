@@ -493,24 +493,24 @@ export class RoutineViewPageComponent implements OnInit, OnDestroy {
     const ordered = [...this.contract.contract_services].sort((a, b) => {
       const serviceNameA = a.service?.name || '';
       const serviceNameB = b.service?.name || '';
-      
+
       // Definir prioridades numéricas para garantir ordem correta
       const getPriority = (serviceName: string): number => {
         if (serviceName === 'Entrada de Cliente') return 1;
         if (serviceName === 'Encerramento') return 2;
         return 3; // Todos os outros serviços
       };
-      
+
       const priorityA = getPriority(serviceNameA);
       const priorityB = getPriority(serviceNameB);
-      
+
       // Se as prioridades são diferentes, ordenar por prioridade
       if (priorityA !== priorityB) {
         return priorityA - priorityB;
       }
-      
+
       // Se as prioridades são iguais (ambos são serviços normais), ordenar alfabeticamente
-      return serviceNameA.localeCompare(serviceNameB);
+      return serviceNameA.localeCompare(serviceNameB, 'pt-BR', { sensitivity: 'base' });
     });
 
     return ordered;
