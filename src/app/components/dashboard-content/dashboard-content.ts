@@ -119,10 +119,8 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
     // Filtrar quick actions baseado no role do usuário
     this.filterQuickActionsByRole();
-    // Carregar dados reais
-    this.loadDashboardData();
-    this.loadChartData();
-    this.loadRecentActivities();
+    // Carregar dados de forma sequencial para evitar rate limiting
+    this.loadDashboardDataSequentially();
   }
 
   ngAfterViewInit() {
@@ -153,152 +151,169 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     }
   }
 
-  private loadDashboardData() {
-    
-    // Se for admin, carregar dados gerais como antes
-    if (this.authService.isAdmin()) {
-      // Buscar dados de contratos, serviços e clientes em paralelo
-      forkJoin({
-        contractStats: this.contractService.getStats(),
-        serviceStats: this.serviceService.getStats(),
-        clientsData: this.clientService.getClients()
-      }).subscribe({
-        next: (response) => {
-          const totalClients = response.clientsData.total || 0;
-          this.updateStatCards(response.contractStats.stats, response.serviceStats.stats, totalClients);
-        },
-        error: (error) => {
-          console.error('Erro ao carregar dados do dashboard:', error);
-          // Usar dados com valores zerados em caso de erro
-          this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
-        }
-      });
-    } else {
-      // Para usuários normais, carregar apenas contratos vinculados ao usuário
-      this.loadUserSpecificData();
-    }
-  }
-
-  private loadChartData() {
-    if (this.authService.isAdmin()) {
-      // Para admin, carregar dados de todos os contratos como antes
-      this.contractService.getContracts().subscribe({
-        next: (response) => {
-          this.generateChartData(response.contracts);
-          if (this.contractsChart) {
-            this.contractsChart.destroy();
-          }
-          this.initContractsChart();
-        },
-        error: (error) => {
-          console.error('Erro ao carregar dados do gráfico:', error);
-          // Usar dados mock em caso de erro
-          this.generateMockChartData();
-          if (this.contractsChart) {
-            this.contractsChart.destroy();
-          }
-          this.initContractsChart();
-        }
-      });
-    } else {
-      // Para usuários normais, carregar dados apenas dos seus contratos
-      this.contractService.getContracts().subscribe({
-        next: (response) => {
-          const userContracts = response.contracts || [];
-          this.generateUserChartData(userContracts);
-          if (this.contractsChart) {
-            this.contractsChart.destroy();
-          }
-          this.initContractsChart();
-        },
-        error: (error) => {
-          console.error('Erro ao carregar dados do gráfico do usuário:', error);
-          // Usar dados zerados em caso de erro
-          this.generateEmptyChartData();
-          if (this.contractsChart) {
-            this.contractsChart.destroy();
-          }
-          this.initContractsChart();
-        }
-      });
-    }
-  }
-
-  private loadRecentActivities() {
-    
-    if (this.authService.isAdmin()) {
-      // Para admin, carregar todas as atividades como antes
-      this.contractService.getRecentServiceActivities(10).subscribe({
-        next: (response) => {
-          if (response.success && response.activities) {
-            this.recentActivities = response.activities.map((activity: any) => ({
-              id: activity.id,
-              time: activity.time,
-              title: activity.title,
-              description: activity.description,
-              type: 'service',
-              status: activity.status,
-              category: activity.category,
-              value: activity.value,
-              duration: activity.duration,
-              contractId: activity.contractId,
-              serviceId: activity.serviceId
-            }));
-          }
-        },
-        error: (error) => {
-          console.error('Erro ao carregar atividades recentes:', error);
-          // Manter atividades mock em caso de erro para demonstração
-        }
-      });
-    } else {
-      // Para usuários normais, carregar apenas atividades dos seus contratos
-      this.loadUserActivities();
-    }
-  }
-
-  private loadUserActivities() {
-    
-    // Buscar contratos do usuário primeiro
-    this.contractService.getContracts().subscribe({
-      next: (response) => {
-        const userContracts = response.contracts || [];
-        const userActivities: Activity[] = [];
-        
-        // Converter serviços dos contratos do usuário em atividades
-        userContracts.forEach(contract => {
-          if (contract.contract_services) {
-            contract.contract_services.forEach((service: any) => {
-              const timeAgo = this.calculateTimeAgo(service.updated_at || contract.created_at);
-              
-              userActivities.push({
-                id: service.id,
-                time: timeAgo,
-                title: service.service.name,
-                description: `Contrato: ${contract.contract_number} - Cliente: ${contract.client.name}`,
-                type: 'service',
-                status: service.status || 'not_started',
-                category: service.service.category,
-                value: service.total_value,
-                duration: service.service.duration ? `${service.service.duration} dias` : undefined,
-                contractId: contract.id,
-                serviceId: service.service.id
-              });
-            });
-          }
-        });
-        
-        // Ordenar por data mais recente e limitar a 10
-        this.recentActivities = userActivities
-          .sort((a, b) => b.id! - a.id!)
-          .slice(0, 10);
-          
-      },
-      error: (error) => {
-        console.error('Erro ao carregar atividades do usuário:', error);
-        this.recentActivities = [];
+  private async loadDashboardDataSequentially() {
+    try {
+      if (this.authService.isAdmin()) {
+        // Carregar dados de forma sequencial para evitar rate limiting
+        await this.loadAdminDataSequentially();
+      } else {
+        // Para usuários normais, carregar apenas contratos vinculados ao usuário
+        await this.loadUserSpecificData();
       }
-    });
+
+      // Aguardar antes de carregar chart data
+      await this.delay(1000);
+      await this.loadChartData();
+
+      // Aguardar antes de carregar atividades
+      await this.delay(1000);
+      await this.loadRecentActivities();
+
+    } catch (error) {
+      console.error('Erro ao carregar dados do dashboard:', error);
+      // Usar dados com valores zerados em caso de erro
+      this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
+    }
+  }
+
+  private async loadAdminDataSequentially() {
+    try {
+      // Carregar dados sequencialmente com delays
+      console.log('📊 Carregando stats de contratos...');
+      const contractStats = await this.contractService.getStats().toPromise();
+
+      await this.delay(500);
+      console.log('📋 Carregando stats de serviços...');
+      const serviceStats = await this.serviceService.getStats().toPromise();
+
+      await this.delay(500);
+      console.log('👥 Carregando dados de clientes...');
+      const clientsData = await this.clientService.getClients().toPromise();
+
+      const totalClients = clientsData?.total || 0;
+      this.updateStatCards(contractStats?.stats || { total: 0, active: 0 }, serviceStats?.stats || { total: 0 }, totalClients);
+
+      console.log('✅ Dados do dashboard carregados com sucesso');
+    } catch (error) {
+      console.error('❌ Erro ao carregar dados admin:', error);
+      this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
+    }
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private async loadChartData() {
+    try {
+      console.log('📈 Carregando dados do gráfico...');
+
+      if (this.authService.isAdmin()) {
+        // Para admin, carregar dados de todos os contratos como antes
+        const response = await this.contractService.getContracts().toPromise();
+        this.generateChartData(response?.contracts || []);
+      } else {
+        // Para usuários normais, carregar dados apenas dos seus contratos
+        const response = await this.contractService.getContracts().toPromise();
+        const userContracts = response?.contracts || [];
+        this.generateUserChartData(userContracts);
+      }
+
+      if (this.contractsChart) {
+        this.contractsChart.destroy();
+      }
+      this.initContractsChart();
+      console.log('✅ Dados do gráfico carregados');
+
+    } catch (error) {
+      console.error('❌ Erro ao carregar dados do gráfico:', error);
+      // Usar dados mock/zerados em caso de erro
+      if (this.authService.isAdmin()) {
+        this.generateMockChartData();
+      } else {
+        this.generateEmptyChartData();
+      }
+
+      if (this.contractsChart) {
+        this.contractsChart.destroy();
+      }
+      this.initContractsChart();
+    }
+  }
+
+  private async loadRecentActivities() {
+    try {
+      console.log('📋 Carregando atividades recentes...');
+
+      if (this.authService.isAdmin()) {
+        // Para admin, carregar todas as atividades como antes
+        const response = await this.contractService.getRecentServiceActivities(10).toPromise();
+        if (response?.success && response.activities) {
+          this.recentActivities = response.activities.map((activity: any) => ({
+            id: activity.id,
+            time: activity.time,
+            title: activity.title,
+            description: activity.description,
+            type: 'service',
+            status: activity.status,
+            category: activity.category,
+            value: activity.value,
+            duration: activity.duration,
+            contractId: activity.contractId,
+            serviceId: activity.serviceId
+          }));
+        }
+      } else {
+        // Para usuários normais, carregar apenas atividades dos seus contratos
+        await this.loadUserActivities();
+      }
+
+      console.log('✅ Atividades recentes carregadas');
+    } catch (error) {
+      console.error('❌ Erro ao carregar atividades recentes:', error);
+      // Manter atividades mock em caso de erro para demonstração
+    }
+  }
+
+  private async loadUserActivities() {
+    try {
+      // Buscar contratos do usuário primeiro
+      const response = await this.contractService.getContracts().toPromise();
+      const userContracts = response?.contracts || [];
+      const userActivities: Activity[] = [];
+
+      // Converter serviços dos contratos do usuário em atividades
+      userContracts.forEach(contract => {
+        if (contract.contract_services) {
+          contract.contract_services.forEach((service: any) => {
+            const timeAgo = this.calculateTimeAgo(service.updated_at || contract.created_at);
+
+            userActivities.push({
+              id: service.id,
+              time: timeAgo,
+              title: service.service.name,
+              description: `Contrato: ${contract.contract_number} - Cliente: ${contract.client.name}`,
+              type: 'service',
+              status: service.status || 'not_started',
+              category: service.service.category,
+              value: service.total_value,
+              duration: service.service.duration ? `${service.service.duration} dias` : undefined,
+              contractId: contract.id,
+              serviceId: service.service.id
+            });
+          });
+        }
+      });
+
+      // Ordenar por data mais recente e limitar a 10
+      this.recentActivities = userActivities
+        .sort((a, b) => b.id! - a.id!)
+        .slice(0, 10);
+
+    } catch (error) {
+      console.error('Erro ao carregar atividades do usuário:', error);
+      this.recentActivities = [];
+    }
   }
 
   private calculateTimeAgo(dateString: string): string {
@@ -754,25 +769,26 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     return action.id;
   }
 
-  private loadUserSpecificData() {
-    
-    // Buscar apenas contratos vinculados ao usuário logado
-    this.contractService.getContracts().subscribe({
-      next: (response) => {
-        const userContracts = response.contracts || [];
-        
-        // Calcular estatísticas baseadas nos contratos do usuário
-        const userStats = this.calculateUserStats(userContracts);
-        
-        // Atualizar cards com dados específicos do usuário
-        this.updateUserStatCards(userStats, userContracts.length);
-      },
-      error: (error) => {
-        console.error('Erro ao carregar contratos do usuário:', error);
-        // Usar dados zerados em caso de erro
-        this.updateUserStatCards({ myContracts: 0, myActiveServices: 0, myCompletedServices: 0 }, 0);
-      }
-    });
+  private async loadUserSpecificData() {
+    try {
+      console.log('👤 Carregando dados específicos do usuário...');
+
+      // Buscar apenas contratos vinculados ao usuário logado
+      const response = await this.contractService.getContracts().toPromise();
+      const userContracts = response?.contracts || [];
+
+      // Calcular estatísticas baseadas nos contratos do usuário
+      const userStats = this.calculateUserStats(userContracts);
+
+      // Atualizar cards com dados específicos do usuário
+      this.updateUserStatCards(userStats, userContracts.length);
+
+      console.log('✅ Dados do usuário carregados');
+    } catch (error) {
+      console.error('❌ Erro ao carregar contratos do usuário:', error);
+      // Usar dados zerados em caso de erro
+      this.updateUserStatCards({ myContracts: 0, myActiveServices: 0, myCompletedServices: 0 }, 0);
+    }
   }
 
   private calculateUserStats(contracts: any[]) {

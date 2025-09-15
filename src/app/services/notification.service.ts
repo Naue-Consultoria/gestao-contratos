@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { WebsocketService } from './websocket.service';
+import { RateLimitService } from './rate-limit.service';
 
 export interface Notification {
   id: string;
@@ -81,7 +82,8 @@ export class NotificationService {
 
   constructor(
     private http: HttpClient,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    private rateLimitService: RateLimitService
   ) {
     this.loadNotificationsFromStorage();
     this.removeTestNotifications(); // Remove notificações de teste ao inicializar
@@ -163,18 +165,25 @@ export class NotificationService {
     }
 
     this.isLoading = true;
-    this.http.get<NotificationListResponse>(`${this.API_URL}?page=${page}&limit=${this.pageSize}`).subscribe({
+
+    // Usar rate limiting para esta requisição
+    const requestKey = `notifications-page-${page}`;
+    this.rateLimitService.executeRequest(
+      requestKey,
+      () => this.http.get<NotificationListResponse>(`${this.API_URL}?page=${page}&limit=${this.pageSize}`),
+      500 // 500ms debounce
+    ).subscribe({
       next: (response) => {
         if (response.success && response.notifications) {
           const serverNotifications = response.notifications.map(this.mapApiNotificationToClient);
-          
+
           if (page === 1) {
             this.notificationHistory.next(serverNotifications);
           } else {
             const current = this.notificationHistory.value;
             this.notificationHistory.next([...current, ...serverNotifications]);
           }
-          
+
           this.currentPage = response.page;
           this.totalPages = response.totalPages;
           this.saveNotificationsToStorage();
@@ -196,7 +205,12 @@ export class NotificationService {
       return;
     }
 
-    this.http.get<{ success: boolean, unreadCount: number }>(`${this.API_URL}/unread-count`).subscribe({
+    // Usar rate limiting para esta requisição
+    this.rateLimitService.executeRequest(
+      'notifications-unread-count',
+      () => this.http.get<{ success: boolean, unreadCount: number }>(`${this.API_URL}/unread-count`),
+      800 // 800ms debounce para contador
+    ).subscribe({
       next: (response) => {
         if (response.success) {
           this.unreadCount.next(response.unreadCount);
