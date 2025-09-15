@@ -82,6 +82,8 @@ export class AuthService {
         if (response.token && response.user) {
           this.setSession(response.token, response.user);
           this.websocketService.connect(response.user.id);
+          // Inicializar notificações após login bem-sucedido
+          this.notificationService.initializeNotifications();
         }
       }),
       catchError(error => {
@@ -285,6 +287,10 @@ export class AuthService {
       try {
         const user = JSON.parse(userJson);
         this.currentUserSubject.next(user);
+        // Inicializar notificações se usuário já estiver autenticado
+        setTimeout(() => {
+          this.notificationService.initializeNotifications();
+        }, 100);
       } catch (error) {
         console.error('❌ Erro ao analisar dados do usuário no localStorage. Limpando sessão.', error);
         this.clearSession();
@@ -300,6 +306,8 @@ export class AuthService {
       tap(response => {
         if (response.token && response.user) {
           this.setSession(response.token, response.user);
+          // Reinicializar notificações após refresh do token
+          this.notificationService.initializeNotifications();
         }
       })
     );

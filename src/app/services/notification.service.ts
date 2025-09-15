@@ -85,8 +85,6 @@ export class NotificationService {
   ) {
     this.loadNotificationsFromStorage();
     this.removeTestNotifications(); // Remove notificações de teste ao inicializar
-    this.fetchUserNotifications();
-    this.fetchUnreadCount();
     this.listenForRealTimeNotifications();
   }
 
@@ -156,7 +154,14 @@ export class NotificationService {
 
   fetchUserNotifications(page: number = 1) {
     if (this.isLoading) return;
-    
+
+    // Verificar se há token antes de fazer a requisição
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('Token não encontrado - pulando busca de notificações');
+      return;
+    }
+
     this.isLoading = true;
     this.http.get<NotificationListResponse>(`${this.API_URL}?page=${page}&limit=${this.pageSize}`).subscribe({
       next: (response) => {
@@ -184,6 +189,13 @@ export class NotificationService {
   }
 
   fetchUnreadCount() {
+    // Verificar se há token antes de fazer a requisição
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('Token não encontrado - pulando busca de contador de não lidas');
+      return;
+    }
+
     this.http.get<{ success: boolean, unreadCount: number }>(`${this.API_URL}/unread-count`).subscribe({
       next: (response) => {
         if (response.success) {
@@ -350,6 +362,14 @@ export class NotificationService {
   refreshNotifications(): void {
     this.currentPage = 1;
     this.fetchUserNotifications(1);
+    this.fetchUnreadCount();
+  }
+
+  /**
+   * Inicializa as notificações após o usuário estar autenticado
+   */
+  initializeNotifications(): void {
+    this.fetchUserNotifications();
     this.fetchUnreadCount();
   }
 
