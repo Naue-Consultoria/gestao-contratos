@@ -76,6 +76,7 @@ export class NotificationService {
   private readonly pageSize = 20;
   private totalPages = 1;
   private isLoading = false;
+  private isInitialized = false; // Flag para evitar inicialização múltipla
 
   private defaultDuration = 5000;
   private maxToasts = 3;
@@ -155,7 +156,10 @@ export class NotificationService {
   }
 
   fetchUserNotifications(page: number = 1) {
-    if (this.isLoading) return;
+    if (this.isLoading) {
+      console.log('⏳ Notificações já carregando, ignorando chamada duplicada');
+      return;
+    }
 
     // Verificar se há token antes de fazer a requisição
     const token = localStorage.getItem('token');
@@ -166,12 +170,12 @@ export class NotificationService {
 
     this.isLoading = true;
 
-    // Usar rate limiting para esta requisição
+    // Usar rate limiting mais agressivo para esta requisição
     const requestKey = `notifications-page-${page}`;
     this.rateLimitService.executeRequest(
       requestKey,
       () => this.http.get<NotificationListResponse>(`${this.API_URL}?page=${page}&limit=${this.pageSize}`),
-      500 // 500ms debounce
+      1500 // Aumentado para 1.5s debounce
     ).subscribe({
       next: (response) => {
         if (response.success && response.notifications) {
@@ -205,11 +209,11 @@ export class NotificationService {
       return;
     }
 
-    // Usar rate limiting para esta requisição
+    // Usar rate limiting mais conservador para esta requisição
     this.rateLimitService.executeRequest(
       'notifications-unread-count',
       () => this.http.get<{ success: boolean, unreadCount: number }>(`${this.API_URL}/unread-count`),
-      800 // 800ms debounce para contador
+      2000 // Aumentado para 2s debounce para contador
     ).subscribe({
       next: (response) => {
         if (response.success) {
@@ -255,6 +259,20 @@ export class NotificationService {
     this.notificationHistory.next([]);
     this.updateUnreadCount();
     this.saveNotificationsToStorage();
+  }
+
+  /**
+   * Resetar estado das notificações (usado no logout)
+   */
+  resetNotificationState(): void {
+    console.log('🧹 Resetando estado das notificações');
+    this.isInitialized = false;
+    this.isLoading = false;
+    this.currentPage = 1;
+    this.totalPages = 1;
+    this.notificationHistory.next([]);
+    this.unreadCount.next(0);
+    this.toastQueue.next([]);
   }
 
   removeTestNotifications(): void {
@@ -383,8 +401,22 @@ export class NotificationService {
    * Inicializa as notificações após o usuário estar autenticado
    */
   initializeNotifications(): void {
-    this.fetchUserNotifications();
-    this.fetchUnreadCount();
+    if (this.isInitialized) {
+      console.log('🔄 Notificações já inicializadas, ignorando');
+      return;
+    }
+
+    console.log('🚀 Inicializando notificações...');
+    this.isInitialized = true;
+    
+    // Usar setTimeout para evitar chamadas imediatas que podem causar rate limiting
+    setTimeout(() => {
+      this.fetchUserNotifications();
+    }, 1000);
+    
+    setTimeout(() => {
+      this.fetchUnreadCount();
+    }, 2000);
   }
 
   /**

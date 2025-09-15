@@ -435,6 +435,16 @@ export class RoutineViewPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Método para forçar recarregamento dos progressos quando necessário
+  forceReloadProgress() {
+    console.log('🔄 Force reloading progress for all services');
+    // Emitir evento para o components filho recarregar os progressos
+    if (this.contract?.contract_services) {
+      // Simular mudança no array para forçar ngOnChanges no component filho
+      this.contract = { ...this.contract };
+    }
+  }
+
   getProgressSummary(): string {
     if (!this.contract?.contract_services || this.contract.contract_services.length === 0) {
       return '0/0 concluídas';

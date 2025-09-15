@@ -1,4 +1,6 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,7 +17,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './contract-services-manager.html',
   styleUrls: ['./contract-services-manager.css']
 })
-export class ContractServicesManagerComponent implements OnInit, OnChanges {
+export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDestroy {
   @Input() services: ApiContractService[] = [];
   @Input() contractId!: number;
   @Input() canEdit: boolean = false;
@@ -40,6 +42,11 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
   // Propriedades para progresso dos serviços
   serviceProgresses: { [serviceId: number]: ServiceProgress } = {};
   loadingProgresses: { [serviceId: number]: boolean } = {};
+  progressRequestCache: { [serviceId: number]: boolean } = {};
+
+  // Subject para controlar o ciclo de vida do componente
+  private destroy$ = new Subject<void>();
+  private isComponentActive = true;
 
   serviceStatuses = [
     { value: 'not_started', label: 'Não iniciado' },
@@ -64,7 +71,6 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    
     // Inicializar status dos serviços se não existir e ordenar com prioridade personalizada
     this.services.forEach((service, index) => {
       if (!service.status) {
@@ -76,23 +82,45 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
       }
     });
     
-    // Ordenar serviços com prioridade personalizada: "Entrada de Cliente" primeiro, "Encerramento" segundo, resto alfabético
+    // Ordenar serviços com prioridade personalizada
     this.sortServices();
-    
-    // Carregar progresso dos serviços
-    this.loadServicesProgress();
+
+    // Carregar progresso dos serviços com debounce
+    this.debounceLoadProgress();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['services'] && changes['services'].currentValue) {
+      // Verificar se realmente houve mudança nos serviços
+      const previousServices = changes['services'].previousValue || [];
+      const currentServices = changes['services'].currentValue || [];
+
+      // Só limpar cache se a quantidade ou IDs dos serviços mudaram
+      const servicesChanged = previousServices.length !== currentServices.length ||
+        !currentServices.every((service: any, index: number) =>
+          previousServices[index]?.id === service.id
+        );
+
+      if (servicesChanged) {
+        // Limpar estados anteriores apenas se os serviços realmente mudaram
+        this.serviceProgresses = {};
+        this.loadingProgresses = {};
+        this.progressRequestCache = {};
+      }
+
       // Inicializar comentários para novos serviços
       this.services.forEach(service => {
         if (!this.comments[service.id]) {
           this.comments[service.id] = [];
         }
       });
+
       this.sortServices();
-      this.loadServicesProgress();
+
+      // Só carregar progresso se os serviços mudaram
+      if (servicesChanged) {
+        this.debounceLoadProgress();
+      }
     }
   }
 
@@ -137,54 +165,20 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
       return 0;
     }
 
-    // Calcular progresso médio baseado nas etapas de cada serviço (excluindo internos)
     let totalProgress = 0;
-    let servicesWithProgress = 0;
+    let validServices = 0;
 
     nonInternalServices.forEach(service => {
       const progress = this.serviceProgresses[service.service.id];
-      if (progress !== undefined) {
+      if (progress) {
         totalProgress += progress.progressPercentage;
-        servicesWithProgress++;
-      } else if (!this.loadingProgresses[service.service.id]) {
-        // Se não está carregando e não tem progresso, assumir que não há etapas (0%)
-        totalProgress += 0;
-        servicesWithProgress++;
       }
+      validServices++;
     });
 
-    // Se ainda não carregou o progresso de nenhum serviço, usar método fallback
-    if (servicesWithProgress === 0) {
-      return this.getTasksProgressFallback();
-    }
-
-    // Calcular progresso médio ponderado
-    const averageProgress = totalProgress / servicesWithProgress;
-    return Math.round(averageProgress);
+    return validServices > 0 ? Math.round(totalProgress / validServices) : 0;
   }
 
-  // Método fallback para calcular progresso baseado em status (usado até carregar as etapas)
-  private getTasksProgressFallback(): number {
-    if (!this.services || this.services.length === 0) {
-      return 0;
-    }
-
-    // Filtrar serviços internos do cálculo de progresso
-    const nonInternalServices = this.services.filter(service => 
-      service.service.category !== 'Interno'
-    );
-
-    if (nonInternalServices.length === 0) {
-      return 0;
-    }
-
-    const completedTasks = nonInternalServices.filter(service => {
-      const status = this.getRoutineStatus(service);
-      return status === 'completed';
-    }).length;
-
-    return Math.round((completedTasks / nonInternalServices.length) * 100);
-  }
 
   // Método para obter contagem de tarefas baseado nas etapas
   getTasksCounts(): { completed: number; total: number } {
@@ -197,96 +191,155 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
       service.service.category !== 'Interno'
     );
 
-    if (nonInternalServices.length === 0) {
-      return { completed: 0, total: 0 };
-    }
-
     let totalStages = 0;
     let completedStages = 0;
-    let servicesWithProgress = 0;
 
     nonInternalServices.forEach(service => {
       const progress = this.serviceProgresses[service.service.id];
-      if (progress !== undefined) {
+      if (progress) {
         totalStages += progress.totalStages;
         completedStages += progress.completedStages;
-        servicesWithProgress++;
-      } else if (!this.loadingProgresses[service.service.id]) {
-        // Se não está carregando e não tem progresso, assumir que não há etapas
-        totalStages += 0;
-        completedStages += 0;
-        servicesWithProgress++;
       }
     });
-
-    // Se ainda não carregou progresso de nenhum serviço, usar método fallback
-    if (servicesWithProgress === 0) {
-      return this.getTasksCountsFallback();
-    }
 
     return { completed: completedStages, total: totalStages };
   }
 
-  // Método fallback para contagem baseado em status
-  private getTasksCountsFallback(): { completed: number; total: number } {
-    // Filtrar serviços internos do cálculo de progresso
-    const nonInternalServices = this.services.filter(service => 
-      service.service.category !== 'Interno'
-    );
 
-    const completed = nonInternalServices.filter(service => {
-      const status = this.getRoutineStatus(service);
-      return status === 'completed';
-    }).length;
+  // Debounce timer para evitar múltiplas chamadas
+  private debounceTimer: any;
 
-    return { completed, total: nonInternalServices.length };
+  // Método com debounce para carregar progresso
+  private debounceLoadProgress() {
+    if (!this.isComponentActive) {
+      return;
+    }
+
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
+
+    this.debounceTimer = setTimeout(() => {
+      if (this.isComponentActive) {
+        this.loadServicesProgress();
+      }
+    }, 500); // Aumentado para 500ms para reduzir chamadas
   }
 
   // Método para carregar progresso de todos os serviços
   loadServicesProgress() {
-    this.services.forEach(service => {
-      this.loadServiceProgress(service.service.id);
+    if (!this.isComponentActive || !this.services || this.services.length === 0) {
+      return;
+    }
+
+    // Limitar a 2 requisições simultâneas para reduzir carga
+    let activeRequests = 0;
+    const maxConcurrentRequests = 2;
+    const delayBetweenRequests = 750; // 750ms entre requisições
+
+    this.services.forEach((service, index) => {
+      if (!this.isComponentActive) return;
+
+      if (service?.service?.id &&
+          !this.loadingProgresses[service.service.id] &&
+          !this.progressRequestCache[service.service.id]) {
+
+        if (activeRequests < maxConcurrentRequests) {
+          // Executar imediatamente para as primeiras requisições
+          this.loadServiceProgress(service.service.id);
+          activeRequests++;
+        } else {
+          // Atrasar as demais requisições de forma escalonada
+          const delay = (index - maxConcurrentRequests + 1) * delayBetweenRequests;
+          setTimeout(() => {
+            if (this.isComponentActive &&
+                !this.loadingProgresses[service.service.id] &&
+                !this.progressRequestCache[service.service.id]) {
+              this.loadServiceProgress(service.service.id);
+            }
+          }, delay);
+        }
+      }
     });
   }
 
   // Método para carregar progresso de um serviço específico
   loadServiceProgress(serviceId: number) {
+    // Verificar se o componente ainda está ativo
+    if (!this.isComponentActive) {
+      return;
+    }
+
+    // Verificar se já está carregando este serviço ou já foi carregado
+    if (this.loadingProgresses[serviceId] || this.progressRequestCache[serviceId]) {
+      return;
+    }
+
+    // Marcar como sendo processado
     this.loadingProgresses[serviceId] = true;
+    this.progressRequestCache[serviceId] = true;
 
-    this.serviceStageService.getServiceProgress(serviceId).subscribe({
-      next: (response) => {
-        this.serviceProgresses[serviceId] = response.progress;
-        this.loadingProgresses[serviceId] = false;
-        // Forçar atualização da barra de progresso geral após carregar progresso individual
-        this.triggerProgressUpdate();
-      },
-      error: (error) => {
-        console.log(`Service ${serviceId} has no stages configured or error loading progress:`, error);
-        // Em caso de erro ou serviço sem etapas, assumir 0% de progresso
-        this.serviceProgresses[serviceId] = {
-          totalStages: 0,
-          completedStages: 0,
-          progressPercentage: 0,
-          stages: []
-        };
-        this.loadingProgresses[serviceId] = false;
-        this.triggerProgressUpdate();
+    // Timeout mais agressivo para evitar acúmulo de requisições
+    const timeoutId = setTimeout(() => {
+      if (this.loadingProgresses[serviceId] && this.isComponentActive) {
+        this.handleProgressError(serviceId, 'timeout');
       }
-    });
+    }, 3000); // 3 segundos timeout
+
+    this.serviceStageService.getServiceProgress(serviceId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (!this.isComponentActive) return;
+
+          clearTimeout(timeoutId);
+          this.serviceProgresses[serviceId] = response.progress;
+          this.loadingProgresses[serviceId] = false;
+
+          // Manter cache por 2 minutos para evitar requisições desnecessárias
+          setTimeout(() => {
+            if (this.isComponentActive) {
+              delete this.progressRequestCache[serviceId];
+            }
+          }, 120000);
+        },
+        error: (error) => {
+          if (!this.isComponentActive) return;
+
+          clearTimeout(timeoutId);
+          this.handleProgressError(serviceId, error);
+
+          // Permitir nova tentativa após 30 segundos em caso de erro
+          setTimeout(() => {
+            if (this.isComponentActive) {
+              delete this.progressRequestCache[serviceId];
+            }
+          }, 30000);
+        }
+      });
   }
 
-  // Método para forçar atualização da view (necessário para Angular detectar mudanças)
-  private triggerProgressUpdate() {
-    // Força detecção de mudanças para atualizar a barra de progresso
-    // Como os métodos getTasksProgress() e getTasksCounts() são chamados no template,
-    // esta chamada vazia força o Angular a recalcular os valores
+  // Método para lidar com erros de progresso
+  private handleProgressError(serviceId: number, error: any) {
+    // Em caso de erro ou serviço sem etapas, assumir 0% de progresso
+    this.serviceProgresses[serviceId] = {
+      totalStages: 0,
+      completedStages: 0,
+      progressPercentage: 0,
+      stages: []
+    };
+    
+    // Garantir que o loading seja definido como false
+    this.loadingProgresses[serviceId] = false;
   }
+
 
   // Método para obter progresso de um serviço
   getServiceProgressPercentage(serviceId: number): number {
     const progress = this.serviceProgresses[serviceId];
     return progress ? progress.progressPercentage : 0;
   }
+
 
   // Método para verificar se está carregando progresso
   isLoadingProgress(serviceId: number): boolean {
@@ -796,5 +849,32 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges {
 
   formatFileSizeBytes(bytes: number): string {
     return this.attachmentService.formatFileSize(bytes);
+  }
+
+  // Cleanup de recursos quando o componente for destruído
+  ngOnDestroy() {
+    // Marcar componente como inativo
+    this.isComponentActive = false;
+
+    // Completar o subject para cancelar todas as observações
+    this.destroy$.next();
+    this.destroy$.complete();
+
+    // Limpar timer de debounce
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
+
+    // Limpar cache de progresso
+    this.progressRequestCache = {};
+    this.loadingProgresses = {};
+    this.serviceProgresses = {};
+  }
+
+  // Método para forçar limpeza do cache (útil para refresh manual)
+  clearProgressCache() {
+    this.progressRequestCache = {};
+    this.serviceProgresses = {};
+    this.loadingProgresses = {};
   }
 }

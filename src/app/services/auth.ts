@@ -62,6 +62,8 @@ export class AuthService {
   private readonly API_URL = `${environment.authUrl}`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
+  
+  private isLoggingIn = false; // Flag para evitar logins simultâneos
 
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -77,18 +79,27 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<LoginResponse> {
+    if (this.isLoggingIn) {
+      console.warn('⚠️ Login já em andamento, ignorando tentativa duplicada');
+      return throwError(() => new Error('Login já em andamento'));
+    }
+
+    this.isLoggingIn = true;
+    
     return this.http.post<LoginResponse>(`${this.API_URL}/login`, { email, password }).pipe(
       tap(response => {
         if (response.token && response.user) {
           this.setSession(response.token, response.user);
           this.websocketService.connect(response.user.id);
-          // Inicializar notificações após delay para evitar rate limiting
+          // Inicializar notificações após delay maior para evitar rate limiting
           setTimeout(() => {
             this.notificationService.initializeNotifications();
-          }, 2000);
+          }, 3000);
         }
+        this.isLoggingIn = false; // Reset flag após sucesso
       }),
       catchError(error => {
+        this.isLoggingIn = false; // Reset flag após erro
         this.notificationService.error('Email ou senha inválidos', 'Falha no Login');
         return throwError(() => error);
       })
@@ -99,13 +110,15 @@ export class AuthService {
     const headers = this.getAuthHeaders();
     return this.http.post(`${this.API_URL}/logout`, {}, { headers }).pipe(
       tap(() => {
-        this.websocketService.disconnect(); // <<< ADICIONE
+        this.websocketService.disconnect();
+        this.notificationService.resetNotificationState(); // Reset do estado das notificações
         this.clearSession();
         this.notificationService.info('Você foi desconectado.', 'Sessão Encerrada');
         this.router.navigate(['/login']);
       }),
       catchError(error => {
-        this.websocketService.disconnect(); // <<< ADICIONE (mesmo em caso de erro)
+        this.websocketService.disconnect();
+        this.notificationService.resetNotificationState(); // Reset mesmo em erro
         this.clearSession();
         this.router.navigate(['/login']);
         return throwError(() => error);

@@ -97,7 +97,9 @@ export interface StageReorderItem {
 export class ServiceStageService {
   private readonly API_URL = `${environment.apiUrl}`;
   private stagesCache = new Map<number, { data: ServiceStagesResponse; timestamp: number }>();
+  private progressCache = new Map<number, { data: ServiceProgressResponse; timestamp: number }>();
   private readonly CACHE_DURATION = 30000; // 30 segundos
+  private readonly PROGRESS_CACHE_DURATION = 60000; // 1 minuto para progresso
 
   constructor(private http: HttpClient) {}
 
@@ -147,12 +149,62 @@ export class ServiceStageService {
   }
 
   /**
-   * Buscar progresso de um serviço
+   * Buscar progresso de um serviço (com cache)
    */
   getServiceProgress(serviceId: number): Observable<ServiceProgressResponse> {
+    // Verificar cache primeiro
+    const cached = this.progressCache.get(serviceId);
+    const now = Date.now();
+
+    if (cached && (now - cached.timestamp) < this.PROGRESS_CACHE_DURATION) {
+      return of(cached.data);
+    }
+
     return this.http.get<ServiceProgressResponse>(`${this.API_URL}/services/${serviceId}/stages/progress`, {
       headers: this.getAuthHeaders()
-    });
+    }).pipe(
+      tap((response: ServiceProgressResponse) => {
+        // Salvar no cache
+        this.progressCache.set(serviceId, {
+          data: response,
+          timestamp: now
+        });
+      }),
+      catchError((error: any) => {
+
+        // Se tiver cache expirado, usar mesmo assim em caso de erro
+        if (cached) {
+          return of(cached.data);
+        }
+
+        // Se o serviço não tiver etapas configuradas (404), retornar progresso vazio
+        if (error?.status === 404) {
+          const fallbackResponse = {
+            progress: {
+              totalStages: 0,
+              completedStages: 0,
+              progressPercentage: 0,
+              stages: []
+            },
+            service: {
+              id: serviceId,
+              name: 'Unknown Service'
+            }
+          } as ServiceProgressResponse;
+
+          // Cache também a resposta de fallback para evitar chamadas repetidas
+          this.progressCache.set(serviceId, {
+            data: fallbackResponse,
+            timestamp: now
+          });
+
+          return of(fallbackResponse);
+        }
+
+        // Para outros erros, propagar o erro
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
@@ -328,15 +380,17 @@ export class ServiceStageService {
   }
 
   /**
-   * Limpar cache de etapas
+   * Limpar cache de etapas e progresso
    */
   clearCache(serviceId?: number): void {
     if (serviceId) {
       this.stagesCache.delete(serviceId);
+      this.progressCache.delete(serviceId);
       console.log(`🗑️ Cache limpo para serviço ${serviceId}`);
     } else {
       this.stagesCache.clear();
-      console.log('🗑️ Cache de etapas totalmente limpo');
+      this.progressCache.clear();
+      console.log('🗑️ Cache de etapas e progresso totalmente limpo');
     }
   }
 

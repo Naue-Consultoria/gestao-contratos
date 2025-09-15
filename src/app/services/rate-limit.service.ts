@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject, timer } from 'rxjs';
-import { debounceTime, switchMap, share } from 'rxjs/operators';
+import { Observable, Subject, timer, EMPTY, throwError } from 'rxjs';
+import { debounceTime, switchMap, share, tap, catchError } from 'rxjs/operators';
 
 interface RequestQueue {
   [key: string]: Subject<any>;
@@ -12,22 +12,40 @@ interface RequestQueue {
 export class RateLimitService {
   private requestQueue: RequestQueue = {};
   private lastRequestTime: { [key: string]: number } = {};
-  private readonly minInterval = 500; // Mínimo 500ms entre requests para o mesmo endpoint
+  private activeRequests: Set<string> = new Set(); // Tracking active requests
+  private readonly minInterval = 1000; // Aumentado para 1 segundo entre requests
+  private readonly maxConcurrentRequests = 3; // Máximo 3 requests simultâneos
 
-  constructor() {}
+  constructor() {
+    // Limpar caches antigos periodicamente
+    setInterval(() => this.cleanupOldEntries(), 60000); // A cada minuto
+  }
 
   /**
    * Executar request com debounce e rate limiting
    */
-  executeRequest<T>(key: string, requestFn: () => Observable<T>, debounceMs: number = 300): Observable<T> {
+  executeRequest<T>(key: string, requestFn: () => Observable<T>, debounceMs: number = 500): Observable<T> {
+    // Se já temos muitos requests ativos, aguardar
+    if (this.activeRequests.size >= this.maxConcurrentRequests) {
+      console.warn(`🚦 Rate limit: ${this.activeRequests.size} requests ativos, aguardando...`);
+      return timer(debounceMs * 2).pipe(
+        switchMap(() => this.executeRequest(key, requestFn, debounceMs))
+      );
+    }
     // Verificar se já existe uma queue para este endpoint
     if (!this.requestQueue[key]) {
       this.requestQueue[key] = new Subject<() => Observable<T>>();
 
-      // Configurar pipeline com debounce
+      // Configurar pipeline com debounce mais agressivo
       this.requestQueue[key].pipe(
         debounceTime(debounceMs),
         switchMap((fn: () => Observable<T>) => {
+          // Verificar se já está executando este request
+          if (this.activeRequests.has(key)) {
+            console.log(`🔄 Request ${key} já em execução, ignorando duplicado`);
+            return EMPTY; // Ignorar requests duplicados
+          }
+
           // Verificar rate limiting
           const now = Date.now();
           const lastRequest = this.lastRequestTime[key] || 0;
@@ -39,14 +57,28 @@ export class RateLimitService {
             console.log(`⏱️ Rate limiting: aguardando ${waitTime}ms para ${key}`);
             return timer(waitTime).pipe(
               switchMap(() => {
+                this.activeRequests.add(key);
                 this.lastRequestTime[key] = Date.now();
-                return fn();
+                return fn().pipe(
+                  tap(() => this.activeRequests.delete(key)),
+                  catchError(err => {
+                    this.activeRequests.delete(key);
+                    return throwError(() => err);
+                  })
+                );
               })
             );
           } else {
             // Executar imediatamente
+            this.activeRequests.add(key);
             this.lastRequestTime[key] = now;
-            return fn();
+            return fn().pipe(
+              tap(() => this.activeRequests.delete(key)),
+              catchError(err => {
+                this.activeRequests.delete(key);
+                return throwError(() => err);
+              })
+            );
           }
         }),
         share() // Compartilhar resultado entre múltiplas subscrições
@@ -127,5 +159,38 @@ export class RateLimitService {
     const lastRequest = this.lastRequestTime[key] || 0;
     const timeSinceLastRequest = now - lastRequest;
     return Math.max(0, this.minInterval - timeSinceLastRequest);
+  }
+
+  /**
+   * Limpar entradas antigas para evitar memory leaks
+   */
+  private cleanupOldEntries(): void {
+    const now = Date.now();
+    const maxAge = 5 * 60 * 1000; // 5 minutos
+    
+    Object.keys(this.lastRequestTime).forEach(key => {
+      if (now - this.lastRequestTime[key] > maxAge) {
+        delete this.lastRequestTime[key];
+        if (this.requestQueue[key]) {
+          this.requestQueue[key].complete();
+          delete this.requestQueue[key];
+        }
+      }
+    });
+  }
+
+  /**
+   * Obter status atual do rate limiting
+   */
+  getStatus(): {
+    activeRequests: number;
+    queuedEndpoints: string[];
+    lastRequestTimes: { [key: string]: number };
+  } {
+    return {
+      activeRequests: this.activeRequests.size,
+      queuedEndpoints: Object.keys(this.requestQueue),
+      lastRequestTimes: { ...this.lastRequestTime }
+    };
   }
 }

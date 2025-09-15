@@ -84,6 +84,7 @@
         <div class="progress-display">
           <div *ngIf="isLoadingProgress(service.service.id)" class="progress-loading">
             <i class="fas fa-spinner fa-spin"></i>
+            <span class="loading-text">Carregando...</span>
           </div>
           <div *ngIf="!isLoadingProgress(service.service.id)" class="service-progress">
             <div class="progress-bar-small">
