@@ -152,14 +152,17 @@ export class ServiceTrackingPageComponent implements OnInit {
       this.selectedDate = this.routine?.scheduled_date || '';
       this.routineNotes = this.routine?.notes || '';
       
-      // Carregar comentários da rotina
+      // Carregar dados adicionais de forma sequencial para evitar sobrecarga de recursos
       if (this.routine?.id) {
-        this.loadComments();
+        await this.loadComments();
+
+        // Adicionar um pequeno delay antes de carregar as etapas
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       // Carregar etapas do serviço se disponível
       if (this.service?.service?.id) {
-        this.loadServiceStages();
+        await this.loadServiceStages();
       }
 
     } catch (error: any) {
@@ -175,20 +178,60 @@ export class ServiceTrackingPageComponent implements OnInit {
 
     try {
       this.isLoadingStages = true;
-      const response = await this.serviceStageService.getServiceStages(this.service.service.id).toPromise();
-      
+
+      // Implementar retry com backoff exponencial para resolver ERR_INSUFFICIENT_RESOURCES
+      const maxRetries = 3;
+      let retryCount = 0;
+      let response = null;
+
+      while (retryCount < maxRetries && !response) {
+        try {
+          response = await this.serviceStageService.getServiceStages(this.service.service.id).toPromise();
+          break;
+        } catch (retryError: any) {
+          retryCount++;
+
+          // Se for erro de recursos insuficientes ou erro de rede, tentar novamente
+          if ((retryError.status === 0 || retryError.message?.includes('ERR_INSUFFICIENT_RESOURCES')) && retryCount < maxRetries) {
+            console.warn(`Tentativa ${retryCount}/${maxRetries} falhou, tentando novamente em ${retryCount * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, retryCount * 1000)); // Backoff exponencial
+            continue;
+          } else {
+            throw retryError; // Re-lançar erro se não for recuperável
+          }
+        }
+      }
+
       if (response) {
         this.serviceStages = response.stages;
         this.stageProgress = response.progress.progressPercentage;
         console.log('Etapas do serviço carregadas:', this.serviceStages);
+      } else {
+        // Se todas as tentativas falharam
+        console.warn('Não foi possível carregar etapas após todas as tentativas');
+        this.serviceStages = [];
+        this.stageProgress = 0;
       }
     } catch (error: any) {
       console.error('Erro ao carregar etapas do serviço:', error);
-      // Se não houver etapas, vamos criar as etapas padrão
-      if (error.status === 404 || (error.error && error.error.error === 'Serviço não encontrado')) {
-        // Não mostrar erro se for porque não há etapas ainda
+
+      // Tratamento específico para diferentes tipos de erro
+      if (error.status === 0) {
+        // Erro de conectividade/recursos
+        console.warn('🌐 Erro de conexão com o servidor');
+        this.serviceStages = [];
+        this.stageProgress = 0;
+        // Não mostrar toastr para erro de conectividade, apenas log
+      } else if (error.status === 404 || (error.error && error.error.error === 'Serviço não encontrado')) {
+        // Serviço não encontrado - normal, não há etapas ainda
         console.log('Nenhuma etapa encontrada para este serviço');
+        this.serviceStages = [];
+        this.stageProgress = 0;
       } else {
+        // Outros erros - mostrar ao usuário
+        console.error('Service', this.service.service.id, 'has no stages configured or error loading progress:', error);
+        this.serviceStages = [];
+        this.stageProgress = 0;
         this.toastr.warning('Não foi possível carregar as etapas do serviço');
       }
     } finally {
@@ -390,25 +433,54 @@ export class ServiceTrackingPageComponent implements OnInit {
       this.comments = [];
       return;
     }
-    
+
     try {
       this.isLoadingComments = true;
-      const comments = await this.routineService.getRoutineComments(this.routine.id).toPromise();
+
+      // Implementar retry para comentários também
+      const maxRetries = 2;
+      let retryCount = 0;
+      let comments = null;
+
+      while (retryCount < maxRetries && !comments) {
+        try {
+          comments = await this.routineService.getRoutineComments(this.routine.id).toPromise();
+          break;
+        } catch (retryError: any) {
+          retryCount++;
+
+          if ((retryError.status === 0 || retryError.message?.includes('ERR_INSUFFICIENT_RESOURCES')) && retryCount < maxRetries) {
+            console.warn(`Tentativa de carregar comentários ${retryCount}/${maxRetries} falhou, tentando novamente...`);
+            await new Promise(resolve => setTimeout(resolve, retryCount * 500));
+            continue;
+          } else {
+            throw retryError;
+          }
+        }
+      }
+
       if (comments) {
         // Debug: verificar se os anexos estão vindo do backend
         console.log('Comentários carregados:', comments);
         this.comments = comments;
-        
+
         // Verificar cada comentário e seus anexos
         this.comments.forEach(comment => {
           if (comment.has_attachments) {
             console.log(`Comentário ${comment.id} tem anexos:`, comment.attachments);
           }
         });
+      } else {
+        console.warn('Não foi possível carregar comentários após todas as tentativas');
+        this.comments = [];
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao carregar comentários:', error);
-      this.toastr.error('Erro ao carregar comentários');
+      this.comments = [];
+
+      if (error.status !== 0) {
+        this.toastr.error('Erro ao carregar comentários');
+      }
     } finally {
       this.isLoadingComments = false;
     }

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface ServiceStage {
@@ -95,6 +96,8 @@ export interface StageReorderItem {
 })
 export class ServiceStageService {
   private readonly API_URL = `${environment.apiUrl}`;
+  private stagesCache = new Map<number, { data: ServiceStagesResponse; timestamp: number }>();
+  private readonly CACHE_DURATION = 30000; // 30 segundos
 
   constructor(private http: HttpClient) {}
 
@@ -107,12 +110,40 @@ export class ServiceStageService {
   }
 
   /**
-   * Buscar etapas de um serviço
+   * Buscar etapas de um serviço (com cache)
    */
   getServiceStages(serviceId: number): Observable<ServiceStagesResponse> {
+    // Verificar cache primeiro
+    const cached = this.stagesCache.get(serviceId);
+    const now = Date.now();
+
+    if (cached && (now - cached.timestamp) < this.CACHE_DURATION) {
+      console.log(`📄 Usando cache para etapas do serviço ${serviceId}`);
+      return of(cached.data);
+    }
+
     return this.http.get<ServiceStagesResponse>(`${this.API_URL}/services/${serviceId}/stages`, {
       headers: this.getAuthHeaders()
-    });
+    }).pipe(
+      tap((response: ServiceStagesResponse) => {
+        // Salvar no cache
+        this.stagesCache.set(serviceId, {
+          data: response,
+          timestamp: now
+        });
+      }),
+      catchError((error: any) => {
+        console.error(`Erro ao buscar etapas do serviço ${serviceId}:`, error);
+
+        // Se tiver cache expirado, usar mesmo assim em caso de erro
+        if (cached) {
+          console.warn(`🗃️ Usando cache expirado para etapas do serviço ${serviceId} devido ao erro`);
+          return of(cached.data);
+        }
+
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
@@ -166,7 +197,14 @@ export class ServiceStageService {
   updateStageStatus(id: number, status: 'pending' | 'completed'): Observable<UpdateServiceStageResponse> {
     return this.http.patch<UpdateServiceStageResponse>(`${this.API_URL}/stages/${id}/status`, { status }, {
       headers: this.getAuthHeaders()
-    });
+    }).pipe(
+      tap((response: UpdateServiceStageResponse) => {
+        // Invalidar cache do serviço após atualização
+        if (response.stage?.service_id) {
+          this.invalidateCache(response.stage.service_id);
+        }
+      })
+    );
   }
 
   /**
@@ -287,5 +325,25 @@ export class ServiceStageService {
       pending,
       progress
     };
+  }
+
+  /**
+   * Limpar cache de etapas
+   */
+  clearCache(serviceId?: number): void {
+    if (serviceId) {
+      this.stagesCache.delete(serviceId);
+      console.log(`🗑️ Cache limpo para serviço ${serviceId}`);
+    } else {
+      this.stagesCache.clear();
+      console.log('🗑️ Cache de etapas totalmente limpo');
+    }
+  }
+
+  /**
+   * Invalidar cache após atualização de etapa
+   */
+  private invalidateCache(serviceId: number): void {
+    this.clearCache(serviceId);
   }
 }

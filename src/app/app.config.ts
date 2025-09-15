@@ -7,6 +7,7 @@ import { provideToastr } from 'ngx-toastr';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth';
+import { retryInterceptor } from './interceptors/retry.interceptor';
 import { CurrencyMaskDirective } from './directives/currency-mask.directive';
 
 export const appConfig: ApplicationConfig = {
@@ -16,7 +17,7 @@ export const appConfig: ApplicationConfig = {
     
     // HTTP Client com interceptors funcionais
     provideHttpClient(
-      withInterceptors([authInterceptor])
+      withInterceptors([retryInterceptor, authInterceptor])
     ),
     
     // Animações para toastr
