@@ -41,7 +41,7 @@
               <span class="service-value">{{ formatCurrency(service.total_value || 0) }}</span>
             </div>
             <div class="service-details" *ngIf="service.service_description">
-              <p class="service-description">{{ service.service_description }}</p>
+              <p class="service-description">{{ stripHtmlTags(service.service_description) }}</p>
             </div>
             <div class="service-meta">
               <span class="service-unit-value">Valor unitário: {{ formatCurrency(service.unit_value || 0) }}</span>

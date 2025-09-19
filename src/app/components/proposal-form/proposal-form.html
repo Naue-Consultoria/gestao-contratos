@@ -334,12 +334,11 @@
               <div class="service-option-details">
                 <span><i class="fas fa-tag"></i> {{ service.category }}</span>
                 <span *ngIf="service.duration_unit && (service.duration_amount || service.duration_unit === 'Projeto')">
-                  <i class="fas fa-clock"></i> 
+                  <i class="fas fa-clock"></i>
                   <span *ngIf="service.duration_unit === 'Projeto'">{{ service.duration_unit }}</span>
                   <span *ngIf="service.duration_unit !== 'Projeto'">{{ service.duration_amount }} {{ service.duration_unit }}</span>
                 </span>
               </div>
-              <p *ngIf="service.description">{{ service.description }}</p>
             </div>
           </div>
           

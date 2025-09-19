@@ -450,8 +450,17 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
 
     } catch (error: any) {
       console.error('Error converting proposal to contract:', error);
+      console.error('Error details:', {
+        status: error.status,
+        message: error.message,
+        error: error.error,
+        statusText: error.statusText
+      });
+
+      // Request is out of scope here, so we can't log it
+
       this.modalService.showError(
-        error.error?.message || 'Erro ao converter proposta em contrato. Tente novamente.'
+        error.error?.message || error.error?.error || 'Erro ao converter proposta em contrato. Tente novamente.'
       );
     } finally {
       this.isLoading = false;
@@ -517,7 +526,21 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
     this.showViewContractModal = false;
     this.close.emit();
   }
-  
+
+  /**
+   * Remove HTML tags from a string
+   */
+  stripHtmlTags(html: string): string {
+    if (!html) return '';
+
+    // Create a temporary div element and assign the HTML
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+
+    // Return the text content which automatically strips HTML tags
+    return tmp.textContent || tmp.innerText || '';
+  }
+
   /**
    * Maps proposal type to a valid contract type
    * Valid contract types: 'Full', 'Pontual', 'Individual'
