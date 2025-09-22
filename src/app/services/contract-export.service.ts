@@ -307,7 +307,8 @@ export class ContractExportService {
               children: [new TextRun({
                 text: section.text,
                 bold: true,
-                size: 32
+                size: 32,
+                font: 'Arial'
               })],
               heading: HeadingLevel.TITLE,
               alignment: AlignmentType.CENTER,
@@ -318,7 +319,8 @@ export class ContractExportService {
               children: [new TextRun({
                 text: section.text,
                 bold: true,
-                size: 24
+                size: 24,
+                font: 'Arial'
               })],
               heading: HeadingLevel.HEADING_1,
               spacing: { before: 300, after: 200 }
@@ -333,7 +335,8 @@ export class ContractExportService {
               children: [new TextRun({
                 text: section.text,
                 size: 20,
-                bold: section.bold || false
+                bold: section.bold || false,
+                font: 'Arial'
               })],
               alignment: AlignmentType.CENTER,
               spacing: { after: 120 }
@@ -343,7 +346,8 @@ export class ContractExportService {
               children: [new TextRun({
                 text: section.text,
                 size: 20,
-                bold: true
+                bold: true,
+                font: 'Arial'
               })],
               alignment: AlignmentType.JUSTIFIED,
               spacing: { after: 120 }
@@ -355,7 +359,10 @@ export class ContractExportService {
                 children: section.parts.map((part: any) => new TextRun({
                   text: part.text,
                   size: 20,
-                  bold: part.bold || false
+                  bold: part.bold || false,
+                  italic: part.italic || false,
+                  underline: part.underline ? {} : undefined,
+                  font: 'Arial'
                 })),
                 alignment: AlignmentType.JUSTIFIED,
                 spacing: { after: 120 }
@@ -364,7 +371,8 @@ export class ContractExportService {
               return new Paragraph({
                 children: [new TextRun({
                   text: section.text,
-                  size: 20
+                  size: 20,
+                  font: 'Arial'
                 })],
                 alignment: AlignmentType.JUSTIFIED,
                 spacing: { after: 120 }
@@ -389,7 +397,8 @@ export class ContractExportService {
     const startDate = this.formatDate(contract.start_date);
     const endDate = this.formatDate(contract.end_date);
 
-    const services = contract.contract_services?.map((cs: any) => cs.service?.name || 'Serviço').join(', ') || '[SERVICOS]';
+    // Formatar serviços com descrições, excluindo os internos
+    const services = this.formatServicesWithDescriptions(contract.contract_services);
     
     // Verificar forma de pagamento e formatar adequadamente
     let paymentText = '';
@@ -423,7 +432,7 @@ export class ContractExportService {
     
     switch (templateId) {
       case 'consultoria-pj':
-        return this.getConsultoriaPJContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, paymentText, clientAddress, clientEmail, clientRepresentative);
+        return this.getConsultoriaPJContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, paymentText, clientAddress, clientEmail, clientRepresentative, contract.contract_services);
       case 'consultoria-pf':
         return this.getConsultoriaPFContent(clientName, clientDocument, contractNumber, totalValue, startDate, endDate, services, paymentText);
       case 'recrutamento':
@@ -437,7 +446,7 @@ export class ContractExportService {
     return this.generateDocumentContent(contract, templateId);
   }
 
-  private getConsultoriaPJContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string, paymentText: string, clientAddress: string, clientEmail: string, clientRepresentative: string): any[] {
+  private getConsultoriaPJContent(clientName: string, clientDocument: string, contractNumber: string, totalValue: string, startDate: string, endDate: string, services: string, paymentText: string, clientAddress: string, clientEmail: string, clientRepresentative: string, contractServices?: any[]): any[] {
   return [
     {
       type: 'title',
@@ -517,10 +526,8 @@ export class ContractExportService {
       type: 'paragraph',
       text: `3.1. O escopo de entregas previstas neste contrato inclui:`
     },
-    {
-      type: 'paragraph',
-      text: services
-    },
+    // Adicionar serviços detalhados
+    ...(contractServices ? this.formatServicesDetailed(contractServices) : [{ type: 'paragraph', text: `Os serviços contratados são: ${services}` }]),
 
     // CLÁUSULA 4 - DAS OBRIGAÇÕES DA CONTRATANTE
     {
@@ -1540,6 +1547,117 @@ export class ContractExportService {
     }
 
     return '[REPRESENTANTE DO CLIENTE]';
+  }
+
+  private formatServicesWithDescriptions(contractServices: any[]): string {
+    if (!contractServices || contractServices.length === 0) {
+      return '[SERVIÇOS]';
+    }
+
+    // Filtrar serviços internos e formatar com nome e descrição
+    const formattedServices = contractServices
+      .filter(cs => {
+        // Filtrar serviços do tipo "Interno" ou com categoria "Interno"
+        const service = cs.service;
+        if (!service) return false;
+
+        // Verificar se o serviço não é interno
+        const isInternal = service.category?.toLowerCase() === 'interno' ||
+                          service.name?.toLowerCase().includes('interno');
+        return !isInternal;
+      })
+      .map(cs => {
+        const service = cs.service;
+        if (!service) return '';
+
+        // Formatar: Nome do Serviço - Descrição (sem tags HTML)
+        let formatted = service.name || 'Serviço';
+        if (service.description) {
+          const cleanDescription = this.stripHtmlTags(service.description);
+          formatted += `: ${cleanDescription}`;
+        }
+        return formatted;
+      })
+      .filter(s => s); // Remover strings vazias
+
+    return formattedServices.length > 0 ? formattedServices.join('; ') : '[SERVIÇOS]';
+  }
+
+  private stripHtmlTags(html: string): string {
+    if (!html) return '';
+
+    // Remove todas as tags HTML
+    let text = html.replace(/<[^>]*>/g, '');
+
+    // Decodifica entidades HTML comuns
+    text = text
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&ldquo;/g, '“')
+      .replace(/&rdquo;/g, '”')
+      .replace(/&ndash;/g, '–')
+      .replace(/&mdash;/g, '—');
+
+    // Remove espaços múltiplos e trim
+    return text.replace(/\s+/g, ' ').trim();
+  }
+
+  private formatServicesDetailed(contractServices: any[]): any[] {
+    if (!contractServices || contractServices.length === 0) {
+      return [{ type: 'paragraph', text: '[SERVIÇOS]' }];
+    }
+
+    // Filtrar serviços internos
+    const validServices = contractServices.filter(cs => {
+      const service = cs.service;
+      if (!service) return false;
+
+      const isInternal = service.category?.toLowerCase() === 'interno' ||
+                        service.name?.toLowerCase().includes('interno');
+      return !isInternal;
+    });
+
+    if (validServices.length === 0) {
+      return [{ type: 'paragraph', text: '[SERVIÇOS]' }];
+    }
+
+    // Criar parágrafos para cada serviço
+    const servicesParagraphs: any[] = [];
+
+    validServices.forEach((cs, index) => {
+      const service = cs.service;
+      if (!service) return;
+
+      const serviceName = service.name || 'Serviço';
+      const serviceDescription = service.description || '';
+
+      // Adicionar nome do serviço em negrito
+      servicesParagraphs.push({
+        type: 'paragraph',
+        parts: [
+          { text: `• `, bold: false },
+          { text: serviceName, bold: true }
+        ]
+      });
+
+      // Se tiver descrição, adicionar como texto simples
+      if (serviceDescription) {
+        const cleanDescription = this.stripHtmlTags(serviceDescription);
+
+        if (cleanDescription) {
+          servicesParagraphs.push({
+            type: 'paragraph',
+            text: `  ${cleanDescription}`
+          });
+        }
+      }
+    });
+
+    return servicesParagraphs;
   }
 
   private isContractInstallment(contract: any): boolean {

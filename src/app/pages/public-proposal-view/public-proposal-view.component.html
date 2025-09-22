@@ -270,177 +270,108 @@
           </p>
         </div>
         
-        <div class="services-table-wrapper">
-          <!-- Desktop Table View -->
-          <div class="services-table-container desktop-view">
-            <table class="services-table">
-              <thead>
-                <tr>
-                  <th class="col-select">Seleção</th>
-                  <th class="col-service">Serviço</th>
-                  <th class="col-duration">Duração</th>
-                  <th class="col-value">Investimento</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr 
-                  *ngFor="let service of proposal.services; let i = index"
-                  class="service-row"
-                  [class.selected]="isServiceSelected(service.service_id)"
-                  [class.unselected]="!isServiceSelected(service.service_id)">
-                  
-                  <td class="col-select">
-                    <div class="checkbox-wrapper">
-                      <input 
-                        type="checkbox" 
-                        [id]="'service-' + service.service_id"
-                        [checked]="isServiceSelected(service.service_id)"
-                        (change)="toggleService(service.service_id)">
-                      <label [for]="'service-' + service.service_id" class="checkbox-label">
-                        <span class="checkmark"></span>
-                      </label>
-                    </div>
-                  </td>
-                  
-                  <td class="col-service">
-                    <div class="service-details">
-                      <h4 class="service-name">{{ service.service.name }}</h4>
-                      <p class="service-description" 
-                         *ngIf="service.service.description" 
-                         [innerHTML]="formatDescription(service.service.description)"
-                         [class.expanded]="isDescriptionExpanded(service.service_id)">
-                      </p>
-                      <button class="expand-button" 
-                              *ngIf="service.service.description"
-                              [class.expanded]="isDescriptionExpanded(service.service_id)"
-                              (click)="toggleDescription(service.service_id)">
-                        <span>{{ isDescriptionExpanded(service.service_id) ? 'Ver menos' : 'Ver mais' }}</span>
-                        <i class="fas fa-chevron-down"></i>
-                      </button>
-                      <div class="service-meta" *ngIf="service.quantity > 1">
-                        <span class="quantity-badge">{{ service.quantity }}x unidades</span>
-                      </div>
-                    </div>
-                  </td>
-                  
-                  
-                  <td class="col-duration">
-                    <div class="duration-info" *ngIf="service.service.duration_unit && (service.service.duration_amount || service.service.duration_unit === 'Projeto')">
-                      <i class="fas fa-clock"></i>
-                      <span *ngIf="service.service.duration_unit === 'Projeto'">{{ service.service.duration_unit }}</span>
-                      <span *ngIf="service.service.duration_unit !== 'Projeto'">{{ service.service.duration_amount }} {{ service.service.duration_unit }}</span>
-                    </div>
-                    <div class="duration-info not-specified" *ngIf="!service.service.duration_unit || (!service.service.duration_amount && service.service.duration_unit !== 'Projeto')">
-                      <i class="fas fa-minus"></i>
-                      <span>A definir</span>
-                    </div>
-                  </td>
-                  
-                  <td class="col-value">
-                    <div class="value-display">
-                      <div class="total-value">{{ formatCurrency(getServiceTotal(service)) }}</div>
-                      <div class="unit-value" *ngIf="service.quantity > 1">
-                        {{ formatCurrency(getServiceValue(service)) }} cada
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <!-- Services Sections Wrapper -->
+        <div class="services-sections-wrapper">
+          <div
+            *ngFor="let service of proposal.services; let i = index"
+            class="service-section"
+            [class.selected]="isServiceSelected(service.service_id)">
 
-          <!-- Mobile Card View -->
-          <div class="services-mobile-view mobile-view">
-            <div 
-              *ngFor="let service of proposal.services; let i = index"
-              class="service-card-mobile"
-              [class.selected]="isServiceSelected(service.service_id)"
-              [class.unselected]="!isServiceSelected(service.service_id)">
-              
-              <!-- Card Header with Checkbox and Title -->
-              <div class="service-card-header">
-                <div class="service-checkbox-mobile">
-                  <input 
-                    type="checkbox" 
-                    [id]="'service-mobile-' + service.service_id"
-                    [checked]="isServiceSelected(service.service_id)"
-                    (change)="toggleService(service.service_id)">
-                  <label [for]="'service-mobile-' + service.service_id" class="checkbox-label-mobile">
-                    <span class="checkmark-mobile"></span>
-                  </label>
-                </div>
-                <div class="service-title-mobile">
-                  <h4 class="service-name-mobile">{{ service.service.name }}</h4>
-                  <div class="service-meta-mobile" *ngIf="service.quantity > 1">
-                    <span class="quantity-badge-mobile">{{ service.quantity }}x unidades</span>
-                  </div>
+            <!-- Service Header with Title and Selection -->
+            <div class="service-header">
+              <div class="service-title-wrapper">
+                <button class="service-toggle-btn"
+                        type="button"
+                        (click)="toggleDescription(service.service_id)"
+                        *ngIf="service.service.description">
+                  <i class="fas fa-chevron-{{ isDescriptionExpanded(service.service_id) ? 'down' : 'right' }}"></i>
+                </button>
+                <h2 class="service-header-title">
+                  {{ service.service.name }}
+                  <span class="quantity-indicator" *ngIf="service.quantity > 1">
+                    ({{ service.quantity }} unidades)
+                  </span>
+                </h2>
+              </div>
+              <div class="service-selection">
+                <input
+                  type="checkbox"
+                  [id]="'service-' + service.service_id"
+                  [checked]="isServiceSelected(service.service_id)"
+                  (change)="toggleService(service.service_id)"
+                  class="service-checkbox">
+                <label [for]="'service-' + service.service_id" class="service-checkbox-label">
+                  <span class="checkmark-icon"></span>
+                  <span class="selection-text">{{ isServiceSelected(service.service_id) ? 'Selecionado' : 'Selecionar' }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Service Content -->
+            <div class="service-content">
+
+              <!-- Service Description -->
+              <div class="service-description-section" *ngIf="service.service.description && isDescriptionExpanded(service.service_id)">
+                <div class="description-content"
+                     [innerHTML]="formatDescription(service.service.description)"
+                     [class.expanded]="true">
                 </div>
               </div>
 
-              <!-- Card Content -->
-              <div class="service-card-content">
-                <!-- Description -->
-                <div class="service-description-mobile" *ngIf="service.service.description">
-                  <p [innerHTML]="formatDescription(service.service.description)"
-                     [class.expanded]="isDescriptionExpanded(service.service_id)">
-                  </p>
-                  <button class="expand-button-mobile" 
-                          [class.expanded]="isDescriptionExpanded(service.service_id)"
-                          (click)="toggleDescription(service.service_id)">
-                    <span>{{ isDescriptionExpanded(service.service_id) ? 'Ver menos' : 'Ver mais' }}</span>
-                    <i class="fas fa-chevron-down"></i>
-                  </button>
+              <!-- Service Details -->
+              <div class="service-details-row">
+                <!-- Duration -->
+                <div class="detail-item">
+                  <div class="detail-label">
+                    <i class="fas fa-clock"></i>
+                    <span>Duração</span>
+                  </div>
+                  <div class="detail-value">
+                    <span *ngIf="service.service.duration_unit === 'Projeto'">{{ service.service.duration_unit }}</span>
+                    <span *ngIf="service.service.duration_unit && service.service.duration_unit !== 'Projeto'">
+                      {{ service.service.duration_amount }} {{ service.service.duration_unit }}
+                    </span>
+                    <span *ngIf="!service.service.duration_unit || (!service.service.duration_amount && service.service.duration_unit !== 'Projeto')">
+                      A definir
+                    </span>
+                  </div>
                 </div>
 
-                <!-- Duration and Value Info -->
-                <div class="service-info-mobile">
-                  <div class="duration-mobile">
-                    <span class="label-mobile">Duração:</span>
-                    <div class="value-mobile">
-                      <div *ngIf="service.service.duration_unit && (service.service.duration_amount || service.service.duration_unit === 'Projeto')">
-                        <i class="fas fa-clock"></i>
-                        <span *ngIf="service.service.duration_unit === 'Projeto'">{{ service.service.duration_unit }}</span>
-                        <span *ngIf="service.service.duration_unit !== 'Projeto'">{{ service.service.duration_amount }} {{ service.service.duration_unit }}</span>
-                      </div>
-                      <div *ngIf="!service.service.duration_unit || (!service.service.duration_amount && service.service.duration_unit !== 'Projeto')">
-                        <i class="fas fa-minus"></i>
-                        <span>A definir</span>
-                      </div>
-                    </div>
+                <!-- Investment -->
+                <div class="detail-item highlight">
+                  <div class="detail-label">
+                    <i class="fas fa-coins"></i>
+                    <span>Investimento</span>
                   </div>
-                  
-                  <div class="investment-mobile">
-                    <span class="label-mobile">Investimento:</span>
-                    <div class="value-mobile">
-                      <div class="total-value-mobile">{{ formatCurrency(getServiceTotal(service)) }}</div>
-                      <div class="unit-value-mobile" *ngIf="service.quantity > 1">
-                        {{ formatCurrency(getServiceValue(service)) }} cada
-                      </div>
+                  <div class="detail-value">
+                    <div class="price-total">{{ formatCurrency(getServiceTotal(service)) }}</div>
+                    <div class="price-unit" *ngIf="service.quantity > 1">
+                      {{ formatCurrency(getServiceValue(service)) }} por unidade
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          
-          <!-- Services Summary -->
-          <div class="services-summary">
-            <div class="selected-count">
-              <i class="fas fa-check-circle"></i>
-              <span>{{ getSelectedServicesCount() }} serviços selecionados</span>
+        </div>
+
+        <!-- Services Summary -->
+        <div class="services-summary">
+          <div class="selected-count">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ getSelectedServicesCount() }} serviços selecionados</span>
+          </div>
+          <div class="summary-total">
+            <div class="total-label">Investimento Total</div>
+            <div class="total-amount">{{ formatCurrency(getSelectedTotal()) }}</div>
+            <div class="discount-note" *ngIf="paymentType !== 'vista'">*desconto de 6% para pagamento à vista</div>
+            <div class="discount-info" *ngIf="canGetDiscount()">
+              <i class="fas fa-tag"></i>
+              <span>Desconto de 6% aplicado!</span>
             </div>
-            <div class="summary-total">
-              <div class="total-label">Investimento Total</div>
-              <div class="total-amount">{{ formatCurrency(getSelectedTotal()) }}</div>
-              <div class="discount-note" *ngIf="paymentType !== 'vista'">*desconto de 6% para pagamento à vista</div>
-              <div class="discount-info" *ngIf="canGetDiscount()">
-                <i class="fas fa-tag"></i>
-                <span>Desconto de 6% aplicado!</span>
-              </div>
-              <div class="discount-unavailable" *ngIf="paymentType === 'vista' && !areAllServicesSelected()">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>Selecione todos os serviços para o desconto</span>
-              </div>
+            <div class="discount-unavailable" *ngIf="paymentType === 'vista' && !areAllServicesSelected()">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>Selecione todos os serviços para o desconto</span>
             </div>
           </div>
         </div>

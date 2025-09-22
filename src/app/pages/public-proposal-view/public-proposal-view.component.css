@@ -1786,13 +1786,422 @@ html {
   padding: 4rem 0;
 }
 
-.services-table-wrapper {
+/* === SERVICES SECTIONS === */
+.services-sections-wrapper {
+  margin-top: 3rem;
+  position: relative;
+}
+
+.service-section {
+  background: white;
+  border-radius: 20px;
+  margin-bottom: 3rem;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(6, 95, 70, 0.1);
+  transition: all 0.3s ease;
+}
+
+.service-section:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.service-section.selected {
+  border-color: #047857;
+  border-width: 2px;
+}
+
+.service-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem 2.5rem;
+  background: #022c22;
+  border-bottom: 1px solid rgba(6, 95, 70, 0.1);
+}
+
+.service-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.service-toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.service-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.service-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.service-toggle-btn:hover::before {
+  width: 50px;
+  height: 50px;
+}
+
+.service-toggle-btn:active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
+}
+
+.service-toggle-btn i {
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  position: relative;
+  z-index: 1;
+}
+
+/* Animação de rotação para o ícone */
+.service-toggle-btn i.fa-chevron-down {
+  animation: rotateDown 0.4s ease forwards;
+}
+
+.service-toggle-btn i.fa-chevron-right {
+  animation: rotateRight 0.4s ease forwards;
+}
+
+@keyframes rotateDown {
+  0% {
+    transform: rotate(-90deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes rotateRight {
+  0% {
+    transform: rotate(90deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: rotate(-10deg);
+  }
+  100% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Pulse animation on first load */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.service-toggle-btn:first-child {
+  animation: pulse 2s ease-out;
+}
+
+.service-header-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  flex: 1;
+  line-height: 1.3;
+}
+
+.service-selection {
+  display: flex;
+  align-items: center;
+}
+
+.service-checkbox {
+  display: none;
+}
+
+.service-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid white;
+  border-radius: 30px;
   background: transparent;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  color: white;
+}
+
+.service-checkbox:checked + .service-checkbox-label {
+  background: white;
+  color: #022c22;
+}
+
+.checkmark-icon::before {
+  content: '✓';
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.service-content {
+  padding: 3rem 2.5rem;
+}
+
+.quantity-indicator {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #86efac;
+  margin-left: 1rem;
+}
+
+.service-description-section {
+  margin-bottom: 2.5rem;
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: top;
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.description-content {
+  color: #53535c;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  position: relative;
+}
+
+.toggle-description {
+  display: none; /* Hide on desktop */
+}
+
+.service-details-row {
+  display: flex;
+  gap: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(6, 95, 70, 0.1);
+}
+
+.detail-item {
+  flex: 1;
+}
+
+.detail-item.highlight {
+  flex: 1.5;
+}
+
+.detail-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+}
+
+.detail-label i {
+  color: #047857;
+  font-size: 1.1rem;
+}
+
+.detail-value {
+  color: #022c22;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.price-total {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #047857;
+}
+
+.price-unit {
+  font-size: 0.95rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* Responsive for service sections */
+@media (max-width: 768px) {
+  .services-sections-wrapper {
+    margin-top: 2rem;
+  }
+
+  .service-section {
+    margin-bottom: 2rem;
+    border-radius: 16px;
+  }
+
+  .service-header {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .service-title-wrapper {
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .service-toggle-btn {
+    padding: 0.5rem 0.6rem;
+    font-size: 1.1rem;
+    min-width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  .service-header-title {
+    font-size: 1.3rem;
+    text-align: left;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  .service-header-title .quantity-indicator {
+    font-size: 0.9rem;
+    display: block;
+    margin-top: 0.25rem;
+  }
+
+  .service-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .service-selection {
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .service-checkbox-label {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .selection-text {
+    font-size: 0.95rem;
+  }
+
+  .quantity-indicator {
+    display: block;
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  .service-details-row {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .detail-item {
+    text-align: center;
+  }
+
+  .detail-label {
+    justify-content: center;
+  }
+
+  .price-total {
+    font-size: 1.5rem;
+  }
+
+  .description-content {
+    font-size: 1rem;
+    max-height: 150px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .description-content.expanded {
+    max-height: none;
+  }
+
+  .toggle-description {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    background: transparent;
+    border: none;
+    color: #047857;
+    font-weight: 600;
+    cursor: pointer;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .toggle-description:hover {
+    color: #022c22;
+  }
+
+  .toggle-description i {
+    transition: transform 0.3s ease;
+  }
+
+  .toggle-description i.rotated {
+    transform: rotate(180deg);
+  }
+}
+
+/* Keep old wrapper for compatibility */
+.services-table-wrapper {
+  background: white;
   border-radius: 20px;
   overflow: hidden;
   margin-top: 0;
   position: relative;
   z-index: 1;
+  border: 1px solid rgba(6, 95, 70, 0.2);
 }
 
 .table-controls {
@@ -1800,13 +2209,13 @@ html {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  background: white;
+  border-bottom: 2px solid rgba(6, 95, 70, 0.1);
 }
 
 .services-counter {
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: #022c22;
   font-weight: 500;
 }
 
@@ -1824,12 +2233,13 @@ html {
 
 .bulk-selection label {
   font-weight: 600;
-  color: white;
+  color: #022c22;
   cursor: pointer;
   margin: 0;
 }
 
 .services-table-container {
+  background: white;
   overflow-x: auto;
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;     /* Firefox */
@@ -1842,14 +2252,16 @@ html {
 .services-table {
   width: 100%;
   border-collapse: collapse;
+  background: white;
 }
 
 .services-table th {
-  background: #022c22;
+  background: white;
   padding: 1.5rem 2rem;
   text-align: center;
   font-weight: 700;
-  color: white;
+  color: #022c22;
+  border-bottom: 2px solid rgba(6, 95, 70, 0.2);
 }
 
 .col-select { 
@@ -1871,27 +2283,29 @@ html {
 
 
 .service-row {
+  background: white;
   border-bottom: 1px solid rgba(6, 95, 70, 0.2);
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
 }
 
 .service-row:hover {
-  background: rgba(6, 95, 70, 0.05);
+  background: white;
 }
 
 .service-row.selected {
-  background: rgba(6, 95, 70, 0.15);
+  background: white;
   border-left: 4px solid #047857;
 }
 
 .service-row.unselected {
-  background: transparent;
+  background: white;
   opacity: 0.5;
   filter: grayscale(20%);
 }
 
 .services-table td {
+  background: white;
   padding: 2.5rem 2rem;
   vertical-align: middle;
   font-size: 1.05rem;
@@ -1925,22 +2339,21 @@ html {
 .service-name {
   font-size: 1.4rem;
   font-weight: 700;
-  color: white;
+  color: #022c22;
   margin: 0 0 1.25rem;
   line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  text-shadow: 0 2px 4px rgba(6, 95, 70, 0.3);
 }
 
 
 .service-description {
-  color: rgba(255, 255, 255, 0.9);
+  color: #022c22;
   font-size: 1rem;
   line-height: 1.6;
   margin: 1rem 0 0;
   font-weight: 400;
-  background: linear-gradient(135deg, rgba(6, 95, 70, 0.12) 0%, rgba(6, 95, 70, 0.06) 100%);
+  background: white;
   padding: 1.25rem;
   border-radius: 10px;
   border: 1px solid rgba(6, 95, 70, 0.25);
@@ -2031,14 +2444,17 @@ html {
 }
 
 .services-summary {
-  background: #022c22;
-  border-top: 3px solid #064e3b;
+  background: white;
+  border: 2px solid #064e3b;
+  border-radius: 20px;
   padding: 2.5rem;
   position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
+  margin-top: 3rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .services-summary::before {
@@ -2060,10 +2476,10 @@ html {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem 2.5rem;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(15px);
+  background: white;
+  border: 1px solid rgba(6, 95, 70, 0.2);
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.15);
   position: relative;
   overflow: hidden;
@@ -2083,7 +2499,7 @@ html {
   display: flex;
   align-items: center;
   gap: 1rem;
-  color: white;
+  color: #022c22;
   font-weight: 600;
   font-size: 1.3rem;
 }
@@ -2102,7 +2518,7 @@ html {
 }
 
 .total-label {
-  color: rgba(255, 255, 255, 0.95);
+  color: #022c22;
   font-size: 1.1rem;
   text-transform: uppercase;
   letter-spacing: 0.8px;
@@ -2112,10 +2528,9 @@ html {
 .total-amount {
   font-size: 3.5rem;
   font-weight: 800;
-  color: white;
+  color: #022c22;
   line-height: 1;
   letter-spacing: -0.02em;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* === SIGNATURE SECTION === */
@@ -2814,7 +3229,7 @@ html {
 
 /* Discount info in services summary */
 .services-summary .discount-note {
-  color: #ffffff;
+  color: #022c22;
   font-size: 0.7rem;
   margin-top: 0.25rem;
   font-style: italic;
@@ -2825,7 +3240,7 @@ html {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #ffffff;
+  color: #022c22;
   font-size: 0.9rem;
   margin-top: 0.5rem;
   font-weight: 500;
@@ -3716,18 +4131,17 @@ html {
     text-align: center;
   }
   
-  /* Services Summary Mobile */
+  /* Services Summary Mobile - Ajustado para mobile */
   .services-summary {
-    margin: 1.5rem 0;
-    padding: 1.5rem;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    gap: 1.5rem;
+    margin: 2rem 1rem;
   }
-  
+
   .selected-count {
-    margin-bottom: 1rem;
     text-align: center;
+    width: 100%;
   }
   
   .summary-total {
@@ -4446,20 +4860,63 @@ html {
     line-height: 1.4;
   }
   
+  /* Ajuste adicional para mobile pequeno */
   .services-summary {
-    margin: 1rem 0;
-    padding: 1rem;
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+    margin: 1.5rem 0.5rem;
+    padding: 1.5rem 1rem;
   }
-  
+
+  .services-summary .selected-count {
+    font-size: 0.95rem;
+  }
+
+  .service-header-title {
+    font-size: 1.1rem;
+  }
+
+  .service-title-wrapper {
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .service-toggle-btn {
+    padding: 0.4rem 0.5rem;
+    font-size: 1rem;
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .service-checkbox-label {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 10px;
+  }
+
+  .checkmark-icon::before {
+    font-size: 0.8rem;
+  }
+
+  .selection-text {
+    font-size: 0.85rem;
+  }
+
+  .services-summary .summary-total {
+    width: 100%;
+  }
+
   .summary-total {
     text-align: center;
   }
-  
+
   .total-amount {
     font-size: 1.5rem;
+  }
+
+  .services-summary .discount-note,
+  .services-summary .discount-info,
+  .services-summary .discount-unavailable {
+    text-align: center;
+    width: 100%;
   }
   
   /* Payment Form Small Mobile */
