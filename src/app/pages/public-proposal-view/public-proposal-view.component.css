@@ -1824,21 +1824,23 @@ html {
 .service-title-wrapper {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .service-toggle-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: 2px solid white;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 1.2rem;
+  padding: 0.5rem 1.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s ease;
+  white-space: nowrap;
   position: relative;
   overflow: hidden;
 }
@@ -1857,9 +1859,15 @@ html {
 }
 
 .service-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: white;
+  transform: translateY(-1px);
+}
+
+.toggle-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .service-toggle-btn:hover::before {
@@ -1944,35 +1952,43 @@ html {
 .service-selection {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
 }
 
-.service-checkbox {
+
+/* New checkbox styles for left side */
+.service-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.service-select-checkbox {
   display: none;
 }
 
-.service-checkbox-label {
+.service-checkbox-mark {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  padding: 0.75rem 1.5rem;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
   border: 2px solid white;
-  border-radius: 30px;
+  border-radius: 4px;
   background: transparent;
+  cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 600;
-  color: white;
+  color: transparent;
 }
 
-.service-checkbox:checked + .service-checkbox-label {
+.service-select-checkbox:checked + .service-checkbox-mark {
   background: white;
   color: #022c22;
 }
 
-.checkmark-icon::before {
-  content: '✓';
-  font-size: 1.2rem;
-  font-weight: bold;
+.service-checkbox-mark i {
+  font-size: 14px;
+  line-height: 1;
 }
 
 .service-content {
@@ -2101,11 +2117,12 @@ html {
   }
 
   .service-toggle-btn {
-    padding: 0.5rem 0.6rem;
-    font-size: 1.1rem;
-    min-width: 36px;
-    height: 36px;
+    padding: 0.6rem 1.8rem;
+    font-size: 0.95rem;
+    min-width: auto;
+    height: auto;
     flex-shrink: 0;
+    margin: 0 auto;
   }
 
   .service-header-title {
@@ -2128,6 +2145,9 @@ html {
   .service-selection {
     width: 100%;
     margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .service-checkbox-label {
@@ -5007,19 +5027,14 @@ html {
   }
 
   .service-toggle-btn {
-    padding: 0.4rem 0.5rem;
-    font-size: 1rem;
-    min-width: 32px;
-    height: 32px;
-  }
-
-  .service-checkbox-label {
-    padding: 0.6rem 0.8rem;
+    padding: 0.5rem 1.2rem;
     font-size: 0.85rem;
-    border-radius: 10px;
+    min-width: auto;
+    height: auto;
+    margin: 0.5rem auto;
   }
 
-  .checkmark-icon::before {
+  .toggle-text {
     font-size: 0.8rem;
   }
 

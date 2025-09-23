@@ -280,12 +280,17 @@
             <!-- Service Header with Title and Selection -->
             <div class="service-header">
               <div class="service-title-wrapper">
-                <button class="service-toggle-btn"
-                        type="button"
-                        (click)="toggleDescription(service.service_id)"
-                        *ngIf="service.service.description">
-                  <i class="fas fa-chevron-{{ isDescriptionExpanded(service.service_id) ? 'down' : 'right' }}"></i>
-                </button>
+                <div class="service-checkbox-wrapper">
+                  <input
+                    type="checkbox"
+                    [id]="'service-checkbox-' + service.service_id"
+                    [checked]="isServiceSelected(service.service_id)"
+                    (change)="toggleService(service.service_id)"
+                    class="service-select-checkbox">
+                  <label [for]="'service-checkbox-' + service.service_id" class="service-checkbox-mark">
+                    <i class="fas fa-check"></i>
+                  </label>
+                </div>
                 <h2 class="service-header-title">
                   {{ service.service.name }}
                   <span class="quantity-indicator" *ngIf="service.quantity > 1">
@@ -294,16 +299,12 @@
                 </h2>
               </div>
               <div class="service-selection">
-                <input
-                  type="checkbox"
-                  [id]="'service-' + service.service_id"
-                  [checked]="isServiceSelected(service.service_id)"
-                  (change)="toggleService(service.service_id)"
-                  class="service-checkbox">
-                <label [for]="'service-' + service.service_id" class="service-checkbox-label">
-                  <span class="checkmark-icon"></span>
-                  <span class="selection-text">{{ isServiceSelected(service.service_id) ? 'Selecionado' : 'Selecionar' }}</span>
-                </label>
+                <button class="service-toggle-btn"
+                        type="button"
+                        (click)="toggleDescription(service.service_id)"
+                        *ngIf="service.service.description">
+                  <span class="toggle-text">{{ isDescriptionExpanded(service.service_id) ? 'Ver menos' : 'Ver mais' }}</span>
+                </button>
               </div>
             </div>
 
