@@ -768,17 +768,45 @@ export class PublicProposalViewComponent implements OnInit {
   formatDescription(description: string): SafeHtml {
     if (!description) return this.sanitizer.bypassSecurityTrustHtml('');
 
-    // Simplesmente preserva quebras de linha e espaços como foram escritos
-    const formatted = description
-      // Substitui quebras de linha por <br>
-      .replace(/\n/g, '<br>')
-      // Preserva espaços múltiplos usando &nbsp;
-      .replace(/  /g, '&nbsp;&nbsp;')
-      // Preserva tabs
-      .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+    // Verifica se a descrição já é HTML (vem do editor)
+    const isHtml = description.includes('<') && description.includes('>');
 
-    // Envolve em um div com white-space: pre-wrap para preservar formatação
-    const wrapped = `<div style="white-space: pre-wrap; line-height: 1.6; font-family: inherit;">${formatted}</div>`;
+    let formatted = description;
+
+    if (isHtml) {
+      // Se é HTML, preserva as tags mas ajusta para melhor visualização
+      formatted = description
+        // Adiciona quebra de linha após cada parágrafo
+        .replace(/<\/p>/gi, '</p>\n')
+        // Adiciona quebra de linha após cada div
+        .replace(/<\/div>/gi, '</div>\n')
+        // Remove parágrafos vazios mas mantém como linha em branco (apenas um <br>)
+        .replace(/<p[^>]*>(&nbsp;|\s|<br\/?>)*<\/p>/gi, '<br>')
+        // Remove divs vazios mas mantém como linha em branco (apenas um <br>)
+        .replace(/<div[^>]*>(&nbsp;|\s|<br\/?>)*<\/div>/gi, '<br>')
+        // Garante que <br> sejam respeitados
+        .replace(/<br\s*\/?>/gi, '<br>')
+        // Adiciona margem esquerda para todas as listas ul e ol
+        .replace(/<ul>/gi, '<ul style="margin-left: 3rem !important; padding-left: 1.5rem !important;">')
+        .replace(/<ol>/gi, '<ol style="margin-left: 3rem !important; padding-left: 1.5rem !important;">');
+    } else {
+      // Se é texto simples, preserva quebras de linha e espaços
+      formatted = description
+        // Substitui quebras de linha duplas por parágrafo
+        .replace(/\n\n+/g, '</p><p>')
+        // Substitui quebras de linha simples por <br>
+        .replace(/\n/g, '<br>')
+        // Preserva espaços múltiplos
+        .replace(/  /g, '&nbsp;&nbsp;')
+        // Preserva tabs
+        .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+
+      // Envolve em parágrafo se não for HTML
+      formatted = `<p>${formatted}</p>`;
+    }
+
+    // Envolve em um container com estilos para preservar formatação
+    const wrapped = `<div class="service-description" style="white-space: pre-line; line-height: 1.8; font-family: inherit; color: #022c22;">${formatted}</div>`;
 
     return this.sanitizer.bypassSecurityTrustHtml(wrapped);
   }

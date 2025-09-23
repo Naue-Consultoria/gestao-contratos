@@ -72,9 +72,8 @@
 /* Form Grid - Responsive Layout */
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  padding: 32px;
+  grid-template-columns: 3fr 1fr;
+  gap: 16px;
 }
 
 
@@ -706,13 +705,348 @@ textarea.form-control {
   outline-offset: 2px;
 }
 
-.ngx-editor-container {
-  border: 1px solid #ccc;
-  border-radius: 4px;
+/* NGX Editor Styles */
+.ngx-editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
 }
 
-.ngx-editor-container.error {
-  border-color: var(--color-danger);
+.ngx-editor-wrapper.error {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+/* Custom Toolbar */
+.custom-toolbar {
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-bottom: 2px solid #e0e0e0;
+  border-radius: 8px 8px 0 0;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Title Dropdown */
+.title-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.title-dropdown .dropdown-toggle {
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.title-dropdown .dropdown-toggle:hover {
+  background: var(--naue-green);
+  color: white;
+  border-color: var(--naue-green);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.title-dropdown .dropdown-toggle i.fa-heading {
+  font-size: 14px;
+}
+
+.title-dropdown .dropdown-toggle i.fa-chevron-down {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.title-dropdown .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  min-width: 120px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+  padding: 4px 0;
+}
+
+.title-dropdown .dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  transition: background 0.2s ease;
+}
+
+.title-dropdown .dropdown-item:hover {
+  background: #f0f9ff;
+  color: var(--naue-green);
+}
+
+/* Editor Menu Toolbar */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuBar {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+
+/* IMPORTANTE: Previne que botões da toolbar disparem submit do formulário */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuBar button {
+  type: button !important;
+}
+
+/* Adiciona evento para garantir que botões não submetam o formulário */
+.ngx-editor-wrapper ::ng-deep button:not([type]) {
+  pointer-events: none;
+}
+
+.ngx-editor-wrapper ::ng-deep button:not([type])::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+/* Toolbar Buttons */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem {
+  background: white;
+  border: 3px solid transparent;
+  box-shadow: inset 0 0 0 1px #d1d5db;
+  border-radius: 6px;
+  padding: 5px 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+}
+
+/* Hover - borda verde destacada com sombra */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem:hover {
+  background: white !important;
+  color: var(--naue-green) !important;
+  border: 3px solid var(--naue-green) !important;
+  box-shadow: 0 0 0 2px rgba(6, 95, 70, 0.2) !important;
+  transition: all 0.2s ease;
+}
+
+
+/* Ícones ficam verdes no hover */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem:hover svg {
+  fill: var(--naue-green) !important;
+  color: var(--naue-green) !important;
+}
+
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem:hover svg path {
+  fill: var(--naue-green) !important;
+}
+
+/* Blockquote específico - mantém as bordas do ícone */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem:hover svg rect,
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem--Active svg rect {
+  fill: none !important; /* Mantém transparente */
+  stroke: currentColor !important; /* Usa a cor do texto */
+}
+
+/* Estado ativo - Todo o container toggle fica verde escuro */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem--Active,
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem.NgxEditor__MenuItem--Active,
+.ngx-editor-wrapper ::ng-deep button.NgxEditor__MenuItem--Active,
+.ngx-editor-wrapper ::ng-deep [class*="NgxEditor__MenuItem--Active"],
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem--Selected,
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem.is-active {
+  background: #065F46 !important; /* Verde escuro */
+  background-color: #065F46 !important;
+  color: white !important;
+  border: 3px solid #065F46 !important;
+  box-shadow: 0 0 0 2px rgba(6, 95, 70, 0.3) !important;
+  font-weight: 600;
+}
+
+
+/* Hover no botão ativo - sem transform para evitar deslocamento */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem--Active:hover {
+  background: #054f3a !important;
+  background-color: #054f3a !important;
+  border-color: #054f3a !important;
+  box-shadow: 0 2px 6px rgba(6, 95, 70, 0.3) !important;
+  transform: none !important; /* Remove o translateY que causa o deslocamento */
+}
+
+/* Ícones dos botões ativos ficam brancos */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem--Active svg {
+  fill: white !important;
+  color: white !important;
+}
+
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem--Active svg path {
+  fill: white !important;
+}
+
+/* Blockquote ativo - mantém bordas visíveis */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem--Active svg rect {
+  fill: none !important;
+  stroke: white !important;
+}
+
+/* Lines em SVG (para ícones como blockquote) ficam brancos quando ativos */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem--Active svg line {
+  stroke: white !important;
+}
+
+/* Captura botões com atributos de estado ativo */
+.ngx-editor-wrapper ::ng-deep button[aria-pressed="true"],
+.ngx-editor-wrapper ::ng-deep button[aria-selected="true"],
+.ngx-editor-wrapper ::ng-deep button[data-active="true"],
+.ngx-editor-wrapper ::ng-deep .NgxEditor__MenuItem[aria-pressed="true"] {
+  background: #065F46 !important;
+  background-color: #065F46 !important;
+  color: white !important;
+  border-color: #065F46 !important;
+}
+
+/* Garante que SVG dentro de botões ativos fiquem brancos */
+.ngx-editor-wrapper ::ng-deep button[aria-pressed="true"] svg,
+.ngx-editor-wrapper ::ng-deep button[aria-pressed="true"] svg *,
+.ngx-editor-wrapper ::ng-deep button[aria-selected="true"] svg,
+.ngx-editor-wrapper ::ng-deep button[aria-selected="true"] svg * {
+  fill: white !important;
+  stroke: white !important;
+}
+
+/* Dropdown Menus */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__Dropdown {
+  min-width: 120px;
+  position: relative;
+}
+
+/* Forçar visibilidade do texto do dropdown */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__Dropdown__Text {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-block !important;
+}
+
+.ngx-editor-wrapper ::ng-deep .NgxEditor__Dropdown__Content {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+}
+
+.ngx-editor-wrapper ::ng-deep .NgxEditor__Dropdown__Item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.ngx-editor-wrapper ::ng-deep .NgxEditor__Dropdown__Item:hover {
+  background: #f0f9ff;
+}
+
+/* Color Picker */
+.ngx-editor-wrapper ::ng-deep .NgxEditor__ColorPicker {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Editor Content Area */
+.ngx-editor-wrapper ::ng-deep .NgxEditor {
+  background: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.ngx-editor-wrapper ::ng-deep .NgxEditor__Content {
+  padding: 16px !important;
+}
+
+/* Editor Typography */
+.ngx-editor-wrapper ::ng-deep .ProseMirror {
+  min-height: 250px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ngx-editor-wrapper ::ng-deep .ProseMirror:focus {
+  outline: none;
+  border-color: var(--naue-green);
+  box-shadow: 0 0 0 3px rgba(10, 98, 84, 0.1);
+}
+
+.ngx-editor-wrapper ::ng-deep .ProseMirror h1 { font-size: 2em; margin: 0.67em 0; }
+.ngx-editor-wrapper ::ng-deep .ProseMirror h2 { font-size: 1.5em; margin: 0.75em 0; }
+.ngx-editor-wrapper ::ng-deep .ProseMirror h3 { font-size: 1.17em; margin: 0.83em 0; }
+.ngx-editor-wrapper ::ng-deep .ProseMirror h4 { font-size: 1em; margin: 1.12em 0; }
+.ngx-editor-wrapper ::ng-deep .ProseMirror h5 { font-size: 0.83em; margin: 1.5em 0; }
+.ngx-editor-wrapper ::ng-deep .ProseMirror h6 { font-size: 0.75em; margin: 1.67em 0; }
+
+.ngx-editor-wrapper ::ng-deep .ProseMirror p { margin: 1em 0; }
+.ngx-editor-wrapper ::ng-deep .ProseMirror ul,
+.ngx-editor-wrapper ::ng-deep .ProseMirror ol { padding-left: 30px; margin: 1em 0; }
+.ngx-editor-wrapper ::ng-deep .ProseMirror li { margin: 0.5em 0; }
+.ngx-editor-wrapper ::ng-deep .ProseMirror blockquote {
+  border-left: 4px solid var(--naue-green);
+  padding-left: 1em;
+  margin: 1em 0;
+  color: #666;
+}
+
+/* Editor Footer */
+.editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 0;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 8px;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #6c737f;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.char-count i {
+  color: var(--naue-green);
+  font-size: 14px;
 }
 
 /* Reduce motion for accessibility */

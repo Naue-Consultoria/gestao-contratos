@@ -1992,6 +1992,16 @@ html {
   transform-origin: top;
 }
 
+/* Força alinhamento de todo conteúdo dentro da section */
+.service-description-section .description-content {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+.service-description-section .description-content > * {
+  margin-left: 0 !important;
+}
+
 @keyframes slideIn {
   0% {
     opacity: 0;
@@ -2350,7 +2360,7 @@ html {
 .service-description {
   color: #022c22;
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.5;
   margin: 1rem 0 0;
   font-weight: 400;
   background: white;
@@ -2359,16 +2369,133 @@ html {
   border: 1px solid rgba(6, 95, 70, 0.25);
   box-shadow: 0 2px 10px rgba(6, 95, 70, 0.08);
   position: relative;
+  white-space: pre-line !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
-/* Garantir que divs dentro da descrição tenham peso normal por padrão */
+/* Preserva formatação em parágrafos e divs dentro da descrição */
+.service-description p,
 .service-description div {
   font-weight: 400 !important;
+  white-space: pre-line !important;
+  margin-bottom: 0.2rem;
+  margin-top: 0;
+  line-height: inherit;
 }
 
-/* Apenas elementos com font-weight bold específico devem ser negrito */
-.service-description div[style*="font-weight: bold"] {
+/* Remove margem do último elemento */
+.service-description p:last-child,
+.service-description div:last-child {
+  margin-bottom: 0;
+}
+
+/* Preserva quebras de linha com espaçamento mínimo */
+.service-description br {
+  display: block;
+  content: "";
+  margin: 0;
+  height: 0.5rem;
+}
+
+/* Elementos em negrito */
+.service-description *[style*="font-weight: bold"],
+.service-description strong,
+.service-description b {
   font-weight: bold !important;
+}
+
+/* RESET COMPLETO DE LISTAS - Remove TUDO e reconstrói */
+.service-description ul,
+.service-description ol,
+.description-content ul,
+.description-content ol {
+  margin: 0.5rem 0 0.5rem 0 !important;
+  padding: 0 0 0 4rem !important; /* Move listas para a direita usando padding */
+  list-style: none !important;
+  list-style-type: none !important;
+  list-style-position: unset !important;
+  white-space: normal;
+}
+
+.service-description li,
+.description-content li {
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-bottom: 0.3rem !important;
+  white-space: pre-line;
+  text-indent: 0 !important;
+  position: relative;
+  display: block;
+}
+
+/* Remove bullets nativos de TODAS as formas possíveis */
+.service-description ul li::marker,
+.service-description ol li::marker,
+.description-content ul li::marker,
+.description-content ol li::marker {
+  content: "" !important;
+  display: none !important;
+}
+
+/* Bullets customizados alinhados à esquerda com o texto normal */
+.service-description ul > li,
+.description-content ul > li {
+  display: block !important;
+  padding-left: 1.2em !important;
+  position: relative;
+}
+
+.service-description ul > li::before,
+.description-content ul > li::before {
+  content: "•" !important;
+  position: absolute !important;
+  left: 0 !important;
+  color: #022c22;
+  font-weight: bold;
+  display: inline-block !important;
+}
+
+/* Numeração para listas ordenadas */
+.service-description ol,
+.description-content ol {
+  counter-reset: custom-counter !important;
+}
+
+.service-description ol > li,
+.description-content ol > li {
+  display: block !important;
+  padding-left: 1.5em !important;
+  position: relative;
+  counter-increment: custom-counter !important;
+}
+
+.service-description ol > li::before,
+.description-content ol > li::before {
+  content: counter(custom-counter) "." !important;
+  position: absolute !important;
+  left: 0 !important;
+  color: #022c22;
+  display: inline-block !important;
+}
+
+/* Listas aninhadas */
+.service-description ul ul,
+.service-description ol ol,
+.description-content ul ul,
+.description-content ol ol {
+  margin-top: 0.3rem !important;
+  margin-left: 1.2em !important;
+}
+
+.service-description ul ul > li::before,
+.description-content ul ul > li::before {
+  content: "◦" !important;
+}
+
+.service-description ul ul ul > li::before,
+.description-content ul ul ul > li::before {
+  content: "▪" !important;
 }
 
 

@@ -12,7 +12,7 @@
 
   <!-- Form -->
   <div class="form-container" *ngIf="!isLoading">
-    <form (ngSubmit)="save()" class="service-form">
+    <form (ngSubmit)="save($event)" class="service-form">
       <div class="form-layout">
         
         <!-- COLUNA ESQUERDA - Informações Básicas -->
@@ -24,29 +24,30 @@
               <i class="fas fa-tag"></i>
               Informações Básicas
             </h3>
-            
-            <div class="form-group">
-              <label class="form-label required">Nome do Serviço</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                [(ngModel)]="formData.name"
-                name="name"
-                placeholder="Ex: Consultoria Estratégica"
-                [class.error]="errors.name"
-                maxlength="255">
-              <span class="error-message" *ngIf="errors.name">{{ errors.name }}</span>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label">Categoria</label>
-              <select 
-                class="form-control" 
-                [(ngModel)]="formData.category"
-                name="category">
-                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-              </select>
-              <div class="help-text">Categorize o serviço para melhor organização</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required">Nome do Serviço</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="formData.name"
+                  name="name"
+                  placeholder="Ex: Consultoria Estratégica"
+                  [class.error]="formSubmitted && errors.name"
+                  maxlength="255">
+                <span class="error-message" *ngIf="formSubmitted && errors.name">{{ errors.name }}</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Categoria</label>
+                <select
+                  class="form-control"
+                  [(ngModel)]="formData.category"
+                  name="category">
+                  <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                </select>
+              </div>
             </div>
 
             <div class="form-group" *ngIf="isEditMode">
@@ -97,8 +98,8 @@
                   name="duration_amount"
                   min="1"
                   placeholder="Ex: 30"
-                  [class.error]="errors.duration">
-                <span class="error-message" *ngIf="errors.duration">{{ errors.duration }}</span>
+                  [class.error]="formSubmitted && errors.duration">
+                <span class="error-message" *ngIf="formSubmitted && errors.duration">{{ errors.duration }}</span>
               </div>
             </div>
 
@@ -118,22 +119,54 @@
             </h3>
 
             <div class="form-group">
-              <div class="ngx-editor-container" [class.error]="errors.description">
-                <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+              <div class="ngx-editor-wrapper" [class.error]="formSubmitted && errors.description">
+                <div class="custom-toolbar">
+                  <!-- Dropdown de Título em Português -->
+                  <div class="title-dropdown">
+                    <button type="button"
+                            class="dropdown-toggle"
+                            (click)="toggleTitleDropdown()">
+                      <i class="fas fa-heading"></i>
+                      <span>{{ selectedTitle }}</span>
+                      <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu" *ngIf="showTitleDropdown">
+                      <button type="button"
+                              class="dropdown-item"
+                              *ngFor="let option of titleOptions"
+                              (click)="applyTitle(option)">
+                        {{ option.label }}
+                      </button>
+                    </div>
+                  </div>
+                  <!-- Toolbar padrão -->
+                  <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+                </div>
                 <ngx-editor
                   [editor]="editor"
                   [(ngModel)]="formData.description"
                   name="description"
                   [placeholder]="'Descreva detalhadamente o serviço: objetivos, metodologia, benefícios...'"
-                  [style]="{ height: '200px', 'overflow-y': 'auto' }"
+                  [style]="{
+                    'min-height': '250px',
+                    'max-height': '400px',
+                    'overflow-y': 'auto',
+                    'border': '1px solid #e0e0e0',
+                    'border-radius': '4px',
+                    'padding': '12px'
+                  }"
                 ></ngx-editor>
               </div>
-              <div class="char-count">
-                {{ descriptionTextLength }}/10000 caracteres
+              <div class="editor-footer">
+                <span class="char-count">
+                  <i class="fas fa-keyboard"></i>
+                  {{ descriptionTextLength }}/10000 caracteres
+                </span>
               </div>
-              <span class="error-message" *ngIf="errors.description">{{ errors.description }}</span>
+              <span class="error-message" *ngIf="formSubmitted && errors.description">{{ errors.description }}</span>
             </div>
           </div>
+
         </div>
 
         <!-- COLUNA DIREITA - Etapas -->
@@ -188,8 +221,8 @@
                         [(ngModel)]="stage.name"
                         name="stageName{{ i }}"
                         placeholder="Nome da etapa"
-                        [class.error]="stage.error">
-                      <span class="error-message" *ngIf="stage.error">{{ stage.error }}</span>
+                        [class.error]="formSubmitted && stage.error">
+                      <span class="error-message" *ngIf="formSubmitted && stage.error">{{ stage.error }}</span>
                     </div>
                     <div class="form-group form-group-category">
                       <input 

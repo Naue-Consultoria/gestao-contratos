@@ -7,6 +7,7 @@ import { ServiceStageService, CreateServiceStageRequest } from '../../services/s
 import { ModalService } from '../../services/modal.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { NgxEditorModule, Editor, Toolbar } from 'ngx-editor';
+import { setBlockType } from 'prosemirror-commands';
 
 interface ServiceStageForm {
   name: string;
@@ -33,9 +34,26 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
   private elementRef = inject(ElementRef);
 
   editor!: Editor;
+  showTitleDropdown = false;
+  selectedTitle = 'Normal';
+  titleOptions = [
+    { label: 'Normal', value: 'p', command: null },
+    { label: 'Título 1', value: 'h1', command: 1 },
+    { label: 'Título 2', value: 'h2', command: 2 },
+    { label: 'Título 3', value: 'h3', command: 3 },
+    { label: 'Título 4', value: 'h4', command: 4 },
+    { label: 'Título 5', value: 'h5', command: 5 }
+  ];
+
   toolbar: Toolbar = [
+    // Formatação de texto
     ['bold', 'italic', 'underline'],
+    ['indent', 'outdent'],
+    // Listas
     ['ordered_list', 'bullet_list'],
+    // Outros
+    ['horizontal_rule'],
+    ['undo', 'redo'],
   ];
 
   formData = {
@@ -65,6 +83,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
   isEditMode = false;
   serviceId: number | null = null;
   errors: any = {};
+  formSubmitted = false;
 
   // Service stages properties
   serviceStages: ServiceStageForm[] = [];
@@ -82,8 +101,57 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     setTimeout(() => {
       this.adjustColumnHeights();
+      this.preventToolbarSubmit();
     }, 100);
   }
+
+  private preventToolbarSubmit() {
+    // Adiciona listener para prevenir submit dos botões da toolbar
+    const toolbarButtons = this.elementRef.nativeElement.querySelectorAll('.NgxEditor__MenuBar button, ngx-editor-menu button');
+    toolbarButtons.forEach((button: HTMLButtonElement) => {
+      button.type = 'button';
+      button.addEventListener('click', (e: Event) => {
+        e.stopPropagation();
+        // Garante que formSubmitted não seja alterado
+        const wasSubmitted = this.formSubmitted;
+        setTimeout(() => {
+          this.formSubmitted = wasSubmitted;
+        }, 0);
+      });
+    });
+  }
+
+  toggleTitleDropdown() {
+    this.showTitleDropdown = !this.showTitleDropdown;
+  }
+
+  applyTitle(option: any) {
+    this.selectedTitle = option.label;
+    this.showTitleDropdown = false;
+
+    if (!this.editor) return;
+
+    const state = this.editor.view.state;
+    const dispatch = this.editor.view.dispatch;
+
+    if (option.command === null) {
+      // Voltar para parágrafo normal
+      const { schema } = state;
+      const type = schema.nodes['paragraph'];
+      if (type) {
+        setBlockType(type)(state, dispatch);
+      }
+    } else {
+      // Aplicar heading usando comando direto do prosemirror
+      const { schema } = state;
+      const type = schema.nodes['heading'];
+      if (type) {
+        setBlockType(type, { level: option.command })(state, dispatch);
+      }
+    }
+  }
+
+
 
   private adjustColumnHeights() {
     const leftColumn = this.elementRef.nativeElement.querySelector('.left-column');
@@ -169,7 +237,28 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
     return Object.keys(this.errors).length === 0 && stagesValid;
   }
 
-  async save() {
+  async save(event?: Event) {
+    // Verifica se foi disparado por um botão da toolbar do ngx-editor
+    if (event) {
+      event.preventDefault();
+
+      // Verifica se o evento veio de um botão da toolbar
+      const target = event.target as HTMLElement;
+      if (target && (target.closest('.NgxEditor__MenuBar') || target.closest('ngx-editor-menu'))) {
+        return;
+      }
+
+      // Verifica também o relatedTarget para eventos de submit
+      const submitEvent = event as any;
+      if (submitEvent.submitter) {
+        const button = submitEvent.submitter as HTMLElement;
+        if (button.closest('.NgxEditor__MenuBar') || button.closest('ngx-editor-menu')) {
+          return;
+        }
+      }
+    }
+
+    this.formSubmitted = true;
     if (!this.validateForm()) {
       this.modalService.showNotification('Por favor, corrija os erros no formulário', false);
       return;
@@ -329,4 +418,5 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
       throw error;
     }
   }
+
 }
