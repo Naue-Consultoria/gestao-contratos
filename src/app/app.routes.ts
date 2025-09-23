@@ -26,6 +26,7 @@ import { HelpPageComponent } from './components/help-page/help-page';
 import { RoutinesPageComponent } from './components/routines-page/routines-page';
 import { RoutineViewPageComponent } from './components/routine-view-page/routine-view-page';
 import { ServiceTrackingPageComponent } from './components/service-tracking-page/service-tracking-page';
+import { RecrutamentoSelecao } from './pages/recrutamento-selecao/recrutamento-selecao';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -222,6 +223,14 @@ export const routes: Routes = [
         component: AnalyticsPageComponent,
         canActivate: [UserGuard],
         title: 'Analytics - NAUE Consultoria',
+      },
+
+      // Recrutamento & Seleção
+      {
+        path: 'recrutamento-selecao',
+        component: RecrutamentoSelecao,
+        canActivate: [UserGuard],
+        title: 'Recrutamento & Seleção - NAUE Consultoria',
       },
 
       // Rotinas

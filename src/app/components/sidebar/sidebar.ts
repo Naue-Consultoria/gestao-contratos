@@ -39,7 +39,8 @@ export class SidebarComponent {
         { id: 'servicos', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/servicos', userRestricted: true },
         { id: 'clientes', icon: 'fas fa-users', text: 'Clientes', route: '/home/clientes', userRestricted: true },
         { id: 'propostas', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/propostas', userRestricted: true },
-        { id: 'contratos', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contratos', userRestricted: true }
+        { id: 'contratos', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contratos', userRestricted: true },
+        { id: 'recrutamento-selecao', icon: 'fas fa-user-tie', text: 'Recrutamento & Seleção', route: '/home/recrutamento-selecao', userRestricted: true }
       ]
     },
     {
