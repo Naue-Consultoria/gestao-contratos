@@ -37,12 +37,12 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
   showTitleDropdown = false;
   selectedTitle = 'Normal';
   titleOptions = [
-    { label: 'Normal', value: 'p', command: null },
-    { label: 'Título 1', value: 'h1', command: 1 },
-    { label: 'Título 2', value: 'h2', command: 2 },
-    { label: 'Título 3', value: 'h3', command: 3 },
-    { label: 'Título 4', value: 'h4', command: 4 },
-    { label: 'Título 5', value: 'h5', command: 5 }
+    { label: 'Normal', value: 'p', command: null, icon: 'T' },
+    { label: 'Título 1', value: 'h1', command: 1, icon: 'H1' },
+    { label: 'Título 2', value: 'h2', command: 2, icon: 'H2' },
+    { label: 'Título 3', value: 'h3', command: 3, icon: 'H3' },
+    { label: 'Título 4', value: 'h4', command: 4, icon: 'H4' },
+    { label: 'Título 5', value: 'h5', command: 5, icon: 'H5' }
   ];
 
   toolbar: Toolbar = [
@@ -386,7 +386,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async createServiceStages(serviceId: number) {
     if (this.serviceStages.length === 0) return;
-    
+
     try {
       for (const stage of this.serviceStages) {
         if (stage.id) {
@@ -397,7 +397,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
             category: stage.category?.trim() || null,
             sort_order: stage.sort_order
           };
-          
+
           await this.serviceStageService.updateStage(stage.id, updateData).toPromise();
         } else {
           // Nova etapa - criar
@@ -408,7 +408,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
             category: stage.category?.trim() || null,
             sort_order: stage.sort_order
           };
-          
+
           await this.serviceStageService.createStage(stageData).toPromise();
         }
       }
@@ -417,6 +417,30 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
       this.modalService.showNotification('Erro ao salvar algumas etapas do serviço', false);
       throw error;
     }
+  }
+
+  insertTemplate() {
+    const template = `<h3>Objetivos</h3>
+<p>Descreva os principais objetivos do serviço...</p>
+
+<h3>Metodologia</h3>
+<p>Explique a metodologia que será aplicada...</p>
+
+<h3>Benefícios Esperados</h3>
+<ul>
+<li>Benefício 1</li>
+<li>Benefício 2</li>
+<li>Benefício 3</li>
+</ul>
+
+<h3>Público-alvo</h3>
+<p>Indique para quem este serviço é direcionado...</p>
+
+<h3>Resultados e Entregáveis</h3>
+<p>Liste os principais resultados e entregáveis do serviço...</p>`;
+
+    this.formData.description = template;
+    this.modalService.showNotification('Template inserido com sucesso!', true);
   }
 
 }

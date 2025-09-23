@@ -705,6 +705,281 @@ textarea.form-control {
   outline-offset: 2px;
 }
 
+/* ========================================
+   DESCRIPTION SECTION - Enhanced Design
+   ======================================== */
+
+.description-section {
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  border: 1px solid #e1e4e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.description-section:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.section-header-enhanced {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.section-title-wrapper {
+  flex: 1;
+}
+
+.section-subtitle {
+  display: block;
+  font-size: 13px;
+  color: #6c737f;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+.section-tools {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-tool {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #d4d6db;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #344054;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-tool:hover {
+  background: var(--naue-primary);
+  color: white;
+  border-color: var(--naue-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 59, 43, 0.2);
+}
+
+.btn-tool i {
+  font-size: 12px;
+}
+
+.tool-text {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .tool-text {
+    display: inline;
+  }
+}
+
+/* Editor Container */
+.editor-container {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #e1e4e8;
+  transition: all 0.2s ease;
+}
+
+.editor-container:focus-within {
+  border-color: var(--naue-primary);
+  box-shadow: 0 0 0 3px rgba(10, 98, 84, 0.1);
+}
+
+/* Toolbar Wrapper */
+.editor-toolbar-wrapper {
+  background: #f8f9fa;
+  margin: -20px -20px 0 -20px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toolbar-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6c737f;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.toolbar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-btn {
+  padding: 6px 10px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar-btn:hover {
+  background: var(--naue-primary);
+  color: white;
+  border-color: var(--naue-primary);
+}
+
+/* Enhanced Title Dropdown */
+.title-dropdown.enhanced {
+  position: relative;
+}
+
+.title-dropdown.enhanced .dropdown-toggle {
+  min-width: 140px;
+}
+
+.dropdown-menu.enhanced {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: none;
+  padding: 8px;
+}
+
+.dropdown-menu.enhanced .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+
+.dropdown-menu.enhanced .dropdown-item:hover {
+  background: var(--naue-primary);
+  color: white;
+}
+
+.dropdown-icon {
+  width: 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
+
+/* Enhanced Editor */
+.enhanced-editor {
+  border: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background: white;
+  margin-top: 16px;
+  width: 100%;
+  overflow: visible;
+  position: relative;
+}
+
+.enhanced-editor ::ng-deep .NgxEditor {
+  border: none;
+  border-radius: 6px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.enhanced-editor ::ng-deep .ProseMirror {
+  min-height: 300px;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #1a1a1a;
+  width: 100%;
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-wrap;
+  resize: vertical;
+}
+
+.enhanced-editor ::ng-deep .ProseMirror:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--naue-primary);
+}
+
+.enhanced-editor ::ng-deep .ProseMirror p {
+  margin-bottom: 1em;
+}
+
+.enhanced-editor ::ng-deep .ProseMirror h1,
+.enhanced-editor ::ng-deep .ProseMirror h2,
+.enhanced-editor ::ng-deep .ProseMirror h3 {
+  color: #1a1a1a;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.enhanced-editor ::ng-deep .ProseMirror ul,
+.enhanced-editor ::ng-deep .ProseMirror ol {
+  padding-left: 24px;
+}
+
+.enhanced-editor ::ng-deep .ProseMirror li {
+  margin-bottom: 0.5em;
+}
+
+.enhanced-editor ::ng-deep .ProseMirror blockquote {
+  border-left: 4px solid var(--naue-primary);
+  padding-left: 16px;
+  margin: 1.5em 0;
+  color: #6c737f;
+  font-style: italic;
+}
+
+/* Editor Footer */
+.editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 0;
+  margin-top: 12px;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #6c737f;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.char-count i {
+  color: var(--naue-primary);
+  font-size: 14px;
+}
+
 /* NGX Editor Styles */
 .ngx-editor-wrapper {
   display: flex;
