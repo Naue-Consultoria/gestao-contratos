@@ -1,12 +1,278 @@
 <div class="page">
   <div class="page-header">
     <h1 class="page-title">Recrutamento & Seleção</h1>
+    <app-breadcrumb></app-breadcrumb>
   </div>
 
-  <div class="table-container">
-    <div class="empty-state">
-      <i class="fas fa-user-tie empty-state-icon"></i>
-      <h2>Em desenvolvimento</h2>
+  <!-- Development Notice -->
+  <div class="development-notice">
+    <div class="notice-icon">
+      <i class="fas fa-info-circle"></i>
     </div>
+    <div class="notice-content">
+      <strong>Página em Desenvolvimento</strong>
+      <p>Esta página está em fase de desenvolvimento. Os dados exibidos são fictícios e utilizados apenas para demonstração.</p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <span class="stat-label">Vagas Abertas</span>
+        <div class="stat-icon-wrapper">
+          <i class="fas fa-briefcase"></i>
+        </div>
+      </div>
+      <div class="stat-value">{{ totalVagasAbertas }}</div>
+      <div class="stat-footer">
+        <div class="stat-change positive">
+          <i class="fas fa-arrow-up"></i>
+          <span>12% este mês</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <span class="stat-label">Vagas Fechadas</span>
+        <div class="stat-icon-wrapper">
+          <i class="fas fa-check-double"></i>
+        </div>
+      </div>
+      <div class="stat-value">{{ totalVagasFechadas }}</div>
+      <div class="stat-footer">
+        <div class="stat-change">
+          <span>{{ vagasFechadasMes }} este mês</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <span class="stat-label">Tempo Médio Fechamento</span>
+        <div class="stat-icon-wrapper">
+          <i class="fas fa-clock"></i>
+        </div>
+      </div>
+      <div class="stat-value">{{ tempoMedioFechamento }} dias</div>
+      <div class="stat-footer">
+        <div class="stat-change negative">
+          <i class="fas fa-arrow-down"></i>
+          <span>3 dias vs mês anterior</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <span class="stat-label">Taxa de Conversão</span>
+        <div class="stat-icon-wrapper">
+          <i class="fas fa-chart-line"></i>
+        </div>
+      </div>
+      <div class="stat-value">{{ taxaConversao }}%</div>
+      <div class="stat-footer">
+        <div class="stat-change positive">
+          <i class="fas fa-arrow-up"></i>
+          <span>5% vs mês anterior</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header com contagem -->
+  <div class="vagas-header">
+    <h2 class="vagas-title">Vagas de Recrutamento</h2>
+    <span class="vagas-count">{{ vagas.length }} vagas cadastradas</span>
+  </div>
+
+  <!-- Main Content -->
+  <div class="table-container">
+    <!-- Filters and Actions -->
+    <div class="table-header">
+      <div class="filters-section">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            class="search-input"
+            [placeholder]="getSearchPlaceholder()"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()">
+          <button
+            *ngIf="searchTerm"
+            class="clear-search-btn"
+            (click)="clearSearch()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="filter-group">
+          <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="">Todos os status</option>
+            <option *ngFor="let status of Object.keys(statusLabels)" [value]="status">
+              {{ statusLabels[status] }}
+            </option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="tipoCargoFilter" (change)="applyFilters()">
+            <option value="">Todos os tipos de cargo</option>
+            <option *ngFor="let tipo of Object.keys(tipoCargoLabels)" [value]="tipo">
+              {{ tipoCargoLabels[tipo] }}
+            </option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="fonteRecrutamentoFilter" (change)="applyFilters()">
+            <option value="">Todas as fontes</option>
+            <option *ngFor="let fonte of Object.keys(fonteRecrutamentoLabels)" [value]="fonte">
+              {{ fonteRecrutamentoLabels[fonte] }}
+            </option>
+          </select>
+        </div>
+
+        <button class="btn btn-secondary btn-clear" (click)="clearFilters()" *ngIf="hasFilters()">
+          <i class="fas fa-times"></i>
+          <span class="btn-text">Limpar filtros</span>
+        </button>
+      </div>
+
+      <div class="action-buttons btn-group">
+        <button class="btn btn-primary btn-new" (click)="openNewModal()">
+          <i class="fas fa-plus-circle"></i>
+          <span class="btn-text">{{ getNewButtonText() }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-container">
+      <i class="fas fa-spinner fa-spin"></i>
+      Carregando dados...
+    </div>
+
+    <!-- Table - Vagas -->
+    <div class="table-wrapper" *ngIf="!isLoading">
+      <div *ngIf="filteredVagas.length === 0" class="empty-state">
+        <i class="fas fa-briefcase empty-icon"></i>
+        <h3>Nenhuma vaga encontrada</h3>
+        <p>Clique em "Nova Vaga" para criar a primeira vaga</p>
+      </div>
+
+      <table class="data-table" *ngIf="filteredVagas.length > 0">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Cargo</th>
+            <th>Tipo Cargo</th>
+            <th>Tipo Abertura</th>
+            <th>Salário</th>
+            <th>Consultora</th>
+            <th>Status</th>
+            <th>Candidato Aprovado</th>
+            <th>Fonte</th>
+            <th>Data Abertura</th>
+            <th>Data Fechamento</th>
+            <th>SLA (dias)</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let vaga of filteredVagas">
+            <td>
+              <div class="client-info">
+                <span class="client-name">{{ vaga.clienteNome }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="vaga-title">
+                {{ vaga.cargo }}
+              </div>
+            </td>
+            <td>
+              <span class="type-badge">{{ tipoCargoLabels[vaga.tipoCargo] }}</span>
+            </td>
+            <td>
+              <span class="abertura-badge" [ngClass]="vaga.tipoAbertura">
+                {{ tipoAberturaLabels[vaga.tipoAbertura] }}
+              </span>
+            </td>
+            <td>
+              <span class="salary-value">R$ {{ vaga.salario | number:'1.2-2' }}</span>
+            </td>
+            <td>
+              <span class="user-name">{{ vaga.usuarioNome }}</span>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + vaga.status">
+                {{ statusLabels[vaga.status] }}
+              </span>
+              <small class="status-interview" *ngIf="vaga.statusEntrevista">
+                {{ statusEntrevistaLabels[vaga.statusEntrevista] }}
+              </small>
+            </td>
+            <td>
+              <div class="approved-candidate" *ngIf="vaga.candidatoAprovado">
+                <span class="candidate-name">
+                  <i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.25rem;"></i>
+                  {{ vaga.candidatoAprovado }}
+                </span>
+                <small class="candidate-contact" *ngIf="vaga.contatoCandidato">
+                  {{ vaga.contatoCandidato }}
+                </small>
+              </div>
+              <span class="empty-text" *ngIf="!vaga.candidatoAprovado">-</span>
+            </td>
+            <td>
+              <span class="fonte-badge">{{ fonteRecrutamentoLabels[vaga.fonteRecrutamento] }}</span>
+            </td>
+            <td>
+              <span class="date-text">{{ vaga.dataAbertura | date:'dd/MM/yyyy' }}</span>
+            </td>
+            <td>
+              <span class="date-text" *ngIf="vaga.dataFechamentoCancelamento">
+                {{ vaga.dataFechamentoCancelamento | date:'dd/MM/yyyy' }}
+              </span>
+              <span class="date-text empty" *ngIf="!vaga.dataFechamentoCancelamento">-</span>
+            </td>
+            <td>
+              <span class="sla-badge"
+                    [ngClass]="getSlaClass(calculateSla(vaga))"
+                    *ngIf="vaga.dataFechamentoCancelamento">
+                {{ calculateSla(vaga) }} dias
+              </span>
+              <span class="sla-badge active" *ngIf="!vaga.dataFechamentoCancelamento">
+                {{ calculateActiveSla(vaga) }} dias
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons-cell">
+                <div class="dropdown-container">
+                  <button class="action-btn dropdown-toggle" (click)="toggleDropdown(vaga.id, $event)" title="Ações">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="dropdown-menu" *ngIf="openDropdownId === vaga.id" [class.show]="openDropdownId === vaga.id">
+                    <button class="dropdown-item" (click)="viewVaga(vaga); closeDropdown($event)">
+                      <i class="fas fa-eye"></i>
+                      Visualizar
+                    </button>
+                    <button class="dropdown-item" (click)="editVaga(vaga); closeDropdown($event)">
+                      <i class="fas fa-edit"></i>
+                      Editar
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item delete" (click)="deleteVaga(vaga); closeDropdown($event)">
+                      <i class="fas fa-trash"></i>
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
   </div>
 </div>

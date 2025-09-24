@@ -1,0 +1,190 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
+
+@Component({
+  selector: 'app-nova-vaga',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, BreadcrumbComponent],
+  templateUrl: './nova-vaga.component.html',
+  styleUrl: './nova-vaga.component.css'
+})
+export class NovaVagaComponent implements OnInit {
+  vagaForm: FormGroup;
+  isSubmitting = false;
+  showSuccessMessage = false;
+
+  // Lists for dropdowns
+  clientes: any[] = [];
+  usuarios: any[] = [];
+
+  tipoCargoOptions = [
+    { value: 'administrativo', label: 'Administrativo' },
+    { value: 'comercial', label: 'Comercial' },
+    { value: 'estagio', label: 'Estágio' },
+    { value: 'gestao', label: 'Gestão' },
+    { value: 'operacional', label: 'Operacional' },
+    { value: 'jovem_aprendiz', label: 'Jovem Aprendiz' }
+  ];
+
+  tipoAberturaOptions = [
+    { value: 'nova', label: 'Nova Vaga' },
+    { value: 'reposicao', label: 'Reposição' }
+  ];
+
+  statusOptions = [
+    { value: 'aberta', label: 'Aberta' },
+    { value: 'divulgacao_prospec', label: 'Divulgação/Prospecção' },
+    { value: 'entrevista_nc', label: 'Entrevista NC' },
+    { value: 'entrevista_empresa', label: 'Entrevista Empresa' },
+    { value: 'testes', label: 'Testes' },
+    { value: 'fechada', label: 'Fechada' },
+    { value: 'fechada_rep', label: 'Fechada/Reposição' },
+    { value: 'cancelada_cliente', label: 'Cancelada pelo Cliente' },
+    { value: 'standby', label: 'Standby' },
+    { value: 'nao_cobrada', label: 'Não Cobrada' },
+    { value: 'encerramento_cont', label: 'Encerramento de Contrato' }
+  ];
+
+  fonteRecrutamentoOptions = [
+    { value: 'catho', label: 'Catho' },
+    { value: 'email', label: 'E-mail' },
+    { value: 'indicacao', label: 'Indicação' },
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'whatsapp', label: 'WhatsApp' },
+    { value: 'trafego', label: 'Tráfego' },
+    { value: 'outros', label: 'Outros' }
+  ];
+
+  statusEntrevistaOptions = [
+    { value: '', label: 'Nenhum' },
+    { value: 'realizada', label: 'Realizada' },
+    { value: 'desistiu', label: 'Desistiu' },
+    { value: 'remarcou', label: 'Remarcou' }
+  ];
+
+  constructor(
+    private fb: FormBuilder,
+    private router: Router
+  ) {
+    this.vagaForm = this.fb.group({
+      clienteId: ['', Validators.required],
+      usuarioId: ['', Validators.required],
+      cargo: ['', Validators.required],
+      tipoCargo: ['', Validators.required],
+      tipoAbertura: ['', Validators.required],
+      status: ['aberta', Validators.required],
+      fonteRecrutamento: ['', Validators.required],
+      statusEntrevista: [''],
+      salario: ['', [Validators.required, Validators.min(0)]],
+      dataAbertura: [this.getToday(), Validators.required],
+      dataFechamentoCancelamento: [''],
+      observacoes: [''],
+      candidatoAprovado: [''],
+      contatoCandidato: ['']
+    });
+  }
+
+  ngOnInit() {
+    this.loadClientes();
+    this.loadUsuarios();
+    this.setupFormListeners();
+  }
+
+  loadClientes() {
+    // Mock data - substituir por chamada real ao backend
+    this.clientes = [
+      { id: 1, nome: 'Tech Solutions Ltda' },
+      { id: 2, nome: 'Finance Corp' },
+      { id: 3, nome: 'Comercial Plus' },
+      { id: 4, nome: 'Startup XYZ' },
+      { id: 5, nome: 'Indústria ABC' }
+    ];
+  }
+
+  loadUsuarios() {
+    // Mock data - substituir por chamada real ao backend
+    this.usuarios = [
+      { id: 1, nome: 'Ana Recrutadora' },
+      { id: 2, nome: 'Carlos RH' },
+      { id: 3, nome: 'Maria Gestora' },
+      { id: 4, nome: 'João Analista' }
+    ];
+  }
+
+  setupFormListeners() {
+    // Listener para o status - limpa campos de fechamento se não estiver fechado
+    this.vagaForm.get('status')?.valueChanges.subscribe(status => {
+      const isFechado = ['fechada', 'fechada_rep', 'cancelada_cliente'].includes(status);
+
+      if (!isFechado) {
+        this.vagaForm.patchValue({
+          dataFechamentoCancelamento: '',
+          candidatoAprovado: '',
+          contatoCandidato: ''
+        });
+      }
+    });
+
+    // Listener para candidato aprovado - habilita/desabilita campo de contato
+    this.vagaForm.get('candidatoAprovado')?.valueChanges.subscribe(candidato => {
+      if (!candidato) {
+        this.vagaForm.patchValue({ contatoCandidato: '' });
+      }
+    });
+  }
+
+  getToday(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  onSubmit() {
+    if (this.vagaForm.valid) {
+      this.isSubmitting = true;
+
+      // Simular envio ao backend
+      setTimeout(() => {
+        console.log('Vaga criada:', this.vagaForm.value);
+        this.showSuccessMessage = true;
+        this.isSubmitting = false;
+
+        // Redirecionar após 2 segundos
+        setTimeout(() => {
+          this.router.navigate(['/recrutamento-selecao']);
+        }, 2000);
+      }, 1000);
+    } else {
+      // Marcar todos os campos como touched para mostrar erros
+      Object.keys(this.vagaForm.controls).forEach(key => {
+        const control = this.vagaForm.get(key);
+        control?.markAsTouched();
+      });
+    }
+  }
+
+  onCancel() {
+    if (confirm('Tem certeza que deseja cancelar? Todas as alterações serão perdidas.')) {
+      this.router.navigate(['/recrutamento-selecao']);
+    }
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.vagaForm.get(fieldName);
+    return !!(field && field.invalid && field.touched);
+  }
+
+  getErrorMessage(fieldName: string): string {
+    const field = this.vagaForm.get(fieldName);
+    if (field?.errors) {
+      if (field.errors['required']) {
+        return 'Este campo é obrigatório';
+      }
+      if (field.errors['min']) {
+        return 'O valor deve ser maior que zero';
+      }
+    }
+    return '';
+  }
+}

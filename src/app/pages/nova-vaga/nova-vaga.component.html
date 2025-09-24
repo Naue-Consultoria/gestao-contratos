@@ -1,0 +1,289 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Nova Vaga</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <!-- Success Message -->
+  <div class="success-message" *ngIf="showSuccessMessage">
+    <i class="fas fa-check-circle"></i>
+    <span>Vaga criada com sucesso! Redirecionando...</span>
+  </div>
+
+  <!-- Form Container -->
+  <div class="form-container">
+    <form [formGroup]="vagaForm" (ngSubmit)="onSubmit()">
+
+      <!-- Section: Informações do Cliente e Responsável -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="fas fa-building"></i>
+          Informações do Cliente e Responsável
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="clienteId" class="required">Cliente</label>
+            <select
+              id="clienteId"
+              formControlName="clienteId"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('clienteId')">
+              <option value="">Selecione um cliente</option>
+              <option *ngFor="let cliente of clientes" [value]="cliente.id">
+                {{ cliente.nome }}
+              </option>
+            </select>
+            <span class="error-message" *ngIf="isFieldInvalid('clienteId')">
+              {{ getErrorMessage('clienteId') }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="usuarioId" class="required">Consultora Responsável</label>
+            <select
+              id="usuarioId"
+              formControlName="usuarioId"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('usuarioId')">
+              <option value="">Selecione a consultora</option>
+              <option *ngFor="let usuario of usuarios" [value]="usuario.id">
+                {{ usuario.nome }}
+              </option>
+            </select>
+            <span class="error-message" *ngIf="isFieldInvalid('usuarioId')">
+              {{ getErrorMessage('usuarioId') }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Dados da Vaga -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="fas fa-briefcase"></i>
+          Dados da Vaga
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="cargo" class="required">Cargo</label>
+            <input
+              type="text"
+              id="cargo"
+              formControlName="cargo"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('cargo')"
+              placeholder="Ex: Desenvolvedor Full Stack">
+            <span class="error-message" *ngIf="isFieldInvalid('cargo')">
+              {{ getErrorMessage('cargo') }}
+            </span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tipoCargo" class="required">Tipo de Cargo</label>
+            <select
+              id="tipoCargo"
+              formControlName="tipoCargo"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('tipoCargo')">
+              <option value="">Selecione o tipo</option>
+              <option *ngFor="let tipo of tipoCargoOptions" [value]="tipo.value">
+                {{ tipo.label }}
+              </option>
+            </select>
+            <span class="error-message" *ngIf="isFieldInvalid('tipoCargo')">
+              {{ getErrorMessage('tipoCargo') }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="tipoAbertura" class="required">Tipo de Abertura</label>
+            <select
+              id="tipoAbertura"
+              formControlName="tipoAbertura"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('tipoAbertura')">
+              <option value="">Selecione o tipo</option>
+              <option *ngFor="let tipo of tipoAberturaOptions" [value]="tipo.value">
+                {{ tipo.label }}
+              </option>
+            </select>
+            <span class="error-message" *ngIf="isFieldInvalid('tipoAbertura')">
+              {{ getErrorMessage('tipoAbertura') }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="salario" class="required">Salário (R$)</label>
+            <input
+              type="number"
+              id="salario"
+              formControlName="salario"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('salario')"
+              placeholder="0,00"
+              min="0"
+              step="100">
+            <span class="error-message" *ngIf="isFieldInvalid('salario')">
+              {{ getErrorMessage('salario') }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Status e Datas -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="fas fa-calendar-alt"></i>
+          Status e Datas
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="status" class="required">Status</label>
+            <select
+              id="status"
+              formControlName="status"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('status')">
+              <option *ngFor="let status of statusOptions" [value]="status.value">
+                {{ status.label }}
+              </option>
+            </select>
+            <span class="error-message" *ngIf="isFieldInvalid('status')">
+              {{ getErrorMessage('status') }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="dataAbertura" class="required">Data de Abertura</label>
+            <input
+              type="date"
+              id="dataAbertura"
+              formControlName="dataAbertura"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('dataAbertura')">
+            <span class="error-message" *ngIf="isFieldInvalid('dataAbertura')">
+              {{ getErrorMessage('dataAbertura') }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="dataFechamentoCancelamento">Data de Fechamento/Cancelamento</label>
+            <input
+              type="date"
+              id="dataFechamentoCancelamento"
+              formControlName="dataFechamentoCancelamento"
+              class="form-control"
+              [disabled]="!['fechada', 'fechada_rep', 'cancelada_cliente'].includes(vagaForm.get('status')?.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Recrutamento -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="fas fa-search"></i>
+          Informações de Recrutamento
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fonteRecrutamento" class="required">Fonte de Recrutamento</label>
+            <select
+              id="fonteRecrutamento"
+              formControlName="fonteRecrutamento"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('fonteRecrutamento')">
+              <option value="">Selecione a fonte</option>
+              <option *ngFor="let fonte of fonteRecrutamentoOptions" [value]="fonte.value">
+                {{ fonte.label }}
+              </option>
+            </select>
+            <span class="error-message" *ngIf="isFieldInvalid('fonteRecrutamento')">
+              {{ getErrorMessage('fonteRecrutamento') }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="statusEntrevista">Status da Entrevista</label>
+            <select
+              id="statusEntrevista"
+              formControlName="statusEntrevista"
+              class="form-control">
+              <option *ngFor="let status of statusEntrevistaOptions" [value]="status.value">
+                {{ status.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="candidatoAprovado">Candidato Aprovado</label>
+            <input
+              type="text"
+              id="candidatoAprovado"
+              formControlName="candidatoAprovado"
+              class="form-control"
+              placeholder="Nome do candidato aprovado"
+              [disabled]="!['fechada', 'fechada_rep'].includes(vagaForm.get('status')?.value)">
+          </div>
+
+          <div class="form-group">
+            <label for="contatoCandidato">Contato do Candidato</label>
+            <input
+              type="text"
+              id="contatoCandidato"
+              formControlName="contatoCandidato"
+              class="form-control"
+              placeholder="Telefone ou e-mail"
+              [disabled]="!vagaForm.get('candidatoAprovado')?.value">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Observações -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="fas fa-comment"></i>
+          Observações
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="observacoes">Observações</label>
+            <textarea
+              id="observacoes"
+              formControlName="observacoes"
+              class="form-control"
+              rows="4"
+              placeholder="Informações adicionais sobre a vaga..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="onCancel()"
+          [disabled]="isSubmitting">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isSubmitting">
+          <i class="fas" [ngClass]="isSubmitting ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+          {{ isSubmitting ? 'Salvando...' : 'Salvar Vaga' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
