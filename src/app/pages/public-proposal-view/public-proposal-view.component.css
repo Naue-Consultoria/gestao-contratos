@@ -1995,6 +1995,23 @@ html {
   padding: 3rem 2.5rem;
 }
 
+/* Remove padding quando não há descrição expandida */
+.service-content:not(:has(.service-description-section)) {
+  padding-top: 0;
+  padding-bottom: 1.5rem;
+}
+
+/* Remove padding-top e borda do service-details-row quando não há descrição */
+.service-content:not(:has(.service-description-section)) .service-details-row {
+  padding-top: 1rem;
+  border-top: none;
+}
+
+/* Ajusta margem do service-header quando seguido de content sem descrição */
+.service-header + .service-content:not(:has(.service-description-section)) {
+  margin-top: -1px; /* Remove espaço adicional */
+}
+
 .quantity-indicator {
   font-size: 1rem;
   font-weight: 500;
@@ -2042,17 +2059,18 @@ html {
 
 .service-details-row {
   display: flex;
-  gap: 3rem;
+  justify-content: space-between;
+  align-items: center;
   padding-top: 2rem;
   border-top: 1px solid rgba(6, 95, 70, 0.1);
 }
 
 .detail-item {
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .detail-item.highlight {
-  flex: 1.5;
+  text-align: right;
 }
 
 .detail-label {
@@ -2168,16 +2186,23 @@ html {
   }
 
   .service-details-row {
-    flex-direction: column;
-    gap: 1.5rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
   }
 
   .detail-item {
-    text-align: center;
+    text-align: left;
+  }
+
+  .detail-item.highlight {
+    text-align: right;
   }
 
   .detail-label {
-    justify-content: center;
+    justify-content: flex-start;
+    font-size: 0.85rem;
   }
 
   .price-total {
