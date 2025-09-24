@@ -9,6 +9,8 @@ export interface CreateServiceRequest {
   duration_unit: 'dias' | 'semanas' | 'meses' | 'encontros' | 'Projeto';
   description?: string | null;
   category?: string | null;
+  subtitle?: string | null;
+  summary?: string | null;
   is_active?: boolean;
 }
 
@@ -18,6 +20,8 @@ export interface UpdateServiceRequest {
   duration_unit?: 'dias' | 'semanas' | 'meses' | 'encontros' | 'Projeto';
   description?: string | null;
   category?: string | null;
+  subtitle?: string | null;
+  summary?: string | null;
   is_active?: boolean;
 }
 
@@ -28,6 +32,8 @@ export interface ApiService {
   duration_unit: string;
   description: string | null;
   category: string | null;
+  subtitle: string | null;
+  summary: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;

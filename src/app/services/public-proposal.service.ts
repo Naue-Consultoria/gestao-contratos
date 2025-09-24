@@ -19,6 +19,8 @@ export interface PublicProposalService {
     duration_unit?: string;
     category: string;
     description?: string;
+    subtitle?: string;
+    summary?: string;
   };
 }
 

@@ -2019,6 +2019,21 @@ html {
   margin-left: 1rem;
 }
 
+/* Estilos para o subtítulo do serviço */
+.service-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.service-subtitle {
+  font-size: 0.9rem;
+  color: #86efac;
+  opacity: 0.9;
+  margin: 0;
+  font-weight: 400;
+}
+
 .service-description-section {
   margin-bottom: 2.5rem;
   animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -2060,17 +2075,53 @@ html {
 .service-details-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding-top: 2rem;
   border-top: 1px solid rgba(6, 95, 70, 0.1);
+  gap: 2rem;
 }
 
 .detail-item {
-  flex: 0 0 auto;
+  flex: 1;
+}
+
+.detail-item.summary {
+  flex: 2;
+  text-align: left;
+}
+
+.detail-item.summary .detail-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #53535c;
+}
+
+.detail-item.duration {
+  flex: 1;
+  text-align: center;
+}
+
+.detail-item.duration .detail-label {
+  justify-content: center;
+}
+
+/* Ajusta layout quando não há summary */
+.service-details-row:not(:has(.detail-item.summary)) .detail-item.duration {
+  text-align: left;
+  flex: 1;
+}
+
+.service-details-row:not(:has(.detail-item.summary)) .detail-item.duration .detail-label {
+  justify-content: flex-start;
 }
 
 .detail-item.highlight {
+  flex: 1;
   text-align: right;
+}
+
+.detail-item.highlight .detail-label {
+  justify-content: flex-end;
 }
 
 .detail-label {
@@ -2083,6 +2134,7 @@ html {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.75rem;
+  height: 1.5rem; /* Altura fixa para alinhar todos os labels */
 }
 
 .detail-label i {
@@ -2186,18 +2238,28 @@ html {
   }
 
   .service-details-row {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 1.5rem;
   }
 
   .detail-item {
     text-align: left;
   }
 
+  .detail-item.summary {
+    flex: 1;
+  }
+
+  .detail-item.duration {
+    flex: 1;
+    text-align: left;
+  }
+
   .detail-item.highlight {
-    text-align: right;
+    flex: 1;
+    text-align: left;
   }
 
   .detail-label {

@@ -50,6 +50,30 @@
               </div>
             </div>
 
+            <div class="form-group">
+              <label class="form-label">Subtítulo (Opcional)</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="formData.subtitle"
+                name="subtitle"
+                placeholder="Ex: Solução estratégica para otimização de resultados"
+                maxlength="255">
+              <div class="help-text">Aparece logo abaixo do nome do serviço nas propostas</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Resumo (Opcional)</label>
+              <textarea
+                class="form-control"
+                [(ngModel)]="formData.summary"
+                name="summary"
+                placeholder="Ex: Implementação completa com acompanhamento especializado, suporte técnico dedicado..."
+                rows="3"
+                maxlength="500"></textarea>
+              <div class="help-text">Breve descrição que aparece na visualização rápida do serviço</div>
+            </div>
+
             <div class="form-group" *ngIf="isEditMode">
               <label class="form-label">Status do Serviço</label>
               <div class="status-toggle-group">

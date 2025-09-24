@@ -62,6 +62,8 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
     duration_unit: 'dias' as 'dias' | 'semanas' | 'meses' | 'encontros' | 'Projeto',
     category: 'Geral',
     description: '',
+    subtitle: '',
+    summary: '',
     is_active: true
   };
 
@@ -180,6 +182,8 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
           duration_unit: service.duration_unit as any,
           category: service.category || 'Geral',
           description: service.description || '',
+          subtitle: service.subtitle || '',
+          summary: service.summary || '',
           is_active: service.is_active
         };
 
@@ -274,6 +278,8 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
           duration_unit: this.formData.duration_unit,
           category: this.formData.category,
           description: this.formData.description,
+          subtitle: this.formData.subtitle || null,
+          summary: this.formData.summary || null,
           is_active: this.formData.is_active
         };
         
@@ -291,7 +297,9 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
           duration_amount: this.formData.duration_unit === 'Projeto' ? null : this.formData.duration_amount,
           duration_unit: this.formData.duration_unit,
           category: this.formData.category,
-          description: this.formData.description
+          description: this.formData.description,
+          subtitle: this.formData.subtitle || null,
+          summary: this.formData.summary || null
         };
         
         const response = await this.serviceService.createService(createData).toPromise();

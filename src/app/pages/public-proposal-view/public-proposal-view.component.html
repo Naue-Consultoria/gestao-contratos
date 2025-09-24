@@ -291,12 +291,15 @@
                     <i class="fas fa-check"></i>
                   </label>
                 </div>
-                <h2 class="service-header-title">
-                  {{ service.service.name }}
-                  <span class="quantity-indicator" *ngIf="service.quantity > 1">
-                    ({{ service.quantity }} unidades)
-                  </span>
-                </h2>
+                <div class="service-title-group">
+                  <h2 class="service-header-title">
+                    {{ service.service.name }}
+                    <span class="quantity-indicator" *ngIf="service.quantity > 1">
+                      ({{ service.quantity }} unidades)
+                    </span>
+                  </h2>
+                  <p class="service-subtitle" *ngIf="service.service.subtitle">{{ service.service.subtitle }}</p>
+                </div>
               </div>
               <div class="service-selection">
                 <button class="service-toggle-btn"
@@ -321,8 +324,15 @@
 
               <!-- Service Details -->
               <div class="service-details-row">
+                <!-- Summary -->
+                <div class="detail-item summary" *ngIf="service.service.summary">
+                  <div class="detail-value">
+                    <span>{{ service.service.summary }}</span>
+                  </div>
+                </div>
+
                 <!-- Duration -->
-                <div class="detail-item">
+                <div class="detail-item duration">
                   <div class="detail-label">
                     <i class="fas fa-clock"></i>
                     <span>Duração</span>
