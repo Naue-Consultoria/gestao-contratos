@@ -292,15 +292,20 @@ export class RecrutamentoSelecao implements OnInit {
 
   // Vaga actions
   viewVaga(vaga: Vaga) {
-    console.log('Viewing vaga:', vaga);
+    this.router.navigate(['/home/recrutamento-selecao/visualizar', vaga.id]);
   }
 
   editVaga(vaga: Vaga) {
-    console.log('Editing vaga:', vaga);
+    this.router.navigate(['/home/recrutamento-selecao/editar', vaga.id]);
   }
 
   deleteVaga(vaga: Vaga) {
-    console.log('Deleting vaga:', vaga);
+    if (confirm('Tem certeza que deseja excluir esta vaga?')) {
+      // TODO: Implement delete functionality
+      console.log('Deleting vaga:', vaga);
+      // After successful deletion:
+      // this.loadData();
+    }
   }
 
   // Dropdown management

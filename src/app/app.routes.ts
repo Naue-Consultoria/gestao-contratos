@@ -28,6 +28,7 @@ import { RoutineViewPageComponent } from './components/routine-view-page/routine
 import { ServiceTrackingPageComponent } from './components/service-tracking-page/service-tracking-page';
 import { RecrutamentoSelecao } from './pages/recrutamento-selecao/recrutamento-selecao';
 import { NovaVagaComponent } from './pages/nova-vaga/nova-vaga.component';
+import { VisualizarVagaComponent } from './pages/visualizar-vaga/visualizar-vaga';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -240,6 +241,22 @@ export const routes: Routes = [
         component: NovaVagaComponent,
         canActivate: [UserGuard],
         title: 'Nova Vaga - NAUE Consultoria',
+      },
+
+      // Visualizar Vaga
+      {
+        path: 'recrutamento-selecao/visualizar/:id',
+        component: VisualizarVagaComponent,
+        canActivate: [UserGuard],
+        title: 'Visualizar Vaga - NAUE Consultoria',
+      },
+
+      // Editar Vaga
+      {
+        path: 'recrutamento-selecao/editar/:id',
+        component: NovaVagaComponent,
+        canActivate: [UserGuard],
+        title: 'Editar Vaga - NAUE Consultoria',
       },
 
       // Rotinas

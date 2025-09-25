@@ -1,0 +1,188 @@
+<div class="page-header">
+  <h1 class="page-title">Detalhes da Vaga</h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="!isLoading && !vaga">
+  <div class="error-icon">
+    <i class="fas fa-exclamation-triangle"></i>
+  </div>
+  <h3>Vaga não encontrada</h3>
+  <p>Não foi possível carregar os dados da vaga.</p>
+  <button class="btn btn-primary" (click)="goBack()">
+    <i class="fas fa-arrow-left"></i> Voltar para Recrutamento
+  </button>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="isLoading" class="loading-container">
+  <div class="loading-spinner"></div>
+  <p>Carregando dados da vaga...</p>
+</div>
+
+<!-- Main Content -->
+<div class="content" *ngIf="!isLoading && vaga">
+
+  <!-- Unified Vaga Details Section -->
+  <div class="vaga-details-unified">
+    <!-- Vaga Overview Header -->
+    <div class="vaga-overview-header">
+      <!-- Action Buttons -->
+      <div class="vaga-actions">
+        <button class="btn-action-header" (click)="editVaga()" title="Editar Vaga">
+          <i class="fas fa-edit"></i>
+          Editar
+        </button>
+        <button class="btn-action-header" (click)="printVaga()" title="Imprimir Vaga">
+          <i class="fas fa-print"></i>
+          Imprimir
+        </button>
+        <button class="btn-action-header delete" (click)="deleteVaga()" title="Excluir Vaga">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+
+      <!-- Primary Info -->
+      <div class="primary-info">
+        <div class="vaga-header">
+          <div class="vaga-logo-section">
+            <div class="company-logo-wrapper">
+              <i class="fas fa-briefcase logo-icon"></i>
+            </div>
+          </div>
+          <div class="vaga-info">
+            <h2 class="vaga-cargo">{{ vaga.cargo }}</h2>
+            <div class="vaga-badges">
+              <span class="code-badge">{{ vaga.codigo }}</span>
+              <span class="type-badge">{{ tipoCargoLabels[vaga.tipoCargo] }}</span>
+              <span class="status-badge" [attr.data-status]="vaga.status">
+                {{ statusLabels[vaga.status] }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meta Information -->
+      <div class="meta-info">
+        <div class="info-group">
+          <span class="info-label">Cliente</span>
+          <span class="info-value">{{ vaga.clienteNome || 'Não informado' }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Consultora</span>
+          <span class="info-value">{{ vaga.usuarioNome || 'Não informado' }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Tipo Abertura</span>
+          <span class="info-value">{{ tipoAberturaLabels[vaga.tipoAbertura] }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Salário</span>
+          <span class="info-value salary">{{ vaga.salario | currency:'BRL':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="vaga-content">
+
+<!-- Job Information Section -->
+      <section class="content-section">
+        <h3 class="section-title">
+          <i class="fas fa-briefcase"></i>
+          Informações da Vaga
+        </h3>
+
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="info-header">
+              <i class="fas fa-calendar-plus"></i>
+              <h4>Data de Abertura</h4>
+            </div>
+            <p class="info-value">{{ vaga.dataAbertura | date:'dd/MM/yyyy' }}</p>
+          </div>
+
+          <div class="info-card" *ngIf="vaga.dataFechamentoCancelamento">
+            <div class="info-header">
+              <i class="fas fa-calendar-check"></i>
+              <h4>Data de Fechamento</h4>
+            </div>
+            <p class="info-value">{{ vaga.dataFechamentoCancelamento | date:'dd/MM/yyyy' }}</p>
+          </div>
+
+          <div class="info-card">
+            <div class="info-header">
+              <i class="fas fa-hourglass-half"></i>
+              <h4>Tempo em Aberto</h4>
+            </div>
+            <p class="info-value">
+              <span class="badge" [ngClass]="getSLAClass(calculateSLA())">
+                {{ calculateSLA() }} dias
+              </span>
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="info-header">
+              <i class="fas fa-share-alt"></i>
+              <h4>Fonte de Recrutamento</h4>
+            </div>
+            <p class="info-value">
+              <span class="fonte-badge">{{ fonteRecrutamentoLabels[vaga.fonteRecrutamento] }}</span>
+            </p>
+          </div>
+
+          <div class="info-card" *ngIf="vaga.statusEntrevista">
+            <div class="info-header">
+              <i class="fas fa-comments"></i>
+              <h4>Status da Entrevista</h4>
+            </div>
+            <p class="info-value">
+              <span class="interview-badge">{{ statusEntrevistaLabels[vaga.statusEntrevista] }}</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Approved Candidate Section -->
+      <section class="content-section" *ngIf="vaga.candidatoAprovado">
+        <h3 class="section-title">
+          <i class="fas fa-user-check"></i>
+          Candidato Aprovado
+        </h3>
+
+        <div class="candidate-card">
+          <div class="candidate-info">
+            <h4>{{ vaga.candidatoAprovado }}</h4>
+            <div class="candidate-details">
+              <div class="detail-row" *ngIf="vaga.emailCandidato">
+                <i class="fas fa-envelope"></i>
+                <a href="mailto:{{ vaga.emailCandidato }}">{{ vaga.emailCandidato }}</a>
+              </div>
+              <div class="detail-row" *ngIf="vaga.telefoneCandidato">
+                <i class="fas fa-phone"></i>
+                <span>{{ vaga.telefoneCandidato }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Observations Section -->
+      <section class="content-section" *ngIf="vaga.observacoes">
+        <h3 class="section-title">
+          <i class="fas fa-comment-alt"></i>
+          Observações
+        </h3>
+
+        <div class="notes-card">
+          <p>{{ vaga.observacoes }}</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
