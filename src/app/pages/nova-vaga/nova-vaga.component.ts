@@ -86,7 +86,9 @@ export class NovaVagaComponent implements OnInit {
       observacoes: [''],
       candidatoAprovado: [''],
       emailCandidato: [''],
-      telefoneCandidato: ['']
+      telefoneCandidato: [''],
+      porcentagemFaturamento: [100, [Validators.min(0), Validators.max(200)]],
+      valorFaturamento: [{ value: 0, disabled: true }]
     });
   }
 
@@ -95,6 +97,7 @@ export class NovaVagaComponent implements OnInit {
     this.loadClientes();
     this.loadUsuarios();
     this.setupFormListeners();
+    this.setupFaturamentoCalculation();
   }
 
   private setBreadcrumb() {
@@ -144,6 +147,20 @@ export class NovaVagaComponent implements OnInit {
     // Removido o listener do candidato aprovado - campos aparecem junto com status fechada
   }
 
+  setupFaturamentoCalculation() {
+    // Atualizar valor de faturamento quando salário ou porcentagem mudar
+    this.vagaForm.get('salario')?.valueChanges.subscribe(() => this.calculateFaturamento());
+    this.vagaForm.get('porcentagemFaturamento')?.valueChanges.subscribe(() => this.calculateFaturamento());
+  }
+
+  calculateFaturamento() {
+    const salario = this.vagaForm.get('salario')?.value || 0;
+    const porcentagem = this.vagaForm.get('porcentagemFaturamento')?.value || 100;
+    const valorFaturamento = salario * (porcentagem / 100);
+
+    this.vagaForm.get('valorFaturamento')?.setValue(valorFaturamento, { emitEvent: false });
+  }
+
   getToday(): string {
     return new Date().toISOString().split('T')[0];
   }
@@ -152,11 +169,17 @@ export class NovaVagaComponent implements OnInit {
     if (this.vagaForm.valid) {
       this.isSubmitting = true;
 
+      // Habilitar campo de valor faturamento antes de enviar
+      this.vagaForm.get('valorFaturamento')?.enable();
+
       // Simular envio ao backend
       setTimeout(() => {
         console.log('Vaga criada:', this.vagaForm.value);
         this.showSuccessMessage = true;
         this.isSubmitting = false;
+
+        // Desabilitar novamente o campo
+        this.vagaForm.get('valorFaturamento')?.disable();
 
         // Redirecionar após 2 segundos
         setTimeout(() => {

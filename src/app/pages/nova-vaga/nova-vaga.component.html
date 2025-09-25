@@ -239,6 +239,40 @@
             </div>
           </div>
 
+          <!-- Section: Faturamento - Only for closed jobs -->
+          <div class="form-section" *ngIf="['fechada', 'fechada_rep'].includes(vagaForm.get('status')?.value)">
+            <h3 class="section-title">
+              <i class="fas fa-calculator"></i>
+              Faturamento
+            </h3>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Porcentagem de Faturamento (%)</label>
+                <input
+                  type="number"
+                  formControlName="porcentagemFaturamento"
+                  class="form-control"
+                  placeholder="100"
+                  min="0"
+                  max="200"
+                  step="5">
+                <small class="form-helper">Porcentagem do salário para faturamento (0-200%)</small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Valor Final de Faturamento</label>
+                <input
+                  type="number"
+                  formControlName="valorFaturamento"
+                  class="form-control"
+                  placeholder="R$ 0,00"
+                  readonly>
+                <small class="form-helper">Calculado automaticamente: Salário × Porcentagem</small>
+              </div>
+            </div>
+          </div>
+
           <!-- Section: Observações -->
           <div class="form-section">
             <h3 class="section-title">

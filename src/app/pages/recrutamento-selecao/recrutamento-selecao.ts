@@ -26,6 +26,8 @@ interface Vaga {
   candidatoAprovado?: string;
   contatoCandidato?: string;
   totalCandidatos: number;
+  porcentagemFaturamento?: number;  // Porcentagem sobre o salário
+  valorFaturamento?: number;  // Valor calculado: salario * (porcentagemFaturamento / 100)
 }
 
 
@@ -44,6 +46,9 @@ export class RecrutamentoSelecao implements OnInit {
   tipoCargoFilter: string = '';
   fonteRecrutamentoFilter: string = '';
   openDropdownId: number | null = null;
+  activeTab: string = 'geral';
+  selectedMonth: string = '';  // Formato: '1' a '12' (mês)
+  selectedYear: string = '';   // Formato: 'YYYY' (ano)
 
   constructor(
     private router: Router,
@@ -214,7 +219,78 @@ export class RecrutamentoSelecao implements OnInit {
         observacoes: 'Vaga preenchida com sucesso',
         candidatoAprovado: 'Pedro Santos',
         contatoCandidato: '(11) 97654-3210',
-        totalCandidatos: 18
+        totalCandidatos: 18,
+        porcentagemFaturamento: 100,
+        valorFaturamento: 2800
+      },
+      {
+        id: 6,
+        codigo: 'VAG006',
+        clienteId: 1,
+        clienteNome: 'Tech Solutions Ltda',
+        usuarioId: 1,
+        usuarioNome: 'Ana Recrutadora',
+        cargo: 'Analista de Sistemas',
+        tipoCargo: 'gestao',
+        tipoAbertura: 'nova',
+        status: 'fechada',
+        fonteRecrutamento: 'linkedin',
+        statusEntrevista: 'realizada',
+        salario: 6500,
+        dataAbertura: new Date('2023-11-15'),
+        dataFechamentoCancelamento: new Date('2023-12-20'),
+        observacoes: 'Vaga fechada com sucesso',
+        candidatoAprovado: 'Maria Silva',
+        contatoCandidato: '(11) 95555-1234',
+        totalCandidatos: 12,
+        porcentagemFaturamento: 100,
+        valorFaturamento: 6500
+      },
+      {
+        id: 7,
+        codigo: 'VAG007',
+        clienteId: 2,
+        clienteNome: 'Finance Corp',
+        usuarioId: 2,
+        usuarioNome: 'Carlos RH',
+        cargo: 'Assistente Administrativo',
+        tipoCargo: 'administrativo',
+        tipoAbertura: 'reposicao',
+        status: 'fechada_rep',
+        fonteRecrutamento: 'catho',
+        statusEntrevista: 'realizada',
+        salario: 3500,
+        dataAbertura: new Date('2023-12-01'),
+        dataFechamentoCancelamento: new Date('2023-12-28'),
+        observacoes: 'Reposicao realizada',
+        candidatoAprovado: 'Carlos Oliveira',
+        contatoCandidato: '(11) 94444-5678',
+        totalCandidatos: 25,
+        porcentagemFaturamento: 80,
+        valorFaturamento: 2800
+      },
+      {
+        id: 8,
+        codigo: 'VAG008',
+        clienteId: 3,
+        clienteNome: 'Comercial Plus',
+        usuarioId: 1,
+        usuarioNome: 'Ana Recrutadora',
+        cargo: 'Gerente de Vendas',
+        tipoCargo: 'comercial',
+        tipoAbertura: 'nova',
+        status: 'fechada',
+        fonteRecrutamento: 'indicacao',
+        statusEntrevista: 'realizada',
+        salario: 15000,
+        dataAbertura: new Date('2024-01-05'),
+        dataFechamentoCancelamento: new Date('2024-02-10'),
+        observacoes: 'Excelente processo seletivo',
+        candidatoAprovado: 'Roberto Costa',
+        contatoCandidato: '(11) 93333-9999',
+        totalCandidatos: 8,
+        porcentagemFaturamento: 120,
+        valorFaturamento: 18000
       }
     ];
 
@@ -266,11 +342,13 @@ export class RecrutamentoSelecao implements OnInit {
     this.departmentFilter = '';
     this.tipoCargoFilter = '';
     this.fonteRecrutamentoFilter = '';
+    this.selectedMonth = '';
+    this.selectedYear = '';
     this.applyFilters();
   }
 
   hasFilters(): boolean {
-    return !!(this.searchTerm || this.statusFilter || this.departmentFilter || this.tipoCargoFilter || this.fonteRecrutamentoFilter);
+    return !!(this.searchTerm || this.statusFilter || this.departmentFilter || this.tipoCargoFilter || this.fonteRecrutamentoFilter || this.selectedMonth || this.selectedYear);
   }
 
   // Helper method to get Object.keys in template
@@ -291,7 +369,23 @@ export class RecrutamentoSelecao implements OnInit {
   }
 
   // Vaga actions
-  viewVaga(vaga: Vaga) {
+  viewVaga(vaga: Vaga, event?: MouseEvent) {
+    // Se event foi fornecido, verificar se clicou em botões de ação
+    if (event) {
+      const target = event.target as HTMLElement;
+
+      if (target.closest('.action-buttons-cell') ||
+          target.closest('.dropdown-container') ||
+          target.closest('.dropdown-menu') ||
+          target.classList.contains('dropdown-toggle') ||
+          target.classList.contains('action-btn')) {
+        return;
+      }
+
+      event.stopPropagation();
+      this.openDropdownId = null;
+    }
+
     this.router.navigate(['/home/recrutamento-selecao/visualizar', vaga.id]);
   }
 
@@ -350,5 +444,75 @@ export class RecrutamentoSelecao implements OnInit {
       return 'sla-danger';
     }
   }
+
+  // Tab management
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+  }
+
+  // Get vagas for fechamento tab (only closed)
+  getVagasFechamento(): Vaga[] {
+    let vagasFechadas = this.vagas.filter(vaga =>
+      (vaga.status === 'fechada' || vaga.status === 'fechada_rep') &&
+      vaga.dataFechamentoCancelamento
+    );
+
+    // Apply month and year filters if set
+    if (this.selectedMonth || this.selectedYear) {
+      vagasFechadas = vagasFechadas.filter(vaga => {
+        if (vaga.dataFechamentoCancelamento) {
+          const fechamentoDate = new Date(vaga.dataFechamentoCancelamento);
+          const year = fechamentoDate.getFullYear().toString();
+          const month = (fechamentoDate.getMonth() + 1).toString();
+
+          const matchesMonth = !this.selectedMonth || month === this.selectedMonth;
+          const matchesYear = !this.selectedYear || year === this.selectedYear;
+
+          return matchesMonth && matchesYear;
+        }
+        return false;
+      });
+    }
+
+    return vagasFechadas;
+  }
+
+  // Get available months (1-12)
+  getAvailableMonths(): { value: string; label: string }[] {
+    const monthNames = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    return monthNames.map((name, index) => ({
+      value: (index + 1).toString(),
+      label: name
+    }));
+  }
+
+  // Get available years from closed vagas
+  getAvailableYears(): { value: string; label: string }[] {
+    const years = new Set<string>();
+
+    this.vagas
+      .filter(vaga =>
+        (vaga.status === 'fechada' || vaga.status === 'fechada_rep') &&
+        vaga.dataFechamentoCancelamento
+      )
+      .forEach(vaga => {
+        if (vaga.dataFechamentoCancelamento) {
+          const date = new Date(vaga.dataFechamentoCancelamento);
+          years.add(date.getFullYear().toString());
+        }
+      });
+
+    return Array.from(years)
+      .sort((a, b) => b.localeCompare(a)) // Sort by most recent first
+      .map(year => ({
+        value: year,
+        label: year
+      }));
+  }
+
 
 }

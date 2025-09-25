@@ -80,6 +80,20 @@
     </div>
   </div>
 
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab" [class.active]="activeTab === 'geral'" (click)="setActiveTab('geral')">
+      <i class="fas fa-eye"></i>
+      Visão Geral
+      <span class="tab-count">{{ filteredVagas.length }}</span>
+    </div>
+    <div class="tab" [class.active]="activeTab === 'fechamento'" (click)="setActiveTab('fechamento')">
+      <i class="fas fa-check-circle"></i>
+      Fechamento
+      <span class="tab-count">{{ getVagasFechamento().length }}</span>
+    </div>
+  </div>
+
   <!-- Main Content -->
   <div class="table-container">
     <!-- Filters and Actions -->
@@ -102,7 +116,7 @@
         </div>
 
         <div class="filter-group">
-          <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()" *ngIf="activeTab === 'geral'">
             <option value="">Todos os status</option>
             <option *ngFor="let status of Object.keys(statusLabels)" [value]="status">
               {{ statusLabels[status] }}
@@ -120,6 +134,21 @@
             <option value="">Todas as fontes</option>
             <option *ngFor="let fonte of Object.keys(fonteRecrutamentoLabels)" [value]="fonte">
               {{ fonteRecrutamentoLabels[fonte] }}
+            </option>
+          </select>
+
+          <!-- Month/Year filters - Only show on Fechamento tab -->
+          <select class="filter-select" [(ngModel)]="selectedMonth" (change)="applyFilters()" *ngIf="activeTab === 'fechamento'">
+            <option value="">Todos os meses</option>
+            <option *ngFor="let month of getAvailableMonths()" [value]="month.value">
+              {{ month.label }}
+            </option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="selectedYear" (change)="applyFilters()" *ngIf="activeTab === 'fechamento'">
+            <option value="">Todos os anos</option>
+            <option *ngFor="let year of getAvailableYears()" [value]="year.value">
+              {{ year.label }}
             </option>
           </select>
         </div>
@@ -144,8 +173,8 @@
       Carregando dados...
     </div>
 
-    <!-- Table - Vagas -->
-    <div class="table-wrapper" *ngIf="!isLoading">
+    <!-- Table - Visão Geral -->
+    <div class="table-wrapper" *ngIf="!isLoading && activeTab === 'geral'">
       <div *ngIf="filteredVagas.length === 0" class="empty-state">
         <i class="fas fa-briefcase empty-icon"></i>
         <h3>Nenhuma vaga encontrada</h3>
@@ -171,7 +200,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let vaga of filteredVagas">
+          <tr *ngFor="let vaga of filteredVagas" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
             <td>
               <div class="client-info">
                 <span class="client-name">{{ vaga.clienteNome }}</span>
@@ -218,6 +247,121 @@
             </td>
             <td>
               <span class="fonte-badge">{{ fonteRecrutamentoLabels[vaga.fonteRecrutamento] }}</span>
+            </td>
+            <td>
+              <span class="date-text">{{ vaga.dataAbertura | date:'dd/MM/yyyy' }}</span>
+            </td>
+            <td>
+              <span class="date-text" *ngIf="vaga.dataFechamentoCancelamento">
+                {{ vaga.dataFechamentoCancelamento | date:'dd/MM/yyyy' }}
+              </span>
+              <span class="date-text empty" *ngIf="!vaga.dataFechamentoCancelamento">-</span>
+            </td>
+            <td>
+              <span class="sla-badge"
+                    [ngClass]="getSlaClass(calculateSla(vaga))"
+                    *ngIf="vaga.dataFechamentoCancelamento">
+                {{ calculateSla(vaga) }} dias
+              </span>
+              <span class="sla-badge active" *ngIf="!vaga.dataFechamentoCancelamento">
+                {{ calculateActiveSla(vaga) }} dias
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons-cell">
+                <div class="dropdown-container">
+                  <button class="action-btn dropdown-toggle" (click)="toggleDropdown(vaga.id, $event)" title="Ações">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="dropdown-menu" *ngIf="openDropdownId === vaga.id" [class.show]="openDropdownId === vaga.id">
+                    <button class="dropdown-item" (click)="viewVaga(vaga); closeDropdown($event)">
+                      <i class="fas fa-eye"></i>
+                      Visualizar
+                    </button>
+                    <button class="dropdown-item" (click)="editVaga(vaga); closeDropdown($event)">
+                      <i class="fas fa-edit"></i>
+                      Editar
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item delete" (click)="deleteVaga(vaga); closeDropdown($event)">
+                      <i class="fas fa-trash"></i>
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table - Fechamento -->
+    <div class="table-wrapper" *ngIf="!isLoading && activeTab === 'fechamento'">
+
+      <div *ngIf="getVagasFechamento().length === 0" class="empty-state">
+        <i class="fas fa-check-circle empty-icon"></i>
+        <h3>Nenhuma vaga fechada encontrada</h3>
+        <p>{{ (selectedMonth || selectedYear) ? 'Nenhuma vaga foi fechada no período selecionado' : 'Vagas fechadas aparecerão aqui' }}</p>
+      </div>
+
+      <table class="data-table" *ngIf="getVagasFechamento().length > 0">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Cargo</th>
+            <th>Status</th>
+            <th>Candidato Aprovado</th>
+            <th>Salário</th>
+            <th>% Faturamento</th>
+            <th>Valor Faturamento</th>
+            <th>Consultora</th>
+            <th>Data Abertura</th>
+            <th>Data Fechamento</th>
+            <th>SLA (dias)</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let vaga of getVagasFechamento()" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
+            <td>
+              <div class="client-info">
+                <span class="client-name">{{ vaga.clienteNome }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="vaga-title">
+                {{ vaga.cargo }}
+              </div>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + vaga.status">
+                {{ statusLabels[vaga.status] }}
+              </span>
+            </td>
+            <td>
+              <div class="approved-candidate" *ngIf="vaga.candidatoAprovado">
+                <span class="candidate-name">
+                  <i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.25rem;"></i>
+                  {{ vaga.candidatoAprovado }}
+                </span>
+                <small class="candidate-contact" *ngIf="vaga.contatoCandidato">
+                  {{ vaga.contatoCandidato }}
+                </small>
+              </div>
+              <span class="empty-text" *ngIf="!vaga.candidatoAprovado">-</span>
+            </td>
+            <td>
+              <span class="salary-value">R$ {{ vaga.salario | number:'1.2-2' }}</span>
+            </td>
+            <td>
+              <span class="percentage-value">{{ vaga.porcentagemFaturamento || 100 }}%</span>
+            </td>
+            <td>
+              <span class="billing-value">R$ {{ vaga.valorFaturamento || (vaga.salario * ((vaga.porcentagemFaturamento || 100) / 100)) | number:'1.2-2' }}</span>
+            </td>
+            <td>
+              <span class="consultant-name">{{ vaga.usuarioNome || '-' }}</span>
             </td>
             <td>
               <span class="date-text">{{ vaga.dataAbertura | date:'dd/MM/yyyy' }}</span>

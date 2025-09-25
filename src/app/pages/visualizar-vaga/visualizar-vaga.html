@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1 class="page-title">Detalhes da Vaga</h1>
+  <h1 class="page-title">Acompanhamento R&S - {{ vaga?.clienteNome || 'Carregando...' }}</h1>
   <app-breadcrumb></app-breadcrumb>
 </div>
 
@@ -48,13 +48,12 @@
         <div class="vaga-header">
           <div class="vaga-logo-section">
             <div class="company-logo-wrapper">
-              <i class="fas fa-briefcase logo-icon"></i>
+              <img src="logoNaue.png" alt="NAUE Consultoria" class="company-logo">
             </div>
           </div>
           <div class="vaga-info">
             <h2 class="vaga-cargo">{{ vaga.cargo }}</h2>
             <div class="vaga-badges">
-              <span class="code-badge">{{ vaga.codigo }}</span>
               <span class="type-badge">{{ tipoCargoLabels[vaga.tipoCargo] }}</span>
               <span class="status-badge" [attr.data-status]="vaga.status">
                 {{ statusLabels[vaga.status] }}
@@ -82,96 +81,97 @@
           <span class="info-label">Salário</span>
           <span class="info-value salary">{{ vaga.salario | currency:'BRL':'symbol':'1.2-2' }}</span>
         </div>
+        <div class="info-group">
+          <span class="info-label">Data de Abertura</span>
+          <span class="info-value">{{ vaga.dataAbertura | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-group" *ngIf="vaga.dataFechamentoCancelamento">
+          <span class="info-label">Data de Fechamento</span>
+          <span class="info-value">{{ vaga.dataFechamentoCancelamento | date:'dd/MM/yyyy' }}</span>
+        </div>
       </div>
     </div>
 
     <!-- Main Content Area -->
     <div class="vaga-content">
 
-<!-- Job Information Section -->
+
+      <!-- Candidates Management Section -->
       <section class="content-section">
-        <h3 class="section-title">
-          <i class="fas fa-briefcase"></i>
-          Informações da Vaga
-        </h3>
-
-        <div class="info-grid">
-          <div class="info-card">
-            <div class="info-header">
-              <i class="fas fa-calendar-plus"></i>
-              <h4>Data de Abertura</h4>
-            </div>
-            <p class="info-value">{{ vaga.dataAbertura | date:'dd/MM/yyyy' }}</p>
-          </div>
-
-          <div class="info-card" *ngIf="vaga.dataFechamentoCancelamento">
-            <div class="info-header">
-              <i class="fas fa-calendar-check"></i>
-              <h4>Data de Fechamento</h4>
-            </div>
-            <p class="info-value">{{ vaga.dataFechamentoCancelamento | date:'dd/MM/yyyy' }}</p>
-          </div>
-
-          <div class="info-card">
-            <div class="info-header">
-              <i class="fas fa-hourglass-half"></i>
-              <h4>Tempo em Aberto</h4>
-            </div>
-            <p class="info-value">
-              <span class="badge" [ngClass]="getSLAClass(calculateSLA())">
-                {{ calculateSLA() }} dias
-              </span>
-            </p>
-          </div>
-
-          <div class="info-card">
-            <div class="info-header">
-              <i class="fas fa-share-alt"></i>
-              <h4>Fonte de Recrutamento</h4>
-            </div>
-            <p class="info-value">
-              <span class="fonte-badge">{{ fonteRecrutamentoLabels[vaga.fonteRecrutamento] }}</span>
-            </p>
-          </div>
-
-          <div class="info-card" *ngIf="vaga.statusEntrevista">
-            <div class="info-header">
-              <i class="fas fa-comments"></i>
-              <h4>Status da Entrevista</h4>
-            </div>
-            <p class="info-value">
-              <span class="interview-badge">{{ statusEntrevistaLabels[vaga.statusEntrevista] }}</span>
-            </p>
-          </div>
+        <div class="section-header">
+          <h3 class="section-title">
+            <i class="fas fa-users"></i>
+            Candidatos
+          </h3>
+          <button class="btn btn-primary btn-sm" (click)="openCandidatoModal()">
+            <i class="fas fa-plus"></i> Adicionar Candidato
+          </button>
         </div>
+
+        <!-- Candidates List -->
+        <div class="table-wrapper" *ngIf="candidatos.length > 0; else noCandidates">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Telefone</th>
+                <th>Status</th>
+                <th>Data Inscrição</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let vagaCandidato of candidatos">
+                <td>
+                  <div class="candidate-info">
+                    <span class="candidate-name">{{ vagaCandidato.candidato.nome }}</span>
+                  </div>
+                </td>
+                <td>
+                  <a *ngIf="vagaCandidato.candidato.email"
+                     href="mailto:{{ vagaCandidato.candidato.email }}"
+                     class="email-link">
+                    {{ vagaCandidato.candidato.email }}
+                  </a>
+                  <span *ngIf="!vagaCandidato.candidato.email" class="empty-text">-</span>
+                </td>
+                <td>
+                  <span class="phone-text">{{ vagaCandidato.candidato.telefone || '-' }}</span>
+                </td>
+                <td>
+                  <span class="status-badge" [ngClass]="'status-' + (vagaCandidato.candidato.status || 'pendente')">
+                    {{ (vagaCandidato.candidato.status || 'pendente') | titlecase }}
+                  </span>
+                </td>
+                <td>
+                  <span class="date-text">{{ vagaCandidato.data_inscricao | date:'dd/MM/yyyy' }}</span>
+                </td>
+                <td>
+                  <div class="action-buttons-cell">
+                    <button class="action-btn"
+                            (click)="openEntrevistaModal(vagaCandidato)"
+                            title="Agendar Entrevista">
+                      <i class="fas fa-calendar-plus"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ng-template #noCandidates>
+          <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <h4>Nenhum candidato cadastrado</h4>
+            <p>Clique em "Adicionar Candidato" para começar a gerenciar candidatos para esta vaga.</p>
+          </div>
+        </ng-template>
       </section>
 
 
-      <!-- Approved Candidate Section -->
-      <section class="content-section" *ngIf="vaga.candidatoAprovado">
-        <h3 class="section-title">
-          <i class="fas fa-user-check"></i>
-          Candidato Aprovado
-        </h3>
-
-        <div class="candidate-card">
-          <div class="candidate-info">
-            <h4>{{ vaga.candidatoAprovado }}</h4>
-            <div class="candidate-details">
-              <div class="detail-row" *ngIf="vaga.emailCandidato">
-                <i class="fas fa-envelope"></i>
-                <a href="mailto:{{ vaga.emailCandidato }}">{{ vaga.emailCandidato }}</a>
-              </div>
-              <div class="detail-row" *ngIf="vaga.telefoneCandidato">
-                <i class="fas fa-phone"></i>
-                <span>{{ vaga.telefoneCandidato }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Observations Section -->
+<!-- Observations Section -->
       <section class="content-section" *ngIf="vaga.observacoes">
         <h3 class="section-title">
           <i class="fas fa-comment-alt"></i>
@@ -185,4 +185,23 @@
 
     </div>
   </div>
+
+  <!-- Candidato Modal -->
+  <app-candidato-modal
+    [isOpen]="isCandidatoModalVisible"
+    [candidato]="selectedCandidato"
+    (modalClosed)="closeCandidatoModal()"
+    (candidatoSaved)="onCandidatoSaved($event)">
+  </app-candidato-modal>
+
+  <!-- Entrevista Modal -->
+  <app-entrevista-modal
+    [isOpen]="isEntrevistaModalVisible"
+    [entrevista]="selectedEntrevista"
+    [vagaCandidatoId]="selectedVagaCandidato?.id || null"
+    [candidatoNome]="selectedVagaCandidato?.candidato?.nome || ''"
+    (modalClosed)="closeEntrevistaModal()"
+    (entrevistaSaved)="onEntrevistaSaved($event)">
+  </app-entrevista-modal>
+
 </div>

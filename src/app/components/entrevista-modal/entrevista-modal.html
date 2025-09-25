@@ -1,0 +1,80 @@
+<div class="modal" [class.active]="isOpen" (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ isEditMode ? 'Editar Entrevista' : 'Agendar Entrevista' }}</h2>
+      <button class="close-btn" (click)="closeModal()" type="button" aria-label="Fechar">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form [formGroup]="entrevistaForm" (ngSubmit)="onSubmit()">
+      <!-- Candidato (readonly info) -->
+      <div class="form-group" *ngIf="candidatoNome">
+        <label class="form-label">Candidato</label>
+        <input
+          type="text"
+          class="form-control"
+          [value]="candidatoNome"
+          readonly>
+      </div>
+
+      <!-- Data da Entrevista -->
+      <div class="form-group">
+        <label for="data_entrevista" class="form-label">Data da Entrevista *</label>
+        <input
+          type="date"
+          id="data_entrevista"
+          class="form-control"
+          [class.is-invalid]="formControls['data_entrevista'].invalid && formControls['data_entrevista'].touched"
+          formControlName="data_entrevista"
+          [disabled]="isLoading">
+        <div class="invalid-feedback" *ngIf="formControls['data_entrevista'].invalid && formControls['data_entrevista'].touched">
+          <span *ngIf="formControls['data_entrevista'].errors?.['required']">Data da entrevista é obrigatória</span>
+        </div>
+      </div>
+
+      <!-- Horário -->
+      <div class="form-group">
+        <label for="hora_entrevista" class="form-label">Horário *</label>
+        <input
+          type="time"
+          id="hora_entrevista"
+          class="form-control"
+          [class.is-invalid]="formControls['hora_entrevista'].invalid && formControls['hora_entrevista'].touched"
+          formControlName="hora_entrevista"
+          [disabled]="isLoading">
+        <div class="invalid-feedback" *ngIf="formControls['hora_entrevista'].invalid && formControls['hora_entrevista'].touched">
+          <span *ngIf="formControls['hora_entrevista'].errors?.['required']">Horário da entrevista é obrigatório</span>
+        </div>
+      </div>
+
+      <!-- Link da Videochamada -->
+      <div class="form-group">
+        <label for="link_chamada" class="form-label">Link da Videochamada</label>
+        <input
+          type="url"
+          id="link_chamada"
+          class="form-control"
+          formControlName="link_chamada"
+          placeholder="https://meet.google.com/xxx-xxx-xxx"
+          [disabled]="isLoading">
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button class="btn btn-primary" (click)="onSubmit()" [disabled]="isLoading">
+        <span *ngIf="!isLoading">
+          <i class="fas" [class.fa-calendar-plus]="!isEditMode" [class.fa-edit]="isEditMode"></i>
+          {{ isEditMode ? 'Atualizar' : 'Agendar' }}
+        </span>
+        <span *ngIf="isLoading">
+          <i class="fas fa-spinner fa-spin"></i>
+          {{ isEditMode ? 'Atualizando...' : 'Agendando...' }}
+        </span>
+      </button>
+      <button class="btn btn-secondary" (click)="closeModal()" [disabled]="isLoading">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>

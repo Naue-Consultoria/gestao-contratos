@@ -1,0 +1,91 @@
+<div class="modal" [class.active]="isOpen" (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ isEditMode ? 'Editar Candidato' : 'Adicionar Candidato' }}</h2>
+      <button class="close-btn" (click)="closeModal()" type="button" aria-label="Fechar">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Nome -->
+    <div class="form-group">
+      <label for="nome" class="form-label">Nome Completo *</label>
+      <input
+        type="text"
+        id="nome"
+        class="form-control"
+        [class.is-invalid]="formControls['nome'].invalid && formControls['nome'].touched"
+        formControlName="nome"
+        placeholder="Digite o nome completo do candidato"
+        [disabled]="isLoading">
+      <div class="invalid-feedback" *ngIf="formControls['nome'].invalid && formControls['nome'].touched">
+        <span *ngIf="formControls['nome'].errors?.['required']">Nome é obrigatório</span>
+        <span *ngIf="formControls['nome'].errors?.['minlength']">Nome deve ter pelo menos 2 caracteres</span>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email" class="form-label">E-mail</label>
+      <input
+        type="email"
+        id="email"
+        class="form-control"
+        [class.is-invalid]="formControls['email'].invalid && formControls['email'].touched"
+        formControlName="email"
+        placeholder="candidato@exemplo.com"
+        [disabled]="isLoading">
+      <div class="invalid-feedback" *ngIf="formControls['email'].invalid && formControls['email'].touched">
+        <span *ngIf="formControls['email'].errors?.['email']">E-mail inválido</span>
+      </div>
+    </div>
+
+    <!-- Telefone -->
+    <div class="form-group">
+      <label for="telefone" class="form-label">Telefone</label>
+      <input
+        type="tel"
+        id="telefone"
+        class="form-control"
+        formControlName="telefone"
+        placeholder="(11) 99999-9999"
+        (input)="formatPhone($event)"
+        maxlength="15"
+        [disabled]="isLoading">
+    </div>
+
+    <!-- Status -->
+    <div class="form-group">
+      <label for="status" class="form-label">Status *</label>
+      <select
+        id="status"
+        class="form-control"
+        [class.is-invalid]="formControls['status'].invalid && formControls['status'].touched"
+        formControlName="status"
+        [disabled]="isLoading">
+        <option value="pendente">Pendente</option>
+        <option value="aprovado">Aprovado</option>
+        <option value="reprovado">Reprovado</option>
+      </select>
+      <div class="invalid-feedback" *ngIf="formControls['status'].invalid && formControls['status'].touched">
+        <span *ngIf="formControls['status'].errors?.['required']">Status é obrigatório</span>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-primary" (click)="onSubmit()" [disabled]="isLoading">
+        <span *ngIf="!isLoading">
+          <i class="fas" [class.fa-save]="!isEditMode" [class.fa-edit]="isEditMode"></i>
+          {{ isEditMode ? 'Atualizar' : 'Cadastrar' }}
+        </span>
+        <span *ngIf="isLoading">
+          <i class="fas fa-spinner fa-spin"></i>
+          {{ isEditMode ? 'Atualizando...' : 'Cadastrando...' }}
+        </span>
+      </button>
+      <button class="btn btn-secondary" (click)="closeModal()" [disabled]="isLoading">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>

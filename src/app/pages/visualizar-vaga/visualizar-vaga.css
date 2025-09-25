@@ -188,11 +188,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0.75rem;
 }
 
-.logo-icon {
-  font-size: 2.5rem;
-  color: var(--white);
+.company-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 .vaga-info {
@@ -303,6 +306,13 @@
   padding-bottom: 0;
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
 .section-title {
   display: flex;
   align-items: center;
@@ -310,7 +320,7 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-dark);
-  margin: 0 0 1.5rem 0;
+  margin: 0;
 }
 
 :host-context(body.dark-mode) .section-title {
@@ -714,5 +724,260 @@
   .btn-action-header {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* ======= TABLE STYLES ======= */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  background: var(--white);
+  margin: 0 -1rem;
+  padding: 0 1rem;
+  position: relative;
+}
+
+:host-context(body.dark-mode) .table-wrapper {
+  background: var(--dark-card);
+}
+
+.data-table {
+  width: 100%;
+  min-width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+/* Scroll bar styles */
+.table-wrapper::-webkit-scrollbar {
+  height: 10px;
+  background-color: #f3f4f6;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background-color: #f3f4f6;
+  border-radius: 4px;
+  margin: 0 1rem;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background-color: #9ca3af;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: #6b7280;
+}
+
+/* Firefox */
+.table-wrapper {
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af #f3f4f6;
+}
+
+.data-table thead {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+:host-context(body.dark-mode) .data-table thead {
+  background-color: #374151;
+  border-bottom: 1px solid #4b5563;
+}
+
+.data-table th {
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background-color: #f9fafb;
+  z-index: 10;
+}
+
+:host-context(body.dark-mode) .data-table th {
+  color: #9ca3af;
+  background-color: #374151;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s;
+}
+
+:host-context(body.dark-mode) .data-table tbody tr {
+  border-bottom: 1px solid #4b5563;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+:host-context(body.dark-mode) .data-table tbody tr:hover {
+  background-color: #374151;
+}
+
+.data-table td {
+  padding: 0.75rem 0.75rem;
+  font-size: 0.8125rem;
+  color: #1f2937;
+  white-space: nowrap;
+}
+
+:host-context(body.dark-mode) .data-table td {
+  color: var(--dark-text);
+}
+
+/* Table Cell Content Styles */
+.candidate-info,
+.candidate-name {
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .candidate-info,
+:host-context(body.dark-mode) .candidate-name {
+  color: var(--dark-text);
+}
+
+.email-link {
+  color: var(--primary-green);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.email-link:hover {
+  text-decoration: underline;
+}
+
+.empty-text {
+  color: var(--text-gray);
+  font-style: italic;
+}
+
+:host-context(body.dark-mode) .empty-text {
+  color: #9ca3af;
+}
+
+.phone-text {
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .phone-text {
+  color: var(--dark-text);
+}
+
+.date-text {
+  color: var(--text-gray);
+}
+
+:host-context(body.dark-mode) .date-text {
+  color: #9ca3af;
+}
+
+/* Status Badge Styles */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Status Candidato */
+.status-pendente {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.status-aprovado {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.status-reprovado {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* Status Vaga */
+.status-inscrito {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.status-triagem {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.status-entrevista_agendada {
+  background-color: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+
+.status-entrevista_realizada {
+  background-color: rgba(20, 184, 166, 0.1);
+  color: #14b8a6;
+}
+
+.status-desistiu {
+  background-color: rgba(156, 163, 175, 0.1);
+  color: #9ca3af;
+}
+
+/* Action Buttons */
+.action-buttons-cell {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--primary-green);
+  color: white;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background-color: #10b981;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(14, 155, 113, 0.3);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive Table */
+@media (max-width: 1024px) {
+  .data-table {
+    font-size: 0.75rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.5rem;
+  }
+
+  .action-buttons-cell {
+    flex-wrap: wrap;
   }
 }
