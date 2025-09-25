@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
+import { BreadcrumbService } from '../../services/breadcrumb.service';
 
 interface Vaga {
   id: number;
@@ -44,7 +45,10 @@ export class RecrutamentoSelecao implements OnInit {
   fonteRecrutamentoFilter: string = '';
   openDropdownId: number | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private breadcrumbService: BreadcrumbService
+  ) {}
 
   // Mapeamentos para labels
   tipoCargoLabels: Record<string, string> = {
@@ -105,7 +109,15 @@ export class RecrutamentoSelecao implements OnInit {
   filteredVagas: Vaga[] = [];
 
   ngOnInit() {
+    this.setBreadcrumb();
     this.loadData();
+  }
+
+  private setBreadcrumb() {
+    this.breadcrumbService.setBreadcrumbs([
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Recrutamento e Seleção' }
+    ]);
   }
 
   loadData() {

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
+import { BreadcrumbService } from '../../services/breadcrumb.service';
 
 @Component({
   selector: 'app-nova-vaga',
@@ -67,7 +68,8 @@ export class NovaVagaComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private breadcrumbService: BreadcrumbService
   ) {
     this.vagaForm = this.fb.group({
       clienteId: ['', Validators.required],
@@ -83,14 +85,24 @@ export class NovaVagaComponent implements OnInit {
       dataFechamentoCancelamento: [''],
       observacoes: [''],
       candidatoAprovado: [''],
-      contatoCandidato: ['']
+      emailCandidato: [''],
+      telefoneCandidato: ['']
     });
   }
 
   ngOnInit() {
+    this.setBreadcrumb();
     this.loadClientes();
     this.loadUsuarios();
     this.setupFormListeners();
+  }
+
+  private setBreadcrumb() {
+    this.breadcrumbService.setBreadcrumbs([
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Recrutamento e Seleção', url: '/home/recrutamento-selecao' },
+      { label: 'Nova Vaga' }
+    ]);
   }
 
   loadClientes() {
@@ -123,17 +135,13 @@ export class NovaVagaComponent implements OnInit {
         this.vagaForm.patchValue({
           dataFechamentoCancelamento: '',
           candidatoAprovado: '',
-          contatoCandidato: ''
+          emailCandidato: '',
+          telefoneCandidato: ''
         });
       }
     });
 
-    // Listener para candidato aprovado - habilita/desabilita campo de contato
-    this.vagaForm.get('candidatoAprovado')?.valueChanges.subscribe(candidato => {
-      if (!candidato) {
-        this.vagaForm.patchValue({ contatoCandidato: '' });
-      }
-    });
+    // Removido o listener do candidato aprovado - campos aparecem junto com status fechada
   }
 
   getToday(): string {
@@ -152,7 +160,7 @@ export class NovaVagaComponent implements OnInit {
 
         // Redirecionar após 2 segundos
         setTimeout(() => {
-          this.router.navigate(['/recrutamento-selecao']);
+          this.router.navigate(['/home/recrutamento-selecao']);
         }, 2000);
       }, 1000);
     } else {
@@ -166,7 +174,7 @@ export class NovaVagaComponent implements OnInit {
 
   onCancel() {
     if (confirm('Tem certeza que deseja cancelar? Todas as alterações serão perdidas.')) {
-      this.router.navigate(['/recrutamento-selecao']);
+      this.router.navigate(['/home/recrutamento-selecao']);
     }
   }
 

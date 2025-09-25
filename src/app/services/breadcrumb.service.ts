@@ -149,6 +149,26 @@ export class BreadcrumbService {
     '/home/notifications': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Notificações' }
+    ],
+    // Rotas de Recrutamento e Seleção
+    '/home/recrutamento-selecao': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Recrutamento e Seleção', url: '/home/recrutamento-selecao' }
+    ],
+    '/home/recrutamento-selecao/nova-vaga': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Recrutamento e Seleção', url: '/home/recrutamento-selecao' },
+      { label: 'Nova Vaga' }
+    ],
+    '/home/recrutamento-selecao/editar': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Recrutamento e Seleção', url: '/home/recrutamento-selecao' },
+      { label: 'Editar Vaga' }
+    ],
+    '/home/recrutamento-selecao/visualizar': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Recrutamento e Seleção', url: '/home/recrutamento-selecao' },
+      { label: 'Visualizar Vaga' }
     ]
   };
 
@@ -271,6 +291,7 @@ export class BreadcrumbService {
       'configuracoes': 'Configurações',
       'profile': 'Meu Perfil',
       'ajuda': 'Ajuda',
+      'recrutamento-selecao': 'Recrutamento e Seleção',
       // Manter mapeamento antigo para compatibilidade
       'contracts': 'Contratos',
       'clients': 'Clientes',
