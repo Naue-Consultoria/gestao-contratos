@@ -77,6 +77,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
     'Gestão',
     'Estratégia',
     'Engenharia',
+    'Recrutamento & Seleção',
     'Interno'
   ];
 

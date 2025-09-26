@@ -14,6 +14,12 @@ export interface ProposalServiceItem {
   selected_by_client?: boolean;
   client_notes?: string;
   created_at?: string;
+  recruitmentPercentages?: {
+    administrativo_gestao: number;
+    comercial: number;
+    operacional: number;
+    estagio_jovem: number;
+  };
 }
 
 export interface Proposal {

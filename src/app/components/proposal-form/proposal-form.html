@@ -242,7 +242,8 @@
                   </div>
 
                   <div class="service-pricing">
-                    <div class="price-input-group">
+                    <!-- Campos normais de valor para outros serviços -->
+                    <div class="price-input-group" *ngIf="!service.isRecruitment">
                       <label class="price-label">Valor do Serviço</label>
                       <div class="price-input-wrapper">
                         <input
@@ -257,6 +258,65 @@
                           placeholder="0,00"
                           appCurrencyMask
                         />
+                      </div>
+                    </div>
+
+                    <!-- Campos de porcentagem para Recrutamento & Seleção -->
+                    <div class="recruitment-percentages" *ngIf="service.isRecruitment">
+                      <label class="price-label">Percentual de Faturamento por Tipo</label>
+                      <div class="percentage-compact-grid">
+                        <div class="percentage-compact-item">
+                          <label>Admin/Gestão</label>
+                          <div class="percentage-compact-input">
+                            <input
+                              type="number"
+                              [(ngModel)]="service.recruitmentPercentages!.administrativo_gestao"
+                              [ngModelOptions]="{standalone: true}"
+                              min="0"
+                              max="200"
+                            />
+                            <span>%</span>
+                          </div>
+                        </div>
+                        <div class="percentage-compact-item">
+                          <label>Comercial</label>
+                          <div class="percentage-compact-input">
+                            <input
+                              type="number"
+                              [(ngModel)]="service.recruitmentPercentages!.comercial"
+                              [ngModelOptions]="{standalone: true}"
+                              min="0"
+                              max="200"
+                            />
+                            <span>%</span>
+                          </div>
+                        </div>
+                        <div class="percentage-compact-item">
+                          <label>Operacional</label>
+                          <div class="percentage-compact-input">
+                            <input
+                              type="number"
+                              [(ngModel)]="service.recruitmentPercentages!.operacional"
+                              [ngModelOptions]="{standalone: true}"
+                              min="0"
+                              max="200"
+                            />
+                            <span>%</span>
+                          </div>
+                        </div>
+                        <div class="percentage-compact-item">
+                          <label>Estágio/JA</label>
+                          <div class="percentage-compact-input">
+                            <input
+                              type="number"
+                              [(ngModel)]="service.recruitmentPercentages!.estagio_jovem"
+                              [ngModelOptions]="{standalone: true}"
+                              min="0"
+                              max="200"
+                            />
+                            <span>%</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

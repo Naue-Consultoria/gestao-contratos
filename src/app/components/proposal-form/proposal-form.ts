@@ -13,6 +13,24 @@ import { ClientService, ApiClient, CreateClientRequest } from '../../services/cl
 import { ServiceService, ApiService } from '../../services/service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
+interface SelectedService {
+  service_id: number;
+  id: number;
+  name: string;
+  unit_value: number;
+  total_value: number;
+  duration: number | null;
+  duration_unit: string | null;
+  category: string;
+  isRecruitment?: boolean;
+  recruitmentPercentages?: {
+    administrativo_gestao: number;
+    comercial: number;
+    operacional: number;
+    estagio_jovem: number;
+  };
+}
+
 @Component({
   selector: 'app-proposal-form',
   standalone: true,
@@ -40,7 +58,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   proposalForm!: FormGroup;
   clients: ApiClient[] = [];
   services: ApiService[] = [];
-  selectedServices: any[] = [];
+  selectedServices: SelectedService[] = [];
   availableServices: ApiService[] = [];
   showServiceModal = false;
   serviceSearchTerm = '';
@@ -172,15 +190,29 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     // Carregar serviços da proposta
     this.selectedServices = proposal.services.map(service => {
       const serviceData = this.services.find(s => s.id === service.service_id);
-      return {
-        ...serviceData,
+      const selectedService: SelectedService = {
+        service_id: service.service_id,
         id: service.service_id,
+        name: serviceData?.name || '',
         unit_value: service.unit_value || 0,
         total_value: service.total_value || 0,
-        // Preservar dados de duração do serviço original
         duration: serviceData?.duration_amount || null,
-        duration_unit: serviceData?.duration_unit || null
+        duration_unit: serviceData?.duration_unit || null,
+        category: serviceData?.category || 'Geral'
       };
+
+      // Se é serviço de Recrutamento & Seleção, adicionar campos de porcentagem
+      if (serviceData?.category === 'Recrutamento & Seleção') {
+        selectedService.isRecruitment = true;
+        selectedService.recruitmentPercentages = service.recruitmentPercentages || {
+          administrativo_gestao: 100,
+          comercial: 100,
+          operacional: 100,
+          estagio_jovem: 50
+        };
+      }
+
+      return selectedService;
     }).filter(service => service.id);
     
     // Atualização concluída - serviços carregados
@@ -200,7 +232,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   addService(service: ApiService): void {
-    this.selectedServices.push({
+    const newService: any = {
       service_id: service.id,
       id: service.id, // Para compatibilidade
       name: service.name,
@@ -209,11 +241,24 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       duration: service.duration_amount || null,
       duration_unit: service.duration_unit || null,
       category: service.category || 'Geral'
-    });
-    
+    };
+
+    // Se é serviço de Recrutamento & Seleção, adicionar campos de porcentagem
+    if (service.category === 'Recrutamento & Seleção') {
+      newService.isRecruitment = true;
+      newService.recruitmentPercentages = {
+        administrativo_gestao: 100,  // Administrativo/Gestão
+        comercial: 100,              // Comercial
+        operacional: 100,            // Operacional
+        estagio_jovem: 50           // Estágio/Jovem Aprendiz
+      };
+    }
+
+    this.selectedServices.push(newService);
+
     // Atualizar valor total
     this.updateTotalValue();
-    
+
     // Fechar modal após adicionar
     this.closeServiceModal();
   }
@@ -708,9 +753,9 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Validar se todos os serviços têm valor
-    const invalidServices = this.selectedServices.filter(service => 
-      !service.unit_value || parseFloat(service.unit_value) <= 0
+    // Validar se todos os serviços têm valor (exceto Recrutamento & Seleção)
+    const invalidServices = this.selectedServices.filter(service =>
+      !service.isRecruitment && (!service.unit_value || service.unit_value <= 0)
     );
 
     if (invalidServices.length > 0) {
@@ -758,7 +803,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       validity_days: 30, // Valor padrão
       services: this.selectedServices.map(service => ({
         service_id: service.id,
-        unit_value: parseFloat(service.unit_value) || 0
+        unit_value: service.unit_value || 0,
+        recruitmentPercentages: service.recruitmentPercentages
       }))
     };
 

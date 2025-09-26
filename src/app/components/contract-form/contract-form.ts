@@ -24,6 +24,13 @@ interface SelectedService {
   duration: number | null;
   duration_unit: string; // Added this property
   category: string;
+  isRecruitment?: boolean;
+  recruitmentPercentages?: {
+    administrativo_gestao: number;
+    comercial: number;
+    operacional: number;
+    estagio_jovem: number;
+  };
 }
 
 interface AssignableUser {
@@ -274,15 +281,30 @@ export class ContractFormComponent implements OnInit {
           this.showBarterOptions = true;
           this.calculateRemainingValue();
         }
-        this.selectedServices = contract.contract_services.map((cs: any) => ({
-          service_id: cs.service.id,
-          name: cs.service.name,
-          unit_value: cs.unit_value,
-          total_value: cs.total_value,
-          duration: cs.service.duration,
-          duration_unit: cs.service.duration_unit,
-          category: cs.service.category,
-        }));
+        this.selectedServices = contract.contract_services.map((cs: any) => {
+          const selectedService: SelectedService = {
+            service_id: cs.service.id,
+            name: cs.service.name,
+            unit_value: cs.unit_value,
+            total_value: cs.total_value,
+            duration: cs.service.duration,
+            duration_unit: cs.service.duration_unit,
+            category: cs.service.category,
+          };
+
+          // Se é serviço de Recrutamento & Seleção, adicionar campos de porcentagem
+          if (cs.service.category === 'Recrutamento & Seleção') {
+            selectedService.isRecruitment = true;
+            selectedService.recruitmentPercentages = cs.recruitmentPercentages || {
+              administrativo_gestao: 100,
+              comercial: 100,
+              operacional: 100,
+              estagio_jovem: 50
+            };
+          }
+
+          return selectedService;
+        });
         this.assignedUsers = contract.assigned_users || [];
         
         // Carregar parcelas se existirem
@@ -426,7 +448,7 @@ export class ContractFormComponent implements OnInit {
   }
 
   addService(service: ApiService) {
-    this.selectedServices.push({
+    const newService: any = {
       service_id: service.id,
       name: service.name,
       unit_value: 0,
@@ -434,7 +456,20 @@ export class ContractFormComponent implements OnInit {
       duration: service.duration_amount || null,
       duration_unit: service.duration_unit,
       category: service.category || 'Geral',
-    });
+    };
+
+    // Se é serviço de Recrutamento & Seleção, adicionar campos de porcentagem
+    if (service.category === 'Recrutamento & Seleção') {
+      newService.isRecruitment = true;
+      newService.recruitmentPercentages = {
+        administrativo_gestao: 100,  // Administrativo/Gestão
+        comercial: 100,              // Comercial
+        operacional: 100,            // Operacional
+        estagio_jovem: 50           // Estágio/Jovem Aprendiz
+      };
+    }
+
+    this.selectedServices.push(newService);
     this.closeServiceModal();
   }
 

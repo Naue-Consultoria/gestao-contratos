@@ -125,6 +125,7 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
       'Desenvolvimento': 'fas fa-line-chart',
       'Gestão': 'fas fa-tasks',
       'Estratégia': 'fas fa-bullseye',
+      'Recrutamento & Seleção': 'fas fa-users',
       'Geral': 'far fa-sticky-note',
       'Interno': 'fas fa-file-contract'
     };
