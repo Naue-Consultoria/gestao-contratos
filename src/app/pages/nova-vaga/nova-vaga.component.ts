@@ -4,6 +4,9 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { Router } from '@angular/router';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
+import { VagaService } from '../../services/vaga.service';
+import { ClientService } from '../../services/client.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-nova-vaga',
@@ -69,7 +72,10 @@ export class NovaVagaComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private breadcrumbService: BreadcrumbService
+    private breadcrumbService: BreadcrumbService,
+    private vagaService: VagaService,
+    private clientService: ClientService,
+    private userService: UserService
   ) {
     this.vagaForm = this.fb.group({
       clienteId: ['', Validators.required],
@@ -88,7 +94,9 @@ export class NovaVagaComponent implements OnInit {
       emailCandidato: [''],
       telefoneCandidato: [''],
       porcentagemFaturamento: [100, [Validators.min(0), Validators.max(200)]],
-      valorFaturamento: [{ value: 0, disabled: true }]
+      valorFaturamento: [{ value: 0, disabled: true }],
+      sigilosa: [false],
+      impostoEstado: [0, [Validators.min(0), Validators.max(100)]]
     });
   }
 
@@ -109,24 +117,45 @@ export class NovaVagaComponent implements OnInit {
   }
 
   loadClientes() {
-    // Mock data - substituir por chamada real ao backend
-    this.clientes = [
-      { id: 1, nome: 'Tech Solutions Ltda' },
-      { id: 2, nome: 'Finance Corp' },
-      { id: 3, nome: 'Comercial Plus' },
-      { id: 4, nome: 'Startup XYZ' },
-      { id: 5, nome: 'Indústria ABC' }
-    ];
+    this.clientService.getAll().subscribe({
+      next: (response: any[]) => {
+        this.clientes = response.map((client: any) => ({
+          id: client.id,
+          nome: client.clients_pj?.company_name ||
+                client.clients_pf?.full_name ||
+                'Cliente sem nome'
+        }));
+      },
+      error: (error: any) => {
+        console.error('Erro ao carregar clientes:', error);
+        // Fallback para dados mock em caso de erro
+        this.clientes = [
+          { id: 1, nome: 'Tech Solutions Ltda' },
+          { id: 2, nome: 'Finance Corp' },
+          { id: 3, nome: 'Comercial Plus' }
+        ];
+      }
+    });
   }
 
   loadUsuarios() {
-    // Mock data - substituir por chamada real ao backend
-    this.usuarios = [
-      { id: 1, nome: 'Ana Recrutadora' },
-      { id: 2, nome: 'Carlos RH' },
-      { id: 3, nome: 'Maria Gestora' },
-      { id: 4, nome: 'João Analista' }
-    ];
+    this.userService.getAll().subscribe({
+      next: (users: any[]) => {
+        this.usuarios = users.map((user: any) => ({
+          id: user.id,
+          nome: user.name
+        }));
+      },
+      error: (error: any) => {
+        console.error('Erro ao carregar usuários:', error);
+        // Fallback para dados mock em caso de erro
+        this.usuarios = [
+          { id: 1, nome: 'Ana Recrutadora' },
+          { id: 2, nome: 'Carlos RH' },
+          { id: 3, nome: 'Maria Gestora' }
+        ];
+      }
+    });
   }
 
   setupFormListeners() {
@@ -169,23 +198,41 @@ export class NovaVagaComponent implements OnInit {
     if (this.vagaForm.valid) {
       this.isSubmitting = true;
 
-      // Habilitar campo de valor faturamento antes de enviar
-      this.vagaForm.get('valorFaturamento')?.enable();
+      // Preparar dados para envio
+      const vagaData = {
+        client_id: this.vagaForm.value.clienteId,
+        user_id: this.vagaForm.value.usuarioId,
+        cargo: this.vagaForm.value.cargo,
+        tipo_cargo: this.vagaForm.value.tipoCargo,
+        tipo_abertura: this.vagaForm.value.tipoAbertura,
+        status: this.vagaForm.value.status,
+        fonte_recrutamento: this.vagaForm.value.fonteRecrutamento,
+        salario: this.vagaForm.value.salario,
+        data_abertura: this.vagaForm.value.dataAbertura,
+        data_fechamento_cancelamento: this.vagaForm.value.dataFechamentoCancelamento || null,
+        observacoes: this.vagaForm.value.observacoes || null,
+        porcentagem_faturamento: this.vagaForm.value.porcentagemFaturamento || 100,
+        sigilosa: this.vagaForm.value.sigilosa || false,
+        imposto_estado: this.vagaForm.value.impostoEstado || 0
+      };
 
-      // Simular envio ao backend
-      setTimeout(() => {
-        console.log('Vaga criada:', this.vagaForm.value);
-        this.showSuccessMessage = true;
-        this.isSubmitting = false;
+      // Enviar para o backend
+      this.vagaService.create(vagaData).subscribe({
+        next: (response) => {
+          console.log('Vaga criada com sucesso:', response);
+          this.showSuccessMessage = true;
 
-        // Desabilitar novamente o campo
-        this.vagaForm.get('valorFaturamento')?.disable();
-
-        // Redirecionar após 2 segundos
-        setTimeout(() => {
-          this.router.navigate(['/home/recrutamento-selecao']);
-        }, 2000);
-      }, 1000);
+          // Redirecionar após 2 segundos
+          setTimeout(() => {
+            this.router.navigate(['/home/recrutamento-selecao']);
+          }, 2000);
+        },
+        error: (error: any) => {
+          console.error('Erro ao criar vaga:', error);
+          this.isSubmitting = false;
+          alert('Erro ao criar vaga. Por favor, tente novamente.');
+        }
+      });
     } else {
       // Marcar todos os campos como touched para mostrar erros
       Object.keys(this.vagaForm.controls).forEach(key => {
@@ -217,5 +264,11 @@ export class NovaVagaComponent implements OnInit {
       }
     }
     return '';
+  }
+
+  calcularValorFaturamento(): number {
+    const salario = this.vagaForm.get('salario')?.value || 0;
+    const porcentagem = this.vagaForm.get('porcentagemFaturamento')?.value || 100;
+    return salario * (porcentagem / 100);
   }
 }

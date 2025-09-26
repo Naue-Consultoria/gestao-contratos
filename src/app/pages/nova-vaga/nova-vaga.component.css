@@ -373,6 +373,25 @@ textarea.form-control {
 }
 
 /* ========================================
+   CALCULATED VALUE DISPLAY
+   ======================================== */
+
+.calculated-value {
+  padding: 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  border: 2px solid #4a90e2;
+  text-align: center;
+  margin: 8px 0;
+}
+
+.calculated-value strong {
+  font-size: 24px;
+  color: #4a90e2;
+  font-weight: 700;
+}
+
+/* ========================================
    RESPONSIVE DESIGN
    ======================================== */
 

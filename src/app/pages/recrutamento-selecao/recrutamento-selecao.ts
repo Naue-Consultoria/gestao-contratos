@@ -28,6 +28,8 @@ interface Vaga {
   totalCandidatos: number;
   porcentagemFaturamento?: number;  // Porcentagem sobre o salário
   valorFaturamento?: number;  // Valor calculado: salario * (porcentagemFaturamento / 100)
+  sigilosa: boolean;
+  impostoEstado: number;
 }
 
 
@@ -49,6 +51,7 @@ export class RecrutamentoSelecao implements OnInit {
   activeTab: string = 'geral';
   selectedMonth: string = '';  // Formato: '1' a '12' (mês)
   selectedYear: string = '';   // Formato: 'YYYY' (ano)
+  consultoraFilter: string = '';
 
   constructor(
     private router: Router,
@@ -146,7 +149,9 @@ export class RecrutamentoSelecao implements OnInit {
         observacoes: 'Urgente - Projeto novo cliente',
         candidatoAprovado: 'João Silva',
         contatoCandidato: '(11) 98765-4321',
-        totalCandidatos: 15
+        totalCandidatos: 15,
+        sigilosa: false,
+        impostoEstado: 12
       },
       {
         id: 2,
@@ -163,7 +168,9 @@ export class RecrutamentoSelecao implements OnInit {
         salario: 4500,
         dataAbertura: new Date('2024-01-15'),
         observacoes: 'Substituição de colaborador',
-        totalCandidatos: 8
+        totalCandidatos: 8,
+        sigilosa: true,
+        impostoEstado: 10
       },
       {
         id: 3,
@@ -181,7 +188,9 @@ export class RecrutamentoSelecao implements OnInit {
         dataAbertura: new Date('2024-01-05'),
         dataFechamentoCancelamento: new Date('2024-01-20'),
         observacoes: 'Cliente pausou processo temporariamente',
-        totalCandidatos: 22
+        totalCandidatos: 22,
+        sigilosa: false,
+        impostoEstado: 8
       },
       {
         id: 4,
@@ -198,7 +207,9 @@ export class RecrutamentoSelecao implements OnInit {
         salario: 2000,
         dataAbertura: new Date('2024-01-18'),
         observacoes: 'Início imediato',
-        totalCandidatos: 35
+        totalCandidatos: 35,
+        sigilosa: false,
+        impostoEstado: 0
       },
       {
         id: 5,
@@ -221,7 +232,9 @@ export class RecrutamentoSelecao implements OnInit {
         contatoCandidato: '(11) 97654-3210',
         totalCandidatos: 18,
         porcentagemFaturamento: 100,
-        valorFaturamento: 2800
+        valorFaturamento: 2800,
+        sigilosa: false,
+        impostoEstado: 10
       },
       {
         id: 6,
@@ -244,7 +257,9 @@ export class RecrutamentoSelecao implements OnInit {
         contatoCandidato: '(11) 95555-1234',
         totalCandidatos: 12,
         porcentagemFaturamento: 100,
-        valorFaturamento: 6500
+        valorFaturamento: 6500,
+        sigilosa: true,
+        impostoEstado: 12
       },
       {
         id: 7,
@@ -267,7 +282,9 @@ export class RecrutamentoSelecao implements OnInit {
         contatoCandidato: '(11) 94444-5678',
         totalCandidatos: 25,
         porcentagemFaturamento: 80,
-        valorFaturamento: 2800
+        valorFaturamento: 2800,
+        sigilosa: false,
+        impostoEstado: 8
       },
       {
         id: 8,
@@ -290,7 +307,9 @@ export class RecrutamentoSelecao implements OnInit {
         contatoCandidato: '(11) 93333-9999',
         totalCandidatos: 8,
         porcentagemFaturamento: 120,
-        valorFaturamento: 18000
+        valorFaturamento: 18000,
+        sigilosa: true,
+        impostoEstado: 15
       }
     ];
 
@@ -344,11 +363,12 @@ export class RecrutamentoSelecao implements OnInit {
     this.fonteRecrutamentoFilter = '';
     this.selectedMonth = '';
     this.selectedYear = '';
+    this.consultoraFilter = '';
     this.applyFilters();
   }
 
   hasFilters(): boolean {
-    return !!(this.searchTerm || this.statusFilter || this.departmentFilter || this.tipoCargoFilter || this.fonteRecrutamentoFilter || this.selectedMonth || this.selectedYear);
+    return !!(this.searchTerm || this.statusFilter || this.departmentFilter || this.tipoCargoFilter || this.fonteRecrutamentoFilter || this.selectedMonth || this.selectedYear || this.consultoraFilter);
   }
 
   // Helper method to get Object.keys in template
@@ -514,5 +534,92 @@ export class RecrutamentoSelecao implements OnInit {
       }));
   }
 
+  // Get available consultoras from vagas
+  getAvailableConsultoras(): string[] {
+    const consultoras = new Set<string>();
+
+    this.vagas
+      .filter(vaga => vaga.status === 'fechada' || vaga.status === 'fechada_rep')
+      .forEach(vaga => {
+        if (vaga.usuarioNome) {
+          consultoras.add(vaga.usuarioNome);
+        }
+      });
+
+    return Array.from(consultoras).sort();
+  }
+
+  // Métodos para a aba de Comissões
+  getVagasComissoes(): Vaga[] {
+    let filteredVagas = this.vagas.filter(vaga =>
+      vaga.status === 'fechada' || vaga.status === 'fechada_rep'
+    );
+
+    // Apply consultora filter if selected
+    if (this.consultoraFilter) {
+      filteredVagas = filteredVagas.filter(vaga =>
+        vaga.usuarioNome === this.consultoraFilter
+      );
+    }
+
+    // Apply search term if present
+    if (this.searchTerm) {
+      const searchLower = this.searchTerm.toLowerCase();
+      filteredVagas = filteredVagas.filter(vaga =>
+        vaga.cargo.toLowerCase().includes(searchLower) ||
+        vaga.clienteNome.toLowerCase().includes(searchLower) ||
+        vaga.usuarioNome?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return filteredVagas;
+  }
+
+  calcularValorFaturamento(vaga: Vaga): number {
+    const porcentagem = vaga.porcentagemFaturamento || 100;
+    return vaga.salario * (porcentagem / 100);
+  }
+
+  calcularValorImposto(vaga: Vaga): number {
+    const valorFaturamento = this.calcularValorFaturamento(vaga);
+    const impostoEstado = vaga.impostoEstado || 0;
+    return valorFaturamento * (impostoEstado / 100);
+  }
+
+  calcularLucro(vaga: Vaga): number {
+    const valorFaturamento = this.calcularValorFaturamento(vaga);
+    const valorImposto = this.calcularValorImposto(vaga);
+    return valorFaturamento - valorImposto;
+  }
+
+  calcularComissao(vaga: Vaga): number {
+    // Calcula 5% do lucro como comissão da consultora
+    const lucro = this.calcularLucro(vaga);
+    return lucro * 0.05; // 5% do lucro
+  }
+
+  calcularTotalFaturamento(): number {
+    return this.getVagasComissoes().reduce((total, vaga) => {
+      return total + this.calcularValorFaturamento(vaga);
+    }, 0);
+  }
+
+  calcularTotalImpostos(): number {
+    return this.getVagasComissoes().reduce((total, vaga) => {
+      return total + this.calcularValorImposto(vaga);
+    }, 0);
+  }
+
+  calcularTotalLucro(): number {
+    return this.getVagasComissoes().reduce((total, vaga) => {
+      return total + this.calcularLucro(vaga);
+    }, 0);
+  }
+
+  calcularTotalComissao(): number {
+    return this.getVagasComissoes().reduce((total, vaga) => {
+      return total + this.calcularComissao(vaga);
+    }, 0);
+  }
 
 }

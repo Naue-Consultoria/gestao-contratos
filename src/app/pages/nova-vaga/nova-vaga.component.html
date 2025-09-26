@@ -108,19 +108,31 @@
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Salário <span class="required">*</span></label>
-              <input
-                type="number"
-                formControlName="salario"
-                class="form-control"
-                [class.error]="isFieldInvalid('salario')"
-                placeholder="R$ 0,00"
-                min="0"
-                step="100">
-              <span class="error-message" *ngIf="isFieldInvalid('salario')">
-                {{ getErrorMessage('salario') }}
-              </span>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Salário <span class="required">*</span></label>
+                <input
+                  type="number"
+                  formControlName="salario"
+                  class="form-control"
+                  [class.error]="isFieldInvalid('salario')"
+                  placeholder="R$ 0,00"
+                  min="0"
+                  step="100">
+                <span class="error-message" *ngIf="isFieldInvalid('salario')">
+                  {{ getErrorMessage('salario') }}
+                </span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Sigilo da Vaga <span class="required">*</span></label>
+                <select
+                  formControlName="sigilosa"
+                  class="form-control select-input">
+                  <option [value]="false">Não Sigilosa</option>
+                  <option [value]="true">Sigilosa</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -207,6 +219,7 @@
               </div>
             </div>
 
+
             <div *ngIf="['fechada', 'fechada_rep'].includes(vagaForm.get('status')?.value)">
               <div class="form-group">
                 <label class="form-label">Candidato Aprovado</label>
@@ -239,16 +252,16 @@
             </div>
           </div>
 
-          <!-- Section: Faturamento - Only for closed jobs -->
-          <div class="form-section" *ngIf="['fechada', 'fechada_rep'].includes(vagaForm.get('status')?.value)">
+          <!-- Section: Faturamento e Impostos -->
+          <div class="form-section">
             <h3 class="section-title">
               <i class="fas fa-calculator"></i>
-              Faturamento
+              Faturamento e Impostos
             </h3>
 
             <div class="form-grid">
               <div class="form-group">
-                <label class="form-label">Porcentagem de Faturamento (%)</label>
+                <label class="form-label">% de Faturamento sobre a Vaga</label>
                 <input
                   type="number"
                   formControlName="porcentagemFaturamento"
@@ -256,20 +269,34 @@
                   placeholder="100"
                   min="0"
                   max="200"
-                  step="5">
-                <small class="form-helper">Porcentagem do salário para faturamento (0-200%)</small>
+                  step="1">
+                <small class="form-hint">Percentual sobre o salário (padrão: 100%)</small>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Valor Final de Faturamento</label>
+                <label class="form-label">Imposto do Estado (%)</label>
                 <input
                   type="number"
-                  formControlName="valorFaturamento"
+                  formControlName="impostoEstado"
                   class="form-control"
-                  placeholder="R$ 0,00"
-                  readonly>
-                <small class="form-helper">Calculado automaticamente: Salário × Porcentagem</small>
+                  placeholder="0"
+                  min="0"
+                  max="100"
+                  step="0.1">
+                <small class="form-hint">Percentual do imposto estadual</small>
               </div>
+            </div>
+
+            <div class="form-group" *ngIf="vagaForm.get('salario')?.value > 0">
+              <label class="form-label">Valor de Faturamento Calculado</label>
+              <div class="calculated-value">
+                <strong>{{ calcularValorFaturamento() | currency:'BRL':'symbol':'1.2-2' }}</strong>
+              </div>
+              <small class="form-hint">
+                Salário ({{ vagaForm.get('salario')?.value | currency:'BRL':'symbol':'1.2-2' }})
+                × {{ vagaForm.get('porcentagemFaturamento')?.value || 100 }}%
+                = {{ calcularValorFaturamento() | currency:'BRL':'symbol':'1.2-2' }}
+              </small>
             </div>
           </div>
 

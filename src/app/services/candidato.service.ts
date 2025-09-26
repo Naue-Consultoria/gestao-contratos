@@ -9,6 +9,7 @@ export interface Candidato {
   email?: string;
   telefone?: string;
   status?: 'pendente' | 'aprovado' | 'reprovado';
+  observacoes?: string;
   created_at?: Date;
   updated_at?: Date;
 }

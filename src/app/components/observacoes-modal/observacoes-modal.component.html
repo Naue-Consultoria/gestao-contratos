@@ -1,0 +1,52 @@
+<div class="modal" [class.active]="isOpen" (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <i class="fas fa-sticky-note"></i>
+        Observações - {{ candidato?.nome || 'Candidato' }}
+      </h2>
+      <button class="close-btn" (click)="closeModal()" type="button" aria-label="Fechar">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="observacoes" class="form-label">
+          Observações sobre o candidato
+        </label>
+        <textarea
+          id="observacoes"
+          class="form-control"
+          [(ngModel)]="observacoes"
+          placeholder="Adicione observações, anotações, feedbacks ou qualquer informação relevante sobre o candidato..."
+          rows="10"
+          [disabled]="isLoading">
+        </textarea>
+        <small class="form-hint">
+          Use este espaço para registrar informações importantes sobre o candidato
+        </small>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        class="btn btn-primary"
+        (click)="onSave()"
+        [disabled]="isLoading || !hasChanges()">
+        <span *ngIf="!isLoading">
+          <i class="fas fa-save"></i>
+          Salvar Observações
+        </span>
+        <span *ngIf="isLoading">
+          <i class="fas fa-spinner fa-spin"></i>
+          Salvando...
+        </span>
+      </button>
+      <button class="btn btn-secondary" (click)="closeModal()" [disabled]="isLoading">
+        <i class="fas fa-times"></i>
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>

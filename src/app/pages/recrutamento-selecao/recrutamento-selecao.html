@@ -92,6 +92,11 @@
       Fechamento
       <span class="tab-count">{{ getVagasFechamento().length }}</span>
     </div>
+    <div class="tab" [class.active]="activeTab === 'comissoes'" (click)="setActiveTab('comissoes')">
+      <i class="fas fa-coins"></i>
+      Comissões
+      <span class="tab-count">{{ getVagasComissoes().length }}</span>
+    </div>
   </div>
 
   <!-- Main Content -->
@@ -134,6 +139,14 @@
             <option value="">Todas as fontes</option>
             <option *ngFor="let fonte of Object.keys(fonteRecrutamentoLabels)" [value]="fonte">
               {{ fonteRecrutamentoLabels[fonte] }}
+            </option>
+          </select>
+
+          <!-- Consultora filter - Only show on Comissões tab -->
+          <select class="filter-select" [(ngModel)]="consultoraFilter" (change)="applyFilters()" *ngIf="activeTab === 'comissoes'">
+            <option value="">Todas as consultoras</option>
+            <option *ngFor="let consultora of getAvailableConsultoras()" [value]="consultora">
+              {{ consultora }}
             </option>
           </select>
 
@@ -188,6 +201,7 @@
             <th>Cargo</th>
             <th>Tipo Cargo</th>
             <th>Tipo Abertura</th>
+            <th>Sigilo</th>
             <th>Salário</th>
             <th>Consultora</th>
             <th>Status</th>
@@ -217,6 +231,11 @@
             <td>
               <span class="abertura-badge" [ngClass]="vaga.tipoAbertura">
                 {{ tipoAberturaLabels[vaga.tipoAbertura] }}
+              </span>
+            </td>
+            <td>
+              <span class="sigilo-badge" [class.sigilosa]="vaga.sigilosa">
+                {{ vaga.sigilosa ? 'Sigilosa' : 'Não Sigilosa' }}
               </span>
             </td>
             <td>
@@ -408,6 +427,84 @@
             </td>
           </tr>
         </tbody>
+      </table>
+    </div>
+
+    <!-- Table - Comissões -->
+    <div class="table-wrapper" *ngIf="!isLoading && activeTab === 'comissoes'">
+      <div *ngIf="getVagasComissoes().length === 0" class="empty-state">
+        <i class="fas fa-coins empty-icon"></i>
+        <h3>Nenhuma comissão encontrada</h3>
+        <p>Vagas fechadas com comissões aparecerão aqui</p>
+      </div>
+
+      <table class="data-table" *ngIf="getVagasComissoes().length > 0">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Cargo</th>
+            <th>Tipo Cargo</th>
+            <th>Salário</th>
+            <th>Faturamento</th>
+            <th>Valor Faturamento</th>
+            <th>Imposto</th>
+            <th>Valor Imposto</th>
+            <th>Lucro</th>
+            <th>Comissão (5%)</th>
+            <th>Consultora</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let vaga of getVagasComissoes()" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
+            <td>
+              <div class="client-info">
+                <span class="client-name">{{ vaga.clienteNome }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="vaga-title">
+                {{ vaga.cargo }}
+              </div>
+            </td>
+            <td>
+              <span class="type-badge">{{ tipoCargoLabels[vaga.tipoCargo] }}</span>
+            </td>
+            <td>
+              <span class="salary-value">{{ vaga.salario | currency:'BRL':'symbol':'1.2-2' }}</span>
+            </td>
+            <td>
+              <span class="percentage-value">{{ vaga.porcentagemFaturamento || 100 }}%</span>
+            </td>
+            <td>
+              <span class="revenue-value">{{ calcularValorFaturamento(vaga) | currency:'BRL':'symbol':'1.2-2' }}</span>
+            </td>
+            <td>
+              <span class="tax-percentage">{{ vaga.impostoEstado || 0 }}%</span>
+            </td>
+            <td>
+              <span class="tax-value">{{ calcularValorImposto(vaga) | currency:'BRL':'symbol':'1.2-2' }}</span>
+            </td>
+            <td>
+              <span class="profit-value">{{ calcularLucro(vaga) | currency:'BRL':'symbol':'1.2-2' }}</span>
+            </td>
+            <td>
+              <span class="commission-value">{{ calcularComissao(vaga) | currency:'BRL':'symbol':'1.2-2' }}</span>
+            </td>
+            <td>
+              <span class="user-name">{{ vaga.usuarioNome }}</span>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="5" class="text-right"><strong>Total:</strong></td>
+            <td><strong>{{ calcularTotalFaturamento() | currency:'BRL':'symbol':'1.2-2' }}</strong></td>
+            <td></td>
+            <td><strong>{{ calcularTotalImpostos() | currency:'BRL':'symbol':'1.2-2' }}</strong></td>
+            <td><strong>{{ calcularTotalLucro() | currency:'BRL':'symbol':'1.2-2' }}</strong></td>
+            <td><strong>{{ calcularTotalComissao() | currency:'BRL':'symbol':'1.2-2' }}</strong></td>
+          </tr>
+        </tfoot>
       </table>
     </div>
 

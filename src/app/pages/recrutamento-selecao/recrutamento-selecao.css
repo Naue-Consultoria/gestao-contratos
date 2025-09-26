@@ -1184,6 +1184,24 @@
   margin: 0.25rem 0;
 }
 
+/* Sigilo Badge */
+.sigilo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #f3f4f6;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.sigilo-badge.sigilosa {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
 /* Animations */
 @keyframes fadeInUp {
   from {
@@ -1270,4 +1288,55 @@
   .action-buttons-cell {
     flex-wrap: wrap;
   }
+}
+
+/* Commission Table Styles */
+.percentage-value {
+  font-weight: 600;
+  color: var(--primary-green);
+}
+
+.revenue-value {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.tax-percentage {
+  font-weight: 500;
+  color: #dc2626;
+}
+
+.tax-value {
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.profit-value {
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.commission-value {
+  font-weight: 700;
+  color: #059669;
+  font-size: 0.938rem;
+}
+
+.total-row {
+  background-color: var(--light-gray);
+  border-top: 2px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .total-row {
+  background-color: #2a2a2a;
+  border-top: 2px solid #444;
+}
+
+.total-row td {
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+.text-right {
+  text-align: right;
 }

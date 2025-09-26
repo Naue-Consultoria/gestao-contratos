@@ -81,6 +81,14 @@
           <span class="info-label">Salário</span>
           <span class="info-value salary">{{ vaga.salario | currency:'BRL':'symbol':'1.2-2' }}</span>
         </div>
+        <div class="info-group" *ngIf="vaga.sigilosa">
+          <span class="info-label">Sigilo</span>
+          <span class="info-value"><i class="fas fa-lock"></i> Vaga Sigilosa</span>
+        </div>
+        <div class="info-group" *ngIf="vaga.impostoEstado > 0">
+          <span class="info-label">Imposto Estado</span>
+          <span class="info-value">{{ vaga.impostoEstado }}%</span>
+        </div>
         <div class="info-group">
           <span class="info-label">Data de Abertura</span>
           <span class="info-value">{{ vaga.dataAbertura | date:'dd/MM/yyyy' }}</span>
@@ -118,6 +126,9 @@
                 <th>Telefone</th>
                 <th>Status</th>
                 <th>Data Inscrição</th>
+                <th>Data Entrevista</th>
+                <th>Horário</th>
+                <th>Status Entrevista</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -148,7 +159,32 @@
                   <span class="date-text">{{ vagaCandidato.data_inscricao | date:'dd/MM/yyyy' }}</span>
                 </td>
                 <td>
+                  <span class="date-text" *ngIf="getLatestInterview(vagaCandidato)">
+                    {{ getLatestInterview(vagaCandidato).data_entrevista | date:'dd/MM/yyyy' }}
+                  </span>
+                  <span class="empty-text" *ngIf="!getLatestInterview(vagaCandidato)">-</span>
+                </td>
+                <td>
+                  <span class="time-text" *ngIf="getLatestInterview(vagaCandidato)">
+                    {{ getLatestInterview(vagaCandidato).hora_entrevista }}
+                  </span>
+                  <span class="empty-text" *ngIf="!getLatestInterview(vagaCandidato)">-</span>
+                </td>
+                <td>
+                  <span class="status-badge"
+                        *ngIf="getLatestInterview(vagaCandidato)"
+                        [ngClass]="'status-' + getLatestInterview(vagaCandidato).status">
+                    {{ getInterviewStatusLabel(getLatestInterview(vagaCandidato).status) }}
+                  </span>
+                  <span class="empty-text" *ngIf="!getLatestInterview(vagaCandidato)">-</span>
+                </td>
+                <td>
                   <div class="action-buttons-cell">
+                    <button class="action-btn"
+                            (click)="openObservacoesModal(vagaCandidato.candidato)"
+                            title="Observações">
+                      <i class="fas fa-sticky-note"></i>
+                    </button>
                     <button class="action-btn"
                             (click)="openEntrevistaModal(vagaCandidato)"
                             title="Agendar Entrevista">
@@ -203,5 +239,13 @@
     (modalClosed)="closeEntrevistaModal()"
     (entrevistaSaved)="onEntrevistaSaved($event)">
   </app-entrevista-modal>
+
+  <!-- Observações Modal -->
+  <app-observacoes-modal
+    [isOpen]="isObservacoesModalVisible"
+    [candidato]="selectedCandidatoForObservacoes"
+    (modalClosed)="closeObservacoesModal()"
+    (observacoesSaved)="onObservacoesSaved($event)">
+  </app-observacoes-modal>
 
 </div>

@@ -934,6 +934,42 @@
   color: #9ca3af;
 }
 
+/* Interview Status Badges */
+.status-agendada {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-realizada {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-cancelada {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-nao_compareceu {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-remarcada {
+  background: #e9d5ff;
+  color: #6b21a8;
+}
+
+/* Time text styling */
+.time-text {
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .time-text {
+  color: var(--dark-text);
+}
+
 /* Action Buttons */
 .action-buttons-cell {
   display: flex;
@@ -964,6 +1000,10 @@
 
 .action-btn:active {
   transform: translateY(0);
+}
+
+.action-btn i {
+  color: white !important;
 }
 
 /* Responsive Table */

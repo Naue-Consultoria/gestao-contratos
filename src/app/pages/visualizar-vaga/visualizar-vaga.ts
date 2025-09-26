@@ -6,6 +6,7 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
 import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { CandidatoModalComponent } from '../../components/candidato-modal/candidato-modal.component';
 import { EntrevistaModal } from '../../components/entrevista-modal/entrevista-modal';
+import { ObservacoesModalComponent } from '../../components/observacoes-modal/observacoes-modal.component';
 import { Entrevista } from '../../services/entrevista.service';
 import { Candidato } from '../../services/candidato.service';
 
@@ -31,6 +32,8 @@ interface Vaga {
   telefoneCandidato?: string;
   porcentagemFaturamento?: number;  // Porcentagem sobre o salário
   valorFaturamento?: number;  // Valor calculado: salario * (porcentagemFaturamento / 100)
+  sigilosa: boolean;
+  impostoEstado: number;
 }
 
 interface VagaCandidato {
@@ -56,7 +59,7 @@ interface CandidateForm {
 @Component({
   selector: 'app-visualizar-vaga',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent, CandidatoModalComponent, EntrevistaModal],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, CandidatoModalComponent, EntrevistaModal, ObservacoesModalComponent],
   templateUrl: './visualizar-vaga.html',
   styleUrl: './visualizar-vaga.css'
 })
@@ -78,6 +81,10 @@ export class VisualizarVagaComponent implements OnInit {
   isEntrevistaModalVisible = false;
   selectedVagaCandidato: VagaCandidato | null = null;
   selectedEntrevista: Entrevista | null = null;
+
+  // Modal de observações
+  isObservacoesModalVisible = false;
+  selectedCandidatoForObservacoes: Candidato | null = null;
 
   // Formulários
   candidateForm = {
@@ -139,7 +146,11 @@ export class VisualizarVagaComponent implements OnInit {
   };
 
   statusEntrevistaLabels: Record<string, string> = {
+    'agendada': 'Agendada',
     'realizada': 'Realizada',
+    'cancelada': 'Cancelada',
+    'nao_compareceu': 'Não Compareceu',
+    'remarcada': 'Remarcada',
     'desistiu': 'Desistiu',
     'remarcou': 'Remarcou'
   };
@@ -193,7 +204,9 @@ export class VisualizarVagaComponent implements OnInit {
         emailCandidato: 'joao.silva@email.com',
         telefoneCandidato: '(11) 98765-4321',
         porcentagemFaturamento: 120,
-        valorFaturamento: 10200
+        valorFaturamento: 10200,
+        sigilosa: false,
+        impostoEstado: 12
       };
       this.isLoading = false;
     }, 500);
@@ -426,5 +439,42 @@ export class VisualizarVagaComponent implements OnInit {
     }
     // Fechar o modal antigo se estiver aberto
     this.showAddCandidateModal = false;
+  }
+
+  // Métodos para o modal de observações
+  openObservacoesModal(candidato: Candidato) {
+    this.selectedCandidatoForObservacoes = candidato;
+    this.isObservacoesModalVisible = true;
+  }
+
+  closeObservacoesModal() {
+    this.isObservacoesModalVisible = false;
+    this.selectedCandidatoForObservacoes = null;
+  }
+
+  onObservacoesSaved(candidatoAtualizado: Candidato) {
+    console.log('Observações salvas:', candidatoAtualizado);
+
+    // Atualizar o candidato na lista local
+    const vagaCandidatoIndex = this.candidatos.findIndex(
+      vc => vc.candidato.id === candidatoAtualizado.id
+    );
+
+    if (vagaCandidatoIndex !== -1) {
+      this.candidatos[vagaCandidatoIndex].candidato = candidatoAtualizado;
+    }
+  }
+
+  // Métodos auxiliares para exibir dados da entrevista
+  getLatestInterview(vagaCandidato: VagaCandidato): any {
+    if (!vagaCandidato.entrevistas || vagaCandidato.entrevistas.length === 0) {
+      return null;
+    }
+    // Retorna a última entrevista (mais recente)
+    return vagaCandidato.entrevistas[vagaCandidato.entrevistas.length - 1];
+  }
+
+  getInterviewStatusLabel(status: string): string {
+    return this.statusEntrevistaLabels[status] || status;
   }
 }
