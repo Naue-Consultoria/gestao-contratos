@@ -345,10 +345,14 @@ export class ContractFormComponent implements OnInit {
       const response = await firstValueFrom(
         this.serviceService.getServicesForContracts({ is_active: true })
       );
-      if (response && response.services)
-        this.availableServices = response.services.sort((a, b) => 
-          a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-        );
+      if (response && response.services) {
+        // Filtrar serviços da categoria 'Interno' para não aparecerem na edição de contratos
+        this.availableServices = response.services
+          .filter((service) => service.category !== 'Interno')
+          .sort((a, b) =>
+            a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+          );
+      }
     } catch (error) {
       console.error('❌ Error loading services:', error);
     }
@@ -431,6 +435,7 @@ export class ContractFormComponent implements OnInit {
     const categories = this.availableServices
       .map(s => s.category || 'Geral')
       .filter((category, index, self) => self.indexOf(category) === index)
+      .filter(category => category !== 'Interno') // Excluir categoria 'Interno' da lista
       .sort();
     return categories;
   }
