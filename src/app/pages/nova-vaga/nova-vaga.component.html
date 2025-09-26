@@ -20,11 +20,11 @@
     <form [formGroup]="vagaForm" (ngSubmit)="onSubmit()" class="vaga-form">
       <div class="form-layout">
         <div class="left-column">
-          <!-- Section: Informações Básicas -->
+          <!-- Section: Informações da Empresa -->
           <div class="form-section">
             <h3 class="section-title">
-              <i class="fas fa-info-circle"></i>
-              Informações Básicas
+              <i class="fas fa-building"></i>
+              Informações da Empresa
             </h3>
 
             <div class="form-grid">
@@ -60,6 +60,14 @@
                 </span>
               </div>
             </div>
+          </div>
+
+          <!-- Section: Detalhes da Vaga -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-briefcase"></i>
+              Detalhes da Vaga
+            </h3>
 
             <div class="form-group">
               <label class="form-label">Cargo <span class="required">*</span></label>
@@ -136,11 +144,61 @@
             </div>
           </div>
 
-          <!-- Section: Status e Datas -->
+          <!-- Section: Faturamento -->
           <div class="form-section">
             <h3 class="section-title">
-              <i class="fas fa-calendar-alt"></i>
-              Status e Datas
+              <i class="fas fa-dollar-sign"></i>
+              Faturamento
+            </h3>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">% de Faturamento</label>
+                <input
+                  type="number"
+                  formControlName="porcentagemFaturamento"
+                  class="form-control"
+                  placeholder="100"
+                  min="0"
+                  max="200"
+                  step="1">
+                <small class="form-hint">Percentual sobre o salário (padrão: 100%)</small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Imposto do Estado (%)</label>
+                <input
+                  type="number"
+                  formControlName="impostoEstado"
+                  class="form-control"
+                  placeholder="0"
+                  min="0"
+                  max="100"
+                  step="0.1">
+                <small class="form-hint">Percentual do imposto estadual</small>
+              </div>
+            </div>
+
+            <div class="form-group" *ngIf="vagaForm.get('salario')?.value > 0">
+              <label class="form-label">Valor de Faturamento Calculado</label>
+              <div class="calculated-value">
+                <strong>{{ calcularValorFaturamento() | currency:'BRL':'symbol':'1.2-2' }}</strong>
+              </div>
+              <small class="form-hint">
+                Salário ({{ vagaForm.get('salario')?.value | currency:'BRL':'symbol':'1.2-2' }})
+                × {{ vagaForm.get('porcentagemFaturamento')?.value || 100 }}%
+                = {{ calcularValorFaturamento() | currency:'BRL':'symbol':'1.2-2' }}
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-column">
+          <!-- Section: Status e Processo -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-tasks"></i>
+              Status do Processo
             </h3>
 
             <div class="form-grid">
@@ -179,16 +237,6 @@
                 formControlName="dataFechamentoCancelamento"
                 class="form-control date-input">
             </div>
-          </div>
-        </div>
-
-        <div class="right-column">
-          <!-- Section: Recrutamento -->
-          <div class="form-section">
-            <h3 class="section-title">
-              <i class="fas fa-users"></i>
-              Informações de Recrutamento
-            </h3>
 
             <div class="form-grid">
               <div class="form-group">
@@ -219,84 +267,42 @@
               </div>
             </div>
 
-
-            <div *ngIf="['fechada', 'fechada_rep'].includes(vagaForm.get('status')?.value)">
-              <div class="form-group">
-                <label class="form-label">Candidato Aprovado</label>
-                <input
-                  type="text"
-                  formControlName="candidatoAprovado"
-                  class="form-control"
-                  placeholder="Nome completo do candidato aprovado">
-              </div>
-
-              <div class="form-grid">
-                <div class="form-group">
-                  <label class="form-label">E-mail do Candidato</label>
-                  <input
-                    type="email"
-                    formControlName="emailCandidato"
-                    class="form-control"
-                    placeholder="email@exemplo.com">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Telefone do Candidato</label>
-                  <input
-                    type="tel"
-                    formControlName="telefoneCandidato"
-                    class="form-control"
-                    placeholder="(00) 00000-0000">
-                </div>
-              </div>
-            </div>
           </div>
 
-          <!-- Section: Faturamento e Impostos -->
-          <div class="form-section">
+          <!-- Section: Candidato Aprovado -->
+          <div class="form-section" *ngIf="['fechada', 'fechada_rep'].includes(vagaForm.get('status')?.value)">
             <h3 class="section-title">
-              <i class="fas fa-calculator"></i>
-              Faturamento e Impostos
+              <i class="fas fa-user-check"></i>
+              Candidato Aprovado
             </h3>
+
+            <div class="form-group">
+              <label class="form-label">Nome do Candidato</label>
+              <input
+                type="text"
+                formControlName="candidatoAprovado"
+                class="form-control"
+                placeholder="Nome completo do candidato aprovado">
+            </div>
 
             <div class="form-grid">
               <div class="form-group">
-                <label class="form-label">% de Faturamento sobre a Vaga</label>
+                <label class="form-label">E-mail</label>
                 <input
-                  type="number"
-                  formControlName="porcentagemFaturamento"
+                  type="email"
+                  formControlName="emailCandidato"
                   class="form-control"
-                  placeholder="100"
-                  min="0"
-                  max="200"
-                  step="1">
-                <small class="form-hint">Percentual sobre o salário (padrão: 100%)</small>
+                  placeholder="email@exemplo.com">
               </div>
 
               <div class="form-group">
-                <label class="form-label">Imposto do Estado (%)</label>
+                <label class="form-label">Telefone</label>
                 <input
-                  type="number"
-                  formControlName="impostoEstado"
+                  type="tel"
+                  formControlName="telefoneCandidato"
                   class="form-control"
-                  placeholder="0"
-                  min="0"
-                  max="100"
-                  step="0.1">
-                <small class="form-hint">Percentual do imposto estadual</small>
+                  placeholder="(00) 00000-0000">
               </div>
-            </div>
-
-            <div class="form-group" *ngIf="vagaForm.get('salario')?.value > 0">
-              <label class="form-label">Valor de Faturamento Calculado</label>
-              <div class="calculated-value">
-                <strong>{{ calcularValorFaturamento() | currency:'BRL':'symbol':'1.2-2' }}</strong>
-              </div>
-              <small class="form-hint">
-                Salário ({{ vagaForm.get('salario')?.value | currency:'BRL':'symbol':'1.2-2' }})
-                × {{ vagaForm.get('porcentagemFaturamento')?.value || 100 }}%
-                = {{ calcularValorFaturamento() | currency:'BRL':'symbol':'1.2-2' }}
-              </small>
             </div>
           </div>
 
