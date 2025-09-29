@@ -674,8 +674,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
         return endDate >= now && endDate <= fifteenDaysFromNow;
       });
 
-      // Mostrar mensagem ao usuário
-      this.modalService.showInfo(`Mostrando ${this.filteredContracts.length} contrato(s) vencendo nos próximos 15 dias`);
+      // Removido toast de informação conforme solicitado
     }
   }
 }

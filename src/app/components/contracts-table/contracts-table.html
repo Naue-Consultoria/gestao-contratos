@@ -41,8 +41,9 @@
     <!-- Filters and Actions -->
     <div class="table-header">
       <div class="filters-section">
-        <!-- Search Box -->
+        <!-- All Filters in One Row -->
         <div class="filter-row">
+          <!-- Search Box -->
           <div class="search-box" [class.searching]="isSearching">
             <i class="fas fa-search search-icon" *ngIf="!isSearching"></i>
             <i class="fas fa-spinner fa-spin search-icon" *ngIf="isSearching"></i>
@@ -61,84 +62,81 @@
               <i class="fas fa-times"></i>
             </button>
           </div>
-        </div>
 
-        <!-- Main Filters -->
-        <div class="filter-row">
-          <div class="filter-group">
-            <div class="filter-item">
-              <label class="filter-label">
-                <i class="fas fa-flag"></i>
-                Status
-              </label>
-              <select class="filter-select" [(ngModel)]="filters.status" (change)="applyFilters()">
-                <option value="">Todos</option>
-                <option value="active">Ativo</option>
-                <option value="completed">Concluído</option>
-                <option value="cancelled">Cancelado</option>
-                <option value="suspended">Suspenso</option>
-              </select>
-            </div>
-
-            <div class="filter-item">
-              <label class="filter-label">
-                <i class="fas fa-user-tie"></i>
-                Cliente
-              </label>
-              <select class="filter-select client-select" [(ngModel)]="filters.client_id" (change)="applyFilters()">
-                <option [value]="null">Todos</option>
-                <option *ngFor="let client of clients" [value]="client.id">{{ client.name }}</option>
-              </select>
-            </div>
+          <!-- Status Filter -->
+          <div class="filter-item">
+            <label class="filter-label">
+              <i class="fas fa-flag"></i>
+              Status
+            </label>
+            <select class="filter-select" [(ngModel)]="filters.status" (change)="applyFilters()">
+              <option value="">Todos</option>
+              <option value="active">Ativo</option>
+              <option value="completed">Concluído</option>
+              <option value="cancelled">Cancelado</option>
+              <option value="suspended">Suspenso</option>
+            </select>
           </div>
 
-          <!-- Date Filters -->
-          <div class="filter-group date-filters">
-            <div class="filter-item">
-              <label class="filter-label">
-                <i class="fas fa-calendar-alt"></i>
-                Tipo de Data
-              </label>
-              <select class="filter-select date-type-select" [(ngModel)]="filters.dateType" (change)="applyFilters()">
-                <option value="">Selecione</option>
-                <option value="created_at">Criação</option>
-                <option value="start_date">Início</option>
-                <option value="end_date">Término</option>
-              </select>
-            </div>
+          <!-- Client Filter -->
+          <div class="filter-item">
+            <label class="filter-label">
+              <i class="fas fa-user-tie"></i>
+              Cliente
+            </label>
+            <select class="filter-select client-select" [(ngModel)]="filters.client_id" (change)="applyFilters()">
+              <option [value]="null">Todos</option>
+              <option *ngFor="let client of clients" [value]="client.id">{{ client.name }}</option>
+            </select>
+          </div>
 
-            <div class="filter-item" [class.disabled]="!filters.dateType">
-              <label class="filter-label">
-                <i class="fas fa-calendar-check"></i>
-                Mês
-              </label>
-              <select class="filter-select month-select" [(ngModel)]="filters.month" (change)="applyFilters()" [disabled]="!filters.dateType">
-                <option value="">Todos</option>
-                <option value="1">Janeiro</option>
-                <option value="2">Fevereiro</option>
-                <option value="3">Março</option>
-                <option value="4">Abril</option>
-                <option value="5">Maio</option>
-                <option value="6">Junho</option>
-                <option value="7">Julho</option>
-                <option value="8">Agosto</option>
-                <option value="9">Setembro</option>
-                <option value="10">Outubro</option>
-                <option value="11">Novembro</option>
-                <option value="12">Dezembro</option>
-              </select>
-            </div>
+          <!-- Date Type Filter -->
+          <div class="filter-item">
+            <label class="filter-label">
+              <i class="fas fa-calendar-alt"></i>
+              Tipo de Data
+            </label>
+            <select class="filter-select date-type-select" [(ngModel)]="filters.dateType" (change)="applyFilters()">
+              <option value="">Selecione</option>
+              <option value="created_at">Criação</option>
+              <option value="start_date">Início</option>
+              <option value="end_date">Término</option>
+            </select>
+          </div>
 
-            <div class="filter-item" [class.disabled]="!filters.dateType">
-              <label class="filter-label">
-                <i class="fas fa-calendar"></i>
-                Ano
-              </label>
-              <select class="filter-select year-select" [(ngModel)]="filters.year" (change)="applyFilters()" [disabled]="!filters.dateType">
-                <option value="">Todos</option>
-                <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
-              </select>
-            </div>
+          <!-- Month Filter -->
+          <div class="filter-item" [class.disabled]="!filters.dateType">
+            <label class="filter-label">
+              <i class="fas fa-calendar-check"></i>
+              Mês
+            </label>
+            <select class="filter-select month-select" [(ngModel)]="filters.month" (change)="applyFilters()" [disabled]="!filters.dateType">
+              <option value="">Todos</option>
+              <option value="1">Janeiro</option>
+              <option value="2">Fevereiro</option>
+              <option value="3">Março</option>
+              <option value="4">Abril</option>
+              <option value="5">Maio</option>
+              <option value="6">Junho</option>
+              <option value="7">Julho</option>
+              <option value="8">Agosto</option>
+              <option value="9">Setembro</option>
+              <option value="10">Outubro</option>
+              <option value="11">Novembro</option>
+              <option value="12">Dezembro</option>
+            </select>
+          </div>
+
+          <!-- Year Filter -->
+          <div class="filter-item" [class.disabled]="!filters.dateType">
+            <label class="filter-label">
+              <i class="fas fa-calendar"></i>
+              Ano
+            </label>
+            <select class="filter-select year-select" [(ngModel)]="filters.year" (change)="applyFilters()" [disabled]="!filters.dateType">
+              <option value="">Todos</option>
+              <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+            </select>
           </div>
 
           <!-- Active Filters Indicator -->

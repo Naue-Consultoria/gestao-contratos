@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProposalService } from '../../services/proposal';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -19,18 +19,28 @@ interface StatCard {
   templateUrl: './proposal-stats-cards.html',
   styleUrls: ['./proposal-stats-cards.css']
 })
-export class ProposalStatsCardsComponent implements OnInit, OnDestroy {
+export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges {
   private proposalService = inject(ProposalService);
   private subscriptions = new Subscription();
+
+  @Input() filteredProposals: any[] = [];
+  @Input() useFilteredData = false;
 
   cards: StatCard[] = [];
   isLoading = true;
   error = '';
+  allProposals: any[] = [];
 
   ngOnInit() {
     this.loadStats();
     // Listen for proposal updates
     window.addEventListener('refreshProposals', this.loadStats.bind(this));
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if ((changes['filteredProposals'] && this.useFilteredData && this.filteredProposals)) {
+      this.updateCardsWithFilteredData();
+    }
   }
 
   ngOnDestroy() {
@@ -41,20 +51,37 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy {
   async loadStats() {
     this.isLoading = true;
     this.error = '';
-    
+
     try {
-      const response = await firstValueFrom(this.proposalService.getProposalStats());
-      
-      if (response && response.success && response.data) {
-        this.buildStatCards(response.data);
+      // Carregar todas as propostas
+      const proposalsResponse = await firstValueFrom(this.proposalService.getProposals());
+
+      if (proposalsResponse && proposalsResponse.success && proposalsResponse.data) {
+        this.allProposals = proposalsResponse.data;
+
+        // Se está usando dados filtrados, usar os filtrados, senão usar todos
+        const proposalsToUse = this.useFilteredData && this.filteredProposals.length >= 0
+          ? this.filteredProposals
+          : this.allProposals;
+
+        this.calculateAndUpdateCards(proposalsToUse);
       } else {
-        // Se não há dados, mostra zeros
         this.buildDefaultCards();
+      }
+
+      // Também carregar estatísticas do backend se disponível
+      try {
+        const statsResponse = await firstValueFrom(this.proposalService.getProposalStats());
+        if (statsResponse && statsResponse.success && statsResponse.data && !this.useFilteredData) {
+          // Usar stats do backend apenas quando não estiver usando dados filtrados
+          this.buildStatCards(statsResponse.data);
+        }
+      } catch {
+        // Ignorar erro de stats, usar cálculo local
       }
     } catch (error: any) {
       console.error('❌ Error loading proposal stats:', error);
-      
-      // Se é erro 500 ou 404, mostra funcionalidade não disponível
+
       if (error?.status === 500 || error?.status === 404) {
         this.error = 'Estatísticas de propostas ainda não implementadas no backend.';
         this.buildDefaultCards();
@@ -65,6 +92,63 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  private updateCardsWithFilteredData() {
+    if (!this.allProposals || this.allProposals.length === 0) {
+      return;
+    }
+
+    const proposals = this.filteredProposals.map(fp => fp.raw || fp);
+    this.calculateAndUpdateCards(proposals);
+  }
+
+  private calculateAndUpdateCards(proposals: any[]) {
+    const totalProposals = proposals.length;
+    const sentProposals = proposals.filter((p: any) => p.status === 'sent').length;
+    const signedProposals = proposals.filter((p: any) => p.status === 'signed').length;
+    const convertedProposals = proposals.filter((p: any) => p.status === 'converted').length;
+
+    // Calcular valor em aberto (propostas enviadas e assinadas, mas não convertidas)
+    const pendingValue = proposals
+      .filter((p: any) => p.status === 'sent' || p.status === 'signed' || p.status === 'draft')
+      .reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+
+    // Calcular valor total de todas as propostas filtradas
+    const totalValue = proposals.reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+
+    this.cards = [
+      {
+        title: 'Total de Propostas',
+        value: totalProposals,
+        icon: 'fas fa-file-alt',
+        color: '#003b2b',
+        subtitle: this.useFilteredData ? 'Propostas filtradas' : undefined
+      },
+      {
+        title: 'Propostas Enviadas',
+        value: sentProposals,
+        icon: 'fas fa-paper-plane',
+        color: '#003b2b',
+        subtitle: totalProposals > 0 ? `${Math.round((sentProposals / totalProposals) * 100)}% do total` : '0% do total'
+      },
+      {
+        title: 'Propostas Assinadas',
+        value: signedProposals + convertedProposals,
+        icon: 'fas fa-check-circle',
+        color: '#003b2b',
+        subtitle: totalProposals > 0 ? `${Math.round(((signedProposals + convertedProposals) / totalProposals) * 100)}% do total` : '0% do total'
+      },
+      {
+        title: 'Valor em Aberto',
+        value: this.formatCurrency(pendingValue),
+        icon: 'fas fa-dollar-sign',
+        color: '#003b2b',
+        subtitle: this.useFilteredData ? `${totalProposals} proposta${totalProposals !== 1 ? 's' : ''} filtrada${totalProposals !== 1 ? 's' : ''}` : 'Propostas não convertidas'
+      }
+    ];
+
+    this.isLoading = false;
   }
 
   private buildStatCards(stats: any) {

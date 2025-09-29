@@ -1,14 +1,18 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ModalService } from '../../services/modal.service';
 import { ProposalService, Proposal, PrepareProposalData } from '../../services/proposal';
+import { ClientService } from '../../services/client';
 import { SendProposalModalComponent } from '../send-proposal-modal/send-proposal-modal';
 import { DeleteConfirmationModalComponent } from '../delete-confirmation-modal/delete-confirmation-modal.component';
 import { ProposalToContractModalComponent } from '../proposal-to-contract-modal/proposal-to-contract-modal';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ProposalStatsCardsComponent } from '../proposal-stats-cards/proposal-stats-cards';
+import { SearchService } from '../../services/search.service';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import jsPDF from 'jspdf';
 
 interface ProposalDisplay {
@@ -31,20 +35,36 @@ interface ProposalDisplay {
 @Component({
   selector: 'app-proposals-page',
   standalone: true,
-  imports: [CommonModule, SendProposalModalComponent, DeleteConfirmationModalComponent, BreadcrumbComponent, ProposalStatsCardsComponent, ProposalToContractModalComponent],
+  imports: [CommonModule, FormsModule, SendProposalModalComponent, DeleteConfirmationModalComponent, BreadcrumbComponent, ProposalStatsCardsComponent, ProposalToContractModalComponent],
   templateUrl: './proposals-page.html',
   styleUrls: ['./proposals-page.css']
 })
 export class ProposalsPageComponent implements OnInit, OnDestroy {
   private modalService = inject(ModalService);
   private proposalService = inject(ProposalService);
+  private clientService = inject(ClientService);
+  private searchService = inject(SearchService);
   private router = inject(Router);
   private subscriptions = new Subscription();
 
   proposals: ProposalDisplay[] = [];
+  filteredProposals: ProposalDisplay[] = [];
+  clients: any[] = [];
   isLoading = true;
+  isSearching = false;
   error = '';
-  
+
+  // Filters
+  filters = {
+    search: '',
+    status: '',
+    client_id: null as number | null,
+    type: '',
+    month: '',
+    year: ''
+  };
+  availableYears: number[] = [];
+
   // Send Proposal Modal
   showSendModal = false;
   selectedProposalForSending: Proposal | null = null;
@@ -62,9 +82,11 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   activeDropdownId: number | null = null;
 
   ngOnInit() {
+    this.subscribeToSearch();
     this.loadData();
+    this.loadClients();
     window.addEventListener('refreshProposals', this.loadData.bind(this));
-    
+
     // Fechar dropdown quando clicar fora
     document.addEventListener('click', () => {
       this.activeDropdownId = null;
@@ -76,35 +98,162 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     window.removeEventListener('refreshProposals', this.loadData.bind(this));
   }
 
+  private subscribeToSearch() {
+    const searchSubscription = this.searchService.searchTerm$
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged()
+      )
+      .subscribe((term) => {
+        this.filters.search = term;
+        if (term && term.trim()) {
+          this.isSearching = true;
+        }
+        this.applyFilters();
+      });
+    this.subscriptions.add(searchSubscription);
+  }
+
+  async loadClients() {
+    try {
+      const response = await firstValueFrom(this.clientService.getClients({ is_active: true }));
+      if (response?.clients) {
+        this.clients = response.clients.sort((a: any, b: any) =>
+          a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+        );
+      }
+    } catch (error) {
+      console.error('Erro ao carregar clientes:', error);
+    }
+  }
+
   async loadData() {
     this.isLoading = true;
     this.error = '';
     try {
       const proposalsResponse = await firstValueFrom(this.proposalService.getProposals());
-      
+
       if (proposalsResponse && proposalsResponse.success) {
         this.proposals = (proposalsResponse.data || []).map((apiProposal: any) => {
           return this.mapApiProposalToTableProposal(apiProposal);
         });
+        this.filteredProposals = [...this.proposals];
+        this.updateAvailableYears();
+        this.applyFilters();
       } else {
         // Se não há dados ou falha na resposta, deixa array vazio
         this.proposals = [];
+        this.filteredProposals = [];
       }
     } catch (error: any) {
       console.error('❌ Error loading proposals data:', error);
-      
+
       // Se é erro 500 ou endpoint não existe, mostra que funcionalidade não está disponível
       if (error?.status === 500 || error?.status === 404) {
         this.error = 'A funcionalidade de propostas ainda não está implementada no backend.';
       } else {
         this.error = 'Não foi possível carregar os dados das propostas.';
       }
-      
+
       // Define array vazio para não quebrar a UI
       this.proposals = [];
+      this.filteredProposals = [];
     } finally {
       this.isLoading = false;
+      this.isSearching = false;
     }
+  }
+
+  applyFilters() {
+    let filtered = [...this.proposals];
+
+    // Filtro de busca
+    if (this.filters.search) {
+      const searchTerm = this.filters.search.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.proposalNumber.toLowerCase().includes(searchTerm) ||
+        p.clientName.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // Filtro de status
+    if (this.filters.status) {
+      filtered = filtered.filter(p => p.status === this.filters.status);
+    }
+
+    // Filtro de cliente
+    if (this.filters.client_id) {
+      filtered = filtered.filter(p => {
+        // Verificar diferentes formas de ter o client_id
+        const clientId = p.raw.client?.id || p.raw.client_id;
+        return clientId === Number(this.filters.client_id);
+      });
+    }
+
+    // Filtro de tipo
+    if (this.filters.type) {
+      filtered = filtered.filter(p => p.raw.type === this.filters.type);
+    }
+
+    // Filtro de mês/ano
+    if (this.filters.month || this.filters.year) {
+      filtered = filtered.filter(p => {
+        const date = new Date(p.raw.created_at);
+        if (this.filters.month && date.getMonth() + 1 !== parseInt(this.filters.month)) {
+          return false;
+        }
+        if (this.filters.year && date.getFullYear() !== parseInt(this.filters.year)) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    this.filteredProposals = filtered;
+    this.isSearching = false;
+  }
+
+  clearFilters() {
+    this.filters = { search: '', status: '', client_id: null, type: '', month: '', year: '' };
+    this.searchService.setSearchTerm('');
+    this.applyFilters();
+  }
+
+  onSearchInput() {
+    this.searchService.setSearchTerm(this.filters.search || '');
+  }
+
+  clearSearch() {
+    this.filters.search = '';
+    this.searchService.setSearchTerm('');
+  }
+
+  private updateAvailableYears() {
+    const years = new Set<number>();
+    const currentYear = new Date().getFullYear();
+
+    years.add(currentYear);
+    years.add(currentYear - 1);
+    years.add(currentYear + 1);
+
+    this.proposals.forEach(proposal => {
+      if (proposal.raw.created_at) {
+        const year = new Date(proposal.raw.created_at).getFullYear();
+        years.add(year);
+      }
+    });
+
+    this.availableYears = Array.from(years).sort((a, b) => b - a);
+  }
+
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.filters.search) count++;
+    if (this.filters.status) count++;
+    if (this.filters.client_id) count++;
+    if (this.filters.type) count++;
+    if (this.filters.month || this.filters.year) count++;
+    return count;
   }
 
   private mapApiProposalToTableProposal(apiProposal: any): ProposalDisplay {

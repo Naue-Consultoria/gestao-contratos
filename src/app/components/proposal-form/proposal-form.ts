@@ -118,6 +118,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       end_date: [''],
       observations: [''],
       max_installments: [12, [Validators.required, Validators.min(1), Validators.max(24)]],
+      status: ['draft'], // Campo de status adicionado
     });
 
     this.newClientForm = this.fb.group({
@@ -184,7 +185,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       type: proposal.type || 'Full',
       end_date: proposal.end_date ? proposal.end_date.split('T')[0] : '',
       observations: proposal.notes || '',
-      max_installments: proposal.max_installments || 12
+      max_installments: proposal.max_installments || 12,
+      status: proposal.status || 'draft' // Carregar status da proposta
     });
 
     // Carregar serviços da proposta
@@ -807,6 +809,11 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
         recruitmentPercentages: service.recruitmentPercentages
       }))
     };
+
+    // Adicionar status apenas quando estiver em modo de edição
+    if (this.isEditMode && this.proposalForm.value.status) {
+      (formData as any).status = this.proposalForm.value.status;
+    }
 
 
     const operation = this.isEditMode 

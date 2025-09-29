@@ -151,6 +151,21 @@
                 <input id="end_date" type="date" formControlName="end_date" class="form-control">
               </div>
             </div>
+
+            <!-- Status field - only visible in edit mode -->
+            <div class="form-group" *ngIf="isEditMode">
+              <label for="status" class="form-label">Status da Proposta</label>
+              <select id="status" formControlName="status" class="form-control">
+                <option value="draft">Rascunho</option>
+                <option value="sent">Enviada</option>
+                <option value="signed">Assinada</option>
+                <option value="rejected">Rejeitada</option>
+                <option value="expired">Expirada</option>
+                <option value="converted">Convertida</option>
+                <option value="contraproposta">Contraproposta</option>
+              </select>
+              <div class="help-text">Alterar o status da proposta pode afetar as ações disponíveis</div>
+            </div>
             
             <div class="form-group">
               <label for="max_installments" class="form-label">Máximo de Parcelas <span class="required">*</span></label>
