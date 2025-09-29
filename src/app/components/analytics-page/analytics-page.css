@@ -763,24 +763,29 @@
   height: 400px;
 }
 
-/* Altura padronizada para ambos os gráficos de conclusão */
-.client-completion-wrapper,
+/* Altura flexível para gráfico de conclusão por contrato */
 .contract-completion-wrapper {
-  height: 400px !important;
-  min-height: 400px;
-  max-height: 400px;
-  overflow-y: auto;
+  min-height: 500px;
+  max-height: 1500px;
+  height: auto !important;
+  overflow: visible;
 }
 
-#clientCompletionChart,
+/* Quando em modo 'Todos os clientes', expandir altura */
+.chart-card.full-width .contract-completion-wrapper {
+  min-height: 600px;
+  max-height: 2000px;
+}
+
+/* Altura dinâmica para o gráfico de contratos */
 #contractCompletionChart {
-  height: 400px !important;
-  max-height: 400px !important;
+  min-height: 500px;
+  height: 100%;
+  max-height: none;
 }
 
 .chart-wrapper canvas {
   width: 100% !important;
-  height: 100% !important;
 }
 
 /* KPI Improvements */

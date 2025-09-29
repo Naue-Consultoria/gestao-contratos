@@ -43,8 +43,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   // Filtro para gráfico de contratos
   selectedClientId: number | null = null;
-  // Filtro para gráfico de clientes
-  selectedClientIdForClients: number | null = null;
   availableClients: {id: number, name: string}[] = [];
 
   // Dados de analytics
@@ -151,7 +149,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     
     this.initConversionGauge();
     this.initContractsDonut();
-    this.initClientCompletionChart(); // Primeiro gráfico da seção Analytics Detalhados
     this.initContractCompletionChart(); // Novo gráfico de conclusão por contratos
     this.initServicesByUserChart();
     this.initTopServicesChart();
@@ -371,261 +368,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-
-  /**
-   * Gráfico de taxa de conclusão por cliente
-   */
-  private initClientCompletionChart() {
-    const canvas = document.getElementById('clientCompletionChart') as HTMLCanvasElement;
-    if (!canvas) {
-      this.showChartError('clientCompletionChart', 'Canvas não encontrado');
-      return;
-    }
-
-    // Altura fixa padronizada para ambos os gráficos
-    const fixedHeight = 400;
-    canvas.style.height = `${fixedHeight}px`;
-    canvas.parentElement!.style.height = `${fixedHeight}px`;
-
-    // Destruir chart existente se houver
-    if (this.charts['clientCompletionChart']) {
-      this.charts['clientCompletionChart'].destroy();
-      delete this.charts['clientCompletionChart'];
-    }
-
-    if (!this.analyticsData?.clientCompletionData) {
-      this.showChartError('clientCompletionChart', 'Dados não disponíveis');
-      return;
-    }
-
-    if (this.analyticsData.clientCompletionData.length === 0) {
-      this.showChartError('clientCompletionChart', 'Nenhum dado de cliente encontrado');
-      return;
-    }
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      this.showChartError('clientCompletionChart', 'Erro ao obter contexto do canvas');
-      return;
-    }
-
-    try {
-      const allData = this.analyticsData.clientCompletionData;
-
-      // Se não há filtro de cliente específico, mostrar apenas clientes com progresso > 0%
-      // Se há filtro específico, mostrar o cliente mesmo com 0%
-      let filteredData;
-      if (this.selectedClientIdForClients !== null) {
-        // Cliente específico selecionado - mostrar mesmo com 0%
-        filteredData = allData.filter((client: any) => client.clientId === this.selectedClientIdForClients);
-      } else {
-        // Nenhum cliente específico - mostrar apenas com progresso > 0%
-        filteredData = allData.filter((client: any) => (client.completionPercentage || 0) > 0);
-      }
-
-      // Se não há dados após o filtro, mostrar mensagem apropriada
-      if (filteredData.length === 0) {
-        const message = this.selectedClientIdForClients !== null
-          ? 'O cliente selecionado ainda não tem nenhum progresso em seu(s) contrato(s)'
-          : 'Nenhum cliente com progresso encontrado';
-        this.showChartError('clientCompletionChart', message);
-        return;
-      }
-
-      const data = filteredData.slice(0, 8); // Limitar a 8 itens
-
-      const labels = data.map((client: any, index: number) => {
-        let name = client.clientName || `Cliente #${client.clientId || index + 1}`;
-
-        // Remover prefixos desnecessários
-        if (name.startsWith('Cliente #') && client.clientId) {
-          name = `Cliente #${client.clientId}`;
-        }
-
-        // Truncar nomes para padronização
-        const finalName = name.length > 30 ? name.substring(0, 30) + '...' : name;
-        return finalName;
-      });
-
-      const completionValues = data.map((client: any) => {
-        const percentage = client.completionPercentage || 0;
-        const validPercentage = Math.max(0, Math.min(100, percentage));
-        // Se o cliente foi especificamente selecionado e tem 0%, mostrar uma barra pequena mas visível
-        if (validPercentage === 0 && this.selectedClientIdForClients !== null) {
-          return 1; // 1% para ser visível
-        }
-        return validPercentage === 0 ? 0 : Math.max(validPercentage, 2);
-      });
-
-      // Cores padronizadas baseadas na porcentagem
-      const colors = data.map((client: any) => {
-        const percentage = client.completionPercentage || 0;
-        if (percentage < 40) {
-          return '#6b7280'; // Cinza
-        } else if (percentage >= 40 && percentage <= 80) {
-          return '#065f46'; // Verde mais escuro
-        } else {
-          return '#3b82f6'; // Azul
-        }
-      });
-
-      const Chart = (window as any).Chart;
-      if (!Chart) {
-        this.showChartError('clientCompletionChart', 'Chart.js não carregado');
-        return;
-      }
-
-      this.charts['clientCompletionChart'] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Taxa de Conclusão (%)',
-            data: completionValues,
-            backgroundColor: colors,
-            borderColor: '#ffffff',
-            borderWidth: 2,
-            borderRadius: 8,
-            borderSkipped: false,
-            barThickness: 'flex',
-            maxBarThickness: 30,
-            minBarLength: 5
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          indexAxis: 'y',
-          layout: {
-            padding: {
-              left: 15,
-              right: 50,
-              top: 15,
-              bottom: 15
-            }
-          },
-          plugins: {
-            legend: {
-              display: false
-            },
-            tooltip: {
-              backgroundColor: '#ffffff',
-              titleColor: '#374151',
-              bodyColor: '#374151',
-              borderColor: '#e5e7eb',
-              borderWidth: 1,
-              cornerRadius: 8,
-              titleFont: {
-                size: 14,
-                weight: 'bold'
-              },
-              bodyFont: {
-                size: 12
-              },
-              callbacks: {
-                title: (context: any) => {
-                  const client = data[context[0].dataIndex];
-                  return client.clientName || 'Cliente';
-                },
-                label: (context: any) => {
-                  const client = data[context.dataIndex];
-                  return [
-                    `📊 ${client.completionPercentage || 0}% concluído`,
-                    `📋 ${client.activeContracts || 0} contratos ativos`
-                  ];
-                }
-              }
-            }
-          },
-          onHover: (event: any, activeElements: any) => {
-            const chart = event.chart;
-            chart.canvas.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
-          },
-          scales: {
-            x: {
-              grid: {
-                color: 'rgba(0, 0, 0, 0.08)',
-                drawBorder: false,
-                lineWidth: 1
-              },
-              ticks: {
-                color: '#6b7280',
-                font: {
-                  size: 11,
-                  weight: '500'
-                },
-                stepSize: 20,
-                callback: function(value: any) {
-                  return value + '%';
-                }
-              },
-              beginAtZero: true,
-              min: 0,
-              max: 100,
-              title: {
-                display: true,
-                text: 'Taxa de Conclusão (%)',
-                color: '#6b7280',
-                font: {
-                  size: 12,
-                  weight: 'bold'
-                }
-              }
-            },
-            y: {
-              grid: {
-                display: false
-              },
-              ticks: {
-                color: '#6b7280',
-                font: {
-                  size: 11,
-                  weight: '500'
-                },
-                maxRotation: 0,
-                callback: function(value: any, index: any) {
-                  const label = labels[index];
-                  return label && label.length > 25 ? label.substring(0, 25) + '...' : label;
-                }
-              }
-            }
-          },
-          animation: {
-            duration: 1200,
-            easing: 'easeInOutQuart',
-            onComplete: () => {
-              const chart = this.charts['clientCompletionChart'];
-              if (!chart) return;
-
-              const ctx = chart.ctx;
-              ctx.font = 'bold 12px Arial';
-              ctx.fillStyle = '#374151';
-              ctx.textAlign = 'left';
-              ctx.textBaseline = 'middle';
-
-              chart.data.datasets.forEach((dataset: any, i: number) => {
-                const meta = chart.getDatasetMeta(i);
-                meta.data.forEach((bar: any, index: number) => {
-                  const client = data[index];
-                  const percentage = client.completionPercentage || 0;
-                  const text = percentage.toFixed(0) + '%';
-
-                  const x = bar.x + 5;
-                  const y = bar.y;
-
-                  ctx.fillText(text, x, y);
-                });
-              });
-            }
-          }
-        }
-      });
-
-    } catch (error: any) {
-      this.showChartError('clientCompletionChart', `Erro ao criar gráfico: ${error?.message || 'Erro desconhecido'}`);
-    }
-  }
-
   /**
    * Mostrar mensagem de erro no lugar do gráfico
    */
@@ -804,28 +546,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     setTimeout(() => this.initContractCompletionChart(), 100);
   }
 
-  /**
-   * Alterar filtro de cliente via evento (para gráfico de clientes)
-   */
-  onClientFilterForClientsChangeEvent(event: Event) {
-    const selectElement = event.target as HTMLSelectElement;
-    const value = selectElement.value;
-    const clientId = value ? +value : null;
-    this.onClientFilterForClientsChange(clientId);
-  }
-
-  /**
-   * Alterar filtro de cliente (para gráfico de clientes)
-   */
-  onClientFilterForClientsChange(clientId: number | null) {
-    this.selectedClientIdForClients = clientId;
-    // Reinicializar apenas o gráfico de clientes
-    if (this.charts['clientCompletionChart']) {
-      this.charts['clientCompletionChart'].destroy();
-      delete this.charts['clientCompletionChart'];
-    }
-    setTimeout(() => this.initClientCompletionChart(), 100);
-  }
 
   /**
    * Gráfico de taxa de conclusão por contrato
@@ -836,11 +556,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       this.showChartError('contractCompletionChart', 'Canvas não encontrado');
       return;
     }
-
-    // Altura fixa padronizada para ambos os gráficos
-    const fixedHeight = 400;
-    canvas.style.height = `${fixedHeight}px`;
-    canvas.parentElement!.style.height = `${fixedHeight}px`;
 
     // Destruir chart existente se houver
     if (this.charts['contractCompletionChart']) {
@@ -853,7 +568,41 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
-    const data = this.getFilteredContractData().slice(0, 8); // Limitar a 8 itens
+    // Se um cliente específico está selecionado, limitar a 10 itens
+    // Se 'Todos os clientes', mostrar todos com progresso > 0%
+    const allData = this.getFilteredContractData();
+    const data = this.selectedClientId !== null
+      ? allData.slice(0, 10)  // Cliente específico: limitar a 10 itens
+      : allData;              // Todos os clientes: mostrar todos
+
+    // Altura dinâmica baseada na quantidade de itens
+    const itemCount = data.length;
+    const baseHeight = 300;
+    const heightPerItem = 25; // Espaçamento mínimo entre itens
+
+    // Calcular altura baseada no número de itens
+    let calculatedHeight;
+    if (this.selectedClientId !== null) {
+      // Cliente específico: altura fixa adequada
+      calculatedHeight = Math.max(450, baseHeight + (itemCount * heightPerItem));
+    } else {
+      // Todos os clientes: altura dinâmica sem limite máximo rígido
+      calculatedHeight = baseHeight + (itemCount * heightPerItem);
+    }
+
+    // Garantir altura mínima e máxima razoável
+    calculatedHeight = Math.min(2000, Math.max(450, calculatedHeight));
+
+    // Aplicar altura ao canvas e seu container
+    canvas.style.height = `${calculatedHeight}px`;
+    canvas.style.maxHeight = 'none';
+    canvas.style.minHeight = `${calculatedHeight}px`;
+
+    if (canvas.parentElement) {
+      canvas.parentElement.style.height = `${calculatedHeight}px`;
+      canvas.parentElement.style.maxHeight = 'none';
+      canvas.parentElement.style.minHeight = `${calculatedHeight}px`;
+    }
 
     if (data.length === 0) {
       const message = this.selectedClientId !== null
@@ -871,8 +620,45 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
     try {
       const labels = data.map((contract: any) => {
-        const contractLabel = `${contract.contractNumber} - ${contract.clientName}`;
-        return contractLabel.length > 30 ? contractLabel.substring(0, 30) + '...' : contractLabel;
+        const contractNumber = contract.contractNumber || '';
+        const clientName = contract.clientName || '';
+        const fullLabel = `${contractNumber} - ${clientName}`;
+
+        // Se o label for muito longo, quebrar em duas linhas
+        if (fullLabel.length > 40) {
+          // Tentar quebrar no meio do texto em um espaço natural
+          const maxLineLength = 35;
+
+          // Procurar o melhor ponto de quebra próximo ao meio
+          const midPoint = Math.floor(fullLabel.length / 2);
+          let breakPoint = -1;
+
+          // Procurar espaço mais próximo do meio (antes ou depois)
+          for (let i = 0; i <= 15; i++) {
+            // Verificar depois do meio
+            if (midPoint + i < fullLabel.length && fullLabel[midPoint + i] === ' ') {
+              breakPoint = midPoint + i;
+              break;
+            }
+            // Verificar antes do meio
+            if (midPoint - i >= 0 && fullLabel[midPoint - i] === ' ') {
+              breakPoint = midPoint - i;
+              break;
+            }
+          }
+
+          // Se encontrou um bom ponto de quebra, usar
+          if (breakPoint > 0 && breakPoint < fullLabel.length - 1) {
+            const line1 = fullLabel.substring(0, breakPoint).trim();
+            const line2 = fullLabel.substring(breakPoint + 1).trim();
+            return [line1, line2];
+          }
+
+          // Fallback: quebrar entre contrato e cliente
+          return [contractNumber, clientName];
+        }
+
+        return fullLabel;
       });
 
       const completionValues = data.map((contract: any) => {
@@ -916,8 +702,10 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
             borderRadius: 8,
             borderSkipped: false,
             barThickness: 'flex',
-            maxBarThickness: 30,
-            minBarLength: 5
+            maxBarThickness: 28,
+            minBarLength: 5,
+            categoryPercentage: 0.98,
+            barPercentage: 0.95
           }]
         },
         options: {
@@ -926,10 +714,10 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
           indexAxis: 'y',
           layout: {
             padding: {
-              left: 15,
-              right: 50,
-              top: 15,
-              bottom: 15
+              left: 25,
+              right: 70,
+              top: 10,
+              bottom: 10
             }
           },
           plugins: {
@@ -953,7 +741,8 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
               callbacks: {
                 title: (context: any) => {
                   const contract = data[context[0].dataIndex];
-                  return `${contract.contractNumber} - ${contract.clientName}`;
+                  // Retornar array para mostrar em linhas separadas no tooltip
+                  return [contract.contractNumber, contract.clientName];
                 },
                 label: (context: any) => {
                   const contract = data[context.dataIndex];
@@ -1009,12 +798,20 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 color: '#6b7280',
                 font: {
                   size: 11,
-                  weight: '500'
+                  weight: '500',
+                  lineHeight: 1.2
                 },
                 maxRotation: 0,
+                padding: 3,
+                autoSkip: false,
                 callback: function(value: any, index: any) {
                   const label = labels[index];
-                  return label && label.length > 25 ? label.substring(0, 25) + '...' : label;
+                  if (Array.isArray(label)) {
+                    // Se é um array, já está formatado com quebra de linha
+                    return label;
+                  }
+                  // Se é string simples, retornar como está
+                  return label;
                 }
               }
             }

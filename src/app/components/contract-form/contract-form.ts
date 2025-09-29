@@ -282,29 +282,29 @@ export class ContractFormComponent implements OnInit {
           this.calculateRemainingValue();
         }
         this.selectedServices = contract.contract_services.map((cs: any) => {
-          const selectedService: SelectedService = {
-            service_id: cs.service.id,
-            name: cs.service.name,
-            unit_value: cs.unit_value,
-            total_value: cs.total_value,
-            duration: cs.service.duration,
-            duration_unit: cs.service.duration_unit,
-            category: cs.service.category,
-          };
-
-          // Se é serviço de Recrutamento & Seleção, adicionar campos de porcentagem
-          if (cs.service.category === 'Recrutamento & Seleção') {
-            selectedService.isRecruitment = true;
-            selectedService.recruitmentPercentages = cs.recruitmentPercentages || {
-              administrativo_gestao: 100,
-              comercial: 100,
-              operacional: 100,
-              estagio_jovem: 50
+            const selectedService: SelectedService = {
+              service_id: cs.service.id,
+              name: cs.service.name,
+              unit_value: cs.unit_value,
+              total_value: cs.total_value,
+              duration: cs.service.duration,
+              duration_unit: cs.service.duration_unit,
+              category: cs.service.category,
             };
-          }
 
-          return selectedService;
-        });
+            // Se é serviço de Recrutamento & Seleção, adicionar campos de porcentagem
+            if (cs.service.category === 'Recrutamento & Seleção') {
+              selectedService.isRecruitment = true;
+              selectedService.recruitmentPercentages = cs.recruitmentPercentages || {
+                administrativo_gestao: 100,
+                comercial: 100,
+                operacional: 100,
+                estagio_jovem: 50
+              };
+            }
+
+            return selectedService;
+          });
         this.assignedUsers = contract.assigned_users || [];
         
         // Carregar parcelas se existirem
@@ -853,7 +853,18 @@ export class ContractFormComponent implements OnInit {
   }
 
   hasSelectedServices(): boolean {
-    return this.selectedServices.length > 0;
+    // Verificar se há pelo menos um serviço que não seja interno
+    return this.selectedServices.filter(s => s.category !== 'Interno').length > 0;
+  }
+
+  // Retorna apenas serviços visíveis (não internos)
+  getVisibleServices(): SelectedService[] {
+    return this.selectedServices.filter(s => s.category !== 'Interno');
+  }
+
+  // Retorna a quantidade de serviços visíveis
+  getVisibleServicesCount(): number {
+    return this.getVisibleServices().length;
   }
 
   isPaymentMethodInstallable(paymentMethod: string): boolean {

@@ -492,7 +492,7 @@
             </div>
 
             <!-- Estado vazio -->
-            <div class="empty-services" *ngIf="selectedServices.length === 0">
+            <div class="empty-services" *ngIf="getVisibleServicesCount() === 0">
               <div class="empty-icon">
                 <i class="fas fa-briefcase"></i>
               </div>
@@ -508,13 +508,14 @@
                 Adicionar Primeiro Serviço
               </button>
             </div>
-            
+
             <!-- Lista de serviços -->
-            <div class="services-list" *ngIf="selectedServices.length > 0">
-              <div class="selected-services" [class.enable-scroll]="selectedServices.length > 3">
+            <div class="services-list" *ngIf="getVisibleServicesCount() > 0">
+              <div class="selected-services" [class.enable-scroll]="getVisibleServicesCount() > 3">
                 <div
                   class="service-card"
                   *ngFor="let service of selectedServices; let i = index"
+                  [hidden]="service.category === 'Interno'"
                 >
                   <div class="service-header">
                     <div class="service-info">

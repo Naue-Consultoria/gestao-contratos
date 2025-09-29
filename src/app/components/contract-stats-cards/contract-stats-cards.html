@@ -12,9 +12,11 @@
 
 <!-- Stats Cards - Mesmo padrão do Dashboard e Propostas -->
 <div *ngIf="!isLoading && !error" class="stats-grid" role="grid" aria-label="Estatísticas de contratos">
-  <div class="stat-card" 
+  <div class="stat-card"
        *ngFor="let card of cards; trackBy: trackByCardId"
        [attr.aria-label]="card.title + ': ' + card.value"
+       [class.clickable]="card.id === 'expiring'"
+       (click)="handleCardClick(card.id)"
        role="gridcell">
     <div class="stat-card-header">
       <span class="stat-label">{{ card.title }}</span>

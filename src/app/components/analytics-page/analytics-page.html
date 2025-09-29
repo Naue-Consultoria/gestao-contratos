@@ -179,73 +179,36 @@
         Analytics Detalhados
       </h3>
       
-      <!-- Gráficos de Conclusão - Lado a Lado -->
-      <div class="completion-charts-container">
-        <!-- Taxa de Conclusão por Contrato - ESQUERDA -->
-        <div class="chart-card half-width">
-          <div class="chart-header">
-            <h4 class="chart-title">
-              <i class="fas fa-file-contract"></i>
-              Taxa de Conclusão por Contrato
-            </h4>
-            
-            <!-- Filtro de Cliente -->
-            <div class="chart-filter" *ngIf="availableClients.length > 0">
-              <select 
-                id="clientFilter" 
-                class="filter-select"
-                [value]="selectedClientId || ''"
-                (change)="onClientFilterChangeEvent($event)">
-                <option value="">Todos os clientes</option>
-                <option 
-                  *ngFor="let client of availableClients" 
-                  [value]="client.id">
-                  {{ client.name }}
-                </option>
-              </select>
-            </div>
-          </div>
-          <div class="chart-wrapper contract-completion-wrapper">
-            <canvas id="contractCompletionChart" *ngIf="analyticsData.contractCompletionData && analyticsData.contractCompletionData.length > 0"></canvas>
-            <div *ngIf="!analyticsData.contractCompletionData || analyticsData.contractCompletionData.length === 0" class="no-data-message">
-              <i class="fas fa-info-circle"></i>
-              <p>Nenhum dado de conclusão por contrato disponível ainda</p>
-              <small>Os dados aparecerão quando houver contratos ativos com serviços em andamento</small>
-            </div>
+      <!-- Gráfico de Conclusão por Contrato - Largura Total -->
+      <div class="chart-card full-width">
+        <div class="chart-header">
+          <h4 class="chart-title">
+            <i class="fas fa-file-contract"></i>
+            Taxa de Conclusão por Contrato
+          </h4>
+
+          <!-- Filtro de Cliente -->
+          <div class="chart-filter" *ngIf="availableClients.length > 0">
+            <select
+              id="clientFilter"
+              class="filter-select"
+              [value]="selectedClientId || ''"
+              (change)="onClientFilterChangeEvent($event)">
+              <option value="">Todos os clientes</option>
+              <option
+                *ngFor="let client of availableClients"
+                [value]="client.id">
+                {{ client.name }}
+              </option>
+            </select>
           </div>
         </div>
-
-        <!-- Taxa de Conclusão por Cliente - DIREITA -->
-        <div class="chart-card half-width">
-          <div class="chart-header">
-            <h4 class="chart-title">
-              <i class="fas fa-percent"></i>
-              Taxa de Conclusão por Cliente
-            </h4>
-
-            <!-- Filtro de Cliente -->
-            <div class="chart-filter" *ngIf="availableClients.length > 0">
-              <select
-                id="clientFilterForClients"
-                class="filter-select"
-                [value]="selectedClientIdForClients || ''"
-                (change)="onClientFilterForClientsChangeEvent($event)">
-                <option value="">Todos os clientes</option>
-                <option
-                  *ngFor="let client of availableClients"
-                  [value]="client.id">
-                  {{ client.name }}
-                </option>
-              </select>
-            </div>
-          </div>
-          <div class="chart-wrapper client-completion-wrapper">
-            <canvas id="clientCompletionChart" *ngIf="analyticsData.clientCompletionData && analyticsData.clientCompletionData.length > 0"></canvas>
-            <div *ngIf="!analyticsData.clientCompletionData || analyticsData.clientCompletionData.length === 0" class="no-data-message">
-              <i class="fas fa-info-circle"></i>
-              <p>Nenhum dado de conclusão por cliente disponível ainda</p>
-              <small>Os dados aparecerão quando houver clientes com serviços em andamento ou concluídos</small>
-            </div>
+        <div class="chart-wrapper contract-completion-wrapper">
+          <canvas id="contractCompletionChart" *ngIf="analyticsData.contractCompletionData && analyticsData.contractCompletionData.length > 0"></canvas>
+          <div *ngIf="!analyticsData.contractCompletionData || analyticsData.contractCompletionData.length === 0" class="no-data-message">
+            <i class="fas fa-info-circle"></i>
+            <p>Nenhum dado de conclusão por contrato disponível ainda</p>
+            <small>Os dados aparecerão quando houver contratos ativos com serviços em andamento</small>
           </div>
         </div>
       </div>
@@ -265,6 +228,7 @@
               <i class="fas fa-info-circle"></i>
               <p>Nenhum dado de distribuição por usuário disponível ainda</p>
               <small>Os dados aparecerão quando houver usuários com serviços atribuídos</small>
+
             </div>
           </div>
         </div>

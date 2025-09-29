@@ -75,8 +75,12 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     status: '',
     client_id: null as number | null,
     type: '',
+    dateType: '',
+    month: '',
+    year: '',
   };
   clients: any[] = [];
+  availableYears: number[] = [];
   isLoading = false;
   isSearching = false;
   error = '';
@@ -179,6 +183,9 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
         status: this.filters.status,
         client_id: this.filters.client_id,
         type: this.currentTab === 'all' ? '' : this.currentTab,
+        dateType: this.filters.dateType,
+        month: this.filters.month,
+        year: this.filters.year,
       };
 
       // Remove filtros vazios para otimizar query
@@ -202,7 +209,8 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
         
         this.contracts = mappedContracts;
         this.filteredContracts = [...mappedContracts];
-        
+        this.updateAvailableYears();
+
         console.log(`✅ Carregados ${mappedContracts.length} contratos`);
       } else {
         this.contracts = [];
@@ -320,7 +328,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   clearFilters() {
-    this.filters = { search: '', status: '', client_id: null, type: '' };
+    this.filters = { search: '', status: '', client_id: null, type: '', dateType: '', month: '', year: '' };
     this.searchService.setSearchTerm(''); // Also clear the global search
     this.currentTab = 'all';
     this.applyFilters();
@@ -595,5 +603,79 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     });
     
     return cancelledValue;
+  }
+
+  // Atualizar anos disponíveis baseado nos contratos
+  private updateAvailableYears() {
+    const years = new Set<number>();
+    const currentYear = new Date().getFullYear();
+
+    // Adicionar o ano atual
+    years.add(currentYear);
+
+    // Adicionar anos dos contratos
+    this.contracts.forEach(contract => {
+      if (contract.raw.created_at) {
+        const year = new Date(contract.raw.created_at).getFullYear();
+        years.add(year);
+      }
+      if (contract.raw.start_date) {
+        const year = new Date(contract.raw.start_date).getFullYear();
+        years.add(year);
+      }
+      if (contract.raw.end_date) {
+        const year = new Date(contract.raw.end_date).getFullYear();
+        years.add(year);
+      }
+    });
+
+    // Adicionar anos anteriores e próximo
+    years.add(currentYear - 1);
+    years.add(currentYear + 1);
+
+    // Converter para array e ordenar
+    this.availableYears = Array.from(years).sort((a, b) => b - a);
+  }
+
+  // Contar quantidade de filtros ativos
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.filters.search) count++;
+    if (this.filters.status) count++;
+    if (this.filters.client_id) count++;
+    if (this.filters.dateType && (this.filters.month || this.filters.year)) count++;
+    return count;
+  }
+
+  // Manipular clique no card de estatísticas
+  handleStatsCardClick(cardId: string) {
+    if (cardId === 'expiring') {
+      // Limpar filtros existentes
+      this.filters = {
+        search: '',
+        status: 'active', // Apenas contratos ativos
+        client_id: null,
+        type: '',
+        dateType: '',
+        month: '',
+        year: ''
+      };
+      this.currentTab = 'all';
+
+      // Calcular datas para próximos 15 dias
+      const now = new Date();
+      const fifteenDaysFromNow = new Date();
+      fifteenDaysFromNow.setDate(fifteenDaysFromNow.getDate() + 15);
+
+      // Filtrar contratos que vencem nos próximos 15 dias
+      this.filteredContracts = this.contracts.filter(contract => {
+        if (contract.raw.status !== 'active' || !contract.raw.end_date) return false;
+        const endDate = new Date(contract.raw.end_date);
+        return endDate >= now && endDate <= fifteenDaysFromNow;
+      });
+
+      // Mostrar mensagem ao usuário
+      this.modalService.showInfo(`Mostrando ${this.filteredContracts.length} contrato(s) vencendo nos próximos 15 dias`);
+    }
   }
 }
