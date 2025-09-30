@@ -1,9 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, LOCALE_ID } from '@angular/core';
+import { CommonModule, registerLocaleData } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
+import localePt from '@angular/common/locales/pt';
+
+// Registrar locale pt-BR
+registerLocaleData(localePt);
 
 interface Vaga {
   id: number;
@@ -37,6 +41,7 @@ interface Vaga {
   selector: 'app-recrutamento-selecao',
   standalone: true,
   imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  providers: [{ provide: LOCALE_ID, useValue: 'pt-BR' }],
   templateUrl: './recrutamento-selecao.html',
   styleUrl: './recrutamento-selecao.css'
 })
@@ -52,6 +57,10 @@ export class RecrutamentoSelecao implements OnInit {
   selectedMonth: string = '';  // Formato: '1' a '12' (mês)
   selectedYear: string = '';   // Formato: 'YYYY' (ano)
   consultoraFilter: string = '';
+
+  // Cache for months and years
+  cachedMonths: { value: string; label: string }[] = [];
+  cachedYears: { value: string; label: string }[] = [];
 
   constructor(
     private router: Router,
@@ -118,7 +127,25 @@ export class RecrutamentoSelecao implements OnInit {
 
   ngOnInit() {
     this.setBreadcrumb();
+    this.initializeFilters();
     this.loadData();
+  }
+
+  private initializeFilters() {
+    // Initialize cached months
+    this.cachedMonths = this.generateMonths();
+  }
+
+  private generateMonths(): { value: string; label: string }[] {
+    const monthNames = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    return monthNames.map((name, index) => ({
+      value: (index + 1).toString(),
+      label: name
+    }));
   }
 
   private setBreadcrumb() {
@@ -313,8 +340,32 @@ export class RecrutamentoSelecao implements OnInit {
       }
     ];
 
-
+    // Initialize cached years after loading data
+    this.updateCachedYears();
     this.applyFilters();
+  }
+
+  private updateCachedYears() {
+    const years = new Set<string>();
+
+    this.vagas
+      .filter(vaga =>
+        (vaga.status === 'fechada' || vaga.status === 'fechada_rep') &&
+        vaga.dataFechamentoCancelamento
+      )
+      .forEach(vaga => {
+        if (vaga.dataFechamentoCancelamento) {
+          const date = new Date(vaga.dataFechamentoCancelamento);
+          years.add(date.getFullYear().toString());
+        }
+      });
+
+    this.cachedYears = Array.from(years)
+      .sort((a, b) => b.localeCompare(a))
+      .map(year => ({
+        value: year,
+        label: year
+      }));
   }
 
   getSearchPlaceholder(): string {
@@ -353,6 +404,12 @@ export class RecrutamentoSelecao implements OnInit {
       return matchesSearch && matchesStatus && matchesTipoCargo && matchesFonte;
     });
 
+  }
+
+  onMonthYearChange() {
+    // Trigger change detection for month/year filters
+    // The methods getVagasFechamento() and getVagasComissoes() will automatically use the updated values
+    console.log('Month/Year changed:', this.selectedMonth, this.selectedYear);
   }
 
   clearFilters() {
@@ -499,39 +556,12 @@ export class RecrutamentoSelecao implements OnInit {
 
   // Get available months (1-12)
   getAvailableMonths(): { value: string; label: string }[] {
-    const monthNames = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-    ];
-
-    return monthNames.map((name, index) => ({
-      value: (index + 1).toString(),
-      label: name
-    }));
+    return this.cachedMonths;
   }
 
   // Get available years from closed vagas
   getAvailableYears(): { value: string; label: string }[] {
-    const years = new Set<string>();
-
-    this.vagas
-      .filter(vaga =>
-        (vaga.status === 'fechada' || vaga.status === 'fechada_rep') &&
-        vaga.dataFechamentoCancelamento
-      )
-      .forEach(vaga => {
-        if (vaga.dataFechamentoCancelamento) {
-          const date = new Date(vaga.dataFechamentoCancelamento);
-          years.add(date.getFullYear().toString());
-        }
-      });
-
-    return Array.from(years)
-      .sort((a, b) => b.localeCompare(a)) // Sort by most recent first
-      .map(year => ({
-        value: year,
-        label: year
-      }));
+    return this.cachedYears;
   }
 
   // Get available consultoras from vagas
@@ -560,6 +590,23 @@ export class RecrutamentoSelecao implements OnInit {
       filteredVagas = filteredVagas.filter(vaga =>
         vaga.usuarioNome === this.consultoraFilter
       );
+    }
+
+    // Apply month and year filters if set
+    if (this.selectedMonth || this.selectedYear) {
+      filteredVagas = filteredVagas.filter(vaga => {
+        if (vaga.dataFechamentoCancelamento) {
+          const fechamentoDate = new Date(vaga.dataFechamentoCancelamento);
+          const year = fechamentoDate.getFullYear().toString();
+          const month = (fechamentoDate.getMonth() + 1).toString();
+
+          const matchesMonth = !this.selectedMonth || month === this.selectedMonth;
+          const matchesYear = !this.selectedYear || year === this.selectedYear;
+
+          return matchesMonth && matchesYear;
+        }
+        return false;
+      });
     }
 
     // Apply search term if present

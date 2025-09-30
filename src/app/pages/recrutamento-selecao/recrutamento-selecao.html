@@ -56,7 +56,7 @@
       </div>
       <div class="stat-value">{{ tempoMedioFechamento }} dias</div>
       <div class="stat-footer">
-        <div class="stat-change negative">
+        <div class="stat-change positive">
           <i class="fas fa-arrow-down"></i>
           <span>3 dias vs mês anterior</span>
         </div>
@@ -150,17 +150,25 @@
             </option>
           </select>
 
-          <!-- Month/Year filters - Only show on Fechamento tab -->
-          <select class="filter-select" [(ngModel)]="selectedMonth" (change)="applyFilters()" *ngIf="activeTab === 'fechamento'">
+          <!-- Month/Year filters - Show on Fechamento and Comissões tabs -->
+          <select class="filter-select"
+                  name="filterMonth"
+                  [value]="selectedMonth"
+                  (change)="selectedMonth = $any($event.target).value; onMonthYearChange()"
+                  [hidden]="activeTab !== 'fechamento' && activeTab !== 'comissoes'">
             <option value="">Todos os meses</option>
-            <option *ngFor="let month of getAvailableMonths()" [value]="month.value">
+            <option *ngFor="let month of cachedMonths" [value]="month.value">
               {{ month.label }}
             </option>
           </select>
 
-          <select class="filter-select" [(ngModel)]="selectedYear" (change)="applyFilters()" *ngIf="activeTab === 'fechamento'">
+          <select class="filter-select"
+                  name="filterYear"
+                  [value]="selectedYear"
+                  (change)="selectedYear = $any($event.target).value; onMonthYearChange()"
+                  [hidden]="activeTab !== 'fechamento' && activeTab !== 'comissoes'">
             <option value="">Todos os anos</option>
-            <option *ngFor="let year of getAvailableYears()" [value]="year.value">
+            <option *ngFor="let year of cachedYears" [value]="year.value">
               {{ year.label }}
             </option>
           </select>
@@ -452,6 +460,7 @@
             <th>Lucro</th>
             <th>Comissão (5%)</th>
             <th>Consultora</th>
+            <th>Data Fechamento</th>
           </tr>
         </thead>
         <tbody>
@@ -470,39 +479,46 @@
               <span class="type-badge">{{ tipoCargoLabels[vaga.tipoCargo] }}</span>
             </td>
             <td>
-              <span class="salary-value">{{ vaga.salario | currency:'BRL':'symbol':'1.2-2' }}</span>
+              <span class="salary-value">R$ {{ vaga.salario | number:'1.2-2':'pt-BR' }}</span>
             </td>
             <td>
               <span class="percentage-value">{{ vaga.porcentagemFaturamento || 100 }}%</span>
             </td>
             <td>
-              <span class="revenue-value">{{ calcularValorFaturamento(vaga) | currency:'BRL':'symbol':'1.2-2' }}</span>
+              <span class="revenue-value">R$ {{ calcularValorFaturamento(vaga) | number:'1.2-2':'pt-BR' }}</span>
             </td>
             <td>
               <span class="tax-percentage">{{ vaga.impostoEstado || 0 }}%</span>
             </td>
             <td>
-              <span class="tax-value">{{ calcularValorImposto(vaga) | currency:'BRL':'symbol':'1.2-2' }}</span>
+              <span class="tax-value">R$ {{ calcularValorImposto(vaga) | number:'1.2-2':'pt-BR' }}</span>
             </td>
             <td>
-              <span class="profit-value">{{ calcularLucro(vaga) | currency:'BRL':'symbol':'1.2-2' }}</span>
+              <span class="profit-value">R$ {{ calcularLucro(vaga) | number:'1.2-2':'pt-BR' }}</span>
             </td>
             <td>
-              <span class="commission-value">{{ calcularComissao(vaga) | currency:'BRL':'symbol':'1.2-2' }}</span>
+              <span class="commission-value">R$ {{ calcularComissao(vaga) | number:'1.2-2':'pt-BR' }}</span>
             </td>
             <td>
               <span class="user-name">{{ vaga.usuarioNome }}</span>
+            </td>
+            <td>
+              <span class="date-text" *ngIf="vaga.dataFechamentoCancelamento">
+                {{ vaga.dataFechamentoCancelamento | date:'dd/MM/yyyy' }}
+              </span>
+              <span class="date-text empty" *ngIf="!vaga.dataFechamentoCancelamento">-</span>
             </td>
           </tr>
         </tbody>
         <tfoot>
           <tr class="total-row">
             <td colspan="5" class="text-right"><strong>Total:</strong></td>
-            <td><strong>{{ calcularTotalFaturamento() | currency:'BRL':'symbol':'1.2-2' }}</strong></td>
+            <td><strong>R$ {{ calcularTotalFaturamento() | number:'1.2-2':'pt-BR' }}</strong></td>
             <td></td>
-            <td><strong>{{ calcularTotalImpostos() | currency:'BRL':'symbol':'1.2-2' }}</strong></td>
-            <td><strong>{{ calcularTotalLucro() | currency:'BRL':'symbol':'1.2-2' }}</strong></td>
-            <td><strong>{{ calcularTotalComissao() | currency:'BRL':'symbol':'1.2-2' }}</strong></td>
+            <td><strong>R$ {{ calcularTotalImpostos() | number:'1.2-2':'pt-BR' }}</strong></td>
+            <td><strong>R$ {{ calcularTotalLucro() | number:'1.2-2':'pt-BR' }}</strong></td>
+            <td><strong>R$ {{ calcularTotalComissao() | number:'1.2-2':'pt-BR' }}</strong></td>
+            <td colspan="2"></td>
           </tr>
         </tfoot>
       </table>
