@@ -1,25 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { VagaService } from '../../services/vaga.service';
 import { ClientService } from '../../services/client.service';
 import { UserService } from '../../services/user.service';
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
-  selector: 'app-nova-vaga',
+  selector: 'app-editar-vaga',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, BreadcrumbComponent, CurrencyMaskDirective],
-  templateUrl: './nova-vaga.component.html',
-  styleUrl: './nova-vaga.component.css'
+  templateUrl: './editar-vaga.component.html',
+  styleUrl: './editar-vaga.component.css'
 })
-export class NovaVagaComponent implements OnInit {
+export class EditarVagaComponent implements OnInit {
   vagaForm: FormGroup;
   isSubmitting = false;
   showSuccessMessage = false;
+  isLoading = true;
+  vagaId: number;
 
   // Lists for dropdowns
   clientes: any[] = [];
@@ -63,21 +66,16 @@ export class NovaVagaComponent implements OnInit {
     { value: 'outros', label: 'Outros' }
   ];
 
-  statusEntrevistaOptions = [
-    { value: '', label: 'Nenhum' },
-    { value: 'realizada', label: 'Realizada' },
-    { value: 'desistiu', label: 'Desistiu' },
-    { value: 'remarcou', label: 'Remarcou' }
-  ];
-
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private breadcrumbService: BreadcrumbService,
     private vagaService: VagaService,
     private clientService: ClientService,
     private userService: UserService
   ) {
+    this.vagaId = 0;
     this.vagaForm = this.fb.group({
       clienteId: ['', Validators.required],
       usuarioId: ['', Validators.required],
@@ -86,9 +84,8 @@ export class NovaVagaComponent implements OnInit {
       tipoAbertura: ['', Validators.required],
       status: ['aberta', Validators.required],
       fonteRecrutamento: ['', Validators.required],
-      statusEntrevista: [''],
       salario: ['', [Validators.required, Validators.min(0)]],
-      dataAbertura: [this.getToday(), Validators.required],
+      dataAbertura: ['', Validators.required],
       dataFechamentoCancelamento: [''],
       observacoes: [''],
       candidatoAprovado: [''],
@@ -101,26 +98,60 @@ export class NovaVagaComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    this.vagaId = Number(this.route.snapshot.paramMap.get('id'));
+
     this.setBreadcrumb();
     this.loadClientes();
     this.loadUsuarios();
     this.setupFormListeners();
     this.setupFaturamentoCalculation();
+
+    await this.loadVagaData();
   }
 
   private setBreadcrumb() {
     this.breadcrumbService.setBreadcrumbs([
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Recrutamento e Seleção', url: '/home/recrutamento-selecao' },
-      { label: 'Nova Vaga' }
+      { label: 'Editar Vaga' }
     ]);
+  }
+
+  async loadVagaData() {
+    try {
+      this.isLoading = true;
+      const vagaData = await firstValueFrom(this.vagaService.getById(this.vagaId));
+
+      // Populate form with existing data
+      this.vagaForm.patchValue({
+        clienteId: vagaData.client_id,
+        usuarioId: vagaData.user_id,
+        cargo: vagaData.cargo,
+        tipoCargo: vagaData.tipo_cargo,
+        tipoAbertura: vagaData.tipo_abertura,
+        status: vagaData.status,
+        fonteRecrutamento: vagaData.fonte_recrutamento,
+        salario: vagaData.salario,
+        dataAbertura: vagaData.data_abertura,
+        dataFechamentoCancelamento: vagaData.data_fechamento_cancelamento || '',
+        observacoes: vagaData.observacoes || '',
+        porcentagemFaturamento: vagaData.porcentagem_faturamento || 100,
+        sigilosa: vagaData.sigilosa || false,
+        impostoEstado: vagaData.imposto_estado || 0
+      });
+
+      this.isLoading = false;
+    } catch (error) {
+      console.error('Erro ao carregar dados da vaga:', error);
+      alert('Erro ao carregar dados da vaga');
+      this.router.navigate(['/home/recrutamento-selecao']);
+    }
   }
 
   loadClientes() {
     this.clientService.getAll().subscribe({
       next: (response: any) => {
-        // O backend retorna { success: true, clients: [], total: number }
         const clientsList = response.clients || response || [];
         this.clientes = clientsList.map((client: any) => ({
           id: client.id,
@@ -130,7 +161,6 @@ export class NovaVagaComponent implements OnInit {
                 client.full_name ||
                 'Cliente sem nome'
         }));
-        console.log('Clientes carregados:', this.clientes);
       },
       error: (error: any) => {
         console.error('Erro ao carregar clientes:', error);
@@ -142,13 +172,11 @@ export class NovaVagaComponent implements OnInit {
   loadUsuarios() {
     this.userService.getAll().subscribe({
       next: (response: any) => {
-        // O backend retorna { users: [] }
         const usersList = response.users || response || [];
         this.usuarios = usersList.map((user: any) => ({
           id: user.id,
           nome: user.name
         }));
-        console.log('Usuários carregados:', this.usuarios);
       },
       error: (error: any) => {
         console.error('Erro ao carregar usuários:', error);
@@ -158,7 +186,6 @@ export class NovaVagaComponent implements OnInit {
   }
 
   setupFormListeners() {
-    // Listener para o status - limpa campos de fechamento se não estiver fechado
     this.vagaForm.get('status')?.valueChanges.subscribe(status => {
       const isFechado = ['fechada', 'fechada_rep', 'cancelada_cliente'].includes(status);
 
@@ -171,12 +198,9 @@ export class NovaVagaComponent implements OnInit {
         });
       }
     });
-
-    // Removido o listener do candidato aprovado - campos aparecem junto com status fechada
   }
 
   setupFaturamentoCalculation() {
-    // Atualizar valor de faturamento quando salário ou porcentagem mudar
     this.vagaForm.get('salario')?.valueChanges.subscribe(() => this.calculateFaturamento());
     this.vagaForm.get('porcentagemFaturamento')?.valueChanges.subscribe(() => this.calculateFaturamento());
   }
@@ -189,15 +213,10 @@ export class NovaVagaComponent implements OnInit {
     this.vagaForm.get('valorFaturamento')?.setValue(valorFaturamento, { emitEvent: false });
   }
 
-  getToday(): string {
-    return new Date().toISOString().split('T')[0];
-  }
-
-  onSubmit() {
+  async onSubmit() {
     if (this.vagaForm.valid) {
       this.isSubmitting = true;
 
-      // Preparar dados para envio
       const vagaData = {
         client_id: this.vagaForm.value.clienteId,
         user_id: this.vagaForm.value.usuarioId,
@@ -215,25 +234,19 @@ export class NovaVagaComponent implements OnInit {
         imposto_estado: this.vagaForm.value.impostoEstado || 0
       };
 
-      // Enviar para o backend
-      this.vagaService.create(vagaData).subscribe({
-        next: (response) => {
-          console.log('Vaga criada com sucesso:', response);
-          this.showSuccessMessage = true;
+      try {
+        await firstValueFrom(this.vagaService.update(this.vagaId, vagaData));
+        this.showSuccessMessage = true;
 
-          // Redirecionar após 2 segundos
-          setTimeout(() => {
-            this.router.navigate(['/home/recrutamento-selecao']);
-          }, 2000);
-        },
-        error: (error: any) => {
-          console.error('Erro ao criar vaga:', error);
-          this.isSubmitting = false;
-          alert('Erro ao criar vaga. Por favor, tente novamente.');
-        }
-      });
+        setTimeout(() => {
+          this.router.navigate(['/home/recrutamento-selecao']);
+        }, 2000);
+      } catch (error: any) {
+        console.error('Erro ao atualizar vaga:', error);
+        this.isSubmitting = false;
+        alert('Erro ao atualizar vaga. Por favor, tente novamente.');
+      }
     } else {
-      // Marcar todos os campos como touched para mostrar erros
       Object.keys(this.vagaForm.controls).forEach(key => {
         const control = this.vagaForm.get(key);
         control?.markAsTouched();

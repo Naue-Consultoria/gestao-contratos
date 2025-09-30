@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -9,6 +9,9 @@ import { EntrevistaModal } from '../../components/entrevista-modal/entrevista-mo
 import { ObservacoesModalComponent } from '../../components/observacoes-modal/observacoes-modal.component';
 import { Entrevista } from '../../services/entrevista.service';
 import { Candidato } from '../../services/candidato.service';
+import { VagaService } from '../../services/vaga.service';
+import { UserService } from '../../services/user.service';
+import { firstValueFrom } from 'rxjs';
 
 interface Vaga {
   id: number;
@@ -155,6 +158,9 @@ export class VisualizarVagaComponent implements OnInit {
     'remarcou': 'Remarcou'
   };
 
+  private vagaService = inject(VagaService);
+  private userService = inject(UserService);
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -180,96 +186,95 @@ export class VisualizarVagaComponent implements OnInit {
     ]);
   }
 
-  loadVagaData() {
-    // Simular carregamento de dados - substituir por chamada real ao backend
-    setTimeout(() => {
+  async loadVagaData() {
+    try {
+      this.isLoading = true;
+      const vagaData = await firstValueFrom(this.vagaService.getById(this.vagaId));
+
+      // Extrair nome do cliente de acordo com a estrutura do banco
+      let clienteNome = 'Cliente não informado';
+      if (vagaData.client) {
+        // Para PJ (empresas) - Supabase retorna como objeto, não array
+        if (vagaData.client.clients_pj) {
+          clienteNome = vagaData.client.clients_pj.trade_name ||
+                       vagaData.client.clients_pj.company_name ||
+                       'Cliente não informado';
+        }
+        // Para PF (pessoas físicas) - Supabase retorna como objeto, não array
+        else if (vagaData.client.clients_pf) {
+          clienteNome = vagaData.client.clients_pf.full_name || 'Cliente não informado';
+        }
+      }
+
+      // Mapear dados do backend para o formato esperado
       this.vaga = {
-        id: this.vagaId,
-        codigo: 'VAG' + String(this.vagaId).padStart(3, '0'),
-        clienteId: 1,
-        clienteNome: 'Tech Solutions Ltda',
-        usuarioId: 1,
-        usuarioNome: 'Ana Recrutadora',
-        cargo: 'Desenvolvedor Full Stack',
-        tipoCargo: 'gestao',
-        tipoAbertura: 'nova',
-        status: 'fechada',
-        fonteRecrutamento: 'linkedin',
-        statusEntrevista: 'realizada',
-        salario: 8500,
-        dataAbertura: new Date('2024-01-10'),
-        dataFechamentoCancelamento: new Date('2024-01-25'),
-        observacoes: 'Vaga urgente para projeto novo cliente. Necessário conhecimento em Angular e Node.js.',
-        candidatoAprovado: 'João Silva',
-        emailCandidato: 'joao.silva@email.com',
-        telefoneCandidato: '(11) 98765-4321',
-        porcentagemFaturamento: 120,
-        valorFaturamento: 10200,
-        sigilosa: false,
-        impostoEstado: 12
+        id: vagaData.id,
+        codigo: vagaData.codigo,
+        clienteId: vagaData.client_id,
+        clienteNome: clienteNome,
+        usuarioId: vagaData.user_id,
+        usuarioNome: vagaData.user?.name || 'Não atribuído',
+        cargo: vagaData.cargo,
+        tipoCargo: vagaData.tipo_cargo,
+        tipoAbertura: vagaData.tipo_abertura,
+        status: vagaData.status,
+        fonteRecrutamento: vagaData.fonte_recrutamento,
+        salario: Number(vagaData.salario || 0),
+        dataAbertura: new Date(vagaData.data_abertura),
+        dataFechamentoCancelamento: vagaData.data_fechamento_cancelamento ? new Date(vagaData.data_fechamento_cancelamento) : undefined,
+        observacoes: vagaData.observacoes,
+        candidatoAprovado: vagaData.candidato_aprovado?.nome,
+        porcentagemFaturamento: Number(vagaData.porcentagem_faturamento || 100),
+        valorFaturamento: Number(vagaData.valor_faturamento || 0),
+        sigilosa: vagaData.sigilosa || false,
+        impostoEstado: Number(vagaData.imposto_estado || 0)
       };
+
       this.isLoading = false;
-    }, 500);
+    } catch (error) {
+      console.error('Erro ao carregar vaga:', error);
+      this.isLoading = false;
+    }
   }
 
-  loadCandidatos() {
-    // Simular carregamento de candidatos - substituir por chamada real ao backend
-    setTimeout(() => {
-      this.candidatos = [
-        {
-          id: 1,
-          vaga_id: this.vagaId,
-          candidato: {
-            id: 1,
-            nome: 'João Silva',
-            email: 'joao.silva@email.com',
-            telefone: '(11) 98765-4321',
-            status: 'aprovado'
-          },
-          status: 'aprovado',
-          data_inscricao: new Date('2024-01-12'),
-          observacoes: 'Candidato com ótimo perfil técnico',
-          entrevistas: [
-            {
-              id: 1,
-              data_entrevista: new Date('2024-01-15'),
-              hora_entrevista: '14:00',
-              status: 'realizada',
-              link_chamada: 'https://meet.google.com/abc-defg-hij',
-              observacoes: 'Entrevista técnica realizada com sucesso',
-              avaliacao: 'Aprovado - conhecimento sólido em Angular e Node.js',
-              entrevistador_nome: 'Ana Recrutadora'
-            }
-          ]
-        },
-        {
-          id: 2,
-          vaga_id: this.vagaId,
-          candidato: {
-            id: 2,
-            nome: 'Maria Santos',
-            email: 'maria.santos@email.com',
-            telefone: '(11) 99876-5432',
-            status: 'pendente'
-          },
-          status: 'entrevista_realizada',
-          data_inscricao: new Date('2024-01-14'),
-          observacoes: 'Perfil interessante, experiência em React',
-          entrevistas: [
-            {
-              id: 2,
-              data_entrevista: new Date('2024-01-18'),
-              hora_entrevista: '10:00',
-              status: 'realizada',
-              link_chamada: 'https://meet.google.com/xyz-uvwx-123',
-              observacoes: 'Primeira entrevista técnica',
-              avaliacao: 'Bom perfil, mas precisa de treinamento em Angular',
-              entrevistador_nome: 'Carlos Gestor'
-            }
-          ]
-        }
-      ];
-    }, 600);
+  async loadCandidatos() {
+    try {
+      console.log('Carregando candidatos para vaga:', this.vagaId);
+      const candidatosData = await firstValueFrom(this.vagaService.getCandidatos(this.vagaId));
+      console.log('Candidatos recebidos do backend:', candidatosData);
+
+      // Mapear dados do backend para o formato esperado
+      this.candidatos = candidatosData.map((vagaCandidato: any) => ({
+        id: vagaCandidato.id,
+        vaga_id: vagaCandidato.vaga_id,
+        candidato: vagaCandidato.candidato,
+        status: vagaCandidato.status,
+        data_inscricao: new Date(vagaCandidato.data_inscricao),
+        observacoes: vagaCandidato.observacoes,
+        entrevistas: vagaCandidato.entrevistas || []
+      }));
+
+      console.log('Candidatos mapeados:', this.candidatos);
+
+      // Atualizar candidato aprovado na vaga
+      if (this.vaga) {
+        console.log('Procurando candidato aprovado...');
+        this.candidatos.forEach(vc => {
+          console.log(`Candidato: ${vc.candidato.nome}, Status: ${vc.candidato.status}`);
+        });
+
+        const candidatoAprovado = this.candidatos.find(
+          vc => vc.candidato.status === 'aprovado'
+        );
+
+        console.log('Candidato aprovado encontrado:', candidatoAprovado);
+        this.vaga.candidatoAprovado = candidatoAprovado?.candidato.nome;
+        console.log('vaga.candidatoAprovado:', this.vaga.candidatoAprovado);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar candidatos:', error);
+      this.candidatos = [];
+    }
   }
 
   getStatusClass(status: string): string {
@@ -303,11 +308,15 @@ export class VisualizarVagaComponent implements OnInit {
     this.router.navigate(['/home/recrutamento-selecao/editar', this.vagaId]);
   }
 
-  deleteVaga() {
+  async deleteVaga() {
     if (confirm('Tem certeza que deseja excluir esta vaga?')) {
-      // Implementar exclusão
-      console.log('Excluir vaga:', this.vagaId);
-      this.router.navigate(['/home/recrutamento-selecao']);
+      try {
+        await firstValueFrom(this.vagaService.delete(this.vagaId));
+        this.router.navigate(['/home/recrutamento-selecao']);
+      } catch (error) {
+        console.error('Erro ao excluir vaga:', error);
+        alert('Erro ao excluir vaga. Tente novamente.');
+      }
     }
   }
 
@@ -401,13 +410,18 @@ export class VisualizarVagaComponent implements OnInit {
     }
   }
 
-  loadEntrevistadores() {
-    // Simulação - substituir por chamada real ao backend
-    this.entrevistadores = [
-      { id: 1, name: 'Ana Recrutadora' },
-      { id: 2, name: 'Carlos Gestor' },
-      { id: 3, name: 'Marina RH' }
-    ];
+  async loadEntrevistadores() {
+    try {
+      const response = await firstValueFrom(this.userService.getAll());
+      const usersList = response.users || response || [];
+      this.entrevistadores = usersList.map((user: any) => ({
+        id: user.id,
+        name: user.name
+      }));
+    } catch (error) {
+      console.error('Erro ao carregar entrevistadores:', error);
+      this.entrevistadores = [];
+    }
   }
 
   // Métodos para o novo modal de candidato
@@ -421,22 +435,28 @@ export class VisualizarVagaComponent implements OnInit {
     this.selectedCandidato = null;
   }
 
-  onCandidatoSaved(candidato: Candidato) {
+  async onCandidatoSaved(candidato: Candidato) {
     console.log('Candidato salvo:', candidato);
-    // Aqui você pode atualizar a lista de candidatos
-    // Por enquanto, vou simular adicionando à lista local
-    if (!this.selectedCandidato) {
-      // Novo candidato - adicionar à lista
-      const novoCandidatoVaga: VagaCandidato = {
-        id: this.candidatos.length + 1,
-        vaga_id: this.vagaId,
-        candidato: candidato,
-        status: 'inscrito',
-        data_inscricao: new Date(),
-        entrevistas: []
-      };
-      this.candidatos.push(novoCandidatoVaga);
+
+    if (!this.selectedCandidato && candidato.id) {
+      // Novo candidato - vincular à vaga
+      try {
+        console.log('Vinculando candidato', candidato.id, 'à vaga', this.vagaId);
+        await firstValueFrom(this.vagaService.vincularCandidato(this.vagaId, candidato.id));
+        console.log('Candidato vinculado com sucesso!');
+
+        // Recarregar lista de candidatos
+        await this.loadCandidatos();
+      } catch (error) {
+        console.error('Erro ao vincular candidato:', error);
+        alert('Erro ao vincular candidato à vaga. Tente novamente.');
+      }
+    } else if (this.selectedCandidato) {
+      // Candidato editado - apenas recarregar lista
+      console.log('Candidato editado, recarregando lista...');
+      await this.loadCandidatos();
     }
+
     // Fechar o modal antigo se estiver aberto
     this.showAddCandidateModal = false;
   }

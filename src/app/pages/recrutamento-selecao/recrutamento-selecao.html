@@ -3,17 +3,6 @@
   <app-breadcrumb></app-breadcrumb>
 </div>
 
-  <!-- Development Notice -->
-  <div class="development-notice">
-    <div class="notice-icon">
-      <i class="fas fa-info-circle"></i>
-    </div>
-    <div class="notice-content">
-      <strong>Página em Desenvolvimento</strong>
-      <p>Esta página está em fase de desenvolvimento. Os dados exibidos são fictícios e utilizados apenas para demonstração.</p>
-    </div>
-  </div>
-
   <!-- Stats Cards -->
   <div class="stats-grid">
     <div class="stat-card">
@@ -24,12 +13,6 @@
         </div>
       </div>
       <div class="stat-value">{{ totalVagasAbertas }}</div>
-      <div class="stat-footer">
-        <div class="stat-change positive">
-          <i class="fas fa-arrow-up"></i>
-          <span>12% este mês</span>
-        </div>
-      </div>
     </div>
 
     <div class="stat-card">
@@ -40,11 +23,6 @@
         </div>
       </div>
       <div class="stat-value">{{ totalVagasFechadas }}</div>
-      <div class="stat-footer">
-        <div class="stat-change">
-          <span>{{ vagasFechadasMes }} este mês</span>
-        </div>
-      </div>
     </div>
 
     <div class="stat-card">
@@ -55,12 +33,6 @@
         </div>
       </div>
       <div class="stat-value">{{ tempoMedioFechamento }} dias</div>
-      <div class="stat-footer">
-        <div class="stat-change positive">
-          <i class="fas fa-arrow-down"></i>
-          <span>3 dias vs mês anterior</span>
-        </div>
-      </div>
     </div>
 
     <div class="stat-card">
@@ -71,12 +43,6 @@
         </div>
       </div>
       <div class="stat-value">{{ taxaConversao }}%</div>
-      <div class="stat-footer">
-        <div class="stat-change positive">
-          <i class="fas fa-arrow-up"></i>
-          <span>5% vs mês anterior</span>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -225,7 +191,12 @@
           <tr *ngFor="let vaga of filteredVagas" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
             <td>
               <div class="client-info">
-                <span class="client-name">{{ vaga.clienteNome }}</span>
+                <div class="client-name-container">
+                  <span class="client-name">{{ vaga.clienteNome }}</span>
+                  <span class="client-company-name" *ngIf="vaga.clienteType === 'PJ' && vaga.clienteCompanyName && vaga.clienteTradeName && vaga.clienteTradeName !== vaga.clienteCompanyName">
+                    {{ vaga.clienteCompanyName }}
+                  </span>
+                </div>
               </div>
             </td>
             <td>
@@ -309,6 +280,10 @@
                       <i class="fas fa-edit"></i>
                       Editar
                     </button>
+                    <button class="dropdown-item" (click)="fecharVaga(vaga); closeDropdown($event)" *ngIf="vaga.status !== 'fechada' && vaga.status !== 'fechada_rep'">
+                      <i class="fas fa-check-circle"></i>
+                      Fechar Vaga
+                    </button>
                     <div class="dropdown-divider"></div>
                     <button class="dropdown-item delete" (click)="deleteVaga(vaga); closeDropdown($event)">
                       <i class="fas fa-trash"></i>
@@ -353,7 +328,12 @@
           <tr *ngFor="let vaga of getVagasFechamento()" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
             <td>
               <div class="client-info">
-                <span class="client-name">{{ vaga.clienteNome }}</span>
+                <div class="client-name-container">
+                  <span class="client-name">{{ vaga.clienteNome }}</span>
+                  <span class="client-company-name" *ngIf="vaga.clienteType === 'PJ' && vaga.clienteCompanyName && vaga.clienteTradeName && vaga.clienteTradeName !== vaga.clienteCompanyName">
+                    {{ vaga.clienteCompanyName }}
+                  </span>
+                </div>
               </div>
             </td>
             <td>
@@ -424,6 +404,10 @@
                       <i class="fas fa-edit"></i>
                       Editar
                     </button>
+                    <button class="dropdown-item" (click)="fecharVaga(vaga); closeDropdown($event)" *ngIf="vaga.status !== 'fechada' && vaga.status !== 'fechada_rep'">
+                      <i class="fas fa-check-circle"></i>
+                      Fechar Vaga
+                    </button>
                     <div class="dropdown-divider"></div>
                     <button class="dropdown-item delete" (click)="deleteVaga(vaga); closeDropdown($event)">
                       <i class="fas fa-trash"></i>
@@ -467,7 +451,12 @@
           <tr *ngFor="let vaga of getVagasComissoes()" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
             <td>
               <div class="client-info">
-                <span class="client-name">{{ vaga.clienteNome }}</span>
+                <div class="client-name-container">
+                  <span class="client-name">{{ vaga.clienteNome }}</span>
+                  <span class="client-company-name" *ngIf="vaga.clienteType === 'PJ' && vaga.clienteCompanyName && vaga.clienteTradeName && vaga.clienteTradeName !== vaga.clienteCompanyName">
+                    {{ vaga.clienteCompanyName }}
+                  </span>
+                </div>
               </div>
             </td>
             <td>
@@ -524,4 +513,42 @@
       </table>
     </div>
 
+  </div>
+
+  <!-- Modal de Confirmação de Fechamento -->
+  <div class="modal-overlay" *ngIf="showFecharVagaModal" (click)="onModalBackdropClick($event)">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i class="fas fa-check-circle"></i>
+          Fechar Vaga
+        </h2>
+        <button class="modal-close-btn" (click)="closeFecharVagaModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="confirmation-message">
+          <p>Tem certeza que deseja fechar a vaga?</p>
+          <div class="vaga-info">
+            <strong>Cargo:</strong> {{ selectedVagaToClose?.cargo }}
+          </div>
+          <div class="vaga-info">
+            <strong>Cliente:</strong> {{ selectedVagaToClose?.clienteNome }}
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeFecharVagaModal()">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button class="btn btn-primary" (click)="confirmFecharVaga()">
+          <i class="fas fa-check"></i>
+          Confirmar Fechamento
+        </button>
+      </div>
+    </div>
   </div>

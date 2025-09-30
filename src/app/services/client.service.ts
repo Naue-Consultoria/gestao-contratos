@@ -11,7 +11,7 @@ export class ClientService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(filters?: any): Observable<any[]> {
+  getAll(filters?: any): Observable<any> {
     let params = new HttpParams();
     if (filters) {
       Object.keys(filters).forEach(key => {
@@ -20,7 +20,7 @@ export class ClientService {
         }
       });
     }
-    return this.http.get<any[]>(this.apiUrl, { params });
+    return this.http.get<any>(this.apiUrl, { params });
   }
 
   getById(id: number): Observable<any> {

@@ -1,9 +1,11 @@
-import { Component, OnInit, LOCALE_ID } from '@angular/core';
+import { Component, OnInit, LOCALE_ID, inject } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
+import { VagaService } from '../../services/vaga.service';
+import { firstValueFrom } from 'rxjs';
 import localePt from '@angular/common/locales/pt';
 
 // Registrar locale pt-BR
@@ -14,6 +16,9 @@ interface Vaga {
   codigo: string;
   clienteId: number;
   clienteNome: string;
+  clienteTradeName?: string;
+  clienteCompanyName?: string;
+  clienteType?: string;
   usuarioId: number;
   usuarioNome: string;
   cargo: string;
@@ -57,10 +62,14 @@ export class RecrutamentoSelecao implements OnInit {
   selectedMonth: string = '';  // Formato: '1' a '12' (mês)
   selectedYear: string = '';   // Formato: 'YYYY' (ano)
   consultoraFilter: string = '';
+  showFecharVagaModal: boolean = false;
+  selectedVagaToClose: Vaga | null = null;
 
   // Cache for months and years
   cachedMonths: { value: string; label: string }[] = [];
   cachedYears: { value: string; label: string }[] = [];
+
+  private vagaService = inject(VagaService);
 
   constructor(
     private router: Router,
@@ -113,11 +122,11 @@ export class RecrutamentoSelecao implements OnInit {
   };
 
   // Stats
-  totalVagasAbertas: number = 12;
-  totalVagasFechadas: number = 28;
-  vagasFechadasMes: number = 7;
-  tempoMedioFechamento: number = 18;
-  taxaConversao: number = 32;
+  totalVagasAbertas: number = 0;
+  totalVagasFechadas: number = 0;
+  vagasFechadasMes: number = 0;
+  tempoMedioFechamento: number = 0;
+  taxaConversao: number = 0;
 
   // Data arrays
   vagas: Vaga[] = [];
@@ -155,194 +164,93 @@ export class RecrutamentoSelecao implements OnInit {
     ]);
   }
 
-  loadData() {
-    // Mock data for demonstration
-    this.vagas = [
-      {
-        id: 1,
-        codigo: 'VAG001',
-        clienteId: 1,
-        clienteNome: 'Tech Solutions Ltda',
-        usuarioId: 1,
-        usuarioNome: 'Ana Recrutadora',
-        cargo: 'Desenvolvedor Full Stack',
-        tipoCargo: 'gestao',
-        tipoAbertura: 'nova',
-        status: 'entrevista_empresa',
-        fonteRecrutamento: 'linkedin',
-        statusEntrevista: 'realizada',
-        salario: 8500,
-        dataAbertura: new Date('2024-01-10'),
-        observacoes: 'Urgente - Projeto novo cliente',
-        candidatoAprovado: 'João Silva',
-        contatoCandidato: '(11) 98765-4321',
-        totalCandidatos: 15,
-        sigilosa: false,
-        impostoEstado: 12
-      },
-      {
-        id: 2,
-        codigo: 'VAG002',
-        clienteId: 2,
-        clienteNome: 'Finance Corp',
-        usuarioId: 2,
-        usuarioNome: 'Carlos RH',
-        cargo: 'Analista de RH',
-        tipoCargo: 'administrativo',
-        tipoAbertura: 'reposicao',
-        status: 'divulgacao_prospec',
-        fonteRecrutamento: 'catho',
-        salario: 4500,
-        dataAbertura: new Date('2024-01-15'),
-        observacoes: 'Substituição de colaborador',
-        totalCandidatos: 8,
-        sigilosa: true,
-        impostoEstado: 10
-      },
-      {
-        id: 3,
-        codigo: 'VAG003',
-        clienteId: 3,
-        clienteNome: 'Comercial Plus',
-        usuarioId: 1,
-        usuarioNome: 'Ana Recrutadora',
-        cargo: 'Coordenador Comercial',
-        tipoCargo: 'comercial',
-        tipoAbertura: 'nova',
-        status: 'standby',
-        fonteRecrutamento: 'indicacao',
-        salario: 12000,
-        dataAbertura: new Date('2024-01-05'),
-        dataFechamentoCancelamento: new Date('2024-01-20'),
-        observacoes: 'Cliente pausou processo temporariamente',
-        totalCandidatos: 22,
-        sigilosa: false,
-        impostoEstado: 8
-      },
-      {
-        id: 4,
-        codigo: 'VAG004',
-        clienteId: 4,
-        clienteNome: 'Startup XYZ',
-        usuarioId: 2,
-        usuarioNome: 'Carlos RH',
-        cargo: 'Estagiário de Marketing',
-        tipoCargo: 'estagio',
-        tipoAbertura: 'nova',
-        status: 'aberta',
-        fonteRecrutamento: 'trafego',
-        salario: 2000,
-        dataAbertura: new Date('2024-01-18'),
-        observacoes: 'Início imediato',
-        totalCandidatos: 35,
-        sigilosa: false,
-        impostoEstado: 0
-      },
-      {
-        id: 5,
-        codigo: 'VAG005',
-        clienteId: 5,
-        clienteNome: 'Indústria ABC',
-        usuarioId: 1,
-        usuarioNome: 'Ana Recrutadora',
-        cargo: 'Operador de Produção',
-        tipoCargo: 'operacional',
-        tipoAbertura: 'reposicao',
-        status: 'fechada',
-        fonteRecrutamento: 'whatsapp',
-        statusEntrevista: 'realizada',
-        salario: 2800,
-        dataAbertura: new Date('2024-01-02'),
-        dataFechamentoCancelamento: new Date('2024-01-25'),
-        observacoes: 'Vaga preenchida com sucesso',
-        candidatoAprovado: 'Pedro Santos',
-        contatoCandidato: '(11) 97654-3210',
-        totalCandidatos: 18,
-        porcentagemFaturamento: 100,
-        valorFaturamento: 2800,
-        sigilosa: false,
-        impostoEstado: 10
-      },
-      {
-        id: 6,
-        codigo: 'VAG006',
-        clienteId: 1,
-        clienteNome: 'Tech Solutions Ltda',
-        usuarioId: 1,
-        usuarioNome: 'Ana Recrutadora',
-        cargo: 'Analista de Sistemas',
-        tipoCargo: 'gestao',
-        tipoAbertura: 'nova',
-        status: 'fechada',
-        fonteRecrutamento: 'linkedin',
-        statusEntrevista: 'realizada',
-        salario: 6500,
-        dataAbertura: new Date('2023-11-15'),
-        dataFechamentoCancelamento: new Date('2023-12-20'),
-        observacoes: 'Vaga fechada com sucesso',
-        candidatoAprovado: 'Maria Silva',
-        contatoCandidato: '(11) 95555-1234',
-        totalCandidatos: 12,
-        porcentagemFaturamento: 100,
-        valorFaturamento: 6500,
-        sigilosa: true,
-        impostoEstado: 12
-      },
-      {
-        id: 7,
-        codigo: 'VAG007',
-        clienteId: 2,
-        clienteNome: 'Finance Corp',
-        usuarioId: 2,
-        usuarioNome: 'Carlos RH',
-        cargo: 'Assistente Administrativo',
-        tipoCargo: 'administrativo',
-        tipoAbertura: 'reposicao',
-        status: 'fechada_rep',
-        fonteRecrutamento: 'catho',
-        statusEntrevista: 'realizada',
-        salario: 3500,
-        dataAbertura: new Date('2023-12-01'),
-        dataFechamentoCancelamento: new Date('2023-12-28'),
-        observacoes: 'Reposicao realizada',
-        candidatoAprovado: 'Carlos Oliveira',
-        contatoCandidato: '(11) 94444-5678',
-        totalCandidatos: 25,
-        porcentagemFaturamento: 80,
-        valorFaturamento: 2800,
-        sigilosa: false,
-        impostoEstado: 8
-      },
-      {
-        id: 8,
-        codigo: 'VAG008',
-        clienteId: 3,
-        clienteNome: 'Comercial Plus',
-        usuarioId: 1,
-        usuarioNome: 'Ana Recrutadora',
-        cargo: 'Gerente de Vendas',
-        tipoCargo: 'comercial',
-        tipoAbertura: 'nova',
-        status: 'fechada',
-        fonteRecrutamento: 'indicacao',
-        statusEntrevista: 'realizada',
-        salario: 15000,
-        dataAbertura: new Date('2024-01-05'),
-        dataFechamentoCancelamento: new Date('2024-02-10'),
-        observacoes: 'Excelente processo seletivo',
-        candidatoAprovado: 'Roberto Costa',
-        contatoCandidato: '(11) 93333-9999',
-        totalCandidatos: 8,
-        porcentagemFaturamento: 120,
-        valorFaturamento: 18000,
-        sigilosa: true,
-        impostoEstado: 15
-      }
-    ];
+  async loadData() {
+    try {
+      this.isLoading = true;
 
-    // Initialize cached years after loading data
-    this.updateCachedYears();
-    this.applyFilters();
+      // Carregar vagas do backend
+      const response = await firstValueFrom(this.vagaService.getAll());
+
+      // Mapear dados do backend para o formato esperado pelo componente
+      this.vagas = response.data.map((vaga: any) => {
+        // Extrair nome do cliente de acordo com a estrutura do banco
+        let clienteNome = 'Cliente não informado';
+        let clienteTradeName = '';
+        let clienteCompanyName = '';
+        let clienteType = '';
+
+        if (vaga.client) {
+          // Para PJ (empresas) - Supabase retorna como objeto, não array
+          if (vaga.client.clients_pj) {
+            clienteType = 'PJ';
+            clienteTradeName = vaga.client.clients_pj.trade_name || '';
+            clienteCompanyName = vaga.client.clients_pj.company_name || '';
+            // Priorizar trade_name sobre company_name
+            clienteNome = clienteTradeName || clienteCompanyName || 'Cliente não informado';
+          }
+          // Para PF (pessoas físicas) - Supabase retorna como objeto, não array
+          else if (vaga.client.clients_pf) {
+            clienteType = 'PF';
+            clienteNome = vaga.client.clients_pf.full_name || 'Cliente não informado';
+          }
+        }
+
+        // Buscar candidato aprovado dos candidatos vinculados
+        let candidatoAprovadoNome = vaga.candidato_aprovado?.nome;
+        if (vaga.vaga_candidatos && Array.isArray(vaga.vaga_candidatos)) {
+          const candidatoAprovado = vaga.vaga_candidatos.find((vc: any) =>
+            vc.candidato && vc.candidato.status === 'aprovado'
+          );
+          if (candidatoAprovado) {
+            candidatoAprovadoNome = candidatoAprovado.candidato.nome;
+          }
+        }
+
+        return {
+          id: vaga.id,
+          codigo: vaga.codigo,
+          clienteId: vaga.client_id,
+          clienteNome: clienteNome,
+          clienteTradeName: clienteTradeName,
+          clienteCompanyName: clienteCompanyName,
+          clienteType: clienteType,
+          usuarioId: vaga.user_id,
+          usuarioNome: vaga.user?.name || 'Não atribuído',
+          cargo: vaga.cargo,
+          tipoCargo: vaga.tipo_cargo,
+          tipoAbertura: vaga.tipo_abertura,
+          status: vaga.status,
+          fonteRecrutamento: vaga.fonte_recrutamento,
+          salario: parseFloat(vaga.salario || 0),
+          dataAbertura: new Date(vaga.data_abertura),
+          dataFechamentoCancelamento: vaga.data_fechamento_cancelamento ? new Date(vaga.data_fechamento_cancelamento) : undefined,
+          observacoes: vaga.observacoes,
+          candidatoAprovado: candidatoAprovadoNome,
+          totalCandidatos: Array.isArray(vaga.vaga_candidatos) ? vaga.vaga_candidatos.length : 0,
+          porcentagemFaturamento: parseFloat(vaga.porcentagem_faturamento || 100),
+          valorFaturamento: parseFloat(vaga.valor_faturamento || 0),
+          sigilosa: vaga.sigilosa || false,
+          impostoEstado: parseFloat(vaga.imposto_estado || 0)
+        };
+      });
+
+      // Carregar estatísticas
+      const stats = await firstValueFrom(this.vagaService.getStatistics());
+      this.totalVagasAbertas = stats.totalVagasAbertas || 0;
+      this.totalVagasFechadas = stats.totalVagasFechadas || 0;
+      this.vagasFechadasMes = stats.vagasFechadasMes || 0;
+      this.tempoMedioFechamento = stats.tempoMedioFechamento || 0;
+      this.taxaConversao = stats.taxaConversao || 0;
+
+      // Initialize cached years after loading data
+      this.updateCachedYears();
+      this.applyFilters();
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      this.vagas = [];
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   private updateCachedYears() {
@@ -470,19 +378,68 @@ export class RecrutamentoSelecao implements OnInit {
     this.router.navigate(['/home/recrutamento-selecao/editar', vaga.id]);
   }
 
-  deleteVaga(vaga: Vaga) {
+  async deleteVaga(vaga: Vaga) {
     if (confirm('Tem certeza que deseja excluir esta vaga?')) {
-      // TODO: Implement delete functionality
-      console.log('Deleting vaga:', vaga);
-      // After successful deletion:
-      // this.loadData();
+      try {
+        await firstValueFrom(this.vagaService.delete(vaga.id));
+        await this.loadData();
+      } catch (error) {
+        console.error('Erro ao excluir vaga:', error);
+        alert('Erro ao excluir vaga. Tente novamente.');
+      }
+    }
+  }
+
+  fecharVaga(vaga: Vaga) {
+    this.selectedVagaToClose = vaga;
+    this.showFecharVagaModal = true;
+  }
+
+  closeFecharVagaModal() {
+    this.showFecharVagaModal = false;
+    this.selectedVagaToClose = null;
+  }
+
+  onModalBackdropClick(event: MouseEvent) {
+    if (event.target === event.currentTarget) {
+      this.closeFecharVagaModal();
+    }
+  }
+
+  async confirmFecharVaga() {
+    if (!this.selectedVagaToClose) return;
+
+    try {
+      await firstValueFrom(this.vagaService.updateStatus(this.selectedVagaToClose.id, 'fechada'));
+      this.closeFecharVagaModal();
+      await this.loadData();
+    } catch (error) {
+      console.error('Erro ao fechar vaga:', error);
+      alert('Erro ao fechar vaga. Tente novamente.');
     }
   }
 
   // Dropdown management
   toggleDropdown(vagaId: number, event: Event) {
     event.stopPropagation();
-    this.openDropdownId = this.openDropdownId === vagaId ? null : vagaId;
+    const wasOpen = this.openDropdownId === vagaId;
+    this.openDropdownId = wasOpen ? null : vagaId;
+
+    if (!wasOpen) {
+      setTimeout(() => this.positionDropdown(event.target as HTMLElement), 0);
+    }
+  }
+
+  positionDropdown(button: HTMLElement) {
+    const dropdown = button.nextElementSibling as HTMLElement;
+    if (!dropdown) return;
+
+    const buttonRect = button.getBoundingClientRect();
+    const dropdownHeight = dropdown.offsetHeight || 150;
+
+    // Posicionar acima do botão
+    dropdown.style.top = `${buttonRect.top - dropdownHeight - 5}px`;
+    dropdown.style.left = `${buttonRect.left}px`;
   }
 
   closeDropdown(event: Event) {

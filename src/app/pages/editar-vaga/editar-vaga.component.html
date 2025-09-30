@@ -1,22 +1,22 @@
 <div class="vaga-page-content">
   <div class="page-header">
-    <h1 class="page-title">Nova Vaga</h1>
+    <h1 class="page-title">Editar Vaga</h1>
     <app-breadcrumb></app-breadcrumb>
   </div>
 
   <!-- Loading -->
-  <div *ngIf="false" class="loading-container">
-    <i class="fas fa-spinner fa-spin"></i>Carregando...
+  <div *ngIf="isLoading" class="loading-container">
+    <i class="fas fa-spinner fa-spin"></i>Carregando dados da vaga...
   </div>
 
   <!-- Success Message -->
   <div class="alert alert-success" *ngIf="showSuccessMessage">
     <i class="fas fa-check-circle"></i>
-    <span>Vaga criada com sucesso! Redirecionando...</span>
+    <span>Vaga atualizada com sucesso! Redirecionando...</span>
   </div>
 
   <!-- Form Container -->
-  <div class="table-container" *ngIf="true">
+  <div class="table-container" *ngIf="!isLoading">
     <form [formGroup]="vagaForm" (ngSubmit)="onSubmit()" class="vaga-form">
       <div class="form-layout">
         <div class="left-column">
@@ -314,7 +314,7 @@
           class="btn btn-primary"
           [disabled]="isSubmitting || vagaForm.invalid">
           <i class="fas" [ngClass]="isSubmitting ? 'fa-spinner fa-spin' : 'fa-save'"></i>
-          {{ isSubmitting ? 'Salvando...' : 'Criar Vaga' }}
+          {{ isSubmitting ? 'Salvando...' : 'Atualizar Vaga' }}
         </button>
       </div>
     </form>

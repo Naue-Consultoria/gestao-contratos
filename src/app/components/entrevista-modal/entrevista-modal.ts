@@ -73,6 +73,8 @@ export class EntrevistaModal implements OnInit {
   onSubmit() {
     if (this.entrevistaForm.valid && this.vagaCandidatoId) {
       this.isLoading = true;
+      this.entrevistaForm.disable();
+
       const entrevistaData: Entrevista = {
         ...this.entrevistaForm.value,
         vaga_candidato_id: this.vagaCandidatoId
@@ -91,6 +93,7 @@ export class EntrevistaModal implements OnInit {
           this.entrevistaSaved.emit(savedEntrevista);
           this.closeModal();
           this.isLoading = false;
+          this.entrevistaForm.enable();
         },
         error: (error) => {
           console.error('Erro ao salvar entrevista:', error);
@@ -99,6 +102,7 @@ export class EntrevistaModal implements OnInit {
             'Erro'
           );
           this.isLoading = false;
+          this.entrevistaForm.enable();
         }
       });
     } else {

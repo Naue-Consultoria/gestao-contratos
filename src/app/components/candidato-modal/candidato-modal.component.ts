@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnChanges, SimpleChanges, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CandidatoService, Candidato } from '../../services/candidato.service';
@@ -11,7 +11,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './candidato-modal.component.html',
   styleUrl: './candidato-modal.component.css'
 })
-export class CandidatoModalComponent implements OnInit {
+export class CandidatoModalComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
   @Input() candidato: Candidato | null = null;
   @Output() modalClosed = new EventEmitter<void>();
@@ -30,6 +30,12 @@ export class CandidatoModalComponent implements OnInit {
   ngOnInit() {
     this.initForm();
     this.setupModalForEditing();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['candidato'] && this.candidatoForm) {
+      this.setupModalForEditing();
+    }
   }
 
   initForm() {
@@ -68,6 +74,8 @@ export class CandidatoModalComponent implements OnInit {
   onSubmit() {
     if (this.candidatoForm.valid) {
       this.isLoading = true;
+      this.candidatoForm.disable();
+
       const candidatoData: Candidato = this.candidatoForm.value;
 
       const operation = this.isEditMode && this.candidato?.id
@@ -83,6 +91,7 @@ export class CandidatoModalComponent implements OnInit {
           this.candidatoSaved.emit(savedCandidato);
           this.closeModal();
           this.isLoading = false;
+          this.candidatoForm.enable();
         },
         error: (error) => {
           console.error('Erro ao salvar candidato:', error);
@@ -91,6 +100,7 @@ export class CandidatoModalComponent implements OnInit {
             'Erro'
           );
           this.isLoading = false;
+          this.candidatoForm.enable();
         }
       });
     } else {
@@ -124,13 +134,25 @@ export class CandidatoModalComponent implements OnInit {
   formatPhone(event: any) {
     let value = event.target.value.replace(/\D/g, '');
 
-    if (value.length <= 11) {
-      value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-      if (value.length < 15) {
-        value = value.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
-      }
+    // Limitar a 11 dígitos
+    if (value.length > 11) {
+      value = value.slice(0, 11);
     }
 
-    this.candidatoForm.patchValue({ telefone: value });
+    // Aplicar máscara baseado no tamanho
+    if (value.length <= 10) {
+      // Formato: (11) 1234-5678
+      value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+    } else {
+      // Formato: (11) 91234-5678
+      value = value.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
+    }
+
+    // Remover traço se não houver números depois dele
+    value = value.replace(/-$/, '');
+
+    // Atualizar o campo
+    event.target.value = value;
+    this.candidatoForm.patchValue({ telefone: value }, { emitEvent: false });
   }
 }

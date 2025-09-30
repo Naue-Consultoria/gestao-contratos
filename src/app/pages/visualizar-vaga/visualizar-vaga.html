@@ -81,13 +81,13 @@
           <span class="info-label">Salário</span>
           <span class="info-value salary">{{ vaga.salario | currency:'BRL':'symbol':'1.2-2' }}</span>
         </div>
+        <div class="info-group" *ngIf="vaga.candidatoAprovado">
+          <span class="info-label">Candidato Aprovado</span>
+          <span class="info-value"><i class="fas fa-check-circle"></i> {{ vaga.candidatoAprovado }}</span>
+        </div>
         <div class="info-group" *ngIf="vaga.sigilosa">
           <span class="info-label">Sigilo</span>
           <span class="info-value"><i class="fas fa-lock"></i> Vaga Sigilosa</span>
-        </div>
-        <div class="info-group" *ngIf="vaga.impostoEstado > 0">
-          <span class="info-label">Imposto Estado</span>
-          <span class="info-value">{{ vaga.impostoEstado }}%</span>
         </div>
         <div class="info-group">
           <span class="info-label">Data de Abertura</span>
@@ -166,7 +166,7 @@
                 </td>
                 <td>
                   <span class="time-text" *ngIf="getLatestInterview(vagaCandidato)">
-                    {{ getLatestInterview(vagaCandidato).hora_entrevista }}
+                    {{ getLatestInterview(vagaCandidato).hora_entrevista | slice:0:5 }}
                   </span>
                   <span class="empty-text" *ngIf="!getLatestInterview(vagaCandidato)">-</span>
                 </td>
@@ -180,6 +180,11 @@
                 </td>
                 <td>
                   <div class="action-buttons-cell">
+                    <button class="action-btn"
+                            (click)="openCandidatoModal(vagaCandidato.candidato)"
+                            title="Editar Candidato">
+                      <i class="fas fa-edit"></i>
+                    </button>
                     <button class="action-btn"
                             (click)="openObservacoesModal(vagaCandidato.candidato)"
                             title="Observações">

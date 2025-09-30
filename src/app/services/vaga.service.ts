@@ -55,4 +55,12 @@ export class VagaService {
     }
     return this.http.get(`${this.apiUrl}/statistics`, { params });
   }
+
+  getCandidatos(vagaId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${vagaId}/candidatos`);
+  }
+
+  vincularCandidato(vagaId: number, candidatoId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${vagaId}/candidatos`, { candidato_id: candidatoId });
+  }
 }
