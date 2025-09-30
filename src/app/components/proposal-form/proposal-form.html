@@ -179,9 +179,46 @@
               <div class="help-text">Define o número máximo de parcelas que o cliente poderá escolher no pagamento a prazo</div>
             </div>
             
+          </div>
+
+          <!-- Seção Solicitante -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-user-tie"></i>
+              Solicitante
+            </h3>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="solicitante_name" class="form-label">Nome do Solicitante</label>
+                <input id="solicitante_name" type="text" formControlName="solicitante_name" class="form-control"
+                       placeholder="Nome completo do solicitante">
+                <div class="help-text">Pessoa que solicitou a proposta</div>
+              </div>
+              <div class="form-group">
+                <label for="solicitante_email" class="form-label">Email do Solicitante</label>
+                <input id="solicitante_email" type="email" formControlName="solicitante_email" class="form-control"
+                       placeholder="email@exemplo.com"
+                       [class.error]="proposalForm.get('solicitante_email')?.invalid && proposalForm.get('solicitante_email')?.touched">
+                <div *ngIf="proposalForm.get('solicitante_email')?.invalid && proposalForm.get('solicitante_email')?.touched"
+                     class="error-message">Email inválido</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="solicitante_phone" class="form-label">Telefone do Solicitante</label>
+              <input id="solicitante_phone" type="text" formControlName="solicitante_phone" class="form-control"
+                     placeholder="(00) 00000-0000">
+              <div class="help-text">Todos os campos do solicitante são opcionais</div>
+            </div>
+          </div>
+
+          <!-- Seção Observações -->
+          <div class="form-section">
+
             <div class="form-group">
               <label for="observations" class="form-label">Observações</label>
-              <textarea id="observations" formControlName="observations" class="form-control" rows="3" 
+              <textarea id="observations" formControlName="observations" class="form-control" rows="3"
                         placeholder="Adicione observações sobre esta proposta..."></textarea>
             </div>
           </div>

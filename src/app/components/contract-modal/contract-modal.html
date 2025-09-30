@@ -67,6 +67,10 @@
       </div>
   
       <div class="modal-footer">
+        <button class="btn btn-primary" (click)="openInstallmentsModal()">
+          <i class="fas fa-calendar-alt"></i>
+          Gerenciar Parcelas
+        </button>
         <button class="btn btn-primary" (click)="save.emit()">
           <i class="fas fa-save"></i>
           Salvar Contrato
@@ -77,3 +81,14 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal de Parcelas -->
+  <app-installments-modal
+    [isOpen]="isInstallmentsModalOpen"
+    [contractId]="contractId"
+    [contractNumber]="contractNumber"
+    [totalValue]="totalValue"
+    [installmentCount]="installmentCount"
+    (close)="closeInstallmentsModal()"
+    (save)="handleInstallmentsSave($event)">
+  </app-installments-modal>

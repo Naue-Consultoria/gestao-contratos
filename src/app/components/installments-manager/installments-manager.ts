@@ -1,7 +1,16 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ContractService, ContractInstallment, ApiContractInstallment } from '../../services/contract';
+import { ContractService, ApiContractInstallment } from '../../services/contract';
+
+export interface ContractInstallment {
+  due_date: string;
+  amount: number;
+  payment_status: 'pago' | 'pendente';
+  paid_date?: string | null;
+  paid_amount?: number | null;
+  notes?: string | null;
+}
 
 @Component({
   selector: 'app-installments-manager',
@@ -92,15 +101,21 @@ export class InstallmentsManagerComponent implements OnInit, OnChanges {
       return;
     }
 
-    this.installments = this.contractService.generateInstallments(
+    const baseInstallments = this.contractService.generateInstallments(
       this.totalValue,
       this.installmentCount,
       this.firstDueDate,
       this.intervalDays
     );
+
+    // Adicionar status padrão de "pendente" a todas as parcelas
+    this.installments = baseInstallments.map(installment => ({
+      ...installment,
+      payment_status: 'pendente' as 'pendente'
+    }));
   }
 
-  updateInstallment(index: number, field: 'due_date' | 'amount' | 'notes', value: any) {
+  updateInstallment(index: number, field: 'due_date' | 'amount' | 'notes' | 'payment_status', value: any) {
     if (this.installments[index]) {
       (this.installments[index] as any)[field] = value;
       this.installmentsChange.emit(this.installments);
@@ -122,15 +137,36 @@ export class InstallmentsManagerComponent implements OnInit, OnChanges {
     this.updateInstallment(index, 'notes', value);
   }
 
+  onStatusChange(index: number, value: 'pago' | 'pendente') {
+    this.updateInstallment(index, 'payment_status', value);
+
+    // Se marcar como paga, definir data e valor de pagamento
+    if (value === 'pago' && this.installments[index]) {
+      if (!this.installments[index].paid_date) {
+        this.installments[index].paid_date = new Date().toISOString().split('T')[0];
+      }
+      if (!this.installments[index].paid_amount) {
+        this.installments[index].paid_amount = this.installments[index].amount;
+      }
+    } else if (value === 'pendente' && this.installments[index]) {
+      // Se voltar para pendente, limpar dados de pagamento
+      this.installments[index].paid_date = null;
+      this.installments[index].paid_amount = null;
+    }
+
+    this.installmentsChange.emit(this.installments);
+  }
+
   addInstallment() {
     const lastInstallment = this.installments[this.installments.length - 1];
-    const newDueDate = lastInstallment 
+    const newDueDate = lastInstallment
       ? new Date(new Date(lastInstallment.due_date).getTime() + (this.intervalDays * 24 * 60 * 60 * 1000))
       : new Date(this.firstDueDate);
 
     this.installments.push({
       due_date: newDueDate.toISOString().split('T')[0],
       amount: 0,
+      payment_status: 'pendente',
       notes: `Parcela ${this.installments.length + 1}`
     });
 

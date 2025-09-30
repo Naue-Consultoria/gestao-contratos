@@ -88,6 +88,10 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   openDropdownId: number | null = null;
   showExportModal = false;
   selectedContract: any = null;
+
+  // Sorting properties
+  sortField: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
   
   // Modal de exclusão
   showDeleteModal = false;
@@ -206,9 +210,15 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
         const mappedContracts = response.contracts.map((contract) =>
           this.mapContractToDisplay(contract)
         );
-        
+
         this.contracts = mappedContracts;
         this.filteredContracts = [...mappedContracts];
+
+        // Apply sorting if there's a sort field
+        if (this.sortField) {
+          this.filteredContracts = this.sortContracts(this.filteredContracts);
+        }
+
         this.updateAvailableYears();
 
         console.log(`✅ Carregados ${mappedContracts.length} contratos`);
@@ -320,6 +330,77 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
   applyFilters() {
     this.loadContracts(); // Simply reload contracts with the new filters
+  }
+
+  sortBy(field: string) {
+    if (this.sortField === field) {
+      // If already sorting by this field, toggle direction
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // If new field, set as ascending
+      this.sortField = field;
+      this.sortDirection = 'asc';
+    }
+
+    // Apply sorting to current contracts
+    this.filteredContracts = this.sortContracts(this.filteredContracts);
+  }
+
+  private sortContracts(contracts: ContractDisplay[]): ContractDisplay[] {
+    const sorted = [...contracts].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (this.sortField) {
+        case 'contractNumber':
+          aValue = a.contractNumber;
+          bValue = b.contractNumber;
+          break;
+        case 'clientName':
+          aValue = a.clientName.toLowerCase();
+          bValue = b.clientName.toLowerCase();
+          break;
+        case 'servicesCount':
+          aValue = a.servicesCount;
+          bValue = b.servicesCount;
+          break;
+        case 'totalValue':
+          // Convert string value to number for proper sorting
+          aValue = this.parseMoneyValue(a.totalValue);
+          bValue = this.parseMoneyValue(b.totalValue);
+          break;
+        case 'endDate':
+          // Handle "Indeterminado" (null dates) - put them at the end
+          aValue = a.raw.end_date ? new Date(a.raw.end_date).getTime() : Number.MAX_VALUE;
+          bValue = b.raw.end_date ? new Date(b.raw.end_date).getTime() : Number.MAX_VALUE;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    return sorted;
+  }
+
+  getSortIcon(field: string): string {
+    if (this.sortField !== field) {
+      return 'fas fa-sort';
+    }
+    return this.sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+  }
+
+  private parseMoneyValue(value: string): number {
+    // Remove "R$ " and thousand separators, replace comma with dot
+    const cleanValue = value.replace(/R\$\s?/g, '').replace(/\./g, '').replace(',', '.');
+    return parseFloat(cleanValue) || 0;
   }
 
   changeTab(tab: 'all' | 'Full' | 'Pontual' | 'Individual' | 'Recrutamento & Seleção') {

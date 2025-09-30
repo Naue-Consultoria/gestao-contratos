@@ -139,7 +139,7 @@
 
 .table-header {
   display: grid;
-  grid-template-columns: 60px 1fr 120px 1fr 80px;
+  grid-template-columns: 60px 1fr 120px 100px 1fr 80px;
   background: #f9fafb;
   padding: 0.75rem;
   font-weight: 600;
@@ -150,11 +150,19 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 60px 1fr 120px 1fr 80px;
+  grid-template-columns: 60px 1fr 120px 100px 1fr 80px;
   padding: 0.75rem;
   border-bottom: 1px solid #f3f4f6;
   align-items: center;
   gap: 0.5rem;
+}
+
+.table-row.paid-row {
+  background-color: #f0fdf4;
+}
+
+.table-row.paid-row:hover {
+  background-color: #dcfce7;
 }
 
 .table-row:last-child {
@@ -190,6 +198,10 @@
 
 .amount-input {
   text-align: right;
+}
+
+.status-input {
+  max-width: 100px;
 }
 
 .btn-icon {
@@ -344,7 +356,7 @@
   
   .table-header,
   .table-row {
-    grid-template-columns: 40px 1fr 100px 80px;
+    grid-template-columns: 40px 1fr 80px 70px 60px;
     font-size: 0.75rem;
   }
   

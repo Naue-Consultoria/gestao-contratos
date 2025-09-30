@@ -91,6 +91,26 @@
           <span class="info-value">{{ proposal.services.length || 0 }} item(s)</span>
         </div>
       </div>
+
+      <!-- Solicitante Information -->
+      <div class="meta-info" *ngIf="proposal.solicitante_name || proposal.solicitante_email || proposal.solicitante_phone">
+        <h3 class="meta-section-title">
+          <i class="fas fa-user"></i>
+          Informações do Solicitante
+        </h3>
+        <div class="info-group" *ngIf="proposal.solicitante_name">
+          <span class="info-label">Nome</span>
+          <span class="info-value">{{ proposal.solicitante_name }}</span>
+        </div>
+        <div class="info-group" *ngIf="proposal.solicitante_email">
+          <span class="info-label">E-mail</span>
+          <span class="info-value">{{ proposal.solicitante_email }}</span>
+        </div>
+        <div class="info-group" *ngIf="proposal.solicitante_phone">
+          <span class="info-label">Telefone</span>
+          <span class="info-value">{{ proposal.solicitante_phone }}</span>
+        </div>
+      </div>
     </div>
 
     <!-- Main Content Area -->

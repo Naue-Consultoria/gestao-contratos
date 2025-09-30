@@ -239,6 +239,17 @@ textarea.form-control {
     background-color: #444;
 }
 
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: var(--white);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+.btn-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(23, 162, 184, 0.4);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .modal-content {

@@ -376,6 +376,37 @@
     box-shadow: 0 6px 16px rgba(14, 155, 113, 0.4);
 }
 
+/* Sortable Headers */
+.custom-table th.sortable {
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.custom-table th.sortable:hover {
+    background-color: rgba(14, 155, 113, 0.08);
+    color: var(--primary-green);
+}
+
+:host-context(body.dark-mode) .custom-table th.sortable:hover {
+    background-color: rgba(14, 155, 113, 0.15);
+    color: var(--primary-green);
+}
+
+.custom-table th.sortable i {
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.custom-table th.sortable i.fa-sort-up,
+.custom-table th.sortable i.fa-sort-down {
+    opacity: 1;
+    color: var(--primary-green);
+}
+
 /* Table */
 .table-wrapper {
     overflow-x: auto;
@@ -476,6 +507,20 @@
 }
 
 .proposal-title.expired {
+    color: #fd7e14;
+    text-decoration: line-through;
+}
+
+.proposal-number {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .proposal-number {
+    color: var(--dark-text);
+}
+
+.proposal-number.expired {
     color: #fd7e14;
     text-decoration: line-through;
 }

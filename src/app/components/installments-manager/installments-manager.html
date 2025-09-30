@@ -84,25 +84,27 @@
         <div class="col-number">#</div>
         <div class="col-date">Vencimento</div>
         <div class="col-amount">Valor</div>
+        <div class="col-status">Status</div>
         <div class="col-notes">Observações</div>
         <div class="col-actions">Ações</div>
       </div>
       
-      <div 
-        *ngFor="let installment of installments; let i = index" 
-        class="table-row">
+      <div
+        *ngFor="let installment of installments; let i = index"
+        class="table-row"
+        [class.paid-row]="installment.payment_status === 'pago'">
         <div class="col-number">{{ i + 1 }}</div>
         <div class="col-date">
-          <input 
-            type="date" 
+          <input
+            type="date"
             class="installment-input date-input"
             [value]="installment.due_date"
             (input)="onDateChange(i, $event)"
             [name]="'due_date_' + i">
         </div>
         <div class="col-amount">
-          <input 
-            type="number" 
+          <input
+            type="number"
             class="installment-input amount-input"
             [value]="installment.amount"
             (input)="onAmountChange(i, $event)"
@@ -110,19 +112,29 @@
             step="0.01"
             min="0">
         </div>
+        <div class="col-status">
+          <select
+            class="installment-input status-input"
+            [(ngModel)]="installment.payment_status"
+            (ngModelChange)="onStatusChange(i, $event)"
+            [name]="'status_' + i">
+            <option value="pendente">Pendente</option>
+            <option value="pago">Paga</option>
+          </select>
+        </div>
         <div class="col-notes">
-          <input 
-            type="text" 
+          <input
+            type="text"
             class="installment-input notes-input"
             [value]="installment.notes || ''"
             (input)="onNotesChange(i, $event)"
             [name]="'notes_' + i"
-            placeholder="Observações da parcela">
+            placeholder="Observações">
         </div>
         <div class="col-actions">
-          <button 
-            type="button" 
-            class="btn-icon btn-danger" 
+          <button
+            type="button"
+            class="btn-icon btn-danger"
             (click)="removeInstallment(i)"
             title="Remover parcela">
             <i class="fas fa-trash"></i>

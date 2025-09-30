@@ -119,6 +119,9 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       observations: [''],
       max_installments: [12, [Validators.required, Validators.min(1), Validators.max(24)]],
       status: ['draft'], // Campo de status adicionado
+      solicitante_name: [''],
+      solicitante_email: ['', Validators.email],
+      solicitante_phone: ['']
     });
 
     this.newClientForm = this.fb.group({
@@ -186,7 +189,10 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       end_date: proposal.end_date ? proposal.end_date.split('T')[0] : '',
       observations: proposal.notes || '',
       max_installments: proposal.max_installments || 12,
-      status: proposal.status || 'draft' // Carregar status da proposta
+      status: proposal.status || 'draft', // Carregar status da proposta
+      solicitante_name: proposal.solicitante_name || '',
+      solicitante_email: proposal.solicitante_email || '',
+      solicitante_phone: proposal.solicitante_phone || ''
     });
 
     // Carregar serviços da proposta
@@ -800,6 +806,9 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       client_city: selectedClient.city || '',
       client_state: selectedClient.state || '',
       client_zipcode: selectedClient.zipcode || '',
+      solicitante_name: this.proposalForm.value.solicitante_name || undefined,
+      solicitante_email: this.proposalForm.value.solicitante_email || undefined,
+      solicitante_phone: this.proposalForm.value.solicitante_phone || undefined,
       end_date: this.proposalForm.value.end_date || null,
       max_installments: this.proposalForm.value.max_installments || 12,
       validity_days: 30, // Valor padrão

@@ -14,6 +14,9 @@ export interface ContractServiceItem {
 export interface ContractInstallment {
   due_date: string;
   amount: number;
+  payment_status: 'pago' | 'pendente';
+  paid_date?: string | null;
+  paid_amount?: number | null;
   notes?: string | null;
 }
 
@@ -446,6 +449,7 @@ export class ContractService {
       installments.push({
         due_date: currentDate.toISOString().split('T')[0],
         amount: installmentValue,
+        payment_status: 'pendente',
         notes: `Parcela ${i + 1} de ${installmentCount}`
       });
 
@@ -457,17 +461,28 @@ export class ContractService {
   }
 
   // Métodos para API de parcelas
-  getContractInstallments(contractId: number): Observable<{ installments: ApiContractInstallment[]; total: number }> {
-    return this.http.get<{ installments: ApiContractInstallment[]; total: number }>(
+  getContractInstallments(contractId: number): Observable<{ installments: ApiContractInstallment[]; total: number; stats?: any }> {
+    return this.http.get<{ installments: ApiContractInstallment[]; total: number; stats?: any }>(
       `${environment.apiUrl}/contracts/${contractId}/installments`,
       { headers: this.getAuthHeaders() }
     );
   }
 
-  updateInstallmentStatus(installmentId: number, statusData: { payment_status: string; paid_amount?: number; paid_date?: string; notes?: string }): Observable<any> {
+  updateInstallmentStatus(installmentId: number, status: 'pago' | 'pendente' | 'atrasado', paidAmount?: number, paidDate?: string, notes?: string): Observable<any> {
+    const body: any = { payment_status: status };
+
+    if (status === 'pago') {
+      body.paid_amount = paidAmount || 0;
+      body.paid_date = paidDate || new Date().toISOString().split('T')[0];
+    }
+
+    if (notes !== undefined) {
+      body.notes = notes;
+    }
+
     return this.http.put(
       `${environment.apiUrl}/installments/${installmentId}/status`,
-      statusData,
+      body,
       { headers: this.getAuthHeaders() }
     );
   }
@@ -476,6 +491,15 @@ export class ContractService {
     return this.http.put(
       `${environment.apiUrl}/installments/${installmentId}/pay`,
       { paid_amount: paidAmount, paid_date: paidDate },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  // Atualizar parcelas vencidas
+  updateOverdueInstallments(): Observable<any> {
+    return this.http.post(
+      `${environment.apiUrl}/installments/update-overdue`,
+      {},
       { headers: this.getAuthHeaders() }
     );
   }
@@ -494,6 +518,15 @@ export class ContractService {
     return this.http.get<{ installments: ApiContractInstallment[]; total: number }>(
       `${environment.apiUrl}/installments/date-range`,
       { params, headers: this.getAuthHeaders() }
+    );
+  }
+
+  // Atualizar todas as parcelas de um contrato
+  updateContractInstallments(contractId: number, installments: any[]): Observable<any> {
+    return this.http.put(
+      `${environment.apiUrl}/contracts/${contractId}/installments`,
+      { installments },
+      { headers: this.getAuthHeaders() }
     );
   }
 

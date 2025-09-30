@@ -286,6 +286,7 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
       this.contractInstallments.push({
         due_date: dueDate.toISOString().split('T')[0],
         amount: installmentValue,
+        payment_status: 'pendente',
         notes: null
       });
     }

@@ -38,6 +38,9 @@ export interface Proposal {
   client_neighborhood: string;
   client_city: string;
   client_zipcode: string;
+  solicitante_name?: string;
+  solicitante_email?: string;
+  solicitante_phone?: string;
   end_date?: string; // Corresponds to 'end_date' in DB, previously 'valid_until'
   validity_days?: number;
   total_value: number;
@@ -100,6 +103,9 @@ export interface CreateProposalData {
   client_city: string;
   client_state: string;
   client_zipcode: string;
+  solicitante_name?: string;
+  solicitante_email?: string;
+  solicitante_phone?: string;
   end_date?: string;
   validity_days?: number;
   max_installments?: number;

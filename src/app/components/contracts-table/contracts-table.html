@@ -195,12 +195,27 @@
       <table class="contracts-table" *ngIf="filteredContracts.length > 0">
         <thead>
           <tr>
-            <th>Número</th>
-            <th>Cliente</th>
+            <th class="sortable" (click)="sortBy('contractNumber')">
+              Número
+              <i [class]="getSortIcon('contractNumber')"></i>
+            </th>
+            <th class="sortable" (click)="sortBy('clientName')">
+              Cliente
+              <i [class]="getSortIcon('clientName')"></i>
+            </th>
             <th>Tipo</th>
-            <th class="text-center">Serviços</th>
-            <th>Valor Total</th>
-            <th>Data de Término</th>
+            <th class="text-center sortable" (click)="sortBy('servicesCount')">
+              Serviços
+              <i [class]="getSortIcon('servicesCount')"></i>
+            </th>
+            <th class="sortable" (click)="sortBy('totalValue')">
+              Valor Total
+              <i [class]="getSortIcon('totalValue')"></i>
+            </th>
+            <th class="sortable" (click)="sortBy('endDate')">
+              Vencimento
+              <i [class]="getSortIcon('endDate')"></i>
+            </th>
             <th>Status</th>
             <th>Pagamento</th>
             <th>Ações</th>

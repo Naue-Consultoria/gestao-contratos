@@ -25,6 +25,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
 
   @Input() filteredProposals: any[] = [];
   @Input() useFilteredData = false;
+  @Input() activeStatusFilter: string = '';
 
   cards: StatCard[] = [];
   isLoading = true;
@@ -38,7 +39,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if ((changes['filteredProposals'] && this.useFilteredData && this.filteredProposals)) {
+    if ((changes['filteredProposals'] || changes['activeStatusFilter']) && this.useFilteredData && this.filteredProposals) {
       this.updateCardsWithFilteredData();
     }
   }
@@ -109,10 +110,42 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
     const signedProposals = proposals.filter((p: any) => p.status === 'signed').length;
     const convertedProposals = proposals.filter((p: any) => p.status === 'converted').length;
 
-    // Calcular valor em aberto (propostas enviadas e assinadas, mas não convertidas)
-    const pendingValue = proposals
-      .filter((p: any) => p.status === 'sent' || p.status === 'signed' || p.status === 'draft')
-      .reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+    // Calculate pending value based on active status filter
+    let pendingValue = 0;
+    let pendingTitle = 'Valor em Aberto';
+    let pendingSubtitle = '';
+    let pendingCount = 0;
+
+    if (this.activeStatusFilter === 'signed') {
+      // When "Assinada" filter is selected, show signed proposals value
+      pendingValue = proposals
+        .filter((p: any) => p.status === 'signed')
+        .reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+      pendingCount = signedProposals;
+      pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} assinada${pendingCount !== 1 ? 's' : ''}`;
+    } else if (this.activeStatusFilter === 'sent') {
+      // When "Enviada" filter is selected, show sent proposals value
+      pendingValue = proposals
+        .filter((p: any) => p.status === 'sent')
+        .reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+      pendingCount = sentProposals;
+      pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} enviada${pendingCount !== 1 ? 's' : ''}`;
+    } else if (this.activeStatusFilter) {
+      // When any other status filter is selected, show that status value
+      pendingValue = proposals
+        .filter((p: any) => p.status === this.activeStatusFilter)
+        .reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+      pendingCount = proposals.filter((p: any) => p.status === this.activeStatusFilter).length;
+      const statusText = this.getStatusText(this.activeStatusFilter);
+      pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} ${statusText.toLowerCase()}${pendingCount !== 1 ? 's' : ''}`;
+    } else {
+      // Default: show sent proposals value when no filter is active
+      pendingValue = proposals
+        .filter((p: any) => p.status === 'sent')
+        .reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+      pendingCount = sentProposals;
+      pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} enviada${pendingCount !== 1 ? 's' : ''}`;
+    }
 
     // Calcular valor total de todas as propostas filtradas
     const totalValue = proposals.reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
@@ -140,11 +173,11 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         subtitle: totalProposals > 0 ? `${Math.round(((signedProposals + convertedProposals) / totalProposals) * 100)}% do total` : '0% do total'
       },
       {
-        title: 'Valor em Aberto',
+        title: pendingTitle,
         value: this.formatCurrency(pendingValue),
         icon: 'fas fa-dollar-sign',
         color: '#003b2b',
-        subtitle: this.useFilteredData ? `${totalProposals} proposta${totalProposals !== 1 ? 's' : ''} filtrada${totalProposals !== 1 ? 's' : ''}` : 'Propostas não convertidas'
+        subtitle: pendingSubtitle
       }
     ];
 
@@ -156,7 +189,8 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
     const sentProposals = stats.byStatus?.sent || 0;
     const signedProposals = stats.byStatus?.signed || 0;
     const acceptedProposals = stats.byStatus?.accepted || 0;
-    const pendingValue = (stats.totalValue || 0) - (stats.acceptedValue || 0);
+    // Calculate pending value only for sent proposals
+    const pendingValue = stats.sentValue || 0;
 
     this.cards = [
       {
@@ -182,6 +216,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         value: this.formatCurrency(pendingValue),
         icon: 'fas fa-dollar-sign',
         color: '#003b2b',
+        subtitle: `${sentProposals} proposta${sentProposals !== 1 ? 's' : ''} enviada${sentProposals !== 1 ? 's' : ''}`
       }
     ];
   }
@@ -217,6 +252,19 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
 
   private formatCurrency(value: number): string {
     return this.proposalService.formatCurrency(value);
+  }
+
+  private getStatusText(status: string): string {
+    const statusMap: { [key: string]: string } = {
+      'draft': 'rascunho',
+      'sent': 'enviada',
+      'signed': 'assinada',
+      'rejected': 'rejeitada',
+      'expired': 'expirada',
+      'converted': 'convertida',
+      'contraproposta': 'contraproposta'
+    };
+    return statusMap[status] || status;
   }
 
   getTrendIcon(trend?: number): string {

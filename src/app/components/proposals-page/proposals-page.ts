@@ -81,6 +81,10 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   // Dropdown control
   activeDropdownId: number | null = null;
 
+  // Sorting
+  sortField: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
   ngOnInit() {
     this.subscribeToSearch();
     this.loadData();
@@ -209,8 +213,93 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       });
     }
 
+    // Aplicar ordenação se houver
+    if (this.sortField) {
+      filtered = this.sortProposals(filtered);
+    }
+
     this.filteredProposals = filtered;
     this.isSearching = false;
+  }
+
+  sortBy(field: string) {
+    if (this.sortField === field) {
+      // Se já está ordenando por este campo, inverte a direção
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // Se é um novo campo, define como ascendente
+      this.sortField = field;
+      this.sortDirection = 'asc';
+    }
+    this.applyFilters();
+  }
+
+  private sortProposals(proposals: ProposalDisplay[]): ProposalDisplay[] {
+    const sorted = [...proposals].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (this.sortField) {
+        case 'proposalNumber':
+          aValue = a.proposalNumber;
+          bValue = b.proposalNumber;
+          break;
+        case 'clientName':
+          aValue = a.clientName.toLowerCase();
+          bValue = b.clientName.toLowerCase();
+          break;
+        case 'totalValue':
+          // Converter string de valor para número
+          aValue = this.parseMoneyValue(a.totalValue);
+          bValue = this.parseMoneyValue(b.totalValue);
+          break;
+        case 'sla':
+          // Ordenar pelo número de dias do SLA
+          aValue = this.parseSLADays(a.sla);
+          bValue = this.parseSLADays(b.sla);
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    return sorted;
+  }
+
+  private parseMoneyValue(value: string): number {
+    // Remove "R$ " e pontos de milhares, substitui vírgula por ponto
+    const cleanValue = value.replace(/R\$\s?/g, '').replace(/\./g, '').replace(',', '.');
+    return parseFloat(cleanValue) || 0;
+  }
+
+  private parseSLADays(sla: string): number {
+    // Se for "-" retorna um número muito alto para ir para o final da ordenação
+    if (sla === '-') {
+      return 999999;
+    }
+
+    // Extrai o número de dias da string (ex: "5 dias" -> 5)
+    const match = sla.match(/(\d+)/);
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+
+    return 999999; // Caso não consiga extrair, vai para o final
+  }
+
+  getSortIcon(field: string): string {
+    if (this.sortField !== field) {
+      return 'fas fa-sort';
+    }
+    return this.sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
   }
 
   clearFilters() {

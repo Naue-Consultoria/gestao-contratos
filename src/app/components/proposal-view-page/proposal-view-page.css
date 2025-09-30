@@ -261,6 +261,24 @@
   gap: 1.5rem;
 }
 
+.meta-section-title {
+  grid-column: 1 / -1;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--white);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meta-section-title i {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
 .info-group {
   display: flex;
   flex-direction: column;

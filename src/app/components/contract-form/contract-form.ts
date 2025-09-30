@@ -14,6 +14,7 @@ import { UserSelectionModalComponent } from '../user-selection-modal/user-select
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { InstallmentsManagerComponent } from '../installments-manager/installments-manager';
+import { InstallmentsModalComponent } from '../installments-modal/installments-modal';
 import { PaymentMethodService } from '../../services/payment-method.service';
 
 interface SelectedService {
@@ -52,7 +53,7 @@ interface AssignedUser {
 @Component({
   selector: 'app-contract-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, UserSelectionModalComponent, CurrencyMaskDirective, BreadcrumbComponent, InstallmentsManagerComponent],
+  imports: [CommonModule, FormsModule, UserSelectionModalComponent, CurrencyMaskDirective, BreadcrumbComponent, InstallmentsManagerComponent, InstallmentsModalComponent],
   templateUrl: './contract-form.html',
   styleUrls: ['./contract-form.css'],
 })
@@ -138,6 +139,7 @@ export class ContractFormComponent implements OnInit {
   isSaving = false;
   isEditMode = false;
   isViewMode = false;
+  isInstallmentsModalOpen = false;
   isUserModalOpen = false;
   contractId: number | null = null;
   errors: any = {};
@@ -273,14 +275,7 @@ export class ContractFormComponent implements OnInit {
           secondary_payment_method: contract.secondary_payment_method || '',
         };
         
-        // Definir se tem segunda forma de pagamento
-        this.hasSecondPaymentMethod = !!(this.formData.payment_method_2);
-        
-        // Se tiver permuta, mostrar as opções
-        if (contract.payment_method === 'Permuta') {
-          this.showBarterOptions = true;
-          this.calculateRemainingValue();
-        }
+        // Primeiro, carregar os serviços para que getTotalValue() funcione corretamente
         this.selectedServices = contract.contract_services.map((cs: any) => {
             const selectedService: SelectedService = {
               service_id: cs.service.id,
@@ -305,15 +300,87 @@ export class ContractFormComponent implements OnInit {
 
             return selectedService;
           });
+
+        // Agora carregar formas de pagamento no array dynamicPaymentMethods
+        this.dynamicPaymentMethods = [];
+
+        // Primeira forma de pagamento
+        if (contract.payment_method || contract.payment_method_1) {
+          const firstMethod: any = {
+            payment_method: contract.payment_method_1 || contract.payment_method || '',
+            value_type: contract.payment_method_1_value_type || 'percentage',
+            installment_count: contract.installment_count || 1,
+            first_installment_date: ''
+          };
+
+          if (firstMethod.value_type === 'percentage') {
+            firstMethod.percentage = contract.payment_method_1_percentage ||
+              (!this.formData.payment_method_2 ? 100 : 50); // Se só tem uma forma, 100%, senão 50%
+          } else {
+            firstMethod.fixed_value = contract.payment_method_1_value || this.getTotalValue();
+          }
+
+          this.dynamicPaymentMethods.push(firstMethod);
+        }
+
+        // Segunda forma de pagamento (se existir)
+        if (contract.payment_method_2 || contract.secondary_payment_method) {
+          const secondMethod: any = {
+            payment_method: contract.payment_method_2 || contract.secondary_payment_method || '',
+            value_type: contract.payment_method_2_value_type || 'percentage',
+            installment_count: 1
+          };
+
+          if (secondMethod.value_type === 'percentage') {
+            secondMethod.percentage = contract.payment_method_2_percentage || 50;
+          } else {
+            secondMethod.fixed_value = contract.payment_method_2_value || 0;
+          }
+
+          this.dynamicPaymentMethods.push(secondMethod);
+        }
+
+        // Se não há formas de pagamento, criar uma vazia
+        if (this.dynamicPaymentMethods.length === 0) {
+          this.dynamicPaymentMethods.push({
+            payment_method: '',
+            value_type: 'percentage',
+            percentage: 100,
+            installment_count: 1
+          });
+        }
+
+        // Definir se tem segunda forma de pagamento baseado no array carregado
+        this.hasSecondPaymentMethod = this.dynamicPaymentMethods.length > 1;
+
+        // Se tiver permuta, mostrar as opções
+        if (contract.payment_method === 'Permuta' ||
+            this.dynamicPaymentMethods.some(m => m.payment_method === 'Permuta')) {
+          this.showBarterOptions = true;
+          this.calculateRemainingValue();
+        }
+
         this.assignedUsers = contract.assigned_users || [];
-        
+
         // Carregar parcelas se existirem
         if (contract.installments && contract.installments.length > 0) {
           this.apiInstallments = contract.installments;
-          
+
           // Definir a data da primeira parcela se existir
           if (contract.installments[0] && contract.installments[0].due_date) {
             this.firstInstallmentDate = contract.installments[0].due_date.split('T')[0];
+
+            // Atualizar também no dynamicPaymentMethods se tiver parcelas
+            if (this.dynamicPaymentMethods.length > 0) {
+              const firstMethod = this.dynamicPaymentMethods[0];
+              if (firstMethod && firstMethod.installment_count && firstMethod.installment_count > 1) {
+                // Encontrar a primeira parcela (menor número de parcela)
+                const firstInstallment = contract.installments.reduce((min: any, curr: any) =>
+                  curr.installment_number < min.installment_number ? curr : min
+                );
+                firstMethod.first_installment_date = firstInstallment.due_date.split('T')[0];
+              }
+            }
           }
         }
       }
@@ -586,6 +653,34 @@ export class ContractFormComponent implements OnInit {
         this.formData.installment_count = this.secondaryInstallmentCount;
       }
 
+      // Atualizar os dados das formas de pagamento baseado no array dynamicPaymentMethods
+      const firstMethod = this.dynamicPaymentMethods[0];
+      const secondMethod = this.dynamicPaymentMethods[1];
+
+      if (firstMethod) {
+        this.formData.payment_method = firstMethod.payment_method;
+        this.formData.payment_method_1 = firstMethod.payment_method;
+        this.formData.payment_method_1_value_type = firstMethod.value_type;
+        this.formData.payment_method_1_percentage = firstMethod.percentage || null;
+        this.formData.payment_method_1_value = firstMethod.fixed_value || null;
+        this.formData.installment_count = firstMethod.installment_count || 1;
+      }
+
+      if (secondMethod) {
+        this.formData.payment_method_2 = secondMethod.payment_method;
+        this.formData.secondary_payment_method = secondMethod.payment_method;
+        this.formData.payment_method_2_value_type = secondMethod.value_type;
+        this.formData.payment_method_2_percentage = secondMethod.percentage || null;
+        this.formData.payment_method_2_value = secondMethod.fixed_value || null;
+      } else {
+        // Limpar segunda forma se não existir
+        this.formData.payment_method_2 = '';
+        this.formData.secondary_payment_method = '';
+        this.formData.payment_method_2_value_type = 'percentage';
+        this.formData.payment_method_2_percentage = null;
+        this.formData.payment_method_2_value = null;
+      }
+
       if (this.isEditMode && this.contractId) {
         const updateData: UpdateContractRequest = {
           contract_number: this.formData.contract_number,
@@ -597,7 +692,7 @@ export class ContractFormComponent implements OnInit {
           notes: this.formData.notes || null,
           status: this.formData.status,
           assigned_users: userIdsToSave,
-          payment_method: this.getMainPaymentMethod(),
+          payment_method: this.formData.payment_method || this.getMainPaymentMethod(),
           expected_payment_date: this.formData.expected_payment_date || null,
           payment_status: this.formData.payment_status,
           installment_count: this.formData.installment_count || 1,
@@ -621,7 +716,7 @@ export class ContractFormComponent implements OnInit {
           notes: this.formData.notes || null,
           services,
           assigned_users: userIdsToSave,
-          payment_method: this.getMainPaymentMethod(),
+          payment_method: this.formData.payment_method || this.getMainPaymentMethod(),
           expected_payment_date: this.formData.expected_payment_date || null,
           payment_status: this.formData.payment_status,
           installment_count: this.formData.installment_count || 1,
@@ -707,6 +802,21 @@ export class ContractFormComponent implements OnInit {
   getPaymentStatusText(status: string): string {
     if (!status) return 'Não informado';
     return this.contractService.getPaymentStatusText(status);
+  }
+
+  // Métodos para o modal de parcelas
+  openInstallmentsModal() {
+    this.isInstallmentsModalOpen = true;
+  }
+
+  closeInstallmentsModal() {
+    this.isInstallmentsModalOpen = false;
+  }
+
+  handleInstallmentsSave(installments: any[]) {
+    console.log('Parcelas salvas:', installments);
+    this.contractInstallments = installments;
+    this.closeInstallmentsModal();
   }
 
   // Métodos para gerenciar parcelas

@@ -635,6 +635,37 @@
     border-bottom: 1px solid #444;
 }
 
+/* Sortable Headers */
+.contracts-table th.sortable {
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.contracts-table th.sortable:hover {
+    background-color: rgba(14, 155, 113, 0.08);
+    color: var(--primary-green);
+}
+
+:host-context(body.dark-mode) .contracts-table th.sortable:hover {
+    background-color: rgba(14, 155, 113, 0.15);
+    color: var(--primary-green);
+}
+
+.contracts-table th.sortable i {
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.contracts-table th.sortable i.fa-sort-up,
+.contracts-table th.sortable i.fa-sort-down {
+    opacity: 1;
+    color: var(--primary-green);
+}
+
 .contracts-table td {
     border-bottom: 1px solid var(--border-gray);
     font-size: 0.875rem;

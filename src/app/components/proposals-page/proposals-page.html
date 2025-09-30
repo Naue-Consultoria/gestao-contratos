@@ -7,7 +7,8 @@
   <!-- Stats Cards -->
   <app-proposal-stats-cards
     [filteredProposals]="filteredProposals"
-    [useFilteredData]="true">
+    [useFilteredData]="true"
+    [activeStatusFilter]="filters.status">
   </app-proposal-stats-cards>
 
   <div class="table-container">
@@ -162,12 +163,24 @@
       <table class="custom-table" *ngIf="filteredProposals.length > 0">
         <thead>
           <tr>
-            <th>Número da Proposta</th>
-            <th>Cliente</th>
+            <th class="sortable" (click)="sortBy('proposalNumber')">
+              Número da Proposta
+              <i [class]="getSortIcon('proposalNumber')"></i>
+            </th>
+            <th class="sortable" (click)="sortBy('clientName')">
+              Cliente
+              <i [class]="getSortIcon('clientName')"></i>
+            </th>
             <th>Tipo</th>
             <th>Status</th>
-            <th>Valor Total</th>
-            <th>SLA</th>
+            <th class="sortable" (click)="sortBy('totalValue')">
+              Valor Total
+              <i [class]="getSortIcon('totalValue')"></i>
+            </th>
+            <th class="sortable" (click)="sortBy('sla')">
+              SLA
+              <i [class]="getSortIcon('sla')"></i>
+            </th>
             <th>Validade</th>
             <th>Criada em</th>
             <th>Ações</th>
