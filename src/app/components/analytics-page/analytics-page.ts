@@ -200,17 +200,39 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const { activeContracts, completedContracts } = this.analyticsData.general;
-    const suspendedContracts = Math.max(0, this.analyticsData.general.totalContracts - activeContracts - completedContracts);
+    // Obter dados por status do backend
+    const byStatus = this.analyticsData.contracts?.byStatus || {};
+
+    // Mapear labels e cores para cada status
+    const statusConfig = {
+      active: { label: 'Ativos', color: '#0A8060' },
+      completed: { label: 'Concluídos', color: '#6366f1' },
+      cancelled: { label: 'Cancelados', color: '#ef4444' },
+      suspended: { label: 'Suspensos', color: '#f59e0b' }
+    };
+
+    // Filtrar apenas status com valores > 0
+    const labels: string[] = [];
+    const data: number[] = [];
+    const colors: string[] = [];
+
+    Object.entries(statusConfig).forEach(([status, config]) => {
+      const value = byStatus[status] || 0;
+      if (value > 0) {
+        labels.push(config.label);
+        data.push(value);
+        colors.push(config.color);
+      }
+    });
 
     const Chart = (window as any).Chart;
     this.charts['contractsDonut'] = new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: ['Ativos', 'Concluídos', 'Outros'],
+        labels,
         datasets: [{
-          data: [activeContracts, completedContracts, suspendedContracts],
-          backgroundColor: ['#0A8060', '#6366f1', '#e5e7eb'],
+          data,
+          backgroundColor: colors,
           borderWidth: 0
         }]
       },

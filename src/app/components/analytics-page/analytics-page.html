@@ -123,7 +123,6 @@
           <div class="kpi-value">{{ analyticsData.general.conversionRate || 0 }}%</div>
           <div class="kpi-description">
             <span class="kpi-subtitle">Sucesso Comercial</span>
-            <span class="kpi-detail">Propostas aceitas / enviadas</span>
           </div>
           <div class="kpi-gauge">
             <canvas id="conversionGauge" width="120" height="60"></canvas>
@@ -150,16 +149,30 @@
         <!-- Contratos Ativos -->
         <div class="kpi-card contracts-kpi">
           <div class="kpi-header">
-            <h4 class="kpi-title">Contratos Ativos</h4>
+            <h4 class="kpi-title">Contratos por Status</h4>
             <div class="kpi-icon">
               <i class="fas fa-file-contract"></i>
             </div>
           </div>
-          <div class="kpi-value">{{ analyticsData.general.activeContracts || 0 }}</div>
+          <div class="kpi-value">{{ analyticsData.general.totalContracts || 0 }}</div>
           <div class="kpi-description">
             <div class="contract-stats">
-              <span>Total: {{ analyticsData.general.totalContracts || 0 }}</span>
-              <span>Concluídos: {{ analyticsData.general.completedContracts || 0 }}</span>
+              <div class="status-item" *ngIf="analyticsData?.contracts?.byStatus && analyticsData.contracts.byStatus['active'] > 0">
+                <span class="status-dot" style="background-color: #0A8060;"></span>
+                <span>Ativos: {{ analyticsData.contracts.byStatus['active'] }}</span>
+              </div>
+              <div class="status-item" *ngIf="analyticsData?.contracts?.byStatus && analyticsData.contracts.byStatus['completed'] > 0">
+                <span class="status-dot" style="background-color: #6366f1;"></span>
+                <span>Concluídos: {{ analyticsData.contracts.byStatus['completed'] }}</span>
+              </div>
+              <div class="status-item" *ngIf="analyticsData?.contracts?.byStatus && analyticsData.contracts.byStatus['cancelled'] > 0">
+                <span class="status-dot" style="background-color: #ef4444;"></span>
+                <span>Cancelados: {{ analyticsData.contracts.byStatus['cancelled'] }}</span>
+              </div>
+              <div class="status-item" *ngIf="analyticsData?.contracts?.byStatus && analyticsData.contracts.byStatus['suspended'] > 0">
+                <span class="status-dot" style="background-color: #f59e0b;"></span>
+                <span>Suspensos: {{ analyticsData.contracts.byStatus['suspended'] }}</span>
+              </div>
             </div>
           </div>
           <div class="contract-chart">
