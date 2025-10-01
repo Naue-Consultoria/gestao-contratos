@@ -208,7 +208,8 @@
               Serviços
               <i [class]="getSortIcon('servicesCount')"></i>
             </th>
-            <th class="sortable" (click)="sortBy('totalValue')">
+            <!-- Coluna de Valor Total - APENAS para Admin -->
+            <th *ngIf="canViewFinancialInfo" class="sortable" (click)="sortBy('totalValue')">
               Valor Total
               <i [class]="getSortIcon('totalValue')"></i>
             </th>
@@ -253,10 +254,11 @@
                 </span>
               </div>
             </td>
-            <td>
+            <!-- Célula de Valor Total - APENAS para Admin -->
+            <td *ngIf="canViewFinancialInfo">
               <div class="contract-value">
                 <span class="value-amount">{{ contract.totalValue }}</span>
-                <span *ngIf="hasCancelledServices(contract.raw)" class="cancelled-indicator" 
+                <span *ngIf="hasCancelledServices(contract.raw)" class="cancelled-indicator"
                       [title]="'Original: ' + contractService.formatValue(contract.raw.total_value) + ' | Cancelados: ' + contractService.formatValue(getCancelledServicesValue(contract.raw)) + ' | Atual: ' + contract.totalValue">
                   *
                 </span>
@@ -367,11 +369,12 @@
                 </span>
               </span>
             </div>
-            <div class="table-card-row">
+            <!-- Valor Total - APENAS para Admin -->
+            <div class="table-card-row" *ngIf="canViewFinancialInfo">
               <span class="table-card-label">Valor Total:</span>
               <span class="table-card-value">
                 <span class="value-amount">{{ contract.totalValue }}</span>
-                <span *ngIf="hasCancelledServices(contract.raw)" class="cancelled-indicator" 
+                <span *ngIf="hasCancelledServices(contract.raw)" class="cancelled-indicator"
                       [title]="'Original: ' + contractService.formatValue(contract.raw.total_value) + ' | Cancelados: ' + contractService.formatValue(getCancelledServicesValue(contract.raw)) + ' | Atual: ' + contract.totalValue">
                   *
                 </span>

@@ -33,6 +33,7 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
   canEdit = false;
   currentUserId: number;
   isAdmin = false;
+  canViewFinancialInfo = false; // Admin Gerencial não pode ver valores
   showExportModal = false;
   showDeleteModal = false;
   isDeleting = false;
@@ -45,13 +46,17 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
         const user = JSON.parse(userJson);
         this.currentUserId = user.id || 0;
         this.isAdmin = user.role === 'admin';
+        // Admin Gerencial não pode ver valores financeiros
+        this.canViewFinancialInfo = user.role === 'admin';
       } catch (error) {
         this.currentUserId = 0;
         this.isAdmin = false;
+        this.canViewFinancialInfo = false;
       }
     } else {
       this.currentUserId = 0;
       this.isAdmin = false;
+      this.canViewFinancialInfo = false;
     }
   }
 

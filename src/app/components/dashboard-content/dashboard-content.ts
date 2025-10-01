@@ -148,7 +148,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
   private async loadDashboardDataSequentially() {
     try {
-      if (this.authService.isAdmin()) {
+      if (this.authService.isAdmin() || this.authService.isAdminGerencial()) {
         // Carregar dados de forma sequencial para evitar rate limiting
         await this.loadAdminDataSequentially();
       } else {
@@ -203,8 +203,8 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     try {
       console.log('📈 Carregando dados do gráfico...');
 
-      if (this.authService.isAdmin()) {
-        // Para admin, carregar dados de todos os contratos como antes
+      if (this.authService.isAdmin() || this.authService.isAdminGerencial()) {
+        // Para admin e admin_gerencial, carregar dados de todos os contratos como antes
         const response = await this.contractService.getContracts().toPromise();
         this.generateChartData(response?.contracts || []);
       } else {
@@ -223,7 +223,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     } catch (error) {
       console.error('❌ Erro ao carregar dados do gráfico:', error);
       // Usar dados mock/zerados em caso de erro
-      if (this.authService.isAdmin()) {
+      if (this.authService.isAdmin() || this.authService.isAdminGerencial()) {
         this.generateMockChartData();
       } else {
         this.generateEmptyChartData();
@@ -240,8 +240,8 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     try {
       console.log('📋 Carregando atividades recentes...');
 
-      if (this.authService.isAdmin()) {
-        // Para admin, carregar todas as atividades como antes
+      if (this.authService.isAdmin() || this.authService.isAdminGerencial()) {
+        // Para admin e admin_gerencial, carregar todas as atividades como antes
         const response = await this.contractService.getRecentServiceActivities(10).toPromise();
         if (response?.success && response.activities) {
           this.recentActivities = response.activities.map((activity: any) => ({
@@ -856,11 +856,11 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   private filterQuickActionsByRole() {
-    // Se for admin, manter todas as ações
-    if (this.authService.isAdmin()) {
+    // Se for admin ou admin_gerencial, manter todas as ações
+    if (this.authService.isAdmin() || this.authService.isAdminGerencial()) {
       return;
     }
-    
+
     // Para usuários normais, remover todos os quick actions
     this.quickActions = [];
   }

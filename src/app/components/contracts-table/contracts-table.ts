@@ -98,9 +98,24 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   selectedContractForDeletion: ContractDisplay | null = null;
   isDeleting = false;
 
+  // Controle de visualização financeira - Admin e Admin Gerencial podem ver valores individuais
+  canViewFinancialInfo = false;
+
   private handleRefresh = () => this.loadInitialData();
 
   ngOnInit() {
+    // Verificar se o usuário pode ver valores financeiros
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        // Admin e Admin Gerencial podem ver valores individuais dos contratos
+        this.canViewFinancialInfo = user.role === 'admin' || user.role === 'admin_gerencial';
+      } catch (error) {
+        this.canViewFinancialInfo = false;
+      }
+    }
+
     this.subscribeToSearch();
     this.subscribeToRefreshEvents();
     this.loadInitialData();

@@ -95,10 +95,27 @@
                   </div>
                 </label>
                 
+                <label class="radio-option" [class.selected]="userData.role === 'admin_gerencial'">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="admin_gerencial"
+                    [(ngModel)]="userData.role">
+                  <div class="radio-content">
+                    <span class="radio-title">
+                      <i class="fas fa-user-tie"></i>
+                      Administrador Gerencial
+                    </span>
+                    <span class="radio-description">
+                      Acesso total exceto valores financeiros, analytics e relatórios. Pode apenas visualizar usuários.
+                    </span>
+                  </div>
+                </label>
+
                 <label class="radio-option" [class.selected]="userData.role === 'admin'">
-                  <input 
-                    type="radio" 
-                    name="role" 
+                  <input
+                    type="radio"
+                    name="role"
                     value="admin"
                     [(ngModel)]="userData.role">
                   <div class="radio-content">

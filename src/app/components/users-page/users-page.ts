@@ -43,6 +43,7 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   error = '';
   currentFilter: 'active' | 'inactive' | 'all' = 'active';
   openDropdownId: number | null = null;
+  canManageUsers = false; // Admin Gerencial não pode editar/deletar usuários
 
   // Delete Confirmation Modal
   showDeleteModal = false;
@@ -51,6 +52,18 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   deleteMode: 'hard' | 'soft' | null = null;
 
   ngOnInit() {
+    // Verificar se o usuário pode gerenciar usuários (criar/editar/deletar)
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        // Apenas Admin pode gerenciar usuários (Admin Gerencial não pode)
+        this.canManageUsers = user.role === 'admin';
+      } catch (error) {
+        this.canManageUsers = false;
+      }
+    }
+
     this.loadUsers();
     this.subscribeToRefreshEvents();
     // Close dropdown when clicking outside
@@ -145,6 +158,7 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   private getRoleDisplay(roleName: string): string {
     const roleMap: { [key: string]: string } = {
       'admin': 'Administrador',
+      'admin_gerencial': 'Admin Gerencial',
       'user': 'Usuário',
       'collaborator': 'Colaborador'
     };
@@ -154,6 +168,7 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   private getPermissionDisplay(roleName: string): string {
     const permissionMap: { [key: string]: string } = {
       'admin': 'Admin',
+      'admin_gerencial': 'Admin Gerencial',
       'user': 'Colaborador',
       'collaborator': 'Colaborador'
     };

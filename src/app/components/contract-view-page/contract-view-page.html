@@ -122,13 +122,14 @@
               <div class="service-description" *ngIf="service.service.category">
                 Categoria: {{ service.service.category }}
               </div>
-              
-              <div class="service-pricing">
+
+              <!-- Valores financeiros - APENAS para Admin -->
+              <div class="service-pricing" *ngIf="canViewFinancialInfo">
                 <div class="service-detail">
                   <span class="detail-label">Valor Unitário:</span>
                   <span class="detail-value">{{ formatCurrency(service.unit_value) }}</span>
                 </div>
-                
+
                 <div class="service-detail highlight">
                   <span class="detail-label">Total:</span>
                   <span class="detail-value" [class.cancelled-service]="getServiceStatus(service) === 'cancelled'">
@@ -150,15 +151,15 @@
           <p>Este contrato ainda não possui serviços cadastrados.</p>
         </div>
         
-        <!-- Services Summary -->
-        <div class="services-summary" *ngIf="getNonInternalServices().length > 0">
+        <!-- Services Summary - APENAS para Admin -->
+        <div class="services-summary" *ngIf="getNonInternalServices().length > 0 && canViewFinancialInfo">
           <div class="summary-card">
             <div class="summary-icon">
               <i class="fas fa-calculator"></i>
             </div>
             <div class="summary-content">
               <div class="summary-label">Valor Total do Contrato</div>
-              
+
               <!-- Mostrar valor original quando há cancelamentos -->
               <div *ngIf="hasCancelledServices()" class="summary-breakdown">
                 <div class="original-value">
@@ -184,13 +185,13 @@
         </div>
       </section>
 
-      <!-- Payment Information Section -->
-      <section class="content-section">
+      <!-- Payment Information Section - APENAS para Admin (não Admin Gerencial) -->
+      <section class="content-section" *ngIf="canViewFinancialInfo">
         <h3 class="section-title">
           <i class="fas fa-credit-card"></i>
           Informações de Pagamento
         </h3>
-        
+
         <div class="payment-info-grid">
           
           <!-- Card Principal: Valor Total e Status -->

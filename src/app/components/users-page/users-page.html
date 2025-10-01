@@ -7,7 +7,8 @@
 <div class="table-section">
   <div class="table-header">
     <h2 class="table-title">Lista de Usuários</h2>
-    <button class="btn btn-primary" (click)="openNewUserPage()">
+    <!-- Botão Novo Usuário - APENAS para Admin -->
+    <button *ngIf="canManageUsers" class="btn btn-primary" (click)="openNewUserPage()">
       <i class="fas fa-plus"></i>
       Novo Usuário
     </button>
@@ -72,8 +73,9 @@
             <div class="user-email">{{ user.email }}</div>
           </td>
           <td>
-            <span class="permission-badge" 
+            <span class="permission-badge"
                   [class.permission-admin]="user.permission === 'Admin'"
+                  [class.permission-admin-gerencial]="user.permission === 'Admin Gerencial'"
                   [class.permission-colaborador]="user.permission === 'Colaborador'">
               {{ user.permission }}
             </span>
@@ -82,14 +84,15 @@
             <div class="since-date">{{ user.since }}</div>
           </td>
           <td>
-            <div class="actions-cell">
-              <button class="action-btn" 
-                      title="Editar" 
+            <!-- Ações - APENAS para Admin -->
+            <div class="actions-cell" *ngIf="canManageUsers">
+              <button class="action-btn"
+                      title="Editar"
                       (click)="editUser(user.id); $event.stopPropagation()">
                 <i class="fas fa-edit"></i>
               </button>
               <div class="dropdown-container" [class.open]="user.id === openDropdownId">
-                <button class="action-btn dropdown-toggle" 
+                <button class="action-btn dropdown-toggle"
                         title="Mais ações"
                         (click)="toggleDropdown(user.id, $event); $event.stopPropagation()">
                   <i class="fas fa-ellipsis-v"></i>

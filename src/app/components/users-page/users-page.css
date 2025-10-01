@@ -243,6 +243,12 @@
   border: 1px solid rgba(0, 59, 43, 0.2);
 }
 
+.permission-admin-gerencial {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
 .permission-colaborador {
   background-color: rgba(16, 185, 129, 0.1);
   color: #059669;
@@ -254,6 +260,12 @@
   background-color: rgba(0, 59, 43, 0.2);
   color: #22c55e;
   border-color: rgba(0, 59, 43, 0.3);
+}
+
+:host-context(body.dark-mode) .permission-admin-gerencial {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 :host-context(body.dark-mode) .permission-colaborador {

@@ -98,7 +98,6 @@ export class RecrutamentoSelecao implements OnInit {
     'entrevista_empresa': 'Entrevista Empresa',
     'testes': 'Testes',
     'fechada': 'Fechada',
-    'fechada_rep': 'Fechada/Reposição',
     'cancelada_cliente': 'Cancelada pelo Cliente',
     'standby': 'Standby',
     'nao_cobrada': 'Não Cobrada',
@@ -126,7 +125,6 @@ export class RecrutamentoSelecao implements OnInit {
   totalVagasFechadas: number = 0;
   vagasFechadasMes: number = 0;
   tempoMedioFechamento: number = 0;
-  taxaConversao: number = 0;
 
   // Data arrays
   vagas: Vaga[] = [];
@@ -240,7 +238,6 @@ export class RecrutamentoSelecao implements OnInit {
       this.totalVagasFechadas = stats.totalVagasFechadas || 0;
       this.vagasFechadasMes = stats.vagasFechadasMes || 0;
       this.tempoMedioFechamento = stats.tempoMedioFechamento || 0;
-      this.taxaConversao = stats.taxaConversao || 0;
 
       // Initialize cached years after loading data
       this.updateCachedYears();

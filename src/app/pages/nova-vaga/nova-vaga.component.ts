@@ -85,7 +85,7 @@ export class NovaVagaComponent implements OnInit {
       tipoCargo: ['', Validators.required],
       tipoAbertura: ['', Validators.required],
       status: ['aberta', Validators.required],
-      fonteRecrutamento: ['', Validators.required],
+      fonteRecrutamento: [''],
       statusEntrevista: [''],
       salario: ['', [Validators.required, Validators.min(0)]],
       dataAbertura: [this.getToday(), Validators.required],

@@ -36,6 +36,8 @@ import { AccessDeniedComponent } from './pages/access-denied/access-denied';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
+import { AdminOnlyGuard } from './guards/admin-only-guard';
+import { AdminGerencialGuard } from './guards/admin-gerencial-guard';
 import { UserGuard } from './guards/user-guard';
 
 export const routes: Routes = [
@@ -106,7 +108,7 @@ export const routes: Routes = [
       {
         path: 'contratos',
         component: ContractsTableComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Contratos - NAUE Consultoria',
       },
 
@@ -114,7 +116,7 @@ export const routes: Routes = [
       {
         path: 'contratos/novo',
         component: ContractFormComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Novo Contrato - NAUE Consultoria',
       },
 
@@ -122,7 +124,7 @@ export const routes: Routes = [
       {
         path: 'contratos/visualizar/:id',
         component: ContractViewPageComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Visualizar Contrato - NAUE Consultoria',
       },
 
@@ -130,7 +132,7 @@ export const routes: Routes = [
       {
         path: 'contratos/editar/:id',
         component: ContractFormComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Editar Contrato - NAUE Consultoria',
       },
 
@@ -138,7 +140,7 @@ export const routes: Routes = [
       {
         path: 'clientes',
         component: ClientsTableComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Clientes - NAUE Consultoria',
       },
 
@@ -146,7 +148,7 @@ export const routes: Routes = [
       {
         path: 'clientes/novo',
         component: NewClientPageComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Novo Cliente - NAUE Consultoria',
       },
 
@@ -154,7 +156,7 @@ export const routes: Routes = [
       {
         path: 'clientes/visualizar/:id',
         component: ClientViewPageComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Detalhes do Cliente - NAUE Consultoria',
       },
 
@@ -162,7 +164,7 @@ export const routes: Routes = [
       {
         path: 'clientes/editar/:id',
         component: NewClientPageComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Editar Cliente - NAUE Consultoria',
       },
 
@@ -194,7 +196,7 @@ export const routes: Routes = [
       {
         path: 'propostas',
         component: ProposalsPageComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Propostas - NAUE Consultoria',
       },
 
@@ -202,7 +204,7 @@ export const routes: Routes = [
       {
         path: 'propostas/nova',
         component: ProposalFormComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Nova Proposta - NAUE Consultoria',
       },
 
@@ -210,7 +212,7 @@ export const routes: Routes = [
       {
         path: 'propostas/visualizar/:id',
         component: ProposalViewPageComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Visualizar Proposta - NAUE Consultoria',
       },
 
@@ -218,39 +220,39 @@ export const routes: Routes = [
       {
         path: 'propostas/editar/:id',
         component: ProposalFormComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Editar Proposta - NAUE Consultoria',
       },
 
-      // Relatórios
+      // Relatórios - APENAS Admin (bloqueia Admin Gerencial)
       {
         path: 'relatorios',
         component: ReportsPage,
-        canActivate: [AdminGuard],
+        canActivate: [AdminOnlyGuard],
         title: 'Relatórios - NAUE Consultoria',
       },
 
-      // Relatórios R&S
+      // Relatórios R&S - APENAS Admin (bloqueia Admin Gerencial)
       {
         path: 'relatorios-rs',
         component: RelatoriosRsComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminOnlyGuard],
         title: 'Relatórios R&S - NAUE Consultoria',
       },
 
-      // Analytics R&S
+      // Analytics R&S - APENAS Admin (bloqueia Admin Gerencial)
       {
         path: 'analytics-rs',
         component: AnalyticsRsComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminOnlyGuard],
         title: 'Analytics R&S - NAUE Consultoria',
       },
 
-      // Analytics e métricas
+      // Analytics e métricas - APENAS Admin (bloqueia Admin Gerencial)
       {
         path: 'analytics',
         component: AnalyticsPageComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminOnlyGuard],
         title: 'Analytics - NAUE Consultoria',
       },
 
@@ -258,7 +260,7 @@ export const routes: Routes = [
       {
         path: 'recrutamento-selecao',
         component: RecrutamentoSelecao,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Recrutamento & Seleção - NAUE Consultoria',
       },
 
@@ -266,7 +268,7 @@ export const routes: Routes = [
       {
         path: 'recrutamento-selecao/nova-vaga',
         component: NovaVagaComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Nova Vaga - NAUE Consultoria',
       },
 
@@ -274,7 +276,7 @@ export const routes: Routes = [
       {
         path: 'recrutamento-selecao/visualizar/:id',
         component: VisualizarVagaComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Visualizar Vaga - NAUE Consultoria',
       },
 
@@ -282,7 +284,7 @@ export const routes: Routes = [
       {
         path: 'recrutamento-selecao/editar/:id',
         component: EditarVagaComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGerencialGuard],
         title: 'Editar Vaga - NAUE Consultoria',
       },
 
@@ -310,27 +312,27 @@ export const routes: Routes = [
         title: 'Acompanhamento de Serviço - NAUE Consultoria',
       },
 
-      // Gestão de usuários
+      // Gestão de usuários - Admin Gerencial pode APENAS visualizar
       {
         path: 'usuarios',
         component: UsersPageComponent,
-        canActivate: [AdminGuard], // Protege a rota para apenas administradores
+        canActivate: [AdminGerencialGuard],
         title: 'Usuários - NAUE Consultoria',
       },
-      
-      // Novo usuário
+
+      // Novo usuário - APENAS Admin
       {
         path: 'usuarios/novo',
         component: NewUserPageComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminOnlyGuard],
         title: 'Novo Usuário - NAUE Consultoria',
       },
-      
-      // Editar usuário
+
+      // Editar usuário - APENAS Admin
       {
         path: 'usuarios/editar/:id',
         component: NewUserPageComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminOnlyGuard],
         title: 'Editar Usuário - NAUE Consultoria',
       },
 

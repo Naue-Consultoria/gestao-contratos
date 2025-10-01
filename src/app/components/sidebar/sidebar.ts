@@ -8,7 +8,8 @@ interface NavItem {
   icon: string;
   text: string;
   route?: string;
-  adminOnly?: boolean;
+  adminOnly?: boolean; // Requer Admin ou Admin Gerencial
+  adminOnlyNotGerencial?: boolean; // Requer APENAS Admin (bloqueia Admin Gerencial)
   children?: NavItem[];
   isExpanded?: boolean;
 }
@@ -49,8 +50,8 @@ export class SidebarComponent {
           isExpanded: false,
           children: [
             { id: 'rs-vagas', icon: 'fas fa-briefcase', text: 'Vagas', route: '/home/recrutamento-selecao' },
-            { id: 'rs-analytics', icon: 'fas fa-chart-line', text: 'Analytics R&S', route: '/home/analytics-rs' },
-            { id: 'rs-relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios R&S', route: '/home/relatorios-rs' }
+            { id: 'rs-analytics', icon: 'fas fa-chart-line', text: 'Analytics R&S', route: '/home/analytics-rs', adminOnlyNotGerencial: true },
+            { id: 'rs-relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios R&S', route: '/home/relatorios-rs', adminOnlyNotGerencial: true }
           ]
         }
       ]
@@ -58,14 +59,14 @@ export class SidebarComponent {
     {
       title: 'ANÁLISES',
       items: [
-        { id: 'relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios', route: '/home/relatorios', adminOnly: true },
-        { id: 'analytics', icon: 'fas fa-chart-pie', text: 'Analytics', route: '/home/analytics', adminOnly: true }
+        { id: 'relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios', route: '/home/relatorios', adminOnly: true, adminOnlyNotGerencial: true },
+        { id: 'analytics', icon: 'fas fa-chart-pie', text: 'Analytics', route: '/home/analytics', adminOnly: true, adminOnlyNotGerencial: true }
       ]
     },
     {
       title: 'CONFIGURAÇÕES',
       items: [
-        { id: 'usuarios', icon: 'fas fa-users', text: 'Usuários', route: '/home/usuarios', adminOnly: true },
+        { id: 'usuarios', icon: 'fas fa-users', text: 'Usuários', route: '/home/usuarios', adminOnly: true, adminOnlyNotGerencial: true },
         { id: 'configuracoes', icon: 'fas fa-cog', text: 'Configurações', route: '/home/configuracoes' }
       ]
     },
@@ -94,23 +95,49 @@ export class SidebarComponent {
 
   private filterNavigationByRole() {
     const isAdmin = this.authService.isAdmin();
+    const isAdminGerencial = this.authService.isAdminGerencial();
 
     this.filteredNavSections = this.navSections.map(section => ({
       ...section,
       items: section.items.filter(item => {
+        // Bloquear itens que são APENAS para Admin (não Admin Gerencial)
+        if (item.adminOnlyNotGerencial && !isAdmin) {
+          return false;
+        }
+
         // Se é admin, pode ver tudo
         if (isAdmin) {
           return true;
         }
 
-        // Se não é admin, não pode ver itens adminOnly
+        // Se é Admin Gerencial, pode ver itens adminOnly (exceto adminOnlyNotGerencial)
+        if (isAdminGerencial && item.adminOnly) {
+          return true;
+        }
+
+        // Se não é admin nem admin gerencial, não pode ver itens adminOnly
         if (item.adminOnly) {
           return false;
         }
 
         // Caso contrário, pode ver
         return true;
-      })
+      }).map(item => {
+        // Filtrar children também
+        if (item.children) {
+          return {
+            ...item,
+            children: item.children.filter(child => {
+              // Bloquear children que são APENAS para Admin
+              if (child.adminOnlyNotGerencial && !isAdmin) {
+                return false;
+              }
+              return true;
+            })
+          };
+        }
+        return item;
+      }).filter(item => !item.children || item.children.length > 0) // Remover itens com children vazios
     })).filter(section => section.items.length > 0);
   }
 

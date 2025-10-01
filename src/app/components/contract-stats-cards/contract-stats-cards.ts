@@ -6,7 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 interface StatsCard {
   id: string;
   title: string;
-  value: string | number;
+  value: string | number; // Pode ser string (formatado) ou number
   icon: string;
   color: string;
   trend?: number;
@@ -30,11 +30,24 @@ export class ContractStatsCardsComponent implements OnInit, OnChanges {
   error: string | null = null;
   cards: StatsCard[] = [];
   allContracts: ApiContract[] = [];
+  canViewFinancialInfo = false; // Admin Gerencial não pode ver valores
 
   constructor(
     private contractService: ContractService,
     private toastr: ToastrService
-  ) {}
+  ) {
+    // Verificar se o usuário pode ver valores financeiros
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        // Apenas Admin pode ver valores (Admin Gerencial não pode)
+        this.canViewFinancialInfo = user.role === 'admin';
+      } catch (error) {
+        this.canViewFinancialInfo = false;
+      }
+    }
+  }
 
   ngOnInit() {
     this.loadStatistics();
@@ -181,7 +194,8 @@ export class ContractStatsCardsComponent implements OnInit, OnChanges {
       return endDate >= now && endDate <= fifteenDaysFromNow;
     }).length;
 
-    this.cards = [
+    // Cards base (sem valores financeiros se Admin Gerencial)
+    const baseCards: StatsCard[] = [
       {
         id: 'status',
         title: statusTitle,
@@ -189,24 +203,32 @@ export class ContractStatsCardsComponent implements OnInit, OnChanges {
         icon: statusIcon,
         color: statusColor,
         subtitle: totalContracts > 0 ? `${Math.round((statusCount / totalContracts) * 100)}% do total filtrado` : '0% do total'
-      },
-      {
+      }
+    ];
+
+    // Card de Valor Total - APENAS para Admin
+    if (this.canViewFinancialInfo) {
+      baseCards.push({
         id: 'value',
         title: 'Valor Total',
         value: this.formatCurrency(totalValue),
         icon: 'fas fa-dollar-sign',
         color: '#003b2b',
         subtitle: this.useFilteredData ? `${totalContracts} contrato${totalContracts !== 1 ? 's' : ''} filtrado${totalContracts !== 1 ? 's' : ''}` : 'Todos os contratos'
-      },
-      {
-        id: 'expiring',
-        title: 'Vencendo em Breve',
-        value: expiringContracts,
-        icon: 'fas fa-clock',
-        color: '#003b2b',
-        subtitle: 'Próximos 15 dias'
-      }
-    ];
+      });
+    }
+
+    // Card de Vencimento
+    baseCards.push({
+      id: 'expiring',
+      title: 'Vencendo em Breve',
+      value: expiringContracts,
+      icon: 'fas fa-clock',
+      color: '#003b2b',
+      subtitle: 'Próximos 15 dias'
+    });
+
+    this.cards = baseCards;
 
     this.isLoading = false;
   }

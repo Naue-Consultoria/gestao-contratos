@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProposalService } from '../../services/proposal';
+import { AuthService } from '../../services/auth';
 import { firstValueFrom, Subscription } from 'rxjs';
 
 interface StatCard {
@@ -21,6 +22,7 @@ interface StatCard {
 })
 export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges {
   private proposalService = inject(ProposalService);
+  private authService = inject(AuthService);
   private subscriptions = new Subscription();
 
   @Input() filteredProposals: any[] = [];
@@ -150,7 +152,8 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
     // Calcular valor total de todas as propostas filtradas
     const totalValue = proposals.reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
 
-    this.cards = [
+    // Construir cards base
+    const baseCards: StatCard[] = [
       {
         title: 'Total de Propostas',
         value: totalProposals,
@@ -171,15 +174,21 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         icon: 'fas fa-check-circle',
         color: '#003b2b',
         subtitle: totalProposals > 0 ? `${Math.round(((signedProposals + convertedProposals) / totalProposals) * 100)}% do total` : '0% do total'
-      },
-      {
+      }
+    ];
+
+    // Adicionar card de "Valor em Aberto" apenas se não for admin_gerencial
+    if (!this.authService.isAdminGerencial()) {
+      baseCards.push({
         title: pendingTitle,
         value: this.formatCurrency(pendingValue),
         icon: 'fas fa-dollar-sign',
         color: '#003b2b',
         subtitle: pendingSubtitle
-      }
-    ];
+      } as StatCard);
+    }
+
+    this.cards = baseCards;
 
     this.isLoading = false;
   }
@@ -192,7 +201,8 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
     // Calculate pending value only for sent proposals
     const pendingValue = stats.sentValue || 0;
 
-    this.cards = [
+    // Construir cards base
+    const baseCards: StatCard[] = [
       {
         title: 'Total de Propostas',
         value: totalProposals,
@@ -210,19 +220,26 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         value: signedProposals + acceptedProposals,
         icon: 'fas fa-check-circle',
         color: '#003b2b',
-      },
-      {
+      }
+    ];
+
+    // Adicionar card de "Valor em Aberto" apenas se não for admin_gerencial
+    if (!this.authService.isAdminGerencial()) {
+      baseCards.push({
         title: 'Valor em Aberto',
         value: this.formatCurrency(pendingValue),
         icon: 'fas fa-dollar-sign',
         color: '#003b2b',
         subtitle: `${sentProposals} proposta${sentProposals !== 1 ? 's' : ''} enviada${sentProposals !== 1 ? 's' : ''}`
-      }
-    ];
+      } as StatCard);
+    }
+
+    this.cards = baseCards;
   }
 
   private buildDefaultCards() {
-    this.cards = [
+    // Construir cards base
+    const baseCards: StatCard[] = [
       {
         title: 'Total de Propostas',
         value: 0,
@@ -240,14 +257,20 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         value: 0,
         icon: 'fas fa-check-circle',
         color: '#003b2b',
-      },
-      {
+      }
+    ];
+
+    // Adicionar card de "Valor em Aberto" apenas se não for admin_gerencial
+    if (!this.authService.isAdminGerencial()) {
+      baseCards.push({
         title: 'Valor em Aberto',
         value: 'R$ 0,00',
         icon: 'fas fa-dollar-sign',
         color: '#003b2b',
-      }
-    ];
+      } as StatCard);
+    }
+
+    this.cards = baseCards;
   }
 
   private formatCurrency(value: number): string {

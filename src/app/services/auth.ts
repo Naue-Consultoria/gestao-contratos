@@ -204,7 +204,20 @@ export class AuthService {
 
   isAdmin(): boolean {
     const user = this.getUser();
-    return user?.role === 'admin' || user?.role_id === 1;
+    const result = user?.role === 'admin' || user?.role_id === 1;
+    console.log('🔍 AuthService.isAdmin() - user.role:', user?.role, 'user.role_id:', user?.role_id, 'result:', result);
+    return result;
+  }
+
+  isAdminGerencial(): boolean {
+    const user = this.getUser();
+    const result = user?.role === 'admin_gerencial';
+    console.log('🔍 AuthService.isAdminGerencial() - user.role:', user?.role, 'result:', result);
+    return result;
+  }
+
+  isAdminOrGerencial(): boolean {
+    return this.isAdmin() || this.isAdminGerencial();
   }
 
   hasPermission(permission: string): boolean {
