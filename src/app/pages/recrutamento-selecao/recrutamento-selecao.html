@@ -116,12 +116,11 @@
             </option>
           </select>
 
-          <!-- Month/Year filters - Show on Fechamento and Comissões tabs -->
+          <!-- Month/Year filters - Show on all tabs -->
           <select class="filter-select"
                   name="filterMonth"
                   [value]="selectedMonth"
-                  (change)="selectedMonth = $any($event.target).value; onMonthYearChange()"
-                  [hidden]="activeTab !== 'fechamento' && activeTab !== 'comissoes'">
+                  (change)="selectedMonth = $any($event.target).value; onMonthYearChange()">
             <option value="">Todos os meses</option>
             <option *ngFor="let month of cachedMonths" [value]="month.value">
               {{ month.label }}
@@ -131,8 +130,7 @@
           <select class="filter-select"
                   name="filterYear"
                   [value]="selectedYear"
-                  (change)="selectedYear = $any($event.target).value; onMonthYearChange()"
-                  [hidden]="activeTab !== 'fechamento' && activeTab !== 'comissoes'">
+                  (change)="selectedYear = $any($event.target).value; onMonthYearChange()">
             <option value="">Todos os anos</option>
             <option *ngFor="let year of cachedYears" [value]="year.value">
               {{ year.label }}

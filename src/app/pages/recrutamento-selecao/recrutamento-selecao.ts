@@ -256,17 +256,17 @@ export class RecrutamentoSelecao implements OnInit {
   private updateCachedYears() {
     const years = new Set<string>();
 
-    this.vagas
-      .filter(vaga =>
-        (vaga.status === 'fechada' || vaga.status === 'fechada_rep') &&
-        vaga.dataFechamentoCancelamento
-      )
-      .forEach(vaga => {
-        if (vaga.dataFechamentoCancelamento) {
-          const date = new Date(vaga.dataFechamentoCancelamento);
-          years.add(date.getFullYear().toString());
-        }
-      });
+    this.vagas.forEach(vaga => {
+      // Add year from data de abertura
+      const aberturaDate = new Date(vaga.dataAbertura);
+      years.add(aberturaDate.getFullYear().toString());
+
+      // Add year from data de fechamento if exists
+      if (vaga.dataFechamentoCancelamento) {
+        const fechamentoDate = new Date(vaga.dataFechamentoCancelamento);
+        years.add(fechamentoDate.getFullYear().toString());
+      }
+    });
 
     this.cachedYears = Array.from(years)
       .sort((a, b) => b.localeCompare(a))
@@ -309,7 +309,20 @@ export class RecrutamentoSelecao implements OnInit {
       const matchesTipoCargo = !this.tipoCargoFilter || vaga.tipoCargo === this.tipoCargoFilter;
       const matchesFonte = !this.fonteRecrutamentoFilter || vaga.fonteRecrutamento === this.fonteRecrutamentoFilter;
 
-      return matchesSearch && matchesStatus && matchesTipoCargo && matchesFonte;
+      // Apply month and year filters based on data de abertura
+      let matchesMonthYear = true;
+      if (this.selectedMonth || this.selectedYear) {
+        const aberturaDate = new Date(vaga.dataAbertura);
+        const year = aberturaDate.getFullYear().toString();
+        const month = (aberturaDate.getMonth() + 1).toString();
+
+        const matchesMonth = !this.selectedMonth || month === this.selectedMonth;
+        const matchesYear = !this.selectedYear || year === this.selectedYear;
+
+        matchesMonthYear = matchesMonth && matchesYear;
+      }
+
+      return matchesSearch && matchesStatus && matchesTipoCargo && matchesFonte && matchesMonthYear;
     });
 
   }
@@ -317,6 +330,8 @@ export class RecrutamentoSelecao implements OnInit {
   onMonthYearChange() {
     // Trigger change detection for month/year filters
     // The methods getVagasFechamento() and getVagasComissoes() will automatically use the updated values
+    // Also apply filters for the "Visão Geral" tab
+    this.applyFilters();
     console.log('Month/Year changed:', this.selectedMonth, this.selectedYear);
   }
 
