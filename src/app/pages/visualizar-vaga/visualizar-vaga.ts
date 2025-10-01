@@ -7,11 +7,12 @@ import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { CandidatoModalComponent } from '../../components/candidato-modal/candidato-modal.component';
 import { EntrevistaModal } from '../../components/entrevista-modal/entrevista-modal';
 import { ObservacoesModalComponent } from '../../components/observacoes-modal/observacoes-modal.component';
-import { Entrevista } from '../../services/entrevista.service';
+import { Entrevista, EntrevistaService } from '../../services/entrevista.service';
 import { Candidato } from '../../services/candidato.service';
 import { VagaService } from '../../services/vaga.service';
 import { UserService } from '../../services/user.service';
 import { firstValueFrom } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 interface Vaga {
   id: number;
@@ -160,6 +161,8 @@ export class VisualizarVagaComponent implements OnInit {
 
   private vagaService = inject(VagaService);
   private userService = inject(UserService);
+  private entrevistaService = inject(EntrevistaService);
+  private toastr = inject(ToastrService);
 
   constructor(
     private router: Router,
@@ -496,5 +499,32 @@ export class VisualizarVagaComponent implements OnInit {
 
   getInterviewStatusLabel(status: string): string {
     return this.statusEntrevistaLabels[status] || status;
+  }
+
+  async onInterviewStatusChange(vagaCandidato: VagaCandidato, event: any) {
+    const newStatus = event.target.value;
+    const latestInterview = this.getLatestInterview(vagaCandidato);
+
+    if (!latestInterview || !latestInterview.id) {
+      this.toastr.error('Entrevista não encontrada');
+      return;
+    }
+
+    try {
+      // Update interview status via API
+      await firstValueFrom(
+        this.entrevistaService.updateEntrevista(latestInterview.id, { status: newStatus })
+      );
+
+      // Update local state
+      latestInterview.status = newStatus;
+
+      this.toastr.success('Status da entrevista atualizado com sucesso');
+    } catch (error) {
+      console.error('Erro ao atualizar status da entrevista:', error);
+      this.toastr.error('Erro ao atualizar status da entrevista');
+      // Revert the select value
+      event.target.value = latestInterview.status;
+    }
   }
 }

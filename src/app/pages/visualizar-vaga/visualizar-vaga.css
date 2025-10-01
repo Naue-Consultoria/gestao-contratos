@@ -1006,6 +1006,79 @@
   color: white !important;
 }
 
+/* Status Select Dropdown */
+.status-select {
+  padding: 0.25rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: transparent;
+  text-transform: capitalize;
+  outline: none;
+}
+
+.status-select:hover {
+  opacity: 0.8;
+  border-color: currentColor;
+}
+
+.status-select:focus {
+  box-shadow: 0 0 0 2px rgba(14, 155, 113, 0.2);
+}
+
+.status-select.status-agendada {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-select.status-realizada {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-select.status-cancelada {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-select.status-nao_compareceu {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-select.status-remarcada {
+  background: #e9d5ff;
+  color: #6b21a8;
+}
+
+:host-context(body.dark-mode) .status-select.status-agendada {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+:host-context(body.dark-mode) .status-select.status-realizada {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+:host-context(body.dark-mode) .status-select.status-cancelada {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+:host-context(body.dark-mode) .status-select.status-nao_compareceu {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+:host-context(body.dark-mode) .status-select.status-remarcada {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+}
+
 /* Responsive Table */
 @media (max-width: 1024px) {
   .data-table {

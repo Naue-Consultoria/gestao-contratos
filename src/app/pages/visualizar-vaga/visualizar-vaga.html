@@ -171,11 +171,17 @@
                   <span class="empty-text" *ngIf="!getLatestInterview(vagaCandidato)">-</span>
                 </td>
                 <td>
-                  <span class="status-badge"
-                        *ngIf="getLatestInterview(vagaCandidato)"
-                        [ngClass]="'status-' + getLatestInterview(vagaCandidato).status">
-                    {{ getInterviewStatusLabel(getLatestInterview(vagaCandidato).status) }}
-                  </span>
+                  <select class="status-select"
+                          *ngIf="getLatestInterview(vagaCandidato)"
+                          [value]="getLatestInterview(vagaCandidato).status"
+                          (change)="onInterviewStatusChange(vagaCandidato, $event)"
+                          [ngClass]="'status-' + getLatestInterview(vagaCandidato).status">
+                    <option value="agendada">Agendada</option>
+                    <option value="realizada">Realizada</option>
+                    <option value="cancelada">Cancelada</option>
+                    <option value="nao_compareceu">Não Compareceu</option>
+                    <option value="remarcada">Remarcada</option>
+                  </select>
                   <span class="empty-text" *ngIf="!getLatestInterview(vagaCandidato)">-</span>
                 </td>
                 <td>
