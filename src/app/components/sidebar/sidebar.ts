@@ -9,7 +9,6 @@ interface NavItem {
   text: string;
   route: string;
   adminOnly?: boolean;
-  userRestricted?: boolean; // Para itens que usuários normais não podem acessar
 }
 
 interface NavSection {
@@ -36,18 +35,18 @@ export class SidebarComponent {
       items: [
         { id: 'dashboard', icon: 'fas fa-chart-line', text: 'Dashboard', route: '/home/dashboard' },
         { id: 'rotinas', icon: 'fas fa-calendar-check', text: 'Rotinas', route: '/home/rotinas' },
-        { id: 'servicos', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/servicos', userRestricted: true },
-        { id: 'clientes', icon: 'fas fa-users', text: 'Clientes', route: '/home/clientes', userRestricted: true },
-        { id: 'propostas', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/propostas', userRestricted: true },
-        { id: 'contratos', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contratos', userRestricted: true },
-        { id: 'recrutamento-selecao', icon: 'fas fa-user-tie', text: 'Recrutamento & Seleção', route: '/home/recrutamento-selecao', userRestricted: true }
+        { id: 'servicos', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/servicos' },
+        { id: 'clientes', icon: 'fas fa-users', text: 'Clientes', route: '/home/clientes', adminOnly: true },
+        { id: 'propostas', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/propostas', adminOnly: true },
+        { id: 'contratos', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contratos', adminOnly: true },
+        { id: 'recrutamento-selecao', icon: 'fas fa-user-tie', text: 'Recrutamento & Seleção', route: '/home/recrutamento-selecao', adminOnly: true }
       ]
     },
     {
       title: 'ANÁLISES',
       items: [
-        { id: 'relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios', route: '/home/relatorios', userRestricted: true },
-        { id: 'analytics', icon: 'fas fa-chart-pie', text: 'Analytics', route: '/home/analytics', userRestricted: true }
+        { id: 'relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios', route: '/home/relatorios', adminOnly: true },
+        { id: 'analytics', icon: 'fas fa-chart-pie', text: 'Analytics', route: '/home/analytics', adminOnly: true }
       ]
     },
     {
@@ -82,7 +81,7 @@ export class SidebarComponent {
 
   private filterNavigationByRole() {
     const isAdmin = this.authService.isAdmin();
-    
+
     this.filteredNavSections = this.navSections.map(section => ({
       ...section,
       items: section.items.filter(item => {
@@ -90,17 +89,12 @@ export class SidebarComponent {
         if (isAdmin) {
           return true;
         }
-        
+
         // Se não é admin, não pode ver itens adminOnly
         if (item.adminOnly) {
           return false;
         }
-        
-        // Se não é admin, não pode ver itens userRestricted
-        if (item.userRestricted) {
-          return false;
-        }
-        
+
         // Caso contrário, pode ver
         return true;
       })

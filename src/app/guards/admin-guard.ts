@@ -26,13 +26,10 @@ export class AdminGuard implements CanActivate {
     if (this.authService.isAdmin()) {
       return true;
     }
-    
-    // Redirecionar para dashboard
-    this.router.navigate(['/home/dashboard']);
-    
-    // Opcionalmente, você pode mostrar uma mensagem de erro
-    // this.toastr.error('Acesso negado. Apenas administradores podem acessar esta página.');
-    
+
+    // Redirecionar para página de acesso negado
+    this.router.navigate(['/access-denied']);
+
     return false;
   }
 }

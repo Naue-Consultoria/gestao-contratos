@@ -54,12 +54,7 @@ interface QuickAction {
 })
 export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestroy {
   statCards: StatCard[] = [];
-  recentActivities: Activity[] = [
-    { time: 'Há 2 horas', title: 'Diagnóstico Organizacional - Empresa ABC', description: 'Reunião inicial realizada com sucesso', type: 'diagnostic', status: 'completed' },
-    { time: 'Há 5 horas', title: 'OKR - Tech Solutions', description: 'Workshop de definição de objetivos concluído', type: 'okr', status: 'completed' },
-    { time: 'Ontem', title: 'Mentoria Individual - Startup XYZ', description: 'Sessão agendada para próxima semana', type: 'mentoring', status: 'scheduled' },
-    { time: 'Há 2 dias', title: 'Consultoria RH - Inovação Corp', description: 'Análise de clima organizacional em andamento', type: 'hr', status: 'in_progress' }
-  ];
+  recentActivities: Activity[] = [];
   quickActions: QuickAction[] = [
     { id: 'routines', icon: 'fas fa-tasks', label: 'Rotinas', color: '#003b2b', action: 'routines' },
     { id: 'new-service', icon: 'fas fa-briefcase', label: 'Novo Serviço', color: '#003b2b', action: 'newService' },

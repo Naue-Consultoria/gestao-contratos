@@ -10,14 +10,10 @@ export class UserGuard implements CanActivate {
   // Rotas permitidas para usuários com role 'usuario'
   private allowedRoutesForUser = [
     '/home/dashboard',
-    '/home/contratos',
-    '/home/clientes',
     '/home/servicos',
-    '/home/propostas',
-    '/home/relatorios',
-    '/home/analytics',
+    '/home/servicos/novo',
     '/home/rotinas',
-    '/home/configuracoes', 
+    '/home/configuracoes',
     '/home/ajuda'
   ];
 
@@ -31,29 +27,14 @@ export class UserGuard implements CanActivate {
    */
   private checkDynamicRoutes(url: string): boolean {
     const dynamicRoutePatterns = [
-      // Rotas de contratos com IDs
-      /^\/home\/contratos\/visualizar\/\d+$/,
-      /^\/home\/contratos\/editar\/\d+$/,
-      
-      // Rotas de clientes com IDs
-      /^\/home\/clientes\/visualizar\/\d+$/,
-      /^\/home\/clientes\/editar\/\d+$/,
-      
-      // Rotas de serviços com IDs
+      // Rotas de serviços com IDs (permitido para usuários)
       /^\/home\/servicos\/editar\/\d+$/,
-      
-      // Rotas de propostas com IDs
-      /^\/home\/propostas\/visualizar\/\d+$/,
-      /^\/home\/propostas\/editar\/\d+$/,
-      
-      // Rotas de rotinas com IDs
+
+      // Rotas de rotinas com IDs (permitido para usuários)
       /^\/home\/rotinas\/visualizar\/\d+$/,
-      
-      // Rota de acompanhamento de serviço - a rota problemática!
-      /^\/home\/rotinas\/\d+\/servico\/\d+$/,
-      
-      // Rotas de usuários (apenas para admin, mas vamos deixar o AdminGuard tratar isso)
-      /^\/home\/usuarios\/editar\/\d+$/
+
+      // Rota de acompanhamento de serviço (permitido para usuários)
+      /^\/home\/rotinas\/\d+\/servico\/\d+$/
     ];
 
     return dynamicRoutePatterns.some(pattern => pattern.test(url));
@@ -90,16 +71,16 @@ export class UserGuard implements CanActivate {
       return true;
     }
 
-    // Se não é uma rota permitida, redirecionar para dashboard
+    // Se não é uma rota permitida, redirecionar para página de acesso negado
     console.log('❌ Acesso negado - Rota não permitida para usuário');
     console.log('🔍 Rota atual:', currentUrl);
     console.log('🔍 User role:', this.authService.getUser()?.role);
     console.log('🔍 isAllowedRoute:', isAllowedRoute);
     console.log('🔍 isDynamicRoute:', isDynamicRoute);
-    
-    // Redirecionar para dashboard
-    this.router.navigate(['/home/dashboard']);
-    
+
+    // Redirecionar para página de acesso negado
+    this.router.navigate(['/access-denied']);
+
     return false;
   }
 }
