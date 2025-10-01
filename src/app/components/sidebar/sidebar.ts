@@ -7,8 +7,10 @@ interface NavItem {
   id: string;
   icon: string;
   text: string;
-  route: string;
+  route?: string;
   adminOnly?: boolean;
+  children?: NavItem[];
+  isExpanded?: boolean;
 }
 
 interface NavSection {
@@ -39,7 +41,18 @@ export class SidebarComponent {
         { id: 'clientes', icon: 'fas fa-users', text: 'Clientes', route: '/home/clientes', adminOnly: true },
         { id: 'propostas', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/propostas', adminOnly: true },
         { id: 'contratos', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contratos', adminOnly: true },
-        { id: 'recrutamento-selecao', icon: 'fas fa-user-tie', text: 'Recrutamento & Seleção', route: '/home/recrutamento-selecao', adminOnly: true }
+        {
+          id: 'recrutamento-selecao',
+          icon: 'fas fa-user-tie',
+          text: 'R&S',
+          adminOnly: true,
+          isExpanded: false,
+          children: [
+            { id: 'rs-vagas', icon: 'fas fa-briefcase', text: 'Vagas', route: '/home/recrutamento-selecao' },
+            { id: 'rs-analytics', icon: 'fas fa-chart-line', text: 'Analytics R&S', route: '/home/analytics-rs' },
+            { id: 'rs-relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios R&S', route: '/home/relatorios-rs' }
+          ]
+        }
       ]
     },
     {
@@ -103,5 +116,16 @@ export class SidebarComponent {
 
   toggleSidebar(): void {
     this.sidebarToggled.emit();
+  }
+
+  toggleDropdown(item: NavItem): void {
+    if (item.children) {
+      item.isExpanded = !item.isExpanded;
+    }
+  }
+
+  isChildRouteActive(children?: NavItem[]): boolean {
+    if (!children) return false;
+    return children.some(child => child.route && this.isRouteActive(child.route));
   }
 }

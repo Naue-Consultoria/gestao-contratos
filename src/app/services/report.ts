@@ -56,6 +56,49 @@ export class ReportService {
     });
   }
 
+  // R&S Reports
+  generateRsGeneralReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/rs/general`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
+  generateRsClientReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/rs/by-client`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
+  generateRsConsultoraReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/rs/by-consultora`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
+  generateRsOpenVacanciesReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/rs/open-vacancies`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
+  generateRsIndividualReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/rs/individual`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
+  // Método para buscar vagas por cliente
+  getVagasByClient(clientId: string): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/vagas/by-client/${clientId}`, {
+      headers: this.getHeaders()
+    });
+  }
+
   // Método auxiliar para download do arquivo
   downloadFile(blob: Blob, filename: string): void {
     const url = window.URL.createObjectURL(blob);

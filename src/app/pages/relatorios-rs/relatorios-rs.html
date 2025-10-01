@@ -1,0 +1,375 @@
+<!-- Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    Relatórios R&S
+  </h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<!-- Reports Grid -->
+<div class="reports-grid">
+
+  <!-- Relatório Geral de R&S -->
+  <div class="report-card" [class.is-loading]="rsGeneralReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon rs-general">
+        <i class="fas fa-briefcase"></i>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h3 class="card-title">Relatório Geral R&S</h3>
+      <p class="card-description">
+        Visão completa de todas as vagas abertas, fechadas e em andamento
+      </p>
+
+      <div class="card-controls">
+        <div class="control-row">
+          <div class="control-group">
+            <label class="control-label">Data Inicial</label>
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="rsGeneralReport.startDate"
+              [disabled]="rsGeneralReport.isLoading">
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Data Final</label>
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="rsGeneralReport.endDate"
+              [disabled]="rsGeneralReport.isLoading">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button
+              class="format-btn"
+              [class.active]="rsGeneralReport.format === 'pdf'"
+              (click)="rsGeneralReport.format = 'pdf'"
+              [disabled]="rsGeneralReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button
+              class="format-btn"
+              [class.active]="rsGeneralReport.format === 'excel'"
+              (click)="rsGeneralReport.format = 'excel'"
+              [disabled]="rsGeneralReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button
+        class="btn-generate"
+        (click)="generateReport('rsGeneral', rsGeneralReport)"
+        [disabled]="rsGeneralReport.isLoading">
+        <i class="fas" [class.fa-download]="!rsGeneralReport.isLoading" [class.fa-spinner]="rsGeneralReport.isLoading" [class.fa-spin]="rsGeneralReport.isLoading"></i>
+        <span>{{ rsGeneralReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Relatório por Cliente -->
+  <div class="report-card" [class.is-loading]="rsClientReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon rs-client">
+        <i class="fas fa-building"></i>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h3 class="card-title">Relatório por Cliente</h3>
+      <p class="card-description">
+        Histórico de vagas e candidatos de um cliente específico
+      </p>
+
+      <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Selecione o Cliente</label>
+          <select
+            class="form-select client-select"
+            [(ngModel)]="rsClientReport.clientId"
+            [disabled]="rsClientReport.isLoading">
+            <option value="">Escolha um cliente...</option>
+            <option *ngFor="let client of clients" [value]="client.id">
+              {{ client.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="control-row">
+          <div class="control-group">
+            <label class="control-label">Data Inicial <span class="optional">(Opcional)</span></label>
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="rsClientReport.startDate"
+              [disabled]="rsClientReport.isLoading">
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Data Final <span class="optional">(Opcional)</span></label>
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="rsClientReport.endDate"
+              [disabled]="rsClientReport.isLoading">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button
+              class="format-btn"
+              [class.active]="rsClientReport.format === 'pdf'"
+              (click)="rsClientReport.format = 'pdf'"
+              [disabled]="rsClientReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button
+              class="format-btn"
+              [class.active]="rsClientReport.format === 'excel'"
+              (click)="rsClientReport.format = 'excel'"
+              [disabled]="rsClientReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button
+        class="btn-generate"
+        (click)="generateReport('rsClient', rsClientReport)"
+        [disabled]="!rsClientReport.clientId || rsClientReport.isLoading">
+        <i class="fas" [class.fa-download]="!rsClientReport.isLoading" [class.fa-spinner]="rsClientReport.isLoading" [class.fa-spin]="rsClientReport.isLoading"></i>
+        <span>{{ rsClientReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Relatório por Consultora -->
+  <div class="report-card" [class.is-loading]="rsConsultoraReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon rs-consultora">
+        <i class="fas fa-user-tie"></i>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h3 class="card-title">Relatório por Consultora</h3>
+      <p class="card-description">
+        Performance e vagas gerenciadas por uma consultora específica
+      </p>
+
+      <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Selecione a Consultora</label>
+          <select
+            class="form-select"
+            [(ngModel)]="rsConsultoraReport.userId"
+            [disabled]="rsConsultoraReport.isLoading">
+            <option value="">Escolha uma consultora...</option>
+            <option *ngFor="let user of consultores" [value]="user.id">
+              {{ user.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="control-row">
+          <div class="control-group">
+            <label class="control-label">Data Inicial <span class="optional">(Opcional)</span></label>
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="rsConsultoraReport.startDate"
+              [disabled]="rsConsultoraReport.isLoading">
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Data Final <span class="optional">(Opcional)</span></label>
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="rsConsultoraReport.endDate"
+              [disabled]="rsConsultoraReport.isLoading">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button
+              class="format-btn"
+              [class.active]="rsConsultoraReport.format === 'pdf'"
+              (click)="rsConsultoraReport.format = 'pdf'"
+              [disabled]="rsConsultoraReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button
+              class="format-btn"
+              [class.active]="rsConsultoraReport.format === 'excel'"
+              (click)="rsConsultoraReport.format = 'excel'"
+              [disabled]="rsConsultoraReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button
+        class="btn-generate"
+        (click)="generateReport('rsConsultora', rsConsultoraReport)"
+        [disabled]="!rsConsultoraReport.userId || rsConsultoraReport.isLoading">
+        <i class="fas" [class.fa-download]="!rsConsultoraReport.isLoading" [class.fa-spinner]="rsConsultoraReport.isLoading" [class.fa-spin]="rsConsultoraReport.isLoading"></i>
+        <span>{{ rsConsultoraReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Relatório de Vagas Abertas -->
+  <div class="report-card" [class.is-loading]="rsOpenVacanciesReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon rs-open">
+        <i class="fas fa-folder-open"></i>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h3 class="card-title">Vagas Abertas</h3>
+      <p class="card-description">
+        Listagem de todas as vagas em aberto e seus candidatos
+      </p>
+
+      <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button
+              class="format-btn"
+              [class.active]="rsOpenVacanciesReport.format === 'pdf'"
+              (click)="rsOpenVacanciesReport.format = 'pdf'"
+              [disabled]="rsOpenVacanciesReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button
+              class="format-btn"
+              [class.active]="rsOpenVacanciesReport.format === 'excel'"
+              (click)="rsOpenVacanciesReport.format = 'excel'"
+              [disabled]="rsOpenVacanciesReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button
+        class="btn-generate"
+        (click)="generateReport('rsOpenVacancies', rsOpenVacanciesReport)"
+        [disabled]="rsOpenVacanciesReport.isLoading">
+        <i class="fas" [class.fa-download]="!rsOpenVacanciesReport.isLoading" [class.fa-spinner]="rsOpenVacanciesReport.isLoading" [class.fa-spin]="rsOpenVacanciesReport.isLoading"></i>
+        <span>{{ rsOpenVacanciesReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Relatório Individual de Vaga -->
+  <div class="report-card" [class.is-loading]="rsIndividualReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon rs-performance">
+        <i class="fas fa-file-invoice"></i>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h3 class="card-title">Relatório Individual</h3>
+      <p class="card-description">
+        Detalhamento completo da história e vida de uma vaga específica
+      </p>
+
+      <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Selecione o Cliente</label>
+          <select
+            class="form-select"
+            [(ngModel)]="rsIndividualReport.clientId"
+            (change)="onClientChangeIndividual()"
+            [disabled]="rsIndividualReport.isLoading">
+            <option value="">Escolha um cliente...</option>
+            <option *ngFor="let client of clients" [value]="client.id">
+              {{ client.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Selecione a Vaga</label>
+          <select
+            class="form-select"
+            [(ngModel)]="rsIndividualReport.vagaId"
+            [disabled]="!rsIndividualReport.clientId || rsIndividualReport.isLoading || vagasByClient.length === 0">
+            <option value="">{{ rsIndividualReport.clientId ? 'Escolha uma vaga...' : 'Selecione um cliente primeiro' }}</option>
+            <option *ngFor="let vaga of vagasByClient" [value]="vaga.id">
+              {{ vaga.codigo }} - {{ vaga.cargo }}
+            </option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button
+              class="format-btn"
+              [class.active]="rsIndividualReport.format === 'pdf'"
+              (click)="rsIndividualReport.format = 'pdf'"
+              [disabled]="rsIndividualReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button
+              class="format-btn"
+              [class.active]="rsIndividualReport.format === 'excel'"
+              (click)="rsIndividualReport.format = 'excel'"
+              [disabled]="rsIndividualReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button
+        class="btn-generate"
+        (click)="generateReport('rsIndividual', rsIndividualReport)"
+        [disabled]="!rsIndividualReport.vagaId || rsIndividualReport.isLoading">
+        <i class="fas" [class.fa-download]="!rsIndividualReport.isLoading" [class.fa-spinner]="rsIndividualReport.isLoading" [class.fa-spin]="rsIndividualReport.isLoading"></i>
+        <span>{{ rsIndividualReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
+</div>

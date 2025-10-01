@@ -153,22 +153,36 @@ export class BreadcrumbService {
     // Rotas de Recrutamento e Seleção
     '/home/recrutamento-selecao': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Recrutamento e Seleção', url: '/home/recrutamento-selecao' }
+      { label: 'R&S', url: '/home/recrutamento-selecao' },
+      { label: 'Vagas' }
     ],
     '/home/recrutamento-selecao/nova-vaga': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Recrutamento e Seleção', url: '/home/recrutamento-selecao' },
+      { label: 'R&S', url: '/home/recrutamento-selecao' },
+      { label: 'Vagas', url: '/home/recrutamento-selecao' },
       { label: 'Nova Vaga' }
     ],
     '/home/recrutamento-selecao/editar': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Recrutamento e Seleção', url: '/home/recrutamento-selecao' },
+      { label: 'R&S', url: '/home/recrutamento-selecao' },
+      { label: 'Vagas', url: '/home/recrutamento-selecao' },
       { label: 'Editar Vaga' }
     ],
     '/home/recrutamento-selecao/visualizar': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Recrutamento e Seleção', url: '/home/recrutamento-selecao' },
+      { label: 'R&S', url: '/home/recrutamento-selecao' },
+      { label: 'Vagas', url: '/home/recrutamento-selecao' },
       { label: 'Visualizar Vaga' }
+    ],
+    '/home/analytics-rs': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'R&S', url: '/home/recrutamento-selecao' },
+      { label: 'Analytics R&S' }
+    ],
+    '/home/relatorios-rs': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'R&S', url: '/home/recrutamento-selecao' },
+      { label: 'Relatórios R&S' }
     ]
   };
 
@@ -291,7 +305,9 @@ export class BreadcrumbService {
       'configuracoes': 'Configurações',
       'profile': 'Meu Perfil',
       'ajuda': 'Ajuda',
-      'recrutamento-selecao': 'Recrutamento e Seleção',
+      'recrutamento-selecao': 'R&S',
+      'analytics-rs': 'Analytics R&S',
+      'relatorios-rs': 'Relatórios R&S',
       // Manter mapeamento antigo para compatibilidade
       'contracts': 'Contratos',
       'clients': 'Clientes',

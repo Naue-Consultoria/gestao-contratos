@@ -1,0 +1,262 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Analytics R&S</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-page">
+    <!-- Header Skeleton -->
+    <div class="loading-header">
+      <div class="skeleton skeleton-title"></div>
+      <div class="skeleton skeleton-subtitle"></div>
+    </div>
+
+    <!-- KPI Cards Skeleton -->
+    <div class="loading-kpi-grid">
+      <div class="skeleton-card" *ngFor="let item of [1,2,3,4,5,6]">
+        <div class="skeleton skeleton-kpi-title"></div>
+        <div class="skeleton skeleton-kpi-value"></div>
+        <div class="skeleton skeleton-kpi-chart"></div>
+      </div>
+    </div>
+
+    <!-- Charts Skeleton -->
+    <div class="loading-charts">
+      <div class="skeleton-chart-container">
+        <div class="skeleton skeleton-chart-title"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+      <div class="loading-chart-grid">
+        <div class="skeleton-chart-small" *ngFor="let item of [1,2,3]">
+          <div class="skeleton skeleton-chart-title"></div>
+          <div class="skeleton skeleton-chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div class="loading-indicator">
+      <div class="loading-spinner">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <span class="loading-text">Carregando analytics R&S...</span>
+      <div class="loading-progress">
+        <div class="progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && !metrics" class="error-container">
+    <div class="error-message">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>Erro ao carregar dados</h3>
+      <p>Não foi possível carregar os dados de analytics. Tente novamente.</p>
+      <button class="retry-btn" (click)="refreshData()">
+        <i class="fas fa-redo"></i>
+        Tentar novamente
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && metrics">
+    <!-- Filtros -->
+    <div class="filter-section">
+      <div class="filter-group">
+        <label class="filter-label">
+          <i class="fas fa-calendar-alt"></i>
+          Filtrar por período
+        </label>
+        <div class="filter-controls">
+          <select class="filter-select" [(ngModel)]="selectedMonth" (change)="applyFilters()">
+            <option value="">Todos os meses</option>
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="selectedYear" (change)="applyFilters()">
+            <option value="">Todos os anos</option>
+            <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+          </select>
+
+          <button class="clear-filter-btn" (click)="clearFilters()" *ngIf="selectedMonth || selectedYear">
+            <i class="fas fa-times"></i>
+            Limpar filtros
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs Principais - Resumo Geral -->
+    <div class="kpi-section">
+      <h3 class="section-title">
+        <i class="fas fa-tachometer-alt"></i>
+        Indicadores-Chave de Performance
+      </h3>
+      <div class="kpi-grid primary-kpis">
+        <!-- Total de Vagas -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Total de Vagas</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-briefcase"></i>
+            </div>
+          </div>
+          <div class="kpi-value">{{ metrics.totalVagas }}</div>
+          <div class="kpi-breakdown">
+            <span>Abertas: {{ metrics.vagasAbertas }}</span>
+            <span>Fechadas: {{ metrics.vagasFechadas }}</span>
+          </div>
+        </div>
+
+        <!-- Taxa de Fechamento -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Taxa de Fechamento</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+          <div class="kpi-value">{{ metrics.taxaFechamento }}%</div>
+          <div class="kpi-description">Sucesso em fechamentos</div>
+        </div>
+
+        <!-- SLA Médio -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <h4 class="kpi-title">SLA Médio</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-clock"></i>
+            </div>
+          </div>
+          <div class="kpi-value">{{ metrics.slaMedia }} dias</div>
+          <div class="kpi-description">Tempo de fechamento</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas Secundárias -->
+    <div class="kpi-section">
+      <h3 class="section-title">
+        <i class="fas fa-chart-line"></i>
+        Métricas de Candidatos e Faturamento
+      </h3>
+      <div class="kpi-grid secondary-kpis">
+        <!-- Total de Candidatos -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Candidatos</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-users"></i>
+            </div>
+          </div>
+          <div class="kpi-value">{{ metrics.totalCandidatos }}</div>
+          <div class="kpi-description">Aprovados: {{ metrics.candidatosAprovados }}</div>
+        </div>
+
+        <!-- Faturamento Total -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Faturamento Total</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-dollar-sign"></i>
+            </div>
+          </div>
+          <div class="kpi-value revenue-value">{{ formatCurrency(metrics.faturamentoTotal) }}</div>
+          <div class="kpi-description">
+            <div class="revenue-breakdown">
+              <span>Previsto: {{ formatCurrency(metrics.faturamentoPrevisto) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vagas Canceladas -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Vagas Canceladas</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-times-circle"></i>
+            </div>
+          </div>
+          <div class="kpi-value">{{ metrics.vagasCanceladas }}</div>
+          <div class="kpi-description">Por solicitação do cliente</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Detalhados -->
+    <div class="analytics-charts-section">
+      <h3 class="section-title">
+        <i class="fas fa-chart-bar"></i>
+        Analytics Detalhados
+      </h3>
+
+      <!-- Performance por Consultora - Largura Total -->
+      <div class="chart-card full-width">
+        <div class="chart-header">
+          <h4 class="chart-title">
+            <i class="fas fa-user-tie"></i>
+            Performance por Consultora
+          </h4>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="consultoraChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Gráficos em Grid 2x2 -->
+      <div class="charts-grid">
+        <!-- Vagas por Status -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-chart-pie"></i>
+              Vagas por Status
+            </h4>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="statusDonut"></canvas>
+          </div>
+        </div>
+
+        <!-- Fonte de Recrutamento -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-bullhorn"></i>
+              Fonte de Recrutamento
+            </h4>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="fonteRecrutamentoChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Vagas por Tipo de Cargo -->
+        <div class="chart-card full-width-on-mobile">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-briefcase"></i>
+              Vagas por Tipo de Cargo
+            </h4>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="tipoCargoChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

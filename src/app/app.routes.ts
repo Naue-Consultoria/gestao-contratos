@@ -30,6 +30,8 @@ import { RecrutamentoSelecao } from './pages/recrutamento-selecao/recrutamento-s
 import { NovaVagaComponent } from './pages/nova-vaga/nova-vaga.component';
 import { VisualizarVagaComponent } from './pages/visualizar-vaga/visualizar-vaga';
 import { EditarVagaComponent } from './pages/editar-vaga/editar-vaga.component';
+import { RelatoriosRsComponent } from './pages/relatorios-rs/relatorios-rs';
+import { AnalyticsRsComponent } from './pages/analytics-rs/analytics-rs';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
@@ -226,6 +228,22 @@ export const routes: Routes = [
         component: ReportsPage,
         canActivate: [AdminGuard],
         title: 'Relatórios - NAUE Consultoria',
+      },
+
+      // Relatórios R&S
+      {
+        path: 'relatorios-rs',
+        component: RelatoriosRsComponent,
+        canActivate: [AdminGuard],
+        title: 'Relatórios R&S - NAUE Consultoria',
+      },
+
+      // Analytics R&S
+      {
+        path: 'analytics-rs',
+        component: AnalyticsRsComponent,
+        canActivate: [AdminGuard],
+        title: 'Analytics R&S - NAUE Consultoria',
       },
 
       // Analytics e métricas
