@@ -155,23 +155,37 @@
             </div>
             
             <div class="stages-list">
-              <div 
-                *ngFor="let stage of serviceStages; let i = index" 
+              <div
+                *ngFor="let stage of serviceStages; let i = index"
                 class="stage-item"
                 [class.completed]="stage.status === 'completed'"
-                [class.pending]="stage.status === 'pending'">
-                <div class="stage-checkbox">
-                  <input 
-                    type="checkbox" 
-                    [id]="'stage-' + stage.id"
-                    [checked]="stage.status === 'completed'"
-                    [disabled]="!canEdit"
-                    (change)="toggleStageStatus(stage, $event)">
-                  <label [for]="'stage-' + stage.id" class="checkbox-label">
-                    <i class="fas" 
-                       [ngClass]="stage.status === 'completed' ? 'fa-check-circle' : 'fa-circle'"
-                       [style.color]="stage.status === 'completed' ? '#28a745' : '#6c757d'"></i>
-                  </label>
+                [class.pending]="stage.status === 'pending'"
+                [class.not-applicable]="stage.is_not_applicable">
+                <div class="stage-checkboxes-container">
+                  <div class="stage-checkbox">
+                    <input
+                      type="checkbox"
+                      [id]="'stage-' + stage.id"
+                      [checked]="stage.status === 'completed'"
+                      [disabled]="!canEdit || stage.is_not_applicable"
+                      (change)="toggleStageStatus(stage, $event)">
+                    <label [for]="'stage-' + stage.id" class="checkbox-label">
+                      <i class="fas"
+                         [ngClass]="stage.status === 'completed' ? 'fa-check-circle' : 'fa-circle'"
+                         [style.color]="stage.status === 'completed' ? '#28a745' : '#6c757d'"></i>
+                    </label>
+                  </div>
+                  <div class="stage-na-checkbox">
+                    <input
+                      type="checkbox"
+                      [id]="'stage-na-' + stage.id"
+                      [checked]="stage.is_not_applicable"
+                      [disabled]="!canEdit || stage.status === 'completed'"
+                      (change)="toggleStageNotApplicable(stage, $event)">
+                    <label [for]="'stage-na-' + stage.id" class="na-checkbox-label">
+                      <span class="na-label">N/A</span>
+                    </label>
+                  </div>
                 </div>
                 <div class="stage-main-content">
                   <div class="stage-number">

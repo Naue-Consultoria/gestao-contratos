@@ -13,6 +13,7 @@ export interface ServiceStage {
   sort_order: number;
   status: 'pending' | 'completed';
   is_active: boolean;
+  is_not_applicable?: boolean;
   created_at: string;
   updated_at: string;
   created_by_user?: { name: string };
@@ -260,6 +261,22 @@ export class ServiceStageService {
   }
 
   /**
+   * Atualizar is_not_applicable de uma etapa
+   */
+  updateStageNotApplicable(id: number, is_not_applicable: boolean): Observable<UpdateServiceStageResponse> {
+    return this.http.patch<UpdateServiceStageResponse>(`${this.API_URL}/stages/${id}/not-applicable`, { is_not_applicable }, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      tap((response: UpdateServiceStageResponse) => {
+        // Invalidar cache do serviço após atualização
+        if (response.stage?.service_id) {
+          this.invalidateCache(response.stage.service_id);
+        }
+      })
+    );
+  }
+
+  /**
    * Atualizar status de múltiplas etapas
    */
   updateMultipleStageStatuses(updates: StageStatusUpdate[]): Observable<MultipleStageUpdatesResponse> {
@@ -342,23 +359,26 @@ export class ServiceStageService {
    * Calcular progresso em porcentagem
    */
   calculateProgress(stages: ServiceStage[]): number {
-    if (stages.length === 0) return 0;
-    const completedStages = stages.filter(stage => stage.status === 'completed').length;
-    return Math.round((completedStages / stages.length) * 100);
+    // Filtrar apenas etapas aplicáveis (não marcadas como N/A)
+    const applicableStages = stages.filter(stage => !stage.is_not_applicable);
+    if (applicableStages.length === 0) return 0;
+    const completedStages = applicableStages.filter(stage => stage.status === 'completed').length;
+    return Math.round((completedStages / applicableStages.length) * 100);
   }
 
   /**
    * Verificar se todas as etapas estão concluídas
    */
   isServiceCompleted(stages: ServiceStage[]): boolean {
-    return stages.length > 0 && stages.every(stage => stage.status === 'completed');
+    const applicableStages = stages.filter(stage => !stage.is_not_applicable);
+    return applicableStages.length > 0 && applicableStages.every(stage => stage.status === 'completed');
   }
 
   /**
    * Obter próxima etapa pendente
    */
   getNextPendingStage(stages: ServiceStage[]): ServiceStage | null {
-    const pendingStages = stages.filter(stage => stage.status === 'pending');
+    const pendingStages = stages.filter(stage => stage.status === 'pending' && !stage.is_not_applicable);
     return pendingStages.length > 0 ? pendingStages[0] : null;
   }
 
@@ -366,8 +386,9 @@ export class ServiceStageService {
    * Obter estatísticas das etapas
    */
   getStageStats(stages: ServiceStage[]): { total: number; completed: number; pending: number; progress: number } {
-    const total = stages.length;
-    const completed = stages.filter(stage => stage.status === 'completed').length;
+    const applicableStages = stages.filter(stage => !stage.is_not_applicable);
+    const total = applicableStages.length;
+    const completed = applicableStages.filter(stage => stage.status === 'completed').length;
     const pending = total - completed;
     const progress = this.calculateProgress(stages);
 

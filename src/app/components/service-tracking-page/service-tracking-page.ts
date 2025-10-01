@@ -247,18 +247,25 @@ export class ServiceTrackingPageComponent implements OnInit {
       return;
     }
 
+    // Se a etapa está marcada como N/A, não permitir marcar como concluída
+    if (stage.is_not_applicable) {
+      this.toastr.warning('Etapa marcada como não aplicável não pode ser concluída');
+      event.target.checked = false;
+      return;
+    }
+
     const newStatus: 'pending' | 'completed' = event.target.checked ? 'completed' : 'pending';
-    
+
     try {
       const response = await this.serviceStageService.updateStageStatus(stage.id, newStatus).toPromise();
-      
+
       if (response) {
         // Atualizar o stage na lista
         const stageIndex = this.serviceStages.findIndex(s => s.id === stage.id);
         if (stageIndex !== -1) {
           this.serviceStages[stageIndex] = response.stage;
         }
-        
+
         // Atualizar o progresso
         if (response.progress) {
           this.stageProgress = response.progress.progressPercentage;
@@ -270,9 +277,55 @@ export class ServiceTrackingPageComponent implements OnInit {
     } catch (error: any) {
       console.error('Erro ao atualizar status da etapa:', error);
       this.toastr.error('Erro ao atualizar status da etapa');
-      
+
       // Reverter o checkbox
       event.target.checked = stage.status === 'completed';
+    }
+  }
+
+  async toggleStageNotApplicable(stage: ServiceStage, event: any) {
+    if (!this.canEdit) {
+      this.toastr.warning('Você não tem permissão para alterar as etapas');
+      // Reverter o checkbox
+      event.target.checked = stage.is_not_applicable || false;
+      return;
+    }
+
+    // Se a etapa está marcada como concluída, não permitir marcar como N/A
+    if (stage.status === 'completed') {
+      this.toastr.warning('Etapa concluída não pode ser marcada como não aplicável');
+      event.target.checked = false;
+      return;
+    }
+
+    const isNotApplicable = event.target.checked;
+
+    try {
+      const response = await this.serviceStageService.updateStageNotApplicable(stage.id, isNotApplicable).toPromise();
+
+      if (response) {
+        // Atualizar o stage na lista
+        const stageIndex = this.serviceStages.findIndex(s => s.id === stage.id);
+        if (stageIndex !== -1) {
+          this.serviceStages[stageIndex] = response.stage;
+        }
+
+        // Atualizar o progresso
+        if (response.progress) {
+          this.stageProgress = response.progress.progressPercentage;
+        } else {
+          // Calcular progresso localmente
+          this.stageProgress = this.serviceStageService.calculateProgress(this.serviceStages);
+        }
+
+        this.toastr.success(`Etapa marcada como ${isNotApplicable ? 'não aplicável' : 'aplicável'}`);
+      }
+    } catch (error: any) {
+      console.error('Erro ao atualizar etapa N/A:', error);
+      this.toastr.error('Erro ao atualizar etapa');
+
+      // Reverter o checkbox
+      event.target.checked = stage.is_not_applicable || false;
     }
   }
 
