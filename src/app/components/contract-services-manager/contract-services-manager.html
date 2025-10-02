@@ -1,22 +1,4 @@
 <div class="services-manager">
-  <!-- Progress Bar Section -->
-  <div class="tasks-progress-section" *ngIf="services && services.length > 0">
-    <div class="progress-header">
-      <h3 class="progress-title">
-        <i class="fas fa-chart-line"></i>
-        Progresso das Tarefas
-      </h3>
-      <div class="progress-stats">
-        <span class="progress-text">{{ getTasksProgress() }}% concluído</span>
-      </div>
-    </div>
-    <div class="progress-bar-container">
-      <div class="progress-bar">
-        <div class="progress-fill" [style.width.%]="getTasksProgress()"></div>
-      </div>
-    </div>
-  </div>
-
   <div class="services-table">
     <div class="table-header-row">
       <div class="col-service">Serviço</div>
