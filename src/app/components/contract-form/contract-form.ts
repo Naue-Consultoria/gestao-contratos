@@ -128,6 +128,7 @@ export class ContractFormComponent implements OnInit {
   firstInstallmentDate: string = '';
   
   availableRoles = [
+    { value: 'owner', label: 'Proprietário' },
     { value: 'editor', label: 'Editor' },
     { value: 'viewer', label: 'Visualizador' }
   ];
@@ -172,6 +173,7 @@ export class ContractFormComponent implements OnInit {
       this.setBreadcrumb();
       this.generateContractNumber();
       this.setDefaultFirstInstallmentDate();
+      this.addCurrentUserAsOwner();
       this.isLoading = false;
     }
 
@@ -202,6 +204,42 @@ export class ContractFormComponent implements OnInit {
       const nextMonth = new Date();
       nextMonth.setMonth(nextMonth.getMonth() + 1);
       this.firstInstallmentDate = nextMonth.toISOString().split('T')[0];
+    }
+  }
+
+  private addCurrentUserAsOwner() {
+    const currentUser = this.authService.getUser();
+    if (currentUser && this.currentUserId) {
+      this.assignedUsers.push({
+        id: 0,
+        user: {
+          id: currentUser.id,
+          name: currentUser.name,
+          email: currentUser.email
+        },
+        role: 'owner'
+      });
+    }
+  }
+
+  private ensureCurrentUserInAssignedUsers() {
+    const currentUser = this.authService.getUser();
+    if (!currentUser || !this.currentUserId) return;
+
+    // Verificar se o usuário atual já está no array
+    const userExists = this.assignedUsers.some(u => u.user.id === this.currentUserId);
+
+    if (!userExists) {
+      // Adicionar usuário atual como owner se não estiver no array
+      this.assignedUsers.push({
+        id: 0,
+        user: {
+          id: currentUser.id,
+          name: currentUser.name,
+          email: currentUser.email
+        },
+        role: 'owner'
+      });
     }
   }
 
@@ -361,6 +399,9 @@ export class ContractFormComponent implements OnInit {
         }
 
         this.assignedUsers = contract.assigned_users || [];
+
+        // Garantir que o usuário atual está no array de assignedUsers ao editar
+        this.ensureCurrentUserInAssignedUsers();
 
         // Carregar parcelas se existirem
         if (contract.installments && contract.installments.length > 0) {
@@ -635,6 +676,9 @@ export class ContractFormComponent implements OnInit {
       return;
     }
     this.isSaving = true;
+
+    // Garantir que o usuário atual está no array de assignedUsers antes de salvar
+    this.ensureCurrentUserInAssignedUsers();
 
     const userIdsToSave = this.assignedUsers.map(u => u.user.id);
 
