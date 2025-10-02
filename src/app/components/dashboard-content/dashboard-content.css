@@ -248,6 +248,12 @@
   align-items: center;
 }
 
+.quick-actions-grid.centered {
+  justify-content: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
 /* Breakpoints para Quick Actions */
 @media (min-width: 1600px) {
   .quick-actions-grid {

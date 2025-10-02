@@ -30,11 +30,11 @@
   </div>
 
   <!-- Quick Actions - Grid Responsivo -->
-  <div class="quick-actions-section" 
-       role="region" 
+  <div class="quick-actions-section"
+       role="region"
        aria-label="Ações rápidas">
     <div class="quick-actions-grid" role="group">
-      <button 
+      <button
         class="quick-action-btn"
         *ngFor="let action of quickActions; trackBy: trackByActionId"
         (click)="executeQuickAction(action.action)"
