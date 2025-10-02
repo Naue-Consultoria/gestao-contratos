@@ -41,7 +41,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if ((changes['filteredProposals'] || changes['activeStatusFilter']) && this.useFilteredData && this.filteredProposals) {
+    if ((changes['filteredProposals'] || changes['activeStatusFilter']) && this.useFilteredData) {
       this.updateCardsWithFilteredData();
     }
   }
@@ -63,8 +63,8 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         this.allProposals = proposalsResponse.data;
 
         // Se está usando dados filtrados, usar os filtrados, senão usar todos
-        const proposalsToUse = this.useFilteredData && this.filteredProposals.length >= 0
-          ? this.filteredProposals
+        const proposalsToUse = this.useFilteredData && this.filteredProposals && this.filteredProposals.length > 0
+          ? this.filteredProposals.map(fp => fp.raw || fp)
           : this.allProposals;
 
         this.calculateAndUpdateCards(proposalsToUse);
@@ -98,7 +98,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
   }
 
   private updateCardsWithFilteredData() {
-    if (!this.allProposals || this.allProposals.length === 0) {
+    if (!this.filteredProposals) {
       return;
     }
 

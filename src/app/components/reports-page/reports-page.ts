@@ -35,6 +35,7 @@ export class ReportsPage implements OnInit {
   
   monthlyReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
   financialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
+  commercialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
   clientReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
   servicesReport: ReportConfig = { clientId: '', serviceId: '', format: 'pdf', isLoading: false };
   serviceRoutinesReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
@@ -107,7 +108,7 @@ export class ReportsPage implements OnInit {
     });
   }
 
-  generateReport(reportType: 'monthly' | 'client' | 'services' | 'financial' | 'serviceRoutines', config: ReportConfig | GeneralReportConfig) {
+  generateReport(reportType: 'monthly' | 'client' | 'services' | 'financial' | 'serviceRoutines' | 'commercial', config: ReportConfig | GeneralReportConfig) {
     if ((reportType === 'client' || reportType === 'serviceRoutines') && !config.clientId) {
       this.toastr.warning('Por favor, selecione um cliente.');
       return;
@@ -160,6 +161,10 @@ export class ReportsPage implements OnInit {
         const routineClientName = routineClient ? routineClient.name.replace(/\s+/g, '_').toLowerCase() : 'cliente';
         fileName = `relatorio_rotinas_${routineClientName}_${year}_${month}`;
         reportObservable = this.reportService.generateServiceRoutinesReport(requestData);
+        break;
+      case 'commercial':
+        fileName = `relatorio_comercial_${year}_${month}`;
+        reportObservable = this.reportService.generateCommercialReport(requestData);
         break;
     }
 

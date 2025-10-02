@@ -147,7 +147,16 @@ export class SidebarComponent {
 
   toggleDropdown(item: NavItem): void {
     if (item.children) {
-      item.isExpanded = !item.isExpanded;
+      // Se a sidebar estiver encolhida, expandir primeiro
+      if (this.isCollapsed) {
+        this.toggleSidebar();
+        // Dar um pequeno delay para a animação da sidebar
+        setTimeout(() => {
+          item.isExpanded = true;
+        }, 100);
+      } else {
+        item.isExpanded = !item.isExpanded;
+      }
     }
   }
 

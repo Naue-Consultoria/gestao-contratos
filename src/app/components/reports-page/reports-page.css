@@ -41,10 +41,10 @@
   margin: 0;
 }
 
-/* Grid de Relatórios - 5 Colunas */
+/* Grid de Relatórios - 3 Colunas */
 .reports-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   width: 100%;
   container-type: inline-size;
@@ -131,6 +131,10 @@
 }
 
 .card-icon.routines {
+  background: linear-gradient(135deg, var(--primary-green, #00b894) 0%, #088a5b 100%);
+}
+
+.card-icon.commercial {
   background: linear-gradient(135deg, var(--primary-green, #00b894) 0%, #088a5b 100%);
 }
 
@@ -413,21 +417,21 @@
 /* Breakpoints específicos para diferentes layouts de grid */
 @media (min-width: 1600px) {
   .reports-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
   }
 }
 
 @media (min-width: 1400px) and (max-width: 1599px) {
   .reports-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.75rem;
   }
 }
 
 @media (min-width: 1200px) and (max-width: 1399px) {
   .reports-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
   }
 }

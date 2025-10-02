@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment';
 export interface ReportRequest {
   companyId?: string;
   serviceId?: string;
-  clientId?: string;
+  clientId?: string | number;
   contractId?: string;
   format: 'pdf' | 'excel';
   startDate?: string;
@@ -87,6 +87,13 @@ export class ReportService {
 
   generateRsIndividualReport(data: ReportRequest): Observable<Blob> {
     return this.http.post(`${this.apiUrl}/rs/individual`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
+  generateCommercialReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/commercial`, data, {
       responseType: 'blob',
       headers: this.getHeaders()
     });

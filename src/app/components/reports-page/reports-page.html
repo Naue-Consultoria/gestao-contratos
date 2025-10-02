@@ -185,6 +185,89 @@
     </div>
   </div>
 
+  <!-- Relatório Comercial -->
+  <div class="report-card" [class.is-loading]="commercialReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon commercial">
+        <i class="fas fa-handshake"></i>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h3 class="card-title">Relatório Comercial</h3>
+      <p class="card-description">
+        Análise de propostas enviadas vs assinadas, valores e taxa de conversão
+      </p>
+
+      <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Cliente <span class="optional">(Opcional)</span></label>
+          <select
+            class="form-select client-select"
+            [(ngModel)]="commercialReport.clientId"
+            [disabled]="commercialReport.isLoading">
+            <option [value]="null">Todos os clientes</option>
+            <option *ngFor="let client of clients" [value]="client.id">
+              {{ client.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="control-row">
+          <div class="control-group">
+            <label class="control-label">Data Inicial</label>
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="commercialReport.startDate"
+              [disabled]="commercialReport.isLoading">
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Data Final</label>
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="commercialReport.endDate"
+              [disabled]="commercialReport.isLoading">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button
+              class="format-btn"
+              [class.active]="commercialReport.format === 'pdf'"
+              (click)="commercialReport.format = 'pdf'"
+              [disabled]="commercialReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button
+              class="format-btn"
+              [class.active]="commercialReport.format === 'excel'"
+              (click)="commercialReport.format = 'excel'"
+              [disabled]="commercialReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button
+        class="btn-generate"
+        (click)="generateReport('commercial', commercialReport)"
+        [disabled]="commercialReport.isLoading">
+        <i class="fas" [class.fa-download]="!commercialReport.isLoading" [class.fa-spinner]="commercialReport.isLoading" [class.fa-spin]="commercialReport.isLoading"></i>
+        <span>{{ commercialReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Relatório Financeiro -->
   <div class="report-card" [class.is-loading]="financialReport.isLoading">
     <div class="card-header">
