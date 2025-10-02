@@ -424,8 +424,6 @@ export class ContractService {
       { value: 'PIX', label: 'PIX' },
       { value: 'Transferência', label: 'Transferência Bancária' },
       { value: 'Boleto', label: 'Boleto Bancário' },
-      { value: 'Cartão de Crédito', label: 'Cartão de Crédito' },
-      { value: 'Cartão de Débito', label: 'Cartão de Débito' },
       { value: 'Dinheiro', label: 'Dinheiro' },
       { value: 'Pix Parcelado', label: 'Pix Parcelado' },
       { value: 'Permuta', label: 'Permuta' },
@@ -435,7 +433,7 @@ export class ContractService {
 
   // Verificar se forma de pagamento permite parcelamento
   isPaymentMethodInstallable(paymentMethod: string): boolean {
-    const installableMethods = ['Boleto', 'Cartão de Crédito', 'Pix Parcelado'];
+    const installableMethods = ['Boleto', 'Pix Parcelado'];
     return installableMethods.includes(paymentMethod);
   }
 

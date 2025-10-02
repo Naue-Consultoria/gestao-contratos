@@ -1172,7 +1172,7 @@ export class ContractFormComponent implements OnInit {
 
   isInstallmentSupported(paymentMethod: string): boolean {
     // Lista de métodos que suportam parcelamento
-    const installmentMethods = ['Cartão de Crédito', 'Boleto', 'À Prazo'];
+    const installmentMethods = ['Boleto', 'Pix Parcelado', 'À Prazo'];
     return installmentMethods.includes(paymentMethod);
   }
 

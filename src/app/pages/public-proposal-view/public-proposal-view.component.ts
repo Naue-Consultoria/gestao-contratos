@@ -121,12 +121,10 @@ export class PublicProposalViewComponent implements OnInit {
   paymentMethods = {
     vista: [
       { value: 'PIX', label: 'PIX', icon: 'fas fa-qrcode' },
-      { value: 'Cartão de Débito', label: 'Cartão de Débito', icon: 'fas fa-credit-card' },
       { value: 'Transferência', label: 'Transferência Bancária', icon: 'fas fa-exchange-alt' }
     ],
     prazo: [
       { value: 'Boleto', label: 'Boleto Bancário', icon: 'fas fa-barcode' },
-      { value: 'Cartão de Crédito', label: 'Cartão de Crédito', icon: 'fas fa-credit-card' },
       { value: 'Pix Parcelado', label: 'Pix Parcelado', icon: 'fas fa-qrcode' }
     ]
   };
@@ -703,7 +701,7 @@ export class PublicProposalViewComponent implements OnInit {
   }
   
   isPaymentMethodInstallable(method: string): boolean {
-    return method === 'Cartão de Crédito' || method === 'Boleto' || method === 'Pix Parcelado';
+    return method === 'Boleto' || method === 'Pix Parcelado';
   }
   
   getInstallmentOptions(): number[] {

@@ -188,7 +188,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       type: proposal.type || 'Full',
       end_date: proposal.end_date ? proposal.end_date.split('T')[0] : '',
       observations: proposal.notes || '',
-      max_installments: proposal.max_installments || 12,
+      max_installments: proposal.max_installments ?? 12, // Usar nullish coalescing para preservar valor do BD
       status: proposal.status || 'draft', // Carregar status da proposta
       solicitante_name: proposal.solicitante_name || '',
       solicitante_email: proposal.solicitante_email || '',
