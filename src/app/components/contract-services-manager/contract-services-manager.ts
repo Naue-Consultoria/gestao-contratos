@@ -71,6 +71,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
   }
 
   ngOnInit() {
+    // Limpar cache ao inicializar para garantir dados frescos após migração
+    this.serviceStageService.clearAllCaches();
+
     // Inicializar status dos serviços se não existir e ordenar com prioridade personalizada
     this.services.forEach((service, index) => {
       if (!service.status) {
@@ -81,7 +84,7 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
         this.comments[service.id] = [];
       }
     });
-    
+
     // Ordenar serviços com prioridade personalizada
     this.sortServices();
 
@@ -169,7 +172,7 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
     let validServices = 0;
 
     nonInternalServices.forEach(service => {
-      const progress = this.serviceProgresses[service.service.id];
+      const progress = this.serviceProgresses[service.id];
       if (progress) {
         totalProgress += progress.progressPercentage;
       }
@@ -195,7 +198,7 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
     let completedStages = 0;
 
     nonInternalServices.forEach(service => {
-      const progress = this.serviceProgresses[service.service.id];
+      const progress = this.serviceProgresses[service.id];
       if (progress) {
         totalStages += progress.totalStages;
         completedStages += progress.completedStages;
@@ -240,22 +243,22 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
     this.services.forEach((service, index) => {
       if (!this.isComponentActive) return;
 
-      if (service?.service?.id &&
-          !this.loadingProgresses[service.service.id] &&
-          !this.progressRequestCache[service.service.id]) {
+      if (service?.id &&
+          !this.loadingProgresses[service.id] &&
+          !this.progressRequestCache[service.id]) {
 
         if (activeRequests < maxConcurrentRequests) {
           // Executar imediatamente para as primeiras requisições
-          this.loadServiceProgress(service.service.id);
+          this.loadServiceProgress(service.id);
           activeRequests++;
         } else {
           // Atrasar as demais requisições de forma escalonada
           const delay = (index - maxConcurrentRequests + 1) * delayBetweenRequests;
           setTimeout(() => {
             if (this.isComponentActive &&
-                !this.loadingProgresses[service.service.id] &&
-                !this.progressRequestCache[service.service.id]) {
-              this.loadServiceProgress(service.service.id);
+                !this.loadingProgresses[service.id] &&
+                !this.progressRequestCache[service.id]) {
+              this.loadServiceProgress(service.id);
             }
           }, delay);
         }
@@ -263,43 +266,43 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
     });
   }
 
-  // Método para carregar progresso de um serviço específico
-  loadServiceProgress(serviceId: number) {
+  // Método para carregar progresso de um contract_service específico
+  loadServiceProgress(contractServiceId: number) {
     // Verificar se o componente ainda está ativo
     if (!this.isComponentActive) {
       return;
     }
 
     // Verificar se já está carregando este serviço ou já foi carregado
-    if (this.loadingProgresses[serviceId] || this.progressRequestCache[serviceId]) {
+    if (this.loadingProgresses[contractServiceId] || this.progressRequestCache[contractServiceId]) {
       return;
     }
 
     // Marcar como sendo processado
-    this.loadingProgresses[serviceId] = true;
-    this.progressRequestCache[serviceId] = true;
+    this.loadingProgresses[contractServiceId] = true;
+    this.progressRequestCache[contractServiceId] = true;
 
     // Timeout mais agressivo para evitar acúmulo de requisições
     const timeoutId = setTimeout(() => {
-      if (this.loadingProgresses[serviceId] && this.isComponentActive) {
-        this.handleProgressError(serviceId, 'timeout');
+      if (this.loadingProgresses[contractServiceId] && this.isComponentActive) {
+        this.handleProgressError(contractServiceId, 'timeout');
       }
     }, 3000); // 3 segundos timeout
 
-    this.serviceStageService.getServiceProgress(serviceId)
+    this.serviceStageService.getServiceProgress(contractServiceId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           if (!this.isComponentActive) return;
 
           clearTimeout(timeoutId);
-          this.serviceProgresses[serviceId] = response.progress;
-          this.loadingProgresses[serviceId] = false;
+          this.serviceProgresses[contractServiceId] = response.progress;
+          this.loadingProgresses[contractServiceId] = false;
 
           // Manter cache por 2 minutos para evitar requisições desnecessárias
           setTimeout(() => {
             if (this.isComponentActive) {
-              delete this.progressRequestCache[serviceId];
+              delete this.progressRequestCache[contractServiceId];
             }
           }, 120000);
         },
@@ -307,12 +310,12 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
           if (!this.isComponentActive) return;
 
           clearTimeout(timeoutId);
-          this.handleProgressError(serviceId, error);
+          this.handleProgressError(contractServiceId, error);
 
           // Permitir nova tentativa após 30 segundos em caso de erro
           setTimeout(() => {
             if (this.isComponentActive) {
-              delete this.progressRequestCache[serviceId];
+              delete this.progressRequestCache[contractServiceId];
             }
           }, 30000);
         }
@@ -334,16 +337,16 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
   }
 
 
-  // Método para obter progresso de um serviço
-  getServiceProgressPercentage(serviceId: number): number {
-    const progress = this.serviceProgresses[serviceId];
+  // Método para obter progresso de um contract_service
+  getServiceProgressPercentage(contractServiceId: number): number {
+    const progress = this.serviceProgresses[contractServiceId];
     return progress ? progress.progressPercentage : 0;
   }
 
 
   // Método para verificar se está carregando progresso
-  isLoadingProgress(serviceId: number): boolean {
-    return this.loadingProgresses[serviceId] || false;
+  isLoadingProgress(contractServiceId: number): boolean {
+    return this.loadingProgresses[contractServiceId] || false;
   }
 
   formatDate(date: string | null | undefined): string {

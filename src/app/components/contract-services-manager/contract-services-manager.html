@@ -64,15 +64,15 @@
       
       <div class="col-progress">
         <div class="progress-display">
-          <div *ngIf="isLoadingProgress(service.service.id)" class="progress-loading">
+          <div *ngIf="isLoadingProgress(service.id)" class="progress-loading">
             <i class="fas fa-spinner fa-spin"></i>
             <span class="loading-text">Carregando...</span>
           </div>
-          <div *ngIf="!isLoadingProgress(service.service.id)" class="service-progress">
+          <div *ngIf="!isLoadingProgress(service.id)" class="service-progress">
             <div class="progress-bar-small">
-              <div class="progress-fill-small" [style.width.%]="getServiceProgressPercentage(service.service.id)"></div>
+              <div class="progress-fill-small" [style.width.%]="getServiceProgressPercentage(service.id)"></div>
             </div>
-            <span class="progress-percentage">{{ getServiceProgressPercentage(service.service.id) }}%</span>
+            <span class="progress-percentage">{{ getServiceProgressPercentage(service.id) }}%</span>
           </div>
         </div>
       </div>

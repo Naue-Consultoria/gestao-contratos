@@ -6,13 +6,15 @@ import { environment } from '../../environments/environment';
 
 export interface ServiceStage {
   id: number;
-  service_id: number;
+  service_id?: number; // ID do serviço do catálogo (para compatibilidade)
+  contract_service_id?: number; // ID do serviço específico do contrato
+  service_stage_id?: number; // ID da etapa template
   name: string;
   description: string | null;
   category: string | null;
   sort_order: number;
   status: 'pending' | 'completed';
-  is_active: boolean;
+  is_active?: boolean;
   is_not_applicable?: boolean;
   created_at: string;
   updated_at: string;
@@ -113,34 +115,34 @@ export class ServiceStageService {
   }
 
   /**
-   * Buscar etapas de um serviço (com cache)
+   * Buscar etapas de um contract_service (com cache)
    */
-  getServiceStages(serviceId: number): Observable<ServiceStagesResponse> {
+  getServiceStages(contractServiceId: number): Observable<ServiceStagesResponse> {
     // Verificar cache primeiro
-    const cached = this.stagesCache.get(serviceId);
+    const cached = this.stagesCache.get(contractServiceId);
     const now = Date.now();
 
     if (cached && (now - cached.timestamp) < this.CACHE_DURATION) {
-      console.log(`📄 Usando cache para etapas do serviço ${serviceId}`);
+      console.log(`📄 Usando cache para etapas do contract_service ${contractServiceId}`);
       return of(cached.data);
     }
 
-    return this.http.get<ServiceStagesResponse>(`${this.API_URL}/services/${serviceId}/stages`, {
+    return this.http.get<ServiceStagesResponse>(`${this.API_URL}/contract-services/${contractServiceId}/stages`, {
       headers: this.getAuthHeaders()
     }).pipe(
       tap((response: ServiceStagesResponse) => {
         // Salvar no cache
-        this.stagesCache.set(serviceId, {
+        this.stagesCache.set(contractServiceId, {
           data: response,
           timestamp: now
         });
       }),
       catchError((error: any) => {
-        console.error(`Erro ao buscar etapas do serviço ${serviceId}:`, error);
+        console.error(`Erro ao buscar etapas do contract_service ${contractServiceId}:`, error);
 
         // Se tiver cache expirado, usar mesmo assim em caso de erro
         if (cached) {
-          console.warn(`🗃️ Usando cache expirado para etapas do serviço ${serviceId} devido ao erro`);
+          console.warn(`🗃️ Usando cache expirado para etapas do contract_service ${contractServiceId} devido ao erro`);
           return of(cached.data);
         }
 
@@ -150,23 +152,23 @@ export class ServiceStageService {
   }
 
   /**
-   * Buscar progresso de um serviço (com cache)
+   * Buscar progresso de um serviço de contrato específico (contract_service_id) (com cache)
    */
-  getServiceProgress(serviceId: number): Observable<ServiceProgressResponse> {
+  getServiceProgress(contractServiceId: number): Observable<ServiceProgressResponse> {
     // Verificar cache primeiro
-    const cached = this.progressCache.get(serviceId);
+    const cached = this.progressCache.get(contractServiceId);
     const now = Date.now();
 
     if (cached && (now - cached.timestamp) < this.PROGRESS_CACHE_DURATION) {
       return of(cached.data);
     }
 
-    return this.http.get<ServiceProgressResponse>(`${this.API_URL}/services/${serviceId}/stages/progress`, {
+    return this.http.get<ServiceProgressResponse>(`${this.API_URL}/contract-services/${contractServiceId}/stages/progress`, {
       headers: this.getAuthHeaders()
     }).pipe(
       tap((response: ServiceProgressResponse) => {
         // Salvar no cache
-        this.progressCache.set(serviceId, {
+        this.progressCache.set(contractServiceId, {
           data: response,
           timestamp: now
         });
@@ -188,13 +190,13 @@ export class ServiceStageService {
               stages: []
             },
             service: {
-              id: serviceId,
+              id: contractServiceId,
               name: 'Unknown Service'
             }
           } as ServiceProgressResponse;
 
           // Cache também a resposta de fallback para evitar chamadas repetidas
-          this.progressCache.set(serviceId, {
+          this.progressCache.set(contractServiceId, {
             data: fallbackResponse,
             timestamp: now
           });
@@ -245,16 +247,16 @@ export class ServiceStageService {
   }
 
   /**
-   * Atualizar status de uma etapa
+   * Atualizar status de uma etapa de contract_service
    */
   updateStageStatus(id: number, status: 'pending' | 'completed'): Observable<UpdateServiceStageResponse> {
-    return this.http.patch<UpdateServiceStageResponse>(`${this.API_URL}/stages/${id}/status`, { status }, {
+    return this.http.patch<UpdateServiceStageResponse>(`${this.API_URL}/contract-service-stages/${id}/status`, { status }, {
       headers: this.getAuthHeaders()
     }).pipe(
       tap((response: UpdateServiceStageResponse) => {
-        // Invalidar cache do serviço após atualização
-        if (response.stage?.service_id) {
-          this.invalidateCache(response.stage.service_id);
+        // Invalidar cache do contract_service após atualização
+        if (response.stage?.contract_service_id) {
+          this.invalidateCache(response.stage.contract_service_id);
         }
       })
     );
@@ -264,13 +266,13 @@ export class ServiceStageService {
    * Atualizar is_not_applicable de uma etapa
    */
   updateStageNotApplicable(id: number, is_not_applicable: boolean): Observable<UpdateServiceStageResponse> {
-    return this.http.patch<UpdateServiceStageResponse>(`${this.API_URL}/stages/${id}/not-applicable`, { is_not_applicable }, {
+    return this.http.patch<UpdateServiceStageResponse>(`${this.API_URL}/contract-service-stages/${id}/not-applicable`, { is_not_applicable }, {
       headers: this.getAuthHeaders()
     }).pipe(
       tap((response: UpdateServiceStageResponse) => {
-        // Invalidar cache do serviço após atualização
-        if (response.stage?.service_id) {
-          this.invalidateCache(response.stage.service_id);
+        // Invalidar cache do contract_service após atualização
+        if (response.stage?.contract_service_id) {
+          this.invalidateCache(response.stage.contract_service_id);
         }
       })
     );
@@ -280,7 +282,7 @@ export class ServiceStageService {
    * Atualizar status de múltiplas etapas
    */
   updateMultipleStageStatuses(updates: StageStatusUpdate[]): Observable<MultipleStageUpdatesResponse> {
-    return this.http.patch<MultipleStageUpdatesResponse>(`${this.API_URL}/stages/status/bulk`, { updates }, {
+    return this.http.patch<MultipleStageUpdatesResponse>(`${this.API_URL}/contract-service-stages/status/bulk`, { updates }, {
       headers: this.getAuthHeaders()
     });
   }
@@ -413,6 +415,15 @@ export class ServiceStageService {
       this.progressCache.clear();
       console.log('🗑️ Cache de etapas e progresso totalmente limpo');
     }
+  }
+
+  /**
+   * Limpar todo o cache ao inicializar (força atualização após migração)
+   */
+  clearAllCaches(): void {
+    this.stagesCache.clear();
+    this.progressCache.clear();
+    console.log('🔄 Cache de etapas completamente limpo - migração detectada');
   }
 
   /**

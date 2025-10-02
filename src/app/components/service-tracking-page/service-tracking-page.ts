@@ -186,7 +186,7 @@ export class ServiceTrackingPageComponent implements OnInit {
 
       while (retryCount < maxRetries && !response) {
         try {
-          response = await this.serviceStageService.getServiceStages(this.service.service.id).toPromise();
+          response = await this.serviceStageService.getServiceStages(this.service.id).toPromise();
           break;
         } catch (retryError: any) {
           retryCount++;
