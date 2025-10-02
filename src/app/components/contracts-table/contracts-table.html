@@ -225,7 +225,7 @@
         <tbody>
           <tr *ngFor="let contract of filteredContracts" (click)="viewContract(contract.id, $event)" style="cursor: pointer">
             <td>
-              <div class="contract-number" [class.expired]="contract.isExpired">
+              <div class="contract-number" [class.expired]="contract.isExpired && contract.raw.status === 'active'">
                 {{ contract.contractNumber }}
               </div>
             </td>
@@ -334,7 +334,7 @@
       <div class="table-card-mode" *ngIf="filteredContracts.length > 0">
         <div *ngFor="let contract of filteredContracts" class="table-card" (click)="viewContract(contract.id, $event)" style="cursor: pointer">
           <div class="table-card-header">
-            <div class="contract-number" [class.expired]="contract.isExpired">{{ contract.contractNumber }}</div>
+            <div class="contract-number" [class.expired]="contract.isExpired && contract.raw.status === 'active'">{{ contract.contractNumber }}</div>
             <span class="status-badge" [style.background-color]="contract.statusColor + '20'" [style.color]="contract.statusColor">
               <span class="status-dot" [style.background-color]="contract.statusColor"></span>
               {{ contract.status }}

@@ -126,8 +126,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 32px;
-  align-items: stretch;
-  overflow: hidden;
+  align-items: start;
 }
 
 .left-column,
@@ -135,8 +134,6 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  height: 100%;
-  overflow: hidden;
 }
 
 /* ========================================
@@ -192,6 +189,11 @@
 .form-group {
   display: flex;
   flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
 }
 
 .form-group.full-width {
@@ -389,6 +391,30 @@ textarea.form-control {
   font-size: 24px;
   color: #4a90e2;
   font-weight: 700;
+}
+
+.calculated-value-display {
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 2px solid var(--naue-primary);
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--naue-primary);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.calculated-value-display:hover {
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.15);
+  transform: translateY(-1px);
+}
+
+.form-hint {
+  font-size: 12px;
+  color: #6c737f;
+  margin-top: 6px;
+  display: block;
 }
 
 /* ========================================

@@ -3,6 +3,8 @@ export interface Vaga {
   codigo: string;
   client_id: number;
   client?: any;
+  contract_id?: number;
+  contract?: any;
   user_id: number;
   user?: any;
   cargo: string;

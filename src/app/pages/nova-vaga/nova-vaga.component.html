@@ -60,6 +60,22 @@
                 </span>
               </div>
             </div>
+
+            <div class="form-group">
+              <label class="form-label">Contrato</label>
+              <select
+                formControlName="contratoId"
+                class="form-control select-input"
+                [disabled]="!vagaForm.get('clienteId')?.value">
+                <option value="">Selecione um contrato</option>
+                <option *ngFor="let contrato of contratos" [value]="contrato.id">
+                  {{ contrato.contract_number }} - {{ contrato.type }}
+                </option>
+              </select>
+              <small class="form-hint" *ngIf="!vagaForm.get('clienteId')?.value">
+                Selecione um cliente primeiro
+              </small>
+            </div>
           </div>
 
           <!-- Section: Detalhes da Vaga -->
@@ -75,7 +91,7 @@
                 type="text"
                 formControlName="cargo"
                 class="form-control"
-                placeholder="Digite aqui o nome do cargo..."
+                placeholder="Ex: Analista de Recursos Humanos"
                 [class.error]="isFieldInvalid('cargo')">
               <span class="error-message" *ngIf="isFieldInvalid('cargo')">
                 {{ getErrorMessage('cargo') }}
@@ -132,7 +148,7 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label">Sigilo da Vaga <span class="required">*</span></label>
+                <label class="form-label">Sigilo da Vaga</label>
                 <select
                   formControlName="sigilosa"
                   class="form-control select-input">
@@ -177,7 +193,6 @@
                 <small class="form-hint">Percentual do imposto estadual</small>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -241,7 +256,6 @@
                 {{ getErrorMessage('fonteRecrutamento') }}
               </span>
             </div>
-
           </div>
 
           <!-- Section: Candidato Aprovado -->

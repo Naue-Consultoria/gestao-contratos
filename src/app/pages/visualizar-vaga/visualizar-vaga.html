@@ -69,6 +69,10 @@
           <span class="info-label">Cliente</span>
           <span class="info-value">{{ vaga.clienteNome || 'Não informado' }}</span>
         </div>
+        <div class="info-group" *ngIf="vaga.contratoNumero">
+          <span class="info-label">Contrato</span>
+          <span class="info-value">{{ vaga.contratoNumero }}</span>
+        </div>
         <div class="info-group">
           <span class="info-label">Consultora</span>
           <span class="info-value">{{ vaga.usuarioNome || 'Não informado' }}</span>

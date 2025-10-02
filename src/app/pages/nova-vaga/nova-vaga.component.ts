@@ -7,6 +7,7 @@ import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { VagaService } from '../../services/vaga.service';
 import { ClientService } from '../../services/client.service';
 import { UserService } from '../../services/user.service';
+import { ContractService } from '../../services/contract.service';
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 
 @Component({
@@ -24,6 +25,7 @@ export class NovaVagaComponent implements OnInit {
   // Lists for dropdowns
   clientes: any[] = [];
   usuarios: any[] = [];
+  contratos: any[] = [];
 
   tipoCargoOptions = [
     { value: 'administrativo', label: 'Administrativo' },
@@ -76,10 +78,12 @@ export class NovaVagaComponent implements OnInit {
     private breadcrumbService: BreadcrumbService,
     private vagaService: VagaService,
     private clientService: ClientService,
-    private userService: UserService
+    private userService: UserService,
+    private contractService: ContractService
   ) {
     this.vagaForm = this.fb.group({
       clienteId: ['', Validators.required],
+      contratoId: [''],
       usuarioId: ['', Validators.required],
       cargo: ['', Validators.required],
       tipoCargo: ['', Validators.required],
@@ -172,7 +176,30 @@ export class NovaVagaComponent implements OnInit {
       }
     });
 
+    // Listener para o cliente - carrega contratos quando cliente mudar
+    this.vagaForm.get('clienteId')?.valueChanges.subscribe(clientId => {
+      if (clientId) {
+        this.loadContratos(clientId);
+      } else {
+        this.contratos = [];
+        this.vagaForm.patchValue({ contratoId: '' });
+      }
+    });
+
     // Removido o listener do candidato aprovado - campos aparecem junto com status fechada
+  }
+
+  loadContratos(clientId: number) {
+    this.contractService.getContractsByClient(clientId).subscribe({
+      next: (response: any) => {
+        this.contratos = response.contracts || [];
+        console.log('Contratos carregados:', this.contratos);
+      },
+      error: (error: any) => {
+        console.error('Erro ao carregar contratos:', error);
+        this.contratos = [];
+      }
+    });
   }
 
   setupFaturamentoCalculation() {
@@ -200,6 +227,7 @@ export class NovaVagaComponent implements OnInit {
       // Preparar dados para envio
       const vagaData = {
         client_id: this.vagaForm.value.clienteId,
+        contract_id: this.vagaForm.value.contratoId || null,
         user_id: this.vagaForm.value.usuarioId,
         cargo: this.vagaForm.value.cargo,
         tipo_cargo: this.vagaForm.value.tipoCargo,

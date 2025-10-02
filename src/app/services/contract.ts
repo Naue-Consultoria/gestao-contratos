@@ -224,6 +224,12 @@ export class ContractService {
     });
   }
 
+  getContractsByClient(clientId: number): Observable<{ contracts: any[] }> {
+    return this.http.get<{ contracts: any[] }>(`${this.API_URL}/client/${clientId}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
   createContract(contractData: CreateContractRequest): Observable<CreateContractResponse> {
     return this.http.post<CreateContractResponse>(this.API_URL, contractData, {
       headers: this.getAuthHeaders()

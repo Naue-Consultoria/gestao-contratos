@@ -19,6 +19,8 @@ interface Vaga {
   codigo: string;
   clienteId: number;
   clienteNome: string;
+  contratoId?: number;
+  contratoNumero?: string;
   usuarioId: number;
   usuarioNome: string;
   cargo: string;
@@ -215,6 +217,8 @@ export class VisualizarVagaComponent implements OnInit {
         codigo: vagaData.codigo,
         clienteId: vagaData.client_id,
         clienteNome: clienteNome,
+        contratoId: vagaData.contract_id,
+        contratoNumero: vagaData.contract?.contract_number,
         usuarioId: vagaData.user_id,
         usuarioNome: vagaData.user?.name || 'Não atribuído',
         cargo: vagaData.cargo,
