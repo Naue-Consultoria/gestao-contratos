@@ -22,7 +22,23 @@ html {
 .section-container {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 0 0.5rem;
+  padding: 0 2rem;
+}
+
+/* Ajuste para telas menores (notebooks 15") */
+@media (max-width: 1600px) {
+  .hero-container,
+  .section-container {
+    padding: 0 5rem;
+  }
+}
+
+/* Ajuste para tablets e telas médias */
+@media (max-width: 1024px) {
+  .hero-container,
+  .section-container {
+    padding: 0 2rem;
+  }
 }
 
 /* === HERO SECTION === */
