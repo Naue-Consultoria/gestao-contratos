@@ -508,7 +508,6 @@
 
 .proposal-title.expired {
     color: #fd7e14;
-    text-decoration: line-through;
 }
 
 .proposal-number {
@@ -522,7 +521,6 @@
 
 .proposal-number.expired {
     color: #fd7e14;
-    text-decoration: line-through;
 }
 
 /* Client Name Container */

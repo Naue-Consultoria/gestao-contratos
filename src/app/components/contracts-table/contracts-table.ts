@@ -37,6 +37,7 @@ interface ContractDisplay {
   paymentStatus: string;
   paymentStatusColor: string;
   paymentStatusIcon: string;
+  isExpired: boolean;
   raw: ApiContract;
 }
 
@@ -339,6 +340,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       paymentStatus: this.contractService.getPaymentStatusText(contract.payment_status || 'pendente'),
       paymentStatusColor: this.contractService.getPaymentStatusColor(contract.payment_status || 'pendente'),
       paymentStatusIcon: this.contractService.getPaymentStatusIcon(contract.payment_status || 'pendente'),
+      isExpired: this.contractService.isContractExpired(contract),
       raw: contract,
     };
   }

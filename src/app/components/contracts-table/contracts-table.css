@@ -709,6 +709,14 @@
     color: var(--primary-green);
 }
 
+.contract-number.expired {
+    color: #fd7e14;
+}
+
+:host-context(body.dark-mode) .contract-number.expired {
+    color: #fd7e14;
+}
+
 /* Client Info */
 .client-info {
     display: flex;
@@ -1101,6 +1109,14 @@
     font-weight: 700;
     color: var(--primary-green);
     margin-bottom: 0.25rem;
+}
+
+.table-card-header .contract-number.expired {
+    color: #fd7e14;
+}
+
+:host-context(body.dark-mode) .table-card-header .contract-number.expired {
+    color: #fd7e14;
 }
 
 :host-context(body.dark-mode) .table-card-header {

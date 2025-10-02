@@ -317,6 +317,14 @@ export class ContractService {
     return icons[type] || 'fas fa-file-contract';
   }
 
+  /**
+   * Verificar se contrato está vencido
+   */
+  isContractExpired(contract: any): boolean {
+    if (!contract.end_date) return false;
+    return new Date(contract.end_date) < new Date();
+  }
+
   // Métodos para serviços do contrato
   getContractServiceById(serviceId: number): Observable<ApiContractService> {
     return this.http.get<ApiContractService>(`${this.API_URL}/services/${serviceId}`, {
