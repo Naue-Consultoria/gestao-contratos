@@ -51,7 +51,6 @@
           <th>USUÁRIO</th>
           <th>EMAIL</th>
           <th>PERMISSÃO</th>
-          <th>DESDE</th>
           <th>AÇÕES</th>
         </tr>
       </thead>
@@ -76,12 +75,10 @@
             <span class="permission-badge"
                   [class.permission-admin]="user.permission === 'Admin'"
                   [class.permission-admin-gerencial]="user.permission === 'Admin Gerencial'"
+                  [class.permission-consultor-rs]="user.permission === 'Consultor R&S'"
                   [class.permission-colaborador]="user.permission === 'Colaborador'">
               {{ user.permission }}
             </span>
-          </td>
-          <td>
-            <div class="since-date">{{ user.since }}</div>
           </td>
           <td>
             <!-- Ações - APENAS para Admin -->

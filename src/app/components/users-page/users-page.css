@@ -249,6 +249,12 @@
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
+.permission-consultor-rs {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
 .permission-colaborador {
   background-color: rgba(16, 185, 129, 0.1);
   color: #059669;
@@ -266,6 +272,12 @@
   background-color: rgba(59, 130, 246, 0.2);
   color: #60a5fa;
   border-color: rgba(59, 130, 246, 0.3);
+}
+
+:host-context(body.dark-mode) .permission-consultor-rs {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
 :host-context(body.dark-mode) .permission-colaborador {
@@ -408,12 +420,6 @@
   .action-btn {
     width: 32px;
     height: 32px;
-  }
-
-  /* Esconder algumas colunas em mobile */
-  .users-table th:nth-child(4),
-  .users-table td:nth-child(4) {
-    display: none;
   }
 }
 

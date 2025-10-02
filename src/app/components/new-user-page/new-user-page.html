@@ -95,6 +95,23 @@
                   </div>
                 </label>
                 
+                <label class="radio-option" [class.selected]="userData.role === 'consultor_rs'">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="consultor_rs"
+                    [(ngModel)]="userData.role">
+                  <div class="radio-content">
+                    <span class="radio-title">
+                      <i class="fas fa-user-clock"></i>
+                      Consultor R&S
+                    </span>
+                    <span class="radio-description">
+                      Acesso completo a Recrutamento & Seleção (vagas, candidatos, entrevistas)
+                    </span>
+                  </div>
+                </label>
+
                 <label class="radio-option" [class.selected]="userData.role === 'admin_gerencial'">
                   <input
                     type="radio"

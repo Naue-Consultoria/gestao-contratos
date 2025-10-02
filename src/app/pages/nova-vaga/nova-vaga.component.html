@@ -75,6 +75,7 @@
                 type="text"
                 formControlName="cargo"
                 class="form-control"
+                placeholder="Digite aqui o nome do cargo..."
                 [class.error]="isFieldInvalid('cargo')">
               <span class="error-message" *ngIf="isFieldInvalid('cargo')">
                 {{ getErrorMessage('cargo') }}

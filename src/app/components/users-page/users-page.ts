@@ -169,6 +169,7 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     const permissionMap: { [key: string]: string } = {
       'admin': 'Admin',
       'admin_gerencial': 'Admin Gerencial',
+      'consultor_rs': 'Consultor R&S',
       'user': 'Colaborador',
       'collaborator': 'Colaborador'
     };

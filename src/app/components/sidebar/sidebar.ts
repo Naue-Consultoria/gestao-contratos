@@ -10,6 +10,8 @@ interface NavItem {
   route?: string;
   adminOnly?: boolean; // Requer Admin ou Admin Gerencial
   adminOnlyNotGerencial?: boolean; // Requer APENAS Admin (bloqueia Admin Gerencial)
+  consultorRSOnly?: boolean; // Disponível apenas para Consultor R&S
+  excludeConsultorRS?: boolean; // Esconder para Consultor R&S
   children?: NavItem[];
   isExpanded?: boolean;
 }
@@ -37,21 +39,20 @@ export class SidebarComponent {
       title: 'PRINCIPAL',
       items: [
         { id: 'dashboard', icon: 'fas fa-chart-line', text: 'Dashboard', route: '/home/dashboard' },
-        { id: 'rotinas', icon: 'fas fa-calendar-check', text: 'Rotinas', route: '/home/rotinas' },
-        { id: 'servicos', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/servicos' },
-        { id: 'clientes', icon: 'fas fa-users', text: 'Clientes', route: '/home/clientes', adminOnly: true },
-        { id: 'propostas', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/propostas', adminOnly: true },
-        { id: 'contratos', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contratos', adminOnly: true },
+        { id: 'rotinas', icon: 'fas fa-calendar-check', text: 'Rotinas', route: '/home/rotinas', excludeConsultorRS: true },
+        { id: 'servicos', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/servicos', excludeConsultorRS: true },
+        { id: 'clientes', icon: 'fas fa-users', text: 'Clientes', route: '/home/clientes', adminOnly: true, excludeConsultorRS: true },
+        { id: 'propostas', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/propostas', adminOnly: true, excludeConsultorRS: true },
+        { id: 'contratos', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contratos', adminOnly: true, excludeConsultorRS: true },
         {
           id: 'recrutamento-selecao',
           icon: 'fas fa-user-tie',
           text: 'R&S',
-          adminOnly: true,
           isExpanded: false,
           children: [
             { id: 'rs-vagas', icon: 'fas fa-briefcase', text: 'Vagas', route: '/home/recrutamento-selecao' },
-            { id: 'rs-analytics', icon: 'fas fa-chart-line', text: 'Analytics R&S', route: '/home/analytics-rs', adminOnlyNotGerencial: true },
-            { id: 'rs-relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios R&S', route: '/home/relatorios-rs', adminOnlyNotGerencial: true }
+            { id: 'rs-analytics', icon: 'fas fa-chart-line', text: 'Analytics R&S', route: '/home/analytics-rs', adminOnlyNotGerencial: true, excludeConsultorRS: true },
+            { id: 'rs-relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios R&S', route: '/home/relatorios-rs', adminOnlyNotGerencial: true, excludeConsultorRS: true }
           ]
         }
       ]
@@ -59,14 +60,14 @@ export class SidebarComponent {
     {
       title: 'ANÁLISES',
       items: [
-        { id: 'relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios', route: '/home/relatorios', adminOnly: true, adminOnlyNotGerencial: true },
-        { id: 'analytics', icon: 'fas fa-chart-pie', text: 'Analytics', route: '/home/analytics', adminOnly: true, adminOnlyNotGerencial: true }
+        { id: 'relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios', route: '/home/relatorios', adminOnly: true, adminOnlyNotGerencial: true, excludeConsultorRS: true },
+        { id: 'analytics', icon: 'fas fa-chart-pie', text: 'Analytics', route: '/home/analytics', adminOnly: true, adminOnlyNotGerencial: true, excludeConsultorRS: true }
       ]
     },
     {
       title: 'CONFIGURAÇÕES',
       items: [
-        { id: 'usuarios', icon: 'fas fa-users', text: 'Usuários', route: '/home/usuarios', adminOnly: true, adminOnlyNotGerencial: true },
+        { id: 'usuarios', icon: 'fas fa-users', text: 'Usuários', route: '/home/usuarios', adminOnly: true, adminOnlyNotGerencial: true, excludeConsultorRS: true },
         { id: 'configuracoes', icon: 'fas fa-cog', text: 'Configurações', route: '/home/configuracoes' }
       ]
     },
@@ -96,16 +97,26 @@ export class SidebarComponent {
   private filterNavigationByRole() {
     const isAdmin = this.authService.isAdmin();
     const isAdminGerencial = this.authService.isAdminGerencial();
+    const isConsultorRS = this.authService.isConsultorRS();
 
     this.filteredNavSections = this.navSections.map(section => ({
       ...section,
       items: section.items.filter(item => {
+        // Se é Consultor R&S, só pode ver itens sem excludeConsultorRS
+        if (isConsultorRS) {
+          if (item.excludeConsultorRS) {
+            return false;
+          }
+          // Consultor R&S pode ver Dashboard e R&S
+          return true;
+        }
+
         // Bloquear itens que são APENAS para Admin (não Admin Gerencial)
         if (item.adminOnlyNotGerencial && !isAdmin) {
           return false;
         }
 
-        // Se é admin, pode ver tudo
+        // Se é admin, pode ver tudo (exceto itens consultorRSOnly)
         if (isAdmin) {
           return true;
         }
@@ -128,6 +139,10 @@ export class SidebarComponent {
           return {
             ...item,
             children: item.children.filter(child => {
+              // Se é Consultor R&S, só pode ver children sem excludeConsultorRS
+              if (isConsultorRS && child.excludeConsultorRS) {
+                return false;
+              }
               // Bloquear children que são APENAS para Admin
               if (child.adminOnlyNotGerencial && !isAdmin) {
                 return false;
