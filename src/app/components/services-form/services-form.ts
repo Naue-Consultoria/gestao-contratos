@@ -204,7 +204,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.serviceId) return;
 
     try {
-      const response = await this.serviceStageService.getServiceStages(this.serviceId).toPromise();
+      const response = await this.serviceStageService.getCatalogServiceStages(this.serviceId).toPromise();
       if (response && response.stages) {
         // Converter ServiceStage para ServiceStageForm
         this.serviceStages = response.stages.map(stage => ({
@@ -214,7 +214,7 @@ export class ServiceFormComponent implements OnInit, AfterViewInit, OnDestroy {
           sort_order: stage.sort_order,
           id: stage.id // Adicionar ID para poder fazer update/delete posteriormente
         } as ServiceStageForm & { id: number }));
-        
+
       }
     } catch (error) {
       console.error('❌ Error loading service stages:', error);

@@ -152,6 +152,20 @@ export class ServiceStageService {
   }
 
   /**
+   * Buscar etapas de um serviço do catálogo (service_id)
+   */
+  getCatalogServiceStages(serviceId: number): Observable<ServiceStagesResponse> {
+    return this.http.get<ServiceStagesResponse>(`${this.API_URL}/services/${serviceId}/stages`, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError((error: any) => {
+        console.error(`Erro ao buscar etapas do serviço ${serviceId}:`, error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
    * Buscar progresso de um serviço de contrato específico (contract_service_id) (com cache)
    */
   getServiceProgress(contractServiceId: number): Observable<ServiceProgressResponse> {
