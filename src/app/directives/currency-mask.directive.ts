@@ -31,14 +31,14 @@ export class CurrencyMaskDirective implements ControlValueAccessor {
       this.el.value = '';
       return;
     }
-    
+
     const numericValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numericValue)) {
       this.rawValue = '';
       this.el.value = '';
       return;
     }
-    
+
     this.rawValue = Math.abs(numericValue * 100).toString();
     this.updateDisplay();
   }

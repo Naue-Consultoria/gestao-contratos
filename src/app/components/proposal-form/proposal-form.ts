@@ -22,6 +22,7 @@ interface SelectedService {
   duration: number | null;
   duration_unit: string | null;
   category: string;
+  _uniqueId?: string; // ID único para controle interno
   isRecruitment?: boolean;
   recruitmentPercentages?: {
     administrativo_gestao: number;
@@ -196,8 +197,10 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     });
 
     // Carregar serviços da proposta
-    this.selectedServices = proposal.services.map(service => {
+    this.selectedServices = proposal.services.map((service, index) => {
       const serviceData = this.services.find(s => s.id === service.service_id);
+      const uniqueId = `${service.service_id}_${Date.now()}_${index}`;
+
       const selectedService: SelectedService = {
         service_id: service.service_id,
         id: service.service_id,
@@ -206,7 +209,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
         total_value: service.total_value || 0,
         duration: serviceData?.duration_amount || null,
         duration_unit: serviceData?.duration_unit || null,
-        category: serviceData?.category || 'Geral'
+        category: serviceData?.category || 'Geral',
+        _uniqueId: uniqueId
       };
 
       // Se é serviço de Recrutamento & Seleção, adicionar campos de porcentagem
@@ -240,6 +244,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   addService(service: ApiService): void {
+    const uniqueId = `${service.id}_${Date.now()}_${Math.random()}`;
+
     const newService: any = {
       service_id: service.id,
       id: service.id, // Para compatibilidade
@@ -248,7 +254,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       total_value: 0,
       duration: service.duration_amount || null,
       duration_unit: service.duration_unit || null,
-      category: service.category || 'Geral'
+      category: service.category || 'Geral',
+      _uniqueId: uniqueId
     };
 
     // Se é serviço de Recrutamento & Seleção, adicionar campos de porcentagem
@@ -275,6 +282,52 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     this.selectedServices.splice(index, 1);
     // Atualizar valor total após remover serviço
     this.updateTotalValue();
+  }
+
+  // Drag and drop methods for service ordering
+  onServiceDragStart(event: DragEvent, index: number): void {
+    event.dataTransfer!.effectAllowed = 'move';
+    event.dataTransfer!.setData('text/plain', index.toString());
+  }
+
+  onServiceDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.dataTransfer!.dropEffect = 'move';
+  }
+
+  onServiceDrop(event: DragEvent, dropIndex: number): void {
+    event.preventDefault();
+    const dragIndex = parseInt(event.dataTransfer!.getData('text/plain'), 10);
+
+    if (dragIndex === dropIndex) return;
+
+    // Use moveItemInArray to properly reorder without destroying elements
+    this.moveItemInArray(this.selectedServices, dragIndex, dropIndex);
+  }
+
+  // Helper method to move item in array without destroying DOM
+  private moveItemInArray<T>(array: T[], fromIndex: number, toIndex: number): void {
+    const element = array[fromIndex];
+    array.splice(fromIndex, 1);
+    array.splice(toIndex, 0, element);
+  }
+
+  // TrackBy function for better performance and to prevent re-rendering issues
+  trackByServiceId(index: number, service: SelectedService): number {
+    return service.service_id;
+  }
+
+  // Update recruitment percentage values
+  updateRecruitmentPercentage(index: number, field: string, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = parseFloat(input.value) || 0;
+
+    if (index < 0 || index >= this.selectedServices.length) return;
+
+    const service = this.selectedServices[index];
+    if (service.recruitmentPercentages) {
+      (service.recruitmentPercentages as any)[field] = value;
+    }
   }
 
   get filteredServices(): ApiService[] {
@@ -309,21 +362,14 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     this.updateServicePrice(index, priceInReais);
   }
 
-  onPriceInput(index: number, event: Event): void {
+  onPriceInputWithMask(index: number, event: Event): void {
     const input = event.target as HTMLInputElement;
     const rawValue = input.value;
-    
-    // Extrai valor numérico do input formatado
-    const numericValue = this.extractNumericValue(rawValue);
-    this.updateServicePriceImmediate(index, numericValue);
-  }
 
-  onPriceKeyup(index: number, event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const rawValue = input.value;
-    
-    // Extrai valor numérico do input formatado
+    // A diretiva já formata o valor, só precisamos extrair o numérico
     const numericValue = this.extractNumericValue(rawValue);
+
+    // Atualiza o serviço
     this.updateServicePriceImmediate(index, numericValue);
   }
 
@@ -420,6 +466,14 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
   formatCurrency(value: number): string {
     return this.proposalService.formatCurrency(value);
+  }
+
+  formatCurrencyForInput(value: number): string {
+    if (!value || value === 0) return '';
+    return value.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 
   // Debug method
@@ -812,9 +866,10 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       end_date: this.proposalForm.value.end_date || null,
       max_installments: this.proposalForm.value.max_installments || 12,
       validity_days: 30, // Valor padrão
-      services: this.selectedServices.map(service => ({
+      services: this.selectedServices.map((service, index) => ({
         service_id: service.id,
         unit_value: service.unit_value || 0,
+        sort_order: index,
         recruitmentPercentages: service.recruitmentPercentages
       }))
     };

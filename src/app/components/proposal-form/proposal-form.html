@@ -267,8 +267,15 @@
                 <div
                   class="service-card"
                   *ngFor="let service of selectedServices; let i = index"
+                  draggable="true"
+                  (dragstart)="onServiceDragStart($event, i)"
+                  (dragover)="onServiceDragOver($event)"
+                  (drop)="onServiceDrop($event, i)"
                 >
                   <div class="service-header">
+                    <div class="drag-handle" title="Arrastar para reordenar">
+                      <i class="fas fa-grip-vertical"></i>
+                    </div>
                     <div class="service-info">
                       <h4 class="service-name">{{ service.name }}</h4>
                       <div class="service-meta">
@@ -304,9 +311,7 @@
                           [(ngModel)]="service.unit_value"
                           [ngModelOptions]="{standalone: true}"
                           (ngModelChange)="onPriceChange(i, $event)"
-                          (input)="onPriceInput(i, $event)"
-                          (keyup)="onPriceKeyup(i, $event)"
-                          [name]="'price_' + i"
+                          [name]="'price_' + service._uniqueId"
                           placeholder="0,00"
                           appCurrencyMask
                         />
@@ -324,6 +329,7 @@
                               type="number"
                               [(ngModel)]="service.recruitmentPercentages!.administrativo_gestao"
                               [ngModelOptions]="{standalone: true}"
+                              [name]="'admin_' + service._uniqueId"
                               min="0"
                               max="200"
                             />
@@ -337,6 +343,7 @@
                               type="number"
                               [(ngModel)]="service.recruitmentPercentages!.comercial"
                               [ngModelOptions]="{standalone: true}"
+                              [name]="'comercial_' + service._uniqueId"
                               min="0"
                               max="200"
                             />
@@ -350,6 +357,7 @@
                               type="number"
                               [(ngModel)]="service.recruitmentPercentages!.operacional"
                               [ngModelOptions]="{standalone: true}"
+                              [name]="'operacional_' + service._uniqueId"
                               min="0"
                               max="200"
                             />
@@ -363,6 +371,7 @@
                               type="number"
                               [(ngModel)]="service.recruitmentPercentages!.estagio_jovem"
                               [ngModelOptions]="{standalone: true}"
+                              [name]="'estagio_' + service._uniqueId"
                               min="0"
                               max="200"
                             />
