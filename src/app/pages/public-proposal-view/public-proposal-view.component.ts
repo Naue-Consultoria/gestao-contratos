@@ -110,7 +110,10 @@ export class PublicProposalViewComponent implements OnInit {
   
   // Controle de expansão de descrições (para mobile)
   expandedDescriptions: Map<number, boolean> = new Map();
-  
+
+  // Controle do modal de sucesso
+  showSuccessModal = false;
+
   // Dados de pagamento
   paymentType: 'vista' | 'prazo' = 'prazo';
   paymentMethod: string = '';
@@ -578,14 +581,17 @@ export class PublicProposalViewComponent implements OnInit {
 
       const response = await this.publicProposalService.signProposal(this.token, signatureData).toPromise();
       if (response?.success) {
-        if (signatureData.is_counterproposal) {
-          this.toastr.success('Contraproposta assinada com sucesso! Aguarde retorno da empresa.');
-        } else {
-          this.toastr.success('Proposta assinada com sucesso!');
-        }
+        // Mostrar modal de sucesso
+        this.showSuccessModal = true;
+
         // Recarregar os dados da proposta para refletir o novo status
         await this.loadProposalSync();
         this.currentStep = 'confirming';
+
+        // Auto-fechar o modal após 5 segundos
+        setTimeout(() => {
+          this.closeSuccessModal();
+        }, 5000);
       }
     } catch (error) {
       console.error('Erro ao assinar proposta:', error);
@@ -1355,5 +1361,10 @@ export class PublicProposalViewComponent implements OnInit {
     // Extrair o valor atual da transform do elemento
     // Para simplificar, começamos do 0 cada vez que começamos a arrastar
     return 0;
+  }
+
+  // Método para fechar o modal de sucesso
+  closeSuccessModal(): void {
+    this.showSuccessModal = false;
   }
 }

@@ -693,6 +693,25 @@
     </section>
   </div>
 
+  <!-- Success Modal -->
+  <div class="modal-backdrop" *ngIf="showSuccessModal" (click)="closeSuccessModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-content success-modal">
+        <div class="success-icon-wrapper">
+          <div class="success-icon">
+            <i class="fas fa-check"></i>
+          </div>
+        </div>
+        <h2 class="modal-title">Proposta Assinada!</h2>
+        <p class="modal-message">A proposta foi assinada com sucesso!</p>
+        <p class="modal-submessage">Em breve entraremos em contato para os próximos passos.</p>
+        <button class="btn-modal-close" (click)="closeSuccessModal()">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="site-footer">
     <div class="footer-container">
