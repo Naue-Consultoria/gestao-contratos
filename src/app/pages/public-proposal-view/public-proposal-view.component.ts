@@ -115,7 +115,7 @@ export class PublicProposalViewComponent implements OnInit {
   paymentType: 'vista' | 'prazo' = 'prazo';
   paymentMethod: string = '';
   installments: number | null = null;
-  discountPercentage = 6; // 6% de desconto para pagamento à vista
+  discountPercentage = 6; // Desconto padrão, será atualizado com o valor da proposta
   
   // Métodos de pagamento (baseados nos contratos)
   paymentMethods = {
@@ -272,6 +272,9 @@ export class PublicProposalViewComponent implements OnInit {
     this.proposalExpired = this.publicProposalService.isProposalExpired(this.proposal);
     this.daysUntilExpiration = this.publicProposalService.getDaysUntilExpiration(this.proposal);
 
+    // Atualizar desconto com os valores da proposta
+    this.updateDiscountPercentages();
+
     // Definir estado inicial baseado no status
     if (this.proposal.status === 'accepted') {
       this.currentStep = 'completed';
@@ -281,6 +284,25 @@ export class PublicProposalViewComponent implements OnInit {
       this.toastr.info('Esta proposta foi rejeitada');
     } else if (this.proposal.status !== 'sent') {
       this.toastr.warning('Esta proposta não está disponível');
+    }
+  }
+
+  private updateDiscountPercentages(): void {
+    if (!this.proposal) {
+      return;
+    }
+
+    // Usar os valores de desconto da proposta se disponíveis - converter para número
+    const vistaDiscount = Number(this.proposal.vista_discount_percentage);
+    const prazoDiscount = Number(this.proposal.prazo_discount_percentage);
+
+    if (this.paymentType === 'vista' && !isNaN(vistaDiscount)) {
+      this.discountPercentage = vistaDiscount;
+    } else if (this.paymentType === 'prazo' && !isNaN(prazoDiscount)) {
+      this.discountPercentage = prazoDiscount;
+    } else {
+      // Valores padrão se não definidos na proposta
+      this.discountPercentage = this.paymentType === 'vista' ? 6 : 0;
     }
   }
 
@@ -627,18 +649,25 @@ export class PublicProposalViewComponent implements OnInit {
 
   getSelectedTotal(): number {
     if (!this.proposal) return 0;
-    
+
     const baseTotal = this.proposal.services
       .filter(service => this.selectedServices.get(service.service_id))
       .reduce((total, service) => {
         return total + this.getServiceTotal(service);
       }, 0);
-    
-    // Aplicar desconto apenas se pagamento à vista E todos os serviços estiverem selecionados
-    if (this.paymentType === 'vista' && this.areAllServicesSelected()) {
-      return baseTotal * (1 - this.discountPercentage / 100);
+
+    // Aplicar desconto com base no tipo de pagamento
+    if (this.discountPercentage > 0) {
+      // Para pagamento à vista, aplica desconto se todos os serviços estão selecionados
+      if (this.paymentType === 'vista' && this.areAllServicesSelected()) {
+        return baseTotal * (1 - this.discountPercentage / 100);
+      }
+      // Para pagamento à prazo, aplica desconto se configurado e todos os serviços selecionados
+      if (this.paymentType === 'prazo' && this.areAllServicesSelected() && this.proposal?.prazo_discount_percentage) {
+        return baseTotal * (1 - this.discountPercentage / 100);
+      }
     }
-    
+
     return baseTotal;
   }
   
@@ -653,21 +682,81 @@ export class PublicProposalViewComponent implements OnInit {
   }
   
   getDiscountAmount(): number {
-    // Desconto só se aplica se pagamento à vista E todos os serviços selecionados
-    if (this.paymentType === 'vista' && this.areAllServicesSelected()) {
+    // Desconto se aplica se todos os serviços estão selecionados e há desconto configurado
+    if (this.areAllServicesSelected() && this.discountPercentage > 0) {
       return this.getBaseTotal() * (this.discountPercentage / 100);
     }
     return 0;
   }
-  
+
   canGetDiscount(): boolean {
-    return this.paymentType === 'vista' && this.areAllServicesSelected();
+    // Verifica se pode ter desconto baseado no tipo de pagamento e configuração
+    const vistaDiscount = Number(this.proposal?.vista_discount_percentage);
+    const prazoDiscount = Number(this.proposal?.prazo_discount_percentage);
+
+    if (this.paymentType === 'vista' && !isNaN(vistaDiscount) && vistaDiscount > 0) {
+      return this.areAllServicesSelected();
+    }
+    if (this.paymentType === 'prazo' && !isNaN(prazoDiscount) && prazoDiscount > 0) {
+      return this.areAllServicesSelected();
+    }
+    return false;
+  }
+
+  // Método auxiliar para obter o valor final com desconto aplicado
+  getFinalValueWithDiscount(): number {
+    const baseTotal = this.getBaseTotal();
+
+    // Se não há desconto configurado ou não todos os serviços estão selecionados
+    if (!this.canGetDiscount()) {
+      return baseTotal;
+    }
+
+    // Aplicar o desconto baseado no tipo de pagamento atual
+    return baseTotal * (1 - this.discountPercentage / 100);
+  }
+
+  // Método para calcular valor com desconto à vista (para exibição no card)
+  getVistaValueWithDiscount(): number {
+    const baseTotal = this.getBaseTotal();
+
+    // Se há desconto à vista configurado e todos os serviços selecionados
+    const vistaDiscount = Number(this.proposal?.vista_discount_percentage);
+    if (!isNaN(vistaDiscount) && vistaDiscount > 0 && this.areAllServicesSelected()) {
+      const discountedValue = baseTotal * (1 - vistaDiscount / 100);
+      return discountedValue;
+    }
+
+    return baseTotal;
+  }
+
+  // Método para calcular valor com desconto à prazo (para exibição no card)
+  getPrazoValueWithDiscount(): number {
+    const baseTotal = this.getBaseTotal();
+
+    // Se há desconto à prazo configurado e todos os serviços selecionados
+    const prazoDiscount = Number(this.proposal?.prazo_discount_percentage);
+    if (!isNaN(prazoDiscount) && prazoDiscount > 0 && this.areAllServicesSelected()) {
+      return baseTotal * (1 - prazoDiscount / 100);
+    }
+
+    return baseTotal;
+  }
+
+  // Método para calcular valor da parcela com desconto
+  getInstallmentValue(): number {
+    const finalValue = this.getFinalValueWithDiscount();
+    const installments = this.installments || this.proposal?.max_installments || 12;
+    return finalValue / installments;
   }
   
   onPaymentTypeChange(type: 'vista' | 'prazo'): void {
     this.paymentType = type;
     this.signatureForm.patchValue({ payment_type: type });
-    
+
+    // Atualizar o desconto baseado no tipo de pagamento
+    this.updateDiscountPercentages();
+
     if (type === 'vista') {
       this.installments = 1;
       this.signatureForm.patchValue({ installments: 1 });
@@ -676,7 +765,7 @@ export class PublicProposalViewComponent implements OnInit {
       this.installments = null;
       this.signatureForm.patchValue({ installments: null });
     }
-    
+
     // Limpar método de pagamento se não for compatível com o novo tipo
     const availableMethods = this.getAvailablePaymentMethods().map(m => m.value);
     if (this.paymentMethod && !availableMethods.includes(this.paymentMethod)) {
@@ -738,13 +827,6 @@ export class PublicProposalViewComponent implements OnInit {
     this.signatureForm.patchValue({ installments: this.installments });
   }
   
-  
-  getInstallmentValue(): number {
-    if (this.paymentType === 'prazo' && this.installments && this.installments > 1) {
-      return this.getSelectedTotal() / this.installments;
-    }
-    return this.getSelectedTotal();
-  }
 
   formatCurrency(value: number): string {
     if (typeof value !== 'number' || value === null || value === undefined || isNaN(value)) {

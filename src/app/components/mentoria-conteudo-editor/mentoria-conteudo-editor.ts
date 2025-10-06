@@ -1,0 +1,490 @@
+import { Component, OnInit, OnDestroy, AfterViewChecked, QueryList, ViewChildren, ElementRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import { MentoriaService, MentoriaEncontro } from '../../services/mentoria.service';
+import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
+import { BreadcrumbService } from '../../services/breadcrumb.service';
+
+interface Teste {
+  id: string;
+  nome: string;
+  imagem?: File;
+  imagemUrl?: string;
+  comentario: string;
+}
+
+interface BlocoProximosPassos {
+  id: string;
+  tipo: 'texto' | 'perguntas' | 'tarefas';
+  conteudo: string;
+  perguntas?: { pergunta: string }[];
+  tarefas?: { titulo: string; itens: { texto: string }[] };
+}
+
+interface Referencia {
+  id: string;
+  tipo: 'ted' | 'livro' | 'leitura';
+  titulo: string;
+  link: string;
+}
+
+interface ConteudoMentoria {
+  visaoGeral: { ativo: boolean; conteudo: string };
+  mentoria: { ativo: boolean; conteudo: string };
+  testes: { ativo: boolean; itens: Teste[] };
+  proximosPassos: { ativo: boolean; blocos: BlocoProximosPassos[] };
+  referencias: { ativo: boolean; itens: Referencia[] };
+  encerramento: { ativo: boolean; conteudo: string };
+}
+
+@Component({
+  selector: 'app-mentoria-conteudo-editor',
+  standalone: true,
+  imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  templateUrl: './mentoria-conteudo-editor.html',
+  styleUrl: './mentoria-conteudo-editor.css'
+})
+export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewChecked {
+  @ViewChildren('richEditor') richEditors!: QueryList<ElementRef>;
+
+  encontroId: number | null = null;
+  encontro: MentoriaEncontro | null = null;
+  isSaving = false;
+  isLoading = false;
+  private editorsInitialized = new Set<string>();
+
+  conteudo: ConteudoMentoria = {
+    visaoGeral: { ativo: true, conteudo: '' },
+    mentoria: { ativo: true, conteudo: '' },
+    testes: { ativo: false, itens: [] },
+    proximosPassos: { ativo: true, blocos: [] },
+    referencias: { ativo: false, itens: [] },
+    encerramento: { ativo: true, conteudo: '' }
+  };
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private mentoriaService: MentoriaService,
+    private toastr: ToastrService,
+    private breadcrumbService: BreadcrumbService
+  ) {}
+
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.encontroId = parseInt(id, 10);
+      this.carregarEncontro();
+    } else {
+      this.toastr.error('ID do encontro não fornecido');
+      this.router.navigate(['/home/mentorias']);
+    }
+    this.setBreadcrumb(id || undefined);
+  }
+
+  ngOnDestroy(): void {
+    // Cleanup if needed
+    this.editorsInitialized.clear();
+  }
+
+  ngAfterViewChecked(): void {
+    // Initialize content for rich editors that haven't been initialized yet
+    this.richEditors.forEach((editorRef, index) => {
+      const editor = editorRef.nativeElement as HTMLDivElement;
+      const bloco = this.conteudo.proximosPassos.blocos.find((b, i) =>
+        b.tipo === 'texto' && this.getTextBlockIndex(b) === index
+      );
+
+      if (bloco && !this.editorsInitialized.has(bloco.id)) {
+        if (bloco.conteudo && bloco.conteudo.trim()) {
+          editor.innerHTML = bloco.conteudo;
+        }
+        this.editorsInitialized.add(bloco.id);
+      }
+    });
+  }
+
+  private getTextBlockIndex(bloco: BlocoProximosPassos): number {
+    return this.conteudo.proximosPassos.blocos
+      .filter(b => b.tipo === 'texto')
+      .findIndex(b => b.id === bloco.id);
+  }
+
+  carregarEncontro(): void {
+    if (!this.encontroId) return;
+
+    this.isLoading = true;
+
+    this.mentoriaService.obterEncontro(this.encontroId).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.encontro = response.data;
+
+          // Carregar conteúdo estruturado se existir
+          if (this.encontro.conteudo_html) {
+            try {
+              this.conteudo = JSON.parse(this.encontro.conteudo_html);
+
+              // Converter dados antigos de tarefas (string[]) para novo formato ({ texto: string }[])
+              if (this.conteudo.proximosPassos && this.conteudo.proximosPassos.blocos) {
+                this.conteudo.proximosPassos.blocos.forEach(bloco => {
+                  if (bloco.tipo === 'tarefas' && bloco.tarefas && bloco.tarefas.itens) {
+                    // Verificar se os itens são strings simples (formato antigo)
+                    if (bloco.tarefas.itens.length > 0 && typeof bloco.tarefas.itens[0] === 'string') {
+                      // Converter strings para objetos
+                      bloco.tarefas.itens = bloco.tarefas.itens.map(item =>
+                        typeof item === 'string' ? { texto: item } : item
+                      );
+                    }
+                  }
+                });
+              }
+            } catch (e) {
+              // Se não for JSON, é conteúdo antigo - manter vazio
+              console.log('Conteúdo não é JSON estruturado');
+            }
+          }
+        }
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar encontro:', error);
+        this.toastr.error('Erro ao carregar encontro');
+        this.isLoading = false;
+        this.router.navigate(['/home/mentorias']);
+      }
+    });
+  }
+
+  // ===== TESTES =====
+
+  adicionarTeste(): void {
+    this.conteudo.testes.itens.push({
+      id: this.generateId(),
+      nome: '',
+      comentario: ''
+    });
+  }
+
+  removerTeste(id: string): void {
+    this.conteudo.testes.itens = this.conteudo.testes.itens.filter(t => t.id !== id);
+  }
+
+  onImagemSelected(event: Event, teste: Teste): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      teste.imagem = input.files[0];
+      // Criar preview da imagem
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        teste.imagemUrl = e.target.result;
+      };
+      reader.readAsDataURL(teste.imagem);
+    }
+  }
+
+  // ===== PRÓXIMOS PASSOS =====
+
+  adicionarBlocoProximosPassos(tipo: 'texto' | 'perguntas' | 'tarefas'): void {
+    const bloco: BlocoProximosPassos = {
+      id: this.generateId(),
+      tipo,
+      conteudo: '',
+      perguntas: tipo === 'perguntas' ? [{ pergunta: '' }] : undefined,
+      tarefas: tipo === 'tarefas' ? { titulo: '', itens: [{ texto: '' }] } : undefined
+    };
+    this.conteudo.proximosPassos.blocos.push(bloco);
+  }
+
+  removerBlocoProximosPassos(id: string): void {
+    this.conteudo.proximosPassos.blocos = this.conteudo.proximosPassos.blocos.filter(b => b.id !== id);
+    // Remove from initialized set when block is removed
+    this.editorsInitialized.delete(id);
+  }
+
+  adicionarPergunta(bloco: BlocoProximosPassos): void {
+    if (!bloco.perguntas) bloco.perguntas = [];
+    bloco.perguntas.push({ pergunta: '' });
+  }
+
+  removerPergunta(bloco: BlocoProximosPassos, index: number): void {
+    if (bloco.perguntas) {
+      bloco.perguntas.splice(index, 1);
+    }
+  }
+
+  adicionarTarefa(bloco: BlocoProximosPassos): void {
+    if (!bloco.tarefas) bloco.tarefas = { titulo: '', itens: [] };
+    bloco.tarefas.itens.push({ texto: '' });
+  }
+
+  removerTarefa(bloco: BlocoProximosPassos, index: number): void {
+    if (bloco.tarefas) {
+      bloco.tarefas.itens.splice(index, 1);
+    }
+  }
+
+  // ===== REFERÊNCIAS =====
+
+  adicionarReferencia(): void {
+    this.conteudo.referencias.itens.push({
+      id: this.generateId(),
+      tipo: 'ted',
+      titulo: '',
+      link: ''
+    });
+  }
+
+  removerReferencia(id: string): void {
+    this.conteudo.referencias.itens = this.conteudo.referencias.itens.filter(r => r.id !== id);
+  }
+
+  // ===== SALVAR =====
+
+  salvarConteudo(): void {
+    if (!this.encontroId) {
+      this.toastr.error('ID do encontro não encontrado');
+      return;
+    }
+
+    this.isSaving = true;
+
+    // Converter para JSON antes de salvar
+    const conteudoJson = JSON.stringify(this.conteudo);
+
+    this.mentoriaService.atualizarEncontro(
+      this.encontroId,
+      { conteudo_html: conteudoJson }
+    ).subscribe({
+      next: (response) => {
+        if (response?.success) {
+          this.toastr.success('Conteúdo salvo com sucesso!');
+          this.router.navigate(['/home/mentorias']);
+        }
+        this.isSaving = false;
+      },
+      error: (error) => {
+        console.error('Erro ao salvar conteúdo:', error);
+        this.toastr.error('Erro ao salvar conteúdo');
+        this.isSaving = false;
+      }
+    });
+  }
+
+  voltar(): void {
+    this.router.navigate(['/home/mentorias']);
+  }
+
+  // ===== UTILITÁRIOS =====
+
+  private generateId(): string {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private setBreadcrumb(encontroId?: string): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { label: 'Home', url: '/home' },
+      { label: 'Mentorias', url: '/home/mentorias' },
+      { label: encontroId ? `Editar Conteúdo #${encontroId}` : 'Editar Conteúdo' }
+    ]);
+  }
+
+  trackByFn(index: number): number {
+    return index;
+  }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
+
+  // ===== RICH EDITOR FUNCTIONS =====
+
+  execCommand(command: string, value: string | undefined = undefined): void {
+    document.execCommand(command, false, value);
+  }
+
+  insertLink(): void {
+    const url = prompt('Digite a URL do link:');
+    if (url) {
+      this.execCommand('createLink', url);
+    }
+  }
+
+  onEditorImageSelected(event: Event, bloco: BlocoProximosPassos): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.toastr.error('A imagem deve ter no máximo 5MB');
+        return;
+      }
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const base64Image = e.target.result;
+
+        // Insert image at cursor position
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+
+          // Create image element
+          const img = document.createElement('img');
+          img.src = base64Image;
+          img.style.maxWidth = '100%';
+          img.style.height = 'auto';
+          img.style.borderRadius = '8px';
+          img.style.margin = '1rem 0';
+          img.style.display = 'block';
+
+          // Insert the image
+          range.deleteContents();
+          range.insertNode(img);
+
+          // Move cursor after the image
+          range.setStartAfter(img);
+          range.setEndAfter(img);
+          selection.removeAllRanges();
+          selection.addRange(range);
+
+          // Update the bloco content
+          const editorDiv = (event.target as HTMLInputElement)
+            .closest('.rich-editor-container')
+            ?.querySelector('.rich-editor') as HTMLDivElement;
+
+          if (editorDiv) {
+            bloco.conteudo = editorDiv.innerHTML;
+          }
+        } else {
+          // If no selection, append at the end
+          const editorDiv = (event.target as HTMLInputElement)
+            .closest('.rich-editor-container')
+            ?.querySelector('.rich-editor') as HTMLDivElement;
+
+          if (editorDiv) {
+            const img = `<img src="${base64Image}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0; display: block;">`;
+            editorDiv.innerHTML += img;
+            bloco.conteudo = editorDiv.innerHTML;
+          }
+        }
+
+        this.toastr.success('Imagem inserida com sucesso!');
+      };
+
+      reader.onerror = () => {
+        this.toastr.error('Erro ao carregar a imagem');
+      };
+
+      reader.readAsDataURL(file);
+
+      // Reset input for next use
+      input.value = '';
+    }
+  }
+
+  onEditorChange(event: Event, bloco: BlocoProximosPassos): void {
+    const target = event.target as HTMLDivElement;
+    bloco.conteudo = target.innerHTML;
+  }
+
+  onEditorInput(event: Event, bloco: BlocoProximosPassos): void {
+    const target = event.target as HTMLDivElement;
+    // Apenas atualiza o conteúdo no modelo, sem alterar o innerHTML
+    bloco.conteudo = target.innerHTML;
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const target = event.target as HTMLElement;
+    const editor = target.closest('.rich-editor') as HTMLDivElement;
+    if (editor) {
+      editor.classList.add('drag-over');
+    }
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const target = event.target as HTMLElement;
+    const editor = target.closest('.rich-editor') as HTMLDivElement;
+    if (editor) {
+      editor.classList.remove('drag-over');
+    }
+  }
+
+  onDrop(event: DragEvent, bloco: BlocoProximosPassos): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const target = event.target as HTMLElement;
+    const editor = target.closest('.rich-editor') as HTMLDivElement;
+    if (editor) {
+      editor.classList.remove('drag-over');
+    }
+
+    if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+      const file = event.dataTransfer.files[0];
+
+      // Check if it's an image
+      if (!file.type.startsWith('image/')) {
+        this.toastr.error('Por favor, arraste apenas arquivos de imagem');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.toastr.error('A imagem deve ter no máximo 5MB');
+        return;
+      }
+
+      // Convert to base64 and insert
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const base64Image = e.target.result;
+
+        // Get the drop position
+        const range = document.caretRangeFromPoint(event.clientX, event.clientY);
+
+        if (range) {
+          // Create image element
+          const img = document.createElement('img');
+          img.src = base64Image;
+          img.style.maxWidth = '100%';
+          img.style.height = 'auto';
+          img.style.borderRadius = '8px';
+          img.style.margin = '1rem 0';
+          img.style.display = 'block';
+
+          // Insert at drop position
+          range.insertNode(img);
+
+          // Update the bloco content
+          if (editor) {
+            bloco.conteudo = editor.innerHTML;
+          }
+        } else {
+          // If no drop position, append at the end
+          const img = `<img src="${base64Image}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0; display: block;">`;
+          editor.innerHTML += img;
+          bloco.conteudo = editor.innerHTML;
+        }
+
+        this.toastr.success('Imagem inserida com sucesso!');
+      };
+
+      reader.onerror = () => {
+        this.toastr.error('Erro ao carregar a imagem');
+      };
+
+      reader.readAsDataURL(file);
+    }
+  }
+}

@@ -59,6 +59,8 @@ export interface Proposal {
   converted_at?: string;
   notes?: string;
   max_installments?: number;
+  vista_discount_percentage?: number;
+  prazo_discount_percentage?: number;
   payment_type?: 'vista' | 'prazo';
   payment_method?: string;
   installments?: number;
@@ -109,6 +111,8 @@ export interface CreateProposalData {
   end_date?: string;
   validity_days?: number;
   max_installments?: number;
+  vista_discount_percentage?: number;
+  prazo_discount_percentage?: number;
   services: {
     service_id: number;
     unit_value: number;

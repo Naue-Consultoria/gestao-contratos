@@ -1,0 +1,495 @@
+<div class="page">
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Carregando encontro...</p>
+  </div>
+
+  <!-- Editor Content -->
+  <div *ngIf="!isLoading && encontro">
+
+    <!-- Header Padronizado -->
+    <div class="page-header">
+      <div class="header-title-section">
+        <h1 class="page-title">Editar Conteúdo da Mentoria</h1>
+        <app-breadcrumb></app-breadcrumb>
+        <p class="subtitle">
+          <i class="fas fa-user"></i>
+          {{ encontro.mentorado_nome }} - Encontro #{{ encontro.numero_encontro }}
+        </p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn-secondary" (click)="voltar()">
+          <i class="fas fa-arrow-left"></i>
+          Voltar
+        </button>
+        <button type="button" class="btn-primary" (click)="salvarConteudo()" [disabled]="isSaving">
+          <i class="fas fa-save"></i>
+          {{ isSaving ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulário -->
+    <form class="editor-form">
+
+      <!-- VISÃO GERAL -->
+      <section class="editor-section">
+        <div class="section-header">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="conteudo.visaoGeral.ativo"
+              name="visaoGeralAtivo">
+            <span class="section-title">
+              <i class="fa-solid fa-bullseye"></i>
+              Visão Geral
+            </span>
+          </label>
+        </div>
+
+        <div *ngIf="conteudo.visaoGeral.ativo" class="section-content">
+          <textarea
+            class="form-textarea"
+            [(ngModel)]="conteudo.visaoGeral.conteudo"
+            name="visaoGeralConteudo"
+            placeholder="Descreva a visão geral do encontro..."
+            rows="4"></textarea>
+        </div>
+      </section>
+
+      <!-- MENTORIA -->
+      <section class="editor-section">
+        <div class="section-header">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="conteudo.mentoria.ativo"
+              name="mentoriaAtivo">
+            <span class="section-title">
+              <i class="fa-solid fa-graduation-cap"></i>
+              Mentoria
+            </span>
+          </label>
+        </div>
+
+        <div *ngIf="conteudo.mentoria.ativo" class="section-content">
+          <textarea
+            class="form-textarea"
+            [(ngModel)]="conteudo.mentoria.conteudo"
+            name="mentoriaConteudo"
+            placeholder="Descreva o conteúdo da mentoria..."
+            rows="6"></textarea>
+        </div>
+      </section>
+
+      <!-- TESTES -->
+      <section class="editor-section">
+        <div class="section-header">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="conteudo.testes.ativo"
+              name="testesAtivo">
+            <span class="section-title">
+              <i class="fa-solid fa-clipboard-check"></i>
+              Testes
+            </span>
+          </label>
+          <button
+            *ngIf="conteudo.testes.ativo"
+            type="button"
+            class="btn-add"
+            (click)="adicionarTeste()">
+            <i class="fa-solid fa-plus"></i>
+            Adicionar Teste
+          </button>
+        </div>
+
+        <div *ngIf="conteudo.testes.ativo" class="section-content">
+          <div *ngFor="let teste of conteudo.testes.itens; trackBy: trackByFn" class="teste-item">
+            <div class="item-header">
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removerTeste(teste.id)">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+
+            <div class="form-group">
+              <label>Nome do Teste</label>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="teste.nome"
+                [name]="'teste-nome-' + teste.id"
+                placeholder="Digite o nome do teste">
+            </div>
+
+            <div class="form-group">
+              <label>Imagem</label>
+              <input
+                type="file"
+                class="form-input-file"
+                accept="image/*"
+                (change)="onImagemSelected($event, teste)">
+              <img
+                *ngIf="teste.imagemUrl"
+                [src]="teste.imagemUrl"
+                class="image-preview"
+                alt="Preview">
+            </div>
+
+            <div class="form-group">
+              <label>Comentário</label>
+              <textarea
+                class="form-textarea"
+                [(ngModel)]="teste.comentario"
+                [name]="'teste-comentario-' + teste.id"
+                placeholder="Adicione um comentário sobre o teste..."
+                rows="3"></textarea>
+            </div>
+          </div>
+
+          <p *ngIf="conteudo.testes.itens.length === 0" class="empty-state">
+            Nenhum teste adicionado. Clique em "Adicionar Teste" para começar.
+          </p>
+        </div>
+      </section>
+
+      <!-- PRÓXIMOS PASSOS -->
+      <section class="editor-section">
+        <div class="section-header">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="conteudo.proximosPassos.ativo"
+              name="proximosPassosAtivo">
+            <span class="section-title">
+              <i class="fa-solid fa-arrow-right"></i>
+              Próximos Passos
+            </span>
+          </label>
+          <div *ngIf="conteudo.proximosPassos.ativo" class="btn-group">
+            <button
+              type="button"
+              class="btn-add"
+              (click)="adicionarBlocoProximosPassos('texto')">
+              <i class="fa-solid fa-align-left"></i>
+              Texto
+            </button>
+            <button
+              type="button"
+              class="btn-add"
+              (click)="adicionarBlocoProximosPassos('perguntas')">
+              <i class="fa-solid fa-question-circle"></i>
+              Perguntas
+            </button>
+            <button
+              type="button"
+              class="btn-add"
+              (click)="adicionarBlocoProximosPassos('tarefas')">
+              <i class="fa-solid fa-list-check"></i>
+              Tarefas
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="conteudo.proximosPassos.ativo" class="section-content">
+          <div *ngFor="let bloco of conteudo.proximosPassos.blocos; trackBy: trackByFn" class="bloco-item">
+            <div class="item-header">
+              <span class="bloco-tipo-badge">
+                <i class="fa-solid"
+                   [ngClass]="{
+                     'fa-align-left': bloco.tipo === 'texto',
+                     'fa-question-circle': bloco.tipo === 'perguntas',
+                     'fa-list-check': bloco.tipo === 'tarefas'
+                   }"></i>
+                {{ bloco.tipo === 'texto' ? 'Texto' : bloco.tipo === 'perguntas' ? 'Perguntas' : 'Tarefas' }}
+              </span>
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removerBlocoProximosPassos(bloco.id)">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+
+            <!-- Bloco Texto -->
+            <div *ngIf="bloco.tipo === 'texto'" class="rich-editor-container">
+              <div class="editor-toolbar">
+                <button type="button"
+                        class="toolbar-btn"
+                        (click)="execCommand('bold')"
+                        title="Negrito">
+                  <i class="fa-solid fa-bold"></i>
+                </button>
+                <button type="button"
+                        class="toolbar-btn"
+                        (click)="execCommand('italic')"
+                        title="Itálico">
+                  <i class="fa-solid fa-italic"></i>
+                </button>
+                <button type="button"
+                        class="toolbar-btn"
+                        (click)="execCommand('underline')"
+                        title="Sublinhado">
+                  <i class="fa-solid fa-underline"></i>
+                </button>
+                <div class="toolbar-separator"></div>
+                <button type="button"
+                        class="toolbar-btn"
+                        (click)="execCommand('insertUnorderedList')"
+                        title="Lista com marcadores">
+                  <i class="fa-solid fa-list"></i>
+                </button>
+                <button type="button"
+                        class="toolbar-btn"
+                        (click)="execCommand('insertOrderedList')"
+                        title="Lista numerada">
+                  <i class="fa-solid fa-list-ol"></i>
+                </button>
+                <div class="toolbar-separator"></div>
+                <button type="button"
+                        class="toolbar-btn"
+                        (click)="insertLink()"
+                        title="Inserir link">
+                  <i class="fa-solid fa-link"></i>
+                </button>
+                <button type="button"
+                        class="toolbar-btn"
+                        (click)="imageFileInput.click()"
+                        title="Inserir imagem">
+                  <i class="fa-solid fa-image"></i>
+                </button>
+                <input #imageFileInput
+                       type="file"
+                       accept="image/*"
+                       style="display: none"
+                       (change)="onEditorImageSelected($event, bloco)">
+                <div class="toolbar-separator"></div>
+                <button type="button"
+                        class="toolbar-btn"
+                        (click)="execCommand('justifyLeft')"
+                        title="Alinhar à esquerda">
+                  <i class="fa-solid fa-align-left"></i>
+                </button>
+                <button type="button"
+                        class="toolbar-btn"
+                        (click)="execCommand('justifyCenter')"
+                        title="Centralizar">
+                  <i class="fa-solid fa-align-center"></i>
+                </button>
+                <button type="button"
+                        class="toolbar-btn"
+                        (click)="execCommand('justifyRight')"
+                        title="Alinhar à direita">
+                  <i class="fa-solid fa-align-right"></i>
+                </button>
+              </div>
+              <div class="rich-editor"
+                   contenteditable="true"
+                   (blur)="onEditorChange($event, bloco)"
+                   (input)="onEditorInput($event, bloco)"
+                   (dragover)="onDragOver($event)"
+                   (dragleave)="onDragLeave($event)"
+                   (drop)="onDrop($event, bloco)"
+                   [attr.data-placeholder]="'Escreva o texto...'"
+                   #richEditor>
+              </div>
+            </div>
+
+            <!-- Bloco Perguntas -->
+            <div *ngIf="bloco.tipo === 'perguntas'">
+              <div *ngFor="let pergunta of bloco.perguntas; let i = index" class="pergunta-item">
+                <div class="pergunta-header">
+                  <span>Pergunta {{ i + 1 }}</span>
+                  <button
+                    type="button"
+                    class="btn-remove-small"
+                    (click)="removerPergunta(bloco, i)">
+                    <i class="fa-solid fa-times"></i>
+                  </button>
+                </div>
+                <textarea
+                  class="form-textarea"
+                  [(ngModel)]="pergunta.pergunta"
+                  [name]="'pergunta-q-' + bloco.id + '-' + i"
+                  placeholder="Digite a pergunta para o mentorado responder"
+                  rows="3">
+                </textarea>
+              </div>
+              <button
+                type="button"
+                class="btn-add-small"
+                (click)="adicionarPergunta(bloco)">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar Pergunta
+              </button>
+            </div>
+
+            <!-- Bloco Tarefas -->
+            <div *ngIf="bloco.tipo === 'tarefas' && bloco.tarefas">
+              <div class="form-group">
+                <label>Título da Lista</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  [(ngModel)]="bloco.tarefas.titulo"
+                  [name]="'tarefas-titulo-' + bloco.id"
+                  placeholder="Digite o título da lista de tarefas">
+              </div>
+              <div *ngFor="let tarefa of bloco.tarefas.itens; let i = index; trackBy: trackByIndex" class="tarefa-item">
+                <input
+                  type="text"
+                  class="form-input"
+                  [(ngModel)]="tarefa.texto"
+                  [name]="'tarefa-' + bloco.id + '-' + i"
+                  placeholder="Digite a tarefa">
+                <button
+                  type="button"
+                  class="btn-remove-small"
+                  (click)="removerTarefa(bloco, i)">
+                  <i class="fa-solid fa-times"></i>
+                </button>
+              </div>
+              <button
+                type="button"
+                class="btn-add-small"
+                (click)="adicionarTarefa(bloco)">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar Tarefa
+              </button>
+            </div>
+          </div>
+
+          <p *ngIf="conteudo.proximosPassos.blocos.length === 0" class="empty-state">
+            Nenhum bloco adicionado. Escolha um tipo acima para começar.
+          </p>
+        </div>
+      </section>
+
+      <!-- REFERÊNCIAS -->
+      <section class="editor-section">
+        <div class="section-header">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="conteudo.referencias.ativo"
+              name="referenciasAtivo">
+            <span class="section-title">
+              <i class="fa-solid fa-book"></i>
+              Referências / Inspirações
+            </span>
+          </label>
+          <button
+            *ngIf="conteudo.referencias.ativo"
+            type="button"
+            class="btn-add"
+            (click)="adicionarReferencia()">
+            <i class="fa-solid fa-plus"></i>
+            Adicionar Referência
+          </button>
+        </div>
+
+        <div *ngIf="conteudo.referencias.ativo" class="section-content">
+          <div *ngFor="let ref of conteudo.referencias.itens; trackBy: trackByFn" class="referencia-item">
+            <div class="item-header">
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removerReferencia(ref.id)">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+
+            <div class="form-group">
+              <label>Tipo</label>
+              <select
+                class="form-select"
+                [(ngModel)]="ref.tipo"
+                [name]="'ref-tipo-' + ref.id">
+                <option value="ted">TED Talk</option>
+                <option value="livro">Livro</option>
+                <option value="leitura">Artigo/Leitura</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Título</label>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="ref.titulo"
+                [name]="'ref-titulo-' + ref.id"
+                placeholder="Digite o título">
+            </div>
+
+            <div class="form-group">
+              <label>Link</label>
+              <input
+                type="url"
+                class="form-input"
+                [(ngModel)]="ref.link"
+                [name]="'ref-link-' + ref.id"
+                placeholder="https://...">
+            </div>
+          </div>
+
+          <p *ngIf="conteudo.referencias.itens.length === 0" class="empty-state">
+            Nenhuma referência adicionada. Clique em "Adicionar Referência" para começar.
+          </p>
+        </div>
+      </section>
+
+      <!-- ENCERRAMENTO -->
+      <section class="editor-section">
+        <div class="section-header">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="conteudo.encerramento.ativo"
+              name="encerramentoAtivo">
+            <span class="section-title">
+              <i class="fa-solid fa-flag-checkered"></i>
+              Encerramento
+            </span>
+          </label>
+        </div>
+
+        <div *ngIf="conteudo.encerramento.ativo" class="section-content">
+          <input
+            type="text"
+            class="form-input"
+            [(ngModel)]="conteudo.encerramento.conteudo"
+            name="encerramentoConteudo"
+            placeholder="Mensagem de encerramento...">
+        </div>
+      </section>
+
+    </form>
+
+    <!-- Footer com Ações -->
+    <div class="editor-footer">
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="voltar()"
+        [disabled]="isSaving">
+        <i class="fas fa-arrow-left"></i>
+        Voltar
+      </button>
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="salvarConteudo()"
+        [disabled]="isSaving">
+        <i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+        {{ isSaving ? 'Salvando...' : 'Salvar Conteúdo' }}
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -44,6 +44,7 @@ export class SidebarComponent {
         { id: 'clientes', icon: 'fas fa-users', text: 'Clientes', route: '/home/clientes', adminOnly: true, excludeConsultorRS: true },
         { id: 'propostas', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/propostas', adminOnly: true, excludeConsultorRS: true },
         { id: 'contratos', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contratos', adminOnly: true, excludeConsultorRS: true },
+        { id: 'mentorias', icon: 'fas fa-chalkboard-teacher', text: 'Mentorias', route: '/home/mentorias', adminOnly: true, excludeConsultorRS: true },
         {
           id: 'recrutamento-selecao',
           icon: 'fas fa-user-tie',

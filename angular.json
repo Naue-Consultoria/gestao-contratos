@@ -97,6 +97,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "gestao-contratos:build:development"
+          },
           "configurations": {
             "production": {
               "buildTarget": "gestao-contratos:build:production"

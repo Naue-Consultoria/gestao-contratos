@@ -1,0 +1,253 @@
+<div class="mentoria-publica-page">
+
+  <!-- LOADING -->
+  <div *ngIf="isLoading" class="loading-screen">
+    <div class="loading-spinner"></div>
+    <p>Carregando mentoria...</p>
+  </div>
+
+  <!-- ERROR STATES -->
+  <div *ngIf="notFound && !isLoading" class="error-screen">
+    <div class="error-container">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <h1>Mentoria não encontrada</h1>
+      <p>O link que você está tentando acessar não existe ou foi removido.</p>
+    </div>
+  </div>
+
+  <div *ngIf="expired && !isLoading && !notFound" class="error-screen">
+    <div class="error-container">
+      <i class="fa-solid fa-clock"></i>
+      <h1>Link expirado</h1>
+      <p>Este link de acesso expirou. Entre em contato com seu mentor para obter um novo link.</p>
+    </div>
+  </div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div *ngIf="encontro && !isLoading && !notFound && !expired" class="mentoria-content">
+
+    <!-- Header Hero -->
+    <header class="mentoria-hero">
+      <div class="hero-overlay"></div>
+      <div class="hero-container">
+        <div class="hero-brand">
+          <img src="logoNaueNeg.png" alt="NAUE Consultoria" class="hero-logo">
+        </div>
+
+        <div class="welcome-message">
+          <div class="welcome-line-1">
+            <span class="welcome-word">Olá,</span>
+            <span class="welcome-name">{{ encontro.mentorado_nome }}!</span>
+          </div>
+          <div class="welcome-line-2">
+            <span class="welcome-word">Bem-vindo(a)</span>
+            <span class="welcome-word">ao</span>
+            <span class="welcome-word">nosso</span>
+            <span class="welcome-word">encontro!</span>
+          </div>
+        </div>
+
+        <div class="hero-info">
+          <div class="meta-info">
+            <span class="meta-item">
+              <i class="fa-solid fa-hashtag"></i>
+              Encontro {{ encontro.numero_encontro }}
+            </span>
+            <span class="meta-item">
+              <i class="fa-solid fa-calendar"></i>
+              {{ formatDate(encontro.data_encontro) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Seção de Visão Geral e Mentoria -->
+    <section class="intro-section" *ngIf="conteudoEstruturado">
+      <div class="intro-container">
+        <!-- Visão Geral -->
+        <div *ngIf="conteudoEstruturado.visaoGeral?.ativo && conteudoEstruturado.visaoGeral?.conteudo"
+             class="intro-block visao-geral-block">
+          <div class="intro-header">
+            <div class="intro-icon">
+              <i class="fa-solid fa-bullseye"></i>
+            </div>
+            <h2>Visão Geral</h2>
+          </div>
+          <div class="intro-content">
+            <p>{{ conteudoEstruturado.visaoGeral.conteudo }}</p>
+          </div>
+        </div>
+
+        <!-- Mentoria -->
+        <div *ngIf="conteudoEstruturado.mentoria?.ativo && conteudoEstruturado.mentoria?.conteudo"
+             class="intro-block mentoria-block">
+          <div class="intro-header">
+            <div class="intro-icon">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h2>Conteúdo da Mentoria</h2>
+          </div>
+          <div class="intro-content">
+            <p>{{ conteudoEstruturado.mentoria.conteudo }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testes Section -->
+    <section class="dark-section testes-main-section"
+             *ngIf="conteudoEstruturado && conteudoEstruturado.testes?.ativo && conteudoEstruturado.testes?.itens?.length > 0">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-clipboard-check"></i>
+            Testes Realizados
+          </h2>
+        </div>
+        <div class="testes-grid-new">
+          <article *ngFor="let teste of conteudoEstruturado.testes.itens" class="teste-card">
+            <h3>{{ teste.nome }}</h3>
+            <div *ngIf="teste.imagemUrl" class="teste-img-new">
+              <img [src]="teste.imagemUrl" [alt]="teste.nome">
+            </div>
+            <p *ngIf="teste.comentario">{{ teste.comentario }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Próximos Passos Section -->
+    <section class="dark-section proximos-passos-main-section"
+             *ngIf="conteudoEstruturado && conteudoEstruturado.proximosPassos?.ativo && conteudoEstruturado.proximosPassos?.blocos?.length > 0">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-arrow-right"></i>
+            Próximos Passos
+          </h2>
+        </div>
+        <div class="passos-container">
+          <div *ngFor="let bloco of conteudoEstruturado.proximosPassos.blocos" class="passo-card">
+
+              <!-- Texto -->
+              <div *ngIf="bloco.tipo === 'texto'" class="passo-texto-block">
+                <div class="texto-indicator"></div>
+                <div class="texto-content" [innerHTML]="bloco.conteudo"></div>
+              </div>
+
+              <!-- Perguntas -->
+              <div *ngIf="bloco.tipo === 'perguntas' && bloco.perguntas?.length > 0" class="passo-perguntas-block">
+                <div class="block-title">
+                  <i class="fa-solid fa-question-circle"></i>
+                  <span>Perguntas para Reflexão</span>
+                </div>
+                <div class="perguntas-container">
+                  <div *ngFor="let pergunta of bloco.perguntas; let i = index" class="pergunta-item">
+                    <div class="pergunta-num">{{ i + 1 }}</div>
+                    <div class="pergunta-body">
+                      <p class="pergunta-q" style="white-space: pre-wrap;">{{ pergunta.pergunta }}</p>
+                      <textarea
+                        class="pergunta-input"
+                        [(ngModel)]="pergunta.respostaUsuario"
+                        (blur)="salvarRespostaAutomaticamente(bloco, i)"
+                        placeholder="Digite sua resposta aqui..."
+                        rows="4"></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="perguntas-actions">
+                  <button
+                    type="button"
+                    class="btn-save-respostas"
+                    (click)="salvarRespostas(bloco)"
+                    [disabled]="savingInteractions">
+                    <i class="fa-solid" [ngClass]="savingInteractions ? 'fa-circle-notch fa-spin' : 'fa-save'"></i>
+                    {{ savingInteractions ? 'Salvando...' : 'Salvar Respostas' }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tarefas -->
+              <div *ngIf="bloco.tipo === 'tarefas' && bloco.tarefas?.itens?.length > 0" class="passo-tarefas-block">
+                <div class="block-title">
+                  <i class="fa-solid fa-list-check"></i>
+                  <span>{{ bloco.tarefas.titulo || 'Tarefas' }}</span>
+                </div>
+                <ul class="tarefas-container">
+                  <li *ngFor="let tarefa of bloco.tarefas.itens; let j = index">
+                    <label class="tarefa-checkbox">
+                      <input
+                        type="checkbox"
+                        [(ngModel)]="tarefa.checked"
+                        (change)="salvarEstadoTarefa(bloco, j)">
+                      <span class="checkbox-custom"></span>
+                      <span class="tarefa-text">{{ tarefa.texto || tarefa }}</span>
+                    </label>
+                  </li>
+                </ul>
+              </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Referências Section -->
+    <section class="dark-section referencias-main-section"
+             *ngIf="conteudoEstruturado && conteudoEstruturado.referencias?.ativo && conteudoEstruturado.referencias?.itens?.length > 0">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-book"></i>
+            Referências e Inspirações
+          </h2>
+        </div>
+        <div class="referencias-grid">
+          <a *ngFor="let ref of conteudoEstruturado.referencias.itens"
+             [href]="ref.link"
+             target="_blank"
+             class="ref-card">
+            <div class="ref-icon-new">
+              <i class="fa-solid"
+                 [ngClass]="{
+                   'fa-play-circle': ref.tipo === 'ted',
+                   'fa-book': ref.tipo === 'livro',
+                   'fa-newspaper': ref.tipo === 'leitura'
+                 }"></i>
+            </div>
+            <div class="ref-content-new">
+              <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Leitura' }}</span>
+              <h4>{{ ref.titulo }}</h4>
+            </div>
+            <i class="fa-solid fa-external-link-alt ref-external-new"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Encerramento Section -->
+    <section class="encerramento-final-section"
+             *ngIf="conteudoEstruturado && conteudoEstruturado.encerramento?.ativo && conteudoEstruturado.encerramento?.conteudo">
+      <div class="encerramento-container">
+        <div class="encerramento-content-new">
+          <p>{{ conteudoEstruturado.encerramento.conteudo }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mentoria-footer">
+      <p *ngIf="savingInteractions" class="saving-indicator">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+        Salvando...
+      </p>
+      <p class="footer-info">
+        <i class="fa-solid fa-shield-halved"></i>
+        Suas informações são mantidas em sigilo
+      </p>
+      <p class="footer-copy">© {{ getCurrentYear() }} NAUE Consultoria - Todos os direitos reservados</p>
+    </footer>
+
+  </div>
+</div>

@@ -33,6 +33,10 @@ import { EditarVagaComponent } from './pages/editar-vaga/editar-vaga.component';
 import { RelatoriosRsComponent } from './pages/relatorios-rs/relatorios-rs';
 import { AnalyticsRsComponent } from './pages/analytics-rs/analytics-rs';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied';
+import { MentoriaList } from './components/mentoria-list/mentoria-list';
+import { MentoriaEditor } from './components/mentoria-editor/mentoria-editor';
+import { MentoriaConteudoEditor } from './components/mentoria-conteudo-editor/mentoria-conteudo-editor';
+import { PublicMentoriaViewComponent } from './pages/public-mentoria-view/public-mentoria-view';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -69,6 +73,13 @@ export const routes: Routes = [
     path: 'public/proposal/:token',
     component: PublicProposalViewComponent,
     title: 'Proposta Comercial - NAUE Consultoria',
+  },
+
+  // Rota pública para visualização de encontros de mentoria
+  {
+    path: 'mentoria/:token',
+    component: PublicMentoriaViewComponent,
+    title: 'Encontro de Mentoria - NAUE Consultoria',
   },
 
   // Rota de acesso negado
@@ -286,6 +297,38 @@ export const routes: Routes = [
         component: EditarVagaComponent,
         canActivate: [AdminGerencialGuard],
         title: 'Editar Vaga - NAUE Consultoria',
+      },
+
+      // Mentorias
+      {
+        path: 'mentorias',
+        component: MentoriaList,
+        canActivate: [AdminGerencialGuard],
+        title: 'Mentorias - NAUE Consultoria',
+      },
+
+      // Novo encontro de mentoria
+      {
+        path: 'mentorias/novo',
+        component: MentoriaEditor,
+        canActivate: [AdminGerencialGuard],
+        title: 'Novo Encontro - NAUE Consultoria',
+      },
+
+      // Editar encontro de mentoria
+      {
+        path: 'mentorias/editar/:id',
+        component: MentoriaEditor,
+        canActivate: [AdminGerencialGuard],
+        title: 'Editar Encontro - NAUE Consultoria',
+      },
+
+      // Editor de conteúdo do encontro de mentoria
+      {
+        path: 'mentorias/:id/conteudo',
+        component: MentoriaConteudoEditor,
+        canActivate: [AdminGerencialGuard],
+        title: 'Editar Conteúdo - NAUE Consultoria',
       },
 
       // Rotinas

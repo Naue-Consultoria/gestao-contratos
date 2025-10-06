@@ -119,6 +119,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       end_date: [''],
       observations: [''],
       max_installments: [12, [Validators.required, Validators.min(1), Validators.max(24)]],
+      vista_discount_percentage: [6, [Validators.required, Validators.min(0), Validators.max(100)]],
+      prazo_discount_percentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
       status: ['draft'], // Campo de status adicionado
       solicitante_name: [''],
       solicitante_email: ['', Validators.email],
@@ -190,6 +192,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       end_date: proposal.end_date ? proposal.end_date.split('T')[0] : '',
       observations: proposal.notes || '',
       max_installments: proposal.max_installments ?? 12, // Usar nullish coalescing para preservar valor do BD
+      vista_discount_percentage: proposal.vista_discount_percentage ?? 6,
+      prazo_discount_percentage: proposal.prazo_discount_percentage ?? 0,
       status: proposal.status || 'draft', // Carregar status da proposta
       solicitante_name: proposal.solicitante_name || '',
       solicitante_email: proposal.solicitante_email || '',
@@ -865,6 +869,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       solicitante_phone: this.proposalForm.value.solicitante_phone || undefined,
       end_date: this.proposalForm.value.end_date || null,
       max_installments: this.proposalForm.value.max_installments || 12,
+      vista_discount_percentage: this.proposalForm.value.vista_discount_percentage ?? 6,
+      prazo_discount_percentage: this.proposalForm.value.prazo_discount_percentage ?? 0,
       validity_days: 30, // Valor padrão
       services: this.selectedServices.map((service, index) => ({
         service_id: service.id,

@@ -1,0 +1,456 @@
+<div class="page" *ngIf="!isLoading">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-title-section">
+      <h1 class="page-title">
+        {{ isEditMode ? 'Editar Encontro de Mentoria' : 'Novo Encontro de Mentoria' }}
+      </h1>
+      <app-breadcrumb></app-breadcrumb>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn-primary" (click)="salvarEncontro()" [disabled]="isSaving">
+        <i class="fas fa-save"></i>
+        {{ isSaving ? 'Salvando...' : 'Salvar e Continuar' }}
+      </button>
+      <button type="button" class="btn-primary" (click)="publicarEncontro()" [disabled]="!isEditMode || isSaving">
+        <i class="fas fa-paper-plane"></i>
+        Publicar
+      </button>
+    </div>
+  </div>
+
+  <!-- Formulário de Metadados -->
+  <div class="form-section">
+    <h3 class="section-title"><i class="fas fa-info-circle"></i> Informações do Encontro</h3>
+
+    <form [formGroup]="encontroForm">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="client_id">Cliente *</label>
+          <select
+            id="client_id"
+            formControlName="client_id"
+            (change)="onClienteChange(+$any($event.target).value)">
+            <option value="">{{ loadingClientes ? 'Carregando...' : 'Selecione um cliente' }}</option>
+            <option *ngFor="let cliente of clientes" [value]="cliente.id">
+              {{ cliente.full_name || cliente.company_name || cliente.trade_name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="contract_id">Contrato *</label>
+          <select
+            id="contract_id"
+            formControlName="contract_id">
+            <option value="">{{ loadingContratos ? 'Carregando...' : 'Selecione um contrato' }}</option>
+            <option *ngFor="let contrato of contratosFiltrados" [value]="contrato.id">
+              #{{ contrato.contract_number }} - {{ contrato.type }} ({{ contrato.status }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="numero_encontro">Número do Encontro</label>
+          <input
+            type="number"
+            id="numero_encontro"
+            formControlName="numero_encontro"
+            placeholder="1, 2, 3...">
+        </div>
+
+        <div class="form-field full-width">
+          <label for="mentorado_nome">Nome do Mentorado *</label>
+          <input
+            type="text"
+            id="mentorado_nome"
+            formControlName="mentorado_nome"
+            placeholder="Ex: João Silva">
+        </div>
+
+        <div class="form-field">
+          <label for="data_encontro">Data do Encontro *</label>
+          <input
+            type="date"
+            id="data_encontro"
+            formControlName="data_encontro">
+        </div>
+
+        <div class="form-field">
+          <label for="token_expira_em">Link Expira em</label>
+          <input
+            type="datetime-local"
+            id="token_expira_em"
+            formControlName="token_expira_em">
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Botão para ir ao editor de conteúdo -->
+  <div class="form-section" *ngIf="isEditMode && encontroId">
+    <h3 class="section-title">
+      <i class="fas fa-edit"></i>
+      Conteúdo do Encontro
+    </h3>
+
+    <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 0.95rem;">
+      O conteúdo do encontro de mentoria é editado em uma página dedicada com editor completo.
+    </p>
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="irParaEditorConteudo()"
+      style="display: inline-flex; align-items: center; gap: 0.5rem;">
+      <i class="fas fa-pen-to-square"></i>
+      Editar Conteúdo do Encontro
+    </button>
+  </div>
+
+  <!-- Área de Blocos (Drag and Drop) - Mantida para compatibilidade, mas oculta -->
+  <div class="blocos-area" style="display: none;">
+    <h2><i class="fas fa-layer-group"></i> Conteúdo do Encontro</h2>
+
+    <div
+      cdkDropList
+      (cdkDropListDropped)="reordenarBlocos($event)"
+      class="blocos-list">
+
+      <div
+        *ngFor="let bloco of blocos; let i = index"
+        cdkDrag
+        class="bloco-item"
+        [class.editing]="blocoEditando === bloco.id">
+
+        <!-- Drag Handle e Header -->
+        <div class="bloco-header" cdkDragHandle>
+          <div class="header-left">
+            <i class="fas fa-grip-vertical drag-icon"></i>
+            <i [class]="'fas ' + getIconeTipo(bloco.tipo)"></i>
+            <span class="bloco-tipo">{{ getNomeTipo(bloco.tipo) }}</span>
+          </div>
+          <div class="header-right">
+            <button class="btn-icon" (click)="editarBloco(bloco.id)" title="Editar">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn-icon danger" (click)="removerBloco(i)" title="Remover">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Editor de Bloco (expandido quando editando) -->
+        <div class="bloco-editor" *ngIf="blocoEditando === bloco.id">
+
+          <!-- TÍTULO -->
+          <div *ngIf="bloco.tipo === 'titulo'" class="editor-content">
+            <div class="form-field">
+              <label>Texto do Título</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.texto" placeholder="Digite o título...">
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label>Nível</label>
+                <select [(ngModel)]="bloco.configuracao.nivel">
+                  <option [value]="1">H1 - Muito Grande</option>
+                  <option [value]="2">H2 - Grande</option>
+                  <option [value]="3">H3 - Médio</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Cor</label>
+                <input type="color" [(ngModel)]="bloco.configuracao.cor">
+              </div>
+            </div>
+          </div>
+
+          <!-- TEXTO -->
+          <div *ngIf="bloco.tipo === 'texto'" class="editor-content">
+            <div class="form-field">
+              <label>Conteúdo</label>
+              <textarea
+                [(ngModel)]="bloco.configuracao.conteudo"
+                rows="6"
+                placeholder="Digite o texto...">
+              </textarea>
+              <small>Suporta HTML básico</small>
+            </div>
+          </div>
+
+          <!-- LISTA -->
+          <div *ngIf="bloco.tipo === 'lista'" class="editor-content">
+            <div class="form-field">
+              <label>Título da Lista</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: Próximos Passos">
+            </div>
+
+            <div class="form-field">
+              <label>Itens</label>
+              <div *ngFor="let item of bloco.configuracao.itens; let idx = index" class="lista-item">
+                <input
+                  type="text"
+                  [(ngModel)]="item.principal"
+                  placeholder="Texto principal"
+                  class="item-principal">
+                <input
+                  type="text"
+                  [(ngModel)]="item.descricao"
+                  placeholder="Descrição (opcional)"
+                  class="item-descricao">
+                <select [(ngModel)]="item.destaque" class="item-destaque">
+                  <option [ngValue]="null">Sem destaque</option>
+                  <option value="yellow">Amarelo</option>
+                  <option value="green">Verde</option>
+                  <option value="orange">Laranja</option>
+                </select>
+                <button class="btn-icon-small danger" (click)="removerItemLista(bloco, idx)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <button class="btn-add" (click)="adicionarItemLista(bloco)">
+                <i class="fas fa-plus"></i> Adicionar Item
+              </button>
+            </div>
+          </div>
+
+          <!-- IMAGEM -->
+          <div *ngIf="bloco.tipo === 'imagem'" class="editor-content">
+            <div class="form-field">
+              <label>Upload de Imagem</label>
+              <input
+                type="file"
+                accept="image/*"
+                (change)="onFileSelected($event, i)"
+                class="file-input">
+              <div *ngIf="uploadingImage" class="upload-progress">
+                <i class="fas fa-spinner fa-spin"></i> Enviando...
+              </div>
+              <img *ngIf="bloco.configuracao.url" [src]="bloco.configuracao.url" class="preview-image">
+            </div>
+            <div class="form-field">
+              <label>Legenda</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.legenda" placeholder="Legenda da imagem">
+            </div>
+            <div class="form-field">
+              <label>Tamanho</label>
+              <select [(ngModel)]="bloco.configuracao.largura">
+                <option value="small">Pequeno</option>
+                <option value="medium">Médio</option>
+                <option value="large">Grande</option>
+                <option value="full">Largura total</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- VIDEO LINK -->
+          <div *ngIf="bloco.tipo === 'video_link'" class="editor-content">
+            <div class="form-field">
+              <label>Título do Vídeo</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: TED Talk sobre liderança">
+            </div>
+            <div class="form-field">
+              <label>URL do Vídeo</label>
+              <input type="url" [(ngModel)]="bloco.configuracao.url" placeholder="https://youtube.com/...">
+            </div>
+            <div class="form-field">
+              <label>Autor/Canal</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.autor" placeholder="Ex: MARTHA GABRIEL | TEDx">
+            </div>
+          </div>
+
+          <!-- PERGUNTA -->
+          <div *ngIf="bloco.tipo === 'pergunta'" class="editor-content">
+            <div class="form-field">
+              <label>Pergunta</label>
+              <textarea
+                [(ngModel)]="bloco.configuracao.pergunta"
+                rows="2"
+                placeholder="Digite a pergunta...">
+              </textarea>
+            </div>
+            <div class="form-field">
+              <label>Placeholder da Resposta</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.placeholder" placeholder="Ex: Digite sua resposta...">
+            </div>
+            <div class="form-field">
+              <label>Exemplo de Resposta (opcional)</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.resposta_exemplo" placeholder="Ex: Comunicação">
+            </div>
+          </div>
+
+          <!-- SEÇÃO DE PERGUNTAS -->
+          <div *ngIf="bloco.tipo === 'secao_perguntas'" class="editor-content">
+            <div class="form-field">
+              <label>Título da Seção</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: Rotina">
+            </div>
+
+            <div class="form-field">
+              <label>Perguntas</label>
+              <div *ngFor="let pergunta of bloco.configuracao.perguntas; let idx = index" class="pergunta-item">
+                <textarea
+                  [(ngModel)]="pergunta.texto"
+                  rows="2"
+                  placeholder="Digite a pergunta..."
+                  class="pergunta-texto">
+                </textarea>
+                <button class="btn-icon-small danger" (click)="removerPergunta(bloco, idx)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <button class="btn-add" (click)="adicionarPergunta(bloco)">
+                <i class="fas fa-plus"></i> Adicionar Pergunta
+              </button>
+            </div>
+          </div>
+
+          <!-- CHECKBOX LISTA -->
+          <div *ngIf="bloco.tipo === 'checkbox_lista'" class="editor-content">
+            <div class="form-field">
+              <label>Título</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: Tarefas para a próxima semana">
+            </div>
+
+            <div class="form-field">
+              <label>Tarefas</label>
+              <div *ngFor="let item of bloco.configuracao.itens; let idx = index" class="checkbox-item">
+                <input
+                  type="text"
+                  [(ngModel)]="item.texto"
+                  placeholder="Texto da tarefa"
+                  class="checkbox-texto">
+                <button class="btn-icon-small danger" (click)="removerCheckbox(bloco, idx)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <button class="btn-add" (click)="adicionarCheckbox(bloco)">
+                <i class="fas fa-plus"></i> Adicionar Tarefa
+              </button>
+            </div>
+          </div>
+
+          <!-- TABELA -->
+          <div *ngIf="bloco.tipo === 'tabela'" class="editor-content">
+            <div class="form-field">
+              <label>Título da Tabela</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: VECA">
+            </div>
+
+            <div class="form-field">
+              <label>Colunas</label>
+              <div class="tabela-colunas">
+                <div *ngFor="let coluna of bloco.configuracao.colunas; let idx = index" class="coluna-item">
+                  <input type="text" [(ngModel)]="bloco.configuracao.colunas[idx]" placeholder="Nome da coluna">
+                  <button class="btn-icon-small danger" (click)="removerColunaTabela(bloco, idx)">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <button class="btn-add-small" (click)="adicionarColunaTabela(bloco)">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label>Linhas</label>
+              <div class="tabela-linhas">
+                <div *ngFor="let linha of bloco.configuracao.linhas; let idxLinha = index" class="linha-item">
+                  <div class="linha-celulas">
+                    <input
+                      *ngFor="let celula of linha; let idxCol = index"
+                      type="text"
+                      [(ngModel)]="bloco.configuracao.linhas[idxLinha][idxCol]"
+                      placeholder="Célula">
+                  </div>
+                  <button class="btn-icon-small danger" (click)="removerLinhaTabela(bloco, idxLinha)">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <button class="btn-add" (click)="adicionarLinhaTabela(bloco)">
+                  <i class="fas fa-plus"></i> Adicionar Linha
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- DESTAQUE -->
+          <div *ngIf="bloco.tipo === 'destaque'" class="editor-content">
+            <div class="form-field">
+              <label>Título</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: G4 GESTÃO E ESTRATÉGIA">
+            </div>
+            <div class="form-field">
+              <label>Subtítulo</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.subtitulo" placeholder="Texto complementar">
+            </div>
+            <div class="form-field">
+              <label>Cor de Fundo</label>
+              <input type="color" [(ngModel)]="bloco.configuracao.cor">
+            </div>
+          </div>
+
+          <!-- GRÁFICO -->
+          <div *ngIf="bloco.tipo === 'grafico'" class="editor-content">
+            <div class="form-field">
+              <label>Título</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: MAPA">
+            </div>
+            <div class="form-field">
+              <label>Subtítulo</label>
+              <input type="text" [(ngModel)]="bloco.configuracao.subtitulo" placeholder="Ex: Indicadores positivos">
+            </div>
+            <div class="form-field">
+              <label>Upload de Imagem do Gráfico</label>
+              <input
+                type="file"
+                accept="image/*"
+                (change)="onFileSelected($event, i)"
+                class="file-input">
+              <img *ngIf="bloco.configuracao.imagem_url" [src]="bloco.configuracao.imagem_url" class="preview-image">
+            </div>
+          </div>
+
+          <!-- Botão Salvar Bloco -->
+          <div class="bloco-actions">
+            <button class="btn-primary-small" (click)="salvarBloco(bloco)">
+              <i class="fas fa-check"></i> Salvar Bloco
+            </button>
+          </div>
+        </div>
+
+        <!-- Preview do Bloco (quando não está editando) -->
+        <div class="bloco-preview" *ngIf="blocoEditando !== bloco.id">
+          <div class="preview-content">
+            <span class="preview-label">{{ getNomeTipo(bloco.tipo) }}:</span>
+            <span class="preview-text">
+              {{ bloco.configuracao.texto || bloco.configuracao.titulo || bloco.configuracao.pergunta || 'Bloco configurado' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="blocos.length === 0" class="blocos-empty">
+        <i class="fas fa-inbox"></i>
+        <p>Nenhum bloco adicionado ainda</p>
+        <small>Clique nos botões acima para adicionar blocos de conteúdo</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer com Ações -->
+  <div class="editor-footer">
+    <button class="btn-primary" (click)="salvarEncontro()" [disabled]="isSaving">
+      <i class="fas fa-save"></i>
+      {{ isSaving ? 'Salvando...' : 'Salvar e Continuar' }}
+    </button>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="isLoading" class="loading-overlay">
+  <div class="spinner"></div>
+  <p>Carregando...</p>
+</div>

@@ -1,0 +1,210 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-title-section">
+      <h1 class="page-title">Gestão de Mentorias</h1>
+      <app-breadcrumb></app-breadcrumb>
+    </div>
+    <button class="btn-primary" (click)="novoEncontro()">
+      <i class="fas fa-plus"></i>
+      Novo Encontro
+    </button>
+  </div>
+
+  <!-- Estatísticas -->
+  <div class="stats-cards">
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <i class="fas fa-calendar"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ totalEncontros }}</div>
+        <div class="stat-label">Total de Encontros</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon published">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ encontrosPublicados }}</div>
+        <div class="stat-label">Publicados</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon draft">
+        <i class="fas fa-edit"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ encontrosRascunho }}</div>
+        <div class="stat-label">Rascunhos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        [(ngModel)]="filtroBusca"
+        (ngModelChange)="onFiltroChange()"
+        placeholder="Buscar por nome do mentorado, número do encontro..."
+        class="search-input">
+    </div>
+
+    <div class="filter-group">
+      <label>Cliente:</label>
+      <select [(ngModel)]="filtroCliente" (ngModelChange)="onFiltroChange()" class="filter-select">
+        <option value="all">Todos os clientes</option>
+        <option *ngFor="let cliente of clientesUnicos" [value]="cliente.id">
+          {{ cliente.nome }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Carregando encontros...</p>
+  </div>
+
+  <!-- Lista de Encontros -->
+  <div *ngIf="!isLoading" class="encontros-list">
+    <!-- Empty State -->
+    <div *ngIf="encontrosAgrupados.size === 0" class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <h3>Nenhum encontro encontrado</h3>
+      <p *ngIf="filtroBusca || filtroCliente !== 'all'">
+        Tente ajustar os filtros ou criar um novo encontro
+      </p>
+      <p *ngIf="!filtroBusca && filtroCliente === 'all'">
+        Comece criando seu primeiro encontro de mentoria
+      </p>
+      <button class="btn-primary" (click)="novoEncontro()">
+        <i class="fas fa-plus"></i>
+        Criar Primeiro Encontro
+      </button>
+    </div>
+
+    <!-- Cards de Contratos com Encontros -->
+    <div *ngIf="encontrosAgrupados.size > 0" class="contratos-grid">
+      <div *ngFor="let grupo of encontrosAgrupados | keyvalue" class="contrato-card">
+
+        <!-- Header do Card do Contrato -->
+        <div class="contrato-header">
+          <div class="contrato-info">
+            <h3 class="contrato-titulo">
+              <i class="fas fa-building"></i>
+              {{ grupo.value.contract?.client?.clients_pj?.company_name || grupo.value.contract?.client?.clients_pf?.full_name || 'Cliente não informado' }}
+            </h3>
+            <div class="cliente-info">
+              <i class="fas fa-file-contract"></i>
+              <span>Contrato {{ grupo.value.contract?.contract_number || 'N/A' }}</span>
+            </div>
+          </div>
+          <div class="contrato-stats">
+            <span class="total-encontros">
+              {{ grupo.value.encontros.length }} encontro{{ grupo.value.encontros.length !== 1 ? 's' : '' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Lista de Encontros do Contrato -->
+        <div class="encontros-container">
+          <div *ngFor="let encontro of grupo.value.encontros; let i = index" class="encontro-item">
+
+            <!-- Coluna Esquerda - Número e Status -->
+            <div class="encontro-left">
+              <span class="encontro-numero" *ngIf="encontro.numero_encontro">
+                {{ encontro.numero_encontro }}
+              </span>
+              <span class="encontro-numero" *ngIf="!encontro.numero_encontro">
+                {{ i + 1 }}
+              </span>
+            </div>
+
+            <!-- Coluna Central - Informações -->
+            <div class="encontro-center">
+              <div class="encontro-main-info">
+                <h4 class="mentorado-nome">
+                  {{ encontro.mentorado_nome }}
+                </h4>
+                <div class="encontro-meta">
+                  <div class="meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>{{ formatarData(encontro.data_encontro) }}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span [class]="'status-badge ' + getStatusBadgeClass(encontro.status)">
+                      {{ getStatusLabel(encontro.status) }}
+                    </span>
+                  </div>
+                  <div class="meta-item" *ngIf="isTokenExpirado(encontro)">
+                    <span class="token-expiry">
+                      <i class="fas fa-exclamation-triangle"></i> Link Expirado
+                    </span>
+                  </div>
+                </div>
+                <p class="visao-geral" *ngIf="encontro.visao_geral">
+                  {{ encontro.visao_geral }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Coluna Direita - Ações -->
+            <div class="encontro-right">
+              <div class="encontro-actions">
+                <button
+                  class="btn-action"
+                  *ngIf="encontro.status === 'draft'"
+                  (click)="publicarEncontro(encontro)"
+                  title="Publicar">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+
+                <button
+                  class="btn-action"
+                  *ngIf="encontro.status === 'published'"
+                  (click)="visualizarEncontro(encontro)"
+                  title="Visualizar">
+                  <i class="fas fa-external-link-alt"></i>
+                </button>
+
+                <button
+                  class="btn-action"
+                  *ngIf="encontro.status === 'published'"
+                  (click)="copiarLink(encontro)"
+                  title="Copiar Link">
+                  <i class="fas fa-copy"></i>
+                </button>
+
+                <div class="dropdown-menu-container">
+                  <button
+                    class="btn-action dropdown-toggle"
+                    (click)="toggleDropdown(encontro.id)"
+                    title="Mais opções">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="dropdown-menu" *ngIf="dropdownAberto === encontro.id">
+                    <button class="dropdown-item" (click)="editarEncontro(encontro.id); closeDropdown()">
+                      <i class="fas fa-edit"></i>
+                      <span>Editar</span>
+                    </button>
+                    <button class="dropdown-item danger" (click)="deletarEncontro(encontro); closeDropdown()">
+                      <i class="fas fa-trash"></i>
+                      <span>Deletar</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
