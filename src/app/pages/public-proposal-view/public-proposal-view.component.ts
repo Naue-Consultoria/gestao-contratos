@@ -688,49 +688,92 @@ export class PublicProposalViewComponent implements OnInit {
   }
   
   getDiscountAmount(): number {
-    // Desconto se aplica se todos os serviços estão selecionados e há desconto configurado
-    if (this.areAllServicesSelected() && this.discountPercentage > 0) {
-      return this.getBaseTotal() * (this.discountPercentage / 100);
+    // Desconto se aplica se todos os serviços estão selecionados
+    if (this.areAllServicesSelected()) {
+      const baseTotal = this.getBaseTotal();
+
+      // Determinar qual desconto aplicar baseado no tipo de pagamento
+      if (this.paymentType === 'vista') {
+        // Primeiro verifica valor absoluto
+        const vistaDiscountValue = Number(this.proposal?.vista_discount_value);
+        if (!isNaN(vistaDiscountValue) && vistaDiscountValue > 0) {
+          return Math.min(vistaDiscountValue, baseTotal); // Não pode descontar mais que o total
+        }
+
+        // Depois verifica porcentagem
+        const vistaDiscountPercentage = Number(this.proposal?.vista_discount_percentage);
+        if (!isNaN(vistaDiscountPercentage) && vistaDiscountPercentage > 0) {
+          return baseTotal * (vistaDiscountPercentage / 100);
+        }
+      } else if (this.paymentType === 'prazo') {
+        // Primeiro verifica valor absoluto
+        const prazoDiscountValue = Number(this.proposal?.prazo_discount_value);
+        if (!isNaN(prazoDiscountValue) && prazoDiscountValue > 0) {
+          return Math.min(prazoDiscountValue, baseTotal); // Não pode descontar mais que o total
+        }
+
+        // Depois verifica porcentagem
+        const prazoDiscountPercentage = Number(this.proposal?.prazo_discount_percentage);
+        if (!isNaN(prazoDiscountPercentage) && prazoDiscountPercentage > 0) {
+          return baseTotal * (prazoDiscountPercentage / 100);
+        }
+      }
     }
     return 0;
   }
 
   canGetDiscount(): boolean {
     // Verifica se pode ter desconto baseado no tipo de pagamento e configuração
-    const vistaDiscount = Number(this.proposal?.vista_discount_percentage);
-    const prazoDiscount = Number(this.proposal?.prazo_discount_percentage);
+    if (this.paymentType === 'vista') {
+      const vistaDiscountValue = Number(this.proposal?.vista_discount_value);
+      const vistaDiscountPercentage = Number(this.proposal?.vista_discount_percentage);
 
-    if (this.paymentType === 'vista' && !isNaN(vistaDiscount) && vistaDiscount > 0) {
-      return this.areAllServicesSelected();
+      if ((!isNaN(vistaDiscountValue) && vistaDiscountValue > 0) ||
+          (!isNaN(vistaDiscountPercentage) && vistaDiscountPercentage > 0)) {
+        return this.areAllServicesSelected();
+      }
     }
-    if (this.paymentType === 'prazo' && !isNaN(prazoDiscount) && prazoDiscount > 0) {
-      return this.areAllServicesSelected();
+    if (this.paymentType === 'prazo') {
+      const prazoDiscountValue = Number(this.proposal?.prazo_discount_value);
+      const prazoDiscountPercentage = Number(this.proposal?.prazo_discount_percentage);
+
+      if ((!isNaN(prazoDiscountValue) && prazoDiscountValue > 0) ||
+          (!isNaN(prazoDiscountPercentage) && prazoDiscountPercentage > 0)) {
+        return this.areAllServicesSelected();
+      }
     }
     return false;
   }
 
   // Método auxiliar para obter o valor final com desconto aplicado
   getFinalValueWithDiscount(): number {
-    const baseTotal = this.getBaseTotal();
-
-    // Se não há desconto configurado ou não todos os serviços estão selecionados
-    if (!this.canGetDiscount()) {
-      return baseTotal;
+    // Usar os métodos específicos de cada tipo de pagamento
+    if (this.paymentType === 'vista') {
+      return this.getVistaValueWithDiscount();
+    } else {
+      return this.getPrazoValueWithDiscount();
     }
-
-    // Aplicar o desconto baseado no tipo de pagamento atual
-    return baseTotal * (1 - this.discountPercentage / 100);
   }
 
   // Método para calcular valor com desconto à vista (para exibição no card)
   getVistaValueWithDiscount(): number {
     const baseTotal = this.getBaseTotal();
 
-    // Se há desconto à vista configurado e todos os serviços selecionados
-    const vistaDiscount = Number(this.proposal?.vista_discount_percentage);
-    if (!isNaN(vistaDiscount) && vistaDiscount > 0 && this.areAllServicesSelected()) {
-      const discountedValue = baseTotal * (1 - vistaDiscount / 100);
-      return discountedValue;
+    // Se todos os serviços estão selecionados, aplicar desconto
+    if (this.areAllServicesSelected()) {
+      // Primeiro verifica se há valor absoluto de desconto
+      const vistaDiscountValue = Number(this.proposal?.vista_discount_value);
+      if (!isNaN(vistaDiscountValue) && vistaDiscountValue > 0) {
+        // Aplica o desconto em valor absoluto
+        return Math.max(0, baseTotal - vistaDiscountValue);
+      }
+
+      // Se não há valor absoluto, verifica porcentagem
+      const vistaDiscountPercentage = Number(this.proposal?.vista_discount_percentage);
+      if (!isNaN(vistaDiscountPercentage) && vistaDiscountPercentage > 0) {
+        // Aplica o desconto em porcentagem
+        return baseTotal * (1 - vistaDiscountPercentage / 100);
+      }
     }
 
     return baseTotal;
@@ -740,10 +783,21 @@ export class PublicProposalViewComponent implements OnInit {
   getPrazoValueWithDiscount(): number {
     const baseTotal = this.getBaseTotal();
 
-    // Se há desconto à prazo configurado e todos os serviços selecionados
-    const prazoDiscount = Number(this.proposal?.prazo_discount_percentage);
-    if (!isNaN(prazoDiscount) && prazoDiscount > 0 && this.areAllServicesSelected()) {
-      return baseTotal * (1 - prazoDiscount / 100);
+    // Se todos os serviços estão selecionados, aplicar desconto
+    if (this.areAllServicesSelected()) {
+      // Primeiro verifica se há valor absoluto de desconto
+      const prazoDiscountValue = Number(this.proposal?.prazo_discount_value);
+      if (!isNaN(prazoDiscountValue) && prazoDiscountValue > 0) {
+        // Aplica o desconto em valor absoluto
+        return Math.max(0, baseTotal - prazoDiscountValue);
+      }
+
+      // Se não há valor absoluto, verifica porcentagem
+      const prazoDiscountPercentage = Number(this.proposal?.prazo_discount_percentage);
+      if (!isNaN(prazoDiscountPercentage) && prazoDiscountPercentage > 0) {
+        // Aplica o desconto em porcentagem
+        return baseTotal * (1 - prazoDiscountPercentage / 100);
+      }
     }
 
     return baseTotal;
@@ -1361,6 +1415,54 @@ export class PublicProposalViewComponent implements OnInit {
     // Extrair o valor atual da transform do elemento
     // Para simplificar, começamos do 0 cada vez que começamos a arrastar
     return 0;
+  }
+
+  // Método para obter a porcentagem de desconto atual (para exibição)
+  getCurrentDiscountPercentage(): number {
+    if (!this.areAllServicesSelected()) {
+      return 0;
+    }
+
+    const baseTotal = this.getBaseTotal();
+    if (baseTotal === 0) {
+      return 0;
+    }
+
+    if (this.paymentType === 'vista') {
+      // Se há valor absoluto, calcular a porcentagem equivalente
+      const vistaDiscountValue = Number(this.proposal?.vista_discount_value);
+      if (!isNaN(vistaDiscountValue) && vistaDiscountValue > 0) {
+        return Math.min(100, (vistaDiscountValue / baseTotal) * 100);
+      }
+      // Retornar a porcentagem direta
+      const vistaDiscountPercentage = Number(this.proposal?.vista_discount_percentage);
+      return (!isNaN(vistaDiscountPercentage) && vistaDiscountPercentage > 0) ? vistaDiscountPercentage : 0;
+    } else {
+      // Se há valor absoluto, calcular a porcentagem equivalente
+      const prazoDiscountValue = Number(this.proposal?.prazo_discount_value);
+      if (!isNaN(prazoDiscountValue) && prazoDiscountValue > 0) {
+        return Math.min(100, (prazoDiscountValue / baseTotal) * 100);
+      }
+      // Retornar a porcentagem direta
+      const prazoDiscountPercentage = Number(this.proposal?.prazo_discount_percentage);
+      return (!isNaN(prazoDiscountPercentage) && prazoDiscountPercentage > 0) ? prazoDiscountPercentage : 0;
+    }
+  }
+
+  // Método auxiliar para verificar se há desconto à vista
+  hasVistaDiscount(): boolean {
+    const vistaDiscountValue = Number(this.proposal?.vista_discount_value);
+    const vistaDiscountPercentage = Number(this.proposal?.vista_discount_percentage);
+    return (!isNaN(vistaDiscountValue) && vistaDiscountValue > 0) ||
+           (!isNaN(vistaDiscountPercentage) && vistaDiscountPercentage > 0);
+  }
+
+  // Método auxiliar para verificar se há desconto a prazo
+  hasPrazoDiscount(): boolean {
+    const prazoDiscountValue = Number(this.proposal?.prazo_discount_value);
+    const prazoDiscountPercentage = Number(this.proposal?.prazo_discount_percentage);
+    return (!isNaN(prazoDiscountValue) && prazoDiscountValue > 0) ||
+           (!isNaN(prazoDiscountPercentage) && prazoDiscountPercentage > 0);
   }
 
   // Método para fechar o modal de sucesso

@@ -379,21 +379,38 @@
               <div class="original-price-summary">
                 De: <s>{{ formatCurrency(getBaseTotal()) }}</s>
               </div>
-              <div class="discount-amount-summary">
-                Economia de {{ formatCurrency(getDiscountAmount()) }} ({{ discountPercentage }}% OFF)
+              <div class="discount-amount-summary" *ngIf="getCurrentDiscountPercentage() > 0">
+                Economia de {{ formatCurrency(getDiscountAmount()) }} ({{ getCurrentDiscountPercentage().toFixed(1) }}% OFF)
+              </div>
+              <div class="discount-amount-summary" *ngIf="getCurrentDiscountPercentage() === 0 && getDiscountAmount() > 0">
+                Economia de {{ formatCurrency(getDiscountAmount()) }}
               </div>
             </div>
             <div class="discount-note">
-              <span *ngIf="paymentType === 'prazo' && proposal && proposal.vista_discount_percentage && proposal.vista_discount_percentage > 0">
-                *desconto de {{ proposal.vista_discount_percentage }}% para pagamento à vista
+              <span *ngIf="paymentType === 'prazo' && hasVistaDiscount()">
+                <ng-container *ngIf="proposal && proposal.vista_discount_percentage && proposal.vista_discount_percentage > 0">
+                  *desconto de {{ proposal.vista_discount_percentage }}% para pagamento à vista
+                </ng-container>
+                <ng-container *ngIf="proposal && (!proposal.vista_discount_percentage || proposal.vista_discount_percentage === 0) && proposal.vista_discount_value && proposal.vista_discount_value > 0">
+                  *desconto de {{ formatCurrency(proposal.vista_discount_value || 0) }} para pagamento à vista
+                </ng-container>
               </span>
-              <span *ngIf="paymentType === 'vista' && proposal && proposal.prazo_discount_percentage && proposal.prazo_discount_percentage > 0">
-                *desconto de {{ proposal.prazo_discount_percentage }}% para pagamento à prazo
+              <span *ngIf="paymentType === 'vista' && hasPrazoDiscount()">
+                <ng-container *ngIf="proposal && proposal.prazo_discount_percentage && proposal.prazo_discount_percentage > 0">
+                  *desconto de {{ proposal.prazo_discount_percentage }}% para pagamento à prazo
+                </ng-container>
+                <ng-container *ngIf="proposal && (!proposal.prazo_discount_percentage || proposal.prazo_discount_percentage === 0) && proposal.prazo_discount_value && proposal.prazo_discount_value > 0">
+                  *desconto de {{ formatCurrency(proposal.prazo_discount_value || 0) }} para pagamento à prazo
+                </ng-container>
               </span>
             </div>
-            <div class="discount-info" *ngIf="canGetDiscount()">
+            <div class="discount-info" *ngIf="canGetDiscount() && getCurrentDiscountPercentage() > 0">
               <i class="fas fa-tag"></i>
-              <span>Desconto de {{ discountPercentage }}% aplicado!</span>
+              <span>Desconto de {{ getCurrentDiscountPercentage().toFixed(1) }}% aplicado!</span>
+            </div>
+            <div class="discount-info" *ngIf="canGetDiscount() && getCurrentDiscountPercentage() === 0 && getDiscountAmount() > 0">
+              <i class="fas fa-tag"></i>
+              <span>Desconto de {{ formatCurrency(getDiscountAmount()) }} aplicado!</span>
             </div>
             <div class="discount-unavailable" *ngIf="paymentType === 'vista' && !areAllServicesSelected()">
               <i class="fas fa-exclamation-triangle"></i>
@@ -508,23 +525,28 @@
                                [checked]="paymentType === 'vista'"
                                (change)="onPaymentTypeChange('vista')">
                         <span class="card-title">À Vista</span>
-                        <span class="discount-badge" *ngIf="areAllServicesSelected() && proposal && proposal.vista_discount_percentage && proposal.vista_discount_percentage > 0">
-                          {{ proposal.vista_discount_percentage }}% OFF
+                        <span class="discount-badge" *ngIf="areAllServicesSelected() && hasVistaDiscount()">
+                          <ng-container *ngIf="proposal && proposal.vista_discount_percentage && proposal.vista_discount_percentage > 0">
+                            {{ proposal.vista_discount_percentage }}% OFF
+                          </ng-container>
+                          <ng-container *ngIf="proposal && (!proposal.vista_discount_percentage || proposal.vista_discount_percentage === 0) && proposal.vista_discount_value && proposal.vista_discount_value > 0">
+                            -{{ formatCurrency(proposal.vista_discount_value || 0) }}
+                          </ng-container>
                         </span>
                       </div>
                       <div class="card-content">
                         <div class="price-display">
-                          <span class="original-price" *ngIf="proposal && proposal.vista_discount_percentage && proposal.vista_discount_percentage > 0 && areAllServicesSelected()">
+                          <span class="original-price" *ngIf="hasVistaDiscount() && areAllServicesSelected()">
                             De: {{ formatCurrency(getBaseTotal()) }}
                           </span>
                           <span class="final-price">
                             {{ formatCurrency(getVistaValueWithDiscount()) }}
                           </span>
                         </div>
-                        <div class="savings" *ngIf="areAllServicesSelected() && proposal && proposal.vista_discount_percentage && proposal.vista_discount_percentage > 0">
+                        <div class="savings" *ngIf="areAllServicesSelected() && hasVistaDiscount()">
                           Economia de {{ formatCurrency(getBaseTotal() - getVistaValueWithDiscount()) }}
                         </div>
-                        <div class="no-discount-info" *ngIf="!areAllServicesSelected() && proposal && proposal.vista_discount_percentage && proposal.vista_discount_percentage > 0">
+                        <div class="no-discount-info" *ngIf="!areAllServicesSelected() && hasVistaDiscount()">
                           <small>Desconto disponível apenas com todos os serviços</small>
                         </div>
                       </div>
@@ -539,13 +561,18 @@
                                [checked]="paymentType === 'prazo'"
                                (change)="onPaymentTypeChange('prazo')">
                         <span class="card-title">A Prazo</span>
-                        <span class="discount-badge" *ngIf="areAllServicesSelected() && proposal && proposal.prazo_discount_percentage && proposal.prazo_discount_percentage > 0">
-                          {{ proposal.prazo_discount_percentage }}% OFF
+                        <span class="discount-badge" *ngIf="areAllServicesSelected() && hasPrazoDiscount()">
+                          <ng-container *ngIf="proposal && proposal.prazo_discount_percentage && proposal.prazo_discount_percentage > 0">
+                            {{ proposal.prazo_discount_percentage }}% OFF
+                          </ng-container>
+                          <ng-container *ngIf="proposal && (!proposal.prazo_discount_percentage || proposal.prazo_discount_percentage === 0) && proposal.prazo_discount_value && proposal.prazo_discount_value > 0">
+                            -{{ formatCurrency(proposal.prazo_discount_value || 0) }}
+                          </ng-container>
                         </span>
                       </div>
                       <div class="card-content">
                         <div class="price-display">
-                          <span class="original-price" *ngIf="proposal && proposal.prazo_discount_percentage && proposal.prazo_discount_percentage > 0 && areAllServicesSelected()">
+                          <span class="original-price" *ngIf="hasPrazoDiscount() && areAllServicesSelected()">
                             De: {{ formatCurrency(getBaseTotal()) }}
                           </span>
                           <span class="final-price">
@@ -555,10 +582,10 @@
                         <div class="installments-info">
                           Em até {{ (proposal && proposal.max_installments) || 12 }}x de {{ formatCurrency(getPrazoValueWithDiscount() / ((proposal && proposal.max_installments) || 12)) }}
                         </div>
-                        <div class="savings" *ngIf="areAllServicesSelected() && proposal && proposal.prazo_discount_percentage && proposal.prazo_discount_percentage > 0">
+                        <div class="savings" *ngIf="areAllServicesSelected() && hasPrazoDiscount()">
                           Economia de {{ formatCurrency(getBaseTotal() - getPrazoValueWithDiscount()) }}
                         </div>
-                        <div class="no-discount-info" *ngIf="!areAllServicesSelected() && proposal && proposal.prazo_discount_percentage && proposal.prazo_discount_percentage > 0">
+                        <div class="no-discount-info" *ngIf="!areAllServicesSelected() && hasPrazoDiscount()">
                           <small>Desconto disponível apenas com todos os serviços</small>
                         </div>
                       </div>

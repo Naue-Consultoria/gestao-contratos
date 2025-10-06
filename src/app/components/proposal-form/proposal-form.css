@@ -1090,3 +1090,106 @@ textarea.form-control {
     min-width: auto;
   }
 }
+
+/* ========================================
+   DISCOUNT SECTIONS
+   ======================================== */
+
+.discount-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.discount-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #022c22;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.discount-title i {
+  color: #047857;
+  font-size: 1rem;
+}
+
+.discount-inputs {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1.5rem;
+  align-items: end;
+}
+
+.discount-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  padding-bottom: 1.5rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85rem;
+  position: relative;
+}
+
+.discount-separator::before,
+.discount-separator::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #ddd);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.discount-separator::before {
+  left: -45px;
+}
+
+.discount-separator::after {
+  right: -45px;
+  background: linear-gradient(270deg, transparent, #ddd);
+}
+
+.discount-section .help-text {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e0e0e0;
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Responsividade para seções de desconto */
+@media (max-width: 768px) {
+  .discount-inputs {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .discount-separator {
+    padding: 1rem 0;
+  }
+
+  .discount-separator::before,
+  .discount-separator::after {
+    width: 100px;
+    top: 50%;
+  }
+
+  .discount-separator::before {
+    left: 0;
+  }
+
+  .discount-separator::after {
+    right: 0;
+  }
+}

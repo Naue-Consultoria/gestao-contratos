@@ -105,6 +105,9 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     this.newClientForm.get('client_type')?.valueChanges.subscribe(value => {
       this.updateDocumentValidation(value);
     });
+
+    // Adicionar listeners para conversão entre valor e porcentagem
+    this.setupDiscountListeners();
   }
 
   ngOnDestroy(): void {
@@ -121,6 +124,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       max_installments: [12, [Validators.required, Validators.min(1), Validators.max(24)]],
       vista_discount_percentage: [6, [Validators.required, Validators.min(0), Validators.max(100)]],
       prazo_discount_percentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+      vista_discount_value: [0, [Validators.required, Validators.min(0)]],
+      prazo_discount_value: [0, [Validators.required, Validators.min(0)]],
       status: ['draft'], // Campo de status adicionado
       solicitante_name: [''],
       solicitante_email: ['', Validators.email],
@@ -194,6 +199,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       max_installments: proposal.max_installments ?? 12, // Usar nullish coalescing para preservar valor do BD
       vista_discount_percentage: proposal.vista_discount_percentage ?? 6,
       prazo_discount_percentage: proposal.prazo_discount_percentage ?? 0,
+      vista_discount_value: (proposal as any).vista_discount_value ?? 0,
+      prazo_discount_value: (proposal as any).prazo_discount_value ?? 0,
       status: proposal.status || 'draft', // Carregar status da proposta
       solicitante_name: proposal.solicitante_name || '',
       solicitante_email: proposal.solicitante_email || '',
@@ -871,6 +878,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       max_installments: this.proposalForm.value.max_installments || 12,
       vista_discount_percentage: this.proposalForm.value.vista_discount_percentage ?? 6,
       prazo_discount_percentage: this.proposalForm.value.prazo_discount_percentage ?? 0,
+      vista_discount_value: this.proposalForm.value.vista_discount_value ?? 0,
+      prazo_discount_value: this.proposalForm.value.prazo_discount_value ?? 0,
       validity_days: 30, // Valor padrão
       services: this.selectedServices.map((service, index) => ({
         service_id: service.id,
@@ -1041,6 +1050,79 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     // Update validity
     cpfControl?.updateValueAndValidity();
     cnpjControl?.updateValueAndValidity();
+  }
+
+  // Métodos para conversão entre valor absoluto e porcentagem de desconto
+  private setupDiscountListeners(): void {
+    // Listener para desconto à vista - porcentagem
+    this.proposalForm.get('vista_discount_percentage')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((percentage) => {
+        if (percentage !== null && percentage !== undefined && !this.isUpdatingDiscounts) {
+          this.updateVistaDiscountValue(percentage);
+        }
+      });
+
+    // Listener para desconto à vista - valor
+    this.proposalForm.get('vista_discount_value')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        if (value !== null && value !== undefined && !this.isUpdatingDiscounts) {
+          this.updateVistaDiscountPercentage(value);
+        }
+      });
+
+    // Listener para desconto a prazo - porcentagem
+    this.proposalForm.get('prazo_discount_percentage')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((percentage) => {
+        if (percentage !== null && percentage !== undefined && !this.isUpdatingDiscounts) {
+          this.updatePrazoDiscountValue(percentage);
+        }
+      });
+
+    // Listener para desconto a prazo - valor
+    this.proposalForm.get('prazo_discount_value')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        if (value !== null && value !== undefined && !this.isUpdatingDiscounts) {
+          this.updatePrazoDiscountPercentage(value);
+        }
+      });
+  }
+
+  private isUpdatingDiscounts = false; // Flag para evitar loops infinitos
+
+  private updateVistaDiscountValue(percentage: number): void {
+    const totalValue = this.calculateTotal();
+    const discountValue = totalValue * (percentage / 100);
+    this.isUpdatingDiscounts = true;
+    this.proposalForm.patchValue({ vista_discount_value: Number(discountValue.toFixed(2)) }, { emitEvent: false });
+    this.isUpdatingDiscounts = false;
+  }
+
+  private updateVistaDiscountPercentage(value: number): void {
+    const totalValue = this.calculateTotal();
+    const percentage = totalValue > 0 ? (value / totalValue) * 100 : 0;
+    this.isUpdatingDiscounts = true;
+    this.proposalForm.patchValue({ vista_discount_percentage: Number(percentage.toFixed(2)) }, { emitEvent: false });
+    this.isUpdatingDiscounts = false;
+  }
+
+  private updatePrazoDiscountValue(percentage: number): void {
+    const totalValue = this.calculateTotal();
+    const discountValue = totalValue * (percentage / 100);
+    this.isUpdatingDiscounts = true;
+    this.proposalForm.patchValue({ prazo_discount_value: Number(discountValue.toFixed(2)) }, { emitEvent: false });
+    this.isUpdatingDiscounts = false;
+  }
+
+  private updatePrazoDiscountPercentage(value: number): void {
+    const totalValue = this.calculateTotal();
+    const percentage = totalValue > 0 ? (value / totalValue) * 100 : 0;
+    this.isUpdatingDiscounts = true;
+    this.proposalForm.patchValue({ prazo_discount_percentage: Number(percentage.toFixed(2)) }, { emitEvent: false });
+    this.isUpdatingDiscounts = false;
   }
 
 

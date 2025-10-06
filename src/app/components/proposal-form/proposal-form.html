@@ -179,46 +179,106 @@
               <div class="help-text">Define o número máximo de parcelas que o cliente poderá escolher no pagamento a prazo</div>
             </div>
 
-            <!-- Desconto para pagamento à vista -->
-            <div class="form-group">
-              <label for="vista_discount" class="form-label">
-                <i class="fas fa-percentage"></i>
-                Desconto Pagamento à Vista (%)
-                <span class="required">*</span>
-              </label>
-              <input
-                id="vista_discount"
-                type="number"
-                formControlName="vista_discount_percentage"
-                class="form-control"
-                min="0"
-                max="100"
-                step="0.5"
-                [class.error]="isFieldInvalid('vista_discount_percentage')"
-                placeholder="Ex: 6">
-              <div *ngIf="isFieldInvalid('vista_discount_percentage')" class="error-message">Desconto à vista deve ser entre 0% e 100%.</div>
-              <div class="help-text">Desconto aplicado automaticamente para pagamento à vista (padrão: 6%)</div>
+            <!-- Descontos para pagamento à vista -->
+            <div class="discount-section">
+              <h4 class="discount-title">
+                <i class="fas fa-tag"></i>
+                Desconto para Pagamento à Vista
+              </h4>
+              <div class="discount-inputs">
+                <!-- Desconto à vista em porcentagem -->
+                <div class="form-group">
+                  <label for="vista_discount" class="form-label">
+                    <i class="fas fa-percentage"></i>
+                    Porcentagem (%)
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="vista_discount"
+                    type="number"
+                    formControlName="vista_discount_percentage"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    [class.error]="isFieldInvalid('vista_discount_percentage')"
+                    placeholder="Ex: 6">
+                  <div *ngIf="isFieldInvalid('vista_discount_percentage')" class="error-message">Desconto deve ser entre 0% e 100%.</div>
+                </div>
+
+                <div class="discount-separator">ou</div>
+
+                <!-- Desconto à vista em valor absoluto -->
+                <div class="form-group">
+                  <label for="vista_discount_value" class="form-label">
+                    <i class="fas fa-dollar-sign"></i>
+                    Valor (R$)
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="vista_discount_value"
+                    type="number"
+                    formControlName="vista_discount_value"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    [class.error]="isFieldInvalid('vista_discount_value')"
+                    placeholder="Ex: 500.00">
+                  <div *ngIf="isFieldInvalid('vista_discount_value')" class="error-message">Valor deve ser maior ou igual a zero.</div>
+                </div>
+              </div>
+              <div class="help-text">Digite a porcentagem ou o valor. O outro campo será calculado automaticamente.</div>
             </div>
 
-            <!-- Desconto para pagamento à prazo -->
-            <div class="form-group">
-              <label for="prazo_discount" class="form-label">
-                <i class="fas fa-percentage"></i>
-                Desconto Pagamento à Prazo (%)
-                <span class="required">*</span>
-              </label>
-              <input
-                id="prazo_discount"
-                type="number"
-                formControlName="prazo_discount_percentage"
-                class="form-control"
-                min="0"
-                max="100"
-                step="0.5"
-                [class.error]="isFieldInvalid('prazo_discount_percentage')"
-                placeholder="Ex: 0">
-              <div *ngIf="isFieldInvalid('prazo_discount_percentage')" class="error-message">Desconto à prazo deve ser entre 0% e 100%.</div>
-              <div class="help-text">Desconto aplicado para pagamento parcelado (padrão: 0%)</div>
+            <!-- Descontos para pagamento à prazo -->
+            <div class="discount-section">
+              <h4 class="discount-title">
+                <i class="fas fa-calendar-alt"></i>
+                Desconto para Pagamento à Prazo
+              </h4>
+              <div class="discount-inputs">
+                <!-- Desconto à prazo em porcentagem -->
+                <div class="form-group">
+                  <label for="prazo_discount" class="form-label">
+                    <i class="fas fa-percentage"></i>
+                    Porcentagem (%)
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="prazo_discount"
+                    type="number"
+                    formControlName="prazo_discount_percentage"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    [class.error]="isFieldInvalid('prazo_discount_percentage')"
+                    placeholder="Ex: 0">
+                  <div *ngIf="isFieldInvalid('prazo_discount_percentage')" class="error-message">Desconto deve ser entre 0% e 100%.</div>
+                </div>
+
+                <div class="discount-separator">ou</div>
+
+                <!-- Desconto à prazo em valor absoluto -->
+                <div class="form-group">
+                  <label for="prazo_discount_value" class="form-label">
+                    <i class="fas fa-dollar-sign"></i>
+                    Valor (R$)
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="prazo_discount_value"
+                    type="number"
+                    formControlName="prazo_discount_value"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    [class.error]="isFieldInvalid('prazo_discount_value')"
+                    placeholder="Ex: 0.00">
+                  <div *ngIf="isFieldInvalid('prazo_discount_value')" class="error-message">Valor deve ser maior ou igual a zero.</div>
+                </div>
+              </div>
+              <div class="help-text">Digite a porcentagem ou o valor. O outro campo será calculado automaticamente.</div>
             </div>
 
           </div>

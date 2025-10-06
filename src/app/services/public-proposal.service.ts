@@ -43,6 +43,8 @@ export interface PublicProposal {
   max_installments?: number;
   vista_discount_percentage?: number;
   prazo_discount_percentage?: number;
+  vista_discount_value?: number;
+  prazo_discount_value?: number;
   client: {
     id: number;
     email: string;
