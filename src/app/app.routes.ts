@@ -35,6 +35,7 @@ import { AnalyticsRsComponent } from './pages/analytics-rs/analytics-rs';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied';
 import { MentoriaList } from './components/mentoria-list/mentoria-list';
 import { MentoriaEditor } from './components/mentoria-editor/mentoria-editor';
+import { MentoriaView } from './components/mentoria-view/mentoria-view';
 import { MentoriaConteudoEditor } from './components/mentoria-conteudo-editor/mentoria-conteudo-editor';
 import { PublicMentoriaViewComponent } from './pages/public-mentoria-view/public-mentoria-view';
 import { AuthGuard } from './guards/auth-guard';
@@ -299,7 +300,7 @@ export const routes: Routes = [
         title: 'Editar Vaga - NAUE Consultoria',
       },
 
-      // Mentorias
+      // Mentorias - Lista
       {
         path: 'mentorias',
         component: MentoriaList,
@@ -307,17 +308,25 @@ export const routes: Routes = [
         title: 'Mentorias - NAUE Consultoria',
       },
 
-      // Novo encontro de mentoria
+      // Nova mentoria (cria múltiplos encontros)
       {
-        path: 'mentorias/novo',
+        path: 'mentorias/nova',
         component: MentoriaEditor,
         canActivate: [AdminGerencialGuard],
-        title: 'Novo Encontro - NAUE Consultoria',
+        title: 'Nova Mentoria - NAUE Consultoria',
       },
 
-      // Editar encontro de mentoria
+      // Visualizar detalhes da mentoria
       {
-        path: 'mentorias/editar/:id',
+        path: 'mentorias/visualizar/:id',
+        component: MentoriaView,
+        canActivate: [AdminGerencialGuard],
+        title: 'Detalhes da Mentoria - NAUE Consultoria',
+      },
+
+      // Editar encontro individual de mentoria
+      {
+        path: 'mentorias/editar-encontro/:id',
         component: MentoriaEditor,
         canActivate: [AdminGerencialGuard],
         title: 'Editar Encontro - NAUE Consultoria',

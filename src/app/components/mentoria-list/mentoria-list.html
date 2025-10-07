@@ -4,9 +4,9 @@
       <h1 class="page-title">Gestão de Mentorias</h1>
       <app-breadcrumb></app-breadcrumb>
     </div>
-    <button class="btn-primary" (click)="novoEncontro()">
+    <button class="btn-primary" (click)="novaMentoria()">
       <i class="fas fa-plus"></i>
-      Novo Encontro
+      Nova Mentoria
     </button>
   </div>
 
@@ -14,11 +14,11 @@
   <div class="stats-cards">
     <div class="stat-card">
       <div class="stat-icon total">
-        <i class="fas fa-calendar"></i>
+        <i class="fas fa-users"></i>
       </div>
       <div class="stat-info">
-        <div class="stat-value">{{ totalEncontros }}</div>
-        <div class="stat-label">Total de Encontros</div>
+        <div class="stat-value">{{ totalMentorias }}</div>
+        <div class="stat-label">Total de Mentorias</div>
       </div>
     </div>
 
@@ -27,18 +27,18 @@
         <i class="fas fa-check-circle"></i>
       </div>
       <div class="stat-info">
-        <div class="stat-value">{{ encontrosPublicados }}</div>
-        <div class="stat-label">Publicados</div>
+        <div class="stat-value">{{ mentoriasAtivas }}</div>
+        <div class="stat-label">Ativas</div>
       </div>
     </div>
 
     <div class="stat-card">
       <div class="stat-icon draft">
-        <i class="fas fa-edit"></i>
+        <i class="fas fa-calendar"></i>
       </div>
       <div class="stat-info">
-        <div class="stat-value">{{ encontrosRascunho }}</div>
-        <div class="stat-label">Rascunhos</div>
+        <div class="stat-value">{{ totalEncontros }}</div>
+        <div class="stat-label">Total de Encontros</div>
       </div>
     </div>
   </div>
@@ -51,7 +51,7 @@
         type="text"
         [(ngModel)]="filtroBusca"
         (ngModelChange)="onFiltroChange()"
-        placeholder="Buscar por nome do mentorado, número do encontro..."
+        placeholder="Buscar por cliente, contrato..."
         class="search-input">
     </div>
 
@@ -64,102 +64,151 @@
         </option>
       </select>
     </div>
+
+    <div class="filter-group">
+      <label>Status:</label>
+      <select [(ngModel)]="filtroStatus" (ngModelChange)="onFiltroChange()" class="filter-select">
+        <option value="all">Todos os status</option>
+        <option value="ativa">Ativa</option>
+        <option value="concluida">Concluída</option>
+        <option value="cancelada">Cancelada</option>
+      </select>
+    </div>
   </div>
 
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-state">
     <div class="spinner"></div>
-    <p>Carregando encontros...</p>
+    <p>Carregando mentorias...</p>
   </div>
 
-  <!-- Lista de Encontros -->
-  <div *ngIf="!isLoading" class="encontros-list">
+  <!-- Lista de Mentorias -->
+  <div *ngIf="!isLoading" class="mentorias-list">
     <!-- Empty State -->
-    <div *ngIf="encontrosAgrupados.size === 0" class="empty-state">
+    <div *ngIf="mentoriasFiltradas.length === 0" class="empty-state">
       <i class="fas fa-inbox"></i>
-      <h3>Nenhum encontro encontrado</h3>
-      <p *ngIf="filtroBusca || filtroCliente !== 'all'">
-        Tente ajustar os filtros ou criar um novo encontro
+      <h3>Nenhuma mentoria encontrada</h3>
+      <p *ngIf="filtroBusca || filtroCliente !== 'all' || filtroStatus !== 'all'">
+        Tente ajustar os filtros ou criar uma nova mentoria
       </p>
-      <p *ngIf="!filtroBusca && filtroCliente === 'all'">
-        Comece criando seu primeiro encontro de mentoria
+      <p *ngIf="!filtroBusca && filtroCliente === 'all' && filtroStatus === 'all'">
+        Comece criando sua primeira mentoria
       </p>
-      <button class="btn-primary" (click)="novoEncontro()">
+      <button class="btn-primary" (click)="novaMentoria()">
         <i class="fas fa-plus"></i>
-        Criar Primeiro Encontro
+        Criar Primeira Mentoria
       </button>
     </div>
 
-    <!-- Cards de Contratos com Encontros -->
-    <div *ngIf="encontrosAgrupados.size > 0" class="contratos-grid">
-      <div *ngFor="let grupo of encontrosAgrupados | keyvalue" class="contrato-card">
+    <!-- Cards de Mentorias -->
+    <div *ngIf="mentoriasFiltradas.length > 0" class="mentorias-grid">
+      <div *ngFor="let mentoria of mentoriasFiltradas" class="mentoria-card">
 
-        <!-- Header do Card do Contrato -->
-        <div class="contrato-header">
-          <div class="contrato-info">
-            <h3 class="contrato-titulo">
+        <!-- Header do Card -->
+        <div class="mentoria-header">
+          <div class="mentoria-info" (click)="visualizarMentoria(mentoria.id)">
+            <div class="cliente-principal">
               <i class="fas fa-building"></i>
-              {{ grupo.value.contract?.client?.clients_pj?.company_name || grupo.value.contract?.client?.clients_pf?.full_name || 'Cliente não informado' }}
-            </h3>
-            <div class="cliente-info">
-              <i class="fas fa-file-contract"></i>
-              <span>Contrato {{ grupo.value.contract?.contract_number || 'N/A' }}</span>
+              <h3>
+                {{ mentoria.client?.clients_pj?.company_name || mentoria.client?.clients_pf?.full_name || 'Cliente não informado' }}
+              </h3>
+            </div>
+            <div class="mentoria-meta">
+              <span class="meta-item">
+                <i class="fas fa-file-contract"></i>
+                Contrato {{ mentoria.contract?.contract_number || 'N/A' }}
+              </span>
+              <span class="meta-item">
+                <i class="fas fa-calendar-alt"></i>
+                {{ mentoria.numero_encontros }} encontro{{ mentoria.numero_encontros !== 1 ? 's' : '' }}
+              </span>
+              <span [class]="'status-badge ' + getStatusBadgeClass(mentoria.status)">
+                {{ getStatusLabel(mentoria.status) }}
+              </span>
             </div>
           </div>
-          <div class="contrato-stats">
-            <span class="total-encontros">
-              {{ grupo.value.encontros.length }} encontro{{ grupo.value.encontros.length !== 1 ? 's' : '' }}
-            </span>
+
+          <div class="mentoria-actions">
+            <button
+              class="btn-expand"
+              [class.expanded]="mentoriaExpandida === mentoria.id"
+              (click)="toggleExpandirMentoria(mentoria.id)"
+              title="Ver encontros">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+
+            <div class="dropdown-menu-container" (click)="$event.stopPropagation()">
+              <button
+                class="btn-action dropdown-toggle"
+                (click)="toggleDropdown(mentoria.id)"
+                title="Mais opções">
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+              <div class="dropdown-menu" *ngIf="dropdownAberto === mentoria.id">
+                <button class="dropdown-item" (click)="adicionarEncontros(mentoria); closeDropdown()">
+                  <i class="fas fa-plus-circle"></i>
+                  <span>Adicionar Encontros</span>
+                </button>
+                <button class="dropdown-item danger" (click)="deletarMentoria(mentoria); closeDropdown()">
+                  <i class="fas fa-trash"></i>
+                  <span>Deletar Mentoria</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Lista de Encontros do Contrato -->
-        <div class="encontros-container">
-          <div *ngFor="let encontro of grupo.value.encontros; let i = index" class="encontro-item">
+        <!-- Encontros (Expandível) -->
+        <div class="encontros-container" *ngIf="mentoriaExpandida === mentoria.id && mentoria.encontros">
+          <div class="encontros-header">
+            <h4>
+              <i class="fas fa-list"></i>
+              Encontros desta Mentoria
+            </h4>
+            <div class="encontros-stats">
+              <span class="stat-badge published" *ngIf="getEncontrosPublicados(mentoria) > 0">
+                <i class="fas fa-check-circle"></i>
+                {{ getEncontrosPublicados(mentoria) }} publicado{{ getEncontrosPublicados(mentoria) !== 1 ? 's' : '' }}
+              </span>
+              <span class="stat-badge draft" *ngIf="getEncontrosRascunho(mentoria) > 0">
+                <i class="fas fa-edit"></i>
+                {{ getEncontrosRascunho(mentoria) }} rascunho{{ getEncontrosRascunho(mentoria) !== 1 ? 's' : '' }}
+              </span>
+            </div>
+          </div>
 
-            <!-- Coluna Esquerda - Número e Status -->
-            <div class="encontro-left">
-              <span class="encontro-numero" *ngIf="encontro.numero_encontro">
+          <div class="encontros-list">
+            <div *ngFor="let encontro of mentoria.encontros" class="encontro-item">
+              <!-- Número -->
+              <div class="encontro-numero-badge">
                 {{ encontro.numero_encontro }}
-              </span>
-              <span class="encontro-numero" *ngIf="!encontro.numero_encontro">
-                {{ i + 1 }}
-              </span>
-            </div>
-
-            <!-- Coluna Central - Informações -->
-            <div class="encontro-center">
-              <div class="encontro-main-info">
-                <h4 class="mentorado-nome">
-                  {{ encontro.mentorado_nome }}
-                </h4>
-                <div class="encontro-meta">
-                  <div class="meta-item">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>{{ formatarData(encontro.data_encontro) }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span [class]="'status-badge ' + getStatusBadgeClass(encontro.status)">
-                      {{ getStatusLabel(encontro.status) }}
-                    </span>
-                  </div>
-                  <div class="meta-item" *ngIf="isTokenExpirado(encontro)">
-                    <span class="token-expiry">
-                      <i class="fas fa-exclamation-triangle"></i> Link Expirado
-                    </span>
-                  </div>
-                </div>
-                <p class="visao-geral" *ngIf="encontro.visao_geral">
-                  {{ encontro.visao_geral }}
-                </p>
               </div>
-            </div>
 
-            <!-- Coluna Direita - Ações -->
-            <div class="encontro-right">
+              <!-- Info -->
+              <div class="encontro-info">
+                <div class="encontro-nome">
+                  {{ encontro.mentorado_nome }}
+                </div>
+                <div class="encontro-data">
+                  <i class="fas fa-calendar-alt"></i>
+                  {{ formatarData(encontro.data_encontro) }}
+                </div>
+              </div>
+
+              <!-- Status -->
+              <div class="encontro-status">
+                <span [class]="'status-badge-small ' + getStatusBadgeClass(encontro.status)">
+                  {{ getStatusLabel(encontro.status) }}
+                </span>
+                <span class="token-expiry-small" *ngIf="isTokenExpirado(encontro)">
+                  <i class="fas fa-exclamation-triangle"></i> Expirado
+                </span>
+              </div>
+
+              <!-- Ações -->
               <div class="encontro-actions">
                 <button
-                  class="btn-action"
+                  class="btn-action-sm"
                   *ngIf="encontro.status === 'draft'"
                   (click)="publicarEncontro(encontro)"
                   title="Publicar">
@@ -167,7 +216,7 @@
                 </button>
 
                 <button
-                  class="btn-action"
+                  class="btn-action-sm"
                   *ngIf="encontro.status === 'published'"
                   (click)="visualizarEncontro(encontro)"
                   title="Visualizar">
@@ -175,34 +224,28 @@
                 </button>
 
                 <button
-                  class="btn-action"
+                  class="btn-action-sm"
                   *ngIf="encontro.status === 'published'"
                   (click)="copiarLink(encontro)"
                   title="Copiar Link">
                   <i class="fas fa-copy"></i>
                 </button>
 
-                <div class="dropdown-menu-container">
-                  <button
-                    class="btn-action dropdown-toggle"
-                    (click)="toggleDropdown(encontro.id)"
-                    title="Mais opções">
-                    <i class="fas fa-ellipsis-v"></i>
-                  </button>
-                  <div class="dropdown-menu" *ngIf="dropdownAberto === encontro.id">
-                    <button class="dropdown-item" (click)="editarEncontro(encontro.id); closeDropdown()">
-                      <i class="fas fa-edit"></i>
-                      <span>Editar</span>
-                    </button>
-                    <button class="dropdown-item danger" (click)="deletarEncontro(encontro); closeDropdown()">
-                      <i class="fas fa-trash"></i>
-                      <span>Deletar</span>
-                    </button>
-                  </div>
-                </div>
+                <button
+                  class="btn-action-sm"
+                  (click)="editarEncontro(encontro.id)"
+                  title="Editar">
+                  <i class="fas fa-edit"></i>
+                </button>
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Loading dos Encontros -->
+        <div class="encontros-loading" *ngIf="mentoriaExpandida === mentoria.id && !mentoria.encontros">
+          <div class="spinner-small"></div>
+          <span>Carregando encontros...</span>
         </div>
       </div>
     </div>

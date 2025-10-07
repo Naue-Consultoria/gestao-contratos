@@ -66,17 +66,66 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.initForm();
-    this.carregarClientes();
-    this.carregarContratos();
+
+    // Carregar clientes e contratos primeiro, depois o encontro
+    Promise.all([
+      this.carregarClientesPromise(),
+      this.carregarContratosPromise()
+    ]).then(() => {
+      const id = this.route.snapshot.paramMap.get('id');
+      if (id) {
+        this.encontroId = parseInt(id, 10);
+        this.isEditMode = true;
+        this.carregarEncontro();
+      }
+    });
 
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.encontroId = parseInt(id, 10);
-      this.isEditMode = true;
-      this.carregarEncontro();
-    }
-
     this.setBreadcrumb(id || undefined);
+  }
+
+  private carregarClientesPromise(): Promise<void> {
+    return new Promise((resolve) => {
+      this.loadingClientes = true;
+      this.encontroForm.get('client_id')?.disable();
+
+      this.clientService.getClients().subscribe({
+        next: (response: ClientsResponse) => {
+          this.clientes = response.clients || [];
+          this.loadingClientes = false;
+          this.encontroForm.get('client_id')?.enable();
+          resolve();
+        },
+        error: (error: any) => {
+          console.error('Erro ao carregar clientes:', error);
+          this.toastr.error('Erro ao carregar clientes');
+          this.loadingClientes = false;
+          this.encontroForm.get('client_id')?.enable();
+          resolve();
+        }
+      });
+    });
+  }
+
+  private carregarContratosPromise(): Promise<void> {
+    return new Promise((resolve) => {
+      this.loadingContratos = true;
+
+      this.contractService.getContracts().subscribe({
+        next: (response: ContractsResponse) => {
+          this.contratos = response.contracts || [];
+          this.contratosFiltrados = this.contratos;
+          this.loadingContratos = false;
+          resolve();
+        },
+        error: (error: any) => {
+          console.error('Erro ao carregar contratos:', error);
+          this.toastr.error('Erro ao carregar contratos');
+          this.loadingContratos = false;
+          resolve();
+        }
+      });
+    });
   }
 
   ngAfterViewInit(): void {
@@ -89,9 +138,17 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
       contract_id: [{ value: '', disabled: true }, Validators.required],
       mentorado_nome: ['', [Validators.required, Validators.minLength(2)]],
       numero_encontro: [''],
-      data_encontro: ['', Validators.required],
+      numero_encontros: [5, [Validators.required, Validators.min(1), Validators.max(50)]], // Para criar mentoria
+      data_encontro: [''], // Não obrigatório no modo criação
       token_expira_em: ['']
     });
+
+    // Ajustar validações dinamicamente baseado no modo
+    if (!this.isEditMode) {
+      // Modo criação: data_encontro não é obrigatória
+      this.encontroForm.get('data_encontro')?.clearValidators();
+      this.encontroForm.get('data_encontro')?.updateValueAndValidity();
+    }
   }
 
   carregarEncontro(): void {
@@ -105,11 +162,15 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
           this.encontro = response.data;
           this.blocos = response.data.blocos || [];
 
-          // Buscar client_id do contrato
+          // Buscar client_id do contrato (após contratos estarem carregados)
           const contrato = this.contratos.find(c => c.id === this.encontro!.contract_id);
           const clientId = contrato?.client_id;
 
-          // Filtrar contratos pelo cliente
+          console.log('📋 Encontro carregado:', this.encontro);
+          console.log('📋 Contrato encontrado:', contrato);
+          console.log('📋 Client ID:', clientId);
+
+          // Filtrar contratos pelo cliente e habilitar o select
           if (clientId) {
             this.onClienteChange(clientId);
           }
@@ -299,10 +360,19 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
   // ===== SALVAR ENCONTRO =====
 
   async salvarEncontro(): Promise<void> {
+    console.log('🔍 salvarEncontro chamado');
+    console.log('📝 Formulário válido?', this.encontroForm.valid);
+    console.log('📝 Valores do formulário:', this.encontroForm.value);
+    console.log('📝 Erros do formulário:', this.encontroForm.errors);
+
     if (this.encontroForm.invalid) {
       this.toastr.error('Preencha todos os campos obrigatórios');
       Object.keys(this.encontroForm.controls).forEach(key => {
-        this.encontroForm.get(key)?.markAsTouched();
+        const control = this.encontroForm.get(key);
+        if (control?.invalid) {
+          console.log(`❌ Campo inválido: ${key}`, control.errors);
+        }
+        control?.markAsTouched();
       });
       return;
     }
@@ -311,6 +381,7 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
 
     try {
       if (this.isEditMode && this.encontroId) {
+        console.log('✏️ Modo edição - Atualizando encontro');
         // Atualizar encontro existente
         const response = await this.mentoriaService.atualizarEncontro(
           this.encontroId,
@@ -323,26 +394,46 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
           this.router.navigate(['/home/mentorias', this.encontroId, 'conteudo']);
         }
       } else {
-        // Criar novo encontro
-        const response = await this.mentoriaService.criarEncontro(
-          this.encontroForm.value
-        ).toPromise();
+        console.log('➕ Modo criação - Criando nova mentoria');
+        // CRIAR NOVA MENTORIA (não mais encontro individual)
+        const formValue = this.encontroForm.value;
+
+        // Habilitar contract_id temporariamente para pegar o valor
+        this.encontroForm.get('contract_id')?.enable();
+        const contractId = this.encontroForm.get('contract_id')?.value;
+        this.encontroForm.get('contract_id')?.disable();
+
+        const dados = {
+          client_id: formValue.client_id,
+          contract_id: contractId,
+          numero_encontros: formValue.numero_encontros,
+          mentorado_nome: formValue.mentorado_nome
+        };
+
+        console.log('📤 Enviando dados:', dados);
+
+        const response = await this.mentoriaService.criarMentoria(dados).toPromise();
+
+        console.log('📥 Resposta recebida:', response);
 
         if (response?.success && response.data) {
-          this.toastr.success('Encontro criado com sucesso!');
-
-          // Se há blocos locais, salvá-los
-          if (this.blocos.length > 0) {
-            await this.salvarBlocosLocais(response.data.id);
-          }
-
-          // Redirecionar para editor de conteúdo
-          this.router.navigate(['/home/mentorias', response.data.id, 'conteudo']);
+          this.toastr.success(
+            `Mentoria criada com ${response.data.numero_encontros} encontros!`,
+            'Sucesso',
+            { timeOut: 5000 }
+          );
+          // Redirecionar para listagem de mentorias
+          this.router.navigate(['/home/mentorias']);
         }
       }
-    } catch (error) {
-      console.error('Erro ao salvar encontro:', error);
-      this.toastr.error('Erro ao salvar encontro');
+    } catch (error: any) {
+      console.error('❌ Erro ao salvar:', error);
+      const errorMessage = error?.error?.message || error?.message || 'Erro desconhecido';
+      this.toastr.error(
+        this.isEditMode ? `Erro ao salvar encontro: ${errorMessage}` : `Erro ao criar mentoria: ${errorMessage}`,
+        'Erro',
+        { timeOut: 5000 }
+      );
     } finally {
       this.isSaving = false;
     }
@@ -502,42 +593,6 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
 
   // ===== CLIENTES E CONTRATOS =====
 
-  carregarClientes(): void {
-    this.loadingClientes = true;
-    this.encontroForm.get('client_id')?.disable();
-
-    this.clientService.getClients().subscribe({
-      next: (response: ClientsResponse) => {
-        this.clientes = response.clients || [];
-        this.loadingClientes = false;
-        this.encontroForm.get('client_id')?.enable();
-      },
-      error: (error: any) => {
-        console.error('Erro ao carregar clientes:', error);
-        this.toastr.error('Erro ao carregar clientes');
-        this.loadingClientes = false;
-        this.encontroForm.get('client_id')?.enable();
-      }
-    });
-  }
-
-  carregarContratos(): void {
-    this.loadingContratos = true;
-
-    this.contractService.getContracts().subscribe({
-      next: (response: ContractsResponse) => {
-        this.contratos = response.contracts || [];
-        this.contratosFiltrados = this.contratos;
-        this.loadingContratos = false;
-      },
-      error: (error: any) => {
-        console.error('Erro ao carregar contratos:', error);
-        this.toastr.error('Erro ao carregar contratos');
-        this.loadingContratos = false;
-      }
-    });
-  }
-
   onClienteChange(clienteId: number): void {
     this.encontroForm.patchValue({ contract_id: '' });
 
@@ -556,9 +611,24 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
     }
   }
 
-  getClienteNome(clientId: number): string {
-    const cliente = this.clientes.find(c => c.id === clientId);
-    return cliente ? (cliente.full_name || cliente.company_name || cliente.trade_name || 'Cliente') : 'Cliente';
+  getClienteNome(cliente: any): string {
+    if (!cliente) return 'CLIENTE';
+
+    // Para PJ: priorizar trade_name (nome fantasia), depois company_name (razão social)
+    // Para PF: usar full_name
+    let nome = '';
+
+    if (cliente.trade_name) {
+      nome = cliente.trade_name;
+    } else if (cliente.company_name) {
+      nome = cliente.company_name;
+    } else if (cliente.full_name) {
+      nome = cliente.full_name;
+    } else {
+      nome = 'Cliente';
+    }
+
+    return nome.toUpperCase();
   }
 
   // ===== BREADCRUMB =====

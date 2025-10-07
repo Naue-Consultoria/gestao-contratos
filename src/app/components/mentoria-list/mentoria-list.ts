@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { MentoriaService, MentoriaEncontro } from '../../services/mentoria.service';
+import { MentoriaService, Mentoria, MentoriaEncontro } from '../../services/mentoria.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
 
@@ -15,27 +15,26 @@ import { BreadcrumbService } from '../../services/breadcrumb.service';
   styleUrl: './mentoria-list.css'
 })
 export class MentoriaList implements OnInit {
-  encontros: MentoriaEncontro[] = [];
-  encontrosFiltrados: MentoriaEncontro[] = [];
-  encontrosAgrupados: Map<number, {
-    contract: any;
-    client: any;
-    encontros: MentoriaEncontro[];
-  }> = new Map();
+  mentorias: Mentoria[] = [];
+  mentoriasFiltradas: Mentoria[] = [];
   isLoading = false;
 
   // Filtros
   filtroCliente: string = 'all';
   filtroBusca: string = '';
+  filtroStatus: string = 'all';
   clientesUnicos: any[] = [];
 
   // Dropdown
   dropdownAberto: number | null = null;
 
   // Estatísticas
+  totalMentorias = 0;
+  mentoriasAtivas = 0;
   totalEncontros = 0;
-  encontrosPublicados = 0;
-  encontrosRascunho = 0;
+
+  // Mentoria expandida
+  mentoriaExpandida: number | null = null;
 
   constructor(
     private mentoriaService: MentoriaService,
@@ -46,7 +45,7 @@ export class MentoriaList implements OnInit {
 
   ngOnInit(): void {
     this.configurarBreadcrumb();
-    this.carregarEncontros();
+    this.carregarMentorias();
   }
 
   private configurarBreadcrumb(): void {
@@ -63,13 +62,19 @@ export class MentoriaList implements OnInit {
     ]);
   }
 
-  carregarEncontros(): void {
+  carregarMentorias(): void {
     this.isLoading = true;
 
-    this.mentoriaService.listarEncontros().subscribe({
+    this.mentoriaService.listarMentorias().subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.encontros = response.data;
+          this.mentorias = response.data;
+
+          console.log('📊 Mentorias carregadas:', this.mentorias);
+          console.log('📊 Primeira mentoria:', this.mentorias[0]);
+          console.log('📊 Client da primeira mentoria:', this.mentorias[0]?.client);
+          console.log('📊 Contract da primeira mentoria:', this.mentorias[0]?.contract);
+
           this.calcularEstatisticas();
           this.extrairClientesUnicos();
           this.aplicarFiltros();
@@ -77,8 +82,8 @@ export class MentoriaList implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Erro ao carregar encontros:', error);
-        this.toastr.error('Erro ao carregar encontros de mentoria');
+        console.error('Erro ao carregar mentorias:', error);
+        this.toastr.error('Erro ao carregar mentorias');
         this.isLoading = false;
       }
     });
@@ -87,9 +92,9 @@ export class MentoriaList implements OnInit {
   extrairClientesUnicos(): void {
     const clientesMap = new Map();
 
-    this.encontros.forEach(encontro => {
-      if (encontro.contract?.client) {
-        const client = encontro.contract.client;
+    this.mentorias.forEach(mentoria => {
+      if (mentoria.client) {
+        const client = mentoria.client;
         const clientId = client.id;
 
         if (!clientesMap.has(clientId)) {
@@ -108,80 +113,80 @@ export class MentoriaList implements OnInit {
   }
 
   calcularEstatisticas(): void {
-    this.totalEncontros = this.encontros.length;
-    this.encontrosPublicados = this.encontros.filter(e => e.status === 'published').length;
-    this.encontrosRascunho = this.encontros.filter(e => e.status === 'draft').length;
+    this.totalMentorias = this.mentorias.length;
+    this.mentoriasAtivas = this.mentorias.filter(m => m.status === 'ativa').length;
+    this.totalEncontros = this.mentorias.reduce((sum, m) => sum + m.numero_encontros, 0);
   }
 
   aplicarFiltros(): void {
-    let resultado = [...this.encontros];
+    let resultado = [...this.mentorias];
 
     // Filtro por cliente
     if (this.filtroCliente !== 'all') {
-      resultado = resultado.filter(e =>
-        e.contract?.client?.id === parseInt(this.filtroCliente)
+      resultado = resultado.filter(m =>
+        m.client?.id === parseInt(this.filtroCliente)
       );
+    }
+
+    // Filtro por status
+    if (this.filtroStatus !== 'all') {
+      resultado = resultado.filter(m => m.status === this.filtroStatus);
     }
 
     // Filtro por busca
     if (this.filtroBusca.trim()) {
       const busca = this.filtroBusca.toLowerCase();
-      resultado = resultado.filter(e =>
-        e.mentorado_nome.toLowerCase().includes(busca) ||
-        (e.numero_encontro && e.numero_encontro.toString().includes(busca)) ||
-        (e.visao_geral && e.visao_geral.toLowerCase().includes(busca)) ||
-        (e.contract?.contract_number?.toLowerCase().includes(busca)) ||
-        (e.contract?.client?.clients_pf?.full_name?.toLowerCase().includes(busca)) ||
-        (e.contract?.client?.clients_pj?.company_name?.toLowerCase().includes(busca))
+      resultado = resultado.filter(m =>
+        (m.contract?.contract_number?.toLowerCase().includes(busca)) ||
+        (m.client?.clients_pf?.full_name?.toLowerCase().includes(busca)) ||
+        (m.client?.clients_pj?.company_name?.toLowerCase().includes(busca))
       );
     }
 
-    this.encontrosFiltrados = resultado;
-    this.agruparEncontrosPorContrato();
-  }
-
-  agruparEncontrosPorContrato(): void {
-    this.encontrosAgrupados.clear();
-
-    this.encontrosFiltrados.forEach(encontro => {
-      const contractId = encontro.contract_id;
-
-      if (!this.encontrosAgrupados.has(contractId)) {
-        this.encontrosAgrupados.set(contractId, {
-          contract: encontro.contract,
-          client: encontro.contract?.client, // O cliente já está aninhado dentro de contract
-          encontros: []
-        });
-      }
-
-      const grupo = this.encontrosAgrupados.get(contractId);
-      if (grupo) {
-        grupo.encontros.push(encontro);
-      }
-    });
-
-    // Ordenar encontros dentro de cada grupo por número do encontro
-    this.encontrosAgrupados.forEach(grupo => {
-      grupo.encontros.sort((a, b) => {
-        if (a.numero_encontro && b.numero_encontro) {
-          return a.numero_encontro - b.numero_encontro;
-        }
-        // Se não tiver número, ordenar por data
-        return new Date(a.data_encontro).getTime() - new Date(b.data_encontro).getTime();
-      });
-    });
+    this.mentoriasFiltradas = resultado;
   }
 
   onFiltroChange(): void {
     this.aplicarFiltros();
   }
 
-  novoEncontro(): void {
-    this.router.navigate(['/home/mentorias/novo']);
+  novaMentoria(): void {
+    this.router.navigate(['/home/mentorias/nova']);
   }
 
-  editarEncontro(id: number): void {
-    this.router.navigate(['/home/mentorias/editar', id]);
+  visualizarMentoria(mentoriaId: number): void {
+    this.router.navigate(['/home/mentorias/visualizar', mentoriaId]);
+  }
+
+  editarEncontro(encontroId: number): void {
+    this.router.navigate(['/home/mentorias/editar-encontro', encontroId]);
+  }
+
+  adicionarEncontros(mentoria: Mentoria): void {
+    const quantidade = prompt('Quantos encontros deseja adicionar?', '1');
+
+    if (!quantidade || isNaN(parseInt(quantidade))) {
+      return;
+    }
+
+    const qtd = parseInt(quantidade);
+    if (qtd < 1 || qtd > 20) {
+      this.toastr.error('Quantidade deve estar entre 1 e 20');
+      return;
+    }
+
+    this.mentoriaService.adicionarEncontros(mentoria.id, qtd).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success(`${qtd} encontro(s) adicionado(s) com sucesso!`);
+          this.carregarMentorias();
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao adicionar encontros:', error);
+        this.toastr.error('Erro ao adicionar encontros');
+      }
+    });
   }
 
   visualizarEncontro(encontro: MentoriaEncontro): void {
@@ -205,7 +210,7 @@ export class MentoriaList implements OnInit {
       return;
     }
 
-    if (!confirm(`Deseja publicar o encontro "${encontro.mentorado_nome}"?`)) {
+    if (!confirm(`Deseja publicar o encontro #${encontro.numero_encontro}?`)) {
       return;
     }
 
@@ -213,7 +218,7 @@ export class MentoriaList implements OnInit {
       next: (response) => {
         if (response.success) {
           this.toastr.success('Encontro publicado com sucesso!');
-          this.carregarEncontros();
+          this.carregarMentorias();
         }
       },
       error: (error) => {
@@ -223,29 +228,64 @@ export class MentoriaList implements OnInit {
     });
   }
 
-  deletarEncontro(encontro: MentoriaEncontro): void {
+  deletarMentoria(mentoria: Mentoria): void {
+    const nomeCliente = mentoria.client?.clients_pj?.company_name ||
+                        mentoria.client?.clients_pf?.full_name ||
+                        'Cliente';
+
     const confirmacao = confirm(
-      `Tem certeza que deseja deletar o encontro "${encontro.mentorado_nome}"?\n\nEsta ação não pode ser desfeita.`
+      `Tem certeza que deseja deletar a mentoria do cliente "${nomeCliente}"?\n\n` +
+      `Isso irá deletar TODOS os ${mentoria.numero_encontros} encontros associados.\n\n` +
+      `Esta ação não pode ser desfeita.`
     );
 
     if (!confirmacao) return;
 
-    this.mentoriaService.deletarEncontro(encontro.id).subscribe({
+    this.mentoriaService.deletarMentoria(mentoria.id).subscribe({
       next: (response) => {
         if (response.success) {
-          this.toastr.success('Encontro deletado com sucesso');
-          this.carregarEncontros();
+          this.toastr.success('Mentoria deletada com sucesso');
+          this.carregarMentorias();
         }
       },
       error: (error) => {
-        console.error('Erro ao deletar encontro:', error);
-        this.toastr.error('Erro ao deletar encontro');
+        console.error('Erro ao deletar mentoria:', error);
+        this.toastr.error('Erro ao deletar mentoria');
       }
     });
   }
 
+  toggleExpandirMentoria(mentoriaId: number): void {
+    if (this.mentoriaExpandida === mentoriaId) {
+      this.mentoriaExpandida = null;
+    } else {
+      this.mentoriaExpandida = mentoriaId;
+
+      // Carregar detalhes da mentoria com encontros
+      const mentoria = this.mentoriasFiltradas.find(m => m.id === mentoriaId);
+      if (mentoria && !mentoria.encontros) {
+        this.mentoriaService.obterMentoria(mentoriaId).subscribe({
+          next: (response) => {
+            if (response.success && response.data) {
+              const index = this.mentoriasFiltradas.findIndex(m => m.id === mentoriaId);
+              if (index !== -1) {
+                this.mentoriasFiltradas[index] = response.data;
+              }
+            }
+          },
+          error: (error) => {
+            console.error('Erro ao carregar detalhes da mentoria:', error);
+          }
+        });
+      }
+    }
+  }
+
   getStatusBadgeClass(status: string): string {
     const classes: { [key: string]: string } = {
+      'ativa': 'badge-active',
+      'concluida': 'badge-completed',
+      'cancelada': 'badge-cancelled',
       'draft': 'badge-draft',
       'published': 'badge-published',
       'archived': 'badge-archived'
@@ -255,6 +295,9 @@ export class MentoriaList implements OnInit {
 
   getStatusLabel(status: string): string {
     const labels: { [key: string]: string } = {
+      'ativa': 'Ativa',
+      'concluida': 'Concluída',
+      'cancelada': 'Cancelada',
       'draft': 'Rascunho',
       'published': 'Publicado',
       'archived': 'Arquivado'
@@ -270,11 +313,11 @@ export class MentoriaList implements OnInit {
     return this.mentoriaService.isTokenExpirado(encontro);
   }
 
-  toggleDropdown(encontroId: number): void {
-    if (this.dropdownAberto === encontroId) {
+  toggleDropdown(mentoriaId: number): void {
+    if (this.dropdownAberto === mentoriaId) {
       this.dropdownAberto = null;
     } else {
-      this.dropdownAberto = encontroId;
+      this.dropdownAberto = mentoriaId;
     }
   }
 
@@ -288,5 +331,15 @@ export class MentoriaList implements OnInit {
     if (!target.closest('.dropdown-menu-container')) {
       this.closeDropdown();
     }
+  }
+
+  getEncontrosPublicados(mentoria: Mentoria): number {
+    if (!mentoria.encontros) return 0;
+    return mentoria.encontros.filter(e => e.status === 'published').length;
+  }
+
+  getEncontrosRascunho(mentoria: Mentoria): number {
+    if (!mentoria.encontros) return 0;
+    return mentoria.encontros.filter(e => e.status === 'draft').length;
   }
 }

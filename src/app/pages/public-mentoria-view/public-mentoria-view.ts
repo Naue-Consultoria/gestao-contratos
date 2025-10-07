@@ -39,6 +39,10 @@ export class PublicMentoriaViewComponent implements OnInit {
   tableOfContents: TocItem[] = [];
   showToc = false; // Começa recolhido
 
+  // Outros encontros da mesma mentoria
+  outrosEncontros: any[] = [];
+  showEncontrosDropdown = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -69,6 +73,9 @@ export class PublicMentoriaViewComponent implements OnInit {
         if (response.success && response.data) {
           this.encontro = response.data;
           this.blocos = response.data.blocos || [];
+          this.outrosEncontros = response.data.outros_encontros || [];
+
+          console.log('📋 Outros encontros carregados:', this.outrosEncontros);
 
           // Tentar carregar conteúdo estruturado (novo formato JSON)
           if (this.encontro.conteudo_html) {
@@ -287,6 +294,14 @@ export class PublicMentoriaViewComponent implements OnInit {
 
   toggleToc(): void {
     this.showToc = !this.showToc;
+  }
+
+  toggleEncontrosDropdown(): void {
+    this.showEncontrosDropdown = !this.showEncontrosDropdown;
+  }
+
+  navegarParaEncontro(token: string): void {
+    window.location.href = `/mentoria/${token}`;
   }
 
   // ===== SALVAR RESPOSTAS DAS PERGUNTAS =====

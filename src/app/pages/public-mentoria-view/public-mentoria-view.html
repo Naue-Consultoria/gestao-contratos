@@ -26,6 +26,39 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <div *ngIf="encontro && !isLoading && !notFound && !expired" class="mentoria-content">
 
+    <!-- Dropdown de Navegação entre Encontros -->
+    <div class="encontros-nav-dropdown" *ngIf="outrosEncontros && outrosEncontros.length > 1">
+      <button
+        class="encontros-nav-toggle"
+        (click)="toggleEncontrosDropdown()"
+        [class.active]="showEncontrosDropdown">
+        <i class="fas fa-list"></i>
+        <span class="nav-text">Encontro {{ encontro.numero_encontro }}</span>
+        <i class="fas fa-chevron-down nav-arrow" [class.rotated]="showEncontrosDropdown"></i>
+      </button>
+
+      <div class="encontros-nav-menu" *ngIf="showEncontrosDropdown">
+        <div class="nav-menu-header">
+          <span>Todos os Encontros</span>
+        </div>
+        <button
+          *ngFor="let outro of outrosEncontros"
+          class="encontro-nav-item"
+          [class.current]="outro.is_current"
+          (click)="navegarParaEncontro(outro.unique_token)"
+          [disabled]="outro.is_current">
+          <div class="encontro-nav-numero">#{{ outro.numero_encontro }}</div>
+          <div class="encontro-nav-info">
+            <span class="encontro-nav-nome">{{ outro.mentorado_nome }}</span>
+            <span class="encontro-nav-status" *ngIf="outro.is_current">
+              <i class="fas fa-circle"></i> Você está aqui
+            </span>
+          </div>
+          <i class="fas fa-chevron-right" *ngIf="!outro.is_current"></i>
+        </button>
+      </div>
+    </div>
+
     <!-- Header Hero -->
     <header class="mentoria-hero">
       <div class="hero-overlay"></div>

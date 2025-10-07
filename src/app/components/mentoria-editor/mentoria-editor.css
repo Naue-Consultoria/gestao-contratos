@@ -102,6 +102,19 @@
   min-height: 80px;
 }
 
+.field-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+.field-hint i {
+  color: #00B74F;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

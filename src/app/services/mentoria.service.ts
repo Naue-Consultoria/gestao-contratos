@@ -3,8 +3,25 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+export interface Mentoria {
+  id: number;
+  client_id: number;
+  contract_id: number;
+  numero_encontros: number;
+  status: 'ativa' | 'concluida' | 'cancelada';
+  created_at: string;
+  updated_at: string;
+  created_by?: number;
+  updated_by?: number;
+  contract?: any;
+  client?: any;
+  criador?: any;
+  encontros?: MentoriaEncontro[];
+}
+
 export interface MentoriaEncontro {
   id: number;
+  mentoria_id?: number;
   contract_id: number;
   mentorado_nome: string;
   numero_encontro?: number;
@@ -21,6 +38,15 @@ export interface MentoriaEncontro {
   contract?: any;
   criador?: any;
   blocos?: EncontroBloco[];
+  outros_encontros?: OutroEncontro[];
+}
+
+export interface OutroEncontro {
+  id: number;
+  numero_encontro: number;
+  mentorado_nome: string;
+  unique_token: string;
+  is_current: boolean;
 }
 
 export interface EncontroBloco {
@@ -69,7 +95,70 @@ export class MentoriaService {
 
   constructor(private http: HttpClient) {}
 
-  // ===== ENDPOINTS PROTEGIDOS =====
+  // ===== ENDPOINTS DE MENTORIAS =====
+
+  /**
+   * Listar todas as mentorias
+   */
+  listarMentorias(clientId?: number, status?: string, contractId?: number): Observable<ApiResponse<Mentoria[]>> {
+    let url = `${this.apiUrl}/mentorias`;
+    const params: string[] = [];
+
+    if (clientId) params.push(`client_id=${clientId}`);
+    if (status) params.push(`status=${status}`);
+    if (contractId) params.push(`contract_id=${contractId}`);
+
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+
+    return this.http.get<ApiResponse<Mentoria[]>>(url);
+  }
+
+  /**
+   * Obter detalhes de uma mentoria com todos os encontros
+   */
+  obterMentoria(id: number): Observable<ApiResponse<Mentoria>> {
+    return this.http.get<ApiResponse<Mentoria>>(`${this.apiUrl}/mentorias/${id}`);
+  }
+
+  /**
+   * Criar nova mentoria e gerar encontros automaticamente
+   */
+  criarMentoria(dados: {
+    client_id: number;
+    contract_id: number;
+    numero_encontros: number;
+    mentorado_nome: string;
+  }): Observable<ApiResponse<Mentoria>> {
+    return this.http.post<ApiResponse<Mentoria>>(`${this.apiUrl}/mentorias`, dados);
+  }
+
+  /**
+   * Atualizar mentoria
+   */
+  atualizarMentoria(id: number, dados: Partial<Mentoria>): Observable<ApiResponse<Mentoria>> {
+    return this.http.put<ApiResponse<Mentoria>>(`${this.apiUrl}/mentorias/${id}`, dados);
+  }
+
+  /**
+   * Deletar mentoria (e todos os encontros)
+   */
+  deletarMentoria(id: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/mentorias/${id}`);
+  }
+
+  /**
+   * Adicionar novos encontros a uma mentoria existente
+   */
+  adicionarEncontros(mentoriaId: number, quantidade: number): Observable<ApiResponse<MentoriaEncontro[]>> {
+    return this.http.post<ApiResponse<MentoriaEncontro[]>>(
+      `${this.apiUrl}/mentorias/${mentoriaId}/encontros`,
+      { quantidade }
+    );
+  }
+
+  // ===== ENDPOINTS DE ENCONTROS =====
 
   /**
    * Listar todos os encontros

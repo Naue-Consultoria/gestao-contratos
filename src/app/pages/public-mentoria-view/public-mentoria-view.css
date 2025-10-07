@@ -13,6 +13,215 @@
   position: relative;
 }
 
+/* === DROPDOWN DE NAVEGAÇÃO ENTRE ENCONTROS === */
+.encontros-nav-dropdown {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+}
+
+.encontros-nav-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 183, 79, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #022c22;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.encontros-nav-toggle:hover {
+  background: white;
+  border-color: #00B74F;
+  box-shadow: 0 6px 16px rgba(0, 183, 79, 0.2);
+  transform: translateY(-2px);
+}
+
+.encontros-nav-toggle.active {
+  background: white;
+  border-color: #00B74F;
+  box-shadow: 0 6px 16px rgba(0, 183, 79, 0.25);
+}
+
+.encontros-nav-toggle i:first-child {
+  color: #00B74F;
+  font-size: 1rem;
+}
+
+.nav-text {
+  color: #022c22;
+  font-weight: 600;
+}
+
+.nav-arrow {
+  color: #00B74F;
+  font-size: 0.75rem;
+  transition: transform 0.3s ease;
+}
+
+.nav-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.encontros-nav-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 320px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: slideDown 0.3s ease;
+  border: 1px solid rgba(0, 183, 79, 0.1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nav-menu-header {
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #00B74F, #059669);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.encontro-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: white;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.encontro-nav-item:hover:not(.current) {
+  background: #f9fafb;
+  padding-left: 22px;
+}
+
+.encontro-nav-item.current {
+  background: rgba(0, 183, 79, 0.05);
+  cursor: default;
+}
+
+.encontro-nav-item:last-child {
+  border-bottom: none;
+}
+
+.encontro-nav-numero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #00B74F, #059669);
+  color: white;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.encontro-nav-item.current .encontro-nav-numero {
+  background: #022c22;
+}
+
+.encontro-nav-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.encontro-nav-nome {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a202c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.encontro-nav-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #00B74F;
+  font-weight: 500;
+}
+
+.encontro-nav-status i {
+  font-size: 0.5rem;
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.encontro-nav-item i.fa-chevron-right {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.encontro-nav-item:hover:not(.current) i.fa-chevron-right {
+  transform: translateX(4px);
+  color: #00B74F;
+}
+
+@media (max-width: 768px) {
+  .encontros-nav-dropdown {
+    top: 10px;
+    left: 10px;
+  }
+
+  .encontros-nav-toggle {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+
+  .encontros-nav-menu {
+    min-width: 280px;
+  }
+
+  .nav-text {
+    display: none;
+  }
+}
+
 .mentoria-publica-page::before {
   content: '';
   position: fixed;

@@ -4,16 +4,39 @@
   <div class="page-header">
     <div class="header-title-section">
       <h1 class="page-title">
-        {{ isEditMode ? 'Editar Encontro de Mentoria' : 'Novo Encontro de Mentoria' }}
+        {{ isEditMode ? 'Editar Encontro de Mentoria' : 'Criar Nova Mentoria' }}
       </h1>
       <app-breadcrumb></app-breadcrumb>
     </div>
     <div class="header-actions">
-      <button type="button" class="btn-primary" (click)="salvarEncontro()" [disabled]="isSaving">
-        <i class="fas fa-save"></i>
-        {{ isSaving ? 'Salvando...' : 'Salvar e Continuar' }}
+      <!-- Modo Criação: Botão de Criar Mentoria -->
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="salvarEncontro()"
+        [disabled]="isSaving || encontroForm.invalid"
+        *ngIf="!isEditMode">
+        <i class="fas fa-plus-circle"></i>
+        {{ isSaving ? 'Criando...' : 'Criar Mentoria' }}
       </button>
-      <button type="button" class="btn-primary" (click)="publicarEncontro()" [disabled]="!isEditMode || isSaving">
+
+      <!-- Modo Edição: Botões de Salvar e Publicar -->
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="salvarEncontro()"
+        [disabled]="isSaving"
+        *ngIf="isEditMode">
+        <i class="fas fa-save"></i>
+        {{ isSaving ? 'Salvando...' : 'Salvar Alterações' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="publicarEncontro()"
+        [disabled]="!isEditMode || isSaving"
+        *ngIf="isEditMode">
         <i class="fas fa-paper-plane"></i>
         Publicar
       </button>
@@ -22,7 +45,10 @@
 
   <!-- Formulário de Metadados -->
   <div class="form-section">
-    <h3 class="section-title"><i class="fas fa-info-circle"></i> Informações do Encontro</h3>
+    <h3 class="section-title">
+      <i class="fas fa-info-circle"></i>
+      {{ isEditMode ? 'Informações do Encontro' : 'Criar Nova Mentoria' }}
+    </h3>
 
     <form [formGroup]="encontroForm">
       <div class="form-grid">
@@ -34,7 +60,7 @@
             (change)="onClienteChange(+$any($event.target).value)">
             <option value="">{{ loadingClientes ? 'Carregando...' : 'Selecione um cliente' }}</option>
             <option *ngFor="let cliente of clientes" [value]="cliente.id">
-              {{ cliente.full_name || cliente.company_name || cliente.trade_name }}
+              {{ getClienteNome(cliente) }}
             </option>
           </select>
         </div>
@@ -51,15 +77,6 @@
           </select>
         </div>
 
-        <div class="form-field">
-          <label for="numero_encontro">Número do Encontro</label>
-          <input
-            type="number"
-            id="numero_encontro"
-            formControlName="numero_encontro"
-            placeholder="1, 2, 3...">
-        </div>
-
         <div class="form-field full-width">
           <label for="mentorado_nome">Nome do Mentorado *</label>
           <input
@@ -69,7 +86,33 @@
             placeholder="Ex: João Silva">
         </div>
 
-        <div class="form-field">
+        <!-- MODO CRIAÇÃO: Número de Encontros -->
+        <div class="form-field" *ngIf="!isEditMode">
+          <label for="numero_encontros">Quantidade de Encontros *</label>
+          <input
+            type="number"
+            id="numero_encontros"
+            formControlName="numero_encontros"
+            min="1"
+            max="50"
+            placeholder="Ex: 5">
+          <small class="field-hint">
+            <i class="fas fa-info-circle"></i>
+            Serão criados {{ encontroForm.get('numero_encontros')?.value || 5 }} encontros automaticamente, espaçados em 7 dias
+          </small>
+        </div>
+
+        <!-- MODO EDIÇÃO: Campos específicos do encontro -->
+        <div class="form-field" *ngIf="isEditMode">
+          <label for="numero_encontro">Número do Encontro</label>
+          <input
+            type="number"
+            id="numero_encontro"
+            formControlName="numero_encontro"
+            placeholder="1, 2, 3...">
+        </div>
+
+        <div class="form-field" *ngIf="isEditMode">
           <label for="data_encontro">Data do Encontro *</label>
           <input
             type="date"
@@ -77,7 +120,7 @@
             formControlName="data_encontro">
         </div>
 
-        <div class="form-field">
+        <div class="form-field" *ngIf="isEditMode">
           <label for="token_expira_em">Link Expira em</label>
           <input
             type="datetime-local"
@@ -88,7 +131,21 @@
     </form>
   </div>
 
-  <!-- Botão para ir ao editor de conteúdo -->
+  <!-- Mensagem de sucesso no modo criação -->
+  <div class="form-section success-message" *ngIf="!isEditMode">
+    <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #d4edda; border-left: 4px solid #28a745; border-radius: 8px;">
+      <i class="fas fa-info-circle" style="color: #28a745; font-size: 1.5rem;"></i>
+      <div>
+        <h4 style="margin: 0 0 0.5rem 0; color: #155724; font-size: 1rem;">Como funciona?</h4>
+        <p style="margin: 0; color: #155724; font-size: 0.9rem;">
+          Ao criar a mentoria, o sistema irá gerar automaticamente <strong>{{ encontroForm.get('numero_encontros')?.value || 5 }} encontros</strong>
+          com datas espaçadas em 7 dias. Você poderá editar o conteúdo de cada encontro individualmente depois.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botão para ir ao editor de conteúdo - APENAS NO MODO EDIÇÃO -->
   <div class="form-section" *ngIf="isEditMode && encontroId">
     <h3 class="section-title">
       <i class="fas fa-edit"></i>
@@ -109,8 +166,8 @@
     </button>
   </div>
 
-  <!-- Área de Blocos (Drag and Drop) - Mantida para compatibilidade, mas oculta -->
-  <div class="blocos-area" style="display: none;">
+  <!-- Área de Blocos - OCULTA COMPLETAMENTE -->
+  <div class="blocos-area" *ngIf="false" style="display: none;">
     <h2><i class="fas fa-layer-group"></i> Conteúdo do Encontro</h2>
 
     <div
