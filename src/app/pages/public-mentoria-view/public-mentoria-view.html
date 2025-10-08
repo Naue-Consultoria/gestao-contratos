@@ -60,38 +60,76 @@
     </div>
 
     <!-- Header Hero -->
-    <header class="mentoria-hero">
+    <header class="mentoria-hero" [class.has-photo]="encontro.foto_encontro_url">
       <div class="hero-overlay"></div>
       <div class="hero-container">
         <div class="hero-brand">
           <img src="logoNaueNeg.png" alt="NAUE Consultoria" class="hero-logo">
         </div>
 
-        <div class="welcome-message">
-          <div class="welcome-line-1">
-            <span class="welcome-word">Olá,</span>
-            <span class="welcome-name">{{ encontro.mentorado_nome }}!</span>
+        <!-- Layout com foto: side-by-side -->
+        <div class="hero-content-wrapper" *ngIf="encontro.foto_encontro_url">
+          <div class="hero-text-side">
+            <div class="welcome-message">
+              <div class="welcome-line-1">
+                <span class="welcome-word">Olá,</span>
+                <span class="welcome-name">{{ encontro.mentorado_nome }}!</span>
+              </div>
+              <div class="welcome-line-2">
+                <span class="welcome-word">Bem-vindo(a)</span>
+                <span class="welcome-word">ao</span>
+                <span class="welcome-word">nosso</span>
+                <span class="welcome-word">encontro!</span>
+              </div>
+            </div>
+
+            <div class="hero-info">
+              <div class="meta-info">
+                <span class="meta-item">
+                  <i class="fa-solid fa-hashtag"></i>
+                  Encontro {{ encontro.numero_encontro }}
+                </span>
+                <span class="meta-item">
+                  <i class="fa-solid fa-calendar"></i>
+                  {{ formatDate(encontro.data_encontro) }}
+                </span>
+              </div>
+            </div>
           </div>
-          <div class="welcome-line-2">
-            <span class="welcome-word">Bem-vindo(a)</span>
-            <span class="welcome-word">ao</span>
-            <span class="welcome-word">nosso</span>
-            <span class="welcome-word">encontro!</span>
+
+          <div class="hero-photo-side">
+            <img [src]="encontro.foto_encontro_url" [alt]="'Foto do Encontro ' + encontro.numero_encontro" class="encontro-photo">
           </div>
         </div>
 
-        <div class="hero-info">
-          <div class="meta-info">
-            <span class="meta-item">
-              <i class="fa-solid fa-hashtag"></i>
-              Encontro {{ encontro.numero_encontro }}
-            </span>
-            <span class="meta-item">
-              <i class="fa-solid fa-calendar"></i>
-              {{ formatDate(encontro.data_encontro) }}
-            </span>
+        <!-- Layout sem foto: centralizado (layout original) -->
+        <ng-container *ngIf="!encontro.foto_encontro_url">
+          <div class="welcome-message">
+            <div class="welcome-line-1">
+              <span class="welcome-word">Olá,</span>
+              <span class="welcome-name">{{ encontro.mentorado_nome }}!</span>
+            </div>
+            <div class="welcome-line-2">
+              <span class="welcome-word">Bem-vindo(a)</span>
+              <span class="welcome-word">ao</span>
+              <span class="welcome-word">nosso</span>
+              <span class="welcome-word">encontro!</span>
+            </div>
           </div>
-        </div>
+
+          <div class="hero-info">
+            <div class="meta-info">
+              <span class="meta-item">
+                <i class="fa-solid fa-hashtag"></i>
+                Encontro {{ encontro.numero_encontro }}
+              </span>
+              <span class="meta-item">
+                <i class="fa-solid fa-calendar"></i>
+                {{ formatDate(encontro.data_encontro) }}
+              </span>
+            </div>
+          </div>
+        </ng-container>
       </div>
     </header>
 
@@ -282,5 +320,15 @@
       <p class="footer-copy">© {{ getCurrentYear() }} NAUE Consultoria - Todos os direitos reservados</p>
     </footer>
 
+  </div>
+
+  <!-- MODAL DE VISUALIZAÇÃO DE IMAGEM -->
+  <div class="image-modal" *ngIf="modalImageSrc" (click)="closeImageModal()">
+    <div class="image-modal-content" (click)="$event.stopPropagation()">
+      <button class="image-modal-close" (click)="closeImageModal()">
+        <i class="fas fa-times"></i>
+      </button>
+      <img [src]="modalImageSrc" alt="Imagem expandida">
+    </div>
   </div>
 </div>

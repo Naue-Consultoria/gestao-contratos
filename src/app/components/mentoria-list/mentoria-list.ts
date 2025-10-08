@@ -158,6 +158,10 @@ export class MentoriaList implements OnInit {
     this.router.navigate(['/home/mentorias/visualizar', mentoriaId]);
   }
 
+  editarMentoria(mentoria: Mentoria): void {
+    this.router.navigate(['/home/mentorias/editar', mentoria.id]);
+  }
+
   editarEncontro(encontroId: number): void {
     this.router.navigate(['/home/mentorias/editar-encontro', encontroId]);
   }

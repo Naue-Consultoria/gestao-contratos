@@ -145,6 +145,10 @@
                 <i class="fas fa-ellipsis-v"></i>
               </button>
               <div class="dropdown-menu" *ngIf="dropdownAberto === mentoria.id">
+                <button class="dropdown-item" (click)="editarMentoria(mentoria); closeDropdown()">
+                  <i class="fas fa-edit"></i>
+                  <span>Editar Mentoria</span>
+                </button>
                 <button class="dropdown-item" (click)="adicionarEncontros(mentoria); closeDropdown()">
                   <i class="fas fa-plus-circle"></i>
                   <span>Adicionar Encontros</span>

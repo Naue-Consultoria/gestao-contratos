@@ -301,19 +301,38 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
             doc.rect(margin, currentY - 4, pageWidth - (margin * 2), rowHeight, 'F');
           }
 
-          doc.setTextColor(51, 51, 51);
-          doc.setFont('helvetica', 'normal');
+          // Se o serviço não foi selecionado, mostrar em cinza e riscado
+          const isNotSelected = service.selected_by_client === false;
+          if (isNotSelected) {
+            doc.setTextColor(150, 150, 150);
+            doc.setFont('helvetica', 'italic');
+          } else {
+            doc.setTextColor(51, 51, 51);
+            doc.setFont('helvetica', 'normal');
+          }
           doc.setFontSize(9);
 
           doc.text(String(index + 1), colNum, currentY);
 
           let serviceName = service.service_name || service.name || `Serviço ${index + 1}`;
+          if (isNotSelected) {
+            serviceName = '✗ ' + serviceName + ' (Não Selecionado)';
+          }
+
           const maxServiceWidth = colValue - colService - 50;
           const serviceText = doc.splitTextToSize(serviceName, maxServiceWidth);
           doc.text(serviceText[0] || serviceName, colService, currentY);
 
           const value = service.total_value || service.value || service.unit_value || 0;
           doc.text(this.formatCurrency(value), colValue, currentY, { align: 'right' });
+
+          // Linha riscada para serviços não selecionados
+          if (isNotSelected) {
+            const textWidth = doc.getTextWidth(serviceText[0] || serviceName);
+            doc.setDrawColor(150, 150, 150);
+            doc.setLineWidth(0.3);
+            doc.line(colService, currentY - 2, colService + textWidth, currentY - 2);
+          }
 
           currentY += rowHeight;
         });
@@ -325,23 +344,67 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
         doc.line(margin, currentY, pageWidth - margin, currentY);
         currentY += 7;
 
-        // Box do valor total
-        const totalBoxWidth = 100;
-        const totalBoxX = pageWidth - margin - totalBoxWidth;
+        // Verificar se há seleção parcial
+        const unselectedCount = fullProposal.services.filter((s: any) => s.selected_by_client === false).length;
+        const totalServices = fullProposal.services.length;
+        const hasPartialSelection = unselectedCount > 0 && unselectedCount < totalServices;
 
-        doc.setFillColor(0, 59, 43);
-        doc.rect(totalBoxX, currentY - 3, totalBoxWidth, 16, 'F');
+        if (hasPartialSelection) {
+          // Mostrar valor original riscado
+          doc.setTextColor(150, 150, 150);
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.text('Valor Original da Proposta:', pageWidth - margin - 100, currentY);
+          const originalValueText = this.formatCurrency(fullProposal.total_value || 0);
+          doc.text(originalValueText, pageWidth - margin - 3, currentY, { align: 'right' });
 
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
+          // Linha riscada no valor original
+          const originalValueWidth = doc.getTextWidth(originalValueText);
+          doc.setDrawColor(150, 150, 150);
+          doc.setLineWidth(0.5);
+          doc.line(pageWidth - margin - originalValueWidth - 3, currentY - 2, pageWidth - margin - 3, currentY - 2);
 
-        doc.text('VALOR TOTAL:', totalBoxX + 3, currentY + 5);
+          currentY += 10;
 
-        const totalValue = this.formatCurrency(fullProposal.total_value || 0);
-        doc.text(totalValue, pageWidth - margin - 3, currentY + 5, { align: 'right' });
+          // Box do valor dos serviços selecionados
+          const totalBoxWidth = 100;
+          const totalBoxX = pageWidth - margin - totalBoxWidth;
 
-        currentY += 25;
+          doc.setFillColor(0, 59, 43);
+          doc.rect(totalBoxX, currentY - 3, totalBoxWidth, 16, 'F');
+
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+
+          doc.text('VALOR SELECIONADO:', totalBoxX + 3, currentY + 5);
+
+          // Calcular valor dos serviços selecionados
+          const selectedServices = fullProposal.services.filter((s: any) => s.selected_by_client !== false);
+          const selectedTotal = selectedServices.reduce((sum: number, s: any) => sum + (s.total_value || 0), 0);
+          const selectedValue = this.formatCurrency(selectedTotal);
+          doc.text(selectedValue, pageWidth - margin - 3, currentY + 5, { align: 'right' });
+
+          currentY += 25;
+        } else {
+          // Box do valor total normal
+          const totalBoxWidth = 100;
+          const totalBoxX = pageWidth - margin - totalBoxWidth;
+
+          doc.setFillColor(0, 59, 43);
+          doc.rect(totalBoxX, currentY - 3, totalBoxWidth, 16, 'F');
+
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+
+          doc.text('VALOR TOTAL:', totalBoxX + 3, currentY + 5);
+
+          const totalValue = this.formatCurrency(fullProposal.total_value || 0);
+          doc.text(totalValue, pageWidth - margin - 3, currentY + 5, { align: 'right' });
+
+          currentY += 25;
+        }
       }
 
       // === CONDIÇÕES DE PAGAMENTO ===

@@ -57,7 +57,8 @@ export class MentoriaView implements OnInit {
   }
 
   private configurarBreadcrumb(): void {
-    const clienteNome = this.mentoria?.client?.clients_pj?.company_name ||
+    const clienteNome = this.mentoria?.client?.clients_pj?.trade_name ||
+                        this.mentoria?.client?.clients_pj?.company_name ||
                         this.mentoria?.client?.clients_pf?.full_name ||
                         'Mentoria';
 
@@ -81,7 +82,8 @@ export class MentoriaView implements OnInit {
 
   getClienteNome(): string {
     if (!this.mentoria?.client) return 'N/A';
-    return this.mentoria.client.clients_pj?.company_name ||
+    return this.mentoria.client.clients_pj?.trade_name ||
+           this.mentoria.client.clients_pj?.company_name ||
            this.mentoria.client.clients_pf?.full_name ||
            'Cliente não informado';
   }
@@ -203,5 +205,72 @@ export class MentoriaView implements OnInit {
 
   getEncontrosRascunho(): number {
     return this.mentoria?.encontros?.filter(e => e.status === 'draft').length || 0;
+  }
+
+  editarMentoria(): void {
+    if (!this.mentoria) return;
+    this.router.navigate(['/home/mentorias/editar', this.mentoria.id]);
+  }
+
+  excluirMentoria(): void {
+    if (!this.mentoria) return;
+
+    const clienteNome = this.getClienteNome();
+    const confirmacao = confirm(
+      `Tem certeza que deseja excluir a mentoria de "${clienteNome}"?\n\n` +
+      `Esta ação irá excluir TODOS os ${this.mentoria.numero_encontros} encontros associados.\n\n` +
+      `Esta ação NÃO pode ser desfeita!`
+    );
+
+    if (!confirmacao) return;
+
+    const confirmacaoFinal = confirm(
+      `ATENÇÃO: Esta é sua última confirmação!\n\n` +
+      `Você está prestes a excluir permanentemente a mentoria e todos os seus encontros.\n\n` +
+      `Deseja realmente continuar?`
+    );
+
+    if (!confirmacaoFinal) return;
+
+    this.mentoriaService.excluirMentoria(this.mentoria.id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success('Mentoria excluída com sucesso!');
+          this.router.navigate(['/home/mentorias']);
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao excluir mentoria:', error);
+        this.toastr.error('Erro ao excluir mentoria');
+      }
+    });
+  }
+
+  excluirEncontro(encontro: MentoriaEncontro): void {
+    if (!encontro.id) return;
+
+    const confirmacao = confirm(
+      `Tem certeza que deseja excluir o Encontro ${encontro.numero_encontro}?\n\n` +
+      `Mentorado: ${encontro.mentorado_nome}\n` +
+      `Data: ${this.formatarData(encontro.data_encontro)}\n\n` +
+      `Esta ação NÃO pode ser desfeita!`
+    );
+
+    if (!confirmacao) return;
+
+    this.mentoriaService.excluirEncontro(encontro.id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success('Encontro excluído com sucesso!');
+          if (this.mentoriaId) {
+            this.carregarMentoria(this.mentoriaId);
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao excluir encontro:', error);
+        this.toastr.error('Erro ao excluir encontro');
+      }
+    });
   }
 }

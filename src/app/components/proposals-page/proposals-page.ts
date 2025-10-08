@@ -971,29 +971,43 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
 
   private calculateSLA(proposal: any): string {
     if (!proposal.created_at) return '-';
-    
+
     const createdDate = new Date(proposal.created_at);
     let endDate: Date;
-    
+
     // Para propostas assinadas, usar a data de assinatura
     if (proposal.status === 'signed' && proposal.signed_at) {
       endDate = new Date(proposal.signed_at);
-    } 
+    }
+    // Para propostas convertidas, usar a data de conversão (ou assinatura)
+    else if (proposal.status === 'converted') {
+      if (proposal.converted_at) {
+        endDate = new Date(proposal.converted_at);
+      } else if (proposal.signed_at) {
+        endDate = new Date(proposal.signed_at);
+      } else {
+        return '-';
+      }
+    }
+    // Para propostas com contraproposta (assinadas parcialmente), usar data de assinatura
+    else if (proposal.status === 'contraproposta' && proposal.signed_at) {
+      endDate = new Date(proposal.signed_at);
+    }
     // Para propostas enviadas, usar a data atual
     else if (proposal.status === 'sent') {
       endDate = new Date();
-    } 
+    }
     // Para outros status, não mostrar SLA
     else {
       return '-';
     }
-    
+
     // Calcular diferença em milissegundos
     const timeDiff = endDate.getTime() - createdDate.getTime();
-    
+
     // Converter para dias (24h = 1 dia)
     const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-    
+
     // Retornar formatado
     if (daysDiff === 0) {
       return '0 dia';
@@ -1001,6 +1015,22 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       return '1 dia';
     } else {
       return `${daysDiff} dias`;
+    }
+  }
+
+  getSLAClass(sla: string): string {
+    if (sla === '-') return '';
+
+    // Extrair número de dias
+    const days = parseInt(sla.split(' ')[0]);
+
+    // Retornar classe baseada na quantidade de dias
+    // 0-3 dias: success (verde)
+    // 4+ dias: warning (amarelo/laranja)
+    if (days <= 3) {
+      return 'sla-success';
+    } else {
+      return 'sla-warning';
     }
   }
 

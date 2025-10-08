@@ -43,6 +43,9 @@ export class PublicMentoriaViewComponent implements OnInit {
   outrosEncontros: any[] = [];
   showEncontrosDropdown = false;
 
+  // Modal de imagem
+  modalImageSrc: string | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -60,6 +63,38 @@ export class PublicMentoriaViewComponent implements OnInit {
     }
 
     this.carregarEncontro();
+  }
+
+  ngAfterViewChecked(): void {
+    // Adicionar event listeners em todas as imagens após o conteúdo ser renderizado
+    this.addImageClickListeners();
+  }
+
+  addImageClickListeners(): void {
+    const images = document.querySelectorAll('.mentoria-content img');
+    images.forEach((img: Element) => {
+      const imgElement = img as HTMLImageElement;
+      // Verificar se já tem o listener para não duplicar
+      if (!imgElement.classList.contains('clickable-image')) {
+        imgElement.classList.add('clickable-image');
+        imgElement.style.cursor = 'pointer';
+        imgElement.addEventListener('click', () => {
+          this.openImageModal(imgElement.src);
+        });
+      }
+    });
+  }
+
+  openImageModal(src: string): void {
+    this.modalImageSrc = src;
+    // Prevenir scroll do body quando modal está aberto
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeImageModal(): void {
+    this.modalImageSrc = null;
+    // Restaurar scroll do body
+    document.body.style.overflow = 'auto';
   }
 
   // Conteúdo estruturado (novo formato)

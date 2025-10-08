@@ -233,6 +233,116 @@
   color: #00B74F;
 }
 
+/* ===== FOTO UPLOAD ===== */
+.foto-upload-container {
+  margin-top: 0.5rem;
+}
+
+.foto-preview {
+  position: relative;
+  display: inline-block;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+}
+
+.foto-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: cover;
+}
+
+.btn-remove-foto {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.btn-remove-foto:hover {
+  background: rgb(220, 38, 38);
+  transform: scale(1.1);
+}
+
+.foto-upload-input {
+  position: relative;
+}
+
+.foto-upload-input input[type="file"] {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.foto-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.foto-upload-label:hover {
+  border-color: var(--green-500);
+  background: #f0fdf4;
+}
+
+.foto-upload-label i {
+  font-size: 2rem;
+  color: var(--green-500);
+}
+
+.foto-upload-label span {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.foto-upload-label small {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.foto-uploading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  color: var(--green-600);
+  font-weight: 500;
+}
+
+.foto-uploading i {
+  font-size: 1.25rem;
+}
+
 /* ===== CONTENT EDITOR SECTION ===== */
 .content-editor-section {
   margin-bottom: 2rem;

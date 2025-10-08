@@ -32,6 +32,7 @@ export interface MentoriaEncontro {
   token_expira_em?: string;
   status: 'draft' | 'published' | 'archived';
   encontro_status?: 'em_andamento' | 'finalizado';
+  foto_encontro_url?: string;
   criado_por?: number;
   atualizado_por?: number;
   criado_em: string;
@@ -214,6 +215,20 @@ export class MentoriaService {
   }
 
   /**
+   * Excluir mentoria (exclui todos os encontros associados)
+   */
+  excluirMentoria(id: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/mentorias/${id}`);
+  }
+
+  /**
+   * Excluir encontro individual
+   */
+  excluirEncontro(id: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/encontros/${id}`);
+  }
+
+  /**
    * Obter estatísticas de um encontro
    */
   obterEstatisticas(id: number): Observable<ApiResponse<EncontroEstatisticas>> {
@@ -260,6 +275,13 @@ export class MentoriaService {
     formData.append('imagem', file);
 
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/upload-imagem`, formData);
+  }
+
+  /**
+   * Upload de foto do encontro
+   */
+  uploadFotoEncontro(encontroId: number, formData: FormData): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/encontros/${encontroId}/foto`, formData);
   }
 
   // ===== ENDPOINTS PÚBLICOS =====

@@ -53,6 +53,14 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
   // Upload de imagem
   uploadingImage = false;
 
+  // Upload de foto do encontro
+  isUploadingFoto = false;
+  fotoEncontroUrl: string | null = null;
+
+  // Upload de foto na criação da mentoria
+  fotoSelecionada: File | null = null;
+  fotoSelecionadaPreview: string | null = null;
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -92,6 +100,14 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
       this.clientService.getClients().subscribe({
         next: (response: ClientsResponse) => {
           this.clientes = response.clients || [];
+
+          // Ordenar clientes alfabeticamente
+          this.clientes.sort((a, b) => {
+            const nomeA = this.getClienteNome(a);
+            const nomeB = this.getClienteNome(b);
+            return nomeA.localeCompare(nomeB, 'pt-BR', { sensitivity: 'base' });
+          });
+
           this.loadingClientes = false;
           this.encontroForm.get('client_id')?.enable();
           resolve();
@@ -186,6 +202,11 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
             encontro_status: this.encontro.encontro_status || 'em_andamento',
             token_expira_em: this.encontro.token_expira_em
           });
+
+          // Carregar URL da foto se existir
+          if (this.encontro.foto_encontro_url) {
+            this.fotoEncontroUrl = this.encontro.foto_encontro_url;
+          }
         }
         this.isLoading = false;
       },
@@ -419,6 +440,12 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
         console.log('📥 Resposta recebida:', response);
 
         if (response?.success && response.data) {
+          // Se houver foto selecionada, fazer upload para todos os encontros
+          if (this.fotoSelecionada && response.data.encontros && response.data.encontros.length > 0) {
+            const encontrosIds = response.data.encontros.map((e: any) => e.id);
+            await this.uploadFotoParaTodosEncontros(encontrosIds);
+          }
+
           this.toastr.success(
             `Mentoria criada com ${response.data.numero_encontros} encontros!`,
             'Sucesso',
@@ -506,6 +533,153 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
   irParaEditorConteudo(): void {
     if (this.encontroId) {
       this.router.navigate(['/home/mentorias', this.encontroId, 'conteudo']);
+    }
+  }
+
+  // ===== UPLOAD DE FOTO NA CRIAÇÃO DA MENTORIA =====
+
+  onFotoSelecionadaCriacao(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      this.toastr.error('Apenas imagens são permitidas (JPEG, PNG, GIF, WEBP)');
+      return;
+    }
+
+    // Validar tamanho (10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.toastr.error('A imagem deve ter no máximo 10MB');
+      return;
+    }
+
+    // Guardar arquivo e criar preview
+    this.fotoSelecionada = file;
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.fotoSelecionadaPreview = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removerFotoSelecionada(): void {
+    this.fotoSelecionada = null;
+    this.fotoSelecionadaPreview = null;
+  }
+
+  async uploadFotoParaTodosEncontros(encontrosIds: number[]): Promise<void> {
+    if (!this.fotoSelecionada || encontrosIds.length === 0) return;
+
+    this.toastr.info(`Enviando foto para ${encontrosIds.length} encontro(s)...`);
+
+    const formData = new FormData();
+    formData.append('foto', this.fotoSelecionada);
+
+    let sucessos = 0;
+    let erros = 0;
+
+    for (const encontroId of encontrosIds) {
+      try {
+        await this.mentoriaService.uploadFotoEncontro(encontroId, formData).toPromise();
+        sucessos++;
+      } catch (error) {
+        console.error(`Erro ao fazer upload da foto para encontro ${encontroId}:`, error);
+        erros++;
+      }
+    }
+
+    if (sucessos > 0) {
+      this.toastr.success(`Foto enviada para ${sucessos} encontro(s)!`);
+    }
+    if (erros > 0) {
+      this.toastr.warning(`${erros} encontro(s) não receberam a foto.`);
+    }
+
+    // Limpar seleção
+    this.fotoSelecionada = null;
+    this.fotoSelecionadaPreview = null;
+  }
+
+  // ===== UPLOAD DE FOTO DO ENCONTRO =====
+
+  onFotoSelecionada(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      this.toastr.error('Apenas imagens são permitidas (JPEG, PNG, GIF, WEBP)');
+      return;
+    }
+
+    // Validar tamanho (10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.toastr.error('A imagem deve ter no máximo 10MB');
+      return;
+    }
+
+    this.uploadFoto(file);
+  }
+
+  async uploadFoto(file: File): Promise<void> {
+    if (!this.encontroId) {
+      this.toastr.error('Salve o encontro antes de fazer upload da foto');
+      return;
+    }
+
+    this.isUploadingFoto = true;
+
+    const formData = new FormData();
+    formData.append('foto', file);
+
+    try {
+      const response: any = await this.mentoriaService.uploadFotoEncontro(this.encontroId, formData).toPromise();
+
+      if (response.success) {
+        this.fotoEncontroUrl = response.data.foto.url;
+        this.toastr.success('Foto enviada com sucesso!');
+      } else {
+        throw new Error(response.message || 'Erro ao enviar foto');
+      }
+    } catch (error: any) {
+      console.error('Erro ao fazer upload da foto:', error);
+      this.toastr.error(error.message || 'Erro ao enviar foto');
+    } finally {
+      this.isUploadingFoto = false;
+    }
+  }
+
+  async removerFoto(): Promise<void> {
+    if (!this.encontroId) return;
+
+    // Confirmar remoção
+    if (!confirm('Deseja realmente remover a foto do encontro?')) {
+      return;
+    }
+
+    this.isUploadingFoto = true;
+
+    try {
+      // Atualizar encontro removendo a URL da foto
+      const encontroAtualizado = {
+        ...this.encontroForm.value,
+        foto_encontro_url: null
+      };
+
+      await this.mentoriaService.atualizarEncontro(this.encontroId, encontroAtualizado).toPromise();
+
+      this.fotoEncontroUrl = null;
+      this.toastr.success('Foto removida com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao remover foto:', error);
+      this.toastr.error('Erro ao remover foto');
+    } finally {
+      this.isUploadingFoto = false;
     }
   }
 

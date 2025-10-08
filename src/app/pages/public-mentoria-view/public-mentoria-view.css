@@ -25,46 +25,44 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 18px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(0, 183, 79, 0.2);
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #022c22;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
 }
 
 .encontros-nav-toggle:hover {
   background: white;
-  border-color: #00B74F;
-  box-shadow: 0 6px 16px rgba(0, 183, 79, 0.2);
-  transform: translateY(-2px);
+  border-color: #022c22;
+  box-shadow: 0 4px 12px rgba(2, 44, 34, 0.15);
 }
 
 .encontros-nav-toggle.active {
   background: white;
-  border-color: #00B74F;
-  box-shadow: 0 6px 16px rgba(0, 183, 79, 0.25);
+  border-color: #022c22;
+  box-shadow: 0 4px 12px rgba(2, 44, 34, 0.15);
 }
 
 .encontros-nav-toggle i:first-child {
-  color: #00B74F;
+  color: #022c22;
   font-size: 1rem;
 }
 
 .nav-text {
-  color: #022c22;
-  font-weight: 600;
+  color: #374151;
+  font-weight: 500;
 }
 
 .nav-arrow {
-  color: #00B74F;
+  color: #6b7280;
   font-size: 0.75rem;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease;
 }
 
 .nav-arrow.rotated {
@@ -73,18 +71,19 @@
 
 .encontros-nav-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 0.5rem);
   left: 0;
   min-width: 320px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  animation: slideDown 0.3s ease;
-  border: 1px solid rgba(0, 183, 79, 0.1);
+  animation: fadeInDown 0.2s ease;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem;
 }
 
-@keyframes slideDown {
+@keyframes fadeInDown {
   from {
     opacity: 0;
     transform: translateY(-10px);
@@ -96,23 +95,24 @@
 }
 
 .nav-menu-header {
-  padding: 14px 18px;
-  background: linear-gradient(135deg, #00B74F, #059669);
-  color: white;
-  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
 }
 
 .encontro-nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 18px;
-  background: white;
+  padding: 0.75rem 1rem;
+  background: none;
   border: none;
-  border-bottom: 1px solid #f3f4f6;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
@@ -120,35 +120,31 @@
 }
 
 .encontro-nav-item:hover:not(.current) {
-  background: #f9fafb;
-  padding-left: 22px;
+  background: #f3f4f6;
 }
 
 .encontro-nav-item.current {
-  background: rgba(0, 183, 79, 0.05);
+  background: rgba(2, 44, 34, 0.08);
   cursor: default;
-}
-
-.encontro-nav-item:last-child {
-  border-bottom: none;
 }
 
 .encontro-nav-numero {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, #00B74F, #059669);
-  color: white;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.9rem;
+  width: 32px;
+  height: 32px;
+  background: #f3f4f6;
+  color: #374151;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem;
   flex-shrink: 0;
 }
 
 .encontro-nav-item.current .encontro-nav-numero {
   background: #022c22;
+  color: white;
 }
 
 .encontro-nav-info {
@@ -160,9 +156,9 @@
 }
 
 .encontro-nav-nome {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #1a202c;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -173,7 +169,7 @@
   align-items: center;
   gap: 6px;
   font-size: 0.75rem;
-  color: #00B74F;
+  color: #022c22;
   font-weight: 500;
 }
 
@@ -199,7 +195,7 @@
 
 .encontro-nav-item:hover:not(.current) i.fa-chevron-right {
   transform: translateX(4px);
-  color: #00B74F;
+  color: #022c22;
 }
 
 @media (max-width: 768px) {
@@ -328,7 +324,7 @@ html {
 }
 
 .hero-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 3rem;
   position: relative;
@@ -352,6 +348,71 @@ html {
   height: 80px;
   object-fit: contain;
   filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
+  pointer-events: none;
+  user-select: none;
+}
+
+/* === HERO CONTENT WRAPPER (COM FOTO) === */
+.hero-content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+.hero-text-side {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  animation: fadeInLeft 0.8s ease 0.2s backwards;
+}
+
+.hero-photo-side {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeInRight 0.8s ease 0.2s backwards;
+}
+
+.hero-photo-side .encontro-photo {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 20px;
+  object-fit: cover;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hero-photo-side .encontro-photo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+/* Animações para o layout com foto */
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* === WELCOME MESSAGE === */
@@ -359,6 +420,12 @@ html {
   text-align: center;
   margin-bottom: 3rem;
   perspective: 1000px;
+}
+
+/* Quando dentro do hero-text-side, manter centralizado */
+.hero-text-side .welcome-message {
+  text-align: center;
+  margin-bottom: 0;
 }
 
 .welcome-line-1,
@@ -432,6 +499,13 @@ html {
   margin-top: 3rem;
 }
 
+/* Quando dentro do hero-text-side, manter centralizado */
+.hero-text-side .hero-info {
+  text-align: center;
+  margin-top: 0;
+  animation: none;
+}
+
 .meta-info {
   display: inline-flex;
   gap: 2.5rem;
@@ -490,7 +564,7 @@ html {
 }
 
 .intro-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 3rem;
   display: grid;
@@ -588,7 +662,7 @@ html {
 }
 
 .dark-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 3rem;
 }
@@ -727,8 +801,20 @@ html {
 /* === TESTES SECTION === */
 .testes-grid-new {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
+}
+
+@media (max-width: 1200px) {
+  .testes-grid-new {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .testes-grid-new {
+    grid-template-columns: 1fr;
+  }
 }
 
 .teste-card {
@@ -816,6 +902,9 @@ html {
   gap: 2rem;
   position: relative;
   z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .passo-card {
@@ -828,6 +917,7 @@ html {
   animation: fadeInUp 0.8s ease-out forwards;
   opacity: 0;
   transform: translateY(30px);
+  width: 100%;
 }
 
 .passo-card:nth-child(1) { animation-delay: 0.2s; }
@@ -1282,7 +1372,7 @@ html {
 }
 
 .encerramento-container {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 3rem;
   position: relative;
@@ -1400,6 +1490,11 @@ html {
     padding: 0 2rem;
   }
 
+  /* Hero com foto em tablet */
+  .hero-content-wrapper {
+    gap: 2rem;
+  }
+
   .content-flow {
     padding: 2.5rem 2rem;
   }
@@ -1429,6 +1524,22 @@ html {
     padding: 0 1.5rem;
   }
 
+  /* Hero com foto em mobile: empilhar verticalmente */
+  .hero-content-wrapper {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .hero-text-side .welcome-message,
+  .hero-text-side .hero-info {
+    text-align: center;
+  }
+
+  .hero-photo-side .encontro-photo {
+    max-width: 100%;
+    border-radius: 16px;
+  }
+
   .intro-container {
     grid-template-columns: 1fr;
   }
@@ -1448,12 +1559,12 @@ html {
     height: 60px;
   }
 
-  .welcome-text {
-    font-size: 1.75rem;
+  .welcome-line-1 {
+    font-size: 2rem;
   }
 
-  .welcome-name {
-    font-size: 2rem;
+  .welcome-line-2 {
+    font-size: 1.5rem;
   }
 
   .meta-info {
@@ -1549,5 +1660,107 @@ html {
   .encerramento-section {
     margin: 1.5rem -1rem -1.5rem;
     padding: 1.5rem 1rem !important;
+  }
+}
+
+/* === MODAL DE VISUALIZAÇÃO DE IMAGEM === */
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 2rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.image-modal-content {
+  position: relative;
+  max-width: 95vw;
+  max-height: 95vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: zoomIn 0.3s ease-out;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.image-modal-content img {
+  max-width: 100%;
+  max-height: 95vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.image-modal-close {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.25rem;
+  color: #1a202c;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.image-modal-close:hover {
+  background: white;
+  transform: scale(1.1);
+  color: #e53e3e;
+}
+
+/* Cursor pointer para imagens clicáveis */
+.mentoria-content img.clickable-image {
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.mentoria-content img.clickable-image:hover {
+  transform: scale(1.02);
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .image-modal {
+    padding: 1rem;
+  }
+
+  .image-modal-close {
+    top: -45px;
+    width: 36px;
+    height: 36px;
+    font-size: 1.125rem;
   }
 }

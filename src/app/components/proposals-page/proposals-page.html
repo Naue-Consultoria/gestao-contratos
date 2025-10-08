@@ -229,10 +229,9 @@
               <span class="value-amount">{{ proposal.totalValue }}</span>
             </td>
             <td>
-              <span 
-                class="sla-badge" 
-                [class.sla-signed]="proposal.status === 'signed'"
-                [class.sla-sent]="proposal.status === 'sent'"
+              <span
+                class="sla-badge"
+                [ngClass]="getSLAClass(proposal.sla)"
                 *ngIf="proposal.sla !== '-'">
                 {{ proposal.sla }}
               </span>

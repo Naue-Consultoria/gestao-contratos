@@ -1,0 +1,186 @@
+<div class="page">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Carregando mentoria...</p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-title-section">
+        <h1 class="page-title">
+          <i class="fas fa-edit" style="color: var(--green-500); margin-right: 0.5rem;"></i>
+          Editar Mentoria
+        </h1>
+        <app-breadcrumb></app-breadcrumb>
+      </div>
+      <div class="header-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="cancelar()">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="salvar()"
+          [disabled]="isSaving || mentoriaForm.invalid">
+          <i class="fas fa-save"></i>
+          {{ isSaving ? 'Salvando...' : 'Salvar Alterações' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-header-left">
+          <i class="fas fa-info-circle section-icon"></i>
+          <div>
+            <h3 class="section-title">Informações da Mentoria</h3>
+            <p class="section-subtitle">Edite os dados básicos da mentoria</p>
+          </div>
+        </div>
+      </div>
+
+      <form [formGroup]="mentoriaForm">
+        <!-- Linha 1: Cliente e Contrato -->
+        <div class="form-row">
+          <div class="form-field">
+            <label for="client_id">
+              <i class="fas fa-building"></i>
+              Cliente *
+            </label>
+            <select
+              id="client_id"
+              formControlName="client_id"
+              (change)="onClienteChange(+$any($event.target).value)">
+              <option value="">{{ loadingClientes ? 'Carregando...' : 'Selecione um cliente' }}</option>
+              <option *ngFor="let cliente of clientes" [value]="cliente.id">
+                {{ getClienteNome(cliente) }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="contract_id">
+              <i class="fas fa-file-contract"></i>
+              Contrato *
+            </label>
+            <select
+              id="contract_id"
+              formControlName="contract_id">
+              <option value="">{{ loadingContratos ? 'Carregando...' : 'Selecione um contrato' }}</option>
+              <option *ngFor="let contrato of contratosFiltrados" [value]="contrato.id">
+                #{{ contrato.contract_number }} - {{ contrato.type }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Linha 2: Status -->
+        <div class="form-row">
+          <div class="form-field">
+            <label for="status">
+              <i class="fas fa-check-circle"></i>
+              Status da Mentoria *
+            </label>
+            <select
+              id="status"
+              formControlName="status">
+              <option value="ativa">Ativa</option>
+              <option value="concluida">Concluída</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Foto dos Encontros Section -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-header-left">
+          <i class="fas fa-image section-icon"></i>
+          <div>
+            <h3 class="section-title">Foto dos Encontros</h3>
+            <p class="section-subtitle">Esta foto será aplicada a todos os encontros da mentoria</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foto Atual -->
+      <div class="foto-atual-container" *ngIf="fotoAtualUrl && !fotoSelecionadaPreview">
+        <label class="foto-label">
+          <i class="fas fa-image"></i>
+          Foto Atual
+        </label>
+        <div class="foto-preview-box">
+          <img [src]="fotoAtualUrl" alt="Foto atual dos encontros">
+        </div>
+      </div>
+
+      <!-- Upload de Nova Foto -->
+      <div class="foto-upload-container">
+        <label class="foto-label">
+          <i class="fas fa-upload"></i>
+          {{ fotoSelecionadaPreview ? 'Nova Foto Selecionada' : 'Selecionar Nova Foto' }}
+        </label>
+
+        <!-- Preview da nova foto -->
+        <div class="foto-preview-box" *ngIf="fotoSelecionadaPreview">
+          <img [src]="fotoSelecionadaPreview" alt="Preview da nova foto">
+          <button type="button" class="btn-remove-foto" (click)="removerFotoSelecionada()">
+            <i class="fas fa-times"></i>
+            Remover
+          </button>
+        </div>
+
+        <!-- Input de upload -->
+        <div class="upload-input-container" *ngIf="!fotoSelecionadaPreview">
+          <input
+            type="file"
+            id="foto-upload"
+            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+            (change)="onFotoSelecionada($event)"
+            style="display: none;">
+          <label for="foto-upload" class="btn-upload">
+            <i class="fas fa-cloud-upload-alt"></i>
+            Escolher Imagem
+          </label>
+          <p class="upload-hint">JPEG, PNG, GIF ou WEBP - Máximo 10MB</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card" *ngIf="mentoria">
+      <div class="info-card-header">
+        <i class="fas fa-info-circle"></i>
+        <span>Informações Adicionais</span>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Total de Encontros:</span>
+          <span class="info-value">{{ mentoria.numero_encontros }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Criado em:</span>
+          <span class="info-value">{{ mentoria.created_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Criado por:</span>
+          <span class="info-value">{{ mentoria.criador?.name || 'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Última atualização:</span>
+          <span class="info-value">{{ mentoria.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

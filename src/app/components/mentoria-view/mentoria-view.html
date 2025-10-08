@@ -2,10 +2,6 @@
   <!-- Header -->
   <div class="page-header">
     <div class="header-title-section">
-      <button class="btn-back" (click)="voltarParaLista()">
-        <i class="fas fa-arrow-left"></i>
-        Voltar
-      </button>
       <h1 class="page-title">{{ getClienteNome() }}</h1>
       <app-breadcrumb></app-breadcrumb>
     </div>
@@ -36,6 +32,12 @@
           <span [class]="'status-badge ' + getStatusBadgeClass(mentoria.status)">
             {{ getStatusLabel(mentoria.status) }}
           </span>
+          <button class="btn-icon-action" (click)="editarMentoria()" title="Editar Mentoria">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="btn-icon-action danger" (click)="excluirMentoria()" title="Excluir Mentoria">
+            <i class="fas fa-trash"></i>
+          </button>
         </div>
       </div>
 
@@ -179,6 +181,14 @@
             title="Editar Conteúdo">
             <i class="fas fa-file-alt"></i>
             <span>Conteúdo</span>
+          </button>
+
+          <button
+            class="btn-action-card danger"
+            (click)="excluirEncontro(encontro)"
+            title="Excluir Encontro">
+            <i class="fas fa-trash"></i>
+            <span>Excluir</span>
           </button>
         </div>
       </div>
