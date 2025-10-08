@@ -412,7 +412,7 @@ export class ProposalService {
       'rejected': 'Rejeitada',
       'expired': 'Expirada',
       'converted': 'Convertida',
-      'contraproposta': 'Assinada Parcialmente'
+      'contraproposta': 'Ass. Parcial'
     };
     return texts[status] || status;
   }

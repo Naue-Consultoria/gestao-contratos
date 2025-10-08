@@ -367,25 +367,26 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         clientName = apiProposal.client_name;
     }
 
-    // Calcular valor total baseado no status
+    // Calcular valor total considerando seleção parcial de serviços
     let totalValue = apiProposal.total_value || 0;
-    if (apiProposal.status === 'contraproposta' && apiProposal.services) {
-      // Para contrapropostas, calcular apenas o valor dos serviços selecionados
-      // Filtra por !== false para incluir serviços selecionados (true ou undefined/null)
-      const selectedServices = apiProposal.services.filter((service: any) => service.selected_by_client !== false);
-      totalValue = selectedServices.reduce((sum: number, service: any) => sum + (service.total_value || 0), 0);
 
-      console.log(`📊 Contraproposta ${apiProposal.proposal_number}:`, {
-        totalServices: apiProposal.services.length,
-        selectedServices: selectedServices.length,
-        originalValue: apiProposal.total_value,
-        calculatedValue: totalValue,
-        services: apiProposal.services.map((s: any) => ({
-          name: s.service_name,
-          value: s.total_value,
-          selected: s.selected_by_client
-        }))
-      });
+    // Verificar se há serviços com seleção parcial (alguns serviços NÃO selecionados, mas não todos)
+    if (apiProposal.services && apiProposal.services.length > 0) {
+      // Contar quantos serviços NÃO foram selecionados
+      const unselectedCount = apiProposal.services.filter((s: any) => s.selected_by_client === false).length;
+      const totalServices = apiProposal.services.length;
+
+      // Só é seleção parcial se:
+      // 1. Houver pelo menos um serviço NÃO selecionado
+      // 2. Mas NÃO todos os serviços são não selecionados (se todos forem false, é dados inconsistentes)
+      const hasPartialSelection = unselectedCount > 0 && unselectedCount < totalServices;
+
+      if (hasPartialSelection) {
+        // Calcular apenas o valor dos serviços selecionados
+        // Filtra por !== false para incluir serviços selecionados (true ou undefined/null)
+        const selectedServices = apiProposal.services.filter((service: any) => service.selected_by_client !== false);
+        totalValue = selectedServices.reduce((sum: number, service: any) => sum + (service.total_value || 0), 0);
+      }
     }
 
     return {
@@ -963,7 +964,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       'accepted': '#28a745',
       'rejected': '#dc3545',
       'expired': '#fd7e14',
-      'contraproposta': '#dc3545'  // Vermelho para contraproposta
+      'contraproposta': '#0a8560'  // Verde mais claro que o 'signed'
     };
     return statusColors[status] || '#6c757d';
   }

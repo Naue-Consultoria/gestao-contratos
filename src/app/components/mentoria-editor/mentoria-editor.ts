@@ -140,6 +140,7 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
       numero_encontro: [''],
       numero_encontros: [5, [Validators.required, Validators.min(1), Validators.max(50)]], // Para criar mentoria
       data_encontro: [''], // Não obrigatório no modo criação
+      encontro_status: ['em_andamento'], // Status do encontro
       token_expira_em: ['']
     });
 
@@ -182,6 +183,7 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
             mentorado_nome: this.encontro.mentorado_nome,
             numero_encontro: this.encontro.numero_encontro,
             data_encontro: this.encontro.data_encontro,
+            encontro_status: this.encontro.encontro_status || 'em_andamento',
             token_expira_em: this.encontro.token_expira_em
           });
         }
@@ -635,19 +637,17 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
 
   setBreadcrumb(id?: string): void {
     const baseBreadcrumbs: any[] = [
-      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Mentorias', url: '/home/mentorias', icon: 'fas fa-chalkboard-teacher' }
+      { label: 'Home', url: '/home/dashboard' },
+      { label: 'Mentorias', url: '/home/mentorias' }
     ];
 
     if (id) {
       baseBreadcrumbs.push({
-        label: `Editar Encontro #${id}`,
-        icon: 'fas fa-edit'
+        label: `Editar Encontro #${id}`
       });
     } else {
       baseBreadcrumbs.push({
-        label: 'Novo Encontro',
-        icon: 'fas fa-plus'
+        label: 'Nova Mentoria'
       });
     }
 

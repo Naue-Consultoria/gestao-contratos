@@ -13,33 +13,33 @@
   <!-- Estatísticas -->
   <div class="stats-cards">
     <div class="stat-card">
-      <div class="stat-icon total">
-        <i class="fas fa-users"></i>
+      <div class="stat-card-header">
+        <span class="stat-label">Total de Mentorias</span>
+        <div class="stat-icon total">
+          <i class="fas fa-users"></i>
+        </div>
       </div>
-      <div class="stat-info">
-        <div class="stat-value">{{ totalMentorias }}</div>
-        <div class="stat-label">Total de Mentorias</div>
-      </div>
+      <div class="stat-value">{{ totalMentorias }}</div>
     </div>
 
     <div class="stat-card">
-      <div class="stat-icon published">
-        <i class="fas fa-check-circle"></i>
+      <div class="stat-card-header">
+        <span class="stat-label">Ativas</span>
+        <div class="stat-icon published">
+          <i class="fas fa-check-circle"></i>
+        </div>
       </div>
-      <div class="stat-info">
-        <div class="stat-value">{{ mentoriasAtivas }}</div>
-        <div class="stat-label">Ativas</div>
-      </div>
+      <div class="stat-value">{{ mentoriasAtivas }}</div>
     </div>
 
     <div class="stat-card">
-      <div class="stat-icon draft">
-        <i class="fas fa-calendar"></i>
+      <div class="stat-card-header">
+        <span class="stat-label">Total de Encontros</span>
+        <div class="stat-icon draft">
+          <i class="fas fa-calendar"></i>
+        </div>
       </div>
-      <div class="stat-info">
-        <div class="stat-value">{{ totalEncontros }}</div>
-        <div class="stat-label">Total de Encontros</div>
-      </div>
+      <div class="stat-value">{{ totalEncontros }}</div>
     </div>
   </div>
 
@@ -102,7 +102,7 @@
 
     <!-- Cards de Mentorias -->
     <div *ngIf="mentoriasFiltradas.length > 0" class="mentorias-grid">
-      <div *ngFor="let mentoria of mentoriasFiltradas" class="mentoria-card">
+      <div *ngFor="let mentoria of mentoriasFiltradas" class="mentoria-card" [class.dropdown-open]="dropdownAberto === mentoria.id">
 
         <!-- Header do Card -->
         <div class="mentoria-header">
@@ -200,6 +200,14 @@
                 <span [class]="'status-badge-small ' + getStatusBadgeClass(encontro.status)">
                   {{ getStatusLabel(encontro.status) }}
                 </span>
+                <select
+                  class="encontro-status-select"
+                  [(ngModel)]="encontro.encontro_status"
+                  (ngModelChange)="updateEncontroStatus(encontro)"
+                  [title]="'Status do encontro'">
+                  <option value="em_andamento">Em andamento</option>
+                  <option value="finalizado">Finalizado</option>
+                </select>
                 <span class="token-expiry-small" *ngIf="isTokenExpirado(encontro)">
                   <i class="fas fa-exclamation-triangle"></i> Expirado
                 </span>

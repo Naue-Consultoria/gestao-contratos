@@ -228,6 +228,25 @@ export class MentoriaList implements OnInit {
     });
   }
 
+  updateEncontroStatus(encontro: any): void {
+    this.mentoriaService.atualizarEncontro(encontro.id, {
+      encontro_status: encontro.encontro_status
+    }).subscribe({
+      next: (response) => {
+        if (response.success) {
+          const statusLabel = encontro.encontro_status === 'em_andamento' ? 'Em andamento' : 'Finalizado';
+          this.toastr.success(`Status atualizado para: ${statusLabel}`);
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao atualizar status do encontro:', error);
+        this.toastr.error('Erro ao atualizar status do encontro');
+        // Recarregar para voltar ao estado anterior
+        this.carregarMentorias();
+      }
+    });
+  }
+
   deletarMentoria(mentoria: Mentoria): void {
     const nomeCliente = mentoria.client?.clients_pj?.company_name ||
                         mentoria.client?.clients_pf?.full_name ||

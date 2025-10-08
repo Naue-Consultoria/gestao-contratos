@@ -391,8 +391,8 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
       }
 
       // === ASSINATURA DIGITAL ===
-      if ((fullProposal.status === 'signed' || fullProposal.status === 'contraproposta') &&
-          (fullProposal.signer_name || fullProposal.signature_data)) {
+      // Mostrar assinatura se houver dados do signatário ou imagem da assinatura
+      if (fullProposal.signer_name || fullProposal.signer_email || fullProposal.signature_data) {
 
         if (currentY > doc.internal.pageSize.getHeight() - 120) {
           doc.addPage();
@@ -706,35 +706,35 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
   getCalculatedTotal(): number {
     if (!this.proposal) return 0;
 
-    // Se for contraproposta, somar apenas os serviços selecionados
-    if (this.proposal.status === 'contraproposta' && this.proposal.services) {
-      const selectedServices = this.proposal.services.filter(service => service.selected_by_client !== false);
-      const selectedServicesTotal = selectedServices.reduce((sum, service) => sum + (service.total_value || 0), 0);
+    // Se houver serviços com seleção parcial (alguns NÃO selecionados, mas não todos),
+    // somar apenas os serviços selecionados
+    if (this.proposal.services) {
+      // Contar quantos serviços NÃO foram selecionados
+      const unselectedCount = this.proposal.services.filter(s => s.selected_by_client === false).length;
+      const totalServices = this.proposal.services.length;
 
-      console.log('💰 Calculando total da contraproposta:', {
-        totalServices: this.proposal.services.length,
-        selectedServices: selectedServices.length,
-        originalTotal: this.proposal.total_value,
-        calculatedTotal: selectedServicesTotal,
-        services: this.proposal.services.map(s => ({
-          name: s.service_name,
-          value: s.total_value,
-          selected: s.selected_by_client
-        }))
-      });
+      // Só é seleção parcial se:
+      // 1. Houver pelo menos um serviço NÃO selecionado
+      // 2. Mas NÃO todos os serviços são não selecionados (se todos forem false, é dados inconsistentes)
+      const hasPartialSelection = unselectedCount > 0 && unselectedCount < totalServices;
 
-      return selectedServicesTotal;
+      if (hasPartialSelection) {
+        const selectedServices = this.proposal.services.filter(service => service.selected_by_client !== false);
+        const selectedServicesTotal = selectedServices.reduce((sum, service) => sum + (service.total_value || 0), 0);
+
+        return selectedServicesTotal;
+      }
     }
 
-    // Para outros status, usar o total_value da proposta
+    // Para propostas sem seleção parcial, usar o total_value da proposta
     return this.proposal.total_value;
   }
 
   /**
-   * Verifica se é uma contraproposta e tem serviços não selecionados
+   * Verifica se tem serviços com seleção parcial (alguns não selecionados)
    */
   isCounterProposalWithChanges(): boolean {
-    if (!this.proposal || this.proposal.status !== 'contraproposta') return false;
+    if (!this.proposal) return false;
 
     return this.proposal.services?.some(s => s.selected_by_client === false) || false;
   }

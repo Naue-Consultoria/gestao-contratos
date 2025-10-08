@@ -190,15 +190,15 @@
           <tr
             *ngFor="let proposal of filteredProposals"
             class="clickable"
-            [class.expired]="proposal.isExpired"
+            [class.expired]="proposal.isExpired && proposal.status !== 'signed'"
             (click)="viewProposal(proposal.id)"
           >
             <td>
               <div class="proposal-info">
-                <div class="proposal-icon" [class.expired]="proposal.isExpired">
+                <div class="proposal-icon" [class.expired]="proposal.isExpired && proposal.status !== 'signed'">
                   <i class="fas fa-file-alt"></i>
                 </div>
-                <span class="proposal-number" [class.expired]="proposal.isExpired">
+                <span class="proposal-number" [class.expired]="proposal.isExpired && proposal.status !== 'signed'">
                   {{ proposal.proposalNumber }}
                 </span>
               </div>

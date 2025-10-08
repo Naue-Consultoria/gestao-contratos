@@ -31,6 +31,7 @@ export interface MentoriaEncontro {
   unique_token: string;
   token_expira_em?: string;
   status: 'draft' | 'published' | 'archived';
+  encontro_status?: 'em_andamento' | 'finalizado';
   criado_por?: number;
   atualizado_por?: number;
   criado_em: string;

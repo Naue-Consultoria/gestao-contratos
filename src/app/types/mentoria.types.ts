@@ -19,6 +19,8 @@ export type TipoInteracao = 'resposta' | 'checkbox' | 'comentario';
 
 export type StatusEncontro = 'draft' | 'published' | 'archived';
 
+export type EncontroStatus = 'em_andamento' | 'finalizado';
+
 // ===== CONFIGURAÇÕES DE BLOCOS =====
 
 export interface BlocoTituloConfig {

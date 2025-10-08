@@ -127,11 +127,11 @@
         <div class="services-grid" *ngIf="proposal.services && proposal.services.length > 0">
           <div *ngFor="let service of proposal.services; let i = index"
                class="service-card"
-               [class.service-not-selected]="proposal.status === 'contraproposta' && service.selected_by_client === false">
+               [class.service-not-selected]="service.selected_by_client === false">
             <div class="service-card-header">
               <div class="service-number">{{ i + 1 }}</div>
               <div class="service-name">{{ service.service_name || 'Serviço ' + service.service_id }}</div>
-              <span class="not-selected-badge" *ngIf="proposal.status === 'contraproposta' && service.selected_by_client === false">
+              <span class="not-selected-badge" *ngIf="service.selected_by_client === false">
                 <i class="fas fa-times-circle"></i> Não Selecionado
               </span>
             </div>
@@ -174,8 +174,8 @@
         <div class="services-summary" *ngIf="proposal.services && proposal.services.length > 0">
           <div class="summary-card">
             <div class="summary-content">
-              <!-- Estrutura para Contraproposta -->
-              <ng-container *ngIf="proposal.status === 'contraproposta' && isCounterProposalWithChanges()">
+              <!-- Estrutura para Contraproposta/Assinatura Parcial -->
+              <ng-container *ngIf="isCounterProposalWithChanges()">
                 <!-- Valor Original (todos os serviços) -->
                 <div class="summary-row">
                   <span class="summary-label">Valor Original da Proposta:</span>
@@ -190,7 +190,7 @@
               </ng-container>
 
               <!-- Estrutura detalhada para pagamento à vista com desconto -->
-              <ng-container *ngIf="hasDiscount() && proposal.status !== 'contraproposta'">
+              <ng-container *ngIf="hasDiscount() && !isCounterProposalWithChanges()">
                 <!-- Valor Original -->
                 <div class="summary-row">
                   <span class="summary-label">Valor Original:</span>
@@ -266,7 +266,7 @@
       </section>
 
       <!-- Signature Section -->
-      <section class="content-section" *ngIf="proposal.status === 'signed' || proposal.status === 'contraproposta'">
+      <section class="content-section" *ngIf="proposal.signer_name || proposal.signer_email || proposal.signature_data">
         <h3 class="section-title">
           <i class="fas fa-signature"></i>
           Assinatura Digital
