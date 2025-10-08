@@ -337,14 +337,14 @@
                   </button>
                   
                   <!-- Stage Reference Selection -->
-                  <select 
+                  <select
                     *ngIf="serviceStages && serviceStages.length > 0"
                     class="stage-reference-select-inline"
                     [(ngModel)]="selectedStageId"
                     [disabled]="!canEdit || isSendingComment"
                     title="Referenciar etapa (opcional)">
                     <option [value]="null">🏷️ Etapa</option>
-                    <option *ngFor="let stage of serviceStages" [value]="stage.id">
+                    <option *ngFor="let stage of serviceStages" [value]="stage.service_stage_id">
                       {{ stage.name }}{{ stage.category ? ' (' + stage.category + ')' : '' }}
                     </option>
                   </select>
