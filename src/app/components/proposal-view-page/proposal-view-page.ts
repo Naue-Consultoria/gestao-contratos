@@ -57,6 +57,20 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
       if (response && response.success) {
         this.proposal = response.data;
         console.log('🔍 Proposal data received:', this.proposal);
+        console.log('🔍 Proposal status:', this.proposal?.status);
+        console.log('🔍 Services array length:', this.proposal?.services?.length);
+        console.log('🔍 Services data:', this.proposal?.services);
+
+        if (this.proposal?.status === 'contraproposta') {
+          console.log('📋 CONTRAPROPOSTA - Services with selection status:', this.proposal?.services?.map(s => ({
+            id: s.id,
+            name: s.service_name,
+            selected_by_client: s.selected_by_client,
+            client_notes: s.client_notes,
+            selected_type: typeof s.selected_by_client
+          })));
+        }
+
         console.log('🔍 Client info direct fields:', {
           client_name: this.proposal?.client_name,
           client_email: this.proposal?.client_email,
@@ -117,226 +131,384 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
     }
 
     try {
+      // Usar os dados completos da proposta que já temos carregados
+      const fullProposal = this.proposal;
+
+      // Gerar PDF usando jsPDF (mesmo formato da tabela)
       const doc = new jsPDF();
-      
-      // Configurações básicas
+
       const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 25;
-      let currentY = margin;
+      const margin = 20;
+      let currentY = 20;
 
-      // === CABEÇALHO PRINCIPAL ===
-      // Fundo verde para o cabeçalho
-      doc.setFillColor(0, 59, 43);
-      doc.rect(0, 0, pageWidth, 35, 'F');
-      
-      // Título principal em branco
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(22);
-      doc.setFont('helvetica', 'bold');
-      doc.text('PROPOSTA COMERCIAL', margin, 22);
-      
-      currentY = 50;
-      doc.setTextColor(0, 0, 0); // Voltar para preto
+      // Adicionar logo da NAUE
+      const logoUrl = 'logoNaue.png';
+      try {
+        const logoImg = new Image();
+        logoImg.src = logoUrl;
+        await new Promise((resolve) => {
+          logoImg.onload = resolve;
+          logoImg.onerror = resolve;
+        });
 
-      // === INFO BOX ===
-      // Box de informações básicas
-      doc.setFillColor(248, 249, 250);
-      doc.setDrawColor(220, 220, 220);
-      doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 25, 3, 3, 'FD');
-      
-      currentY += 8;
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Proposta: ${this.proposal.proposal_number}`, margin + 8, currentY);
-      
-      currentY += 7;
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Data de geração: ${new Date().toLocaleDateString('pt-BR')}`, margin + 8, currentY);
-      
-      // Status da proposta
-      if (this.proposal.status === 'signed') {
-        currentY += 7;
-        doc.setTextColor(0, 59, 43);
-        doc.setFont('helvetica', 'bold');
-        doc.text('✓ STATUS: ASSINADA', margin + 8, currentY);
-        doc.setTextColor(0, 0, 0);
+        if (logoImg.complete && logoImg.naturalWidth > 0) {
+          const canvas = document.createElement('canvas');
+          canvas.width = logoImg.naturalWidth;
+          canvas.height = logoImg.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(logoImg, 0, 0);
+            const logoDataUrl = canvas.toDataURL('image/png');
+            const logoWidth = 40;
+            const logoHeight = logoWidth * (logoImg.naturalHeight / logoImg.naturalWidth);
+            doc.addImage(logoDataUrl, 'PNG', margin, currentY, logoWidth, logoHeight);
+          }
+        }
+      } catch (error) {
+        console.warn('Logo não carregado:', error);
       }
 
-      currentY += 25;
+      // Título ao lado do logo
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PROPOSTA COMERCIAL', margin + 45, currentY + 8);
+
+      // Subtítulo com número da proposta
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Proposta Nº ${fullProposal.proposal_number}`, margin + 45, currentY + 20);
+
+      // Data de geração
+      doc.setFontSize(9);
+      const dataGeracao = new Date().toLocaleDateString('pt-BR');
+      doc.text(`Gerado em: ${dataGeracao}`, pageWidth - margin, currentY + 8, { align: 'right' });
+
+      // Linha divisória
+      currentY += 35;
+      doc.setDrawColor(0, 59, 43);
+      doc.setLineWidth(0.5);
+      doc.line(margin, currentY, pageWidth - margin, currentY);
+
+      currentY += 10;
+      doc.setTextColor(0, 0, 0);
 
       // === DADOS DO CLIENTE ===
-      this.addSectionHeader(doc, 'DADOS DO CLIENTE', currentY, margin, pageWidth);
-      currentY += 15;
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Dados do Cliente', margin, currentY);
+      currentY += 10;
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
 
       const clientName = this.getClientName();
       if (clientName) {
-        this.addInfoRow(doc, 'Cliente:', clientName, currentY, margin);
-        currentY += 10;
+        doc.text(`Nome: ${clientName}`, margin, currentY);
+        currentY += 6;
       }
 
       const clientEmail = this.getClientEmail();
       if (clientEmail) {
-        this.addInfoRow(doc, 'E-mail:', clientEmail, currentY, margin);
-        currentY += 10;
+        doc.text(`Email: ${clientEmail}`, margin, currentY);
+        currentY += 6;
       }
 
       const clientPhone = this.getClientPhone();
       if (clientPhone) {
-        this.addInfoRow(doc, 'Telefone:', clientPhone, currentY, margin);
-        currentY += 10;
+        doc.text(`Telefone: ${clientPhone}`, margin, currentY);
+        currentY += 6;
       }
+
+      // Tipo da proposta
+      if (fullProposal.type) {
+        doc.text(`Tipo de Proposta: ${fullProposal.type}`, margin, currentY);
+        currentY += 6;
+      }
+
+      // Status da proposta
+      const statusMap: { [key: string]: string } = {
+        'draft': 'Rascunho',
+        'sent': 'Enviada',
+        'signed': 'Assinada',
+        'rejected': 'Rejeitada',
+        'expired': 'Expirada',
+        'converted': 'Convertida',
+        'contraproposta': 'Assinada Parcialmente'
+      };
+      doc.text(`Status: ${statusMap[fullProposal.status] || fullProposal.status}`, margin, currentY);
+
+      currentY += 15;
 
       // === SERVIÇOS ===
-      if (this.proposal.services && this.proposal.services.length > 0) {
+      if (fullProposal.services && fullProposal.services.length > 0) {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('Serviços Propostos', margin, currentY);
         currentY += 10;
-        this.addSectionHeader(doc, 'SERVIÇOS PROPOSTOS', currentY, margin, pageWidth);
-        currentY += 15;
 
-        this.proposal.services.forEach((service, index) => {
-          // Calcular altura necessária para este serviço
-          const descriptionLines = service.service_description ? 
-            doc.splitTextToSize(service.service_description, pageWidth - (margin * 2) - 10).length : 0;
-          const serviceHeight = 35 + (descriptionLines * 4);
+        // Criar tabela de serviços
+        const tableTop = currentY;
+        const headerHeight = 18;
+        const rowHeight = 16;
 
-          // Verificar se precisa de nova página
-          if (currentY + serviceHeight > pageHeight - 40) {
+        // Cabeçalho da tabela
+        doc.setFillColor(0, 59, 43);
+        doc.rect(margin, tableTop, pageWidth - (margin * 2), headerHeight, 'F');
+
+        const colNum = margin + 5;
+        const colService = margin + 20;
+        const colValue = pageWidth - margin - 5;
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+
+        doc.text('#', colNum, tableTop + 12);
+        doc.text('Serviço', colService, tableTop + 12);
+        doc.text('Valor', colValue, tableTop + 12, { align: 'right' });
+
+        currentY = tableTop + headerHeight + 5;
+
+        doc.setTextColor(51, 51, 51);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+
+        fullProposal.services.forEach((service: any, index: number) => {
+          if (currentY + rowHeight > doc.internal.pageSize.getHeight() - 30) {
             doc.addPage();
-            currentY = margin + 20;
-          }
+            currentY = 20;
 
-          // Box para cada serviço
-          const boxHeight = Math.max(25, 15 + (descriptionLines * 4));
-          doc.setFillColor(252, 253, 254);
-          doc.setDrawColor(229, 231, 235);
-          doc.roundedRect(margin, currentY, pageWidth - (margin * 2), boxHeight, 2, 2, 'FD');
+            doc.setFillColor(0, 59, 43);
+            doc.rect(margin, currentY, pageWidth - (margin * 2), headerHeight, 'F');
 
-          // Número e nome do serviço
-          doc.setFontSize(11);
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(0, 59, 43);
-          doc.text(`${index + 1}. ${service.service_name}`, margin + 5, currentY + 8);
-          
-          let serviceY = currentY + 15;
-          
-          // Descrição do serviço
-          if (service.service_description) {
-            doc.setTextColor(0, 0, 0);
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+
+            doc.text('#', colNum, currentY + 12);
+            doc.text('Serviço', colService, currentY + 12);
+            doc.text('Valor', colValue, currentY + 12, { align: 'right' });
+
+            currentY += headerHeight + 5;
+            doc.setTextColor(51, 51, 51);
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(9);
-            const description = doc.splitTextToSize(service.service_description, pageWidth - (margin * 2) - 10);
-            doc.text(description, margin + 5, serviceY);
-            serviceY += description.length * 4;
           }
-          
-          // Valor do serviço
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(0, 59, 43);
-          doc.setFontSize(10);
-          doc.text(`Valor: ${this.formatCurrency(service.total_value)}`, margin + 5, serviceY + 5);
-          
-          currentY += boxHeight + 8;
-          doc.setTextColor(0, 0, 0);
+
+          if (index % 2 === 0) {
+            doc.setFillColor(245, 245, 245);
+            doc.rect(margin, currentY - 4, pageWidth - (margin * 2), rowHeight, 'F');
+          }
+
+          doc.setTextColor(51, 51, 51);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+
+          doc.text(String(index + 1), colNum, currentY);
+
+          let serviceName = service.service_name || service.name || `Serviço ${index + 1}`;
+          const maxServiceWidth = colValue - colService - 50;
+          const serviceText = doc.splitTextToSize(serviceName, maxServiceWidth);
+          doc.text(serviceText[0] || serviceName, colService, currentY);
+
+          const value = service.total_value || service.value || service.unit_value || 0;
+          doc.text(this.formatCurrency(value), colValue, currentY, { align: 'right' });
+
+          currentY += rowHeight;
         });
+
+        // Linha de total
+        currentY += 3;
+        doc.setDrawColor(204, 204, 204);
+        doc.setLineWidth(0.5);
+        doc.line(margin, currentY, pageWidth - margin, currentY);
+        currentY += 7;
+
+        // Box do valor total
+        const totalBoxWidth = 100;
+        const totalBoxX = pageWidth - margin - totalBoxWidth;
+
+        doc.setFillColor(0, 59, 43);
+        doc.rect(totalBoxX, currentY - 3, totalBoxWidth, 16, 'F');
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+
+        doc.text('VALOR TOTAL:', totalBoxX + 3, currentY + 5);
+
+        const totalValue = this.formatCurrency(fullProposal.total_value || 0);
+        doc.text(totalValue, pageWidth - margin - 3, currentY + 5, { align: 'right' });
+
+        currentY += 25;
       }
 
-      // === VALOR TOTAL ===
-      currentY += 10;
-      
-      // Box destacado para valor total
-      doc.setFillColor(0, 59, 43);
-      doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 20, 5, 5, 'F');
-      
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`VALOR TOTAL: ${this.formatCurrency(this.proposal.total_value)}`, margin + 10, currentY + 13);
-
-      // === ASSINATURA ===
-      if (this.proposal.status === 'signed') {
-        currentY += 20;
-
-        // Verificar se precisa de nova página para a assinatura
-        if (currentY > pageHeight - 120) {
+      // === CONDIÇÕES DE PAGAMENTO ===
+      doc.setTextColor(0, 0, 0);
+      if (fullProposal.payment_method || (fullProposal.installments && fullProposal.installments > 1) || fullProposal.payment_type) {
+        if (currentY > doc.internal.pageSize.getHeight() - 80) {
           doc.addPage();
-          currentY = margin + 20;
+          currentY = 20;
         }
 
-        this.addSectionHeader(doc, 'ASSINATURA DIGITAL', currentY, margin, pageWidth);
-        currentY += 15;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Condições de Pagamento', margin, currentY);
+        currentY += 10;
 
-        // Box para a área da assinatura
-        doc.setFillColor(248, 249, 250);
-        doc.setDrawColor(220, 220, 220);
-        doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 85, 3, 3, 'FD');
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
 
-        if (this.proposal.signature_data) {
+        if (fullProposal.payment_type) {
+          const paymentTypeText = fullProposal.payment_type === 'vista' ? 'À Vista' : 'À Prazo';
+          doc.text(`Tipo de Pagamento: ${paymentTypeText}`, margin, currentY);
+          currentY += 6;
+        }
+
+        if (fullProposal.payment_method) {
+          doc.text(`Forma de Pagamento: ${fullProposal.payment_method}`, margin, currentY);
+          currentY += 6;
+        }
+
+        if (fullProposal.installments && fullProposal.installments > 1) {
+          doc.text(`Número de Parcelas: ${fullProposal.installments}x`, margin, currentY);
+          currentY += 6;
+
+          if (fullProposal.final_value) {
+            const valorParcela = fullProposal.final_value / fullProposal.installments;
+            doc.text(`Valor por Parcela: ${this.formatCurrency(valorParcela)}`, margin, currentY);
+            currentY += 6;
+          }
+        }
+
+        if (fullProposal.discount_applied && fullProposal.discount_applied > 0) {
+          doc.text(`Desconto Aplicado: ${this.formatCurrency(fullProposal.discount_applied)}`, margin, currentY);
+          currentY += 6;
+        }
+
+        currentY += 10;
+      }
+
+      // === ASSINATURA DIGITAL ===
+      if ((fullProposal.status === 'signed' || fullProposal.status === 'contraproposta') &&
+          (fullProposal.signer_name || fullProposal.signature_data)) {
+
+        if (currentY > doc.internal.pageSize.getHeight() - 120) {
+          doc.addPage();
+          currentY = 20;
+        }
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 59, 43);
+        doc.text('Assinatura Digital', margin, currentY);
+        currentY += 10;
+        doc.setTextColor(0, 0, 0);
+
+        // Dados do Signatário
+        if (fullProposal.signer_name || fullProposal.signer_email) {
+          doc.setFillColor(248, 249, 250);
+          doc.setDrawColor(220, 220, 220);
+
+          let signerBoxHeight = 15;
+          if (fullProposal.signer_name) signerBoxHeight += 6;
+          if (fullProposal.signer_email) signerBoxHeight += 6;
+          if (fullProposal.signer_phone) signerBoxHeight += 6;
+          if (fullProposal.signer_document) signerBoxHeight += 6;
+          if (fullProposal.signer_observations) {
+            const obsLines = doc.splitTextToSize(fullProposal.signer_observations, pageWidth - margin * 2 - 10);
+            signerBoxHeight += (obsLines.length * 5) + 8;
+          }
+
+          doc.roundedRect(margin, currentY, pageWidth - (margin * 2), signerBoxHeight, 3, 3, 'FD');
+          currentY += 8;
+
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(0, 59, 43);
+          doc.text('Dados do Signatário', margin + 5, currentY);
+          currentY += 8;
+
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+
+          if (fullProposal.signer_name) {
+            doc.text(`Nome: ${fullProposal.signer_name}`, margin + 5, currentY);
+            currentY += 6;
+          }
+
+          if (fullProposal.signer_email) {
+            doc.text(`E-mail: ${fullProposal.signer_email}`, margin + 5, currentY);
+            currentY += 6;
+          }
+
+          if (fullProposal.signer_phone) {
+            doc.text(`Telefone: ${fullProposal.signer_phone}`, margin + 5, currentY);
+            currentY += 6;
+          }
+
+          if (fullProposal.signer_document) {
+            doc.text(`Documento: ${fullProposal.signer_document}`, margin + 5, currentY);
+            currentY += 6;
+          }
+
+          if (fullProposal.signer_observations) {
+            doc.setFont('helvetica', 'bold');
+            doc.text('Observações:', margin + 5, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            const obsLines = doc.splitTextToSize(fullProposal.signer_observations, pageWidth - margin * 2 - 10);
+            doc.text(obsLines, margin + 5, currentY);
+            currentY += (obsLines.length * 5);
+          }
+
+          currentY += 10;
+        }
+
+        // Imagem da Assinatura
+        if (fullProposal.signature_data) {
+          doc.setFillColor(248, 249, 250);
+          doc.setDrawColor(220, 220, 220);
+          doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 50, 3, 3, 'FD');
+
           try {
-            // Imagem da assinatura centralizada
-            const imgWidth = 80;
-            const imgHeight = 40;
+            const imgWidth = 70;
+            const imgHeight = 35;
             const imgX = (pageWidth - imgWidth) / 2;
-            doc.addImage(this.proposal.signature_data, 'PNG', imgX, currentY + 10, imgWidth, imgHeight);
-            
-            currentY += 55;
+            doc.addImage(fullProposal.signature_data, 'PNG', imgX, currentY + 7.5, imgWidth, imgHeight);
+            currentY += 50;
           } catch (error) {
             console.warn('Erro ao adicionar assinatura ao PDF:', error);
             doc.setTextColor(0, 59, 43);
-            doc.setFontSize(12);
+            doc.setFontSize(10);
             doc.setFont('helvetica', 'bold');
-            doc.text('✓ Assinatura Digital Válida', margin + 10, currentY + 25);
-            currentY += 40;
+            doc.text('✓ Assinatura Digital Válida', margin + 5, currentY + 25);
+            currentY += 50;
           }
-        } else {
-          currentY += 40;
+
+          currentY += 5;
         }
 
-        // Informações do signatário (apenas se existirem)
-        if (this.proposal.signer_name || this.proposal.signed_at) {
+        // Data de Assinatura
+        if (fullProposal.signed_at) {
           doc.setTextColor(0, 59, 43);
           doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          
-          // Primeira linha: Nome e Data
-          let firstLineInfo = [];
-          if (this.proposal.signer_name) firstLineInfo.push(`Assinado por: ${this.proposal.signer_name}`);
-          if (this.proposal.signed_at) firstLineInfo.push(`Data: ${this.formatDate(this.proposal.signed_at)}`);
-          
-          if (firstLineInfo.length > 0) {
-            const firstLineText = firstLineInfo.join(' | ');
-            const firstLineWidth = doc.getTextWidth(firstLineText);
-            const firstLineX = (pageWidth - firstLineWidth) / 2;
-            doc.text(firstLineText, firstLineX, currentY + 15);
-          }
-          
-          // Segunda linha: E-mail e Documento (se existirem)
-          let secondLineInfo = [];
-          if (this.proposal.signer_email) secondLineInfo.push(`E-mail: ${this.proposal.signer_email}`);
-          if (this.proposal.signer_document) secondLineInfo.push(`Documento: ${this.proposal.signer_document}`);
-          
-          if (secondLineInfo.length > 0) {
-            const secondLineText = secondLineInfo.join(' | ');
-            const secondLineWidth = doc.getTextWidth(secondLineText);
-            const secondLineX = (pageWidth - secondLineWidth) / 2;
-            doc.text(secondLineText, secondLineX, currentY + 25);
-          }
+          doc.setFont('helvetica', 'italic');
+          const signedDate = new Date(fullProposal.signed_at).toLocaleDateString('pt-BR');
+          const dateText = `Assinado em ${signedDate}`;
+          const dateWidth = doc.getTextWidth(dateText);
+          const dateX = (pageWidth - dateWidth) / 2;
+          doc.text(dateText, dateX, currentY);
+          currentY += 10;
         }
-        
-        currentY += 30;
       }
 
-      // === RODAPÉ ===
-      currentY = pageHeight - 20;
-      doc.setTextColor(128, 128, 128);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.text('NAUE Consultoria - Documento gerado automaticamente', margin, currentY);
-      doc.text(`Página 1 de ${doc.getNumberOfPages()}`, pageWidth - margin - 20, currentY);
-      
       // Salvar o PDF
-      const fileName = `proposta-${this.proposal.proposal_number.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+      const fileName = `proposta-${fullProposal.proposal_number.replace(/\s+/g, '-').toLowerCase()}.pdf`;
       doc.save(fileName);
-      
+
       this.modalService.showSuccess('PDF gerado com sucesso!');
 
     } catch (error: any) {
@@ -344,30 +516,6 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
       this.modalService.showError('Erro ao gerar o PDF da proposta.');
     }
   }
-
-  private addSectionHeader(doc: any, title: string, y: number, margin: number, pageWidth: number): void {
-    // Fundo cinza claro para seção
-    doc.setFillColor(240, 242, 245);
-    doc.rect(margin, y - 3, pageWidth - (margin * 2), 12, 'F');
-    
-    // Título da seção
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 59, 43);
-    doc.text(title, margin + 5, y + 5);
-    
-    doc.setTextColor(0, 0, 0); // Voltar para preto
-  }
-
-  private addInfoRow(doc: any, label: string, value: string, y: number, margin: number): void {
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text(label, margin + 5, y);
-    
-    doc.setFont('helvetica', 'normal');
-    doc.text(value, margin + 35, y);
-  }
-
 
   async copyPublicLink() {
     if (!this.proposal) return;
@@ -552,11 +700,50 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
     return this.proposal.total_value;
   }
 
+  /**
+   * Calcula o valor total considerando apenas serviços selecionados em contrapropostas
+   */
+  getCalculatedTotal(): number {
+    if (!this.proposal) return 0;
+
+    // Se for contraproposta, somar apenas os serviços selecionados
+    if (this.proposal.status === 'contraproposta' && this.proposal.services) {
+      const selectedServices = this.proposal.services.filter(service => service.selected_by_client !== false);
+      const selectedServicesTotal = selectedServices.reduce((sum, service) => sum + (service.total_value || 0), 0);
+
+      console.log('💰 Calculando total da contraproposta:', {
+        totalServices: this.proposal.services.length,
+        selectedServices: selectedServices.length,
+        originalTotal: this.proposal.total_value,
+        calculatedTotal: selectedServicesTotal,
+        services: this.proposal.services.map(s => ({
+          name: s.service_name,
+          value: s.total_value,
+          selected: s.selected_by_client
+        }))
+      });
+
+      return selectedServicesTotal;
+    }
+
+    // Para outros status, usar o total_value da proposta
+    return this.proposal.total_value;
+  }
+
+  /**
+   * Verifica se é uma contraproposta e tem serviços não selecionados
+   */
+  isCounterProposalWithChanges(): boolean {
+    if (!this.proposal || this.proposal.status !== 'contraproposta') return false;
+
+    return this.proposal.services?.some(s => s.selected_by_client === false) || false;
+  }
+
   hasDiscount(): boolean {
     if (!this.proposal) return false;
-    
+
     return !!(
-      this.proposal.payment_type === 'vista' && 
+      this.proposal.payment_type === 'vista' &&
       this.proposal.discount_applied && 
       this.proposal.discount_applied > 0
     );

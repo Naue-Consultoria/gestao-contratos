@@ -371,9 +371,21 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     let totalValue = apiProposal.total_value || 0;
     if (apiProposal.status === 'contraproposta' && apiProposal.services) {
       // Para contrapropostas, calcular apenas o valor dos serviços selecionados
-      totalValue = apiProposal.services
-        .filter((service: any) => service.selected_by_client === true)
-        .reduce((sum: number, service: any) => sum + (service.total_value || 0), 0);
+      // Filtra por !== false para incluir serviços selecionados (true ou undefined/null)
+      const selectedServices = apiProposal.services.filter((service: any) => service.selected_by_client !== false);
+      totalValue = selectedServices.reduce((sum: number, service: any) => sum + (service.total_value || 0), 0);
+
+      console.log(`📊 Contraproposta ${apiProposal.proposal_number}:`, {
+        totalServices: apiProposal.services.length,
+        selectedServices: selectedServices.length,
+        originalValue: apiProposal.total_value,
+        calculatedValue: totalValue,
+        services: apiProposal.services.map((s: any) => ({
+          name: s.service_name,
+          value: s.total_value,
+          selected: s.selected_by_client
+        }))
+      });
     }
 
     return {
@@ -615,7 +627,8 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         'signed': 'Assinada',
         'rejected': 'Rejeitada',
         'expired': 'Expirada',
-        'converted': 'Convertida'
+        'converted': 'Convertida',
+        'contraproposta': 'Assinada Parcialmente'
       };
       doc.text(`Status: ${statusMap[fullProposal.status] || fullProposal.status}`, margin, currentY);
 
@@ -758,34 +771,172 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
 
       // === CONDIÇÕES DE PAGAMENTO ===
       doc.setTextColor(0, 0, 0);
-      if (fullProposal.payment_method || fullProposal.installment_count > 1) {
-        doc.setFontSize(14);
+      if (fullProposal.payment_method || fullProposal.installments > 1 || fullProposal.payment_type) {
+        // Verificar se precisa de nova página
+        if (currentY > doc.internal.pageSize.getHeight() - 80) {
+          doc.addPage();
+          currentY = 20;
+        }
+
+        doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
         doc.text('Condições de Pagamento', margin, currentY);
-        currentY += 15;
+        currentY += 10;
 
-        doc.setFontSize(11);
+        doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
+
+        if (fullProposal.payment_type) {
+          const paymentTypeText = fullProposal.payment_type === 'vista' ? 'À Vista' : 'À Prazo';
+          doc.text(`Tipo de Pagamento: ${paymentTypeText}`, margin, currentY);
+          currentY += 6;
+        }
 
         if (fullProposal.payment_method) {
           doc.text(`Forma de Pagamento: ${fullProposal.payment_method}`, margin, currentY);
-          currentY += 8;
+          currentY += 6;
         }
 
-        if (fullProposal.installment_count && fullProposal.installment_count > 1) {
-          const valorParcela = (fullProposal.total_value || 0) / fullProposal.installment_count;
-          doc.text(`Parcelamento: ${fullProposal.installment_count}x de ${this.formatCurrency(valorParcela)}`, margin, currentY);
-          currentY += 8;
+        if (fullProposal.installments && fullProposal.installments > 1) {
+          doc.text(`Número de Parcelas: ${fullProposal.installments}x`, margin, currentY);
+          currentY += 6;
+
+          if (fullProposal.final_value) {
+            const valorParcela = fullProposal.final_value / fullProposal.installments;
+            doc.text(`Valor por Parcela: ${this.formatCurrency(valorParcela)}`, margin, currentY);
+            currentY += 6;
+          }
         }
 
-        currentY += 15;
+        if (fullProposal.discount_applied && fullProposal.discount_applied > 0) {
+          doc.text(`Desconto Aplicado: ${this.formatCurrency(fullProposal.discount_applied)}`, margin, currentY);
+          currentY += 6;
+        }
+
+        currentY += 10;
       }
 
-      
+      // === ASSINATURA DIGITAL ===
+      if ((fullProposal.status === 'signed' || fullProposal.status === 'contraproposta') &&
+          (fullProposal.signer_name || fullProposal.signature_data)) {
+
+        // Verificar se precisa de nova página
+        if (currentY > doc.internal.pageSize.getHeight() - 120) {
+          doc.addPage();
+          currentY = 20;
+        }
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 59, 43);
+        doc.text('Assinatura Digital', margin, currentY);
+        currentY += 10;
+        doc.setTextColor(0, 0, 0);
+
+        // Dados do Signatário
+        if (fullProposal.signer_name || fullProposal.signer_email) {
+          doc.setFillColor(248, 249, 250);
+          doc.setDrawColor(220, 220, 220);
+
+          let signerBoxHeight = 15;
+          if (fullProposal.signer_name) signerBoxHeight += 6;
+          if (fullProposal.signer_email) signerBoxHeight += 6;
+          if (fullProposal.signer_phone) signerBoxHeight += 6;
+          if (fullProposal.signer_document) signerBoxHeight += 6;
+          if (fullProposal.signer_observations) {
+            const obsLines = doc.splitTextToSize(fullProposal.signer_observations, pageWidth - margin * 2 - 10);
+            signerBoxHeight += (obsLines.length * 5) + 8;
+          }
+
+          doc.roundedRect(margin, currentY, pageWidth - (margin * 2), signerBoxHeight, 3, 3, 'FD');
+          currentY += 8;
+
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(0, 59, 43);
+          doc.text('Dados do Signatário', margin + 5, currentY);
+          currentY += 8;
+
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+
+          if (fullProposal.signer_name) {
+            doc.text(`Nome: ${fullProposal.signer_name}`, margin + 5, currentY);
+            currentY += 6;
+          }
+
+          if (fullProposal.signer_email) {
+            doc.text(`E-mail: ${fullProposal.signer_email}`, margin + 5, currentY);
+            currentY += 6;
+          }
+
+          if (fullProposal.signer_phone) {
+            doc.text(`Telefone: ${fullProposal.signer_phone}`, margin + 5, currentY);
+            currentY += 6;
+          }
+
+          if (fullProposal.signer_document) {
+            doc.text(`Documento: ${fullProposal.signer_document}`, margin + 5, currentY);
+            currentY += 6;
+          }
+
+          if (fullProposal.signer_observations) {
+            doc.setFont('helvetica', 'bold');
+            doc.text('Observações:', margin + 5, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            const obsLines = doc.splitTextToSize(fullProposal.signer_observations, pageWidth - margin * 2 - 10);
+            doc.text(obsLines, margin + 5, currentY);
+            currentY += (obsLines.length * 5);
+          }
+
+          currentY += 10;
+        }
+
+        // Imagem da Assinatura
+        if (fullProposal.signature_data) {
+          doc.setFillColor(248, 249, 250);
+          doc.setDrawColor(220, 220, 220);
+          doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 50, 3, 3, 'FD');
+
+          try {
+            const imgWidth = 70;
+            const imgHeight = 35;
+            const imgX = (pageWidth - imgWidth) / 2;
+            doc.addImage(fullProposal.signature_data, 'PNG', imgX, currentY + 7.5, imgWidth, imgHeight);
+            currentY += 50;
+          } catch (error) {
+            console.warn('Erro ao adicionar assinatura ao PDF:', error);
+            doc.setTextColor(0, 59, 43);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.text('✓ Assinatura Digital Válida', margin + 5, currentY + 25);
+            currentY += 50;
+          }
+
+          currentY += 5;
+        }
+
+        // Data de Assinatura
+        if (fullProposal.signed_at) {
+          doc.setTextColor(0, 59, 43);
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'italic');
+          const signedDate = new Date(fullProposal.signed_at).toLocaleDateString('pt-BR');
+          const dateText = `Assinado em ${signedDate}`;
+          const dateWidth = doc.getTextWidth(dateText);
+          const dateX = (pageWidth - dateWidth) / 2;
+          doc.text(dateText, dateX, currentY);
+          currentY += 10;
+        }
+      }
+
+
       // Salvar o PDF
       const fileName = `proposta-${fullProposal.proposal_number.replace(/\s+/g, '-').toLowerCase()}.pdf`;
       doc.save(fileName);
-      
+
       this.modalService.showSuccess('PDF gerado com sucesso!');
 
     } catch (error: any) {

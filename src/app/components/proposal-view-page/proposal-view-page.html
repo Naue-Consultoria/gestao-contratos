@@ -125,23 +125,37 @@
         
         <!-- Services Grid -->
         <div class="services-grid" *ngIf="proposal.services && proposal.services.length > 0">
-          <div *ngFor="let service of proposal.services; let i = index" class="service-card">
+          <div *ngFor="let service of proposal.services; let i = index"
+               class="service-card"
+               [class.service-not-selected]="proposal.status === 'contraproposta' && service.selected_by_client === false">
             <div class="service-card-header">
               <div class="service-number">{{ i + 1 }}</div>
               <div class="service-name">{{ service.service_name || 'Serviço ' + service.service_id }}</div>
+              <span class="not-selected-badge" *ngIf="proposal.status === 'contraproposta' && service.selected_by_client === false">
+                <i class="fas fa-times-circle"></i> Não Selecionado
+              </span>
             </div>
-            
+
             <div class="service-card-body">
               <div class="service-pricing">
                 <div class="service-detail">
                   <span class="detail-label">Valor Unitário:</span>
                   <span class="detail-value">{{ formatCurrency(service.unit_value) }}</span>
                 </div>
-                
+
                 <div class="service-detail highlight">
                   <span class="detail-label">Total:</span>
                   <span class="detail-value">{{ formatCurrency(service.total_value) }}</span>
                 </div>
+              </div>
+
+              <!-- Client Notes -->
+              <div class="client-notes" *ngIf="proposal.status === 'contraproposta' && service.client_notes">
+                <div class="notes-header">
+                  <i class="fas fa-comment-dots"></i>
+                  <span>Observações do Cliente:</span>
+                </div>
+                <p class="notes-text">{{ service.client_notes }}</p>
               </div>
             </div>
           </div>
@@ -160,32 +174,47 @@
         <div class="services-summary" *ngIf="proposal.services && proposal.services.length > 0">
           <div class="summary-card">
             <div class="summary-content">
+              <!-- Estrutura para Contraproposta -->
+              <ng-container *ngIf="proposal.status === 'contraproposta' && isCounterProposalWithChanges()">
+                <!-- Valor Original (todos os serviços) -->
+                <div class="summary-row">
+                  <span class="summary-label">Valor Original da Proposta:</span>
+                  <span class="summary-value-line strike-through">{{ formatCurrency(proposal.total_value) }}</span>
+                </div>
+
+                <!-- Valor dos Serviços Selecionados -->
+                <div class="summary-row total-row counterprop-highlight">
+                  <span class="summary-label total-label">Valor dos Serviços Selecionados:</span>
+                  <span class="summary-final-value">{{ formatCurrency(getCalculatedTotal()) }}</span>
+                </div>
+              </ng-container>
+
               <!-- Estrutura detalhada para pagamento à vista com desconto -->
-              <ng-container *ngIf="hasDiscount()">
+              <ng-container *ngIf="hasDiscount() && proposal.status !== 'contraproposta'">
                 <!-- Valor Original -->
                 <div class="summary-row">
                   <span class="summary-label">Valor Original:</span>
                   <span class="summary-value-line strike-through">{{ formatCurrency(getOriginalValue()) }}</span>
                 </div>
-                
+
                 <!-- Desconto à Vista -->
                 <div class="summary-row discount-row">
                   <span class="summary-label discount-label">Desconto à Vista:</span>
                   <span class="summary-discount-value">- {{ formatCurrency(proposal.discount_applied) }}</span>
                 </div>
-                
+
                 <!-- Valor Total Final -->
                 <div class="summary-row total-row">
                   <span class="summary-label total-label">Valor Total da Proposta:</span>
                   <span class="summary-final-value">{{ formatCurrency(proposal.total_value) }}</span>
                 </div>
               </ng-container>
-              
+
               <!-- Estrutura simples para propostas sem desconto (parcelado ou à vista sem desconto) -->
-              <ng-container *ngIf="!hasDiscount()">
+              <ng-container *ngIf="!hasDiscount() && (proposal.status !== 'contraproposta' || !isCounterProposalWithChanges())">
                 <div class="summary-row total-row">
                   <span class="summary-label total-label">Valor Total da Proposta:</span>
-                  <span class="summary-final-value">{{ formatCurrency(proposal.total_value) }}</span>
+                  <span class="summary-final-value">{{ formatCurrency(getCalculatedTotal()) }}</span>
                 </div>
               </ng-container>
             </div>
@@ -237,12 +266,12 @@
       </section>
 
       <!-- Signature Section -->
-      <section class="content-section" *ngIf="proposal.status === 'signed'">
+      <section class="content-section" *ngIf="proposal.status === 'signed' || proposal.status === 'contraproposta'">
         <h3 class="section-title">
           <i class="fas fa-signature"></i>
           Assinatura Digital
         </h3>
-        
+
         <!-- Dados do Signatário -->
         <div class="signer-data" *ngIf="proposal.signer_name || proposal.signer_email">
           <h4 class="signer-title">
@@ -254,36 +283,36 @@
               <span class="detail-label">Nome:</span>
               <span class="detail-value">{{ proposal.signer_name }}</span>
             </div>
-            
+
             <div class="signer-detail" *ngIf="proposal.signer_email">
               <span class="detail-label">E-mail:</span>
               <span class="detail-value">{{ proposal.signer_email }}</span>
             </div>
-            
+
             <div class="signer-detail" *ngIf="proposal.signer_phone">
               <span class="detail-label">Telefone:</span>
               <span class="detail-value">{{ proposal.signer_phone }}</span>
             </div>
-            
+
             <div class="signer-detail" *ngIf="proposal.signer_document">
               <span class="detail-label">Documento:</span>
               <span class="detail-value">{{ proposal.signer_document }}</span>
             </div>
-            
+
             <div class="signer-detail" *ngIf="proposal.signer_observations">
               <span class="detail-label">Observações:</span>
               <span class="detail-value">{{ proposal.signer_observations }}</span>
             </div>
           </div>
         </div>
-        
+
         <div class="signature-display" *ngIf="proposal.signature_data">
           <label>Assinatura Digital:</label>
           <div class="signature-image">
             <img [src]="proposal.signature_data" alt="Assinatura Digital" />
           </div>
         </div>
-        
+
         <div class="signature-info" *ngIf="proposal.signed_at">
           <i class="fas fa-calendar-check"></i>
           <span>Assinada em {{ formatDate(proposal.signed_at) }}</span>

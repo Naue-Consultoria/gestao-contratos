@@ -348,12 +348,14 @@
   color: #ef4444;
 }
 
-/* Estilos para contrapropostas */
+/* Estilos para propostas assinadas parcialmente */
+.partial-signature-value,
 .counterproposal-value {
   color: #dc3545 !important;
   font-weight: 600 !important;
 }
 
+:host-context(body.dark-mode) .partial-signature-value,
 :host-context(body.dark-mode) .counterproposal-value {
   color: #ff6b7a !important;
 }

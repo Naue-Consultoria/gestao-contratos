@@ -51,7 +51,7 @@
               <option value="rejected">Rejeitada</option>
               <option value="expired">Expirada</option>
               <option value="converted">Convertida</option>
-              <option value="contraproposta">Contraproposta</option>
+              <option value="contraproposta">Assinada Parcialmente</option>
             </select>
           </div>
 
@@ -264,7 +264,7 @@
                   <i class="fas fa-link"></i>
                 </button>
 
-                <!-- Botão Converter em Contrato - para propostas assinadas ou contrapropostas -->
+                <!-- Botão Converter em Contrato - para propostas assinadas ou assinadas parcialmente -->
                 <button
                   *ngIf="proposal.raw.status === 'signed' || proposal.raw.status === 'contraproposta'"
                   class="action-btn convert-btn"

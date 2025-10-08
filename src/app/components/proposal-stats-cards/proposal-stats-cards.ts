@@ -285,7 +285,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
       'rejected': 'rejeitada',
       'expired': 'expirada',
       'converted': 'convertida',
-      'contraproposta': 'contraproposta'
+      'contraproposta': 'assinada parcialmente'
     };
     return statusMap[status] || status;
   }

@@ -988,7 +988,7 @@ export class PublicProposalViewComponent implements OnInit {
       'accepted': 'Aceita',
       'rejected': 'Rejeitada',
       'expired': 'Expirada',
-      'contraproposta': 'Contraproposta'
+      'contraproposta': 'Assinada Parcialmente'
     };
     return texts[status] || status;
   }
