@@ -1474,18 +1474,6 @@ input[type="radio"] {
     padding-bottom: 1.5rem;
 }
 
-.timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -1.5rem;
-    top: 0.25rem;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: var(--primary-green);
-    border: 2px solid var(--white);
-    box-shadow: 0 0 0 4px rgba(14, 155, 113, 0.2);
-}
 
 :host-context(body.dark-mode) .timeline-item::before {
     border-color: var(--dark-card);

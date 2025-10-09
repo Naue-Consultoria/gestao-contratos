@@ -240,22 +240,6 @@
                 formControlName="dataFechamentoCancelamento"
                 class="form-control date-input">
             </div>
-
-            <div class="form-group">
-              <label class="form-label">Fonte de Recrutamento</label>
-              <select
-                formControlName="fonteRecrutamento"
-                class="form-control select-input"
-                [class.error]="isFieldInvalid('fonteRecrutamento')">
-                <option value="">Selecione a fonte</option>
-                <option *ngFor="let fonte of fonteRecrutamentoOptions" [value]="fonte.value">
-                  {{ fonte.label }}
-                </option>
-              </select>
-              <span class="error-message" *ngIf="isFieldInvalid('fonteRecrutamento')">
-                {{ getErrorMessage('fonteRecrutamento') }}
-              </span>
-            </div>
           </div>
 
           <!-- Section: Candidato Aprovado -->

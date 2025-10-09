@@ -370,8 +370,10 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     // Calcular valor total considerando seleção parcial de serviços
     let totalValue = apiProposal.total_value || 0;
 
-    // Verificar se há serviços com seleção parcial (alguns serviços NÃO selecionados, mas não todos)
-    if (apiProposal.services && apiProposal.services.length > 0) {
+    // Verificar se há serviços com seleção parcial apenas para propostas assinadas, contrapropostas ou convertidas
+    // Para propostas enviadas, todos os serviços estão disponíveis
+    if ((apiProposal.status === 'signed' || apiProposal.status === 'contraproposta' || apiProposal.status === 'converted') &&
+        apiProposal.services && apiProposal.services.length > 0) {
       // Contar quantos serviços NÃO foram selecionados
       const unselectedCount = apiProposal.services.filter((s: any) => s.selected_by_client === false).length;
       const totalServices = apiProposal.services.length;
@@ -951,7 +953,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       'Full': 'Full',
       'Pontual': 'Pontual',
       'Individual': 'Individual',
-      'Recrutamento & Seleção': 'Recrutamento & Seleção'
+      'Recrutamento & Seleção': 'R&S'
     };
     return types[type] || type || 'Full';
   }

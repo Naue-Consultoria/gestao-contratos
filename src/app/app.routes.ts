@@ -17,6 +17,7 @@ import { ProposalsPageComponent } from './components/proposals-page/proposals-pa
 import { ProposalFormComponent } from './components/proposal-form/proposal-form';
 import { ProposalViewPageComponent } from './components/proposal-view-page/proposal-view-page';
 import { PublicProposalViewComponent } from './pages/public-proposal-view/public-proposal-view.component';
+import { PublicRecruitmentProposalView } from './pages/public-recruitment-proposal-view/public-recruitment-proposal-view';
 import { ReportsPage } from './components/reports-page/reports-page';
 import { AnalyticsPageComponent } from './components/analytics-page/analytics-page';
 import { UsersPageComponent } from './components/users-page/users-page';
@@ -75,6 +76,13 @@ export const routes: Routes = [
     path: 'public/proposal/:token',
     component: PublicProposalViewComponent,
     title: 'Proposta Comercial - NAUE Consultoria',
+  },
+
+  // Rota pública para visualização de propostas de Recrutamento & Seleção
+  {
+    path: 'public/recruitment-proposal/:token',
+    component: PublicRecruitmentProposalView,
+    title: 'Proposta de Recrutamento & Seleção - NAUE Consultoria',
   },
 
   // Rota pública para visualização de encontros de mentoria

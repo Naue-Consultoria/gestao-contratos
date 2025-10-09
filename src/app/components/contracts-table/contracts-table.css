@@ -481,7 +481,7 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #0a5c42 0%, #0e9b71 100%);
+    background: var(--primary-green);
     color: var(--white);
     box-shadow: 0 4px 12px rgba(10, 92, 66, 0.3);
     font-weight: 600;
@@ -495,7 +495,7 @@
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(10, 92, 66, 0.4);
-    background: linear-gradient(135deg, #084835 0%, #0a5c42 100%);
+    background: #0a5c42;
 }
 
 .btn-secondary {

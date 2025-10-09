@@ -60,18 +60,6 @@ export class Login {
     });
   }
 
-  onFormSubmit(event: Event) {
-    event.preventDefault();
-    this.submit();
-  }
-
-  onKeyPress(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      this.submit();
-    }
-  }
-
   navigate() {
     this.router.navigate(['register']);
   }

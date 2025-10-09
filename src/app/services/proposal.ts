@@ -505,6 +505,12 @@ export class ProposalService {
   getPublicProposalUrl(proposal: Proposal): string | null {
     if (!proposal.unique_link) return null;
     const baseUrl = window.location.origin;
+
+    // Se for proposta de Recrutamento & Seleção, usar a página específica de R&S
+    if (proposal.type === 'Recrutamento & Seleção') {
+      return `${baseUrl}/public/recruitment-proposal/${proposal.unique_link}`;
+    }
+
     return `${baseUrl}/public/proposal/${proposal.unique_link}`;
   }
 

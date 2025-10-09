@@ -108,6 +108,22 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
     // Adicionar listeners para conversão entre valor e porcentagem
     this.setupDiscountListeners();
+
+    // Listener para tipo de proposta - resetar descontos e parcelas para R&S
+    this.proposalForm.get('type')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(type => {
+        if (type === 'Recrutamento & Seleção') {
+          // Para R&S: zerar descontos e forçar pagamento à vista
+          this.proposalForm.patchValue({
+            max_installments: 1,
+            vista_discount_percentage: 0,
+            prazo_discount_percentage: 0,
+            vista_discount_value: 0,
+            prazo_discount_value: 0
+          }, { emitEvent: false });
+        }
+      });
   }
 
   ngOnDestroy(): void {

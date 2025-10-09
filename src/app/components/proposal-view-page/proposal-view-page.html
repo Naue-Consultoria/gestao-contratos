@@ -127,11 +127,11 @@
         <div class="services-grid" *ngIf="proposal.services && proposal.services.length > 0">
           <div *ngFor="let service of proposal.services; let i = index"
                class="service-card"
-               [class.service-not-selected]="service.selected_by_client === false">
+               [class.service-not-selected]="(proposal.status === 'signed' || proposal.status === 'contraproposta' || proposal.status === 'converted') && service.selected_by_client === false">
             <div class="service-card-header">
               <div class="service-number">{{ i + 1 }}</div>
               <div class="service-name">{{ service.service_name || 'Serviço ' + service.service_id }}</div>
-              <span class="not-selected-badge" *ngIf="service.selected_by_client === false">
+              <span class="not-selected-badge" *ngIf="(proposal.status === 'signed' || proposal.status === 'contraproposta' || proposal.status === 'converted') && service.selected_by_client === false">
                 <i class="fas fa-times-circle"></i> Não Selecionado
               </span>
             </div>

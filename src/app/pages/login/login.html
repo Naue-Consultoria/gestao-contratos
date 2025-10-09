@@ -5,24 +5,22 @@
         class="login-logo"
     />
     
-    <form [formGroup]="loginForm" (ngSubmit)="onFormSubmit($event)">
+    <form [formGroup]="loginForm" (ngSubmit)="submit()">
         <app-login-primary-input
             formControlName="email"
             inputName="email"
             type="email"
             label="Email"
             placeholder="Digite seu email"
-            (keypress)="onKeyPress($event)"
         >
         </app-login-primary-input>
-        
+
         <app-login-primary-input
             formControlName="password"
             inputName="password"
             type="password"
             label="Senha"
             placeholder="Digite sua senha"
-            (keypress)="onKeyPress($event)"
         >
         </app-login-primary-input>
         

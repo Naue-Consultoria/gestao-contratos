@@ -167,7 +167,7 @@
               <div class="help-text">Alterar o status da proposta pode afetar as ações disponíveis</div>
             </div>
             
-            <div class="form-group">
+            <div class="form-group" *ngIf="proposalForm.get('type')?.value !== 'Recrutamento & Seleção'">
               <label for="max_installments" class="form-label">Máximo de Parcelas <span class="required">*</span></label>
               <select id="max_installments" formControlName="max_installments" class="form-control" [class.error]="isFieldInvalid('max_installments')">
                 <option value="1">1x (somente à vista)</option>
@@ -180,7 +180,7 @@
             </div>
 
             <!-- Descontos para pagamento à vista -->
-            <div class="discount-section">
+            <div class="discount-section" *ngIf="proposalForm.get('type')?.value !== 'Recrutamento & Seleção'">
               <h4 class="discount-title">
                 <i class="fas fa-tag"></i>
                 Desconto para Pagamento à Vista
@@ -231,7 +231,7 @@
             </div>
 
             <!-- Descontos para pagamento à prazo -->
-            <div class="discount-section">
+            <div class="discount-section" *ngIf="proposalForm.get('type')?.value !== 'Recrutamento & Seleção'">
               <h4 class="discount-title">
                 <i class="fas fa-calendar-alt"></i>
                 Desconto para Pagamento à Prazo

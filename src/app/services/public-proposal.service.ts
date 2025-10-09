@@ -12,6 +12,12 @@ export interface PublicProposalService {
   custom_value?: number;
   selected_by_client?: boolean;
   client_notes?: string;
+  recruitmentPercentages?: {
+    administrativo_gestao: number;
+    comercial: number;
+    operacional: number;
+    estagio_jovem: number;
+  };
   service: {
     name: string;
     value: number;
@@ -27,6 +33,7 @@ export interface PublicProposalService {
 export interface PublicProposal {
   id: number;
   proposal_number?: string;
+  type?: string;
   title: string;
   description?: string;
   status: string;
