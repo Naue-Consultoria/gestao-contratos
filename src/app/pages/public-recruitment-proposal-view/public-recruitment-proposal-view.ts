@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -27,7 +27,7 @@ type ProposalServiceItem = PublicProposalService;
   templateUrl: './public-recruitment-proposal-view.html',
   styleUrls: ['./public-recruitment-proposal-view.css']
 })
-export class PublicRecruitmentProposalView implements OnInit {
+export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
   currentYear = new Date().getFullYear();
   @ViewChild('signatureCanvas', { static: false }) signatureCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -141,6 +141,11 @@ export class PublicRecruitmentProposalView implements OnInit {
     this.loadProposal();
   }
 
+  ngAfterViewInit(): void {
+    // Canvas será inicializado quando a proposta for carregada
+    // Veja método loadProposal()
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -181,6 +186,13 @@ export class PublicRecruitmentProposalView implements OnInit {
           if (response.success) {
             this.proposal = response.data;
             this.checkProposalStatus();
+
+            // Inicializar canvas após proposta ser carregada e DOM estar pronto
+            if (this.proposal?.status === 'sent' && !this.proposalExpired) {
+              setTimeout(() => {
+                this.initializeSignatureCanvas();
+              }, 1000);
+            }
           }
           this.isLoading = false;
         },
@@ -254,30 +266,57 @@ export class PublicRecruitmentProposalView implements OnInit {
 
   // === MÉTODOS DE ASSINATURA ===
 
-  initializeSignatureCanvas(): void {
-    setTimeout(() => {
-      if (this.signatureCanvas && this.signatureCanvas.nativeElement) {
-        const canvas = this.signatureCanvas.nativeElement;
-        const rect = canvas.getBoundingClientRect();
+  initializeSignatureCanvas(retryCount: number = 0): void {
+    const maxRetries = 10;
 
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-
-        this.signatureContext = canvas.getContext('2d');
-
-        if (this.signatureContext) {
-          this.signatureContext.strokeStyle = '#000000';
-          this.signatureContext.lineWidth = 2;
-          this.signatureContext.lineCap = 'round';
-          this.signatureContext.lineJoin = 'round';
-        }
+    if (!this.signatureCanvas || !this.signatureCanvas.nativeElement) {
+      if (retryCount < maxRetries) {
+        setTimeout(() => this.initializeSignatureCanvas(retryCount + 1), 200);
       }
-    }, 200);
+      return;
+    }
+
+    const canvas = this.signatureCanvas.nativeElement;
+    const parent = canvas.parentElement;
+
+    if (!parent) {
+      if (retryCount < maxRetries) {
+        setTimeout(() => this.initializeSignatureCanvas(retryCount + 1), 200);
+      }
+      return;
+    }
+
+    const rect = parent.getBoundingClientRect();
+
+    if (rect.width === 0) {
+      if (retryCount < maxRetries) {
+        setTimeout(() => this.initializeSignatureCanvas(retryCount + 1), 200);
+      }
+      return;
+    }
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = 250 * dpr;
+
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = '250px';
+
+    this.signatureContext = canvas.getContext('2d');
+
+    if (this.signatureContext) {
+      this.signatureContext.scale(dpr, dpr);
+      this.signatureContext.strokeStyle = '#000000';
+      this.signatureContext.lineWidth = 2;
+      this.signatureContext.lineCap = 'round';
+      this.signatureContext.lineJoin = 'round';
+    }
   }
 
   startDrawing(event: MouseEvent): void {
     if (!this.signatureContext) return;
 
+    event.preventDefault();
     this.isDrawing = true;
     const rect = this.signatureCanvas.nativeElement.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -290,6 +329,7 @@ export class PublicRecruitmentProposalView implements OnInit {
   draw(event: MouseEvent): void {
     if (!this.isDrawing || !this.signatureContext) return;
 
+    event.preventDefault();
     const rect = this.signatureCanvas.nativeElement.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
