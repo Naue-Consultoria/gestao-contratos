@@ -397,6 +397,15 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
       return;
     }
 
+    // Validar valor total da proposta (para R&S, valor 0 é permitido pois será calculado depois)
+    const totalValue = this.getTotalValue();
+    const isRecruitment = this.proposal?.type === 'Recrutamento & Seleção';
+
+    if (!isRecruitment && (!totalValue || totalValue <= 0)) {
+      this.toastr.error('Erro: valor da proposta inválido. Por favor, recarregue a página.');
+      return;
+    }
+
     this.isSubmitting = true;
 
     try {
@@ -406,7 +415,7 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
       const signatureData: SignatureData = {
         signature_data: signatureDataUrl,
         ...this.signatureForm.value,
-        final_value: this.getTotalValue(),
+        final_value: totalValue || 0, // Para R&S, pode ser 0
         payment_type: 'vista', // R&S sempre à vista
         payment_method: this.paymentMethod,
         installments: 1
@@ -453,8 +462,12 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
   // === MÉTODOS UTILITÁRIOS ===
 
   getTotalValue(): number {
-    if (!this.proposal) return 0;
-    return this.proposal.total_value;
+    if (!this.proposal || !this.proposal.total_value) {
+      return 0;
+    }
+    // Garantir que o valor seja um número positivo válido
+    const value = Number(this.proposal.total_value);
+    return value > 0 ? value : 0;
   }
 
   formatCurrency(value: number): string {
