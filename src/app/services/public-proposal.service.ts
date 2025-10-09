@@ -52,6 +52,8 @@ export interface PublicProposal {
   prazo_discount_percentage?: number;
   vista_discount_value?: number;
   prazo_discount_value?: number;
+  solicitante_name?: string;
+  solicitante_email?: string;
   client: {
     id: number;
     email: string;

@@ -230,6 +230,27 @@ html {
   line-height: 1.2;
 }
 
+.solicitante-info {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.solicitante-name {
+  font-size: 1.45rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: -0.01em;
+}
+
+.solicitante-email {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: -0.005em;
+}
+
 /* Company Stats */
 .company-stats {
   display: grid;
@@ -3938,7 +3959,15 @@ html {
   .client-name {
     font-size: 1.4rem;
   }
-  
+
+  .solicitante-name {
+    font-size: 0.9rem;
+  }
+
+  .solicitante-email {
+    font-size: 0.8rem;
+  }
+
   /* About Section Mobile Improvements */
   .about-content {
     flex-direction: column;
@@ -4700,7 +4729,15 @@ html {
   .client-name {
     font-size: 1.2rem;
   }
-  
+
+  .solicitante-name {
+    font-size: 0.85rem;
+  }
+
+  .solicitante-email {
+    font-size: 0.75rem;
+  }
+
   .ceo-photo {
     width: 250px;
     height: 250px;
@@ -4872,7 +4909,15 @@ html {
   .client-name {
     font-size: 1.1rem;
   }
-  
+
+  .solicitante-name {
+    font-size: 0.8rem;
+  }
+
+  .solicitante-email {
+    font-size: 0.7rem;
+  }
+
   .ceo-photo {
     width: 200px;
     height: 200px;

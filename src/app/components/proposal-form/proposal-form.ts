@@ -919,30 +919,22 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       next: (response) => {
         // Limpar toast de loading
         this.toastr.clear();
-        
+
         if (response.success) {
           const successMessage = this.isEditMode ? 'Proposta atualizada com sucesso' : 'Proposta criada com sucesso';
-          
+
           // Sempre mostrar sucesso primeiro
           this.toastr.success(successMessage);
-          
-          // Se não está editando, redirecionar para a lista
-          if (!this.isEditMode) {
-            // Redirecionar para a lista de propostas após um delay
-            setTimeout(() => {
-              if (!this.isModal) {
-                this.router.navigate(['/home/propostas']);
-              }
-            }, 1500);
-          }
-          
+
           // Emitir evento de salvamento
           this.onSave.emit(response.data);
-          
-          // Reset form apenas se é modal e está editando
-          if (!this.isModal && this.isEditMode) {
-            this.resetForm();
-          }
+
+          // Redirecionar para a lista de propostas após um delay (tanto para criar quanto editar)
+          setTimeout(() => {
+            if (!this.isModal) {
+              this.router.navigate(['/home/propostas']);
+            }
+          }, 1500);
         } else {
           this.toastr.error(response.message || 'Erro ao salvar proposta');
         }
