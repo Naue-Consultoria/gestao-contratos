@@ -230,6 +230,27 @@ html {
   line-height: 1.2;
 }
 
+.solicitante-info {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.solicitante-name {
+  font-size: 1.45rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: -0.01em;
+}
+
+.solicitante-email {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: -0.005em;
+}
+
 /* Company Stats */
 .company-stats {
   display: grid;
