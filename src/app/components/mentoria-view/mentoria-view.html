@@ -32,6 +32,12 @@
           <span [class]="'status-badge ' + getStatusBadgeClass(mentoria.status)">
             {{ getStatusLabel(mentoria.status) }}
           </span>
+          <button class="btn-icon-action" *ngIf="mentoria.unique_token" (click)="visualizarHub()" title="Visualizar Hub Público">
+            <i class="fas fa-globe"></i>
+          </button>
+          <button class="btn-icon-action" *ngIf="mentoria.unique_token" (click)="copiarLinkHub()" title="Copiar Link do Hub">
+            <i class="fas fa-link"></i>
+          </button>
           <button class="btn-icon-action" (click)="editarMentoria()" title="Editar Mentoria">
             <i class="fas fa-edit"></i>
           </button>

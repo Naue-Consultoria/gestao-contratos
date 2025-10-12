@@ -101,14 +101,14 @@
       </form>
     </div>
 
-    <!-- Foto dos Encontros Section -->
+    <!-- Foto da Mentoria Section -->
     <div class="form-section">
       <div class="section-header">
         <div class="section-header-left">
           <i class="fas fa-image section-icon"></i>
           <div>
-            <h3 class="section-title">Foto dos Encontros</h3>
-            <p class="section-subtitle">Esta foto será aplicada a todos os encontros da mentoria</p>
+            <h3 class="section-title">Foto da Mentoria</h3>
+            <p class="section-subtitle">Esta foto será exibida no hub público da mentoria</p>
           </div>
         </div>
       </div>
@@ -117,10 +117,18 @@
       <div class="foto-atual-container" *ngIf="fotoAtualUrl && !fotoSelecionadaPreview">
         <label class="foto-label">
           <i class="fas fa-image"></i>
-          Foto Atual
+          Foto Atual da Mentoria
         </label>
         <div class="foto-preview-box">
-          <img [src]="fotoAtualUrl" alt="Foto atual dos encontros">
+          <img [src]="fotoAtualUrl" alt="Foto atual da mentoria">
+          <button type="button"
+                  class="btn-remove-foto"
+                  (click)="removerFotoAtual()"
+                  [disabled]="isUploadingFoto"
+                  title="Remover foto atual">
+            <i class="fas fa-trash"></i>
+            Remover Foto Atual
+          </button>
         </div>
       </div>
 
@@ -128,7 +136,7 @@
       <div class="foto-upload-container">
         <label class="foto-label">
           <i class="fas fa-upload"></i>
-          {{ fotoSelecionadaPreview ? 'Nova Foto Selecionada' : 'Selecionar Nova Foto' }}
+          {{ fotoSelecionadaPreview ? 'Nova Foto Selecionada' : 'Selecionar Foto da Mentoria' }}
         </label>
 
         <!-- Preview da nova foto -->
@@ -136,24 +144,80 @@
           <img [src]="fotoSelecionadaPreview" alt="Preview da nova foto">
           <button type="button" class="btn-remove-foto" (click)="removerFotoSelecionada()">
             <i class="fas fa-times"></i>
-            Remover
+            Cancelar Seleção
           </button>
         </div>
 
         <!-- Input de upload -->
-        <div class="upload-input-container" *ngIf="!fotoSelecionadaPreview">
+        <div class="upload-input-container" *ngIf="!fotoSelecionadaPreview && !fotoAtualUrl">
           <input
             type="file"
             id="foto-upload"
             accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
             (change)="onFotoSelecionada($event)"
+            [disabled]="isUploadingFoto"
             style="display: none;">
-          <label for="foto-upload" class="btn-upload">
-            <i class="fas fa-cloud-upload-alt"></i>
-            Escolher Imagem
+          <label for="foto-upload" class="btn-upload" [class.disabled]="isUploadingFoto">
+            <i class="fas" [ngClass]="isUploadingFoto ? 'fa-spinner fa-spin' : 'fa-cloud-upload-alt'"></i>
+            {{ isUploadingFoto ? 'Enviando...' : 'Escolher Imagem' }}
           </label>
           <p class="upload-hint">JPEG, PNG, GIF ou WEBP - Máximo 10MB</p>
+          <p class="upload-info">
+            <i class="fas fa-info-circle"></i>
+            A foto será exibida no hub público onde o mentorado visualiza todos os encontros
+          </p>
         </div>
+      </div>
+    </div>
+
+    <!-- Testes da Mentoria Section -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-header-left">
+          <i class="fas fa-clipboard-check section-icon"></i>
+          <div>
+            <h3 class="section-title">Testes e Avaliações</h3>
+            <p class="section-subtitle">Adicione links de testes para os mentorados realizarem</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testes-container">
+        <div class="teste-item" *ngFor="let teste of testes; let i = index">
+          <div class="teste-header">
+            <span class="teste-numero">Teste {{ i + 1 }}</span>
+            <button type="button" class="btn-remove-teste" (click)="removerTeste(i)" title="Remover teste">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="teste-fields">
+            <input
+              type="text"
+              [(ngModel)]="teste.titulo"
+              placeholder="Título do teste (ex: Teste de Perfil Comportamental)"
+              class="teste-titulo">
+            <input
+              type="text"
+              [(ngModel)]="teste.descricao"
+              placeholder="Descrição breve (ex: Avalie seu perfil comportamental)"
+              class="teste-descricao">
+            <input
+              type="url"
+              [(ngModel)]="teste.link"
+              placeholder="Link do teste (https://...)"
+              class="teste-link">
+          </div>
+        </div>
+
+        <button type="button" class="btn-add-teste" (click)="adicionarTeste()">
+          <i class="fas fa-plus"></i>
+          Adicionar Teste
+        </button>
+
+        <small class="field-hint" *ngIf="testes.length === 0">
+          <i class="fas fa-info-circle"></i>
+          Os testes aparecerão no hub da mentoria para os mentorados realizarem
+        </small>
       </div>
     </div>
 

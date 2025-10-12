@@ -40,6 +40,7 @@ import { MentoriaEdit } from './components/mentoria-edit/mentoria-edit';
 import { MentoriaView } from './components/mentoria-view/mentoria-view';
 import { MentoriaConteudoEditor } from './components/mentoria-conteudo-editor/mentoria-conteudo-editor';
 import { PublicMentoriaViewComponent } from './pages/public-mentoria-view/public-mentoria-view';
+import { PublicMentoriaHub } from './pages/public-mentoria-hub/public-mentoria-hub';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -90,6 +91,13 @@ export const routes: Routes = [
     path: 'mentoria/:token',
     component: PublicMentoriaViewComponent,
     title: 'Encontro de Mentoria - NAUE Consultoria',
+  },
+
+  // Rota pública para visualização do hub de mentoria
+  {
+    path: 'mentoria-hub/:token',
+    component: PublicMentoriaHub,
+    title: 'Programa de Mentoria - NAUE Consultoria',
   },
 
   // Rota de acesso negado

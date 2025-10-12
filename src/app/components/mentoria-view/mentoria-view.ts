@@ -273,4 +273,28 @@ export class MentoriaView implements OnInit {
       }
     });
   }
+
+  visualizarHub(): void {
+    if (!this.mentoria || !this.mentoria.unique_token) {
+      this.toastr.warning('Esta mentoria não possui um link de acesso público');
+      return;
+    }
+
+    const url = `${window.location.origin}/mentoria-hub/${this.mentoria.unique_token}`;
+    window.open(url, '_blank');
+  }
+
+  copiarLinkHub(): void {
+    if (!this.mentoria || !this.mentoria.unique_token) {
+      this.toastr.warning('Esta mentoria não possui um link de acesso público');
+      return;
+    }
+
+    const url = `${window.location.origin}/mentoria-hub/${this.mentoria.unique_token}`;
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastr.success('Link do hub copiado para a área de transferência!');
+    }).catch(() => {
+      this.toastr.error('Erro ao copiar link');
+    });
+  }
 }

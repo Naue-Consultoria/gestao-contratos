@@ -9,6 +9,9 @@ export interface Mentoria {
   contract_id: number;
   numero_encontros: number;
   status: 'ativa' | 'concluida' | 'cancelada';
+  unique_token?: string;
+  foto_url?: string;
+  testes?: any; // JSONB field for storing test links
   created_at: string;
   updated_at: string;
   created_by?: number;
@@ -132,6 +135,7 @@ export class MentoriaService {
     contract_id: number;
     numero_encontros: number;
     mentorado_nome: string;
+    testes?: any; // Optional test links array
   }): Observable<ApiResponse<Mentoria>> {
     return this.http.post<ApiResponse<Mentoria>>(`${this.apiUrl}/mentorias`, dados);
   }
@@ -284,6 +288,13 @@ export class MentoriaService {
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/encontros/${encontroId}/foto`, formData);
   }
 
+  /**
+   * Upload de foto da mentoria
+   */
+  uploadFotoMentoria(mentoriaId: number, formData: FormData): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/mentorias/${mentoriaId}/foto`, formData);
+  }
+
   // ===== ENDPOINTS PÚBLICOS =====
 
   /**
@@ -291,6 +302,13 @@ export class MentoriaService {
    */
   obterEncontroPublico(token: string): Observable<ApiResponse<MentoriaEncontro>> {
     return this.http.get<ApiResponse<MentoriaEncontro>>(`${this.apiUrl}/publico/${token}`);
+  }
+
+  /**
+   * Obter mentoria completa via token público (sem autenticação)
+   */
+  obterMentoriaPublica(token: string): Observable<ApiResponse<Mentoria>> {
+    return this.http.get<ApiResponse<Mentoria>>(`${this.apiUrl}/publico/mentoria/${token}`);
   }
 
   /**

@@ -159,6 +159,51 @@
             </div>
           </div>
         </div>
+
+        <!-- Linha 4: Testes da Mentoria -->
+        <div class="form-field">
+          <label>
+            <i class="fas fa-clipboard-check"></i>
+            Testes e Avaliações (Opcional)
+          </label>
+          <div class="testes-container">
+            <div class="teste-item" *ngFor="let teste of testes; let i = index">
+              <div class="teste-header">
+                <span class="teste-numero">Teste {{ i + 1 }}</span>
+                <button type="button" class="btn-remove-teste" (click)="removerTeste(i)" title="Remover teste">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div class="teste-fields">
+                <input
+                  type="text"
+                  [(ngModel)]="teste.titulo"
+                  placeholder="Título do teste (ex: Teste de Perfil Comportamental)"
+                  class="teste-titulo">
+                <input
+                  type="text"
+                  [(ngModel)]="teste.descricao"
+                  placeholder="Descrição breve (ex: Avalie seu perfil comportamental)"
+                  class="teste-descricao">
+                <input
+                  type="url"
+                  [(ngModel)]="teste.link"
+                  placeholder="Link do teste (https://...)"
+                  class="teste-link">
+              </div>
+            </div>
+
+            <button type="button" class="btn-add-teste" (click)="adicionarTeste()">
+              <i class="fas fa-plus"></i>
+              Adicionar Teste
+            </button>
+
+            <small class="field-hint" *ngIf="testes.length === 0">
+              <i class="fas fa-info-circle"></i>
+              Os testes aparecerão no hub da mentoria para os mentorados realizarem
+            </small>
+          </div>
+        </div>
       </ng-container>
 
       <!-- MODO EDIÇÃO -->
@@ -215,6 +260,39 @@
               <option value="em_andamento">🟡 Em andamento</option>
               <option value="finalizado">✅ Finalizado</option>
             </select>
+          </div>
+        </div>
+
+        <!-- Linha 3: Foto do Encontro (full width) -->
+        <div class="form-field">
+          <label for="foto_encontro">
+            <i class="fas fa-image"></i>
+            Foto do Encontro
+          </label>
+          <div class="foto-upload-container">
+            <!-- Preview da foto existente ou selecionada -->
+            <div class="foto-preview" *ngIf="fotoEncontroUrl">
+              <img [src]="fotoEncontroUrl" alt="Foto do encontro">
+              <button type="button" class="btn-remove-foto" (click)="removerFoto()" title="Remover foto" [disabled]="isUploadingFoto">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <!-- Input de upload quando não há foto -->
+            <div class="foto-upload-input" *ngIf="!fotoEncontroUrl">
+              <input
+                type="file"
+                id="foto_encontro"
+                accept="image/*"
+                (change)="onFotoSelecionada($event)"
+                [disabled]="isUploadingFoto"
+                #fotoInput>
+              <label for="foto_encontro" class="foto-upload-label" [class.uploading]="isUploadingFoto">
+                <i class="fas" [ngClass]="isUploadingFoto ? 'fa-spinner fa-spin' : 'fa-cloud-upload-alt'"></i>
+                <span>{{ isUploadingFoto ? 'Enviando...' : 'Clique para selecionar uma foto' }}</span>
+                <small *ngIf="!isUploadingFoto">PNG, JPG, GIF ou WEBP (máx. 10MB)</small>
+              </label>
+            </div>
           </div>
         </div>
       </ng-container>

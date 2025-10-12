@@ -129,6 +129,23 @@
           </div>
 
           <div class="mentoria-actions">
+            <!-- Botões de acesso rápido -->
+            <button
+              *ngIf="mentoria.unique_token"
+              class="btn-action primary"
+              (click)="visualizarHub(mentoria)"
+              title="Visualizar Hub Público">
+              <i class="fas fa-globe"></i>
+            </button>
+
+            <button
+              *ngIf="mentoria.unique_token"
+              class="btn-action"
+              (click)="copiarLinkHub(mentoria)"
+              title="Copiar Link do Hub">
+              <i class="fas fa-link"></i>
+            </button>
+
             <button
               class="btn-expand"
               [class.expanded]="mentoriaExpandida === mentoria.id"
@@ -145,6 +162,15 @@
                 <i class="fas fa-ellipsis-v"></i>
               </button>
               <div class="dropdown-menu" *ngIf="dropdownAberto === mentoria.id">
+                <button class="dropdown-item" *ngIf="mentoria.unique_token" (click)="visualizarHub(mentoria); closeDropdown()">
+                  <i class="fas fa-globe"></i>
+                  <span>Visualizar Hub</span>
+                </button>
+                <button class="dropdown-item" *ngIf="mentoria.unique_token" (click)="copiarLinkHub(mentoria); closeDropdown()">
+                  <i class="fas fa-link"></i>
+                  <span>Copiar Link do Hub</span>
+                </button>
+                <div class="dropdown-divider" *ngIf="mentoria.unique_token"></div>
                 <button class="dropdown-item" (click)="editarMentoria(mentoria); closeDropdown()">
                   <i class="fas fa-edit"></i>
                   <span>Editar Mentoria</span>

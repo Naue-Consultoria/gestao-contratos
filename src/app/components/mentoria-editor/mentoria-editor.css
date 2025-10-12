@@ -1635,3 +1635,129 @@ button:disabled {
   height: 0;
   float: left;
 }
+
+/* ===== TESTES SECTION ===== */
+.testes-container {
+  margin-top: 0.5rem;
+}
+
+.teste-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.teste-item:hover {
+  background: #f0fdf4;
+  border-color: var(--green-500);
+}
+
+.teste-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.teste-numero {
+  font-weight: 600;
+  color: var(--green-600);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-remove-teste {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: none;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.75rem;
+}
+
+.btn-remove-teste:hover {
+  background: #dc2626;
+  color: white;
+  transform: scale(1.1);
+}
+
+.teste-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.teste-titulo,
+.teste-descricao,
+.teste-link {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.2s;
+  background: white;
+}
+
+.teste-titulo:focus,
+.teste-descricao:focus,
+.teste-link:focus {
+  outline: none;
+  border-color: var(--green-500);
+  box-shadow: 0 0 0 3px rgba(0, 183, 79, 0.1);
+}
+
+.teste-titulo {
+  font-weight: 500;
+}
+
+.btn-add-teste {
+  width: 100%;
+  padding: 0.75rem;
+  background: white;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--green-600);
+  transition: all 0.2s;
+}
+
+.btn-add-teste:hover {
+  background: #f0fdf4;
+  border-color: var(--green-500);
+  color: var(--green-700);
+}
+
+.btn-add-teste i {
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .teste-fields {
+    gap: 0.5rem;
+  }
+
+  .teste-titulo,
+  .teste-descricao,
+  .teste-link {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
+}

@@ -1,0 +1,255 @@
+<div class="mentoria-hub-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando mentoria...</p>
+  </div>
+
+  <!-- Not Found State -->
+  <div *ngIf="!isLoading && notFound" class="error-container">
+    <div class="error-content">
+      <i class="fas fa-exclamation-circle"></i>
+      <h2>Mentoria não encontrada</h2>
+      <p>O link que você está tentando acessar é inválido ou expirou.</p>
+    </div>
+  </div>
+
+  <!-- Mentoria Content -->
+  <div *ngIf="!isLoading && !notFound && mentoria" class="mentoria-content">
+    <!-- Header -->
+    <header class="mentoria-header">
+      <div class="header-content">
+        <div class="logo-section">
+          <img src="assets/images/logo.png" alt="NAUE" class="logo">
+        </div>
+        <div class="mentoria-title">
+          <h1>Programa de Mentoria</h1>
+          <p class="subtitle">{{getClientName()}}</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-info">
+          <h2>Bem-vindo ao seu Programa de Mentoria</h2>
+          <p class="hero-description">
+            Este é o seu espaço exclusivo para acompanhar todos os encontros e materiais do programa de mentoria.
+            Navegue pelos encontros disponíveis abaixo para acessar o conteúdo.
+          </p>
+
+          <!-- Status Badge -->
+          <div class="status-badge" [ngClass]="getStatusClass(mentoria.status)">
+            <i class="fas fa-circle"></i>
+            {{getStatusText(mentoria.status)}}
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="progress-section">
+            <div class="progress-header">
+              <span class="progress-label">Progresso do Programa</span>
+              <span class="progress-value">{{getProgresso()}}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getProgresso()"></div>
+            </div>
+            <p class="progress-info">
+              {{getEncontrosPublicados()}} de {{mentoria.numero_encontros}} encontros disponíveis
+            </p>
+          </div>
+        </div>
+
+        <!-- Hero Image -->
+        <div class="hero-image" *ngIf="mentoria.foto_url">
+          <img [src]="mentoria.foto_url"
+               alt="Imagem da mentoria"
+               (click)="openImageModal(mentoria.foto_url)"
+               class="clickable">
+        </div>
+        <div class="hero-image placeholder" *ngIf="!mentoria.foto_url">
+          <i class="fas fa-graduation-cap"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Info Cards -->
+    <section class="info-cards">
+      <div class="card">
+        <div class="card-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="card-content">
+          <h3>Total de Encontros</h3>
+          <p class="card-value">{{mentoria.numero_encontros}}</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">
+          <i class="fas fa-building"></i>
+        </div>
+        <div class="card-content">
+          <h3>Empresa</h3>
+          <p class="card-value">{{getClientName()}}</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">
+          <i class="fas fa-file-contract"></i>
+        </div>
+        <div class="card-content">
+          <h3>Contrato</h3>
+          <p class="card-value">{{mentoria.contract?.contract_number || 'N/A'}}</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="card-content">
+          <h3>Iniciado em</h3>
+          <p class="card-value">{{formatDate(mentoria.created_at)}}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testes Section -->
+    <section class="testes-section" *ngIf="mentoria.testes && mentoria.testes.length > 0">
+      <div class="section-header">
+        <h2>
+          <i class="fas fa-clipboard-check"></i>
+          Testes e Avaliações
+        </h2>
+        <p class="section-description">
+          Complete os testes abaixo para avaliar seu perfil e competências
+        </p>
+      </div>
+
+      <div class="testes-grid">
+        <div *ngFor="let teste of mentoria.testes; let i = index" class="teste-card">
+          <div class="teste-icon">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <div class="teste-content">
+            <h3 class="teste-title">{{teste.titulo || 'Teste ' + (i + 1)}}</h3>
+            <p class="teste-description">{{teste.descricao || 'Clique para realizar o teste'}}</p>
+          </div>
+          <div class="teste-action">
+            <a [href]="teste.link"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="btn-teste">
+              <i class="fas fa-external-link-alt"></i>
+              Realizar Teste
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Encontros Section -->
+    <section class="encontros-section">
+      <div class="section-header">
+        <h2>
+          <i class="fas fa-list"></i>
+          Encontros do Programa
+        </h2>
+        <p class="section-description">
+          Clique em um encontro publicado para acessar o conteúdo completo
+        </p>
+      </div>
+
+      <div class="encontros-grid">
+        <!-- Card de Encontro -->
+        <div *ngFor="let encontro of encontrosVisiveis"
+             class="encontro-card"
+             [class.accessible]="isEncontroAccessible(encontro)"
+             [class.blocked]="!isEncontroAccessible(encontro)">
+
+          <div class="encontro-header">
+            <div class="encontro-number">
+              <span class="number">{{encontro.numero_encontro}}</span>
+              <span class="label">Encontro</span>
+            </div>
+            <div class="encontro-status" [ngClass]="getEncontroStatusClass(encontro.status)">
+              {{getEncontroStatusText(encontro.status)}}
+            </div>
+          </div>
+
+          <div class="encontro-body">
+            <h3 class="encontro-title">{{encontro.mentorado_nome}}</h3>
+            <p class="encontro-date">
+              <i class="far fa-calendar"></i>
+              {{formatDate(encontro.data_encontro)}}
+            </p>
+
+            <div class="encontro-preview" *ngIf="encontro.visao_geral">
+              <p>{{encontro.visao_geral}}</p>
+            </div>
+          </div>
+
+          <div class="encontro-footer">
+            <button *ngIf="isEncontroAccessible(encontro)"
+                    (click)="navegarParaEncontro(encontro.unique_token)"
+                    class="btn-access">
+              <i class="fas fa-external-link-alt"></i>
+              Acessar Encontro
+            </button>
+            <div *ngIf="!isEncontroAccessible(encontro)" class="blocked-message">
+              <i class="fas fa-lock"></i>
+              <span *ngIf="encontro.status === 'draft'">Em preparação</span>
+              <span *ngIf="encontro.status === 'archived'">Arquivado</span>
+              <span *ngIf="!encontro.unique_token">Não disponível</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botão Ver Mais -->
+      <div *ngIf="temMaisEncontros" class="show-more-container">
+        <button (click)="toggleMostrarEncontros()" class="btn-show-more">
+          <span *ngIf="!showAllEncontros">
+            <i class="fas fa-chevron-down"></i>
+            Ver todos os encontros
+          </span>
+          <span *ngIf="showAllEncontros">
+            <i class="fas fa-chevron-up"></i>
+            Ver menos
+          </span>
+        </button>
+      </div>
+
+      <!-- Mensagem quando não há encontros -->
+      <div *ngIf="!mentoria.encontros || mentoria.encontros.length === 0" class="no-encontros">
+        <i class="fas fa-inbox"></i>
+        <p>Nenhum encontro disponível no momento.</p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mentoria-footer">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="assets/images/logo.png" alt="NAUE">
+        </div>
+        <div class="footer-text">
+          <p>&copy; {{getCurrentYear()}} NAUE - Todos os direitos reservados</p>
+          <p class="footer-subtitle">Sistema de Gestão de Mentorias</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal de Imagem -->
+  <div *ngIf="modalImageSrc" class="image-modal" (click)="closeImageModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="close-button" (click)="closeImageModal()">
+        <i class="fas fa-times"></i>
+      </button>
+      <img [src]="modalImageSrc" alt="Imagem ampliada">
+    </div>
+  </div>
+</div>

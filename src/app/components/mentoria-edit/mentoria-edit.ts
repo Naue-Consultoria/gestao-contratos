@@ -36,6 +36,9 @@ export class MentoriaEdit implements OnInit {
   fotoSelecionadaPreview: string | null = null;
   fotoAtualUrl: string | null = null;
 
+  // Testes da mentoria
+  testes: Array<{titulo: string, descricao: string, link: string}> = [];
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -171,15 +174,30 @@ export class MentoriaEdit implements OnInit {
       status: this.mentoria.status
     });
 
-    // Carregar foto atual se existir algum encontro com foto
-    if (this.mentoria.encontros && this.mentoria.encontros.length > 0) {
-      const encontroComFoto = this.mentoria.encontros.find((e: any) => e.foto_encontro_url);
-      if (encontroComFoto && encontroComFoto.foto_encontro_url) {
-        this.fotoAtualUrl = encontroComFoto.foto_encontro_url;
+    // Carregar foto atual da mentoria se existir
+    if (this.mentoria.foto_url) {
+      this.fotoAtualUrl = this.mentoria.foto_url;
+    }
+
+    // Carregar testes da mentoria se existir
+    if (this.mentoria.testes) {
+      // Parse JSONB field if it's a string
+      if (typeof this.mentoria.testes === 'string') {
+        try {
+          this.testes = JSON.parse(this.mentoria.testes);
+        } catch (e) {
+          console.error('Erro ao parsear testes:', e);
+          this.testes = [];
+        }
+      } else if (Array.isArray(this.mentoria.testes)) {
+        this.testes = this.mentoria.testes;
+      } else {
+        this.testes = [];
       }
     }
 
     console.log('✅ Formulário preenchido:', this.mentoriaForm.value);
+    console.log('✅ Testes carregados:', this.testes);
   }
 
   onClienteChange(clientId: number): void {
@@ -220,13 +238,16 @@ export class MentoriaEdit implements OnInit {
 
     try {
       // 1. Atualizar dados da mentoria
-      const dados = this.mentoriaForm.getRawValue();
+      const dados = {
+        ...this.mentoriaForm.getRawValue(),
+        testes: this.testes.length > 0 ? this.testes : []
+      };
       const response = await this.mentoriaService.atualizarMentoria(this.mentoriaId, dados).toPromise();
 
       if (response?.success) {
-        // 2. Se houver foto selecionada, fazer upload para todos os encontros
-        if (this.fotoSelecionada && this.mentoria?.encontros) {
-          await this.uploadFotoParaTodosEncontros();
+        // 2. Se houver foto selecionada, fazer upload para a mentoria
+        if (this.fotoSelecionada) {
+          await this.uploadFotoMentoria();
         }
 
         this.toastr.success('Mentoria atualizada com sucesso!');
@@ -281,35 +302,70 @@ export class MentoriaEdit implements OnInit {
     this.fotoSelecionadaPreview = null;
   }
 
-  async uploadFotoParaTodosEncontros(): Promise<void> {
-    if (!this.fotoSelecionada || !this.mentoria?.encontros) return;
+  async uploadFotoMentoria(): Promise<void> {
+    if (!this.fotoSelecionada || !this.mentoriaId) return;
 
-    const encontrosIds = this.mentoria.encontros.map((e: any) => e.id);
-    this.toastr.info(`Enviando foto para ${encontrosIds.length} encontro(s)...`);
+    this.isUploadingFoto = true;
+    const formData = new FormData();
+    formData.append('foto', this.fotoSelecionada);
 
-    let sucessos = 0;
-    let erros = 0;
+    try {
+      const response: any = await this.mentoriaService.uploadFotoMentoria(this.mentoriaId, formData).toPromise();
 
-    for (const encontroId of encontrosIds) {
-      try {
-        // Criar novo FormData para cada upload
-        const formData = new FormData();
-        formData.append('foto', this.fotoSelecionada);
-
-        await this.mentoriaService.uploadFotoEncontro(encontroId, formData).toPromise();
-        sucessos++;
-      } catch (error) {
-        console.error(`Erro ao fazer upload para encontro ${encontroId}:`, error);
-        erros++;
+      if (response?.success) {
+        this.toastr.success('Foto da mentoria atualizada!');
+        // Atualizar a URL da foto
+        if (response.data?.foto?.url) {
+          this.fotoAtualUrl = response.data.foto.url;
+        }
       }
+    } catch (error: any) {
+      console.error('Erro ao fazer upload da foto:', error);
+      this.toastr.error('Erro ao enviar foto da mentoria');
+    } finally {
+      this.isUploadingFoto = false;
+    }
+  }
+
+  async removerFotoAtual(): Promise<void> {
+    if (!this.mentoriaId) return;
+
+    if (!confirm('Deseja realmente remover a foto da mentoria?')) {
+      return;
     }
 
-    if (sucessos > 0) {
-      this.toastr.success(`Foto enviada para ${sucessos} encontro(s)!`);
+    this.isUploadingFoto = true;
+
+    try {
+      // Atualizar mentoria removendo a URL da foto
+      const response = await this.mentoriaService.atualizarMentoria(this.mentoriaId, {
+        foto_url: undefined
+      }).toPromise();
+
+      if (response?.success) {
+        this.fotoAtualUrl = null;
+        this.toastr.success('Foto removida com sucesso!');
+      }
+    } catch (error: any) {
+      console.error('Erro ao remover foto:', error);
+      this.toastr.error('Erro ao remover foto');
+    } finally {
+      this.isUploadingFoto = false;
     }
-    if (erros > 0) {
-      this.toastr.warning(`Erro ao enviar para ${erros} encontro(s)`);
-    }
+  }
+
+  // ===== GERENCIAMENTO DE TESTES =====
+
+  adicionarTeste(): void {
+    this.testes.push({
+      titulo: '',
+      descricao: '',
+      link: ''
+    });
+  }
+
+  removerTeste(index: number): void {
+    this.testes.splice(index, 1);
   }
 
   private configurarBreadcrumb(): void {

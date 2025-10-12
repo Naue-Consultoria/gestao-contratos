@@ -61,6 +61,9 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
   fotoSelecionada: File | null = null;
   fotoSelecionadaPreview: string | null = null;
 
+  // Testes da mentoria
+  testes: Array<{titulo: string, descricao: string, link: string}> = [];
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -430,7 +433,8 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
           client_id: formValue.client_id,
           contract_id: contractId,
           numero_encontros: formValue.numero_encontros,
-          mentorado_nome: formValue.mentorado_nome
+          mentorado_nome: formValue.mentorado_nome,
+          testes: this.testes.length > 0 ? this.testes : undefined
         };
 
         console.log('📤 Enviando dados:', dados);
@@ -805,6 +809,20 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
     }
 
     return nome.toUpperCase();
+  }
+
+  // ===== GERENCIAMENTO DE TESTES =====
+
+  adicionarTeste(): void {
+    this.testes.push({
+      titulo: '',
+      descricao: '',
+      link: ''
+    });
+  }
+
+  removerTeste(index: number): void {
+    this.testes.splice(index, 1);
   }
 
   // ===== BREADCRUMB =====

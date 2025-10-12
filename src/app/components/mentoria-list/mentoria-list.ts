@@ -365,4 +365,28 @@ export class MentoriaList implements OnInit {
     if (!mentoria.encontros) return 0;
     return mentoria.encontros.filter(e => e.status === 'draft').length;
   }
+
+  visualizarHub(mentoria: Mentoria): void {
+    if (!mentoria.unique_token) {
+      this.toastr.warning('Esta mentoria não possui um link de acesso público');
+      return;
+    }
+
+    const url = `${window.location.origin}/mentoria-hub/${mentoria.unique_token}`;
+    window.open(url, '_blank');
+  }
+
+  copiarLinkHub(mentoria: Mentoria): void {
+    if (!mentoria.unique_token) {
+      this.toastr.warning('Esta mentoria não possui um link de acesso público');
+      return;
+    }
+
+    const url = `${window.location.origin}/mentoria-hub/${mentoria.unique_token}`;
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastr.success('Link do hub copiado para a área de transferência!');
+    }).catch(() => {
+      this.toastr.error('Erro ao copiar link');
+    });
+  }
 }
