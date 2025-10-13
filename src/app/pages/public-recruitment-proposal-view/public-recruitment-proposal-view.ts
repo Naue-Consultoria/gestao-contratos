@@ -112,6 +112,9 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
   private signatureContext: CanvasRenderingContext2D | null = null;
   private isDrawing = false;
 
+  // Controle do formulário de assinatura (toggle)
+  isSignatureFormExpanded = false;
+
   private destroy$ = new Subject<void>();
   private token: string = '';
 
@@ -173,8 +176,8 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
       client_email: ['', [Validators.required, Validators.email]],
       client_phone: [''],
       client_document: [''],
-      client_observations: [''],
-      payment_method: ['', Validators.required]
+      client_observations: ['']
+      // payment_method removido - não é mais necessário para R&S
     });
   }
 
@@ -245,8 +248,8 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
     return (
       this.signatureForm.get('client_name')?.valid === true &&
       this.signatureForm.get('client_email')?.valid === true &&
-      this.signatureForm.get('payment_method')?.valid === true &&
       this.signatureDrawn
+      // payment_method não é mais necessário para R&S
     );
   }
 
@@ -417,7 +420,7 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
         ...this.signatureForm.value,
         final_value: totalValue || 0, // Para R&S, pode ser 0
         payment_type: 'vista', // R&S sempre à vista
-        payment_method: this.paymentMethod,
+        payment_method: 'Boleto', // Forma de pagamento padrão para R&S
         installments: 1
       };
 
@@ -933,6 +936,18 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
 
   closeSuccessModal(): void {
     this.showSuccessModal = false;
+  }
+
+  // === MÉTODO DE TOGGLE DO FORMULÁRIO ===
+
+  toggleSignatureForm(): void {
+    this.isSignatureFormExpanded = !this.isSignatureFormExpanded;
+    if (this.isSignatureFormExpanded) {
+      // Aguardar animação e inicializar canvas
+      setTimeout(() => {
+        this.initializeSignatureCanvas();
+      }, 300);
+    }
   }
 
   // === MÉTODOS DE PORCENTAGENS DE R&S ===

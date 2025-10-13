@@ -435,9 +435,19 @@
         <div class="section-header">
           <h2 class="section-title">Finalize Sua <span class="highlight-text">Proposta</span></h2>
           <p class="section-subtitle">Preencha os dados abaixo e assine digitalmente para confirmar sua aceitação. Este é o último passo para iniciarmos nossa parceria de sucesso.</p>
+
+          <!-- Toggle Button -->
+          <button type="button" class="toggle-signature-btn"
+                  (click)="toggleSignatureForm()"
+                  [class.expanded]="isSignatureFormExpanded">
+            <span class="toggle-btn-text">
+              <i class="fas" [class.fa-chevron-down]="!isSignatureFormExpanded" [class.fa-chevron-up]="isSignatureFormExpanded"></i>
+              {{ isSignatureFormExpanded ? 'Ocultar Formulário de Assinatura' : 'Mostrar Formulário de Assinatura' }}
+            </span>
+          </button>
         </div>
-        
-        <div class="signature-form-container">
+
+        <div class="signature-form-container" [class.expanded]="isSignatureFormExpanded" [class.collapsed]="!isSignatureFormExpanded">
           <form [formGroup]="signatureForm" class="signature-form">
             
             <!-- Personal Information -->

@@ -407,7 +407,7 @@
             <ul class="agreement-list">
               <li>
                 <i class="fas fa-check"></i>
-                <span>Caso o candidato selecionado não tenha <em>match</em> com a cultura da empresa ou não atenda as expectativas para do cargo, <strong>a contratante tem como garantia uma reposição</strong> dentro do prazo de até <strong>45 dias para vagas operacionais e 60 dias</strong> para vagas administrativas/comerciais, após a data de início;</span>
+                <span>Caso o candidato selecionado não tenha match com a cultura da empresa ou não atenda as expectativas para do cargo, <strong>a contratante tem como garantia uma reposição</strong> dentro do prazo de até <strong>45 dias para vagas operacionais e 60 dias</strong> para vagas administrativas/comerciais, após a data de início;</span>
               </li>
               <li>
                 <i class="fas fa-check"></i>
@@ -449,37 +449,6 @@
       </div>
     </section>
 
-    <!-- Next Steps Section -->
-    <section class="next-steps-section-wrapper">
-      <div class="section-container">
-        <div class="next-steps-section">
-          <div class="next-steps-content">
-            <div class="next-steps-left">
-              <h2 class="next-steps-title">PRÓXIMOS<br>PASSOS</h2>
-            </div>
-            <div class="next-steps-right">
-              <p class="next-steps-intro">Estamos prontos para iniciar o projeto imediatamente.</p>
-              <p class="next-steps-subtitle">Após aprovação:</p>
-              <ul class="next-steps-list">
-                <li>
-                  <i class="fas fa-check"></i>
-                  <span>Envio da minuta contratual.</span>
-                </li>
-                <li>
-                  <i class="fas fa-check"></i>
-                  <span>Agendamento das reuniões de alinhamento.</span>
-                </li>
-                <li>
-                  <i class="fas fa-check"></i>
-                  <span>Planejamento detalhado do cronograma de trabalho.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Digital Signature Section -->
     <section class="signature-section" *ngIf="proposal.status === 'sent' && !proposalExpired">
       <div class="section-container">
@@ -488,7 +457,17 @@
           <p class="section-subtitle">Preencha os dados abaixo e assine digitalmente para confirmar a contratação do serviço de Recrutamento & Seleção.</p>
         </div>
 
-        <div class="signature-form-container">
+        <!-- Toggle Button -->
+        <button type="button" class="toggle-signature-btn"
+                (click)="toggleSignatureForm()"
+                [class.expanded]="isSignatureFormExpanded">
+          <span class="toggle-btn-text">
+            <i class="fas" [class.fa-chevron-down]="!isSignatureFormExpanded" [class.fa-chevron-up]="isSignatureFormExpanded"></i>
+            {{ isSignatureFormExpanded ? 'Ocultar Formulário de Assinatura' : 'Mostrar Formulário de Assinatura' }}
+          </span>
+        </button>
+
+        <div class="signature-form-container" [class.collapsed]="!isSignatureFormExpanded" [class.expanded]="isSignatureFormExpanded">
           <form [formGroup]="signatureForm" class="signature-form">
 
             <!-- Personal Information -->
@@ -553,35 +532,6 @@
                     (input)="onDocumentInput($event)"
                     (keypress)="onDocumentKeyPress($event)">
                 </div>
-              </div>
-            </div>
-
-            <!-- Payment Method -->
-            <div class="form-section">
-              <h3 class="form-section-title">
-                <i class="fas fa-credit-card"></i>
-                Forma de Pagamento
-              </h3>
-
-              <div class="payment-method-selection">
-                <label class="field-label">Escolha o método de pagamento *</label>
-                <div class="payment-methods">
-                  <label class="payment-method-option"
-                         *ngFor="let method of paymentMethods">
-                    <input type="radio"
-                           name="payment_method"
-                           [value]="method.value"
-                           [checked]="paymentMethod === method.value"
-                           (change)="onPaymentMethodChange(method.value)">
-                    <span class="method-label">
-                      <i [class]="method.icon"></i>
-                      {{ method.label }}
-                    </span>
-                  </label>
-                </div>
-              </div>
-              <div class="payment-info-box">
-                <p>O pagamento é realizado à vista após a aprovação e contratação do candidato selecionado.</p>
               </div>
             </div>
 
@@ -663,6 +613,37 @@
               </div>
             </div>
           </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Next Steps Section -->
+    <section class="next-steps-section-wrapper">
+      <div class="section-container">
+        <div class="next-steps-section">
+          <div class="next-steps-content">
+            <div class="next-steps-left">
+              <h2 class="next-steps-title">PRÓXIMOS<br>PASSOS</h2>
+            </div>
+            <div class="next-steps-right">
+              <p class="next-steps-intro">Estamos prontos para iniciar o projeto imediatamente.</p>
+              <p class="next-steps-subtitle">Após aprovação:</p>
+              <ul class="next-steps-list">
+                <li>
+                  <i class="fas fa-check"></i>
+                  <span>Envio da minuta contratual.</span>
+                </li>
+                <li>
+                  <i class="fas fa-check"></i>
+                  <span>Agendamento das reuniões de alinhamento.</span>
+                </li>
+                <li>
+                  <i class="fas fa-check"></i>
+                  <span>Planejamento detalhado do cronograma de trabalho.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -114,6 +114,9 @@ export class PublicProposalViewComponent implements OnInit {
   // Controle do modal de sucesso
   showSuccessModal = false;
 
+  // Controle do formulário de assinatura (toggle)
+  isSignatureFormExpanded = false;
+
   // Dados de pagamento
   paymentType: 'vista' | 'prazo' = 'prazo';
   paymentMethod: string = '';
@@ -1468,5 +1471,17 @@ export class PublicProposalViewComponent implements OnInit {
   // Método para fechar o modal de sucesso
   closeSuccessModal(): void {
     this.showSuccessModal = false;
+  }
+
+  // Método para toggle do formulário de assinatura
+  toggleSignatureForm(): void {
+    this.isSignatureFormExpanded = !this.isSignatureFormExpanded;
+
+    // Se está expandindo, inicializar o canvas de assinatura após um delay
+    if (this.isSignatureFormExpanded) {
+      setTimeout(() => {
+        this.initializeSignatureCanvas();
+      }, 300); // Aguardar a animação de expansão
+    }
   }
 }
