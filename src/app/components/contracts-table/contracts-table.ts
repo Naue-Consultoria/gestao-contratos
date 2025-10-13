@@ -200,7 +200,8 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       // Filtros limpos e organizados
       const cleanFilters: any = {
         search: this.filters.search?.trim(),
-        status: this.filters.status,
+        // Não enviar "vencido" para o backend - é filtro frontend
+        status: this.filters.status === 'vencido' ? '' : this.filters.status,
         client_id: this.filters.client_id,
         type: this.currentTab === 'all' ? '' : this.currentTab,
         dateType: this.filters.dateType,
@@ -228,7 +229,16 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
         );
 
         this.contracts = mappedContracts;
-        this.filteredContracts = [...mappedContracts];
+
+        // Filtrar contratos vencidos se o filtro estiver ativo
+        // Vencidos = contratos com status "active" e que estão expirados (end_date < hoje)
+        if (this.filters.status === 'vencido') {
+          this.filteredContracts = mappedContracts.filter(contract =>
+            contract.isExpired && contract.raw.status === 'active'
+          );
+        } else {
+          this.filteredContracts = [...mappedContracts];
+        }
 
         // Apply sorting if there's a sort field
         if (this.sortField) {

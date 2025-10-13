@@ -54,40 +54,43 @@
           </div>
 
           <form [formGroup]="mentoriaForm">
-            <!-- Cliente -->
-            <div class="form-field">
-              <label for="client_id">
-                <i class="fas fa-building"></i>
-                Cliente *
-              </label>
-              <select
-                id="client_id"
-                formControlName="client_id"
-                (change)="onClienteChange(+$any($event.target).value)">
-                <option value="">{{ loadingClientes ? 'Carregando...' : 'Selecione um cliente' }}</option>
-                <option *ngFor="let cliente of clientes" [value]="cliente.id">
-                  {{ getClienteNome(cliente) }}
-                </option>
-              </select>
+            <!-- Linha 1: Cliente e Contrato -->
+            <div class="form-row">
+              <!-- Cliente -->
+              <div class="form-field">
+                <label for="client_id">
+                  <i class="fas fa-building"></i>
+                  Cliente *
+                </label>
+                <select
+                  id="client_id"
+                  formControlName="client_id"
+                  (change)="onClienteChange(+$any($event.target).value)">
+                  <option value="">{{ loadingClientes ? 'Carregando...' : 'Selecione um cliente' }}</option>
+                  <option *ngFor="let cliente of clientes" [value]="cliente.id">
+                    {{ getClienteNome(cliente) }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Contrato -->
+              <div class="form-field">
+                <label for="contract_id">
+                  <i class="fas fa-file-contract"></i>
+                  Contrato *
+                </label>
+                <select
+                  id="contract_id"
+                  formControlName="contract_id">
+                  <option value="">{{ loadingContratos ? 'Carregando...' : 'Selecione um contrato' }}</option>
+                  <option *ngFor="let contrato of contratosFiltrados" [value]="contrato.id">
+                    #{{ contrato.contract_number }} - {{ contrato.type }}
+                  </option>
+                </select>
+              </div>
             </div>
 
-            <!-- Contrato -->
-            <div class="form-field">
-              <label for="contract_id">
-                <i class="fas fa-file-contract"></i>
-                Contrato *
-              </label>
-              <select
-                id="contract_id"
-                formControlName="contract_id">
-                <option value="">{{ loadingContratos ? 'Carregando...' : 'Selecione um contrato' }}</option>
-                <option *ngFor="let contrato of contratosFiltrados" [value]="contrato.id">
-                  #{{ contrato.contract_number }} - {{ contrato.type }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Status da Mentoria -->
+            <!-- Status da Mentoria (linha inteira) -->
             <div class="form-field">
               <label for="status">
                 <i class="fas fa-check-circle"></i>
@@ -100,6 +103,50 @@
                 <option value="concluida">Concluída</option>
                 <option value="cancelada">Cancelada</option>
               </select>
+            </div>
+
+            <!-- Linha 2: Idade e Profissão -->
+            <div class="form-row">
+              <!-- Idade do Mentorado -->
+              <div class="form-field">
+                <label for="mentorado_idade">
+                  <i class="fas fa-birthday-cake"></i>
+                  Idade do Mentorado
+                </label>
+                <input
+                  type="number"
+                  id="mentorado_idade"
+                  formControlName="mentorado_idade"
+                  min="1"
+                  max="150"
+                  placeholder="Ex: 35">
+              </div>
+
+              <!-- Profissão do Mentorado -->
+              <div class="form-field">
+                <label for="mentorado_profissao">
+                  <i class="fas fa-briefcase"></i>
+                  Profissão do Mentorado
+                </label>
+                <input
+                  type="text"
+                  id="mentorado_profissao"
+                  formControlName="mentorado_profissao"
+                  placeholder="Ex: Empresário">
+              </div>
+            </div>
+
+            <!-- Email do Mentorado (linha inteira) -->
+            <div class="form-field">
+              <label for="mentorado_email">
+                <i class="fas fa-envelope"></i>
+                Email do Mentorado
+              </label>
+              <input
+                type="email"
+                id="mentorado_email"
+                formControlName="mentorado_email"
+                placeholder="Ex: joao@email.com">
             </div>
           </form>
         </div>
@@ -141,7 +188,7 @@
               <i class="fas fa-image section-icon"></i>
               <div>
                 <h3 class="section-title">Foto da Mentoria</h3>
-                <p class="section-subtitle">Esta foto será exibida no hub público da mentoria</p>
+                <p class="section-subtitle">Esta foto será exibida no hub da mentoria</p>
               </div>
             </div>
           </div>
@@ -186,7 +233,7 @@
             </label>
             <p class="upload-info">
               <i class="fas fa-info-circle"></i>
-              A foto será exibida no hub público onde o mentorado visualiza todos os encontros
+              A foto será exibida no hub da mentoria, onde o mentorado acessa todos os encontros
             </p>
           </div>
         </div>

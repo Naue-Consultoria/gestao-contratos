@@ -14,6 +14,9 @@ interface MentoriaPublica {
   unique_token?: string;
   foto_url?: string;
   testes?: any;
+  mentorado_idade?: number;
+  mentorado_profissao?: string;
+  mentorado_email?: string;
   created_at: string;
   updated_at: string;
   contract?: any;

@@ -60,6 +60,28 @@
                 <span class="hero-card-subtitle">Participante do programa</span>
               </div>
             </div>
+
+            <div class="hero-card" *ngIf="mentoria.mentorado_idade" scrollAnimation animationType="zoom" [animationDelay]="1.0">
+              <div class="hero-card-icon">
+                <i class="fas fa-birthday-cake"></i>
+              </div>
+              <div class="hero-card-content">
+                <h3>Idade</h3>
+                <p class="hero-card-value">{{mentoria.mentorado_idade}} anos</p>
+                <span class="hero-card-subtitle">Idade do mentorado</span>
+              </div>
+            </div>
+
+            <div class="hero-card" *ngIf="mentoria.mentorado_profissao" scrollAnimation animationType="zoom" [animationDelay]="1.2">
+              <div class="hero-card-icon">
+                <i class="fas fa-briefcase"></i>
+              </div>
+              <div class="hero-card-content">
+                <h3>Profissão</h3>
+                <p class="hero-card-value">{{mentoria.mentorado_profissao}}</p>
+                <span class="hero-card-subtitle">Área de atuação</span>
+              </div>
+            </div>
           </div>
         </div>
 

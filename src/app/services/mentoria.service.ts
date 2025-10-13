@@ -12,6 +12,10 @@ export interface Mentoria {
   unique_token?: string;
   foto_url?: string;
   testes?: any; // JSONB field for storing test links
+  mentorado_nome?: string; // Nome do mentorado
+  mentorado_idade?: number; // Idade do mentorado
+  mentorado_profissao?: string; // Profissão do mentorado
+  mentorado_email?: string; // Email do mentorado
   created_at: string;
   updated_at: string;
   created_by?: number;
@@ -135,6 +139,9 @@ export class MentoriaService {
     contract_id: number;
     numero_encontros: number;
     mentorado_nome: string;
+    mentorado_idade?: number; // Idade do mentorado
+    mentorado_profissao?: string; // Profissão do mentorado
+    mentorado_email?: string; // Email do mentorado
     testes?: any; // Optional test links array
   }): Observable<ApiResponse<Mentoria>> {
     return this.http.post<ApiResponse<Mentoria>>(`${this.apiUrl}/mentorias`, dados);

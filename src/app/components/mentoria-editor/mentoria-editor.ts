@@ -156,6 +156,9 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
       client_id: ['', Validators.required],
       contract_id: [{ value: '', disabled: true }, Validators.required],
       mentorado_nome: ['', [Validators.required, Validators.minLength(2)]],
+      mentorado_idade: [''], // Idade do mentorado (opcional)
+      mentorado_profissao: [''], // Profissão do mentorado (opcional)
+      mentorado_email: ['', [Validators.email]], // Email do mentorado (opcional, mas com validação de formato)
       numero_encontro: [''],
       numero_encontros: [5, [Validators.required, Validators.min(1), Validators.max(50)]], // Para criar mentoria
       data_encontro: [''], // Não obrigatório no modo criação
@@ -434,6 +437,9 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
           contract_id: contractId,
           numero_encontros: formValue.numero_encontros,
           mentorado_nome: formValue.mentorado_nome,
+          mentorado_idade: formValue.mentorado_idade || undefined,
+          mentorado_profissao: formValue.mentorado_profissao || undefined,
+          mentorado_email: formValue.mentorado_email || undefined,
           testes: this.testes.length > 0 ? this.testes : undefined
         };
 
