@@ -293,6 +293,15 @@
                       <span>Editar</span>
                     </button>
                     
+                    <!-- Duplicar -->
+                    <button
+                      class="dropdown-item"
+                      (click)="duplicateProposal(proposal, $event); closeDropdown()"
+                    >
+                      <i class="fas fa-copy"></i>
+                      <span>Duplicar</span>
+                    </button>
+
                     <!-- Gerar PDF -->
                     <button
                       class="dropdown-item"
@@ -301,7 +310,7 @@
                       <i class="fas fa-file-pdf"></i>
                       <span>Gerar PDF</span>
                     </button>
-                    
+
                     <!-- Excluir -->
                     <button
                       class="dropdown-item delete-item"
@@ -348,3 +357,11 @@
   (close)="closeConvertModal()"
   (converted)="onConversionCompleted($event)">
 </app-proposal-to-contract-modal>
+
+<!-- Duplicate Proposal Modal -->
+<app-duplicate-proposal-modal
+  [proposal]="selectedProposalForDuplication"
+  [show]="showDuplicateModal"
+  (close)="onDuplicateModalClose()"
+  (proposalDuplicated)="onProposalDuplicated($event)">
+</app-duplicate-proposal-modal>

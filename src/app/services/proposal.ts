@@ -221,8 +221,8 @@ export class ProposalService {
   /**
    * Duplicar proposta
    */
-  duplicateProposal(id: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${id}/duplicate`, {});
+  duplicateProposal(id: number, duplicateData?: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/duplicate`, duplicateData || {});
   }
 
   /**

@@ -8,6 +8,7 @@ import { ClientService } from '../../services/client';
 import { SendProposalModalComponent } from '../send-proposal-modal/send-proposal-modal';
 import { DeleteConfirmationModalComponent } from '../delete-confirmation-modal/delete-confirmation-modal.component';
 import { ProposalToContractModalComponent } from '../proposal-to-contract-modal/proposal-to-contract-modal';
+import { DuplicateProposalModalComponent } from '../duplicate-proposal-modal/duplicate-proposal-modal';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ProposalStatsCardsComponent } from '../proposal-stats-cards/proposal-stats-cards';
@@ -35,7 +36,7 @@ interface ProposalDisplay {
 @Component({
   selector: 'app-proposals-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, SendProposalModalComponent, DeleteConfirmationModalComponent, BreadcrumbComponent, ProposalStatsCardsComponent, ProposalToContractModalComponent],
+  imports: [CommonModule, FormsModule, SendProposalModalComponent, DeleteConfirmationModalComponent, BreadcrumbComponent, ProposalStatsCardsComponent, ProposalToContractModalComponent, DuplicateProposalModalComponent],
   templateUrl: './proposals-page.html',
   styleUrls: ['./proposals-page.css']
 })
@@ -77,6 +78,10 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   // Convert to Contract Modal
   showConvertModal = false;
   selectedProposalForConversion: Proposal | null = null;
+
+  // Duplicate Proposal Modal
+  showDuplicateModal = false;
+  selectedProposalForDuplication: Proposal | null = null;
 
   // Dropdown control
   activeDropdownId: number | null = null;
@@ -434,24 +439,27 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     this.router.navigate(['/home/propostas/visualizar', id]);
   }
 
-  async duplicateProposal(proposal: ProposalDisplay, event: MouseEvent) {
+  duplicateProposal(proposal: ProposalDisplay, event: MouseEvent) {
     event.stopPropagation();
-    
-    if (confirm(`Deseja duplicar a proposta de "${proposal.clientName}" (${proposal.proposalNumber})?`)) {
-      try {
-        const response = await firstValueFrom(this.proposalService.duplicateProposal(proposal.id));
-        if (response && response.success) {
-          this.modalService.showSuccess('Proposta duplicada com sucesso!');
-          this.loadData();
-        }
-      } catch (error: any) {
-        console.error('❌ Error duplicating proposal:', error);
-        if (error?.status === 500 || error?.status === 404) {
-          this.modalService.showError('Funcionalidade de duplicar propostas ainda não implementada no backend.');
-        } else {
-          this.modalService.showError('Não foi possível duplicar a proposta.');
-        }
-      }
+    this.selectedProposalForDuplication = proposal.raw;
+    this.showDuplicateModal = true;
+  }
+
+  onDuplicateModalClose() {
+    this.showDuplicateModal = false;
+    this.selectedProposalForDuplication = null;
+  }
+
+  onProposalDuplicated(newProposal: any) {
+    this.modalService.showSuccess('Proposta duplicada com sucesso!');
+    this.showDuplicateModal = false;
+    this.selectedProposalForDuplication = null;
+    this.loadData(); // Recarregar a lista de propostas
+
+    // Perguntar se deseja editar a nova proposta
+    const editNewProposal = confirm('Deseja editar a proposta duplicada?');
+    if (editNewProposal && newProposal?.id) {
+      this.router.navigate(['/home/propostas/editar', newProposal.id]);
     }
   }
 
