@@ -1,10 +1,10 @@
-<div class="page" *ngIf="!isLoading">
+<div class="page mentoria-editor-page" *ngIf="!isLoading">
 
   <!-- Header -->
   <div class="page-header">
     <div class="header-title-section">
       <h1 class="page-title">
-        <i class="fas fa-chalkboard-teacher" style="color: var(--green-500); margin-right: 0.5rem;"></i>
+        <i class="fas fa-chalkboard-teacher" style="color: #00594a; margin-right: 0.5rem;"></i>
         {{ isEditMode ? 'Editar Encontro de Mentoria' : 'Criar Nova Mentoria' }}
       </h1>
       <app-breadcrumb></app-breadcrumb>
@@ -44,621 +44,309 @@
     </div>
   </div>
 
-  <!-- Formulário de Metadados -->
-  <div class="form-section">
-    <div class="section-header">
-      <div class="section-header-left">
-        <i class="fas fa-user-circle section-icon"></i>
-        <div>
-          <h3 class="section-title">
-            {{ isEditMode ? 'Informações do Encontro' : 'Dados da Mentoria' }}
-          </h3>
-          <p class="section-subtitle">
-            {{ isEditMode ? 'Configure os dados básicos deste encontro' : 'Preencha as informações para criar a mentoria' }}
-          </p>
-        </div>
-      </div>
-    </div>
+  <!-- Container Principal com Duas Colunas -->
+  <div class="two-column-layout">
 
-    <form [formGroup]="encontroForm">
-      <!-- MODO CRIAÇÃO -->
-      <ng-container *ngIf="!isEditMode">
-        <!-- Linha 1: Cliente e Contrato -->
-        <div class="form-row">
-          <div class="form-field">
-            <label for="client_id">
-              <i class="fas fa-building"></i>
-              Cliente *
-            </label>
-            <select
-              id="client_id"
-              formControlName="client_id"
-              (change)="onClienteChange(+$any($event.target).value)">
-              <option value="">{{ loadingClientes ? 'Carregando...' : 'Selecione um cliente' }}</option>
-              <option *ngFor="let cliente of clientes" [value]="cliente.id">
-                {{ getClienteNome(cliente) }}
-              </option>
-            </select>
-          </div>
+    <!-- Coluna Esquerda - Informações Principais -->
+    <div class="column-left">
 
-          <div class="form-field">
-            <label for="contract_id">
-              <i class="fas fa-file-contract"></i>
-              Contrato *
-            </label>
-            <select
-              id="contract_id"
-              formControlName="contract_id">
-              <option value="">{{ loadingContratos ? 'Carregando...' : 'Selecione um contrato' }}</option>
-              <option *ngFor="let contrato of contratosFiltrados" [value]="contrato.id">
-                #{{ contrato.contract_number }} - {{ contrato.type }}
-              </option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Linha 2: Nome do Mentorado e Quantidade de Encontros -->
-        <div class="form-row">
-          <div class="form-field">
-            <label for="mentorado_nome">
-              <i class="fas fa-user-graduate"></i>
-              Nome do Mentorado *
-            </label>
-            <input
-              type="text"
-              id="mentorado_nome"
-              formControlName="mentorado_nome"
-              placeholder="Ex: João Silva">
-          </div>
-
-          <div class="form-field highlight-field">
-            <label for="numero_encontros">
-              <i class="fas fa-calendar-check"></i>
-              Quantidade de Encontros *
-            </label>
-            <input
-              type="number"
-              id="numero_encontros"
-              formControlName="numero_encontros"
-              min="1"
-              max="50"
-              placeholder="Ex: 5">
-            <small class="field-hint">
-              <i class="fas fa-info-circle"></i>
-              Serão criados {{ encontroForm.get('numero_encontros')?.value || 5 }} encontros espaçados em 7 dias
-            </small>
-          </div>
-        </div>
-
-        <!-- Linha 3: Foto da Mentoria (full width) -->
-        <div class="form-field">
-          <label for="foto_mentoria">
-            <i class="fas fa-image"></i>
-            Foto da Mentoria (Opcional)
-          </label>
-          <div class="foto-upload-container">
-            <div class="foto-preview" *ngIf="fotoSelecionadaPreview">
-              <img [src]="fotoSelecionadaPreview" alt="Foto da mentoria">
-              <button type="button" class="btn-remove-foto" (click)="removerFotoSelecionada()" title="Remover foto">
-                <i class="fas fa-times"></i>
-              </button>
+      <!-- Seção de Informações Básicas -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <i class="fas fa-info-circle section-icon"></i>
+            <div>
+              <h3 class="section-title">
+                {{ isEditMode ? 'Informações do Encontro' : 'Informações Básicas' }}
+              </h3>
+              <p class="section-subtitle">
+                {{ isEditMode ? 'Configure os dados básicos deste encontro' : 'Dados principais da mentoria' }}
+              </p>
             </div>
+          </div>
+        </div>
 
-            <div class="foto-upload-input" *ngIf="!fotoSelecionadaPreview">
-              <input
-                type="file"
-                id="foto_mentoria"
-                accept="image/*"
-                (change)="onFotoSelecionadaCriacao($event)"
-                #fotoInputCriacao>
-              <label for="foto_mentoria" class="foto-upload-label">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <span>Clique para selecionar uma foto</span>
-                <small>PNG, JPG, GIF ou WEBP (máx. 10MB) - A foto será aplicada a todos os encontros</small>
+        <form [formGroup]="encontroForm">
+          <!-- MODO CRIAÇÃO -->
+          <ng-container *ngIf="!isEditMode">
+            <!-- Cliente -->
+            <div class="form-field">
+              <label for="client_id">
+                <i class="fas fa-building"></i>
+                Cliente *
               </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Linha 4: Testes da Mentoria -->
-        <div class="form-field">
-          <label>
-            <i class="fas fa-clipboard-check"></i>
-            Testes e Avaliações (Opcional)
-          </label>
-          <div class="testes-container">
-            <div class="teste-item" *ngFor="let teste of testes; let i = index">
-              <div class="teste-header">
-                <span class="teste-numero">Teste {{ i + 1 }}</span>
-                <button type="button" class="btn-remove-teste" (click)="removerTeste(i)" title="Remover teste">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <div class="teste-fields">
-                <input
-                  type="text"
-                  [(ngModel)]="teste.titulo"
-                  placeholder="Título do teste (ex: Teste de Perfil Comportamental)"
-                  class="teste-titulo">
-                <input
-                  type="text"
-                  [(ngModel)]="teste.descricao"
-                  placeholder="Descrição breve (ex: Avalie seu perfil comportamental)"
-                  class="teste-descricao">
-                <input
-                  type="url"
-                  [(ngModel)]="teste.link"
-                  placeholder="Link do teste (https://...)"
-                  class="teste-link">
-              </div>
-            </div>
-
-            <button type="button" class="btn-add-teste" (click)="adicionarTeste()">
-              <i class="fas fa-plus"></i>
-              Adicionar Teste
-            </button>
-
-            <small class="field-hint" *ngIf="testes.length === 0">
-              <i class="fas fa-info-circle"></i>
-              Os testes aparecerão no hub da mentoria para os mentorados realizarem
-            </small>
-          </div>
-        </div>
-      </ng-container>
-
-      <!-- MODO EDIÇÃO -->
-      <ng-container *ngIf="isEditMode">
-        <!-- Linha 1: Nome do Mentorado e Número do Encontro -->
-        <div class="form-row">
-          <div class="form-field">
-            <label for="mentorado_nome">
-              <i class="fas fa-user-graduate"></i>
-              Nome do Mentorado *
-            </label>
-            <input
-              type="text"
-              id="mentorado_nome"
-              formControlName="mentorado_nome"
-              placeholder="Ex: João Silva">
-          </div>
-
-          <div class="form-field">
-            <label for="numero_encontro">
-              <i class="fas fa-hashtag"></i>
-              Número do Encontro
-            </label>
-            <input
-              type="number"
-              id="numero_encontro"
-              formControlName="numero_encontro"
-              placeholder="1, 2, 3...">
-          </div>
-        </div>
-
-        <!-- Linha 2: Data e Status do Encontro -->
-        <div class="form-row">
-          <div class="form-field">
-            <label for="data_encontro">
-              <i class="fas fa-calendar-alt"></i>
-              Data do Encontro *
-            </label>
-            <input
-              type="date"
-              id="data_encontro"
-              formControlName="data_encontro">
-          </div>
-
-          <div class="form-field">
-            <label for="encontro_status">
-              <i class="fas fa-check-circle"></i>
-              Status do Encontro
-            </label>
-            <select
-              id="encontro_status"
-              formControlName="encontro_status"
-              class="status-select">
-              <option value="em_andamento">🟡 Em andamento</option>
-              <option value="finalizado">✅ Finalizado</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Linha 3: Foto do Encontro (full width) -->
-        <div class="form-field">
-          <label for="foto_encontro">
-            <i class="fas fa-image"></i>
-            Foto do Encontro
-          </label>
-          <div class="foto-upload-container">
-            <!-- Preview da foto existente ou selecionada -->
-            <div class="foto-preview" *ngIf="fotoEncontroUrl">
-              <img [src]="fotoEncontroUrl" alt="Foto do encontro">
-              <button type="button" class="btn-remove-foto" (click)="removerFoto()" title="Remover foto" [disabled]="isUploadingFoto">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-
-            <!-- Input de upload quando não há foto -->
-            <div class="foto-upload-input" *ngIf="!fotoEncontroUrl">
-              <input
-                type="file"
-                id="foto_encontro"
-                accept="image/*"
-                (change)="onFotoSelecionada($event)"
-                [disabled]="isUploadingFoto"
-                #fotoInput>
-              <label for="foto_encontro" class="foto-upload-label" [class.uploading]="isUploadingFoto">
-                <i class="fas" [ngClass]="isUploadingFoto ? 'fa-spinner fa-spin' : 'fa-cloud-upload-alt'"></i>
-                <span>{{ isUploadingFoto ? 'Enviando...' : 'Clique para selecionar uma foto' }}</span>
-                <small *ngIf="!isUploadingFoto">PNG, JPG, GIF ou WEBP (máx. 10MB)</small>
-              </label>
-            </div>
-          </div>
-        </div>
-      </ng-container>
-    </form>
-  </div>
-
-  <!-- Botão para ir ao editor de conteúdo - APENAS NO MODO EDIÇÃO -->
-  <div class="content-editor-section" *ngIf="isEditMode && encontroId">
-    <div class="content-card">
-      <div class="content-card-icon">
-        <i class="fas fa-pen-to-square"></i>
-      </div>
-      <div class="content-card-body">
-        <h3 class="content-card-title">Conteúdo do Encontro</h3>
-        <p class="content-card-description">
-          Edite o conteúdo completo do encontro de mentoria com o editor de texto completo, incluindo textos, listas, imagens, vídeos e muito mais.
-        </p>
-        <button
-          type="button"
-          class="btn-primary btn-large"
-          (click)="irParaEditorConteudo()">
-          <i class="fas fa-pen-to-square"></i>
-          Editar Conteúdo do Encontro
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Área de Blocos - OCULTA COMPLETAMENTE -->
-  <div class="blocos-area" *ngIf="false" style="display: none;">
-    <h2><i class="fas fa-layer-group"></i> Conteúdo do Encontro</h2>
-
-    <div
-      cdkDropList
-      (cdkDropListDropped)="reordenarBlocos($event)"
-      class="blocos-list">
-
-      <div
-        *ngFor="let bloco of blocos; let i = index"
-        cdkDrag
-        class="bloco-item"
-        [class.editing]="blocoEditando === bloco.id">
-
-        <!-- Drag Handle e Header -->
-        <div class="bloco-header" cdkDragHandle>
-          <div class="header-left">
-            <i class="fas fa-grip-vertical drag-icon"></i>
-            <i [class]="'fas ' + getIconeTipo(bloco.tipo)"></i>
-            <span class="bloco-tipo">{{ getNomeTipo(bloco.tipo) }}</span>
-          </div>
-          <div class="header-right">
-            <button class="btn-icon" (click)="editarBloco(bloco.id)" title="Editar">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn-icon danger" (click)="removerBloco(i)" title="Remover">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Editor de Bloco (expandido quando editando) -->
-        <div class="bloco-editor" *ngIf="blocoEditando === bloco.id">
-
-          <!-- TÍTULO -->
-          <div *ngIf="bloco.tipo === 'titulo'" class="editor-content">
-            <div class="form-field">
-              <label>Texto do Título</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.texto" placeholder="Digite o título...">
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label>Nível</label>
-                <select [(ngModel)]="bloco.configuracao.nivel">
-                  <option [value]="1">H1 - Muito Grande</option>
-                  <option [value]="2">H2 - Grande</option>
-                  <option [value]="3">H3 - Médio</option>
-                </select>
-              </div>
-              <div class="form-field">
-                <label>Cor</label>
-                <input type="color" [(ngModel)]="bloco.configuracao.cor">
-              </div>
-            </div>
-          </div>
-
-          <!-- TEXTO -->
-          <div *ngIf="bloco.tipo === 'texto'" class="editor-content">
-            <div class="form-field">
-              <label>Conteúdo</label>
-              <textarea
-                [(ngModel)]="bloco.configuracao.conteudo"
-                rows="6"
-                placeholder="Digite o texto...">
-              </textarea>
-              <small>Suporta HTML básico</small>
-            </div>
-          </div>
-
-          <!-- LISTA -->
-          <div *ngIf="bloco.tipo === 'lista'" class="editor-content">
-            <div class="form-field">
-              <label>Título da Lista</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: Próximos Passos">
-            </div>
-
-            <div class="form-field">
-              <label>Itens</label>
-              <div *ngFor="let item of bloco.configuracao.itens; let idx = index" class="lista-item">
-                <input
-                  type="text"
-                  [(ngModel)]="item.principal"
-                  placeholder="Texto principal"
-                  class="item-principal">
-                <input
-                  type="text"
-                  [(ngModel)]="item.descricao"
-                  placeholder="Descrição (opcional)"
-                  class="item-descricao">
-                <select [(ngModel)]="item.destaque" class="item-destaque">
-                  <option [ngValue]="null">Sem destaque</option>
-                  <option value="yellow">Amarelo</option>
-                  <option value="green">Verde</option>
-                  <option value="orange">Laranja</option>
-                </select>
-                <button class="btn-icon-small danger" (click)="removerItemLista(bloco, idx)">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <button class="btn-add" (click)="adicionarItemLista(bloco)">
-                <i class="fas fa-plus"></i> Adicionar Item
-              </button>
-            </div>
-          </div>
-
-          <!-- IMAGEM -->
-          <div *ngIf="bloco.tipo === 'imagem'" class="editor-content">
-            <div class="form-field">
-              <label>Upload de Imagem</label>
-              <input
-                type="file"
-                accept="image/*"
-                (change)="onFileSelected($event, i)"
-                class="file-input">
-              <div *ngIf="uploadingImage" class="upload-progress">
-                <i class="fas fa-spinner fa-spin"></i> Enviando...
-              </div>
-              <img *ngIf="bloco.configuracao.url" [src]="bloco.configuracao.url" class="preview-image">
-            </div>
-            <div class="form-field">
-              <label>Legenda</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.legenda" placeholder="Legenda da imagem">
-            </div>
-            <div class="form-field">
-              <label>Tamanho</label>
-              <select [(ngModel)]="bloco.configuracao.largura">
-                <option value="small">Pequeno</option>
-                <option value="medium">Médio</option>
-                <option value="large">Grande</option>
-                <option value="full">Largura total</option>
+              <select
+                id="client_id"
+                formControlName="client_id"
+                (change)="onClienteChange(+$any($event.target).value)">
+                <option value="">{{ loadingClientes ? 'Carregando...' : 'Selecione um cliente' }}</option>
+                <option *ngFor="let cliente of clientes" [value]="cliente.id">
+                  {{ getClienteNome(cliente) }}
+                </option>
               </select>
             </div>
-          </div>
 
-          <!-- VIDEO LINK -->
-          <div *ngIf="bloco.tipo === 'video_link'" class="editor-content">
+            <!-- Contrato -->
             <div class="form-field">
-              <label>Título do Vídeo</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: TED Talk sobre liderança">
-            </div>
-            <div class="form-field">
-              <label>URL do Vídeo</label>
-              <input type="url" [(ngModel)]="bloco.configuracao.url" placeholder="https://youtube.com/...">
-            </div>
-            <div class="form-field">
-              <label>Autor/Canal</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.autor" placeholder="Ex: MARTHA GABRIEL | TEDx">
-            </div>
-          </div>
-
-          <!-- PERGUNTA -->
-          <div *ngIf="bloco.tipo === 'pergunta'" class="editor-content">
-            <div class="form-field">
-              <label>Pergunta</label>
-              <textarea
-                [(ngModel)]="bloco.configuracao.pergunta"
-                rows="2"
-                placeholder="Digite a pergunta...">
-              </textarea>
-            </div>
-            <div class="form-field">
-              <label>Placeholder da Resposta</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.placeholder" placeholder="Ex: Digite sua resposta...">
-            </div>
-            <div class="form-field">
-              <label>Exemplo de Resposta (opcional)</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.resposta_exemplo" placeholder="Ex: Comunicação">
-            </div>
-          </div>
-
-          <!-- SEÇÃO DE PERGUNTAS -->
-          <div *ngIf="bloco.tipo === 'secao_perguntas'" class="editor-content">
-            <div class="form-field">
-              <label>Título da Seção</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: Rotina">
+              <label for="contract_id">
+                <i class="fas fa-file-contract"></i>
+                Contrato *
+              </label>
+              <select
+                id="contract_id"
+                formControlName="contract_id">
+                <option value="">{{ loadingContratos ? 'Carregando...' : 'Selecione um contrato' }}</option>
+                <option *ngFor="let contrato of contratosFiltrados" [value]="contrato.id">
+                  #{{ contrato.contract_number }} - {{ contrato.type }}
+                </option>
+              </select>
             </div>
 
+            <!-- Nome do Mentorado -->
             <div class="form-field">
-              <label>Perguntas</label>
-              <div *ngFor="let pergunta of bloco.configuracao.perguntas; let idx = index" class="pergunta-item">
-                <textarea
-                  [(ngModel)]="pergunta.texto"
-                  rows="2"
-                  placeholder="Digite a pergunta..."
-                  class="pergunta-texto">
-                </textarea>
-                <button class="btn-icon-small danger" (click)="removerPergunta(bloco, idx)">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <button class="btn-add" (click)="adicionarPergunta(bloco)">
-                <i class="fas fa-plus"></i> Adicionar Pergunta
-              </button>
-            </div>
-          </div>
-
-          <!-- CHECKBOX LISTA -->
-          <div *ngIf="bloco.tipo === 'checkbox_lista'" class="editor-content">
-            <div class="form-field">
-              <label>Título</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: Tarefas para a próxima semana">
-            </div>
-
-            <div class="form-field">
-              <label>Tarefas</label>
-              <div *ngFor="let item of bloco.configuracao.itens; let idx = index" class="checkbox-item">
-                <input
-                  type="text"
-                  [(ngModel)]="item.texto"
-                  placeholder="Texto da tarefa"
-                  class="checkbox-texto">
-                <button class="btn-icon-small danger" (click)="removerCheckbox(bloco, idx)">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <button class="btn-add" (click)="adicionarCheckbox(bloco)">
-                <i class="fas fa-plus"></i> Adicionar Tarefa
-              </button>
-            </div>
-          </div>
-
-          <!-- TABELA -->
-          <div *ngIf="bloco.tipo === 'tabela'" class="editor-content">
-            <div class="form-field">
-              <label>Título da Tabela</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: VECA">
-            </div>
-
-            <div class="form-field">
-              <label>Colunas</label>
-              <div class="tabela-colunas">
-                <div *ngFor="let coluna of bloco.configuracao.colunas; let idx = index" class="coluna-item">
-                  <input type="text" [(ngModel)]="bloco.configuracao.colunas[idx]" placeholder="Nome da coluna">
-                  <button class="btn-icon-small danger" (click)="removerColunaTabela(bloco, idx)">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-                <button class="btn-add-small" (click)="adicionarColunaTabela(bloco)">
-                  <i class="fas fa-plus"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="form-field">
-              <label>Linhas</label>
-              <div class="tabela-linhas">
-                <div *ngFor="let linha of bloco.configuracao.linhas; let idxLinha = index" class="linha-item">
-                  <div class="linha-celulas">
-                    <input
-                      *ngFor="let celula of linha; let idxCol = index"
-                      type="text"
-                      [(ngModel)]="bloco.configuracao.linhas[idxLinha][idxCol]"
-                      placeholder="Célula">
-                  </div>
-                  <button class="btn-icon-small danger" (click)="removerLinhaTabela(bloco, idxLinha)">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-                <button class="btn-add" (click)="adicionarLinhaTabela(bloco)">
-                  <i class="fas fa-plus"></i> Adicionar Linha
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- DESTAQUE -->
-          <div *ngIf="bloco.tipo === 'destaque'" class="editor-content">
-            <div class="form-field">
-              <label>Título</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: G4 GESTÃO E ESTRATÉGIA">
-            </div>
-            <div class="form-field">
-              <label>Subtítulo</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.subtitulo" placeholder="Texto complementar">
-            </div>
-            <div class="form-field">
-              <label>Cor de Fundo</label>
-              <input type="color" [(ngModel)]="bloco.configuracao.cor">
-            </div>
-          </div>
-
-          <!-- GRÁFICO -->
-          <div *ngIf="bloco.tipo === 'grafico'" class="editor-content">
-            <div class="form-field">
-              <label>Título</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.titulo" placeholder="Ex: MAPA">
-            </div>
-            <div class="form-field">
-              <label>Subtítulo</label>
-              <input type="text" [(ngModel)]="bloco.configuracao.subtitulo" placeholder="Ex: Indicadores positivos">
-            </div>
-            <div class="form-field">
-              <label>Upload de Imagem do Gráfico</label>
+              <label for="mentorado_nome">
+                <i class="fas fa-user-graduate"></i>
+                Nome do Mentorado *
+              </label>
               <input
-                type="file"
-                accept="image/*"
-                (change)="onFileSelected($event, i)"
-                class="file-input">
-              <img *ngIf="bloco.configuracao.imagem_url" [src]="bloco.configuracao.imagem_url" class="preview-image">
+                type="text"
+                id="mentorado_nome"
+                formControlName="mentorado_nome"
+                placeholder="Ex: João Silva">
+            </div>
+
+            <!-- Quantidade de Encontros -->
+            <div class="form-field highlight-field">
+              <label for="numero_encontros">
+                <i class="fas fa-calendar-check"></i>
+                Quantidade de Encontros *
+              </label>
+              <input
+                type="number"
+                id="numero_encontros"
+                formControlName="numero_encontros"
+                min="1"
+                max="50"
+                placeholder="Ex: 5">
+              <small class="field-hint">
+                <i class="fas fa-info-circle"></i>
+                Serão criados {{ encontroForm.get('numero_encontros')?.value || 5 }} encontros espaçados em 7 dias
+              </small>
+            </div>
+          </ng-container>
+
+          <!-- MODO EDIÇÃO -->
+          <ng-container *ngIf="isEditMode">
+            <!-- Nome do Mentorado -->
+            <div class="form-field">
+              <label for="mentorado_nome">
+                <i class="fas fa-user-graduate"></i>
+                Nome do Mentorado *
+              </label>
+              <input
+                type="text"
+                id="mentorado_nome"
+                formControlName="mentorado_nome"
+                placeholder="Ex: João Silva">
+            </div>
+
+            <!-- Número do Encontro -->
+            <div class="form-field">
+              <label for="numero_encontro">
+                <i class="fas fa-hashtag"></i>
+                Número do Encontro
+              </label>
+              <input
+                type="number"
+                id="numero_encontro"
+                formControlName="numero_encontro"
+                placeholder="1, 2, 3...">
+            </div>
+
+            <!-- Data do Encontro -->
+            <div class="form-field">
+              <label for="data_encontro">
+                <i class="fas fa-calendar-alt"></i>
+                Data do Encontro *
+              </label>
+              <input
+                type="date"
+                id="data_encontro"
+                formControlName="data_encontro">
+            </div>
+
+            <!-- Status do Encontro -->
+            <div class="form-field">
+              <label for="encontro_status">
+                <i class="fas fa-check-circle"></i>
+                Status do Encontro
+              </label>
+              <select
+                id="encontro_status"
+                formControlName="encontro_status"
+                class="status-select">
+                <option value="em_andamento">🟡 Em andamento</option>
+                <option value="finalizado">✅ Finalizado</option>
+              </select>
+            </div>
+          </ng-container>
+        </form>
+      </div>
+    </div>
+
+    <!-- Coluna Direita - Mídia e Testes -->
+    <div class="column-right">
+
+      <!-- Seção de Mídia -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <i class="fas fa-image section-icon"></i>
+            <div>
+              <h3 class="section-title">
+                {{ isEditMode ? 'Foto do Encontro' : 'Foto da Mentoria' }}
+              </h3>
+              <p class="section-subtitle">
+                {{ isEditMode ? 'Imagem para este encontro específico' : 'Esta foto será aplicada a todos os encontros' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODO CRIAÇÃO - Foto da Mentoria -->
+        <div *ngIf="!isEditMode" class="foto-upload-container">
+          <!-- Indicador de arquivo selecionado -->
+          <div class="foto-selected-indicator" *ngIf="fotoSelecionadaPreview">
+            <i class="fas fa-check-circle"></i>
+            <span>Foto selecionada</span>
+            <button type="button" class="btn-remove-foto" (click)="removerFotoSelecionada()" title="Remover foto">
+              <i class="fas fa-times"></i>
+              Remover
+            </button>
+          </div>
+
+          <div class="foto-upload-input" *ngIf="!fotoSelecionadaPreview">
+            <input
+              type="file"
+              id="foto_mentoria"
+              accept="image/*"
+              (change)="onFotoSelecionadaCriacao($event)"
+              #fotoInputCriacao>
+            <label for="foto_mentoria" class="foto-upload-label">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Clique para selecionar uma foto</span>
+              <small>PNG, JPG, GIF ou WEBP (máx. 10MB)</small>
+            </label>
+          </div>
+        </div>
+
+        <!-- MODO EDIÇÃO - Foto do Encontro -->
+        <div *ngIf="isEditMode" class="foto-upload-container">
+          <!-- Indicador de foto existente -->
+          <div class="foto-selected-indicator" *ngIf="fotoEncontroUrl">
+            <i class="fas fa-image"></i>
+            <span>Foto atual do encontro</span>
+            <button type="button" class="btn-remove-foto" (click)="removerFoto()" title="Remover foto" [disabled]="isUploadingFoto">
+              <i class="fas fa-trash"></i>
+              Remover foto
+            </button>
+          </div>
+
+          <div class="foto-upload-input" *ngIf="!fotoEncontroUrl">
+            <input
+              type="file"
+              id="foto_encontro"
+              accept="image/*"
+              (change)="onFotoSelecionada($event)"
+              [disabled]="isUploadingFoto"
+              #fotoInput>
+            <label for="foto_encontro" class="foto-upload-label" [class.uploading]="isUploadingFoto">
+              <i class="fas" [ngClass]="isUploadingFoto ? 'fa-spinner fa-spin' : 'fa-cloud-upload-alt'"></i>
+              <span>{{ isUploadingFoto ? 'Enviando...' : 'Clique para selecionar uma foto' }}</span>
+              <small *ngIf="!isUploadingFoto">PNG, JPG, GIF ou WEBP (máx. 10MB)</small>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção de Testes e Avaliações - Apenas no modo Criação -->
+      <div class="form-section" *ngIf="!isEditMode">
+        <div class="section-header">
+          <div class="section-header-left">
+            <i class="fas fa-clipboard-check section-icon"></i>
+            <div>
+              <h3 class="section-title">Testes e Avaliações</h3>
+              <p class="section-subtitle">Adicione links de testes para os mentorados</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testes-container">
+          <div class="teste-item" *ngFor="let teste of testes; let i = index">
+            <div class="teste-header">
+              <span class="teste-numero">Teste {{ i + 1 }}</span>
+              <button type="button" class="btn-remove-teste" (click)="removerTeste(i)" title="Remover teste">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="teste-fields">
+              <input
+                type="text"
+                [(ngModel)]="teste.titulo"
+                placeholder="Título do teste"
+                class="teste-titulo">
+              <input
+                type="text"
+                [(ngModel)]="teste.descricao"
+                placeholder="Descrição breve"
+                class="teste-descricao">
+              <input
+                type="url"
+                [(ngModel)]="teste.link"
+                placeholder="Link do teste (https://...)"
+                class="teste-link">
             </div>
           </div>
 
-          <!-- Botão Salvar Bloco -->
-          <div class="bloco-actions">
-            <button class="btn-primary-small" (click)="salvarBloco(bloco)">
-              <i class="fas fa-check"></i> Salvar Bloco
+          <button type="button" class="btn-add-teste" (click)="adicionarTeste()">
+            <i class="fas fa-plus"></i>
+            Adicionar Teste
+          </button>
+
+          <small class="field-hint" *ngIf="testes.length === 0">
+            <i class="fas fa-info-circle"></i>
+            Os testes aparecerão no hub da mentoria para os mentorados realizarem
+          </small>
+        </div>
+      </div>
+
+      <!-- Seção Editor de Conteúdo - Apenas no modo Edição -->
+      <div class="form-section" *ngIf="isEditMode && encontroId">
+        <div class="section-header">
+          <div class="section-header-left">
+            <i class="fas fa-pen-to-square section-icon"></i>
+            <div>
+              <h3 class="section-title">Conteúdo do Encontro</h3>
+              <p class="section-subtitle">Editor completo para o conteúdo</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <div class="content-card-body">
+            <button
+              type="button"
+              class="btn-primary btn-large"
+              (click)="irParaEditorConteudo()">
+              Editar Conteúdo do Encontro
             </button>
           </div>
         </div>
-
-        <!-- Preview do Bloco (quando não está editando) -->
-        <div class="bloco-preview" *ngIf="blocoEditando !== bloco.id">
-          <div class="preview-content">
-            <span class="preview-label">{{ getNomeTipo(bloco.tipo) }}:</span>
-            <span class="preview-text">
-              {{ bloco.configuracao.texto || bloco.configuracao.titulo || bloco.configuracao.pergunta || 'Bloco configurado' }}
-            </span>
-          </div>
-        </div>
       </div>
 
-      <!-- Empty State -->
-      <div *ngIf="blocos.length === 0" class="blocos-empty">
-        <i class="fas fa-inbox"></i>
-        <p>Nenhum bloco adicionado ainda</p>
-        <small>Clique nos botões acima para adicionar blocos de conteúdo</small>
-      </div>
     </div>
   </div>
 
-  <!-- Footer com Ações -->
-  <div class="editor-footer">
-    <button class="btn-primary" (click)="salvarEncontro()" [disabled]="isSaving">
-      <i class="fas fa-save"></i>
-      {{ isSaving ? 'Salvando...' : 'Salvar e Continuar' }}
-    </button>
-  </div>
 </div>
 
 <!-- Loading State -->

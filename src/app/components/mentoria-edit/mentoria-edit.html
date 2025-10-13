@@ -1,4 +1,4 @@
-<div class="page">
+<div class="page mentoria-edit-page">
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-state">
     <div class="spinner"></div>
@@ -11,7 +11,7 @@
     <div class="page-header">
       <div class="header-title-section">
         <h1 class="page-title">
-          <i class="fas fa-edit" style="color: var(--green-500); margin-right: 0.5rem;"></i>
+          <i class="fas fa-edit" style="color: #00594a; margin-right: 0.5rem;"></i>
           Editar Mentoria
         </h1>
         <app-breadcrumb></app-breadcrumb>
@@ -35,214 +35,211 @@
       </div>
     </div>
 
-    <!-- Form Section -->
-    <div class="form-section">
-      <div class="section-header">
-        <div class="section-header-left">
-          <i class="fas fa-info-circle section-icon"></i>
-          <div>
-            <h3 class="section-title">Informações da Mentoria</h3>
-            <p class="section-subtitle">Edite os dados básicos da mentoria</p>
-          </div>
-        </div>
-      </div>
+    <!-- Layout em Duas Colunas -->
+    <div class="two-column-layout">
 
-      <form [formGroup]="mentoriaForm">
-        <!-- Linha 1: Cliente e Contrato -->
-        <div class="form-row">
-          <div class="form-field">
-            <label for="client_id">
-              <i class="fas fa-building"></i>
-              Cliente *
-            </label>
-            <select
-              id="client_id"
-              formControlName="client_id"
-              (change)="onClienteChange(+$any($event.target).value)">
-              <option value="">{{ loadingClientes ? 'Carregando...' : 'Selecione um cliente' }}</option>
-              <option *ngFor="let cliente of clientes" [value]="cliente.id">
-                {{ getClienteNome(cliente) }}
-              </option>
-            </select>
+      <!-- Coluna Esquerda - Informações Básicas -->
+      <div class="column-left">
+
+        <!-- Seção de Informações Básicas -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-header-left">
+              <i class="fas fa-info-circle section-icon"></i>
+              <div>
+                <h3 class="section-title">Informações da Mentoria</h3>
+                <p class="section-subtitle">Edite os dados básicos da mentoria</p>
+              </div>
+            </div>
           </div>
 
-          <div class="form-field">
-            <label for="contract_id">
-              <i class="fas fa-file-contract"></i>
-              Contrato *
-            </label>
-            <select
-              id="contract_id"
-              formControlName="contract_id">
-              <option value="">{{ loadingContratos ? 'Carregando...' : 'Selecione um contrato' }}</option>
-              <option *ngFor="let contrato of contratosFiltrados" [value]="contrato.id">
-                #{{ contrato.contract_number }} - {{ contrato.type }}
-              </option>
-            </select>
-          </div>
+          <form [formGroup]="mentoriaForm">
+            <!-- Cliente -->
+            <div class="form-field">
+              <label for="client_id">
+                <i class="fas fa-building"></i>
+                Cliente *
+              </label>
+              <select
+                id="client_id"
+                formControlName="client_id"
+                (change)="onClienteChange(+$any($event.target).value)">
+                <option value="">{{ loadingClientes ? 'Carregando...' : 'Selecione um cliente' }}</option>
+                <option *ngFor="let cliente of clientes" [value]="cliente.id">
+                  {{ getClienteNome(cliente) }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Contrato -->
+            <div class="form-field">
+              <label for="contract_id">
+                <i class="fas fa-file-contract"></i>
+                Contrato *
+              </label>
+              <select
+                id="contract_id"
+                formControlName="contract_id">
+                <option value="">{{ loadingContratos ? 'Carregando...' : 'Selecione um contrato' }}</option>
+                <option *ngFor="let contrato of contratosFiltrados" [value]="contrato.id">
+                  #{{ contrato.contract_number }} - {{ contrato.type }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Status da Mentoria -->
+            <div class="form-field">
+              <label for="status">
+                <i class="fas fa-check-circle"></i>
+                Status da Mentoria *
+              </label>
+              <select
+                id="status"
+                formControlName="status">
+                <option value="ativa">Ativa</option>
+                <option value="concluida">Concluída</option>
+                <option value="cancelada">Cancelada</option>
+              </select>
+            </div>
+          </form>
         </div>
 
-        <!-- Linha 2: Status -->
-        <div class="form-row">
-          <div class="form-field">
-            <label for="status">
-              <i class="fas fa-check-circle"></i>
-              Status da Mentoria *
-            </label>
-            <select
-              id="status"
-              formControlName="status">
-              <option value="ativa">Ativa</option>
-              <option value="concluida">Concluída</option>
-              <option value="cancelada">Cancelada</option>
-            </select>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <!-- Foto da Mentoria Section -->
-    <div class="form-section">
-      <div class="section-header">
-        <div class="section-header-left">
-          <i class="fas fa-image section-icon"></i>
-          <div>
-            <h3 class="section-title">Foto da Mentoria</h3>
-            <p class="section-subtitle">Esta foto será exibida no hub público da mentoria</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Foto Atual -->
-      <div class="foto-atual-container" *ngIf="fotoAtualUrl && !fotoSelecionadaPreview">
-        <label class="foto-label">
-          <i class="fas fa-image"></i>
-          Foto Atual da Mentoria
-        </label>
-        <div class="foto-preview-box">
-          <img [src]="fotoAtualUrl" alt="Foto atual da mentoria">
-          <button type="button"
-                  class="btn-remove-foto"
-                  (click)="removerFotoAtual()"
-                  [disabled]="isUploadingFoto"
-                  title="Remover foto atual">
-            <i class="fas fa-trash"></i>
-            Remover Foto Atual
-          </button>
-        </div>
-      </div>
-
-      <!-- Upload de Nova Foto -->
-      <div class="foto-upload-container">
-        <label class="foto-label">
-          <i class="fas fa-upload"></i>
-          {{ fotoSelecionadaPreview ? 'Nova Foto Selecionada' : 'Selecionar Foto da Mentoria' }}
-        </label>
-
-        <!-- Preview da nova foto -->
-        <div class="foto-preview-box" *ngIf="fotoSelecionadaPreview">
-          <img [src]="fotoSelecionadaPreview" alt="Preview da nova foto">
-          <button type="button" class="btn-remove-foto" (click)="removerFotoSelecionada()">
-            <i class="fas fa-times"></i>
-            Cancelar Seleção
-          </button>
-        </div>
-
-        <!-- Input de upload -->
-        <div class="upload-input-container" *ngIf="!fotoSelecionadaPreview && !fotoAtualUrl">
-          <input
-            type="file"
-            id="foto-upload"
-            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-            (change)="onFotoSelecionada($event)"
-            [disabled]="isUploadingFoto"
-            style="display: none;">
-          <label for="foto-upload" class="btn-upload" [class.disabled]="isUploadingFoto">
-            <i class="fas" [ngClass]="isUploadingFoto ? 'fa-spinner fa-spin' : 'fa-cloud-upload-alt'"></i>
-            {{ isUploadingFoto ? 'Enviando...' : 'Escolher Imagem' }}
-          </label>
-          <p class="upload-hint">JPEG, PNG, GIF ou WEBP - Máximo 10MB</p>
-          <p class="upload-info">
+        <!-- Card de Informações Adicionais -->
+        <div class="info-card" *ngIf="mentoria">
+          <div class="info-card-header">
             <i class="fas fa-info-circle"></i>
-            A foto será exibida no hub público onde o mentorado visualiza todos os encontros
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Testes da Mentoria Section -->
-    <div class="form-section">
-      <div class="section-header">
-        <div class="section-header-left">
-          <i class="fas fa-clipboard-check section-icon"></i>
-          <div>
-            <h3 class="section-title">Testes e Avaliações</h3>
-            <p class="section-subtitle">Adicione links de testes para os mentorados realizarem</p>
+            <span>Informações Adicionais</span>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Total de Encontros:</span>
+              <span class="info-value">{{ mentoria.numero_encontros }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Criado em:</span>
+              <span class="info-value">{{ mentoria.created_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Criado por:</span>
+              <span class="info-value">{{ mentoria.criador?.name || 'N/A' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Última atualização:</span>
+              <span class="info-value">{{ mentoria.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="testes-container">
-        <div class="teste-item" *ngFor="let teste of testes; let i = index">
-          <div class="teste-header">
-            <span class="teste-numero">Teste {{ i + 1 }}</span>
-            <button type="button" class="btn-remove-teste" (click)="removerTeste(i)" title="Remover teste">
-              <i class="fas fa-times"></i>
+      <!-- Coluna Direita - Foto e Testes -->
+      <div class="column-right">
+
+        <!-- Seção de Foto da Mentoria -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-header-left">
+              <i class="fas fa-image section-icon"></i>
+              <div>
+                <h3 class="section-title">Foto da Mentoria</h3>
+                <p class="section-subtitle">Esta foto será exibida no hub público da mentoria</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Indicador de Foto Atual -->
+          <div class="foto-status-indicator" *ngIf="fotoAtualUrl && !fotoSelecionadaPreview">
+            <i class="fas fa-check-circle"></i>
+            <span>Foto atual da mentoria</span>
+            <button type="button"
+                    class="btn-remove-foto"
+                    (click)="removerFotoAtual()"
+                    [disabled]="isUploadingFoto"
+                    title="Remover foto atual">
+              <i class="fas fa-trash"></i>
+              Remover
             </button>
           </div>
-          <div class="teste-fields">
+
+          <!-- Indicador de Nova Foto Selecionada -->
+          <div class="foto-status-indicator new-photo" *ngIf="fotoSelecionadaPreview">
+            <i class="fas fa-image"></i>
+            <span>Nova foto selecionada</span>
+            <button type="button" class="btn-remove-foto" (click)="removerFotoSelecionada()">
+              <i class="fas fa-times"></i>
+              Cancelar
+            </button>
+          </div>
+
+          <!-- Input de Upload -->
+          <div class="upload-input-container" *ngIf="!fotoSelecionadaPreview && !fotoAtualUrl">
             <input
-              type="text"
-              [(ngModel)]="teste.titulo"
-              placeholder="Título do teste (ex: Teste de Perfil Comportamental)"
-              class="teste-titulo">
-            <input
-              type="text"
-              [(ngModel)]="teste.descricao"
-              placeholder="Descrição breve (ex: Avalie seu perfil comportamental)"
-              class="teste-descricao">
-            <input
-              type="url"
-              [(ngModel)]="teste.link"
-              placeholder="Link do teste (https://...)"
-              class="teste-link">
+              type="file"
+              id="foto-upload"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+              (change)="onFotoSelecionada($event)"
+              [disabled]="isUploadingFoto"
+              style="display: none;">
+            <label for="foto-upload" class="btn-upload" [class.disabled]="isUploadingFoto">
+              <i class="fas" [ngClass]="isUploadingFoto ? 'fa-spinner fa-spin' : 'fa-cloud-upload-alt'"></i>
+              <span>{{ isUploadingFoto ? 'Enviando...' : 'Escolher Imagem' }}</span>
+              <small>JPEG, PNG, GIF ou WEBP - Máximo 10MB</small>
+            </label>
+            <p class="upload-info">
+              <i class="fas fa-info-circle"></i>
+              A foto será exibida no hub público onde o mentorado visualiza todos os encontros
+            </p>
           </div>
         </div>
 
-        <button type="button" class="btn-add-teste" (click)="adicionarTeste()">
-          <i class="fas fa-plus"></i>
-          Adicionar Teste
-        </button>
+        <!-- Seção de Testes e Avaliações -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-header-left">
+              <i class="fas fa-clipboard-check section-icon"></i>
+              <div>
+                <h3 class="section-title">Testes e Avaliações</h3>
+                <p class="section-subtitle">Adicione links de testes para os mentorados realizarem</p>
+              </div>
+            </div>
+          </div>
 
-        <small class="field-hint" *ngIf="testes.length === 0">
-          <i class="fas fa-info-circle"></i>
-          Os testes aparecerão no hub da mentoria para os mentorados realizarem
-        </small>
-      </div>
-    </div>
+          <div class="testes-container">
+            <div class="teste-item" *ngFor="let teste of testes; let i = index">
+              <div class="teste-header">
+                <span class="teste-numero">Teste {{ i + 1 }}</span>
+                <button type="button" class="btn-remove-teste" (click)="removerTeste(i)" title="Remover teste">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div class="teste-fields">
+                <input
+                  type="text"
+                  [(ngModel)]="teste.titulo"
+                  placeholder="Título do teste (ex: Teste de Perfil Comportamental)"
+                  class="teste-titulo">
+                <input
+                  type="text"
+                  [(ngModel)]="teste.descricao"
+                  placeholder="Descrição breve (ex: Avalie seu perfil comportamental)"
+                  class="teste-descricao">
+                <input
+                  type="url"
+                  [(ngModel)]="teste.link"
+                  placeholder="Link do teste (https://...)"
+                  class="teste-link">
+              </div>
+            </div>
 
-    <!-- Info Card -->
-    <div class="info-card" *ngIf="mentoria">
-      <div class="info-card-header">
-        <i class="fas fa-info-circle"></i>
-        <span>Informações Adicionais</span>
-      </div>
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">Total de Encontros:</span>
-          <span class="info-value">{{ mentoria.numero_encontros }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Criado em:</span>
-          <span class="info-value">{{ mentoria.created_at | date: 'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Criado por:</span>
-          <span class="info-value">{{ mentoria.criador?.name || 'N/A' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Última atualização:</span>
-          <span class="info-value">{{ mentoria.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+            <button type="button" class="btn-add-teste" (click)="adicionarTeste()">
+              <i class="fas fa-plus"></i>
+              Adicionar Teste
+            </button>
+
+            <small class="field-hint" *ngIf="testes.length === 0">
+              <i class="fas fa-info-circle"></i>
+              Os testes aparecerão no hub da mentoria para os mentorados realizarem
+            </small>
+          </div>
         </div>
       </div>
     </div>

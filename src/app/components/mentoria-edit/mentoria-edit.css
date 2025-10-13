@@ -3,6 +3,34 @@
   animation: fadeInUp 0.5s ease;
 }
 
+.mentoria-edit-page {
+  padding: 1.25rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Two Column Layout */
+.two-column-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.column-left,
+.column-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+  .two-column-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -19,7 +47,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
   gap: 1rem;
 }
@@ -146,11 +174,11 @@
 /* Form Section */
 .form-section {
   background: var(--white);
-  border-radius: 16px;
-  box-shadow: var(--shadow-sm);
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   border: 1px solid var(--border-gray);
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: 1.75rem;
+  margin-bottom: 0;
 }
 
 :host-context(body.dark-mode) .form-section {
@@ -162,8 +190,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--border-gray);
 }
 
@@ -215,14 +243,19 @@
 .form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-field:last-child {
+  margin-bottom: 0;
 }
 
 .form-field label {
@@ -344,8 +377,73 @@
 
 /* Foto Upload */
 .foto-atual-container,
-.foto-upload-container {
-  margin-bottom: 1.5rem;
+.foto-preview-container,
+.upload-input-container {
+  margin-bottom: 0;
+}
+
+.foto-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 2px solid #86efac;
+  border-radius: 10px;
+  margin-bottom: 0;
+  color: #166534;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.foto-status-indicator.new-photo {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #fbbf24;
+  color: #92400e;
+}
+
+.foto-status-indicator i {
+  font-size: 1.25rem;
+  color: #16a34a;
+}
+
+.foto-status-indicator.new-photo i {
+  color: #f59e0b;
+}
+
+.foto-status-indicator span {
+  flex: 1;
+}
+
+.foto-status-indicator .btn-remove-foto {
+  position: static;
+  padding: 0.5rem 1rem;
+  background: white;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  backdrop-filter: none;
+}
+
+.foto-status-indicator .btn-remove-foto:hover {
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+:host-context(body.dark-mode) .foto-status-indicator {
+  background: var(--dark-bg);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
 }
 
 .foto-label {
@@ -354,7 +452,7 @@
   gap: 0.5rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-dark);
+  color: #374151;
   margin-bottom: 0.75rem;
 }
 
@@ -419,18 +517,30 @@
 }
 
 .btn-upload {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--white);
-  border: 2px dashed var(--border-gray);
-  border-radius: 10px;
-  color: var(--text-dark);
+  padding: 2rem;
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  color: #374151;
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-align: center;
+  width: 100%;
+}
+
+.btn-upload small {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 400;
+  display: block;
+  margin-top: 0.25rem;
 }
 
 :host-context(body.dark-mode) .btn-upload {
@@ -496,15 +606,15 @@
 
 /* Testes Section */
 .testes-container {
-  margin-top: 0.5rem;
+  margin-top: 0;
 }
 
 .teste-item {
   background: var(--bg-light);
   border: 1px solid var(--border-gray);
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1rem;
+  border-radius: 10px;
+  padding: 0.875rem;
+  margin-bottom: 0.875rem;
   position: relative;
   transition: all 0.2s;
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MentoriaService } from '../../services/mentoria.service';
+import { ScrollAnimationDirective } from '../../directives/scroll-animation';
 
 interface MentoriaPublica {
   id: number;
@@ -23,7 +24,7 @@ interface MentoriaPublica {
 @Component({
   selector: 'app-public-mentoria-hub',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ScrollAnimationDirective],
   templateUrl: './public-mentoria-hub.html',
   styleUrl: './public-mentoria-hub.css'
 })
@@ -118,15 +119,20 @@ export class PublicMentoriaHub implements OnInit {
 
   // Helpers
   getClientName(): string {
-    if (!this.mentoria?.client) return 'Cliente';
+    if (!this.mentoria?.client) {
+      console.log('Mentoria ou client não disponível');
+      return '';
+    }
 
     const client = this.mentoria.client;
+    console.log('Client data:', client);
+
     if (client.clients_pf) {
-      return client.clients_pf.full_name;
+      return client.clients_pf.full_name || '';
     } else if (client.clients_pj) {
-      return client.clients_pj.company_name || client.clients_pj.trade_name;
+      return client.clients_pj.company_name || client.clients_pj.trade_name || '';
     }
-    return 'Cliente';
+    return '';
   }
 
   formatDate(date: string | Date): string {
@@ -223,5 +229,15 @@ export class PublicMentoriaHub implements OnInit {
   getEncontrosPublicados(): number {
     if (!this.mentoria?.encontros) return 0;
     return this.mentoria.encontros.filter(e => e.status === 'published').length;
+  }
+
+  getMentoradoName(): string {
+    if (!this.mentoria?.encontros || this.mentoria.encontros.length === 0) {
+      return 'Não definido';
+    }
+
+    // Pega o nome do primeiro encontro
+    const primeiroEncontro = this.mentoria.encontros.find(e => e.numero_encontro === 1) || this.mentoria.encontros[0];
+    return primeiroEncontro?.mentorado_nome || 'Não definido';
   }
 }
