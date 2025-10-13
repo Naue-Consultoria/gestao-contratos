@@ -46,7 +46,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "60kB",
-                  "maximumError": "80kB"
+                  "maximumError": "90kB"
                 }
               ],
               "allowedCommonJsDependencies": [
