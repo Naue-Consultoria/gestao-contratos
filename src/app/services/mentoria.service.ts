@@ -435,4 +435,136 @@ export class MentoriaService {
   formatarData(data: string): string {
     return new Date(data).toLocaleDateString('pt-BR');
   }
+
+  // ===== MAPA MENTAL =====
+
+  /**
+   * Obter mapa mental de um encontro via token público
+   */
+  obterMapaMentalPublico(token: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/publico/${token}/mapa-mental`);
+  }
+
+  /**
+   * Obter mapa mental de um encontro (autenticado)
+   */
+  obterMapaMental(encontroId: number): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/encontros/${encontroId}/mapa-mental`);
+  }
+
+  /**
+   * Salvar mapa mental completo (via token público)
+   */
+  salvarMapaMentalCompleto(mapaId: number, dados: {
+    colunas: any[];
+    cards: { [key: string]: any[] };
+    conexoes: any[];
+  }): Observable<ApiResponse<void>> {
+    return this.http.put<ApiResponse<void>>(
+      `${this.apiUrl}/mapa-mental/${mapaId}/salvar-completo`,
+      dados
+    );
+  }
+
+  /**
+   * Adicionar card ao mapa mental
+   */
+  adicionarCardMapaMental(mapaId: number, card: {
+    card_id: string;
+    coluna_id: string;
+    meta?: string;
+    indicador?: string;
+    prazo?: string;
+  }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/mapa-mental/${mapaId}/cards`,
+      card
+    );
+  }
+
+  /**
+   * Atualizar card do mapa mental
+   */
+  atualizarCardMapaMental(cardIdDb: number, dados: {
+    meta?: string;
+    indicador?: string;
+    prazo?: string;
+    coluna_id?: string;
+  }): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(
+      `${this.apiUrl}/mapa-mental/cards/${cardIdDb}`,
+      dados
+    );
+  }
+
+  /**
+   * Remover card do mapa mental
+   */
+  removerCardMapaMental(cardId: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(
+      `${this.apiUrl}/mapa-mental/cards/${cardId}`
+    );
+  }
+
+  /**
+   * Adicionar coluna ao mapa mental
+   */
+  adicionarColunaMapaMental(mapaId: number, coluna: {
+    coluna_id: string;
+    nome: string;
+    cor: string;
+    cor_bg: string;
+    cor_borda: string;
+    sort_order?: number;
+  }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/mapa-mental/${mapaId}/colunas`,
+      coluna
+    );
+  }
+
+  /**
+   * Remover coluna do mapa mental
+   */
+  removerColunaMapaMental(colunaId: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(
+      `${this.apiUrl}/mapa-mental/colunas/${colunaId}`
+    );
+  }
+
+  /**
+   * Adicionar conexão entre cards
+   */
+  adicionarConexaoMapaMental(mapaId: number, conexao: {
+    card_origem_id: string;
+    card_destino_id: string;
+  }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/mapa-mental/${mapaId}/conexoes`,
+      conexao
+    );
+  }
+
+  /**
+   * Remover conexão entre cards
+   */
+  removerConexaoMapaMental(mapaId: number, conexao: {
+    card_origem_id: string;
+    card_destino_id: string;
+  }): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(
+      `${this.apiUrl}/mapa-mental/${mapaId}/conexoes`,
+      { body: conexao }
+    );
+  }
+
+  /**
+   * Ativar/desativar mapa mental
+   */
+  toggleMapaMentalAtivo(encontroId: number, ativo: boolean): Observable<ApiResponse<any>> {
+    return this.http.patch<ApiResponse<any>>(
+      `${this.apiUrl}/encontros/${encontroId}/mapa-mental/ativo`,
+      { ativo }
+    );
+  }
 }

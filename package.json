@@ -13,7 +13,7 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^20.0.3",
-    "@angular/cdk": "^20.2.7",
+    "@angular/cdk": "^20.2.8",
     "@angular/common": "^20.0.0",
     "@angular/compiler": "^20.0.0",
     "@angular/core": "^20.0.0",
@@ -28,6 +28,7 @@
     "ckeditor5-premium-features": "^47.0.0",
     "docx": "^9.5.1",
     "file-saver": "^2.0.5",
+    "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "ngx-editor": "^18.0.0",
     "ngx-tiptap": "^14.0.1",

@@ -444,6 +444,32 @@
         </div>
       </section>
 
+      <!-- MAPA MENTAL -->
+      <section class="editor-section">
+        <div class="section-header">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="conteudo.mapaMental.ativo"
+              name="mapaMentalAtivo">
+            <span class="section-title">
+              <i class="fa-solid fa-diagram-project"></i>
+              Mapa Mental Estratégico
+            </span>
+          </label>
+        </div>
+
+        <div *ngIf="conteudo.mapaMental.ativo" class="section-content">
+          <div class="info-box">
+            <i class="fa-solid fa-info-circle"></i>
+            <p>
+              <strong>Mapa Mental ativado!</strong><br>
+              O mentorado poderá criar e organizar seu mapa mental estratégico na visualização pública do encontro.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <!-- ENCERRAMENTO -->
       <section class="editor-section">
         <div class="section-header">

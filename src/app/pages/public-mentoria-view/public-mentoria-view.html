@@ -297,6 +297,227 @@
       </div>
     </section>
 
+    <!-- Mapa Mental Section -->
+    <section class="dark-section mapa-mental-main-section"
+             *ngIf="conteudoEstruturado && conteudoEstruturado.mapaMental?.ativo">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-diagram-project"></i>
+            Mapa Mental Estratégico
+          </h2>
+        </div>
+
+        <!-- Controles -->
+        <div class="mapa-mental-controls">
+          <div class="controls-left">
+            <button
+              type="button"
+              class="btn-add-nivel"
+              (click)="adicionarNivelMapaMental()">
+              <i class="fa-solid fa-plus"></i>
+              Acrescentar Nível
+            </button>
+          </div>
+
+          <div class="controls-right">
+            <button
+              type="button"
+              class="btn-salvar-mapa"
+              (click)="salvarMapaMentalManual()"
+              [disabled]="salvandoMapaMental"
+              title="Salvar alterações do mapa mental">
+              <i class="fa-solid" [ngClass]="salvandoMapaMental ? 'fa-circle-notch fa-spin' : 'fa-save'"></i>
+              {{ salvandoMapaMental ? 'Salvando...' : 'Salvar Mapa' }}
+            </button>
+
+            <!-- Dropdown de Exportação -->
+            <div class="export-dropdown">
+              <button
+                type="button"
+                class="btn-export-main"
+                (click)="toggleExportDropdown()"
+                [class.active]="showExportDropdown">
+                <i class="fa-solid fa-download"></i>
+                Exportar
+                <i class="fa-solid fa-chevron-down dropdown-arrow" [class.rotated]="showExportDropdown"></i>
+              </button>
+
+              <div class="export-menu" *ngIf="showExportDropdown">
+                <button
+                  type="button"
+                  class="export-option"
+                  (click)="exportarMapaMentalPNG()">
+                  <i class="fa-solid fa-image"></i>
+                  <span>Exportar como PNG</span>
+                </button>
+                <button
+                  type="button"
+                  class="export-option"
+                  (click)="exportarMapaMentalPDF()">
+                  <i class="fa-solid fa-file-pdf"></i>
+                  <span>Exportar como PDF</span>
+                </button>
+                <button
+                  type="button"
+                  class="export-option"
+                  (click)="exportarMapaMentalICS()">
+                  <i class="fa-solid fa-calendar-plus"></i>
+                  <span>Exportar para Agenda (.ics)</span>
+                </button>
+                <button
+                  type="button"
+                  class="export-option"
+                  (click)="exportarMapaMentalMarkdown()">
+                  <i class="fa-brands fa-markdown"></i>
+                  <span>Exportar para Notion (Markdown)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colunas e Cards -->
+        <div class="mapa-mental-container">
+          <div *ngFor="let coluna of conteudoEstruturado.mapaMental.data.colunas; trackBy: trackByFn" class="mapa-mental-coluna">
+            <!-- Cabeçalho da Coluna -->
+            <div class="coluna-header" [ngClass]="coluna.corBg">
+              <h3>{{ coluna.nome }}</h3>
+              <div class="coluna-header-actions">
+                <button
+                  type="button"
+                  class="btn-add-card"
+                  (click)="adicionarCardMapaMental(coluna.id)"
+                  title="Adicionar card">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+                <button
+                  *ngIf="podeRemoverNivel(coluna.id)"
+                  type="button"
+                  class="btn-remove-nivel"
+                  (click)="removerNivelMapaMental(coluna.id)"
+                  title="Remover nível">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Cards -->
+            <div
+              class="coluna-cards"
+              cdkDropList
+              [cdkDropListData]="conteudoEstruturado.mapaMental.data.cards[coluna.id]"
+              (cdkDropListDropped)="onCardDrop($event, coluna.id)">
+              <div
+                *ngFor="let card of conteudoEstruturado.mapaMental.data.cards[coluna.id]; trackBy: trackByFn"
+                cdkDrag
+                class="mapa-mental-card"
+                [class.conectando]="mapaMentalConectando === card.id"
+                [ngClass]="coluna.corBorda"
+                [attr.id]="'card-' + card.id">
+
+                <div class="card-body">
+                  <!-- Meta -->
+                  <div class="form-group">
+                    <label>Meta</label>
+                    <textarea
+                      class="form-textarea"
+                      [value]="card.meta"
+                      (input)="atualizarCardMapaMental(coluna.id, card.id, 'meta', $any($event.target).value)"
+                      placeholder="Descreva a meta"
+                      rows="2"></textarea>
+                  </div>
+
+                  <!-- Indicador de Sucesso -->
+                  <div class="form-group">
+                    <label>IS</label>
+                    <textarea
+                      class="form-textarea"
+                      [value]="card.indicador"
+                      (input)="atualizarCardMapaMental(coluna.id, card.id, 'indicador', $any($event.target).value)"
+                      placeholder="Indicador de sucesso"
+                      rows="2"></textarea>
+                  </div>
+
+                  <!-- Prazo -->
+                  <div class="form-group">
+                    <label>Prazo</label>
+                    <input
+                      type="date"
+                      class="form-input"
+                      [value]="card.prazo"
+                      (input)="atualizarCardMapaMental(coluna.id, card.id, 'prazo', $any($event.target).value)">
+                  </div>
+
+                  <!-- Ações do Card -->
+                  <div class="card-actions">
+                    <button
+                      type="button"
+                      class="btn-conectar"
+                      [class.active]="mapaMentalConectando === card.id"
+                      (click)="iniciarConexaoMapaMental(card.id)">
+                      <i class="fa-solid fa-arrow-right"></i>
+                      {{ mapaMentalConectando === card.id ? 'Conectando...' : 'Conectar' }}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-remove"
+                      (click)="removerCardMapaMental(coluna.id, card.id)">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+
+                  <!-- Conexões -->
+                  <div *ngIf="obterConexoesDoCard(card.id).length > 0" class="card-conexoes">
+                    <p class="conexoes-label">CONEXÕES:</p>
+                    <div class="conexoes-badges">
+                      <span
+                        *ngFor="let conexao of obterConexoesDoCard(card.id); let i = index"
+                        class="conexao-badge">
+                        → {{ obterNomeColunaDoCard(conexao.para) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p *ngIf="!conteudoEstruturado.mapaMental.data.cards[coluna.id] || conteudoEstruturado.mapaMental.data.cards[coluna.id].length === 0"
+                 class="empty-state-small">
+                Clique em + para adicionar um card
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de Conexões -->
+        <div *ngIf="conteudoEstruturado.mapaMental.data.conexoes.length > 0" class="conexoes-lista">
+          <h3>Conexões Criadas</h3>
+          <div
+            *ngFor="let conexao of conteudoEstruturado.mapaMental.data.conexoes; let i = index"
+            class="conexao-item">
+            <div class="conexao-content">
+              <div class="conexao-card-info">
+                <strong class="conexao-meta">{{ obterCardPorId(conexao.de)?.meta || 'Card origem' }}</strong>
+                <small class="conexao-nivel">{{ obterNomeColunaDoCard(conexao.de) }}</small>
+              </div>
+              <span class="conexao-arrow">→</span>
+              <div class="conexao-card-info">
+                <strong class="conexao-meta">{{ obterCardPorId(conexao.para)?.meta || 'Card destino' }}</strong>
+                <small class="conexao-nivel">{{ obterNomeColunaDoCard(conexao.para) }}</small>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn-remove-conexao"
+              (click)="removerConexaoMapaMental(i)">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     <!-- Encerramento Section -->
     <section class="encerramento-final-section"
              *ngIf="conteudoEstruturado && conteudoEstruturado.encerramento?.ativo && conteudoEstruturado.encerramento?.conteudo">

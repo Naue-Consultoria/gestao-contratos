@@ -30,12 +30,42 @@ interface Referencia {
   link: string;
 }
 
+// ===== MAPA MENTAL =====
+
+interface MapaMentalCard {
+  id: string;
+  colunaId: string;
+  meta: string;
+  indicador: string;
+  prazo: string;
+}
+
+interface MapaMentalColuna {
+  id: string;
+  nome: string;
+  cor: string;
+  corBg: string;
+  corBorda: string;
+}
+
+interface MapaMentalConexao {
+  de: string;
+  para: string;
+}
+
+interface MapaMentalData {
+  colunas: MapaMentalColuna[];
+  cards: { [colunaId: string]: MapaMentalCard[] };
+  conexoes: MapaMentalConexao[];
+}
+
 interface ConteudoMentoria {
   visaoGeral: { ativo: boolean; conteudo: string };
   mentoria: { ativo: boolean; conteudo: string };
   testes: { ativo: boolean; itens: Teste[] };
   proximosPassos: { ativo: boolean; blocos: BlocoProximosPassos[] };
   referencias: { ativo: boolean; itens: Referencia[] };
+  mapaMental: { ativo: boolean; data: MapaMentalData };
   encerramento: { ativo: boolean; conteudo: string };
 }
 
@@ -55,12 +85,41 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
   isLoading = false;
   private editorsInitialized = new Set<string>();
 
+  // Mapa Mental - Variáveis de controle
+  mapaMentalConectando: string | null = null;
+  mostrarCalendarioMapaMental = false;
+  mostrarExportacaoMapaMental = false;
+
+  coresPredefinidas = [
+    { cor: '#EF4444', corBg: 'bg-rose-600', corBorda: 'border-rose-600' },
+    { cor: '#10B981', corBg: 'bg-emerald-600', corBorda: 'border-emerald-600' },
+    { cor: '#8B5CF6', corBg: 'bg-violet-600', corBorda: 'border-violet-600' },
+    { cor: '#EC4899', corBg: 'bg-fuchsia-600', corBorda: 'border-fuchsia-600' },
+    { cor: '#F97316', corBg: 'bg-orange-600', corBorda: 'border-orange-600' },
+    { cor: '#06B6D4', corBg: 'bg-cyan-600', corBorda: 'border-cyan-600' },
+    { cor: '#84CC16', corBg: 'bg-lime-600', corBorda: 'border-lime-600' }
+  ];
+
+  nivelLetras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
   conteudo: ConteudoMentoria = {
     visaoGeral: { ativo: true, conteudo: '' },
     mentoria: { ativo: true, conteudo: '' },
     testes: { ativo: false, itens: [] },
     proximosPassos: { ativo: true, blocos: [] },
     referencias: { ativo: false, itens: [] },
+    mapaMental: {
+      ativo: false,
+      data: {
+        colunas: [
+          { id: 'nivelA', nome: 'Nível A', cor: '#3B82F6', corBg: 'bg-blue-600', corBorda: 'border-blue-600' },
+          { id: 'metas', nome: 'Metas', cor: '#F59E0B', corBg: 'bg-amber-600', corBorda: 'border-amber-600' },
+          { id: 'visao', nome: 'Visão', cor: '#0D9488', corBg: 'bg-teal-600', corBorda: 'border-teal-600' }
+        ],
+        cards: {},
+        conexoes: []
+      }
+    },
     encerramento: { ativo: true, conteudo: '' }
   };
 
@@ -140,6 +199,22 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
                     }
                   }
                 });
+              }
+
+              // Adicionar mapaMental se não existir (retrocompatibilidade)
+              if (!this.conteudo.mapaMental) {
+                this.conteudo.mapaMental = {
+                  ativo: false,
+                  data: {
+                    colunas: [
+                      { id: 'nivelA', nome: 'Nível A', cor: '#3B82F6', corBg: 'bg-blue-600', corBorda: 'border-blue-600' },
+                      { id: 'metas', nome: 'Metas', cor: '#F59E0B', corBg: 'bg-amber-600', corBorda: 'border-amber-600' },
+                      { id: 'visao', nome: 'Visão', cor: '#0D9488', corBg: 'bg-teal-600', corBorda: 'border-teal-600' }
+                    ],
+                    cards: {},
+                    conexoes: []
+                  }
+                };
               }
             } catch (e) {
               // Se não for JSON, é conteúdo antigo - manter vazio
@@ -275,6 +350,91 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
   voltar(): void {
     this.router.navigate(['/home/mentorias']);
+  }
+
+  // ===== MAPA MENTAL =====
+
+  adicionarNivelMapaMental(): void {
+    const niveisAtuais = this.conteudo.mapaMental.data.colunas.length - 2;
+    const proximaLetra = this.nivelLetras[niveisAtuais];
+    const corConfig = this.coresPredefinidas[niveisAtuais % this.coresPredefinidas.length];
+
+    const novaColuna: MapaMentalColuna = {
+      id: `nivel${proximaLetra}`,
+      nome: `Nível ${proximaLetra}`,
+      ...corConfig
+    };
+
+    this.conteudo.mapaMental.data.colunas = [novaColuna, ...this.conteudo.mapaMental.data.colunas];
+  }
+
+  adicionarCardMapaMental(colunaId: string): void {
+    const novoCard: MapaMentalCard = {
+      id: `card-${Date.now()}`,
+      colunaId,
+      meta: '',
+      indicador: '',
+      prazo: ''
+    };
+
+    if (!this.conteudo.mapaMental.data.cards[colunaId]) {
+      this.conteudo.mapaMental.data.cards[colunaId] = [];
+    }
+
+    this.conteudo.mapaMental.data.cards[colunaId].push(novoCard);
+  }
+
+  atualizarCardMapaMental(colunaId: string, cardId: string, campo: keyof MapaMentalCard, valor: string): void {
+    const cards = this.conteudo.mapaMental.data.cards[colunaId];
+    if (!cards) return;
+
+    const card = cards.find(c => c.id === cardId);
+    if (card) {
+      (card as any)[campo] = valor;
+    }
+  }
+
+  removerCardMapaMental(colunaId: string, cardId: string): void {
+    const cards = this.conteudo.mapaMental.data.cards[colunaId];
+    if (!cards) return;
+
+    this.conteudo.mapaMental.data.cards[colunaId] = cards.filter(c => c.id !== cardId);
+
+    // Remove conexões relacionadas
+    this.conteudo.mapaMental.data.conexoes = this.conteudo.mapaMental.data.conexoes.filter(
+      c => c.de !== cardId && c.para !== cardId
+    );
+  }
+
+  iniciarConexaoMapaMental(cardId: string): void {
+    if (this.mapaMentalConectando === cardId) {
+      this.mapaMentalConectando = null;
+    } else if (this.mapaMentalConectando) {
+      this.conteudo.mapaMental.data.conexoes.push({
+        de: this.mapaMentalConectando,
+        para: cardId
+      });
+      this.mapaMentalConectando = null;
+      this.toastr.success('Conexão criada!');
+    } else {
+      this.mapaMentalConectando = cardId;
+    }
+  }
+
+  removerConexaoMapaMental(index: number): void {
+    this.conteudo.mapaMental.data.conexoes.splice(index, 1);
+  }
+
+  obterCardPorId(cardId: string): MapaMentalCard | undefined {
+    for (const colunaId in this.conteudo.mapaMental.data.cards) {
+      const card = this.conteudo.mapaMental.data.cards[colunaId].find(c => c.id === cardId);
+      if (card) return card;
+    }
+    return undefined;
+  }
+
+  obterConexoesDoCard(cardId: string): MapaMentalConexao[] {
+    return this.conteudo.mapaMental.data.conexoes.filter(c => c.de === cardId);
   }
 
   // ===== UTILITÁRIOS =====
