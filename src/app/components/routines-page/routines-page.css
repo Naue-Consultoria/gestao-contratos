@@ -592,69 +592,117 @@
   margin: 0;
 }
 
-/* Routine Cards */
-.routine-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 1.5rem;
-}
-
-@media (max-width: 768px) {
-  .routine-cards {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
-
-.routine-card {
-  background: white;
+/* Table Container */
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
   border: 1px solid #f1f5f9;
-  border-radius: 16px;
-  padding: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: white;
 }
 
-:host-context(body.dark-mode) .routine-card {
+:host-context(body.dark-mode) .table-container {
   background: var(--dark-card);
   border-color: var(--dark-border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.routine-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-  border-color: #0e9b71;
+/* Routines Table */
+.routines-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
 }
 
-:host-context(body.dark-mode) .routine-card:hover {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-  border-color: #10b981;
+.routines-table thead {
+  background: #f8fafc;
+  border-bottom: 2px solid #e5e7eb;
 }
 
-/* Card Header */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem 0 1.5rem;
-  margin-bottom: 1rem;
+:host-context(body.dark-mode) .routines-table thead {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--dark-border);
 }
 
+.routines-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+:host-context(body.dark-mode) .routines-table th {
+  color: var(--dark-text-secondary);
+}
+
+.routines-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+}
+
+:host-context(body.dark-mode) .routines-table tbody tr {
+  border-color: var(--dark-border);
+}
+
+.routine-row {
+  cursor: pointer;
+}
+
+.routine-row:hover {
+  background: #f8fafc;
+}
+
+:host-context(body.dark-mode) .routine-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.routines-table td {
+  padding: 1rem;
+  vertical-align: middle;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .routines-table td {
+  color: var(--dark-text);
+}
+
+/* Column Styles */
+.col-contract {
+  min-width: 180px;
+}
+
+.col-client {
+  min-width: 250px;
+}
+
+.col-type {
+  min-width: 140px;
+}
+
+.col-services {
+  min-width: 120px;
+  text-align: center;
+}
+
+.col-progress {
+  min-width: 200px;
+}
+
+.col-actions {
+  width: 80px;
+  text-align: center;
+}
+
+/* Contract Badge */
 .contract-badge {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  display: inline-block;
 }
 
 .contract-number {
-  font-size: 1.125rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: #0e9b71;
-  margin: 0;
   letter-spacing: -0.025em;
 }
 
@@ -662,93 +710,10 @@
   color: #10b981;
 }
 
-.contract-type {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0;
-}
-
-:host-context(body.dark-mode) .contract-type {
-  color: var(--dark-text-secondary);
-}
-
-.click-indicator {
-  width: 32px;
-  height: 32px;
-  background: rgba(14, 155, 113, 0.1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.click-indicator i {
-  color: #0e9b71;
-  font-size: 14px;
-  transition: transform 0.3s ease;
-}
-
-.routine-card:hover .click-indicator {
-  background: #0e9b71;
-}
-
-.routine-card:hover .click-indicator i {
-  color: white;
-  transform: translateX(2px);
-}
-
-:host-context(body.dark-mode) .click-indicator {
-  background: rgba(16, 185, 129, 0.15);
-}
-
-:host-context(body.dark-mode) .click-indicator i {
-  color: #10b981;
-}
-
-:host-context(body.dark-mode) .routine-card:hover .click-indicator {
-  background: #10b981;
-}
-
-/* Client Section */
-.client-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.client-avatar {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #0e9b71 0%, #065f46 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.client-avatar i {
-  color: white;
-  font-size: 20px;
-}
-
-.client-info {
-  flex: 1;
-  min-width: 0;
-}
-
+/* Client Name */
 .client-name {
-  font-size: 1.125rem;
   font-weight: 600;
   color: #1e293b;
-  margin: 0 0 0.25rem 0;
-  line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -758,99 +723,85 @@
   color: var(--dark-text);
 }
 
-.client-meta {
-  font-size: 0.875rem;
-  color: #64748b;
-  margin: 0;
-  font-weight: 500;
+/* Type Badge */
+.type-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-:host-context(body.dark-mode) .client-meta {
-  color: var(--dark-text-secondary);
-}
-
-/* Schedule Section */
-/* Progress Section */
-.progress-section {
-  padding: 0 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.progress-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 1px solid #f1f5f9;
-}
-
-:host-context(body.dark-mode) .progress-item {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--dark-border);
-}
-
-.progress-icon {
-  width: 32px;
-  height: 32px;
+/* Type Colors - Full */
+.type-badge.type-full {
   background: rgba(14, 155, 113, 0.1);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.progress-icon i {
   color: #0e9b71;
-  font-size: 14px;
 }
 
-:host-context(body.dark-mode) .progress-icon {
+:host-context(body.dark-mode) .type-badge.type-full {
   background: rgba(16, 185, 129, 0.15);
-}
-
-:host-context(body.dark-mode) .progress-icon i {
   color: #10b981;
 }
 
-.progress-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  flex: 1;
+/* Type Colors - Pontual */
+.type-badge.type-pontual {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
 }
 
-.progress-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
+:host-context(body.dark-mode) .type-badge.type-pontual {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
 }
 
-.progress-label span:first-child {
-  font-size: 0.875rem;
+/* Type Colors - Individual (Mentoria) */
+.type-badge.type-individual {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+
+:host-context(body.dark-mode) .type-badge.type-individual {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+}
+
+/* Type Colors - Recrutamento & Seleção */
+.type-badge.type-recrutamento {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+:host-context(body.dark-mode) .type-badge.type-recrutamento {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+/* Type Colors - Default */
+.type-badge.type-default {
+  background: rgba(100, 116, 139, 0.1);
+  color: #64748b;
+}
+
+:host-context(body.dark-mode) .type-badge.type-default {
+  background: rgba(100, 116, 139, 0.15);
+  color: #94a3b8;
+}
+
+/* Services Count */
+.services-count {
+  display: inline-block;
   font-weight: 500;
-  color: var(--text-dark);
+  color: #64748b;
 }
 
-:host-context(body.dark-mode) .progress-label span:first-child {
-  color: var(--dark-text);
-}
-
-.progress-text {
-  font-size: 0.75rem;
-  color: var(--text-gray);
-  font-weight: 400;
-}
-
-:host-context(body.dark-mode) .progress-text {
+:host-context(body.dark-mode) .services-count {
   color: var(--dark-text-secondary);
 }
 
-.progress-bar-container {
+/* Progress Cell */
+.progress-cell {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -884,7 +835,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-dark);
-  min-width: 32px;
+  min-width: 40px;
   text-align: right;
 }
 
@@ -892,115 +843,35 @@
   color: var(--dark-text);
 }
 
-/* Legacy schedule section styles for backward compatibility */
-.schedule-section {
-  padding: 0 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.schedule-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 1px solid #f1f5f9;
-}
-
-:host-context(body.dark-mode) .schedule-item {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--dark-border);
-}
-
-.schedule-icon {
-  width: 32px;
-  height: 32px;
+/* Action Button */
+.btn-action {
+  width: 36px;
+  height: 36px;
   background: rgba(14, 155, 113, 0.1);
+  border: none;
   border-radius: 8px;
-  display: flex;
+  color: #0e9b71;
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
-.schedule-icon i {
-  color: #0e9b71;
-  font-size: 14px;
+.btn-action:hover {
+  background: #0e9b71;
+  color: white;
+  transform: translateX(2px);
 }
 
-:host-context(body.dark-mode) .schedule-icon {
+:host-context(body.dark-mode) .btn-action {
   background: rgba(16, 185, 129, 0.15);
-}
-
-:host-context(body.dark-mode) .schedule-icon i {
   color: #10b981;
 }
 
-.schedule-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.schedule-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-:host-context(body.dark-mode) .schedule-label {
-  color: var(--dark-text-secondary);
-}
-
-.schedule-date {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-:host-context(body.dark-mode) .schedule-date {
-  color: var(--dark-text);
-}
-
-/* Card Footer */
-.card-footer {
-  padding: 1rem 1.5rem;
-  background: #f8fafc;
-  border-top: 1px solid #f1f5f9;
-}
-
-:host-context(body.dark-mode) .card-footer {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: var(--dark-border);
-}
-
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+:host-context(body.dark-mode) .btn-action:hover {
   background: #10b981;
-  flex-shrink: 0;
-}
-
-.status-text {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #064e3b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-:host-context(body.dark-mode) .status-text {
-  color: #10b981;
+  color: white;
 }
 
 /* Button Styles */
@@ -1027,56 +898,137 @@
   box-shadow: 0 4px 12px rgba(14, 155, 113, 0.3);
 }
 
+.btn-secondary {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.btn-secondary:hover {
+  background: #e2e8f0;
+}
+
+:host-context(body.dark-mode) .btn-secondary {
+  background: var(--dark-input);
+  color: var(--dark-text);
+}
+
+:host-context(body.dark-mode) .btn-secondary:hover {
+  background: var(--dark-hover);
+}
+
 /* Responsive Design */
-@media (max-width: 768px) {
-  .card-header {
-    padding: 1rem 1.25rem 0 1.25rem;
+@media (max-width: 1024px) {
+  .routines-table {
+    font-size: 0.8125rem;
   }
-  
-  .client-section,
-  .schedule-section {
-    padding: 0 1.25rem;
+
+  .routines-table th,
+  .routines-table td {
+    padding: 0.875rem;
   }
-  
-  .card-footer {
-    padding: 0.875rem 1.25rem;
+
+  .col-contract {
+    min-width: 150px;
+  }
+
+  .col-client {
+    min-width: 200px;
   }
 }
 
-@media (max-width: 480px) {
-  .routine-cards {
-    gap: 0.875rem;
+@media (max-width: 768px) {
+  .table-container {
+    border: none;
+    border-radius: 0;
   }
-  
-  .card-header {
-    padding: 0.875rem 1rem 0 1rem;
-    margin-bottom: 0.875rem;
+
+  .routines-table {
+    display: block;
+    overflow-x: auto;
   }
-  
-  .client-section {
-    padding: 0 1rem;
-    margin-bottom: 1.25rem;
+
+  .routines-table thead {
+    display: none;
   }
-  
-  .client-avatar {
-    width: 40px;
-    height: 40px;
+
+  .routines-table tbody {
+    display: block;
   }
-  
-  .client-avatar i {
-    font-size: 18px;
+
+  .routine-row {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 1rem;
+    background: white;
   }
-  
-  .client-name {
-    font-size: 1rem;
+
+  :host-context(body.dark-mode) .routine-row {
+    background: var(--dark-card);
+    border-color: var(--dark-border);
   }
-  
-  .schedule-section {
-    padding: 0 1rem;
-    margin-bottom: 1.25rem;
+
+  .routine-row:hover {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
-  
-  .card-footer {
-    padding: 0.75rem 1rem;
+
+  :host-context(body.dark-mode) .routine-row:hover {
+    background: var(--dark-card);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .routines-table td {
+    display: block;
+    padding: 0.5rem 0;
+    border: none;
+    text-align: left !important;
+  }
+
+  .routines-table td::before {
+    content: attr(class);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .col-contract::before {
+    content: "Contrato";
+  }
+
+  .col-client::before {
+    content: "Cliente";
+  }
+
+  .col-type::before {
+    content: "Tipo";
+  }
+
+  .col-services::before {
+    content: "Serviços";
+  }
+
+  .col-progress::before {
+    content: "Progresso";
+  }
+
+  .col-actions {
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  :host-context(body.dark-mode) .col-actions {
+    border-color: var(--dark-border);
+  }
+
+  .col-actions::before {
+    display: none;
   }
 }

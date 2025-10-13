@@ -128,11 +128,20 @@ export class RoutinesPageComponent implements OnInit {
   private getTypeLabel(type: string): string {
     const types: { [key: string]: string } = {
       'Full': 'Contrato Full',
-      'Pontual': 'Contrato Pontual', 
+      'Pontual': 'Contrato Pontual',
       'Individual': 'Mentoria Individual',
       'Recrutamento & Seleção': 'Recrutamento & Seleção'
     };
     return types[type] || type;
+  }
+
+  getTypeClass(type: string): string {
+    const typeKey = type.toLowerCase().replace(/\s+/g, '-');
+    if (type.includes('Full')) return 'type-full';
+    if (type.includes('Pontual')) return 'type-pontual';
+    if (type.includes('Individual')) return 'type-individual';
+    if (type.includes('Recrutamento')) return 'type-recrutamento';
+    return 'type-default';
   }
 
   private getStatusColor(status: string): string {
