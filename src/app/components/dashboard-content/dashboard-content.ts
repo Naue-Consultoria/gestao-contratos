@@ -538,13 +538,12 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
         return contractDate === monthKey;
       }).length;
       
-      // Contar contratos ativos no mês (criados até o mês e ainda ativos)
+      // Contar contratos ativos no mês (criados até o mês e com status 'active')
       const activeInMonth = contracts.filter(contract => {
         const contractDate = new Date(contract.created_at).toISOString().substring(0, 7);
         const isCreatedBeforeOrInMonth = contractDate <= monthKey;
-        const isActiveInMonth = contract.status === 'active' || 
-          (contract.end_date && new Date(contract.end_date).toISOString().substring(0, 7) >= monthKey);
-        return isCreatedBeforeOrInMonth && isActiveInMonth;
+        const isActive = contract.status === 'active';
+        return isCreatedBeforeOrInMonth && isActive;
       }).length;
       
       createdData.push(createdInMonth);
