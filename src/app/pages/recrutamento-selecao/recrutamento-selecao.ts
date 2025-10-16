@@ -29,6 +29,7 @@ interface Vaga {
   fonteRecrutamento: 'catho' | 'email' | 'indicacao' | 'linkedin' | 'whatsapp' | 'trafego' | 'outros';
   statusEntrevista?: 'realizada' | 'desistiu' | 'remarcou';
   salario: number;
+  pretensaoSalarial?: number;
   dataAbertura: Date;
   dataFechamentoCancelamento?: Date;
   observacoes?: string;
@@ -220,6 +221,7 @@ export class RecrutamentoSelecao implements OnInit {
           status: vaga.status,
           fonteRecrutamento: vaga.fonte_recrutamento,
           salario: parseFloat(vaga.salario || 0),
+          pretensaoSalarial: vaga.pretensao_salarial ? parseFloat(vaga.pretensao_salarial) : undefined,
           dataAbertura: new Date(vaga.data_abertura),
           dataFechamentoCancelamento: vaga.data_fechamento_cancelamento ? new Date(vaga.data_fechamento_cancelamento) : undefined,
           observacoes: vaga.observacoes,

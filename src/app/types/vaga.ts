@@ -14,6 +14,7 @@ export interface Vaga {
           'fechada' | 'fechada_rep' | 'cancelada_cliente' | 'standby' | 'nao_cobrada' | 'encerramento_cont';
   fonte_recrutamento: 'catho' | 'email' | 'indicacao' | 'linkedin' | 'whatsapp' | 'trafego' | 'outros';
   salario: number;
+  pretensao_salarial?: number;
   data_abertura: Date | string;
   data_fechamento_cancelamento?: Date | string;
   candidato_aprovado_id?: number;

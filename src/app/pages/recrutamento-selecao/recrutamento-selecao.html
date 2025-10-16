@@ -165,6 +165,7 @@
             <th>Tipo Abertura</th>
             <th>Sigilo</th>
             <th>Salário</th>
+            <th>Pretensão Salarial</th>
             <th>Consultora</th>
             <th>Status</th>
             <th>Candidato Aprovado</th>
@@ -206,7 +207,12 @@
               </span>
             </td>
             <td>
-              <span class="salary-value">R$ {{ vaga.salario | number:'1.2-2' }}</span>
+              <span class="salary-value" *ngIf="vaga.salario">R$ {{ vaga.salario | number:'1.2-2' }}</span>
+              <span class="empty-text" *ngIf="!vaga.salario">-</span>
+            </td>
+            <td>
+              <span class="salary-value" *ngIf="vaga.pretensaoSalarial">R$ {{ vaga.pretensaoSalarial | number:'1.2-2' }}</span>
+              <span class="empty-text" *ngIf="!vaga.pretensaoSalarial">-</span>
             </td>
             <td>
               <span class="user-name">{{ vaga.usuarioNome }}</span>

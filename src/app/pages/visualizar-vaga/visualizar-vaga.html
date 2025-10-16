@@ -85,6 +85,10 @@
           <span class="info-label">Salário</span>
           <span class="info-value salary">{{ vaga.salario | currency:'BRL':'symbol':'1.2-2' }}</span>
         </div>
+        <div class="info-group" *ngIf="vaga.pretensaoSalarial">
+          <span class="info-label">Pretensão Salarial</span>
+          <span class="info-value salary">{{ vaga.pretensaoSalarial | currency:'BRL':'symbol':'1.2-2' }}</span>
+        </div>
         <div class="info-group" *ngIf="vaga.candidatoAprovado">
           <span class="info-label">Candidato Aprovado</span>
           <span class="info-value"><i class="fas fa-check-circle"></i> {{ vaga.candidatoAprovado }}</span>

@@ -30,6 +30,7 @@ interface Vaga {
   fonteRecrutamento: string;
   statusEntrevista?: string;
   salario: number;
+  pretensaoSalarial?: number;
   dataAbertura: Date;
   dataFechamentoCancelamento?: Date;
   observacoes?: string;
@@ -227,6 +228,7 @@ export class VisualizarVagaComponent implements OnInit {
         status: vagaData.status,
         fonteRecrutamento: vagaData.fonte_recrutamento,
         salario: Number(vagaData.salario || 0),
+        pretensaoSalarial: vagaData.pretensao_salarial ? Number(vagaData.pretensao_salarial) : undefined,
         dataAbertura: new Date(vagaData.data_abertura),
         dataFechamentoCancelamento: vagaData.data_fechamento_cancelamento ? new Date(vagaData.data_fechamento_cancelamento) : undefined,
         observacoes: vagaData.observacoes,
