@@ -38,7 +38,6 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   isLoading = true;
   isRefreshing = false;
   selectedPeriod: 'week' | 'month' | 'quarter' | 'year' = 'month';
-  revenuePeriod = '6';
   lastUpdated: Date = new Date();
 
   // Filtro para gráfico de contratos

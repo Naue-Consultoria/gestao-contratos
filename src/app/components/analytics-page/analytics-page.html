@@ -68,26 +68,26 @@
         Período de análise
       </label>
       <div class="period-buttons">
-        <button 
-          class="period-btn" 
+        <button
+          class="period-btn"
           [class.active]="selectedPeriod === 'week'"
           (click)="setPeriod('week')">
           Semana
         </button>
-        <button 
-          class="period-btn" 
+        <button
+          class="period-btn"
           [class.active]="selectedPeriod === 'month'"
           (click)="setPeriod('month')">
           Mês
         </button>
-        <button 
-          class="period-btn" 
+        <button
+          class="period-btn"
           [class.active]="selectedPeriod === 'quarter'"
           (click)="setPeriod('quarter')">
           Trimestre
         </button>
-        <button 
-          class="period-btn" 
+        <button
+          class="period-btn"
           [class.active]="selectedPeriod === 'year'"
           (click)="setPeriod('year')">
           Ano

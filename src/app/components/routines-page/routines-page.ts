@@ -160,22 +160,31 @@ export class RoutinesPageComponent implements OnInit {
       return { completed: 0, total: 0, percentage: 0 };
     }
 
-    // Filtrar serviços internos do cálculo de progresso
-    const nonInternalServices = contract.contract_services.filter(service => 
-      service.service?.category !== 'Interno'
-    );
+    // Usar TODOS os serviços (incluindo internos)
+    const allServices = contract.contract_services;
 
-    if (nonInternalServices.length === 0) {
+    if (allServices.length === 0) {
       return { completed: 0, total: 0, percentage: 0 };
     }
 
     let totalSteps = 0;
     let completedSteps = 0;
 
-    // Para cada serviço do contrato (excluindo internos), contar suas etapas
-    nonInternalServices.forEach(service => {
-      // Se o serviço tem service_stages definidas, usar essas
-      if (service.service?.service_stages && service.service.service_stages.length > 0) {
+    // Usar o progresso calculado pelo backend (já vem nas contract_service_stages específicas)
+    allServices.forEach(service => {
+      // Se o backend retornou progresso calculado, usar esse
+      if ((service as any).progress) {
+        const progress = (service as any).progress;
+        totalSteps += progress.totalStages;
+        completedSteps += progress.completedStages;
+
+        // Log temporário para debug do contrato 145 (0039)
+        if (contract.id === 145) {
+          console.log(`🔍 [Frontend] Contrato 145 - Serviço:`, service.service?.name, progress);
+        }
+      }
+      // Fallback: se não tem progresso do backend, usar lógica antiga
+      else if (service.service?.service_stages && service.service.service_stages.length > 0) {
         totalSteps += service.service.service_stages.length;
         completedSteps += service.service.service_stages.filter((stage: any) => stage.status === 'completed').length;
       } else {
@@ -187,8 +196,13 @@ export class RoutinesPageComponent implements OnInit {
       }
     });
 
+    // Log do resultado final para contrato 145
+    if (contract.id === 145) {
+      console.log(`🔍 [Frontend] Contrato 145 TOTAL:`, { totalSteps, completedSteps, percentage });
+    }
+
     const percentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-    
+
     return {
       completed: completedSteps,
       total: totalSteps,
