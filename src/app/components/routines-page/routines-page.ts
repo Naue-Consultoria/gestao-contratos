@@ -196,12 +196,12 @@ export class RoutinesPageComponent implements OnInit {
       }
     });
 
+    const percentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
     // Log do resultado final para contrato 145
     if (contract.id === 145) {
       console.log(`🔍 [Frontend] Contrato 145 TOTAL:`, { totalSteps, completedSteps, percentage });
     }
-
-    const percentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
     return {
       completed: completedSteps,
