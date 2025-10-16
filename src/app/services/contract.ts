@@ -59,6 +59,7 @@ export interface CreateContractRequest {
   payment_method_2_value?: number | null;
   payment_method_2_percentage?: number | null;
   expected_payment_date?: string | null;
+  first_installment_date?: string | null;
   payment_status?: 'pago' | 'pendente';
   installment_count?: number;
   installments?: ContractInstallment[];
@@ -88,6 +89,7 @@ export interface UpdateContractRequest {
   payment_method_2_value?: number | null;
   payment_method_2_percentage?: number | null;
   expected_payment_date?: string | null;
+  first_installment_date?: string | null;
   payment_status?: 'pago' | 'pendente';
   installment_count?: number;
   installments?: ContractInstallment[];
@@ -136,6 +138,7 @@ export interface ApiContract {
   updated_at: string;
   payment_method?: string | null;
   expected_payment_date?: string | null;
+  first_installment_date?: string | null;
   payment_status?: 'pago' | 'pendente';
   installment_count?: number;
   installment_value?: number | null;
@@ -288,10 +291,34 @@ export class ContractService {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valueInReais || 0);
   }
 
+  /**
+   * Formatar data para exibição
+   */
   formatDate(date: string | null): string {
     if (!date) return 'Indeterminado';
     // Adiciona T00:00:00 para garantir que a data seja interpretada como local
     return new Date(`${date}T00:00:00`).toLocaleDateString('pt-BR');
+  }
+
+  /**
+   * Obter data atual no formato YYYY-MM-DD sem conversão UTC
+   */
+  getTodayDateString(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Formatar objeto Date para string YYYY-MM-DD sem conversão UTC
+   */
+  formatDateToString(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   calculateDuration(startDate: string, endDate?: string | null): number {
@@ -455,18 +482,27 @@ export class ContractService {
   generateInstallments(totalValue: number, installmentCount: number, firstDueDate: string, intervalDays: number = 30): ContractInstallment[] {
     const installments: ContractInstallment[] = [];
     const installmentValue = totalValue / installmentCount;
-    let currentDate = new Date(firstDueDate);
+
+    // Parse da data sem conversão UTC - usar formato local
+    const [year, month, day] = firstDueDate.split('-').map(Number);
+    let currentDate = new Date(year, month - 1, day); // month - 1 porque meses em JS são 0-indexed
 
     for (let i = 0; i < installmentCount; i++) {
+      // Formatar data manualmente para evitar conversão UTC
+      const dateYear = currentDate.getFullYear();
+      const dateMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const dateDay = String(currentDate.getDate()).padStart(2, '0');
+      const formattedDate = `${dateYear}-${dateMonth}-${dateDay}`;
+
       installments.push({
-        due_date: currentDate.toISOString().split('T')[0],
+        due_date: formattedDate,
         amount: installmentValue,
         payment_status: 'pendente',
         notes: `Parcela ${i + 1} de ${installmentCount}`
       });
 
-      // Próxima data (soma intervalDays)
-      currentDate = new Date(currentDate.getTime() + (intervalDays * 24 * 60 * 60 * 1000));
+      // Próxima data (adicionar intervalDays)
+      currentDate.setDate(currentDate.getDate() + intervalDays);
     }
 
     return installments;
@@ -485,7 +521,7 @@ export class ContractService {
 
     if (status === 'pago') {
       body.paid_amount = paidAmount || 0;
-      body.paid_date = paidDate || new Date().toISOString().split('T')[0];
+      body.paid_date = paidDate || this.getTodayDateString();
     }
 
     if (notes !== undefined) {

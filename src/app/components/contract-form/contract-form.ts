@@ -201,9 +201,14 @@ export class ContractFormComponent implements OnInit {
 
   private setDefaultFirstInstallmentDate() {
     if (!this.firstInstallmentDate) {
-      const nextMonth = new Date();
-      nextMonth.setMonth(nextMonth.getMonth() + 1);
-      this.firstInstallmentDate = nextMonth.toISOString().split('T')[0];
+      // Usar data local sem conversão UTC
+      const today = new Date();
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+      // Formatar manualmente para evitar conversão UTC
+      const year = nextMonth.getFullYear();
+      const month = String(nextMonth.getMonth() + 1).padStart(2, '0');
+      const day = String(nextMonth.getDate()).padStart(2, '0');
+      this.firstInstallmentDate = `${year}-${month}-${day}`;
     }
   }
 
@@ -403,12 +408,22 @@ export class ContractFormComponent implements OnInit {
         // Garantir que o usuário atual está no array de assignedUsers ao editar
         this.ensureCurrentUserInAssignedUsers();
 
+        // Carregar first_installment_date se existir no contrato
+        if (contract.first_installment_date) {
+          this.firstInstallmentDate = contract.first_installment_date.split('T')[0];
+
+          // Sincronizar com dynamicPaymentMethods se já foi criado
+          if (this.dynamicPaymentMethods.length > 0 && this.dynamicPaymentMethods[0]) {
+            this.dynamicPaymentMethods[0].first_installment_date = this.firstInstallmentDate;
+          }
+        }
+
         // Carregar parcelas se existirem
         if (contract.installments && contract.installments.length > 0) {
           this.apiInstallments = contract.installments;
 
-          // Definir a data da primeira parcela se existir
-          if (contract.installments[0] && contract.installments[0].due_date) {
+          // Se não houver first_installment_date no contrato, usar a data da primeira parcela
+          if (!this.firstInstallmentDate && contract.installments[0] && contract.installments[0].due_date) {
             this.firstInstallmentDate = contract.installments[0].due_date.split('T')[0];
 
             // Atualizar também no dynamicPaymentMethods se tiver parcelas
@@ -671,6 +686,10 @@ export class ContractFormComponent implements OnInit {
   }
 
   async save() {
+    console.log('💾 [Frontend] Iniciando save()...');
+    console.log('📅 [Frontend] firstInstallmentDate no início do save:', this.firstInstallmentDate);
+    console.log('📅 [Frontend] dynamicPaymentMethods[0]:', this.dynamicPaymentMethods[0]);
+
     if (!this.validateForm()) {
       this.modalService.showWarning('Por favor, corrija os erros no formulário', 'Formulário Inválido');
       return;
@@ -726,6 +745,8 @@ export class ContractFormComponent implements OnInit {
       }
 
       if (this.isEditMode && this.contractId) {
+        console.log('📅 [Frontend] firstInstallmentDate antes de salvar:', this.firstInstallmentDate);
+
         const updateData: UpdateContractRequest = {
           contract_number: this.formData.contract_number,
           client_id: this.formData.client_id!,
@@ -738,6 +759,7 @@ export class ContractFormComponent implements OnInit {
           assigned_users: userIdsToSave,
           payment_method: this.formData.payment_method || this.getMainPaymentMethod(),
           expected_payment_date: this.formData.expected_payment_date || null,
+          first_installment_date: this.firstInstallmentDate || null,
           payment_status: this.formData.payment_status,
           installment_count: this.formData.installment_count || 1,
           installments: finalInstallments,
@@ -746,6 +768,9 @@ export class ContractFormComponent implements OnInit {
           barter_percentage: this.formData.barter_percentage || null,
           secondary_payment_method: this.formData.secondary_payment_method || null,
         };
+
+        console.log('📤 [Frontend] Dados que serão enviados ao backend:', JSON.stringify(updateData, null, 2));
+
         await firstValueFrom(
           this.contractService.updateContract(this.contractId, updateData)
         );
@@ -762,6 +787,7 @@ export class ContractFormComponent implements OnInit {
           assigned_users: userIdsToSave,
           payment_method: this.formData.payment_method || this.getMainPaymentMethod(),
           expected_payment_date: this.formData.expected_payment_date || null,
+          first_installment_date: this.firstInstallmentDate || null,
           payment_status: this.formData.payment_status,
           installment_count: this.formData.installment_count || 1,
           installments: finalInstallments,
@@ -1052,9 +1078,14 @@ export class ContractFormComponent implements OnInit {
   
   setDefaultSecondaryFirstInstallmentDate() {
     if (!this.secondaryFirstInstallmentDate) {
-      const nextMonth = new Date();
-      nextMonth.setMonth(nextMonth.getMonth() + 1);
-      this.secondaryFirstInstallmentDate = nextMonth.toISOString().split('T')[0];
+      // Usar data local sem conversão UTC
+      const today = new Date();
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+      // Formatar manualmente para evitar conversão UTC
+      const year = nextMonth.getFullYear();
+      const month = String(nextMonth.getMonth() + 1).padStart(2, '0');
+      const day = String(nextMonth.getDate()).padStart(2, '0');
+      this.secondaryFirstInstallmentDate = `${year}-${month}-${day}`;
     }
   }
 
@@ -1222,11 +1253,37 @@ export class ContractFormComponent implements OnInit {
 
   onPaymentInstallmentCountChange(methodIndex: number, installmentCount: number) {
     this.dynamicPaymentMethods[methodIndex].installment_count = installmentCount;
+
+    // Sincronizar com formData se for o primeiro método
+    if (methodIndex === 0) {
+      this.formData.installment_count = installmentCount;
+      console.log(`📅 [Sync] formData.installment_count atualizado para: ${installmentCount}`);
+
+      // Regenerar parcelas se necessário
+      if (installmentCount > 1 && this.getTotalValue() > 0 && this.firstInstallmentDate) {
+        this.generateInstallments();
+      } else if (installmentCount === 1) {
+        this.contractInstallments = [];
+      }
+    }
+
     console.log(`📅 Método ${methodIndex + 1}: ${installmentCount}x`);
   }
 
   onPaymentFirstInstallmentDateChange(methodIndex: number, date: string) {
     this.dynamicPaymentMethods[methodIndex].first_installment_date = date;
+
+    // Sincronizar com a variável principal se for o primeiro método
+    if (methodIndex === 0) {
+      this.firstInstallmentDate = date;
+      console.log(`📅 [Sync] firstInstallmentDate atualizado para: ${date}`);
+
+      // Regenerar parcelas se necessário
+      if (this.formData.installment_count > 1 && this.getTotalValue() > 0 && date) {
+        this.generateInstallments();
+      }
+    }
+
     console.log(`📅 Método ${methodIndex + 1} primeira parcela: ${date}`);
   }
 

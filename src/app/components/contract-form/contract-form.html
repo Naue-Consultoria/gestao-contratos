@@ -225,9 +225,10 @@
                   <div class="payment-row-2" *ngIf="method.payment_method && isPaymentMethodInstallable(method.payment_method)">
                     <div class="field-group installment-field">
                       <label class="field-label">Parcelas</label>
-                      <select 
+                      <select
                         class="form-control"
                         [(ngModel)]="method.installment_count"
+                        (ngModelChange)="onPaymentInstallmentCountChange(i, $event)"
                         [name]="'installment_count_' + i"
                         [disabled]="isLoading">
                         <option [value]="1">À vista</option>
@@ -243,6 +244,7 @@
                         type="date"
                         class="form-control"
                         [(ngModel)]="method.first_installment_date"
+                        (ngModelChange)="onPaymentFirstInstallmentDateChange(i, $event)"
                         [name]="'first_installment_date_' + i"
                         [disabled]="isLoading">
                     </div>
