@@ -49,11 +49,12 @@ export class SidebarComponent {
           id: 'recrutamento-selecao',
           icon: 'fas fa-user-tie',
           text: 'R&S',
+          adminOnly: true, // Apenas Admin, Admin Gerencial e Consultor R&S
           isExpanded: false,
           children: [
             { id: 'rs-vagas', icon: 'fas fa-briefcase', text: 'Vagas', route: '/home/recrutamento-selecao' },
-            { id: 'rs-analytics', icon: 'fas fa-chart-line', text: 'Analytics R&S', route: '/home/analytics-rs', adminOnlyNotGerencial: true, excludeConsultorRS: true },
-            { id: 'rs-relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios R&S', route: '/home/relatorios-rs', adminOnlyNotGerencial: true, excludeConsultorRS: true }
+            { id: 'rs-analytics', icon: 'fas fa-chart-line', text: 'Analytics R&S', route: '/home/analytics-rs' },
+            { id: 'rs-relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios R&S', route: '/home/relatorios-rs' }
           ]
         }
       ]
@@ -99,6 +100,7 @@ export class SidebarComponent {
     const isAdmin = this.authService.isAdmin();
     const isAdminGerencial = this.authService.isAdminGerencial();
     const isConsultorRS = this.authService.isConsultorRS();
+    const hasRSAccess = isAdmin || isAdminGerencial || isConsultorRS;
 
     this.filteredNavSections = this.navSections.map(section => ({
       ...section,
@@ -128,7 +130,12 @@ export class SidebarComponent {
         }
 
         // Se não é admin nem admin gerencial, não pode ver itens adminOnly
+        // Exceção: Item R&S pode ser visto por quem tem hasRSAccess
         if (item.adminOnly) {
+          // Se for o item R&S, verificar hasRSAccess
+          if (item.id === 'recrutamento-selecao' && hasRSAccess) {
+            return true;
+          }
           return false;
         }
 

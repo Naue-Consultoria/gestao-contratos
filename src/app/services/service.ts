@@ -135,6 +135,12 @@ export class ServiceService {
     });
   }
 
+  duplicateService(id: number, duplicateData?: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/${id}/duplicate`, duplicateData || {}, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
   formatDuration(amount: number | null, unit: string): string {
     if (unit === 'Projeto') return 'Projeto';
     if (!amount || !unit) return 'N/A';

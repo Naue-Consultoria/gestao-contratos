@@ -6,6 +6,7 @@ import { ModalService } from '../../services/modal.service';
 import { ServiceService, ApiService, ServiceStats } from '../../services/service';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
+import { DuplicateServiceModalComponent } from '../duplicate-service-modal/duplicate-service-modal';
 
 interface ServiceDisplay {
   id: number;
@@ -19,7 +20,7 @@ interface ServiceDisplay {
 @Component({
   selector: 'app-services-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, DuplicateServiceModalComponent],
   templateUrl: './services-table.html',
   styleUrls: ['./services-table.css']
 })
@@ -33,11 +34,15 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
   filteredServices: ServiceDisplay[] = [];
   isLoading = true;
   error = '';
-  
+
   // Filter properties
   searchTerm = '';
   selectedCategory = '';
   availableCategories: string[] = [];
+
+  // Duplicate modal properties
+  showDuplicateModal = false;
+  selectedServiceForDuplication: ApiService | null = null;
 
   ngOnInit() {
     this.loadData();
@@ -168,5 +173,29 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     this.searchTerm = '';
     this.selectedCategory = '';
     this.applyFilters();
+  }
+
+  duplicateService(service: ServiceDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    this.selectedServiceForDuplication = service.raw;
+    this.showDuplicateModal = true;
+  }
+
+  onDuplicateModalClose() {
+    this.showDuplicateModal = false;
+    this.selectedServiceForDuplication = null;
+  }
+
+  onServiceDuplicated(newService: any) {
+    this.modalService.showSuccess('Serviço duplicado com sucesso!');
+    this.showDuplicateModal = false;
+    this.selectedServiceForDuplication = null;
+    this.loadData(); // Reload services list
+
+    // Offer to edit the new service
+    const editNewService = confirm('Deseja editar o serviço duplicado?');
+    if (editNewService && newService?.id) {
+      this.router.navigate(['/home/servicos/editar', newService.id]);
+    }
   }
 }

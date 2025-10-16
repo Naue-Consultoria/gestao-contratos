@@ -47,6 +47,7 @@ import { AdminGuard } from './guards/admin-guard';
 import { AdminOnlyGuard } from './guards/admin-only-guard';
 import { AdminGerencialGuard } from './guards/admin-gerencial-guard';
 import { UserGuard } from './guards/user-guard';
+import { rsGuard } from './guards/rs-guard';
 
 export const routes: Routes = [
   {
@@ -261,19 +262,19 @@ export const routes: Routes = [
         title: 'Relatórios - NAUE Consultoria',
       },
 
-      // Relatórios R&S - APENAS Admin (bloqueia Admin Gerencial)
+      // Relatórios R&S - Admin, Admin Gerencial e Consultor R&S
       {
         path: 'relatorios-rs',
         component: RelatoriosRsComponent,
-        canActivate: [AdminOnlyGuard],
+        canActivate: [rsGuard],
         title: 'Relatórios R&S - NAUE Consultoria',
       },
 
-      // Analytics R&S - APENAS Admin (bloqueia Admin Gerencial)
+      // Analytics R&S - Admin, Admin Gerencial e Consultor R&S
       {
         path: 'analytics-rs',
         component: AnalyticsRsComponent,
-        canActivate: [AdminOnlyGuard],
+        canActivate: [rsGuard],
         title: 'Analytics R&S - NAUE Consultoria',
       },
 
@@ -285,35 +286,35 @@ export const routes: Routes = [
         title: 'Analytics - NAUE Consultoria',
       },
 
-      // Recrutamento & Seleção
+      // Recrutamento & Seleção - Admin, Admin Gerencial e Consultor R&S
       {
         path: 'recrutamento-selecao',
         component: RecrutamentoSelecao,
-        canActivate: [AdminGerencialGuard],
+        canActivate: [rsGuard],
         title: 'Recrutamento & Seleção - NAUE Consultoria',
       },
 
-      // Nova Vaga
+      // Nova Vaga - Admin, Admin Gerencial e Consultor R&S
       {
         path: 'recrutamento-selecao/nova-vaga',
         component: NovaVagaComponent,
-        canActivate: [AdminGerencialGuard],
+        canActivate: [rsGuard],
         title: 'Nova Vaga - NAUE Consultoria',
       },
 
-      // Visualizar Vaga
+      // Visualizar Vaga - Admin, Admin Gerencial e Consultor R&S
       {
         path: 'recrutamento-selecao/visualizar/:id',
         component: VisualizarVagaComponent,
-        canActivate: [AdminGerencialGuard],
+        canActivate: [rsGuard],
         title: 'Visualizar Vaga - NAUE Consultoria',
       },
 
-      // Editar Vaga
+      // Editar Vaga - Admin, Admin Gerencial e Consultor R&S
       {
         path: 'recrutamento-selecao/editar/:id',
         component: EditarVagaComponent,
-        canActivate: [AdminGerencialGuard],
+        canActivate: [rsGuard],
         title: 'Editar Vaga - NAUE Consultoria',
       },
 
