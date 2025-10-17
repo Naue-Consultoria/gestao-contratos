@@ -9,6 +9,12 @@ export interface ContractServiceItem {
   unit_value: number; // em reais
   scheduled_start_date?: string | null;
   status?: 'not_started' | 'scheduled' | 'in_progress' | 'completed';
+  recruitmentPercentages?: {
+    administrativo_gestao: number;
+    comercial: number;
+    operacional: number;
+    estagio_jovem: number;
+  };
 }
 
 export interface ContractInstallment {

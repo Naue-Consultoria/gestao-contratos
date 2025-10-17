@@ -706,6 +706,7 @@ export class ContractFormComponent implements OnInit {
         (s) => ({
           service_id: s.service_id,
           unit_value: s.unit_value,
+          recruitmentPercentages: s.isRecruitment ? s.recruitmentPercentages : undefined
         })
       );
       

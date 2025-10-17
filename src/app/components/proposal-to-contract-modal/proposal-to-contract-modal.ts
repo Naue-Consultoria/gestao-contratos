@@ -391,10 +391,17 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
       const proposalFinalValue = this.getProposalFinalValue();
       
       const services: ContractServiceItem[] = proposalServices.map(service => {
-        return {
+        const contractService: ContractServiceItem = {
           service_id: service.service_id,
           unit_value: service.unit_value || 0
         };
+
+        // Incluir percentuais de recrutamento se existirem
+        if (service.recruitmentPercentages) {
+          contractService.recruitmentPercentages = service.recruitmentPercentages;
+        }
+
+        return contractService;
       });
 
       // Prepare user assignments
