@@ -684,7 +684,7 @@ html {
 }
 
 .dark-title i {
-  color: #022c22;
+  color: #244e2d;
   font-size: 2rem;
 }
 
@@ -2995,5 +2995,487 @@ html {
 
   .abc-slider-value {
     font-size: 1.5rem;
+  }
+}
+
+/* ===== ZONAS DE APRENDIZADO ===== */
+
+.zonas-aprendizado-main-section {
+  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.zonas-aprendizado-content {
+  background: white;
+  border-radius: 24px;
+  padding: 3rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.zonas-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  align-items: center;
+}
+
+.add-palavra-container {
+  display: flex;
+  gap: 1rem;
+  max-width: 600px;
+  width: 100%;
+}
+
+.zonas-actions-container {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-palavra {
+  flex: 1;
+  padding: 0.875rem 1.25rem;
+  border: 2px solid rgba(2, 44, 34, 0.2);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: rgba(2, 44, 34, 0.05);
+  color: #022c22;
+  transition: all 0.3s;
+}
+
+.input-palavra::placeholder {
+  color: rgba(2, 44, 34, 0.5);
+}
+
+.input-palavra:focus {
+  outline: none;
+  border-color: #00B74F;
+  background: rgba(0, 183, 79, 0.05);
+  box-shadow: 0 0 0 4px rgba(0, 183, 79, 0.1);
+}
+
+.btn-add-palavra {
+  padding: 1.125rem 3rem;
+  background: #022c22;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 8px 24px rgba(2, 44, 34, 0.3);
+  white-space: nowrap;
+}
+
+.btn-add-palavra:hover {
+  background: #014d3a;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 183, 79, 0.4);
+}
+
+.btn-salvar-zonas {
+  padding: 1.125rem 3rem;
+  background: #022c22;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 8px 24px rgba(2, 44, 34, 0.3);
+  white-space: nowrap;
+}
+
+.btn-salvar-zonas:hover:not(:disabled) {
+  background: #014d3a;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 183, 79, 0.4);
+}
+
+.btn-salvar-zonas:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-export-zonas {
+  padding: 1.125rem 3rem;
+  background: #022c22;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 8px 24px rgba(2, 44, 34, 0.3);
+  white-space: nowrap;
+}
+
+.btn-export-zonas:hover {
+  background: #014d3a;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 183, 79, 0.4);
+}
+
+/* Container dos Quadrantes */
+.zonas-quadrantes-container {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 3rem 5rem 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Grid de Quadrantes */
+.quadrantes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* Linhas divisórias entre quadrantes */
+.quadrantes-grid::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 15%;
+  bottom: 15%;
+  width: 1px;
+  background: #022c22;
+  transform: translateX(-50%);
+  z-index: 5;
+}
+
+.quadrantes-grid::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: #022c22;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
+/* Eixos em formato L */
+.eixo-y {
+  position: absolute;
+  left: 0;
+  top: -30px;
+  bottom: 0;
+  width: 4px;
+  background: #022c22;
+  z-index: 10;
+}
+
+.eixo-y::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 15px solid #022c22;
+}
+
+.eixo-y .eixo-line {
+  display: none;
+}
+
+.eixo-y .eixo-label {
+  position: absolute;
+  left: -3.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  color: #022c22;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+.eixo-x {
+  position: absolute;
+  left: 0;
+  right: -30px;
+  bottom: 0;
+  height: 4px;
+  background: #022c22;
+  z-index: 10;
+}
+
+.eixo-x::after {
+  content: '';
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 15px solid #022c22;
+}
+
+.eixo-x .eixo-line {
+  display: none;
+}
+
+.eixo-x .eixo-label {
+  position: absolute;
+  bottom: -3.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #022c22;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+.quadrante {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2.5rem;
+  min-height: 350px;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Bordas específicas para cada quadrante */
+.zona-ansiedade {
+  background: white;
+}
+
+.zona-aprendizado {
+  background: white;
+}
+
+.zona-apatia {
+  background: white;
+}
+
+.zona-conforto {
+  background: white;
+}
+
+.quadrante:hover {
+  /* Animação removida */
+}
+
+.quadrante.drag-over {
+  box-shadow: 0 25px 50px rgba(0, 183, 79, 0.3);
+}
+
+.quadrante.drag-over::before {
+  opacity: 1;
+}
+
+.quadrante-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.quadrante-header h3 {
+  font-size: 1.375rem;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.zona-ansiedade .quadrante-header h3 {
+  color: #022c22;
+}
+
+.zona-aprendizado .quadrante-header h3 {
+  color: #022c22;
+}
+
+.zona-apatia .quadrante-header h3 {
+  color: #022c22;
+}
+
+.zona-conforto .quadrante-header h3 {
+  color: #022c22;
+}
+
+.quadrante-content {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-content: flex-start;
+  position: relative;
+  z-index: 1;
+}
+
+/* Tags de Palavras */
+.palavra-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: linear-gradient(135deg, rgba(2, 44, 34, 0.08), rgba(0, 183, 79, 0.05));
+  border: 2px solid rgba(2, 44, 34, 0.15);
+  border-radius: 20px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #022c22;
+  cursor: move;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.palavra-tag:hover {
+  background: linear-gradient(135deg, rgba(0, 183, 79, 0.12), rgba(2, 44, 34, 0.08));
+  border-color: #00B74F;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 183, 79, 0.3);
+}
+
+.palavra-tag:active {
+  cursor: grabbing;
+}
+
+.btn-remove-palavra {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.75rem;
+}
+
+.btn-remove-palavra:hover {
+  background: #ef4444;
+  color: white;
+  transform: scale(1.1);
+}
+
+.zona-empty {
+  width: 100%;
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.875rem;
+  padding: 2rem 1rem;
+}
+
+/* Legenda */
+.zonas-legenda {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.legenda-fonte {
+  color: rgba(2, 44, 34, 0.6);
+  font-size: 0.875rem;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .quadrantes-grid {
+    gap: 2rem;
+  }
+
+  .quadrante {
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .zonas-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-palavra-container {
+    flex-direction: column;
+    min-width: 100%;
+  }
+
+  .btn-add-palavra,
+  .btn-salvar-zonas {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .zonas-quadrantes-container {
+    padding: 2rem 1rem 4rem 1rem;
+  }
+
+  .quadrantes-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .quadrante {
+    min-height: 200px;
+    border: 3px solid !important;
+    border-radius: 16px;
+  }
+
+  .zona-ansiedade {
+    border-color: #ef4444 !important;
+  }
+
+  .zona-aprendizado {
+    border-color: #00B74F !important;
+  }
+
+  .zona-apatia {
+    border-color: #6b7280 !important;
+  }
+
+  .zona-conforto {
+    border-color: #3b82f6 !important;
+  }
+
+  .eixo-y,
+  .eixo-x {
+    display: none;
   }
 }

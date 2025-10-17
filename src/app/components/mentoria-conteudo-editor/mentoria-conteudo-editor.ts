@@ -43,6 +43,12 @@ interface ModeloABC {
   acaoImpedimentos: string;
 }
 
+// ===== ZONAS DE APRENDIZADO =====
+interface PalavraZona {
+  id: string;
+  texto: string;
+}
+
 // ===== MAPA MENTAL =====
 
 interface MapaMentalCard {
@@ -87,6 +93,7 @@ interface ConteudoMentoria {
   referencias: { ativo: boolean; itens: Referencia[] };
   mapaMental: { ativo: boolean; data: MapaMentalData };
   modeloABC: { ativo: boolean };
+  zonasAprendizado: { ativo: boolean };
   encerramento: { ativo: boolean; conteudo: string };
   ordemSecoes?: string[]; // Nova propriedade para controlar a ordem
 }
@@ -143,6 +150,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       }
     },
     modeloABC: { ativo: false },
+    zonasAprendizado: { ativo: false },
     encerramento: { ativo: true, conteudo: '' },
     ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental'] // Ordem padrão
   };
@@ -252,6 +260,11 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
               // Adicionar modeloABC se não existir (retrocompatibilidade)
               if (!this.conteudo.modeloABC) {
                 this.conteudo.modeloABC = { ativo: false };
+              }
+
+              // Adicionar zonasAprendizado se não existir (retrocompatibilidade)
+              if (!this.conteudo.zonasAprendizado) {
+                this.conteudo.zonasAprendizado = { ativo: false };
               }
 
               // Adicionar ordem de seções se não existir (retrocompatibilidade)

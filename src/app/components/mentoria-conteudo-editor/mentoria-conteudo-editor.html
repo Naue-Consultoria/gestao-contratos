@@ -595,6 +595,32 @@
         </div>
       </section>
 
+      <!-- ZONAS DE APRENDIZADO -->
+      <section class="editor-section">
+        <div class="section-header">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="conteudo.zonasAprendizado.ativo"
+              name="zonasAprendizadoAtivo">
+            <span class="section-title">
+              <i class="fa-solid fa-chart-simple"></i>
+              Zonas de Aprendizado
+            </span>
+          </label>
+        </div>
+
+        <div *ngIf="conteudo.zonasAprendizado.ativo" class="section-content">
+          <div class="info-box">
+            <i class="fa-solid fa-info-circle"></i>
+            <p>
+              <strong>Zonas de Aprendizado ativado!</strong><br>
+              O mentorado poderá posicionar palavras/conceitos no gráfico de 4 quadrantes (Ansiedade, Aprendizado, Apatia, Conforto) baseado em Segurança Psicológica x Motivação.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <!-- ENCERRAMENTO -->
       <section class="editor-section">
         <div class="section-header">

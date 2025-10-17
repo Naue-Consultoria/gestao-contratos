@@ -604,4 +604,28 @@ export class MentoriaService {
       dados
     );
   }
+
+  // ===== ZONAS DE APRENDIZADO =====
+
+  /**
+   * Obter Zonas de Aprendizado por token público
+   */
+  obterZonasAprendizadoPublico(token: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/publico/${token}/zonas-aprendizado`);
+  }
+
+  /**
+   * Salvar Zonas de Aprendizado (via token público)
+   */
+  salvarZonasAprendizado(token: string, dados: {
+    zona_ansiedade: any[];
+    zona_aprendizado: any[];
+    zona_apatia: any[];
+    zona_conforto: any[];
+  }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/publico/${token}/zonas-aprendizado`,
+      dados
+    );
+  }
 }

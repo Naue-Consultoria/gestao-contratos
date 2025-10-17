@@ -461,6 +461,195 @@
       </div>
     </section>
 
+    <!-- Zonas de Aprendizado Section -->
+    <section class="dark-section zonas-aprendizado-main-section"
+             *ngIf="conteudoEstruturado && conteudoEstruturado.zonasAprendizado?.ativo">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-chart-simple"></i>
+            Zonas de Aprendizado
+          </h2>
+          <p class="dark-subtitle">Segurança Psicológica x Motivação e Senso de Dono(a)</p>
+        </div>
+
+        <div class="zonas-aprendizado-content">
+
+          <!-- Controles -->
+          <div class="zonas-controls">
+            <div class="add-palavra-container">
+              <input
+                type="text"
+                class="input-palavra"
+                [(ngModel)]="novaPalavra"
+                (keyup.enter)="adicionarPalavraZona()"
+                placeholder="Digite uma palavra/conceito e pressione Enter...">
+              <button
+                type="button"
+                class="btn-add-palavra"
+                (click)="adicionarPalavraZona()">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar
+              </button>
+            </div>
+
+            <div class="zonas-actions-container">
+              <button
+                type="button"
+                class="btn-salvar-zonas"
+                (click)="salvarZonasAprendizado()"
+                [disabled]="salvandoZonas">
+                <i class="fa-solid" [ngClass]="salvandoZonas ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+                {{ salvandoZonas ? 'Salvando...' : 'Salvar Gráfico' }}
+              </button>
+
+              <button
+                type="button"
+                class="btn-export-zonas"
+                (click)="exportarZonasAprendizadoPDF()">
+                <i class="fa-solid fa-file-pdf"></i>
+                Exportar PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Gráfico de 4 Quadrantes -->
+          <div class="zonas-quadrantes-container">
+
+          <!-- Grid de Quadrantes -->
+          <div class="quadrantes-grid">
+
+            <!-- Eixo Y (vertical) - na borda esquerda -->
+            <div class="eixo-y">
+              <div class="eixo-label">Motivação e Senso de Dono(a)</div>
+            </div>
+
+            <!-- Eixo X (horizontal) - na borda inferior -->
+            <div class="eixo-x">
+              <div class="eixo-label">Segurança Psicológica</div>
+            </div>
+
+            <!-- Quadrante: Zona de Ansiedade (superior esquerdo) -->
+            <div class="quadrante zona-ansiedade"
+                 (drop)="onDropPalavra($event, 'ansiedade')"
+                 (dragover)="onDragOver($event)"
+                 (dragleave)="onDragLeave($event)">
+              <div class="quadrante-header">
+                <h3>Zona de Ansiedade</h3>
+              </div>
+              <div class="quadrante-content">
+                <div
+                  *ngFor="let palavra of getPalavrasPorZona('ansiedade')"
+                  class="palavra-tag"
+                  draggable="true"
+                  (dragstart)="onDragStart($event, palavra.id)">
+                  <span>{{ palavra.texto }}</span>
+                  <button
+                    class="btn-remove-palavra"
+                    (click)="removerPalavraZona(palavra.id)">
+                    <i class="fa-solid fa-times"></i>
+                  </button>
+                </div>
+                <p *ngIf="getPalavrasPorZona('ansiedade').length === 0" class="zona-empty">
+                  Arraste palavras aqui
+                </p>
+              </div>
+            </div>
+
+            <!-- Quadrante: Zona de Aprendizado (superior direito) -->
+            <div class="quadrante zona-aprendizado"
+                 (drop)="onDropPalavra($event, 'aprendizado')"
+                 (dragover)="onDragOver($event)"
+                 (dragleave)="onDragLeave($event)">
+              <div class="quadrante-header">
+                <h3>Zona de Aprendizado</h3>
+              </div>
+              <div class="quadrante-content">
+                <div
+                  *ngFor="let palavra of getPalavrasPorZona('aprendizado')"
+                  class="palavra-tag"
+                  draggable="true"
+                  (dragstart)="onDragStart($event, palavra.id)">
+                  <span>{{ palavra.texto }}</span>
+                  <button
+                    class="btn-remove-palavra"
+                    (click)="removerPalavraZona(palavra.id)">
+                    <i class="fa-solid fa-times"></i>
+                  </button>
+                </div>
+                <p *ngIf="getPalavrasPorZona('aprendizado').length === 0" class="zona-empty">
+                  Arraste palavras aqui
+                </p>
+              </div>
+            </div>
+
+            <!-- Quadrante: Zona de Apatia (inferior esquerdo) -->
+            <div class="quadrante zona-apatia"
+                 (drop)="onDropPalavra($event, 'apatia')"
+                 (dragover)="onDragOver($event)"
+                 (dragleave)="onDragLeave($event)">
+              <div class="quadrante-header">
+                <h3>Zona de Apatia</h3>
+              </div>
+              <div class="quadrante-content">
+                <div
+                  *ngFor="let palavra of getPalavrasPorZona('apatia')"
+                  class="palavra-tag"
+                  draggable="true"
+                  (dragstart)="onDragStart($event, palavra.id)">
+                  <span>{{ palavra.texto }}</span>
+                  <button
+                    class="btn-remove-palavra"
+                    (click)="removerPalavraZona(palavra.id)">
+                    <i class="fa-solid fa-times"></i>
+                  </button>
+                </div>
+                <p *ngIf="getPalavrasPorZona('apatia').length === 0" class="zona-empty">
+                  Arraste palavras aqui
+                </p>
+              </div>
+            </div>
+
+            <!-- Quadrante: Zona de Conforto (inferior direito) -->
+            <div class="quadrante zona-conforto"
+                 (drop)="onDropPalavra($event, 'conforto')"
+                 (dragover)="onDragOver($event)"
+                 (dragleave)="onDragLeave($event)">
+              <div class="quadrante-header">
+                <h3>Zona de Conforto</h3>
+              </div>
+              <div class="quadrante-content">
+                <div
+                  *ngFor="let palavra of getPalavrasPorZona('conforto')"
+                  class="palavra-tag"
+                  draggable="true"
+                  (dragstart)="onDragStart($event, palavra.id)">
+                  <span>{{ palavra.texto }}</span>
+                  <button
+                    class="btn-remove-palavra"
+                    (click)="removerPalavraZona(palavra.id)">
+                    <i class="fa-solid fa-times"></i>
+                  </button>
+                </div>
+                <p *ngIf="getPalavrasPorZona('conforto').length === 0" class="zona-empty">
+                  Arraste palavras aqui
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+          <!-- Legenda -->
+          <div class="zonas-legenda">
+            <p class="legenda-fonte">Fonte: The Fearless Organization Flow</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section class="dark-section mapa-mental-main-section"
              *ngIf="conteudoEstruturado && conteudoEstruturado.mapaMental?.ativo">

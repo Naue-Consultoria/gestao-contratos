@@ -29,6 +29,17 @@ interface ModeloABC {
   acaoImpedimentos: string;
 }
 
+// ===== ZONAS DE APRENDIZADO =====
+interface PalavraZona {
+  id: string;
+  texto: string;
+  zona: 'ansiedade' | 'aprendizado' | 'apatia' | 'conforto';
+}
+
+interface ZonasAprendizadoData {
+  palavras: PalavraZona[];
+}
+
 // ===== MAPA MENTAL =====
 interface MapaMentalCard {
   id: string;
@@ -113,6 +124,14 @@ export class PublicMentoriaViewComponent implements OnInit {
   };
   modeloABCId: number | null = null;
   salvandoModeloABC: boolean = false;
+
+  // Zonas de Aprendizado
+  zonasAprendizado: ZonasAprendizadoData = {
+    palavras: []
+  };
+  zonasAprendizadoId: number | null = null;
+  salvandoZonas: boolean = false;
+  novaPalavra: string = '';
   coresPredefinidas = [
     { cor: '#EF4444', corBg: 'bg-rose-600', corBorda: 'border-rose-600' },
     { cor: '#10B981', corBg: 'bg-emerald-600', corBorda: 'border-emerald-600' },
@@ -559,6 +578,48 @@ export class PublicMentoriaViewComponent implements OnInit {
       },
       error: (error: any) => {
         console.warn('⚠️ Erro ao carregar Modelo ABC:', error);
+      }
+    });
+
+    // Carregar Zonas de Aprendizado do banco de dados
+    console.log('📊 Carregando Zonas de Aprendizado do banco de dados...');
+    this.mentoriaService.obterZonasAprendizadoPublico(this.token).subscribe({
+      next: (response: any) => {
+        if (response.success && response.data) {
+          console.log('✅ Zonas de Aprendizado carregadas do banco:', response.data);
+          this.zonasAprendizadoId = response.data.id;
+
+          // Reconstruir array de palavras a partir dos 4 quadrantes
+          const palavras: PalavraZona[] = [];
+
+          if (response.data.zona_ansiedade) {
+            response.data.zona_ansiedade.forEach((p: any) => {
+              palavras.push({ id: p.id, texto: p.texto, zona: 'ansiedade' });
+            });
+          }
+          if (response.data.zona_aprendizado) {
+            response.data.zona_aprendizado.forEach((p: any) => {
+              palavras.push({ id: p.id, texto: p.texto, zona: 'aprendizado' });
+            });
+          }
+          if (response.data.zona_apatia) {
+            response.data.zona_apatia.forEach((p: any) => {
+              palavras.push({ id: p.id, texto: p.texto, zona: 'apatia' });
+            });
+          }
+          if (response.data.zona_conforto) {
+            response.data.zona_conforto.forEach((p: any) => {
+              palavras.push({ id: p.id, texto: p.texto, zona: 'conforto' });
+            });
+          }
+
+          this.zonasAprendizado.palavras = palavras;
+        } else {
+          console.log('ℹ️ Nenhuma Zona de Aprendizado encontrada no banco');
+        }
+      },
+      error: (error: any) => {
+        console.warn('⚠️ Erro ao carregar Zonas de Aprendizado:', error);
       }
     });
 
@@ -1867,5 +1928,393 @@ export class PublicMentoriaViewComponent implements OnInit {
         this.salvandoModeloABC = false;
       }
     });
+  }
+
+  // ===== ZONAS DE APRENDIZADO =====
+
+  adicionarPalavraZona(): void {
+    if (!this.novaPalavra || !this.novaPalavra.trim()) {
+      this.toastr.warning('Digite uma palavra antes de adicionar');
+      return;
+    }
+
+    const novaPalavra: PalavraZona = {
+      id: `palavra-${Date.now()}`,
+      texto: this.novaPalavra.trim(),
+      zona: 'aprendizado' // Padrão: zona de aprendizado (ideal)
+    };
+
+    this.zonasAprendizado.palavras.push(novaPalavra);
+    this.novaPalavra = '';
+  }
+
+  moverPalavraParaZona(palavraId: string, novaZona: 'ansiedade' | 'aprendizado' | 'apatia' | 'conforto'): void {
+    const palavra = this.zonasAprendizado.palavras.find(p => p.id === palavraId);
+    if (palavra) {
+      palavra.zona = novaZona;
+    }
+  }
+
+  removerPalavraZona(palavraId: string): void {
+    this.zonasAprendizado.palavras = this.zonasAprendizado.palavras.filter(p => p.id !== palavraId);
+  }
+
+  getPalavrasPorZona(zona: 'ansiedade' | 'aprendizado' | 'apatia' | 'conforto'): PalavraZona[] {
+    return this.zonasAprendizado.palavras.filter(p => p.zona === zona);
+  }
+
+  // Drag and Drop para palavras
+  palavraArrastada: string | null = null;
+
+  onDragStart(event: DragEvent, palavraId: string): void {
+    this.palavraArrastada = palavraId;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/html', '');
+    }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    const target = event.currentTarget as HTMLElement;
+    target.classList.add('drag-over');
+  }
+
+  onDragLeave(event: DragEvent): void {
+    const target = event.currentTarget as HTMLElement;
+    target.classList.remove('drag-over');
+  }
+
+  onDropPalavra(event: DragEvent, zona: 'ansiedade' | 'aprendizado' | 'apatia' | 'conforto'): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const target = event.currentTarget as HTMLElement;
+    target.classList.remove('drag-over');
+
+    if (this.palavraArrastada) {
+      this.moverPalavraParaZona(this.palavraArrastada, zona);
+      this.palavraArrastada = null;
+    }
+  }
+
+  salvarZonasAprendizado(): void {
+    if (!this.token || this.expired) {
+      this.toastr.warning('Não foi possível salvar as Zonas de Aprendizado');
+      return;
+    }
+
+    if (this.zonasAprendizado.palavras.length === 0) {
+      this.toastr.info('Adicione pelo menos uma palavra antes de salvar');
+      return;
+    }
+
+    this.salvandoZonas = true;
+
+    // Agrupar palavras por zona
+    const dadosParaSalvar = {
+      zona_ansiedade: this.getPalavrasPorZona('ansiedade').map(p => ({ id: p.id, texto: p.texto })),
+      zona_aprendizado: this.getPalavrasPorZona('aprendizado').map(p => ({ id: p.id, texto: p.texto })),
+      zona_apatia: this.getPalavrasPorZona('apatia').map(p => ({ id: p.id, texto: p.texto })),
+      zona_conforto: this.getPalavrasPorZona('conforto').map(p => ({ id: p.id, texto: p.texto }))
+    };
+
+    console.log('💾 Salvando Zonas de Aprendizado...', dadosParaSalvar);
+
+    this.mentoriaService.salvarZonasAprendizado(this.token, dadosParaSalvar).subscribe({
+      next: (response: any) => {
+        console.log('✅ Zonas de Aprendizado salvas com sucesso!', response);
+        if (response.data && response.data.id) {
+          this.zonasAprendizadoId = response.data.id;
+        }
+        this.toastr.success('Zonas de Aprendizado salvas com sucesso!');
+        this.salvandoZonas = false;
+      },
+      error: (error: any) => {
+        console.error('❌ Erro ao salvar Zonas de Aprendizado:', error);
+        this.toastr.error('Erro ao salvar Zonas de Aprendizado');
+        this.salvandoZonas = false;
+      }
+    });
+  }
+
+  // ===== EXPORTAR ZONAS DE APRENDIZADO PDF =====
+  async exportarZonasAprendizadoPDF(): Promise<void> {
+    console.log('🖨️ Iniciando exportação PDF das Zonas de Aprendizado...');
+    console.log('Palavras:', this.zonasAprendizado);
+
+    try {
+      this.toastr.info('Gerando PDF das Zonas de Aprendizado...');
+
+      console.log('1️⃣ Criando container de visualização...');
+      // Criar container temporário para renderização
+      const container = this.criarContainerZonasVisualizacao();
+      document.body.appendChild(container);
+
+      console.log('2️⃣ Aguardando renderização...');
+      // Aguardar renderização
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      console.log('3️⃣ Capturando como imagem com html2canvas...');
+      // Capturar como imagem
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#022c22',
+        scale: 2,
+        logging: true,
+        width: container.scrollWidth,
+        height: container.scrollHeight
+      });
+
+      console.log('4️⃣ Canvas criado:', canvas.width, 'x', canvas.height);
+
+      // Remover container temporário
+      document.body.removeChild(container);
+
+      console.log('5️⃣ Gerando PDF...');
+      // Converter para PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+
+      console.log('6️⃣ Salvando PDF...');
+      pdf.save(`zonas-aprendizado-${this.encontro?.mentorado_nome || 'mentoria'}-${Date.now()}.pdf`);
+
+      console.log('✅ PDF exportado com sucesso!');
+      this.toastr.success('PDF exportado com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao exportar PDF:', error);
+      this.toastr.error('Erro ao exportar PDF: ' + (error as any).message);
+    }
+  }
+
+  private criarContainerZonasVisualizacao(): HTMLElement {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.background = '#022c22';
+    container.style.padding = '60px';
+    container.style.minWidth = '1400px';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.color = 'white';
+
+    // Logo
+    const logo = document.createElement('img');
+    logo.src = '/logoNaueNeg.png';
+    logo.style.position = 'absolute';
+    logo.style.top = '40px';
+    logo.style.left = '40px';
+    logo.style.height = '45px';
+    logo.style.width = 'auto';
+    logo.style.objectFit = 'contain';
+    logo.style.zIndex = '10';
+    container.appendChild(logo);
+
+    // Título
+    const header = document.createElement('div');
+    header.style.textAlign = 'center';
+    header.style.marginBottom = '40px';
+    header.style.marginTop = '40px';
+
+    const h1 = document.createElement('h1');
+    h1.textContent = 'Zonas de Aprendizado';
+    h1.style.fontSize = '36px';
+    h1.style.margin = '0 0 10px 0';
+    h1.style.fontWeight = 'bold';
+    h1.style.color = 'white';
+    header.appendChild(h1);
+
+    const subtitle = document.createElement('p');
+    subtitle.textContent = 'Segurança Psicológica x Motivação e Senso de Dono(a)';
+    subtitle.style.fontSize = '18px';
+    subtitle.style.color = 'rgba(255, 255, 255, 0.7)';
+    subtitle.style.margin = '0 0 10px 0';
+    header.appendChild(subtitle);
+
+    const info = document.createElement('div');
+    info.textContent = `${this.encontro?.mentorado_nome || 'Mentoria'}`;
+    info.style.fontSize = '16px';
+    info.style.fontWeight = '600';
+    info.style.color = 'rgba(255, 255, 255, 0.8)';
+    header.appendChild(info);
+
+    container.appendChild(header);
+
+    // Grid de quadrantes com eixos
+    const graficoWrapper = document.createElement('div');
+    graficoWrapper.style.position = 'relative';
+    graficoWrapper.style.maxWidth = '1200px';
+    graficoWrapper.style.margin = '0 auto';
+    graficoWrapper.style.padding = '60px';
+
+    // Eixo Y
+    const eixoY = document.createElement('div');
+    eixoY.style.position = 'absolute';
+    eixoY.style.left = '0';
+    eixoY.style.top = '30px';
+    eixoY.style.bottom = '30px';
+    eixoY.style.width = '4px';
+    eixoY.style.background = '#00B74F';
+    graficoWrapper.appendChild(eixoY);
+
+    // Seta Y
+    const setaY = document.createElement('div');
+    setaY.style.position = 'absolute';
+    setaY.style.top = '-12px';
+    setaY.style.left = '-8px';
+    setaY.style.width = '0';
+    setaY.style.height = '0';
+    setaY.style.borderLeft = '10px solid transparent';
+    setaY.style.borderRight = '10px solid transparent';
+    setaY.style.borderBottom = '15px solid #00B74F';
+    eixoY.appendChild(setaY);
+
+    // Label Y
+    const labelY = document.createElement('div');
+    labelY.textContent = 'Motivação e Senso de Dono(a)';
+    labelY.style.position = 'absolute';
+    labelY.style.left = '-180px';
+    labelY.style.top = '50%';
+    labelY.style.transform = 'translateY(-50%) rotate(-90deg)';
+    labelY.style.color = 'white';
+    labelY.style.fontWeight = '700';
+    labelY.style.fontSize = '14px';
+    labelY.style.whiteSpace = 'nowrap';
+    eixoY.appendChild(labelY);
+
+    // Eixo X
+    const eixoX = document.createElement('div');
+    eixoX.style.position = 'absolute';
+    eixoX.style.left = '0';
+    eixoX.style.right = '0';
+    eixoX.style.bottom = '0';
+    eixoX.style.height = '4px';
+    eixoX.style.background = '#00B74F';
+    graficoWrapper.appendChild(eixoX);
+
+    // Seta X
+    const setaX = document.createElement('div');
+    setaX.style.position = 'absolute';
+    setaX.style.right = '-12px';
+    setaX.style.top = '-8px';
+    setaX.style.width = '0';
+    setaX.style.height = '0';
+    setaX.style.borderTop = '10px solid transparent';
+    setaX.style.borderBottom = '10px solid transparent';
+    setaX.style.borderLeft = '15px solid #00B74F';
+    eixoX.appendChild(setaX);
+
+    // Label X
+    const labelX = document.createElement('div');
+    labelX.textContent = 'Segurança Psicológica';
+    labelX.style.position = 'absolute';
+    labelX.style.bottom = '-40px';
+    labelX.style.left = '50%';
+    labelX.style.transform = 'translateX(-50%)';
+    labelX.style.color = 'white';
+    labelX.style.fontWeight = '700';
+    labelX.style.fontSize = '14px';
+    labelX.style.whiteSpace = 'nowrap';
+    eixoX.appendChild(labelX);
+
+    // Grid
+    const grid = document.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = '1fr 1fr';
+    grid.style.gridTemplateRows = '1fr 1fr';
+    grid.style.gap = '0';
+    grid.style.minHeight = '600px';
+    grid.style.position = 'relative';
+
+    // Linhas divisórias
+    const linhaVertical = document.createElement('div');
+    linhaVertical.style.position = 'absolute';
+    linhaVertical.style.left = '50%';
+    linhaVertical.style.top = '15%';
+    linhaVertical.style.bottom = '15%';
+    linhaVertical.style.width = '1px';
+    linhaVertical.style.background = '#022c22';
+    linhaVertical.style.transform = 'translateX(-50%)';
+    linhaVertical.style.zIndex = '5';
+    grid.appendChild(linhaVertical);
+
+    const linhaHorizontal = document.createElement('div');
+    linhaHorizontal.style.position = 'absolute';
+    linhaHorizontal.style.top = '50%';
+    linhaHorizontal.style.left = '15%';
+    linhaHorizontal.style.right = '15%';
+    linhaHorizontal.style.height = '1px';
+    linhaHorizontal.style.background = '#022c22';
+    linhaHorizontal.style.transform = 'translateY(-50%)';
+    linhaHorizontal.style.zIndex = '5';
+    grid.appendChild(linhaHorizontal);
+
+    // Criar quadrantes
+    const zonas = [
+      { nome: 'Zona de Ansiedade', zona: 'ansiedade' as const },
+      { nome: 'Zona de Aprendizado', zona: 'aprendizado' as const },
+      { nome: 'Zona de Apatia', zona: 'apatia' as const },
+      { nome: 'Zona de Conforto', zona: 'conforto' as const }
+    ];
+
+    zonas.forEach(({ nome, zona }) => {
+      const quadrante = document.createElement('div');
+      quadrante.style.background = 'white';
+      quadrante.style.padding = '30px';
+      quadrante.style.minHeight = '300px';
+      quadrante.style.display = 'flex';
+      quadrante.style.flexDirection = 'column';
+
+      const titulo = document.createElement('h3');
+      titulo.textContent = nome;
+      titulo.style.fontSize = '20px';
+      titulo.style.fontWeight = '700';
+      titulo.style.margin = '0 0 20px 0';
+      titulo.style.color = '#022c22';
+      titulo.style.textAlign = 'center';
+      quadrante.appendChild(titulo);
+
+      const palavrasContainer = document.createElement('div');
+      palavrasContainer.style.display = 'flex';
+      palavrasContainer.style.flexWrap = 'wrap';
+      palavrasContainer.style.gap = '10px';
+
+      const palavras = this.getPalavrasPorZona(zona);
+      palavras.forEach(palavra => {
+        const tag = document.createElement('span');
+        tag.textContent = palavra.texto;
+        tag.style.display = 'inline-block';
+        tag.style.padding = '8px 16px';
+        tag.style.background = 'rgba(2, 44, 34, 0.1)';
+        tag.style.border = '2px solid rgba(2, 44, 34, 0.2)';
+        tag.style.borderRadius = '20px';
+        tag.style.fontSize = '14px';
+        tag.style.fontWeight = '500';
+        tag.style.color = '#022c22';
+        palavrasContainer.appendChild(tag);
+      });
+
+      quadrante.appendChild(palavrasContainer);
+      grid.appendChild(quadrante);
+    });
+
+    graficoWrapper.appendChild(grid);
+    container.appendChild(graficoWrapper);
+
+    // Footer
+    const footer = document.createElement('div');
+    footer.style.textAlign = 'center';
+    footer.style.marginTop = '40px';
+    footer.style.color = 'rgba(255, 255, 255, 0.5)';
+    footer.style.fontSize = '12px';
+    footer.textContent = 'Fonte: The Fearless Organization Flow';
+    container.appendChild(footer);
+
+    return container;
   }
 }
