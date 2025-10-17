@@ -302,6 +302,15 @@ export class MentoriaService {
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/mentorias/${mentoriaId}/foto`, formData);
   }
 
+  /**
+   * Upload de arquivo de teste (imagem ou PDF)
+   */
+  uploadArquivoTeste(encontroId: number, file: File): Observable<ApiResponse<{ url: string; filename: string; originalName: string; isPdf: boolean }>> {
+    const formData = new FormData();
+    formData.append('arquivo', file);
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/encontros/${encontroId}/teste-arquivo`, formData);
+  }
+
   // ===== ENDPOINTS PÚBLICOS =====
 
   /**

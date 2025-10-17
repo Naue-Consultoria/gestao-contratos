@@ -13,6 +13,8 @@ interface Teste {
   nome: string;
   imagem?: File;
   imagemUrl?: string;
+  isPdf?: boolean;
+  nomeArquivo?: string;
   comentario: string;
 }
 
@@ -26,7 +28,7 @@ interface BlocoProximosPassos {
 
 interface Referencia {
   id: string;
-  tipo: 'ted' | 'livro' | 'leitura';
+  tipo: 'ted' | 'livro' | 'leitura' | 'video';
   titulo: string;
   link: string;
 }
@@ -310,16 +312,26 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     this.conteudo.testes.itens = this.conteudo.testes.itens.filter(t => t.id !== id);
   }
 
-  onImagemSelected(event: Event, teste: Teste): void {
+  onArquivoSelected(event: Event, teste: Teste): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
-      teste.imagem = input.files[0];
-      // Criar preview da imagem
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        teste.imagemUrl = e.target.result;
-      };
-      reader.readAsDataURL(teste.imagem);
+      const file = input.files[0];
+      teste.imagem = file;
+      teste.nomeArquivo = file.name;
+
+      // Verificar se é PDF
+      if (file.type === 'application/pdf') {
+        teste.isPdf = true;
+        teste.imagemUrl = undefined;
+      } else {
+        // É uma imagem - criar preview
+        teste.isPdf = false;
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          teste.imagemUrl = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
     }
   }
 
@@ -448,7 +460,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
   // ===== SALVAR =====
 
-  salvarConteudo(): void {
+  async salvarConteudo(): Promise<void> {
     if (!this.encontroId) {
       this.toastr.error('ID do encontro não encontrado');
       return;
@@ -456,26 +468,66 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
     this.isSaving = true;
 
-    // Converter para JSON antes de salvar
-    const conteudoJson = JSON.stringify(this.conteudo);
+    try {
+      // 1. Fazer upload dos arquivos de testes para Supabase Storage
+      if (this.conteudo.testes.ativo && this.conteudo.testes.itens.length > 0) {
+        for (const teste of this.conteudo.testes.itens) {
+          // Se tem arquivo para upload (File object)
+          if (teste.imagem && teste.imagem instanceof File) {
+            try {
+              const uploadResponse = await this.mentoriaService
+                .uploadArquivoTeste(this.encontroId, teste.imagem)
+                .toPromise();
 
-    this.mentoriaService.atualizarEncontro(
-      this.encontroId,
-      { conteudo_html: conteudoJson }
-    ).subscribe({
-      next: (response) => {
-        if (response?.success) {
-          this.toastr.success('Conteúdo salvo com sucesso!');
-          this.router.navigate(['/home/mentorias']);
+              if (uploadResponse?.success && uploadResponse.data) {
+                // Atualizar com a URL do Supabase Storage
+                teste.imagemUrl = uploadResponse.data.url;
+                teste.isPdf = uploadResponse.data.isPdf;
+                teste.nomeArquivo = uploadResponse.data.originalName;
+                // Remover o File object para não tentar serializar
+                teste.imagem = undefined;
+              }
+            } catch (uploadError: any) {
+              console.error('Erro ao fazer upload do arquivo:', uploadError);
+
+              // Verificar se é erro de bucket não existir
+              if (uploadError.status === 500) {
+                this.toastr.error('Erro: Bucket do Supabase não configurado. Crie o bucket "mentoria-fotos" no Supabase Dashboard.');
+                this.isSaving = false;
+                return;
+              }
+
+              this.toastr.warning(`Erro ao fazer upload do arquivo: ${teste.nome || 'teste'}`);
+            }
+          }
         }
-        this.isSaving = false;
-      },
-      error: (error) => {
-        console.error('Erro ao salvar conteúdo:', error);
-        this.toastr.error('Erro ao salvar conteúdo');
-        this.isSaving = false;
       }
-    });
+
+      // 2. Converter para JSON e salvar
+      const conteudoJson = JSON.stringify(this.conteudo);
+
+      this.mentoriaService.atualizarEncontro(
+        this.encontroId,
+        { conteudo_html: conteudoJson }
+      ).subscribe({
+        next: (response) => {
+          if (response?.success) {
+            this.toastr.success('Conteúdo salvo com sucesso!');
+            this.router.navigate(['/home/mentorias']);
+          }
+          this.isSaving = false;
+        },
+        error: (error) => {
+          console.error('Erro ao salvar conteúdo:', error);
+          this.toastr.error('Erro ao salvar conteúdo');
+          this.isSaving = false;
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao processar salvamento:', error);
+      this.toastr.error('Erro ao processar salvamento');
+      this.isSaving = false;
+    }
   }
 
   voltar(): void {

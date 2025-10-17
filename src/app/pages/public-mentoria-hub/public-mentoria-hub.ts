@@ -140,6 +140,15 @@ export class PublicMentoriaHub implements OnInit {
 
   formatDate(date: string | Date): string {
     if (!date) return '-';
+
+    // Se a data é uma string no formato YYYY-MM-DD (sem horário),
+    // adicionar 'T00:00:00' para forçar timezone local
+    if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = date.split('-');
+      const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      return d.toLocaleDateString('pt-BR');
+    }
+
     const d = new Date(date);
     return d.toLocaleDateString('pt-BR');
   }
@@ -242,5 +251,14 @@ export class PublicMentoriaHub implements OnInit {
     // Pega o nome do primeiro encontro
     const primeiroEncontro = this.mentoria.encontros.find(e => e.numero_encontro === 1) || this.mentoria.encontros[0];
     return primeiroEncontro?.mentorado_nome || 'Não definido';
+  }
+
+  getEncontrosConcluidos(): number {
+    if (!this.mentoria?.encontros) return 0;
+    return this.mentoria.encontros.filter(e => e.encontro_status === 'finalizado').length;
+  }
+
+  getTotalEncontros(): number {
+    return this.mentoria?.numero_encontros || 0;
   }
 }

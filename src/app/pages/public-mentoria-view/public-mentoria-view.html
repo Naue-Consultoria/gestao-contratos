@@ -179,10 +179,22 @@
         <div class="testes-grid-new">
           <article *ngFor="let teste of conteudoEstruturado.testes.itens" class="teste-card">
             <h3>{{ teste.nome }}</h3>
-            <div *ngIf="teste.imagemUrl" class="teste-img-new">
+            <div *ngIf="teste.imagemUrl && !teste.isPdf" class="teste-img-new">
               <img [src]="teste.imagemUrl" [alt]="teste.nome">
             </div>
-            <p *ngIf="teste.comentario">{{ teste.comentario }}</p>
+            <div *ngIf="teste.isPdf && teste.imagemUrl" class="teste-pdf-new">
+              <div class="pdf-icon-wrapper">
+                <i class="fas fa-file-pdf"></i>
+              </div>
+              <div class="pdf-info">
+                <span class="pdf-label">Arquivo PDF</span>
+                <a [href]="teste.imagemUrl" target="_blank" class="btn-download-pdf">
+                  <i class="fas fa-download"></i>
+                  Baixar / Visualizar PDF
+                </a>
+              </div>
+            </div>
+            <p *ngIf="teste.comentario" class="teste-comentario">{{ teste.comentario }}</p>
           </article>
         </div>
       </div>

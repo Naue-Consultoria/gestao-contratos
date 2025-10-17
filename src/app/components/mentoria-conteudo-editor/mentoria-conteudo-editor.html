@@ -150,17 +150,23 @@
             </div>
 
             <div class="form-group">
-              <label>Imagem</label>
+              <label>Arquivo (Imagem ou PDF)</label>
               <input
                 type="file"
                 class="form-input-file"
-                accept="image/*"
-                (change)="onImagemSelected($event, teste)">
+                accept="image/*,.pdf"
+                (change)="onArquivoSelected($event, teste)">
               <img
-                *ngIf="teste.imagemUrl"
+                *ngIf="teste.imagemUrl && !teste.isPdf"
                 [src]="teste.imagemUrl"
                 class="image-preview"
                 alt="Preview">
+              <div
+                *ngIf="teste.isPdf && teste.nomeArquivo"
+                class="pdf-preview">
+                <i class="fas fa-file-pdf"></i>
+                <span>{{ teste.nomeArquivo }}</span>
+              </div>
             </div>
 
             <div class="form-group">
@@ -498,6 +504,7 @@
                 [(ngModel)]="ref.tipo"
                 [name]="'ref-tipo-' + ref.id">
                 <option value="ted">TED Talk</option>
+                <option value="video">Vídeo</option>
                 <option value="livro">Livro</option>
                 <option value="leitura">Artigo/Leitura</option>
               </select>

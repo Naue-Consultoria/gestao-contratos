@@ -44,9 +44,9 @@
                 <i class="fas fa-calendar-check"></i>
               </div>
               <div class="hero-card-content">
-                <h3>Total de Encontros</h3>
-                <p class="hero-card-value">{{mentoria.numero_encontros}}</p>
-                <span class="hero-card-subtitle">Iniciado em {{formatDate(mentoria.created_at)}}</span>
+                <h3>Progresso dos Encontros</h3>
+                <p class="hero-card-value">{{getEncontrosConcluidos()}} / {{getTotalEncontros()}}</p>
+                <span class="hero-card-subtitle">Concluídos / Total</span>
               </div>
             </div>
 
@@ -140,7 +140,7 @@
       <div class="section-header" scrollAnimation animationType="fade" [animationDelay]="0.1">
         <h2>
           <i class="fas fa-list"></i>
-          Encontros da Mentoria
+          PD | Plano Diretivo
         </h2>
         <p class="section-description">
           Clique em um encontro publicado para acessar o conteúdo completo
