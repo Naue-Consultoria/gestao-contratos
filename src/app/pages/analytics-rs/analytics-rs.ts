@@ -302,19 +302,19 @@ export class AnalyticsRsComponent implements OnInit, AfterViewInit, OnDestroy {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Green shades palette for status
+    // Cores variadas e distintas para cada status
     const statusColors: { [key: string]: string } = {
-      'aberta': '#0A8060',
-      'divulgacao_prospec': '#0ea578',
-      'entrevista_nc': '#12c98f',
-      'entrevista_empresa': '#16eaa7',
-      'testes': '#5cf3c1',
-      'fechada': '#0A8060',
-      'fechada_rep': '#0ea578',
-      'cancelada_cliente': '#ef4444',
-      'standby': '#6b7280',
-      'nao_cobrada': '#f87171',
-      'encerramento_cont': '#9ca3af'
+      'aberta': '#0A8060',           // Verde escuro
+      'divulgacao_prospec': '#3b82f6', // Azul
+      'entrevista_nc': '#8b5cf6',    // Roxo
+      'entrevista_empresa': '#f59e0b', // Laranja
+      'testes': '#06b6d4',           // Ciano
+      'fechada': '#10b981',          // Verde claro
+      'fechada_rep': '#14b8a6',      // Teal
+      'cancelada_cliente': '#ef4444', // Vermelho
+      'standby': '#6b7280',          // Cinza
+      'nao_cobrada': '#f87171',      // Vermelho claro
+      'encerramento_cont': '#9ca3af' // Cinza claro
     };
 
     const labels = this.vagasPorStatus.map(v => this.getStatusLabel(v.status));
