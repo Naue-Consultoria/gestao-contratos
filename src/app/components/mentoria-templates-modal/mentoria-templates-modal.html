@@ -1,0 +1,360 @@
+<div class="modal-overlay" (click)="fecharModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2>
+        <i class="fas fa-bookmark"></i>
+        Gerenciar Templates
+      </h2>
+      <button class="btn-close" (click)="fecharModal()" type="button">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Tabs de navegação -->
+    <div class="modal-tabs" *ngIf="!templateDetalhes">
+      <button
+        class="tab-btn"
+        [class.active]="modo === 'listar'"
+        (click)="mudarModo('listar')"
+        type="button">
+        <i class="fas fa-list"></i>
+        Usar Template
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="modo === 'criar'"
+        (click)="mudarModo('criar')"
+        type="button">
+        <i class="fas fa-plus-circle"></i>
+        Criar Novo Template
+      </button>
+    </div>
+
+    <!-- Conteúdo do modal -->
+    <div class="modal-body">
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Carregando templates...</p>
+      </div>
+
+      <!-- Modo: Listar Templates -->
+      <div *ngIf="!isLoading && modo === 'listar' && !templateDetalhes" class="templates-list">
+        <!-- Filtro de Tipo -->
+        <div class="filter-tabs" *ngIf="templates.length > 0">
+          <button
+            type="button"
+            class="filter-tab"
+            [class.active]="filtroTipo === null"
+            (click)="filtroTipo = null">
+            <i class="fas fa-list"></i>
+            Todos ({{ templates.length }})
+          </button>
+          <button
+            type="button"
+            class="filter-tab"
+            [class.active]="filtroTipo === 'perguntas'"
+            (click)="filtroTipo = 'perguntas'">
+            <i class="fas fa-question-circle"></i>
+            Perguntas ({{ contarTemplatesPorTipo('perguntas') }})
+          </button>
+          <button
+            type="button"
+            class="filter-tab"
+            [class.active]="filtroTipo === 'tarefas'"
+            (click)="filtroTipo = 'tarefas'">
+            <i class="fas fa-list-check"></i>
+            Tarefas ({{ contarTemplatesPorTipo('tarefas') }})
+          </button>
+        </div>
+
+        <div *ngIf="templates.length === 0" class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <p>Nenhum template salvo ainda</p>
+          <small>Use a aba "Criar Novo Template" para começar</small>
+        </div>
+
+        <div *ngIf="templatesFiltrados.length > 0" class="templates-grid">
+          <div *ngFor="let template of templatesFiltrados" class="template-card">
+            <div class="template-card-header">
+              <h3>{{ template.nome }}</h3>
+              <div class="template-card-actions">
+                <button
+                  class="btn-icon btn-use"
+                  (click)="carregarTemplate(template)"
+                  title="Usar este template"
+                  type="button">
+                  <i class="fas fa-plus-circle"></i>
+                </button>
+                <button
+                  class="btn-icon btn-view"
+                  (click)="visualizarTemplate(template)"
+                  title="Visualizar/Editar"
+                  type="button">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button
+                  class="btn-icon btn-delete"
+                  (click)="excluirTemplate(template)"
+                  title="Excluir"
+                  type="button">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            <p class="template-description" *ngIf="template.descricao">
+              {{ template.descricao }}
+            </p>
+            <div class="template-meta">
+              <span class="template-type-badge" [class.badge-perguntas]="template.tipo === 'perguntas'" [class.badge-tarefas]="template.tipo === 'tarefas'">
+                <i class="fas" [class.fa-question-circle]="template.tipo === 'perguntas'" [class.fa-list-check]="template.tipo === 'tarefas'"></i>
+                {{ template.tipo === 'perguntas' ? 'Perguntas' : 'Tarefas' }}
+              </span>
+              <span class="template-count">
+                {{ getPreviewText(template.content, template.tipo) }}
+              </span>
+              <span class="template-date" *ngIf="template.created_at">
+                {{ template.created_at | date: 'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modo: Criar Novo Template -->
+      <div *ngIf="!isLoading && modo === 'criar' && !templateDetalhes" class="save-template-form">
+        <!-- Seletor de Tipo -->
+        <div class="form-group">
+          <label for="templateTipo">
+            Tipo de Template <span class="required">*</span>
+          </label>
+          <div class="tipo-selector">
+            <button
+              type="button"
+              class="tipo-btn"
+              [class.active]="novoTemplateTipo === 'perguntas'"
+              (click)="novoTemplateTipo = 'perguntas'">
+              <i class="fas fa-question-circle"></i>
+              Perguntas
+            </button>
+            <button
+              type="button"
+              class="tipo-btn"
+              [class.active]="novoTemplateTipo === 'tarefas'"
+              (click)="novoTemplateTipo = 'tarefas'">
+              <i class="fas fa-list-check"></i>
+              Tarefas
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="templateNome">
+            Nome do Template <span class="required">*</span>
+          </label>
+          <input
+            id="templateNome"
+            type="text"
+            class="form-control"
+            [(ngModel)]="novoTemplate.nome"
+            placeholder="Ex: Perguntas de Autoconhecimento"
+            maxlength="255"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="templateDescricao">
+            Descrição (opcional)
+          </label>
+          <textarea
+            id="templateDescricao"
+            class="form-control"
+            [(ngModel)]="novoTemplate.descricao"
+            placeholder="Descreva o que este template contém..."
+            rows="3"
+            maxlength="500"
+          ></textarea>
+        </div>
+
+        <!-- Editor de Perguntas -->
+        <div *ngIf="novoTemplateTipo === 'perguntas'" class="template-editor">
+          <h4>Perguntas</h4>
+          <div *ngFor="let pergunta of novasPerguntas; let i = index" class="editor-item">
+            <div class="editor-item-header">
+              <span>Pergunta {{ i + 1 }}</span>
+              <button
+                type="button"
+                class="btn-remove-tiny"
+                (click)="removerPerguntaNova(i)"
+                [disabled]="novasPerguntas.length === 1">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <textarea
+              class="form-control"
+              [(ngModel)]="pergunta.pergunta"
+              placeholder="Digite a pergunta..."
+              rows="3"
+            ></textarea>
+          </div>
+          <button
+            type="button"
+            class="btn btn-secondary btn-add-item"
+            (click)="adicionarPerguntaNova()">
+            <i class="fas fa-plus"></i>
+            Adicionar Pergunta
+          </button>
+        </div>
+
+        <!-- Editor de Tarefas -->
+        <div *ngIf="novoTemplateTipo === 'tarefas'" class="template-editor">
+          <div class="form-group">
+            <label for="tarefasTitulo">Título da Lista de Tarefas</label>
+            <input
+              id="tarefasTitulo"
+              type="text"
+              class="form-control"
+              [(ngModel)]="novasTarefas.titulo"
+              placeholder="Ex: Ações para esta semana"
+            />
+          </div>
+          <h4>Itens</h4>
+          <div *ngFor="let item of novasTarefas.itens; let i = index" class="editor-item-inline">
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="item.texto"
+              placeholder="Digite a tarefa..."
+            />
+            <button
+              type="button"
+              class="btn-remove-tiny"
+              (click)="removerTarefaNova(i)"
+              [disabled]="novasTarefas.itens.length === 1">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <button
+            type="button"
+            class="btn btn-secondary btn-add-item"
+            (click)="adicionarTarefaNova()">
+            <i class="fas fa-plus"></i>
+            Adicionar Tarefa
+          </button>
+        </div>
+
+        <div class="form-actions">
+          <button
+            class="btn btn-secondary"
+            (click)="mudarModo('listar')"
+            [disabled]="isSaving"
+            type="button">
+            <i class="fas fa-arrow-left"></i>
+            Cancelar
+          </button>
+          <button
+            class="btn btn-primary"
+            (click)="salvarNovoTemplate()"
+            [disabled]="isSaving || !novoTemplate.nome.trim() || !temConteudoValido()"
+            type="button">
+            <i class="fas fa-check" *ngIf="!isSaving"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+            {{ isSaving ? 'Salvando...' : 'Salvar Template' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Visualização/Edição de Template -->
+      <div *ngIf="templateDetalhes" class="template-details">
+        <button class="btn-back" (click)="fecharDetalhes()" type="button">
+          <i class="fas fa-arrow-left"></i>
+          Voltar
+        </button>
+
+        <div *ngIf="!modoEdicao" class="details-view">
+          <div class="details-header">
+            <div>
+              <h3>{{ templateDetalhes.nome }}</h3>
+              <p *ngIf="templateDetalhes.descricao" class="details-description">
+                {{ templateDetalhes.descricao }}
+              </p>
+              <div class="details-meta">
+                <span *ngIf="templateDetalhes.created_by_name">
+                  <i class="fas fa-user"></i>
+                  {{ templateDetalhes.created_by_name }}
+                </span>
+                <span *ngIf="templateDetalhes.created_at">
+                  <i class="fas fa-calendar"></i>
+                  {{ templateDetalhes.created_at | date: 'dd/MM/yyyy HH:mm' }}
+                </span>
+              </div>
+            </div>
+            <button class="btn btn-secondary" (click)="editarTemplate()" type="button">
+              <i class="fas fa-edit"></i>
+              Editar
+            </button>
+          </div>
+
+          <div class="details-content">
+            <h4>Conteúdo</h4>
+            <div class="content-list">
+              <div *ngFor="let item of getContentDetails(templateDetalhes.content, templateDetalhes.tipo); let i = index" class="content-item">
+                <span class="item-number">{{ i + 1 }}.</span>
+                <span class="item-text">{{ item }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="details-actions">
+            <button class="btn btn-primary" (click)="carregarTemplate(templateDetalhes)" type="button">
+              <i class="fas fa-plus-circle"></i>
+              Usar Este Template
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="modoEdicao" class="details-edit">
+          <div class="form-group">
+            <label>Nome do Template</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="templateDetalhes.nome"
+              maxlength="255"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Descrição</label>
+            <textarea
+              class="form-control"
+              [(ngModel)]="templateDetalhes.descricao"
+              rows="3"
+              maxlength="500"
+            ></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button
+              class="btn btn-secondary"
+              (click)="modoEdicao = false"
+              [disabled]="isSaving"
+              type="button">
+              Cancelar
+            </button>
+            <button
+              class="btn btn-primary"
+              (click)="salvarEdicao()"
+              [disabled]="isSaving"
+              type="button">
+              <i class="fas fa-check" *ngIf="!isSaving"></i>
+              <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+              {{ isSaving ? 'Salvando...' : 'Salvar Alterações' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

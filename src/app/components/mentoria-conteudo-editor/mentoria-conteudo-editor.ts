@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { MentoriaService, MentoriaEncontro } from '../../services/mentoria.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
+import { MentoriaTemplatesModalComponent } from '../mentoria-templates-modal/mentoria-templates-modal';
 
 interface Teste {
   id: string;
@@ -102,7 +103,7 @@ interface ConteudoMentoria {
 @Component({
   selector: 'app-mentoria-conteudo-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, MentoriaTemplatesModalComponent],
   templateUrl: './mentoria-conteudo-editor.html',
   styleUrl: './mentoria-conteudo-editor.css'
 })
@@ -775,5 +776,31 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
       reader.readAsDataURL(file);
     }
+  }
+
+  // ===== TEMPLATES =====
+
+  mostrarModalTemplates = false;
+
+  abrirGerenciadorTemplates(): void {
+    this.mostrarModalTemplates = true;
+  }
+
+  fecharModalTemplates(): void {
+    this.mostrarModalTemplates = false;
+  }
+
+  aplicarTemplate(templateData: { tipo: 'perguntas' | 'tarefas'; content: any }): void {
+    // Criar novo bloco com o conteúdo do template
+    const novoBloco: BlocoProximosPassos = {
+      id: this.generateId(),
+      tipo: templateData.tipo,
+      conteudo: '',
+      perguntas: templateData.tipo === 'perguntas' ? templateData.content : undefined,
+      tarefas: templateData.tipo === 'tarefas' ? templateData.content : undefined
+    };
+
+    this.conteudo.proximosPassos.blocos.push(novoBloco);
+    this.fecharModalTemplates();
   }
 }
