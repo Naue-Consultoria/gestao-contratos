@@ -15,6 +15,20 @@ interface TocItem {
   level: number;
 }
 
+// ===== MODELO ABC =====
+interface ModeloABC {
+  adversidade: string;
+  pensamento: string;
+  consequencia: string;
+  antidotoExigencia: string;
+  antidotoRotulo: string;
+  fraseNocaute: string;
+  planoAcao: string;
+  nivelDisposicao: number;
+  impedimentos: string;
+  acaoImpedimentos: string;
+}
+
 // ===== MAPA MENTAL =====
 interface MapaMentalCard {
   id: string;
@@ -83,6 +97,22 @@ export class PublicMentoriaViewComponent implements OnInit {
   salvandoMapaMental: boolean = false;
   mapaMentalId: number | null = null; // ID do mapa mental no banco
   showExportDropdown: boolean = false;
+
+  // Modelo ABC
+  modeloABC: ModeloABC = {
+    adversidade: '',
+    pensamento: '',
+    consequencia: '',
+    antidotoExigencia: '',
+    antidotoRotulo: '',
+    fraseNocaute: '',
+    planoAcao: '',
+    nivelDisposicao: 5,
+    impedimentos: '',
+    acaoImpedimentos: ''
+  };
+  modeloABCId: number | null = null;
+  salvandoModeloABC: boolean = false;
   coresPredefinidas = [
     { cor: '#EF4444', corBg: 'bg-rose-600', corBorda: 'border-rose-600' },
     { cor: '#10B981', corBg: 'bg-emerald-600', corBorda: 'border-emerald-600' },
@@ -501,6 +531,34 @@ export class PublicMentoriaViewComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('❌ Erro ao carregar interações:', error);
+      }
+    });
+
+    // Carregar Modelo ABC do banco de dados
+    console.log('📋 Carregando Modelo ABC do banco de dados...');
+    this.mentoriaService.obterModeloABCPublico(this.token).subscribe({
+      next: (response: any) => {
+        if (response.success && response.data) {
+          console.log('✅ Modelo ABC carregado do banco:', response.data);
+          this.modeloABCId = response.data.id;
+          this.modeloABC = {
+            adversidade: response.data.adversidade || '',
+            pensamento: response.data.pensamento || '',
+            consequencia: response.data.consequencia || '',
+            antidotoExigencia: response.data.antidoto_exigencia || '',
+            antidotoRotulo: response.data.antidoto_rotulo || '',
+            fraseNocaute: response.data.frase_nocaute || '',
+            planoAcao: response.data.plano_acao || '',
+            nivelDisposicao: response.data.nivel_disposicao || 5,
+            impedimentos: response.data.impedimentos || '',
+            acaoImpedimentos: response.data.acao_impedimentos || ''
+          };
+        } else {
+          console.log('ℹ️ Nenhum Modelo ABC encontrado no banco');
+        }
+      },
+      error: (error: any) => {
+        console.warn('⚠️ Erro ao carregar Modelo ABC:', error);
       }
     });
 
@@ -1755,5 +1813,59 @@ export class PublicMentoriaViewComponent implements OnInit {
 
     conexoesContainer.appendChild(lista);
     return conexoesContainer;
+  }
+
+  // ===== MODELO ABC =====
+
+  salvarModeloABC(): void {
+    if (!this.token || this.expired) {
+      this.toastr.warning('Não foi possível salvar o Modelo ABC');
+      return;
+    }
+
+    // Validar se pelo menos um campo foi preenchido
+    const temDados = this.modeloABC.adversidade || this.modeloABC.pensamento ||
+                     this.modeloABC.consequencia || this.modeloABC.antidotoExigencia ||
+                     this.modeloABC.antidotoRotulo || this.modeloABC.fraseNocaute ||
+                     this.modeloABC.planoAcao || this.modeloABC.impedimentos ||
+                     this.modeloABC.acaoImpedimentos;
+
+    if (!temDados) {
+      this.toastr.info('Preencha pelo menos um campo antes de salvar');
+      return;
+    }
+
+    this.salvandoModeloABC = true;
+
+    const dadosParaSalvar = {
+      adversidade: this.modeloABC.adversidade,
+      pensamento: this.modeloABC.pensamento,
+      consequencia: this.modeloABC.consequencia,
+      antidoto_exigencia: this.modeloABC.antidotoExigencia,
+      antidoto_rotulo: this.modeloABC.antidotoRotulo,
+      frase_nocaute: this.modeloABC.fraseNocaute,
+      plano_acao: this.modeloABC.planoAcao,
+      nivel_disposicao: this.modeloABC.nivelDisposicao,
+      impedimentos: this.modeloABC.impedimentos,
+      acao_impedimentos: this.modeloABC.acaoImpedimentos
+    };
+
+    console.log('💾 Salvando Modelo ABC...', dadosParaSalvar);
+
+    this.mentoriaService.salvarModeloABC(this.token, dadosParaSalvar).subscribe({
+      next: (response: any) => {
+        console.log('✅ Modelo ABC salvo com sucesso!', response);
+        if (response.data && response.data.id) {
+          this.modeloABCId = response.data.id;
+        }
+        this.toastr.success('Modelo ABC salvo com sucesso!');
+        this.salvandoModeloABC = false;
+      },
+      error: (error: any) => {
+        console.error('❌ Erro ao salvar Modelo ABC:', error);
+        this.toastr.error('Erro ao salvar Modelo ABC');
+        this.salvandoModeloABC = false;
+      }
+    });
   }
 }

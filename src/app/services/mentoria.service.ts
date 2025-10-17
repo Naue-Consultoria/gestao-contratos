@@ -574,4 +574,34 @@ export class MentoriaService {
       { ativo }
     );
   }
+
+  // ===== MODELO ABC =====
+
+  /**
+   * Obter Modelo ABC por token público
+   */
+  obterModeloABCPublico(token: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/publico/${token}/modelo-abc`);
+  }
+
+  /**
+   * Salvar Modelo ABC (via token público)
+   */
+  salvarModeloABC(token: string, dados: {
+    adversidade: string;
+    pensamento: string;
+    consequencia: string;
+    antidoto_exigencia: string;
+    antidoto_rotulo: string;
+    frase_nocaute: string;
+    plano_acao: string;
+    nivel_disposicao: number;
+    impedimentos: string;
+    acao_impedimentos: string;
+  }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/publico/${token}/modelo-abc`,
+      dados
+    );
+  }
 }

@@ -30,6 +30,19 @@ interface Referencia {
   link: string;
 }
 
+interface ModeloABC {
+  adversidade: string;
+  pensamento: string;
+  consequencia: string;
+  antidotoExigencia: string;
+  antidotoRotulo: string;
+  fraseNocaute: string;
+  planoAcao: string;
+  nivelDisposicao: number;
+  impedimentos: string;
+  acaoImpedimentos: string;
+}
+
 // ===== MAPA MENTAL =====
 
 interface MapaMentalCard {
@@ -59,6 +72,13 @@ interface MapaMentalData {
   conexoes: MapaMentalConexao[];
 }
 
+interface SecaoReordenavel {
+  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental';
+  titulo: string;
+  icone: string;
+  ordem: number;
+}
+
 interface ConteudoMentoria {
   visaoGeral: { ativo: boolean; conteudo: string };
   mentoria: { ativo: boolean; conteudo: string };
@@ -66,7 +86,9 @@ interface ConteudoMentoria {
   proximosPassos: { ativo: boolean; blocos: BlocoProximosPassos[] };
   referencias: { ativo: boolean; itens: Referencia[] };
   mapaMental: { ativo: boolean; data: MapaMentalData };
+  modeloABC: { ativo: boolean };
   encerramento: { ativo: boolean; conteudo: string };
+  ordemSecoes?: string[]; // Nova propriedade para controlar a ordem
 }
 
 @Component({
@@ -120,8 +142,18 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
         conexoes: []
       }
     },
-    encerramento: { ativo: true, conteudo: '' }
+    modeloABC: { ativo: false },
+    encerramento: { ativo: true, conteudo: '' },
+    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental'] // Ordem padrão
   };
+
+  // Lista de seções reordenáveis
+  secoesReordenaveis: SecaoReordenavel[] = [
+    { id: 'testes', titulo: 'Testes', icone: 'fa-clipboard-check', ordem: 0 },
+    { id: 'proximosPassos', titulo: 'Próximos Passos', icone: 'fa-arrow-right', ordem: 1 },
+    { id: 'referencias', titulo: 'Referências / Inspirações', icone: 'fa-book', ordem: 2 },
+    { id: 'mapaMental', titulo: 'Mapa Mental Estratégico', icone: 'fa-diagram-project', ordem: 3 }
+  ];
 
   constructor(
     private route: ActivatedRoute,
@@ -216,6 +248,16 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
                   }
                 };
               }
+
+              // Adicionar modeloABC se não existir (retrocompatibilidade)
+              if (!this.conteudo.modeloABC) {
+                this.conteudo.modeloABC = { ativo: false };
+              }
+
+              // Adicionar ordem de seções se não existir (retrocompatibilidade)
+              if (!this.conteudo.ordemSecoes) {
+                this.conteudo.ordemSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental'];
+              }
             } catch (e) {
               // Se não for JSON, é conteúdo antigo - manter vazio
               console.log('Conteúdo não é JSON estruturado');
@@ -277,6 +319,73 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     this.conteudo.proximosPassos.blocos = this.conteudo.proximosPassos.blocos.filter(b => b.id !== id);
     // Remove from initialized set when block is removed
     this.editorsInitialized.delete(id);
+  }
+
+  // ===== REORGANIZAR SEÇÕES =====
+
+  get secoesOrdenadas(): string[] {
+    if (!this.conteudo.ordemSecoes || this.conteudo.ordemSecoes.length === 0) {
+      return ['testes', 'proximosPassos', 'referencias', 'mapaMental'];
+    }
+    return this.conteudo.ordemSecoes;
+  }
+
+  moverSecaoParaCima(secaoId: string): void {
+    const index = this.conteudo.ordemSecoes!.indexOf(secaoId);
+    if (index <= 0) return; // Já está no topo ou não encontrado
+
+    const novaOrdem = [...this.conteudo.ordemSecoes!];
+    [novaOrdem[index - 1], novaOrdem[index]] = [novaOrdem[index], novaOrdem[index - 1]];
+    this.conteudo.ordemSecoes = novaOrdem;
+  }
+
+  moverSecaoParaBaixo(secaoId: string): void {
+    const index = this.conteudo.ordemSecoes!.indexOf(secaoId);
+    if (index === -1 || index >= this.conteudo.ordemSecoes!.length - 1) return; // Já está no final ou não encontrado
+
+    const novaOrdem = [...this.conteudo.ordemSecoes!];
+    [novaOrdem[index], novaOrdem[index + 1]] = [novaOrdem[index + 1], novaOrdem[index]];
+    this.conteudo.ordemSecoes = novaOrdem;
+  }
+
+  podeSecaoSubir(secaoId: string): boolean {
+    const index = this.conteudo.ordemSecoes?.indexOf(secaoId) ?? -1;
+    return index > 0;
+  }
+
+  podeSecaoDescer(secaoId: string): boolean {
+    const index = this.conteudo.ordemSecoes?.indexOf(secaoId) ?? -1;
+    return index !== -1 && index < (this.conteudo.ordemSecoes?.length ?? 0) - 1;
+  }
+
+  // ===== REORGANIZAR BLOCOS COM SETAS =====
+
+  moverBlocoParaCima(index: number): void {
+    if (index === 0) return; // Já está no topo
+
+    const blocos = [...this.conteudo.proximosPassos.blocos];
+    // Trocar posições
+    [blocos[index - 1], blocos[index]] = [blocos[index], blocos[index - 1]];
+    this.conteudo.proximosPassos.blocos = blocos;
+    console.log('✅ Bloco movido para cima. Nova ordem:', this.conteudo.proximosPassos.blocos.map(b => b.tipo));
+  }
+
+  moverBlocoParaBaixo(index: number): void {
+    if (index === this.conteudo.proximosPassos.blocos.length - 1) return; // Já está no final
+
+    const blocos = [...this.conteudo.proximosPassos.blocos];
+    // Trocar posições
+    [blocos[index], blocos[index + 1]] = [blocos[index + 1], blocos[index]];
+    this.conteudo.proximosPassos.blocos = blocos;
+    console.log('✅ Bloco movido para baixo. Nova ordem:', this.conteudo.proximosPassos.blocos.map(b => b.tipo));
+  }
+
+  podeSubir(index: number): boolean {
+    return index > 0;
+  }
+
+  podeDescer(index: number): boolean {
+    return index < this.conteudo.proximosPassos.blocos.length - 1;
   }
 
   adicionarPergunta(bloco: BlocoProximosPassos): void {
@@ -451,8 +560,8 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     ]);
   }
 
-  trackByFn(index: number): number {
-    return index;
+  trackByFn(index: number, item: any): string {
+    return item?.id || index.toString();
   }
 
   trackByIndex(index: number): number {

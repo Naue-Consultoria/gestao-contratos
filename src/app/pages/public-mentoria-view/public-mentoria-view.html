@@ -297,6 +297,170 @@
       </div>
     </section>
 
+    <!-- Modelo ABC Section -->
+    <section class="dark-section modelo-abc-main-section"
+             *ngIf="conteudoEstruturado && conteudoEstruturado.modeloABC?.ativo">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-brain"></i>
+            Modelo ABC
+          </h2>
+          <p class="dark-subtitle">Adversity, Belief, Consequence</p>
+        </div>
+
+        <div class="modelo-abc-content">
+
+          <!-- Cabeçalho ABC -->
+          <div class="abc-header-grid-public">
+            <div class="abc-header-card abc-a">
+              <div class="abc-letter-large">A</div>
+              <h3 class="abc-card-title">Adversity</h3>
+              <p class="abc-card-desc">Adversidade: acontecimento que funciona como "gatilho" para o pensamento/crença irracional</p>
+            </div>
+            <div class="abc-header-card abc-b">
+              <div class="abc-letter-large">B</div>
+              <h3 class="abc-card-title">Belief</h3>
+              <p class="abc-card-desc">Pensamento: "X" TEM que/ NÃO TEM que (exigência) + "ação" + SENÃO "X" É (rótulo)</p>
+            </div>
+            <div class="abc-header-card abc-c">
+              <div class="abc-letter-large">C</div>
+              <h3 class="abc-card-title">Consequence</h3>
+              <p class="abc-card-desc">Consequência: emoção, reações fisiológicas e ação/comportamento</p>
+            </div>
+          </div>
+
+          <!-- Campos ABC -->
+          <div class="abc-inputs-grid">
+            <div class="abc-input-group">
+              <textarea
+                class="abc-input"
+                [(ngModel)]="modeloABC.adversidade"
+                placeholder="Descreva a adversidade..."
+                rows="6"></textarea>
+            </div>
+            <div class="abc-input-group">
+              <textarea
+                class="abc-input"
+                [(ngModel)]="modeloABC.pensamento"
+                placeholder="Descreva o pensamento/crença..."
+                rows="6"></textarea>
+            </div>
+            <div class="abc-input-group">
+              <textarea
+                class="abc-input"
+                [(ngModel)]="modeloABC.consequencia"
+                placeholder="Descreva as consequências..."
+                rows="6"></textarea>
+            </div>
+          </div>
+
+          <!-- Verificação -->
+          <div class="abc-verification-box">
+            <h4>Verificação se o pensamento é lógico, realista e produtivo</h4>
+          </div>
+
+          <!-- Antídotos -->
+          <div class="abc-antidotos-section">
+            <div class="abc-field">
+              <label>Antídoto para exigência:</label>
+              <textarea
+                class="abc-input"
+                [(ngModel)]="modeloABC.antidotoExigencia"
+                placeholder="Escreva o antídoto para a exigência..."
+                rows="3"></textarea>
+            </div>
+
+            <div class="abc-field">
+              <label>Antídoto para o rótulo:</label>
+              <textarea
+                class="abc-input"
+                [(ngModel)]="modeloABC.antidotoRotulo"
+                placeholder="Escreva o antídoto para o rótulo..."
+                rows="3"></textarea>
+            </div>
+
+            <div class="abc-field">
+              <label>Frase de nocaute:</label>
+              <textarea
+                class="abc-input"
+                [(ngModel)]="modeloABC.fraseNocaute"
+                placeholder="Escreva a frase de nocaute..."
+                rows="2"></textarea>
+            </div>
+          </div>
+
+          <!-- Tarefa 1 -->
+          <div class="abc-task-info">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <p><strong>Tarefa:</strong> Ler as frases antídotos 4 vezes por dia por 30 dias, e antes de momentos críticos.</p>
+          </div>
+
+          <!-- Plano de Ação -->
+          <div class="abc-field">
+            <label>Plano de ação para lidar com o tipo de acontecimento que ativa a crença:</label>
+            <textarea
+              class="abc-input"
+              [(ngModel)]="modeloABC.planoAcao"
+              placeholder="Descreva o plano de ação..."
+              rows="4"></textarea>
+          </div>
+
+          <!-- Nível de Disposição -->
+          <div class="abc-field">
+            <label>De 0 a 10 o quanto você está disposta(o) a colocar este plano em ação?</label>
+            <div class="abc-slider-container">
+              <input
+                type="range"
+                min="0"
+                max="10"
+                [(ngModel)]="modeloABC.nivelDisposicao"
+                class="abc-slider">
+              <span class="abc-slider-value">{{ modeloABC.nivelDisposicao }}</span>
+            </div>
+          </div>
+
+          <!-- Impedimentos -->
+          <div class="abc-field">
+            <label>O que poderia impedir de colocá-lo em ação?</label>
+            <textarea
+              class="abc-input"
+              [(ngModel)]="modeloABC.impedimentos"
+              placeholder="Liste os possíveis impedimentos..."
+              rows="3"></textarea>
+          </div>
+
+          <div class="abc-field">
+            <label>O que fará caso os impedimentos apareçam?</label>
+            <textarea
+              class="abc-input"
+              [(ngModel)]="modeloABC.acaoImpedimentos"
+              placeholder="Descreva as ações..."
+              rows="3"></textarea>
+          </div>
+
+          <!-- Tarefa 2 -->
+          <div class="abc-task-info">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <p><strong>Tarefa:</strong> Executar o plano de ação por uma semana e anotar como foi a execução deste plano.</p>
+          </div>
+
+          <!-- Botão Salvar -->
+          <div class="abc-actions">
+            <button
+              type="button"
+              class="btn-save-abc"
+              (click)="salvarModeloABC()"
+              [disabled]="salvandoModeloABC">
+              <i class="fa-solid" [ngClass]="salvandoModeloABC ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+              {{ salvandoModeloABC ? 'Salvando...' : 'Salvar Modelo ABC' }}
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section class="dark-section mapa-mental-main-section"
              *ngIf="conteudoEstruturado && conteudoEstruturado.mapaMental?.ativo">

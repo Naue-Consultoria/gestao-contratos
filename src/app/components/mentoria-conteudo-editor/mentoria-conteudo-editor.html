@@ -84,28 +84,49 @@
         </div>
       </section>
 
-      <!-- TESTES -->
-      <section class="editor-section">
-        <div class="section-header">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="conteudo.testes.ativo"
-              name="testesAtivo">
-            <span class="section-title">
-              <i class="fa-solid fa-clipboard-check"></i>
-              Testes
-            </span>
-          </label>
-          <button
-            *ngIf="conteudo.testes.ativo"
-            type="button"
-            class="btn-add"
-            (click)="adicionarTeste()">
-            <i class="fa-solid fa-plus"></i>
-            Adicionar Teste
-          </button>
-        </div>
+      <!-- SEÇÕES REORDENÁVEIS -->
+      <ng-container *ngFor="let secaoId of secoesOrdenadas">
+
+        <!-- TESTES -->
+        <section *ngIf="secaoId === 'testes'" class="editor-section">
+          <div class="section-header">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="conteudo.testes.ativo"
+                name="testesAtivo">
+              <span class="section-title">
+                <i class="fa-solid fa-clipboard-check"></i>
+                Testes
+              </span>
+            </label>
+            <div class="section-header-actions">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverSecaoParaCima('testes')"
+                [disabled]="!podeSecaoSubir('testes')"
+                title="Mover seção para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverSecaoParaBaixo('testes')"
+                [disabled]="!podeSecaoDescer('testes')"
+                title="Mover seção para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
+                *ngIf="conteudo.testes.ativo"
+                type="button"
+                class="btn-add"
+                (click)="adicionarTeste()">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar Teste
+              </button>
+            </div>
+          </div>
 
         <div *ngIf="conteudo.testes.ativo" class="section-content">
           <div *ngFor="let teste of conteudo.testes.itens; trackBy: trackByFn" class="teste-item">
@@ -160,7 +181,7 @@
       </section>
 
       <!-- PRÓXIMOS PASSOS -->
-      <section class="editor-section">
+      <section *ngIf="secaoId === 'proximosPassos'" class="editor-section">
         <div class="section-header">
           <label class="checkbox-label">
             <input
@@ -172,49 +193,88 @@
               Próximos Passos
             </span>
           </label>
-          <div *ngIf="conteudo.proximosPassos.ativo" class="btn-group">
+          <div class="section-header-actions">
             <button
               type="button"
-              class="btn-add"
-              (click)="adicionarBlocoProximosPassos('texto')">
-              <i class="fa-solid fa-align-left"></i>
-              Texto
+              class="btn-reorder-section"
+              (click)="moverSecaoParaCima('proximosPassos')"
+              [disabled]="!podeSecaoSubir('proximosPassos')"
+              title="Mover seção para cima">
+              <i class="fa-solid fa-arrow-up"></i>
             </button>
             <button
               type="button"
-              class="btn-add"
-              (click)="adicionarBlocoProximosPassos('perguntas')">
-              <i class="fa-solid fa-question-circle"></i>
-              Perguntas
+              class="btn-reorder-section"
+              (click)="moverSecaoParaBaixo('proximosPassos')"
+              [disabled]="!podeSecaoDescer('proximosPassos')"
+              title="Mover seção para baixo">
+              <i class="fa-solid fa-arrow-down"></i>
             </button>
-            <button
-              type="button"
-              class="btn-add"
-              (click)="adicionarBlocoProximosPassos('tarefas')">
-              <i class="fa-solid fa-list-check"></i>
-              Tarefas
-            </button>
+            <div *ngIf="conteudo.proximosPassos.ativo" class="btn-group">
+              <button
+                type="button"
+                class="btn-add"
+                (click)="adicionarBlocoProximosPassos('texto')">
+                <i class="fa-solid fa-align-left"></i>
+                Texto
+              </button>
+              <button
+                type="button"
+                class="btn-add"
+                (click)="adicionarBlocoProximosPassos('perguntas')">
+                <i class="fa-solid fa-question-circle"></i>
+                Perguntas
+              </button>
+              <button
+                type="button"
+                class="btn-add"
+                (click)="adicionarBlocoProximosPassos('tarefas')">
+                <i class="fa-solid fa-list-check"></i>
+                Tarefas
+              </button>
+            </div>
           </div>
         </div>
 
         <div *ngIf="conteudo.proximosPassos.ativo" class="section-content">
-          <div *ngFor="let bloco of conteudo.proximosPassos.blocos; trackBy: trackByFn" class="bloco-item">
+          <div *ngFor="let bloco of conteudo.proximosPassos.blocos; let i = index; trackBy: trackByFn"
+               class="bloco-item">
             <div class="item-header">
-              <span class="bloco-tipo-badge">
-                <i class="fa-solid"
-                   [ngClass]="{
-                     'fa-align-left': bloco.tipo === 'texto',
-                     'fa-question-circle': bloco.tipo === 'perguntas',
-                     'fa-list-check': bloco.tipo === 'tarefas'
-                   }"></i>
-                {{ bloco.tipo === 'texto' ? 'Texto' : bloco.tipo === 'perguntas' ? 'Perguntas' : 'Tarefas' }}
-              </span>
-              <button
-                type="button"
-                class="btn-remove"
-                (click)="removerBlocoProximosPassos(bloco.id)">
-                <i class="fa-solid fa-trash"></i>
-              </button>
+              <div class="item-header-left">
+                <span class="bloco-tipo-badge">
+                  <i class="fa-solid"
+                     [ngClass]="{
+                       'fa-align-left': bloco.tipo === 'texto',
+                       'fa-question-circle': bloco.tipo === 'perguntas',
+                       'fa-list-check': bloco.tipo === 'tarefas'
+                     }"></i>
+                  {{ bloco.tipo === 'texto' ? 'Texto' : bloco.tipo === 'perguntas' ? 'Perguntas' : 'Tarefas' }}
+                </span>
+              </div>
+              <div class="item-header-right">
+                <button
+                  type="button"
+                  class="btn-reorder"
+                  (click)="moverBlocoParaCima(i)"
+                  [disabled]="!podeSubir(i)"
+                  title="Mover para cima">
+                  <i class="fa-solid fa-arrow-up"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn-reorder"
+                  (click)="moverBlocoParaBaixo(i)"
+                  [disabled]="!podeDescer(i)"
+                  title="Mover para baixo">
+                  <i class="fa-solid fa-arrow-down"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn-remove"
+                  (click)="removerBlocoProximosPassos(bloco.id)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
             </div>
 
             <!-- Bloco Texto -->
@@ -372,7 +432,7 @@
       </section>
 
       <!-- REFERÊNCIAS -->
-      <section class="editor-section">
+      <section *ngIf="secaoId === 'referencias'" class="editor-section">
         <div class="section-header">
           <label class="checkbox-label">
             <input
@@ -384,14 +444,32 @@
               Referências / Inspirações
             </span>
           </label>
-          <button
-            *ngIf="conteudo.referencias.ativo"
-            type="button"
-            class="btn-add"
-            (click)="adicionarReferencia()">
-            <i class="fa-solid fa-plus"></i>
-            Adicionar Referência
-          </button>
+          <div class="section-header-actions">
+            <button
+              type="button"
+              class="btn-reorder-section"
+              (click)="moverSecaoParaCima('referencias')"
+              [disabled]="!podeSecaoSubir('referencias')"
+              title="Mover seção para cima">
+              <i class="fa-solid fa-arrow-up"></i>
+            </button>
+            <button
+              type="button"
+              class="btn-reorder-section"
+              (click)="moverSecaoParaBaixo('referencias')"
+              [disabled]="!podeSecaoDescer('referencias')"
+              title="Mover seção para baixo">
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+            <button
+              *ngIf="conteudo.referencias.ativo"
+              type="button"
+              class="btn-add"
+              (click)="adicionarReferencia()">
+              <i class="fa-solid fa-plus"></i>
+              Adicionar Referência
+            </button>
+          </div>
         </div>
 
         <div *ngIf="conteudo.referencias.ativo" class="section-content">
@@ -445,7 +523,7 @@
       </section>
 
       <!-- MAPA MENTAL -->
-      <section class="editor-section">
+      <section *ngIf="secaoId === 'mapaMental'" class="editor-section">
         <div class="section-header">
           <label class="checkbox-label">
             <input
@@ -457,6 +535,24 @@
               Mapa Mental Estratégico
             </span>
           </label>
+          <div class="section-header-actions">
+            <button
+              type="button"
+              class="btn-reorder-section"
+              (click)="moverSecaoParaCima('mapaMental')"
+              [disabled]="!podeSecaoSubir('mapaMental')"
+              title="Mover seção para cima">
+              <i class="fa-solid fa-arrow-up"></i>
+            </button>
+            <button
+              type="button"
+              class="btn-reorder-section"
+              (click)="moverSecaoParaBaixo('mapaMental')"
+              [disabled]="!podeSecaoDescer('mapaMental')"
+              title="Mover seção para baixo">
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+          </div>
         </div>
 
         <div *ngIf="conteudo.mapaMental.ativo" class="section-content">
@@ -465,6 +561,35 @@
             <p>
               <strong>Mapa Mental ativado!</strong><br>
               O mentorado poderá criar e organizar seu mapa mental estratégico na visualização pública do encontro.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      </ng-container>
+      <!-- FIM DAS SEÇÕES REORDENÁVEIS -->
+
+      <!-- MODELO ABC -->
+      <section class="editor-section">
+        <div class="section-header">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="conteudo.modeloABC.ativo"
+              name="modeloABCAtivo">
+            <span class="section-title">
+              <i class="fa-solid fa-brain"></i>
+              Modelo ABC
+            </span>
+          </label>
+        </div>
+
+        <div *ngIf="conteudo.modeloABC.ativo" class="section-content">
+          <div class="info-box">
+            <i class="fa-solid fa-info-circle"></i>
+            <p>
+              <strong>Modelo ABC ativado!</strong><br>
+              O mentorado poderá preencher o formulário do Modelo ABC (Adversity, Belief, Consequence) na visualização pública do encontro.
             </p>
           </div>
         </div>
