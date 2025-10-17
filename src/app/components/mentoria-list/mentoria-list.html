@@ -114,6 +114,10 @@
               </h3>
             </div>
             <div class="mentoria-meta">
+              <span class="meta-item" *ngIf="mentoria.encontros && mentoria.encontros.length > 0 && mentoria.encontros[0].mentorado_nome">
+                <i class="fas fa-user"></i>
+                {{ mentoria.encontros[0].mentorado_nome }}
+              </span>
               <span class="meta-item">
                 <i class="fas fa-file-contract"></i>
                 Contrato {{ mentoria.contract?.contract_number || 'N/A' }}
