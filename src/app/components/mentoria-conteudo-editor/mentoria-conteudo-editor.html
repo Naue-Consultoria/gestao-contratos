@@ -621,6 +621,32 @@
         </div>
       </section>
 
+      <!-- THE GOLDEN CIRCLE -->
+      <section class="editor-section">
+        <div class="section-header">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="conteudo.goldenCircle.ativo"
+              name="goldenCircleAtivo">
+            <span class="section-title">
+              <i class="fa-solid fa-bullseye"></i>
+              The Golden Circle
+            </span>
+          </label>
+        </div>
+
+        <div *ngIf="conteudo.goldenCircle.ativo" class="section-content">
+          <div class="info-box">
+            <i class="fa-solid fa-info-circle"></i>
+            <p>
+              <strong>The Golden Circle ativado!</strong><br>
+              O mentorado poderá responder às três perguntas fundamentais: Por quê (WHY), Como (HOW) e O quê (WHAT) você faz, visualizadas em círculos concêntricos.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <!-- ENCERRAMENTO -->
       <section class="editor-section">
         <div class="section-header">

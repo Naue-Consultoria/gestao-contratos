@@ -40,6 +40,13 @@ interface ZonasAprendizadoData {
   palavras: PalavraZona[];
 }
 
+// ===== THE GOLDEN CIRCLE =====
+interface GoldenCircleData {
+  why: string;  // Por que você faz o que você faz? Qual o propósito?
+  how: string;  // Como você faz o que você faz? Seu processo.
+  what: string; // O que você faz? Seu resultado.
+}
+
 // ===== MAPA MENTAL =====
 interface MapaMentalCard {
   id: string;
@@ -142,6 +149,15 @@ export class PublicMentoriaViewComponent implements OnInit {
     { cor: '#84CC16', corBg: 'bg-lime-600', corBorda: 'border-lime-600' }
   ];
   nivelLetras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  // The Golden Circle
+  goldenCircle: GoldenCircleData = {
+    why: '',
+    how: '',
+    what: ''
+  };
+  goldenCircleId: number | null = null;
+  salvandoGoldenCircle: boolean = false;
 
   // ViewChild para o container de visualização do mapa
   @ViewChild('mapaMentalVisualizacao', { static: false }) mapaMentalVisualizacao?: ElementRef;
@@ -2314,6 +2330,263 @@ export class PublicMentoriaViewComponent implements OnInit {
     footer.style.fontSize = '12px';
     footer.textContent = 'Fonte: The Fearless Organization Flow';
     container.appendChild(footer);
+
+    return container;
+  }
+
+  // ===== THE GOLDEN CIRCLE =====
+
+  salvarGoldenCircle(): void {
+    if (!this.token || this.expired) {
+      this.toastr.warning('Não foi possível salvar o Golden Circle');
+      return;
+    }
+
+    const temDados = this.goldenCircle.why || this.goldenCircle.how || this.goldenCircle.what;
+
+    if (!temDados) {
+      this.toastr.info('Preencha pelo menos um campo antes de salvar');
+      return;
+    }
+
+    this.salvandoGoldenCircle = true;
+
+    const dadosParaSalvar = {
+      why: this.goldenCircle.why,
+      how: this.goldenCircle.how,
+      what: this.goldenCircle.what
+    };
+
+    console.log('💾 Salvando Golden Circle...', dadosParaSalvar);
+
+    this.mentoriaService.salvarGoldenCircle(this.token, dadosParaSalvar).subscribe({
+      next: (response: any) => {
+        console.log('✅ Golden Circle salvo com sucesso!', response);
+        if (response.data && response.data.id) {
+          this.goldenCircleId = response.data.id;
+        }
+        this.toastr.success('Golden Circle salvo com sucesso!');
+        this.salvandoGoldenCircle = false;
+      },
+      error: (error: any) => {
+        console.error('❌ Erro ao salvar Golden Circle:', error);
+        this.toastr.error('Erro ao salvar Golden Circle');
+        this.salvandoGoldenCircle = false;
+      }
+    });
+  }
+
+  async exportarGoldenCirclePDF(): Promise<void> {
+    const temDados = this.goldenCircle.why || this.goldenCircle.how || this.goldenCircle.what;
+
+    if (!temDados) {
+      this.toastr.warning('Preencha os campos antes de exportar');
+      return;
+    }
+
+    try {
+      this.toastr.info('Gerando PDF do Golden Circle...');
+
+      const container = this.criarContainerGoldenCircleVisualizacao();
+      document.body.appendChild(container);
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        width: container.scrollWidth,
+        height: container.scrollHeight
+      });
+
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`golden-circle-${this.encontro?.mentorado_nome || 'mentoria'}-${Date.now()}.pdf`);
+
+      this.toastr.success('PDF exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      this.toastr.error('Erro ao exportar PDF');
+    }
+  }
+
+  private criarContainerGoldenCircleVisualizacao(): HTMLElement {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.background = '#ffffff';
+    container.style.padding = '60px';
+    container.style.minWidth = '1400px';
+    container.style.minHeight = '900px';
+    container.style.fontFamily = 'Arial, sans-serif';
+
+    // Logo
+    const logo = document.createElement('img');
+    logo.src = '/logoNaue.png';
+    logo.style.position = 'absolute';
+    logo.style.top = '40px';
+    logo.style.left = '40px';
+    logo.style.height = '45px';
+    container.appendChild(logo);
+
+    // Título
+    const header = document.createElement('div');
+    header.style.textAlign = 'center';
+    header.style.marginBottom = '60px';
+
+    const h1 = document.createElement('h1');
+    h1.textContent = 'The Golden Circle';
+    h1.style.fontSize = '36px';
+    h1.style.margin = '0 0 10px 0';
+    h1.style.fontWeight = 'bold';
+    h1.style.color = '#022c22';
+    header.appendChild(h1);
+
+    const info = document.createElement('div');
+    info.textContent = `${this.encontro?.mentorado_nome || 'Mentoria'}`;
+    info.style.fontSize = '18px';
+    info.style.fontWeight = '600';
+    info.style.color = '#666';
+    header.appendChild(info);
+
+    container.appendChild(header);
+
+    // Círculos e Textos
+    const circlesWrapper = document.createElement('div');
+    circlesWrapper.style.display = 'flex';
+    circlesWrapper.style.gap = '80px';
+    circlesWrapper.style.alignItems = 'center';
+    circlesWrapper.style.justifyContent = 'center';
+    circlesWrapper.style.margin = '0 auto';
+    circlesWrapper.style.maxWidth = '1200px';
+
+    // SVG dos círculos
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '500');
+    svg.setAttribute('height', '500');
+    svg.style.flexShrink = '0';
+
+    // Círculo externo (WHAT)
+    const circleWhat = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circleWhat.setAttribute('cx', '250');
+    circleWhat.setAttribute('cy', '250');
+    circleWhat.setAttribute('r', '200');
+    circleWhat.setAttribute('fill', 'none');
+    circleWhat.setAttribute('stroke', '#022c22');
+    circleWhat.setAttribute('stroke-width', '3');
+    svg.appendChild(circleWhat);
+
+    // Texto WHAT
+    const textWhat = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    textWhat.setAttribute('x', '250');
+    textWhat.setAttribute('y', '430');
+    textWhat.setAttribute('text-anchor', 'middle');
+    textWhat.setAttribute('font-size', '32');
+    textWhat.setAttribute('font-weight', 'bold');
+    textWhat.setAttribute('fill', '#022c22');
+    textWhat.textContent = 'WHAT';
+    svg.appendChild(textWhat);
+
+    // Círculo médio (HOW)
+    const circleHow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circleHow.setAttribute('cx', '250');
+    circleHow.setAttribute('cy', '250');
+    circleHow.setAttribute('r', '133');
+    circleHow.setAttribute('fill', 'none');
+    circleHow.setAttribute('stroke', '#022c22');
+    circleHow.setAttribute('stroke-width', '3');
+    svg.appendChild(circleHow);
+
+    // Texto HOW
+    const textHow = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    textHow.setAttribute('x', '250');
+    textHow.setAttribute('y', '370');
+    textHow.setAttribute('text-anchor', 'middle');
+    textHow.setAttribute('font-size', '32');
+    textHow.setAttribute('font-weight', 'bold');
+    textHow.setAttribute('fill', '#022c22');
+    textHow.textContent = 'HOW';
+    svg.appendChild(textHow);
+
+    // Círculo interno (WHY)
+    const circleWhy = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circleWhy.setAttribute('cx', '250');
+    circleWhy.setAttribute('cy', '250');
+    circleWhy.setAttribute('r', '66');
+    circleWhy.setAttribute('fill', 'none');
+    circleWhy.setAttribute('stroke', '#022c22');
+    circleWhy.setAttribute('stroke-width', '3');
+    svg.appendChild(circleWhy);
+
+    // Texto WHY
+    const textWhy = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    textWhy.setAttribute('x', '250');
+    textWhy.setAttribute('y', '265');
+    textWhy.setAttribute('text-anchor', 'middle');
+    textWhy.setAttribute('font-size', '32');
+    textWhy.setAttribute('font-weight', 'bold');
+    textWhy.setAttribute('fill', '#022c22');
+    textWhy.textContent = 'WHY';
+    svg.appendChild(textWhy);
+
+    circlesWrapper.appendChild(svg);
+
+    // Textos explicativos
+    const textsContainer = document.createElement('div');
+    textsContainer.style.display = 'flex';
+    textsContainer.style.flexDirection = 'column';
+    textsContainer.style.gap = '30px';
+    textsContainer.style.maxWidth = '500px';
+
+    const items = [
+      { title: 'Por que você faz o que você faz?', subtitle: 'Qual o propósito?', value: this.goldenCircle.why },
+      { title: 'Como você faz o que você faz?', subtitle: 'Seu processo.', value: this.goldenCircle.how },
+      { title: 'O que você faz?', subtitle: 'Seu resultado.', value: this.goldenCircle.what }
+    ];
+
+    items.forEach(item => {
+      const itemDiv = document.createElement('div');
+      itemDiv.style.borderLeft = '4px solid #022c22';
+      itemDiv.style.paddingLeft = '20px';
+
+      const titleEl = document.createElement('div');
+      titleEl.textContent = item.title;
+      titleEl.style.fontSize = '18px';
+      titleEl.style.fontWeight = 'bold';
+      titleEl.style.color = '#022c22';
+      titleEl.style.marginBottom = '5px';
+      itemDiv.appendChild(titleEl);
+
+      const subtitleEl = document.createElement('div');
+      subtitleEl.textContent = item.subtitle;
+      subtitleEl.style.fontSize = '14px';
+      subtitleEl.style.color = '#666';
+      subtitleEl.style.marginBottom = '10px';
+      itemDiv.appendChild(subtitleEl);
+
+      const valueEl = document.createElement('div');
+      valueEl.textContent = item.value || '(Não preenchido)';
+      valueEl.style.fontSize = '15px';
+      valueEl.style.color = item.value ? '#333' : '#999';
+      valueEl.style.fontStyle = item.value ? 'normal' : 'italic';
+      valueEl.style.lineHeight = '1.5';
+      itemDiv.appendChild(valueEl);
+
+      textsContainer.appendChild(itemDiv);
+    });
+
+    circlesWrapper.appendChild(textsContainer);
+    container.appendChild(circlesWrapper);
 
     return container;
   }

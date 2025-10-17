@@ -219,7 +219,7 @@ export class EditarVagaComponent implements OnInit {
     if (this.vagaForm.valid) {
       this.isSubmitting = true;
 
-      const vagaData = {
+      const vagaData: any = {
         client_id: this.vagaForm.value.clienteId,
         user_id: this.vagaForm.value.usuarioId,
         cargo: this.vagaForm.value.cargo,
@@ -227,14 +227,14 @@ export class EditarVagaComponent implements OnInit {
         tipo_abertura: this.vagaForm.value.tipoAbertura,
         status: this.vagaForm.value.status,
         fonte_recrutamento: this.vagaForm.value.fonteRecrutamento,
-        salario: this.vagaForm.value.salario,
-        pretensao_salarial: this.vagaForm.value.pretensaoSalarial || null,
+        salario: this.vagaForm.value.salario ? parseFloat(this.vagaForm.value.salario) : undefined,
+        pretensao_salarial: this.vagaForm.value.pretensaoSalarial ? parseFloat(this.vagaForm.value.pretensaoSalarial) : undefined,
         data_abertura: this.vagaForm.value.dataAbertura,
         data_fechamento_cancelamento: this.vagaForm.value.dataFechamentoCancelamento || null,
         observacoes: this.vagaForm.value.observacoes || null,
-        porcentagem_faturamento: this.vagaForm.value.porcentagemFaturamento || 100,
+        porcentagem_faturamento: this.vagaForm.value.porcentagemFaturamento ? parseFloat(this.vagaForm.value.porcentagemFaturamento) : 100,
         sigilosa: this.vagaForm.value.sigilosa || false,
-        imposto_estado: this.vagaForm.value.impostoEstado || 0
+        imposto_estado: this.vagaForm.value.impostoEstado ? parseFloat(this.vagaForm.value.impostoEstado) : 0
       };
 
       try {

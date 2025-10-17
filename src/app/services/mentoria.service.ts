@@ -628,4 +628,27 @@ export class MentoriaService {
       dados
     );
   }
+
+  // ===== THE GOLDEN CIRCLE =====
+
+  /**
+   * Obter Golden Circle por token público
+   */
+  obterGoldenCirclePublico(token: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/publico/${token}/golden-circle`);
+  }
+
+  /**
+   * Salvar Golden Circle (via token público)
+   */
+  salvarGoldenCircle(token: string, dados: {
+    why: string;
+    how: string;
+    what: string;
+  }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/publico/${token}/golden-circle`,
+      dados
+    );
+  }
 }

@@ -100,196 +100,86 @@
       </button>
     </div>
 
-    <!-- Cards de Mentorias -->
-    <div *ngIf="mentoriasFiltradas.length > 0" class="mentorias-grid">
-      <div *ngFor="let mentoria of mentoriasFiltradas" class="mentoria-card" [class.dropdown-open]="dropdownAberto === mentoria.id">
-
-        <!-- Header do Card -->
-        <div class="mentoria-header">
-          <div class="mentoria-info" (click)="visualizarMentoria(mentoria.id)">
-            <div class="cliente-principal">
-              <i class="fas fa-building"></i>
-              <h3>
-                {{ mentoria.client?.clients_pj?.company_name || mentoria.client?.clients_pf?.full_name || 'Cliente não informado' }}
-              </h3>
-            </div>
-            <div class="mentoria-meta">
-              <span class="meta-item" *ngIf="mentoria.encontros && mentoria.encontros.length > 0 && mentoria.encontros[0].mentorado_nome">
+    <!-- Tabela de Mentorias -->
+    <div *ngIf="mentoriasFiltradas.length > 0" class="table-container">
+      <table class="mentorias-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Mentorado</th>
+            <th>Contrato</th>
+            <th>Encontros</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let mentoria of mentoriasFiltradas" [class.dropdown-open]="dropdownAberto === mentoria.id">
+            <td class="cliente-cell" (click)="visualizarMentoria(mentoria.id)">
+              <div class="cliente-info">
+                <i class="fas fa-building"></i>
+                <span>{{ mentoria.client?.clients_pj?.company_name || mentoria.client?.clients_pf?.full_name || 'Cliente não informado' }}</span>
+              </div>
+            </td>
+            <td class="mentorado-cell">
+              <div class="mentorado-info" *ngIf="mentoria.encontros && mentoria.encontros.length > 0 && mentoria.encontros[0].mentorado_nome">
                 <i class="fas fa-user"></i>
-                {{ mentoria.encontros[0].mentorado_nome }}
-              </span>
-              <span class="meta-item">
-                <i class="fas fa-file-contract"></i>
-                Contrato {{ mentoria.contract?.contract_number || 'N/A' }}
-              </span>
-              <span class="meta-item">
-                <i class="fas fa-calendar-alt"></i>
-                {{ mentoria.numero_encontros }} encontro{{ mentoria.numero_encontros !== 1 ? 's' : '' }}
-              </span>
+                <span>{{ mentoria.encontros[0].mentorado_nome }}</span>
+              </div>
+              <span *ngIf="!mentoria.encontros || mentoria.encontros.length === 0 || !mentoria.encontros[0].mentorado_nome" class="text-muted">-</span>
+            </td>
+            <td class="contrato-cell">
+              <span class="contrato-number">{{ mentoria.contract?.contract_number || 'N/A' }}</span>
+            </td>
+            <td class="encontros-cell">
+              <span class="encontros-count">{{ mentoria.numero_encontros }}</span>
+            </td>
+            <td class="status-cell">
               <span [class]="'status-badge ' + getStatusBadgeClass(mentoria.status)">
                 {{ getStatusLabel(mentoria.status) }}
               </span>
-            </div>
-          </div>
-
-          <div class="mentoria-actions">
-            <!-- Botões de acesso rápido -->
-            <button
-              *ngIf="mentoria.unique_token"
-              class="btn-action primary"
-              (click)="visualizarHub(mentoria)"
-              title="Visualizar Hub Público">
-              <i class="fas fa-globe"></i>
-            </button>
-
-            <button
-              *ngIf="mentoria.unique_token"
-              class="btn-action"
-              (click)="copiarLinkHub(mentoria)"
-              title="Copiar Link do Hub">
-              <i class="fas fa-link"></i>
-            </button>
-
-            <button
-              class="btn-expand"
-              [class.expanded]="mentoriaExpandida === mentoria.id"
-              (click)="toggleExpandirMentoria(mentoria.id)"
-              title="Ver encontros">
-              <i class="fas fa-chevron-down"></i>
-            </button>
-
-            <div class="dropdown-menu-container" (click)="$event.stopPropagation()">
-              <button
-                class="btn-action dropdown-toggle"
-                (click)="toggleDropdown(mentoria.id)"
-                title="Mais opções">
-                <i class="fas fa-ellipsis-v"></i>
-              </button>
-              <div class="dropdown-menu" *ngIf="dropdownAberto === mentoria.id">
-                <button class="dropdown-item" *ngIf="mentoria.unique_token" (click)="visualizarHub(mentoria); closeDropdown()">
+            </td>
+            <td class="actions-cell">
+              <div class="table-actions">
+                <button
+                  *ngIf="mentoria.unique_token"
+                  class="btn-action primary"
+                  (click)="visualizarHub(mentoria)"
+                  title="Visualizar Hub Público">
                   <i class="fas fa-globe"></i>
-                  <span>Visualizar Hub</span>
                 </button>
-                <button class="dropdown-item" *ngIf="mentoria.unique_token" (click)="copiarLinkHub(mentoria); closeDropdown()">
+
+                <button
+                  *ngIf="mentoria.unique_token"
+                  class="btn-action"
+                  (click)="copiarLinkHub(mentoria)"
+                  title="Copiar Link do Hub">
                   <i class="fas fa-link"></i>
-                  <span>Copiar Link do Hub</span>
                 </button>
-                <div class="dropdown-divider" *ngIf="mentoria.unique_token"></div>
-                <button class="dropdown-item" (click)="editarMentoria(mentoria); closeDropdown()">
-                  <i class="fas fa-edit"></i>
-                  <span>Editar Mentoria</span>
-                </button>
-                <button class="dropdown-item" (click)="adicionarEncontros(mentoria); closeDropdown()">
-                  <i class="fas fa-plus-circle"></i>
-                  <span>Adicionar Encontros</span>
-                </button>
-                <button class="dropdown-item danger" (click)="deletarMentoria(mentoria); closeDropdown()">
-                  <i class="fas fa-trash"></i>
-                  <span>Deletar Mentoria</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Encontros (Expandível) -->
-        <div class="encontros-container" *ngIf="mentoriaExpandida === mentoria.id && mentoria.encontros">
-          <div class="encontros-header">
-            <h4>
-              <i class="fas fa-list"></i>
-              Encontros desta Mentoria
-            </h4>
-            <div class="encontros-stats">
-              <span class="stat-badge published" *ngIf="getEncontrosPublicados(mentoria) > 0">
-                <i class="fas fa-check-circle"></i>
-                {{ getEncontrosPublicados(mentoria) }} publicado{{ getEncontrosPublicados(mentoria) !== 1 ? 's' : '' }}
-              </span>
-              <span class="stat-badge draft" *ngIf="getEncontrosRascunho(mentoria) > 0">
-                <i class="fas fa-edit"></i>
-                {{ getEncontrosRascunho(mentoria) }} rascunho{{ getEncontrosRascunho(mentoria) !== 1 ? 's' : '' }}
-              </span>
-            </div>
-          </div>
-
-          <div class="encontros-list">
-            <div *ngFor="let encontro of mentoria.encontros" class="encontro-item">
-              <!-- Número -->
-              <div class="encontro-numero-badge">
-                {{ encontro.numero_encontro }}
-              </div>
-
-              <!-- Info -->
-              <div class="encontro-info">
-                <div class="encontro-nome">
-                  {{ encontro.mentorado_nome }}
-                </div>
-                <div class="encontro-data">
-                  <i class="fas fa-calendar-alt"></i>
-                  {{ formatarData(encontro.data_encontro) }}
+                <div class="dropdown-menu-container" (click)="$event.stopPropagation()">
+                  <button
+                    class="btn-action dropdown-toggle"
+                    (click)="toggleDropdown(mentoria.id)"
+                    title="Mais opções">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="dropdown-menu" *ngIf="dropdownAberto === mentoria.id">
+                    <button class="dropdown-item" (click)="editarMentoria(mentoria); closeDropdown()">
+                      <i class="fas fa-edit"></i>
+                      <span>Editar Mentoria</span>
+                    </button>
+                    <button class="dropdown-item danger" (click)="deletarMentoria(mentoria); closeDropdown()">
+                      <i class="fas fa-trash"></i>
+                      <span>Deletar Mentoria</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <!-- Status -->
-              <div class="encontro-status">
-                <span [class]="'status-badge-small ' + getStatusBadgeClass(encontro.status)">
-                  {{ getStatusLabel(encontro.status) }}
-                </span>
-                <select
-                  class="encontro-status-select"
-                  [(ngModel)]="encontro.encontro_status"
-                  (ngModelChange)="updateEncontroStatus(encontro)"
-                  [title]="'Status do encontro'">
-                  <option value="em_andamento">Em andamento</option>
-                  <option value="finalizado">Finalizado</option>
-                </select>
-                <span class="token-expiry-small" *ngIf="isTokenExpirado(encontro)">
-                  <i class="fas fa-exclamation-triangle"></i> Expirado
-                </span>
-              </div>
-
-              <!-- Ações -->
-              <div class="encontro-actions">
-                <button
-                  class="btn-action-sm"
-                  *ngIf="encontro.status === 'draft'"
-                  (click)="publicarEncontro(encontro)"
-                  title="Publicar">
-                  <i class="fas fa-paper-plane"></i>
-                </button>
-
-                <button
-                  class="btn-action-sm"
-                  *ngIf="encontro.status === 'published'"
-                  (click)="visualizarEncontro(encontro)"
-                  title="Visualizar">
-                  <i class="fas fa-external-link-alt"></i>
-                </button>
-
-                <button
-                  class="btn-action-sm"
-                  *ngIf="encontro.status === 'published'"
-                  (click)="copiarLink(encontro)"
-                  title="Copiar Link">
-                  <i class="fas fa-copy"></i>
-                </button>
-
-                <button
-                  class="btn-action-sm"
-                  (click)="editarEncontro(encontro.id)"
-                  title="Editar">
-                  <i class="fas fa-edit"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Loading dos Encontros -->
-        <div class="encontros-loading" *ngIf="mentoriaExpandida === mentoria.id && !mentoria.encontros">
-          <div class="spinner-small"></div>
-          <span>Carregando encontros...</span>
-        </div>
-      </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

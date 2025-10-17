@@ -650,6 +650,129 @@
       </div>
     </section>
 
+    <!-- The Golden Circle Section -->
+    <section class="dark-section golden-circle-main-section"
+             *ngIf="conteudoEstruturado && conteudoEstruturado.goldenCircle?.ativo">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-bullseye"></i>
+            The Golden Circle
+          </h2>
+          <p class="dark-subtitle">Descubra seu propósito, processo e resultado</p>
+        </div>
+
+        <div class="golden-circle-content">
+
+          <!-- Layout: Círculos + Perguntas -->
+          <div class="golden-circle-layout">
+
+            <!-- Círculos SVG com Setas -->
+            <div class="golden-circles-svg">
+              <svg viewBox="0 0 700 700" xmlns="http://www.w3.org/2000/svg">
+                <!-- Círculo externo (WHAT) -->
+                <circle cx="250" cy="350" r="200" fill="none" stroke="#022c22" stroke-width="3"/>
+                <text x="250" y="530" text-anchor="middle" font-size="32" font-weight="bold" fill="#022c22">WHAT</text>
+
+                <!-- Círculo médio (HOW) -->
+                <circle cx="250" cy="350" r="133" fill="none" stroke="#022c22" stroke-width="3"/>
+                <text x="250" y="470" text-anchor="middle" font-size="32" font-weight="bold" fill="#022c22">HOW</text>
+
+                <!-- Círculo interno (WHY) -->
+                <circle cx="250" cy="350" r="66" fill="none" stroke="#022c22" stroke-width="3"/>
+                <text x="250" y="365" text-anchor="middle" font-size="32" font-weight="bold" fill="#022c22">WHY</text>
+
+                <!-- Seta para WHY (do círculo interno para cima-direita) -->
+                <path d="M 316 340 Q 450 80 650 80" stroke="#022c22" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+
+                <!-- Seta para HOW (horizontal do círculo médio) -->
+                <line x1="383" y1="350" x2="650" y2="350" stroke="#022c22" stroke-width="3" marker-end="url(#arrowhead)"/>
+
+                <!-- Seta para WHAT (do círculo externo para baixo-direita) -->
+                <path d="M 391 491 Q 500 620 650 620" stroke="#022c22" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+
+                <!-- Definição da ponta de seta -->
+                <defs>
+                  <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <polygon points="0 0, 10 3, 0 6" fill="#022c22"/>
+                  </marker>
+                </defs>
+              </svg>
+            </div>
+
+            <!-- Campos de Perguntas -->
+            <div class="golden-questions">
+
+              <!-- WHY -->
+              <div class="golden-field">
+                <div class="golden-question-header">
+                  <span class="golden-label">WHY</span>
+                  <h3>Por que você faz o que você faz?</h3>
+                  <p class="golden-subtitle">Qual o propósito?</p>
+                </div>
+                <textarea
+                  class="golden-input"
+                  [(ngModel)]="goldenCircle.why"
+                  placeholder="Descreva seu propósito, sua razão de ser..."
+                  rows="4"></textarea>
+              </div>
+
+              <!-- HOW -->
+              <div class="golden-field">
+                <div class="golden-question-header">
+                  <span class="golden-label">HOW</span>
+                  <h3>Como você faz o que você faz?</h3>
+                  <p class="golden-subtitle">Seu processo.</p>
+                </div>
+                <textarea
+                  class="golden-input"
+                  [(ngModel)]="goldenCircle.how"
+                  placeholder="Descreva seu processo, como você opera..."
+                  rows="4"></textarea>
+              </div>
+
+              <!-- WHAT -->
+              <div class="golden-field">
+                <div class="golden-question-header">
+                  <span class="golden-label">WHAT</span>
+                  <h3>O que você faz?</h3>
+                  <p class="golden-subtitle">Seu resultado.</p>
+                </div>
+                <textarea
+                  class="golden-input"
+                  [(ngModel)]="goldenCircle.what"
+                  placeholder="Descreva o que você faz, seus resultados..."
+                  rows="4"></textarea>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Botões -->
+          <div class="golden-circle-actions">
+            <button
+              type="button"
+              class="btn-save-golden"
+              (click)="salvarGoldenCircle()"
+              [disabled]="salvandoGoldenCircle">
+              <i class="fa-solid" [ngClass]="salvandoGoldenCircle ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+              {{ salvandoGoldenCircle ? 'Salvando...' : 'Salvar' }}
+            </button>
+
+            <button
+              type="button"
+              class="btn-export-golden"
+              (click)="exportarGoldenCirclePDF()">
+              <i class="fa-solid fa-file-pdf"></i>
+              Exportar PDF
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section class="dark-section mapa-mental-main-section"
              *ngIf="conteudoEstruturado && conteudoEstruturado.mapaMental?.ativo">

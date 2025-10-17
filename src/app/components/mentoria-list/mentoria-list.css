@@ -355,17 +355,177 @@
   color: var(--dark-text-muted);
 }
 
-/* Mentorias Grid */
-.mentorias-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
+/* Table Container */
+.table-container {
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-gray);
+  overflow: visible;
 }
 
-@media (max-width: 768px) {
-  .mentorias-grid {
-    grid-template-columns: 1fr;
-  }
+:host-context(body.dark-mode) .table-container {
+  background: var(--dark-card);
+  border-color: var(--dark-border);
+}
+
+/* Mentorias Table */
+.mentorias-table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.mentorias-table thead {
+  background: var(--bg-light);
+  border-bottom: 2px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .mentorias-table thead {
+  background: var(--dark-bg);
+  border-bottom-color: var(--dark-border);
+}
+
+.mentorias-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+:host-context(body.dark-mode) .mentorias-table th {
+  color: var(--dark-text-muted);
+}
+
+.mentorias-table tbody tr {
+  border-bottom: 1px solid var(--border-gray);
+  transition: all 0.2s ease;
+}
+
+:host-context(body.dark-mode) .mentorias-table tbody tr {
+  border-bottom-color: var(--dark-border);
+}
+
+.mentorias-table tbody tr:hover {
+  background: var(--bg-light);
+}
+
+:host-context(body.dark-mode) .mentorias-table tbody tr:hover {
+  background: var(--dark-bg);
+}
+
+.mentorias-table tbody tr.dropdown-open {
+  position: relative;
+  z-index: 1000;
+}
+
+.mentorias-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.mentorias-table td {
+  padding: 1.25rem 1.5rem;
+  font-size: 0.9375rem;
+  color: var(--text-dark);
+  vertical-align: middle;
+}
+
+:host-context(body.dark-mode) .mentorias-table td {
+  color: var(--dark-text);
+}
+
+.cliente-cell {
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.cliente-cell:hover {
+  opacity: 0.8;
+}
+
+.cliente-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cliente-info i {
+  color: var(--primary-green);
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.cliente-info span {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .cliente-info span {
+  color: var(--dark-text);
+}
+
+.mentorado-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mentorado-info i {
+  color: var(--primary-green);
+  font-size: 0.875rem;
+}
+
+.mentorado-info span {
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .mentorado-info span {
+  color: var(--dark-text);
+}
+
+.text-muted {
+  color: var(--text-gray);
+  font-style: italic;
+}
+
+:host-context(body.dark-mode) .text-muted {
+  color: var(--dark-text-muted);
+}
+
+.contrato-number {
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .contrato-number {
+  color: var(--dark-text);
+}
+
+.encontros-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 0.75rem;
+  background: rgba(14, 155, 113, 0.1);
+  color: var(--primary-green);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
 
 /* Mentoria Card */
