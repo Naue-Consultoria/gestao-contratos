@@ -801,14 +801,8 @@ html {
 /* === TESTES SECTION === */
 .testes-grid-new {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-}
-
-@media (max-width: 1200px) {
-  .testes-grid-new {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
 }
 
 @media (max-width: 768px) {
@@ -819,60 +813,71 @@ html {
 
 .teste-card {
   background: white;
-  padding: 2.5rem;
-  border-radius: 20px;
+  padding: 1.5rem;
+  border-radius: 12px;
   border: 1px solid #e5e7eb;
-  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  animation: fadeInUp 0.8s ease-out forwards;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  animation: fadeInUp 0.6s ease-out forwards;
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(20px);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.teste-card:nth-child(1) { animation-delay: 0.1s; }
-.teste-card:nth-child(2) { animation-delay: 0.2s; }
-.teste-card:nth-child(3) { animation-delay: 0.3s; }
-.teste-card:nth-child(4) { animation-delay: 0.4s; }
-.teste-card:nth-child(5) { animation-delay: 0.5s; }
-.teste-card:nth-child(6) { animation-delay: 0.6s; }
+.teste-card:nth-child(1) { animation-delay: 0.05s; }
+.teste-card:nth-child(2) { animation-delay: 0.1s; }
+.teste-card:nth-child(3) { animation-delay: 0.15s; }
+.teste-card:nth-child(4) { animation-delay: 0.2s; }
+.teste-card:nth-child(5) { animation-delay: 0.25s; }
+.teste-card:nth-child(6) { animation-delay: 0.3s; }
 
 .teste-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  border-color: #00B74F;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border-color: #022c22;
 }
 
 .teste-card h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #022c22;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
   letter-spacing: -0.025em;
+  line-height: 1.3;
 }
 
 .teste-img-new {
-  margin-bottom: 1.5rem;
-  border-radius: 16px;
+  margin-bottom: 1rem;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
 }
 
 .teste-img-new img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   display: block;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s ease;
 }
 
 .teste-card:hover .teste-img-new img {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 .teste-card p {
-  font-size: 1.125rem;
-  line-height: 1.75;
-  color: #4a5568;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #374151;
   margin: 0;
+  font-weight: 400;
 }
 
 /* === PRÓXIMOS PASSOS SECTION === */
@@ -1333,6 +1338,21 @@ html {
 .ref-card:hover .ref-external-new {
   color: #022c22;
   transform: translateX(4px);
+}
+
+/* Ref card sem link (não clicável) */
+.ref-card-no-link {
+  cursor: default;
+}
+
+.ref-card-no-link:hover {
+  transform: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-color: #e5e7eb;
+}
+
+.ref-card-no-link::before {
+  display: none;
 }
 
 /* === ENCERRAMENTO FINAL === */
@@ -3634,83 +3654,82 @@ html {
 
 /* ===== PDF DISPLAY IN TESTES ===== */
 .teste-pdf-new {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  border: 2px solid #f87171;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin: 1.25rem 0;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0 0 1rem 0;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   transition: all 0.3s ease;
 }
 
 .teste-pdf-new:hover {
-  box-shadow: 0 8px 20px rgba(248, 113, 113, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
+  border-color: #022c22;
 }
 
 .pdf-icon-wrapper {
   flex-shrink: 0;
-  width: 80px;
-  height: 80px;
-  background: white;
-  border-radius: 12px;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #022c22, #014d3a);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+  box-shadow: 0 2px 8px rgba(2, 44, 34, 0.2);
 }
 
 .pdf-icon-wrapper i {
-  font-size: 3rem;
-  color: #dc2626;
+  font-size: 1.5rem;
+  color: white;
 }
 
 .pdf-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .pdf-label {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: #991b1b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  display: none;
 }
 
 .btn-download-pdf {
   display: inline-flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.75rem 1.5rem;
-  background: #dc2626;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #022c22;
   color: white;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 6px;
   font-weight: 600;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   transition: all 0.3s ease;
   align-self: flex-start;
 }
 
 .btn-download-pdf:hover {
-  background: #b91c1c;
-  transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+  background: #014d3a;
+  transform: translateX(3px);
+  box-shadow: 0 2px 8px rgba(2, 44, 34, 0.3);
 }
 
 .btn-download-pdf i {
-  font-size: 1rem;
+  font-size: 0.875rem;
 }
 
 .teste-comentario {
-  margin: 1rem 0 0 0;
-  line-height: 1.6;
-  color: #4b5563;
+  margin: 0;
+  line-height: 1.7;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 400;
 }
 
 /* Responsive PDF */

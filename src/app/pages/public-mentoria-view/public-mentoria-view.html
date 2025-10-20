@@ -78,8 +78,8 @@
               <div class="welcome-line-2">
                 <span class="welcome-word">Bem-vindo(a)</span>
                 <span class="welcome-word">ao</span>
-                <span class="welcome-word">nosso</span>
-                <span class="welcome-word">encontro!</span>
+                <span class="welcome-word">seu</span>
+                <span class="welcome-word">PD | Plano Diretivo!</span>
               </div>
             </div>
 
@@ -112,8 +112,8 @@
             <div class="welcome-line-2">
               <span class="welcome-word">Bem-vindo(a)</span>
               <span class="welcome-word">ao</span>
-              <span class="welcome-word">nosso</span>
-              <span class="welcome-word">encontro!</span>
+              <span class="welcome-word">seu</span>
+              <span class="welcome-word">PD | Plano Diretivo!</span>
             </div>
           </div>
 
@@ -223,7 +223,7 @@
               <div *ngIf="bloco.tipo === 'perguntas' && bloco.perguntas?.length > 0" class="passo-perguntas-block">
                 <div class="block-title">
                   <i class="fa-solid fa-question-circle"></i>
-                  <span>Perguntas para Reflexão</span>
+                  <span>{{ getNomeTemplate(bloco) }}</span>
                 </div>
                 <div class="perguntas-container">
                   <div *ngFor="let pergunta of bloco.perguntas; let i = index" class="pergunta-item">
@@ -287,24 +287,44 @@
           </h2>
         </div>
         <div class="referencias-grid">
-          <a *ngFor="let ref of conteudoEstruturado.referencias.itens"
-             [href]="ref.link"
-             target="_blank"
-             class="ref-card">
-            <div class="ref-icon-new">
-              <i class="fa-solid"
-                 [ngClass]="{
-                   'fa-play-circle': ref.tipo === 'ted',
-                   'fa-book': ref.tipo === 'livro',
-                   'fa-newspaper': ref.tipo === 'leitura'
-                 }"></i>
+          <ng-container *ngFor="let ref of conteudoEstruturado.referencias.itens">
+            <!-- Com link: elemento clicável -->
+            <a *ngIf="ref.link && ref.link.trim() !== ''"
+               [href]="ref.link"
+               target="_blank"
+               class="ref-card">
+              <div class="ref-icon-new">
+                <i class="fa-solid"
+                   [ngClass]="{
+                     'fa-play-circle': ref.tipo === 'ted',
+                     'fa-book': ref.tipo === 'livro',
+                     'fa-newspaper': ref.tipo === 'leitura'
+                   }"></i>
+              </div>
+              <div class="ref-content-new">
+                <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Leitura' }}</span>
+                <h4>{{ ref.titulo }}</h4>
+              </div>
+              <i class="fa-solid fa-external-link-alt ref-external-new"></i>
+            </a>
+
+            <!-- Sem link: elemento não clicável -->
+            <div *ngIf="!ref.link || ref.link.trim() === ''"
+                 class="ref-card ref-card-no-link">
+              <div class="ref-icon-new">
+                <i class="fa-solid"
+                   [ngClass]="{
+                     'fa-play-circle': ref.tipo === 'ted',
+                     'fa-book': ref.tipo === 'livro',
+                     'fa-newspaper': ref.tipo === 'leitura'
+                   }"></i>
+              </div>
+              <div class="ref-content-new">
+                <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Leitura' }}</span>
+                <h4>{{ ref.titulo }}</h4>
+              </div>
             </div>
-            <div class="ref-content-new">
-              <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Leitura' }}</span>
-              <h4>{{ ref.titulo }}</h4>
-            </div>
-            <i class="fa-solid fa-external-link-alt ref-external-new"></i>
-          </a>
+          </ng-container>
         </div>
       </div>
     </section>

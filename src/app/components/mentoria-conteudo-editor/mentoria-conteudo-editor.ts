@@ -24,6 +24,8 @@ interface BlocoProximosPassos {
   conteudo: string;
   perguntas?: { pergunta: string }[];
   tarefas?: { titulo: string; itens: { texto: string }[] };
+  nomeTemplate?: string;
+  template_id?: number;
 }
 
 interface Referencia {
@@ -842,14 +844,16 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     this.mostrarModalTemplates = false;
   }
 
-  aplicarTemplate(templateData: { tipo: 'perguntas' | 'tarefas'; content: any }): void {
+  aplicarTemplate(templateData: { tipo: 'perguntas' | 'tarefas'; content: any; nomeTemplate?: string; template_id?: number }): void {
     // Criar novo bloco com o conteúdo do template
     const novoBloco: BlocoProximosPassos = {
       id: this.generateId(),
       tipo: templateData.tipo,
       conteudo: '',
       perguntas: templateData.tipo === 'perguntas' ? templateData.content : undefined,
-      tarefas: templateData.tipo === 'tarefas' ? templateData.content : undefined
+      tarefas: templateData.tipo === 'tarefas' ? templateData.content : undefined,
+      nomeTemplate: templateData.nomeTemplate,
+      template_id: templateData.template_id
     };
 
     this.conteudo.proximosPassos.blocos.push(novoBloco);

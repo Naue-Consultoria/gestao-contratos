@@ -158,10 +158,12 @@ export class MentoriaTemplatesModalComponent implements OnInit {
   }
 
   carregarTemplate(template: MentoriaTemplate): void {
-    // Emitir template com tipo para o editor saber como usar
+    // Emitir template com tipo, nome e ID para o editor saber como usar
     this.templateSelecionado.emit({
       tipo: template.tipo,
-      content: template.content
+      content: template.content,
+      nomeTemplate: template.nome,
+      template_id: template.id
     });
     this.toastr.success(`Template "${template.nome}" carregado!`);
     this.fecharModal();

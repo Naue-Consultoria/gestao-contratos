@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MentoriaService, MentoriaEncontro, EncontroBloco, BlocoInteracao } from '../../services/mentoria.service';
+import { MentoriaTemplatesService } from '../../services/mentoria-templates.service';
 import { MentoriaHelpers } from '../../types/mentoria.types';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import html2canvas from 'html2canvas';
@@ -98,6 +99,9 @@ export class PublicMentoriaViewComponent implements OnInit {
   // Salvamento automático
   savingInteractions = false;
 
+  // Cache de nomes de templates
+  templateNamesCache: { [templateId: number]: string } = {};
+
   // Table of Contents
   tableOfContents: TocItem[] = [];
   showToc = false; // Começa recolhido
@@ -166,6 +170,7 @@ export class PublicMentoriaViewComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private mentoriaService: MentoriaService,
+    private templatesService: MentoriaTemplatesService,
     private toastr: ToastrService
   ) {}
 
@@ -240,6 +245,9 @@ export class PublicMentoriaViewComponent implements OnInit {
 
                 // Carregar estados salvos das interações
                 this.carregarEstadosSalvos();
+
+                // Carregar nomes dos templates
+                this.carregarNomesTemplates();
               }
             } catch (e) {
               // Não é JSON estruturado, é conteúdo HTML antigo
@@ -387,6 +395,52 @@ export class PublicMentoriaViewComponent implements OnInit {
 
   getCurrentYear(): number {
     return new Date().getFullYear();
+  }
+
+  /**
+   * Carrega nomes dos templates usados nos blocos de perguntas
+   */
+  carregarNomesTemplates(): void {
+    if (!this.conteudoEstruturado?.proximosPassos?.blocos) return;
+
+    const templateIds: number[] = [];
+
+    // Coletar todos os template_ids únicos
+    this.conteudoEstruturado.proximosPassos.blocos.forEach((bloco: any) => {
+      if (bloco.template_id && !templateIds.includes(bloco.template_id)) {
+        templateIds.push(bloco.template_id);
+      }
+    });
+
+    // Buscar nomes dos templates usando endpoint público
+    templateIds.forEach(templateId => {
+      this.templatesService.obterNomeTemplatePublico(templateId).subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.templateNamesCache[templateId] = response.data.nome;
+          }
+        },
+        error: (error) => {
+          console.error(`Erro ao carregar nome do template ${templateId}:`, error);
+        }
+      });
+    });
+  }
+
+  /**
+   * Obtém o nome do template para exibição
+   */
+  getNomeTemplate(bloco: any): string {
+    // Se tem template_id, buscar do cache
+    if (bloco.template_id && this.templateNamesCache[bloco.template_id]) {
+      return this.templateNamesCache[bloco.template_id];
+    }
+    // Fallback para nome salvo no bloco (compatibilidade)
+    if (bloco.nomeTemplate) {
+      return bloco.nomeTemplate;
+    }
+    // Fallback padrão
+    return 'Perguntas para Reflexão';
   }
 
   generateTableOfContents(): void {

@@ -82,4 +82,11 @@ export class MentoriaTemplatesService {
   excluirTemplate(id: number): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`);
   }
+
+  /**
+   * Obtém apenas o nome de um template (público, sem autenticação)
+   */
+  obterNomeTemplatePublico(id: number): Observable<ApiResponse<{ id: number; nome: string }>> {
+    return this.http.get<ApiResponse<{ id: number; nome: string }>>(`${this.apiUrl}/publico/${id}/nome`);
+  }
 }

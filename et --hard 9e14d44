@@ -1,0 +1,249 @@
+[33me1258f2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m add: notificações em desenvolvimento
+[33m9e14d44[m add: pdf in tests
+[33mfd7440a[m add: templates de perguntas
+[33m20e020c[m fix: mentoria executiva individual
+[33m247608e[m fix: vaga R&S
+[33m423887c[m fix: vagas r&s
+[33m93ed069[m add: mentorado name em gestao de mentorias
+[33maf7241e[m add: graficos de zonas
+[33m69f9af2[m add: modelo abc
+[33m4c67f6b[m fix: analytics R&S
+[33m6b2b76a[m fix: R&S contract percentage
+[33m9774460[m add: pretensão salarial
+[33madf1945[m fix: routines
+[33m37db127[m fix budget limit
+[33m5824115[m fix deploy on vercel
+[33m804116f[m fix: routines progress bar
+[33mbdfb129[m fix: contracts installments
+[33mfbf92b3[m fix graphic logic
+[33m3a283fb[m style: tabela de rotinas
+[33m4ee35ee[m fix: angular buidget
+[33mf22e298[m add: duplicar proposta
+[33m4fb85bb[m add: idade e profissão mentorado
+[33ma826a3b[m fix: mental map
+[33m67f4336[m style: mentoria hub and R&S proposal
+[33m91c5889[m style new mentoria hub page
+[33m13fc065[m add: mentoria hub
+[33m074a998[m fix: solicitante name in proposal R&S
+[33m27dcf2c[m add: solicitante name in public proposal
+[33mc545796[m converting proposal
+[33mb2e5369[m fix: proposal page
+[33m4f87948[m new R&S proposal page
+[33m016be9c[m add: modificações de mentorias
+[33m0ff6ca2[m fix proposal converting into contract
+[33m6b02899[m fix: proposta assinada parcialmente
+[33m8b49bd4[m fix: routine comments
+[33m1efa5f5[m fix: new mentorias page
+[33mf8096ea[m proposal value discount
+[33m5af353d[m add: proposal modal
+[33m02d0865[m add: mentoria module and % discount proposals
+[33m9c3c371[m fix: etapas
+[33me6b17e4[m add: reordenar serviços para proposta
+[33m28377b4[m fix: padding in public proposal for notebooks
+[33m780ef82[m add: contrato linkado com vaga
+[33m9fbab2b[m fix: routines stages
+[33m6db8201[m remove barra de progresso em rotinas visualizar
+[33mdd934b0[m style: contrato vencido em laranja na tabela de contratos
+[33mf793115[m add: consultor R&S dashboard
+[33mc8f430b[m add: new role consultor R&S
+[33mb2e7fb3[m fix: atribuição de usuarios em contratos
+[33m0c5064e[m fix: proposal max installments
+[33m26765f0[m add: relatorio comercial
+[33ma1db2b8[m add: new user role - admin gerencial
+[33mfe41d5f[m add: report and analytics page R&S
+[33m7b3c980[m fix: status da entrevista selecionavel na tabela
+[33mafea8dd[m user can create a service
+[33m28f69f2[m fix: N/A button em etapas
+[33m8a64496[m add: campos de filtro por data em R&S
+[33m75c3519[m add: R&S page funcional
+[33m7309dbc[m fix: analytics card numbers
+[33m5f69d72[m fix: tabela de comissão
+[33mbb6d476[m add: solicitante
+[33m41ebe21[m filters in contracts and proposals
+[33m5d506b4[m[33m ([m[1;31morigin/dev[m[33m, [m[1;32mdev[m[33m)[m style: new contracts page
+[33md86da52[m fix: contract form edit
+[33mf35e56a[m fix: R&S para contratos e propostas
+[33m0bc0cae[m style: posicionamento de campos na pagina de nova vaga
+[33mff4367a[m add: nova pagina de acompanhamento R&S
+[33m85bfcea[m feat: acompanhamento R&S
+[33mb788d1b[m add: visualization page vagas
+[33me2ab678[m fix: R&S breadcrumb
+[33m8fcf957[m add: nova vaga pg
+[33m55b1213[m add: summary and subtitle on proposals page
+[33md635de8[m style: proposal card
+[33m8deb6e0[m fix: service selection on proposal page
+[33mf170f7f[m add: R&S page
+[33m3a133b5[m fix: text area de descrição de serviço
+[33mf56d81e[m feat: novo formato de descrição
+[33m52dd785[m quebra de linha
+[33m015d50f[m style: new proposal page
+[33m364e9f8[m add: new contract model
+[33ma4aa1bc[m fix: converting proposal
+[33m11d85a3[m fix: progress bars in routines
+[33m207ced1[m add: rate limit
+[33md7f9b12[m fix: routines interceptor
+[33m7bba452[m fix notification service
+[33m47ba418[m fix: service order in routines
+[33m625c7b6[m style: analytics percentage
+[33me4d6d7e[m style: analytics
+[33mbc64459[m style: analytics colors
+[33mccc2327[m style: analytics colors
+[33m52778a9[m add: sla
+[33m11f3a1d[m add: novo botao de nova etapa
+[33mfc4ff28[m add: novo grafico
+[33mb22c90d[m add: analytics
+[33m24490ba[m add: default services
+[33m72712fb[m add: default services
+[33mebfbed7[m add: service category Intern
+[33m609d67a[m feat: tag em comentario
+[33mce1342a[m feat: stage category
+[33m0d76534[m style: uppercase client names
+[33md11d30d[m add: multiple payment methods
+[33m3205509[m stle: new client page
+[33m6215b32[m fix: service description mobile version
+[33maf4974c[m add: routines stages added
+[33m0b40700[m fix: 10k caracteres
+[33mf46d313[m add: service stages
+[33md53858f[m feat: new description options
+[33m03410ab[m fix: proposal edit client
+[33m329d041[m add: cpf and cnpj fields new proposal page
+[33m1091fa4[m commit final
+[33m76672b3[m fix: cellphone responsive
+[33mf7a9dab[m fix: cellphone responsive
+[33md5d4cd5[m style: permuta on contract details
+[33m53e3b3c[m add: permuta
+[33m9c22f4b[m style: public proposal cellphone
+[33m3225b9f[m style: proposal 1280x800
+[33m327914d[m fix: value size contract and analytic cards
+[33m63844f2[m add: contracts table
+[33mee90451[m fix: proposal public automatic client info
+[33m95e0ee0[m add: adtivio
+[33m19c30e1[m fix: routines
+[33mdd63399[m add: confirmation modal
+[33m38f0c72[m style: public proposal
+[33m45e78fe[m fix: proposal
+[33mbeb1f9d[m fix: routines
+[33m68154cf[m fix: foto dos especialistas na proposta publica
+[33mb894522[m style: novo mapa brasil na pg de proposta
+[33mabded95[m fix: proposal integration
+[33md9507bf[m remove: console.log public proposal page
+[33mb3e001f[m fix: prod proposal
+[33m3bb71fe[m fix: public proposal access
+[33m013d889[m fix: signature field
+[33m11662a0[m style: section de assinatura digital
+[33m4cce199[m style: new public proposal table
+[33m8d8795a[m style: pagina de proposta
+[33m4f4cfdb[m style: new user page
+[33md33e7e8[m add: cliente logos
+[33mc23d3c9[m add: cargo to user
+[33mcabebcc[m feat: download button
+[33me53ce6c[m fix: routines attachments on supabase
+[33mfdbda3d[m fix: deploy on vercel
+[33m5843020[m add: routines new page, remove: log spam
+[33macf27d4[m style: user permission badge
+[33m82622c6[m fix build bundle limit
+[33mbf4e3b2[m fix: contract dropdown
+[33m694c57a[m fix: routines and contracts splitted
+[33m9129b71[m fix: proposal convert to contract
+[33mc9b5709[m fix: notification restriction
+[33m8c0fe15[m fix: user visualization
+[33md1303ee[m add: user restriction
+[33m861aeed[m style: proposal footer
+[33m5686659[m add: signer data
+[33mbc1c718[m style: proposal status badge colors
+[33m68b3f1b[m fix: accept proposal button
+[33m4f8223d[m fix: proposal signature
+[33m2aaa96b[m fix: proposal signing
+[33mb08f30e[m style: proposal detailed page
+[33ma02ee5c[m feat: proposals detailed view page
+[33m4e216d3[m ifx: ocntract docx 2
+[33m36c0a4c[m fix: contract docx
+[33m74064da[m fix: contract docx
+[33m404d3e9[m style: contracts page
+[33mde1ab8e[m fix: proposals sending logic
+[33md19573b[m fix: buffer
+[33m00d4627[m fix: budget limit
+[33mf5e0507[m feat: contract to pdf and to docx
+[33m3b067fe[m fix: breadcrumb
+[33m96549cf[m chore: rename routes to pt-br
+[33m5a28550[m add: exclusion modal
+[33m4483265[m fix: proposal creation
+[33mc26c1ee[m fix: proposal link
+[33mc1b4d3b[m fix: client filter in routines page
+[33m2caaac7[m style: routines page
+[33m4fa087d[m fix: inactive users table message
+[33mf85ad4a[m fix: action buttons users table
+[33m3fa3c8b[m add: routines report
+[33mf4f786c[m fix: reports
+[33m2cfaac9[m add: dashboard recent activities
+[33m0733cc9[m fix: client register
+[33m8aeaf07[m add: client multi-email
+[33m4277649[m fix: clients table action buttons
+[33m68a737e[m remove: reports buttons analytics page
+[33mda773de[m fix: analytics logic all done
+[33me4490cb[m add: representante legal
+[33m0611b2f[m style: analytics
+[33mc127b37[m fix: analytics logic
+[33m95567ce[m fix: service durantion
+[33m792b9a5[m fix: id string to number
+[33m0790056[m fix: reports download name
+[33m63ae3c2[m fix: contract payment terms
+[33me5d1cba[m add: contracts payment info
+[33mcad4968[m fix: proposals cards and proposals table
+[33medd24db[m add: user pfp
+[33m8651c02[m remove: routine priority
+[33maed4907[m add: contracts cards
+[33m278e165[m fix: contrcat with multiple services
+[33ma7e2344[m fix: user assign
+[33mee9f0c0[m fix: auth logic
+[33m4dd7fa6[m style cards icon
+[33me01b735[m fix: proposal sign page
+[33m7e6fd18[m add: proposal sign page
+[33m5b172fb[m fix: new client logo preview
+[33mc1f08ed[m fix: cliente logo
+[33md3d0d69[m feat: client logo
+[33mfe855c1[m fix: budget limit
+[33m2db422f[m add: client details page
+[33mbca409e[m style: contracts reponsive
+[33m64e0997[m add: serach bar services table
+[33mfc9a46f[m fix: contract values
+[33mda5ee0b[m fix: attachments
+[33meb9150b[m add: new client attributes
+[33mfd51daf[m style: icons colors
+[33m76d6476[m remove: client statcards
+[33m865c43b[m Merge branch 'main' of https://github.com/Naue-Consultoria/gestao-contratos
+[33m32731ab[m fix: circular dependency
+[33mfa08d87[m fix: service management
+[33m6a352e8[m feat: routines attachments
+[33ma0b3f0d[m remove: silent mode
+[33m19f8e60[m feat: notification websocket
+[33m9c54c6c[m Merge branch 'main' of https://github.com/Naue-Consultoria/gestao-contratos
+[33m9c8b54e[m feat: notification service
+[33meb99192[m add: routines to sidebar
+[33m9e7e3e5[m add: routines oage
+[33m7b2667e[m fix: breadcrumb path buttons
+[33mac34dc1[m fix: budget limit
+[33m1bcf737[m add: routine button
+[33m3295e94[m fix: client name
+[33md110bd0[m fix: routines
+[33mfb260f2[m fix: contracts
+[33m2d42252[m style: configs
+[33mc6ea48c[m chore: iconNaue
+[33m003656a[m fix: values mask
+[33m3872412[m Merge branch 'main' of https://github.com/Naue-Consultoria/gestao-contratos
+[33m2cede73[m style: remove dark mode
+[33m594b174[m style: nav icon
+[33ma87c568[m fix: contract management
+[33m7726ad4[m fix: services report
+[33m5159635[m remove: client select on monthly and financial
+[33mc4064c3[m Merge branch 'main' of https://github.com/Naue-Consultoria/gestao-contratos
+[33mf8c3a01[m fix: contracts count
+[33m9b7a741[m fix: contract creation
+[33m2f74797[m add: contract_services management
+[33m122911d[m fix: proposals register
+[33m61afc63[m fix: client register
+[33m4821c9f[m fix: service register
+[33mff46254[m chore: dashboard stats with real data
+[33mb0e8382[m remove: analytics charts download button
+[33m2f3f063[m remove: client RG
+[33me3c1aa9[m chore: change sidebar order
