@@ -509,6 +509,39 @@ export class PublicMentoriaViewComponent implements OnInit {
     window.location.href = `/mentoria/${token}`;
   }
 
+  /**
+   * Obtém encontros publicados
+   */
+  getEncontrosPublicados(): any[] {
+    if (!this.outrosEncontros) return [];
+    return this.outrosEncontros.filter(e => e.status === 'published');
+  }
+
+  /**
+   * Verifica se deve mostrar dropdown (2+ encontros publicados)
+   */
+  shouldShowDropdown(): boolean {
+    return this.getEncontrosPublicados().length > 1;
+  }
+
+  /**
+   * Verifica se deve mostrar botão voltar (apenas 1 encontro publicado)
+   */
+  shouldShowBackButton(): boolean {
+    return this.getEncontrosPublicados().length === 1;
+  }
+
+  /**
+   * Volta para o hub da mentoria
+   */
+  voltarParaHub(): void {
+    if (!this.encontro?.mentoria_token) {
+      console.error('Token da mentoria não encontrado');
+      return;
+    }
+    window.location.href = `/mentoria-hub/${this.encontro.mentoria_token}`;
+  }
+
   // ===== SALVAR RESPOSTAS DAS PERGUNTAS =====
   salvarRespostas(bloco: any): void {
     if (!this.token || this.expired || !bloco.perguntas) return;

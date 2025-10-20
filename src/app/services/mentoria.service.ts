@@ -48,6 +48,7 @@ export interface MentoriaEncontro {
   criador?: any;
   blocos?: EncontroBloco[];
   outros_encontros?: OutroEncontro[];
+  mentoria_token?: string;
 }
 
 export interface OutroEncontro {
@@ -55,6 +56,7 @@ export interface OutroEncontro {
   numero_encontro: number;
   mentorado_nome: string;
   unique_token: string;
+  status: string;
   is_current: boolean;
 }
 

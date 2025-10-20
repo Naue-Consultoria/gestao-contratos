@@ -26,8 +26,8 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <div *ngIf="encontro && !isLoading && !notFound && !expired" class="mentoria-content">
 
-    <!-- Dropdown de Navegação entre Encontros -->
-    <div class="encontros-nav-dropdown" *ngIf="outrosEncontros && outrosEncontros.length > 1">
+    <!-- Dropdown de Navegação entre Encontros (quando há 2+ encontros publicados) -->
+    <div class="encontros-nav-dropdown" *ngIf="shouldShowDropdown()">
       <button
         class="encontros-nav-toggle"
         (click)="toggleEncontrosDropdown()"
@@ -42,7 +42,7 @@
           <span>Todos os Encontros</span>
         </div>
         <button
-          *ngFor="let outro of outrosEncontros"
+          *ngFor="let outro of getEncontrosPublicados()"
           class="encontro-nav-item"
           [class.current]="outro.is_current"
           (click)="navegarParaEncontro(outro.unique_token)"
@@ -57,6 +57,16 @@
           <i class="fas fa-chevron-right" *ngIf="!outro.is_current"></i>
         </button>
       </div>
+    </div>
+
+    <!-- Botão Voltar ao Hub (quando há apenas 1 encontro publicado) -->
+    <div class="encontros-nav-dropdown" *ngIf="shouldShowBackButton()">
+      <button
+        class="encontros-nav-toggle"
+        (click)="voltarParaHub()">
+        <i class="fas fa-arrow-left"></i>
+        <span class="nav-text">Voltar ao Hub da Mentoria</span>
+      </button>
     </div>
 
     <!-- Header Hero -->
