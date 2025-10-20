@@ -1251,6 +1251,12 @@ html {
   gap: 2rem;
 }
 
+.ref-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .ref-card {
   display: flex;
   align-items: center;
@@ -1353,6 +1359,95 @@ html {
 
 .ref-card-no-link::before {
   display: none;
+}
+
+/* Campo de anotações nas referências */
+.ref-anotacoes {
+  background: white;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.anotacoes-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #022c22;
+  margin-bottom: 0.75rem;
+}
+
+.anotacoes-label i {
+  color: #014d3a;
+  font-size: 0.9rem;
+}
+
+.anotacoes-textarea {
+  width: 100%;
+  padding: 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #374151;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.anotacoes-textarea:focus {
+  outline: none;
+  border-color: #022c22;
+  box-shadow: 0 0 0 3px rgba(2, 44, 34, 0.1);
+}
+
+.anotacoes-textarea::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Ações de referências */
+.referencias-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-save-anotacoes {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #022c22, #014d3a);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(2, 44, 34, 0.3);
+}
+
+.btn-save-anotacoes:hover:not(:disabled) {
+  background: linear-gradient(135deg, #014d3a, #022c22);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(2, 44, 34, 0.4);
+}
+
+.btn-save-anotacoes:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-save-anotacoes i {
+  font-size: 1.1rem;
 }
 
 /* === ENCERRAMENTO FINAL === */

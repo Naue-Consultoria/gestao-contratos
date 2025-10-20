@@ -163,6 +163,9 @@ export class PublicMentoriaViewComponent implements OnInit {
   goldenCircleId: number | null = null;
   salvandoGoldenCircle: boolean = false;
 
+  // Referências - Anotações
+  salvandoAnotacoes: boolean = false;
+
   // ViewChild para o container de visualização do mapa
   @ViewChild('mapaMentalVisualizacao', { static: false }) mapaMentalVisualizacao?: ElementRef;
 
@@ -606,6 +609,19 @@ export class PublicMentoriaViewComponent implements OnInit {
         if (response.success && response.data) {
           response.data.forEach((interacao: any) => {
             try {
+              // Para anotações de referência, não fazer parse
+              if (interacao.tipo_interacao === 'anotacao_referencia' && interacao.chave_item) {
+                const match = interacao.chave_item.match(/^referencia_(\d+)$/);
+                if (match && this.conteudoEstruturado.referencias?.itens) {
+                  const index = parseInt(match[1]);
+                  if (this.conteudoEstruturado.referencias.itens[index]) {
+                    this.conteudoEstruturado.referencias.itens[index].anotacaoMentorado = interacao.valor || '';
+                  }
+                }
+                return; // Pular para próxima interação
+              }
+
+              // Para outros tipos, fazer parse
               const valor = JSON.parse(interacao.valor);
 
               // Restaurar respostas das perguntas
@@ -2460,6 +2476,49 @@ export class PublicMentoriaViewComponent implements OnInit {
         this.toastr.error('Erro ao salvar Golden Circle');
         this.salvandoGoldenCircle = false;
       }
+    });
+  }
+
+  // ===== REFERÊNCIAS - ANOTAÇÕES =====
+
+  salvarTodasAnotacoesReferencias(): void {
+    if (!this.token || this.expired) {
+      this.toastr.warning('Não foi possível salvar as anotações');
+      return;
+    }
+
+    if (!this.conteudoEstruturado?.referencias?.itens) {
+      return;
+    }
+
+    this.salvandoAnotacoes = true;
+    let salvasComSucesso = 0;
+    const totalParaSalvar = this.conteudoEstruturado.referencias.itens.length;
+
+    // Salvar cada anotação
+    this.conteudoEstruturado.referencias.itens.forEach((ref: any, index: number) => {
+      this.mentoriaService.salvarInteracao(this.token, {
+        bloco_id: 0,
+        tipo_interacao: 'anotacao_referencia',
+        chave_item: `referencia_${index}`,
+        valor: ref.anotacaoMentorado || ''
+      }).subscribe({
+        next: () => {
+          salvasComSucesso++;
+          console.log(`✅ Anotação ${salvasComSucesso}/${totalParaSalvar} salva`);
+
+          // Quando todas forem salvas
+          if (salvasComSucesso === totalParaSalvar) {
+            this.toastr.success('Aprendizados salvos com sucesso!');
+            this.salvandoAnotacoes = false;
+          }
+        },
+        error: (error) => {
+          console.error('Erro ao salvar anotação:', error);
+          this.salvandoAnotacoes = false;
+          this.toastr.error('Erro ao salvar alguns aprendizados');
+        }
+      });
     });
   }
 

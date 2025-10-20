@@ -297,44 +297,71 @@
           </h2>
         </div>
         <div class="referencias-grid">
-          <ng-container *ngFor="let ref of conteudoEstruturado.referencias.itens">
-            <!-- Com link: elemento clicável -->
-            <a *ngIf="ref.link && ref.link.trim() !== ''"
-               [href]="ref.link"
-               target="_blank"
-               class="ref-card">
-              <div class="ref-icon-new">
-                <i class="fa-solid"
-                   [ngClass]="{
-                     'fa-play-circle': ref.tipo === 'ted',
-                     'fa-book': ref.tipo === 'livro',
-                     'fa-newspaper': ref.tipo === 'leitura'
-                   }"></i>
-              </div>
-              <div class="ref-content-new">
-                <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Leitura' }}</span>
-                <h4>{{ ref.titulo }}</h4>
-              </div>
-              <i class="fa-solid fa-external-link-alt ref-external-new"></i>
-            </a>
+          <ng-container *ngFor="let ref of conteudoEstruturado.referencias.itens; let refIndex = index">
+            <div class="ref-card-container">
+              <!-- Com link: elemento clicável -->
+              <a *ngIf="ref.link && ref.link.trim() !== ''"
+                 [href]="ref.link"
+                 target="_blank"
+                 class="ref-card">
+                <div class="ref-icon-new">
+                  <i class="fa-solid"
+                     [ngClass]="{
+                       'fa-play-circle': ref.tipo === 'ted',
+                       'fa-book': ref.tipo === 'livro',
+                       'fa-newspaper': ref.tipo === 'leitura'
+                     }"></i>
+                </div>
+                <div class="ref-content-new">
+                  <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Leitura' }}</span>
+                  <h4>{{ ref.titulo }}</h4>
+                </div>
+                <i class="fa-solid fa-external-link-alt ref-external-new"></i>
+              </a>
 
-            <!-- Sem link: elemento não clicável -->
-            <div *ngIf="!ref.link || ref.link.trim() === ''"
-                 class="ref-card ref-card-no-link">
-              <div class="ref-icon-new">
-                <i class="fa-solid"
-                   [ngClass]="{
-                     'fa-play-circle': ref.tipo === 'ted',
-                     'fa-book': ref.tipo === 'livro',
-                     'fa-newspaper': ref.tipo === 'leitura'
-                   }"></i>
+              <!-- Sem link: elemento não clicável -->
+              <div *ngIf="!ref.link || ref.link.trim() === ''"
+                   class="ref-card ref-card-no-link">
+                <div class="ref-icon-new">
+                  <i class="fa-solid"
+                     [ngClass]="{
+                       'fa-play-circle': ref.tipo === 'ted',
+                       'fa-book': ref.tipo === 'livro',
+                       'fa-newspaper': ref.tipo === 'leitura'
+                     }"></i>
+                </div>
+                <div class="ref-content-new">
+                  <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Leitura' }}</span>
+                  <h4>{{ ref.titulo }}</h4>
+                </div>
               </div>
-              <div class="ref-content-new">
-                <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Leitura' }}</span>
-                <h4>{{ ref.titulo }}</h4>
+
+              <!-- Campo de Anotações do Mentorado -->
+              <div class="ref-anotacoes">
+                <label class="anotacoes-label">
+                  <i class="fa-solid fa-pen"></i>
+                  Seus Aprendizados:
+                </label>
+                <textarea
+                  class="anotacoes-textarea"
+                  [(ngModel)]="ref.anotacaoMentorado"
+                  placeholder="Anote aqui seus principais aprendizados desta referência..."
+                  rows="3"></textarea>
               </div>
             </div>
           </ng-container>
+        </div>
+
+        <!-- Botão para salvar todas as anotações -->
+        <div class="referencias-actions">
+          <button
+            type="button"
+            class="btn-save-anotacoes"
+            (click)="salvarTodasAnotacoesReferencias()"
+            [disabled]="salvandoAnotacoes">
+            <i class="fa-solid" [ngClass]="salvandoAnotacoes ? 'fa-circle-notch fa-spin' : 'fa-save'"></i>
+            {{ salvandoAnotacoes ? 'Salvando...' : 'Salvar Aprendizados' }}
+          </button>
         </div>
       </div>
     </section>
