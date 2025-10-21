@@ -256,9 +256,32 @@ export class NotificationService {
   }
 
   clearHistory(): void {
+    // Limpar estado local
     this.notificationHistory.next([]);
     this.updateUnreadCount();
     this.saveNotificationsToStorage();
+
+    // Deletar do backend
+    this.http.delete(`${this.API_URL}/delete-all`).subscribe({
+      next: () => {
+        console.log('✅ Notificações deletadas do servidor');
+        this.fetchUnreadCount(); // Sincronizar contador
+      },
+      error: (err) => console.error('❌ Erro ao deletar notificações do servidor:', err)
+    });
+  }
+
+  /**
+   * Deletar notificações antigas (mais de X dias)
+   */
+  deleteOldNotifications(daysOld: number = 30): void {
+    this.http.delete(`${this.API_URL}/delete-old?days=${daysOld}`).subscribe({
+      next: () => {
+        console.log(`✅ Notificações antigas (>${daysOld} dias) deletadas`);
+        this.refreshNotifications(); // Recarregar notificações
+      },
+      error: (err) => console.error('❌ Erro ao deletar notificações antigas:', err)
+    });
   }
 
   /**

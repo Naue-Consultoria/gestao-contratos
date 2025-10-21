@@ -155,9 +155,23 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
 
   markAllAsRead() {
     if (this.unreadCount === 0) return;
-    
+
     if (confirm(`Marcar todas as ${this.unreadCount} notificações como lidas?`)) {
       this.notificationService.markAllAsRead();
+    }
+  }
+
+  clearAllNotifications() {
+    if (this.totalCount === 0) return;
+
+    const confirmMessage = `Tem certeza que deseja DELETAR todas as ${this.totalCount} notificações?\n\nEsta ação não pode ser desfeita e todas as notificações serão permanentemente removidas.`;
+
+    if (confirm(confirmMessage)) {
+      this.notificationService.clearHistory();
+      // Fechar modal após limpar
+      setTimeout(() => {
+        this.close.emit();
+      }, 500);
     }
   }
 

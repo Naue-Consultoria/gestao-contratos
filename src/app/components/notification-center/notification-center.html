@@ -8,13 +8,21 @@
         Notificações
       </h2>
       <div class="header-actions">
-        <button 
-          class="action-btn" 
+        <button
+          class="action-btn"
           (click)="markAllAsRead()"
           [disabled]="unreadCount === 0"
           title="Marcar todas como lidas">
           <i class="fas fa-check-double"></i>
           Marcar todas como lidas
+        </button>
+        <button
+          class="action-btn delete-btn"
+          (click)="clearAllNotifications()"
+          [disabled]="totalCount === 0"
+          title="Deletar todas as notificações">
+          <i class="fas fa-trash"></i>
+          Limpar tudo
         </button>
         <button class="close-btn" (click)="close.emit()" title="Fechar">
           <i class="fas fa-times"></i>

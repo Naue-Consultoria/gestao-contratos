@@ -110,7 +110,22 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
   }
   
   clearAll() {
-    this.notificationService.clearHistory();
+    // Confirmar com o usuário antes de deletar tudo
+    const totalNotifications = this.notifications.length;
+
+    if (totalNotifications === 0) {
+      return;
+    }
+
+    const confirmMessage = `Tem certeza que deseja deletar todas as ${totalNotifications} notificações? Esta ação não pode ser desfeita.`;
+
+    if (confirm(confirmMessage)) {
+      this.notificationService.clearHistory();
+      // Fechar dropdown após limpar
+      setTimeout(() => {
+        this.close.emit();
+      }, 500);
+    }
   }
   
   
