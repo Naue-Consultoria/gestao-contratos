@@ -84,7 +84,7 @@ interface MapaMentalData {
 }
 
 interface SecaoReordenavel {
-  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental';
+  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle';
   titulo: string;
   icone: string;
   ordem: number;
@@ -159,7 +159,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     zonasAprendizado: { ativo: false },
     goldenCircle: { ativo: false },
     encerramento: { ativo: true, conteudo: '' },
-    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental'] // Ordem padrão
+    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle'] // Ordem padrão
   };
 
   // Lista de seções reordenáveis
@@ -167,7 +167,10 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { id: 'testes', titulo: 'Testes', icone: 'fa-clipboard-check', ordem: 0 },
     { id: 'proximosPassos', titulo: 'Próximos Passos', icone: 'fa-arrow-right', ordem: 1 },
     { id: 'referencias', titulo: 'Referências / Inspirações', icone: 'fa-book', ordem: 2 },
-    { id: 'mapaMental', titulo: 'Mapa Mental Estratégico', icone: 'fa-diagram-project', ordem: 3 }
+    { id: 'mapaMental', titulo: 'Mapa Mental Estratégico', icone: 'fa-diagram-project', ordem: 3 },
+    { id: 'modeloABC', titulo: 'Modelo ABC', icone: 'fa-brain', ordem: 4 },
+    { id: 'zonasAprendizado', titulo: 'Zonas de Aprendizado', icone: 'fa-chart-simple', ordem: 5 },
+    { id: 'goldenCircle', titulo: 'The Golden Circle', icone: 'fa-bullseye', ordem: 6 }
   ];
 
   constructor(
@@ -281,7 +284,10 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
               // Adicionar ordem de seções se não existir (retrocompatibilidade)
               if (!this.conteudo.ordemSecoes) {
-                this.conteudo.ordemSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental'];
+                this.conteudo.ordemSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle'];
+              } else if (this.conteudo.ordemSecoes.length === 4) {
+                // Migrar ordens antigas (4 seções) para o novo formato (7 seções)
+                this.conteudo.ordemSecoes = [...this.conteudo.ordemSecoes, 'modeloABC', 'zonasAprendizado', 'goldenCircle'];
               }
             } catch (e) {
               // Se não for JSON, é conteúdo antigo - manter vazio
@@ -360,7 +366,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
   get secoesOrdenadas(): string[] {
     if (!this.conteudo.ordemSecoes || this.conteudo.ordemSecoes.length === 0) {
-      return ['testes', 'proximosPassos', 'referencias', 'mapaMental'];
+      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle'];
     }
     return this.conteudo.ordemSecoes;
   }

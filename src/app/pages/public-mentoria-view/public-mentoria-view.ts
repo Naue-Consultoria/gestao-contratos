@@ -224,6 +224,14 @@ export class PublicMentoriaViewComponent implements OnInit {
   // Conteúdo estruturado (novo formato)
   conteudoEstruturado: any = null;
 
+  // Getter para obter seções ordenadas conforme configuração do editor
+  get secoesOrdenadas(): string[] {
+    if (!this.conteudoEstruturado?.ordemSecoes || this.conteudoEstruturado.ordemSecoes.length === 0) {
+      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle'];
+    }
+    return this.conteudoEstruturado.ordemSecoes;
+  }
+
   carregarEncontro(): void {
     this.isLoading = true;
 

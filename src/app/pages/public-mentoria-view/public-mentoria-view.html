@@ -176,9 +176,12 @@
       </div>
     </section>
 
+    <!-- SEÇÕES REORDENÁVEIS -->
+    <ng-container *ngFor="let secaoId of secoesOrdenadas">
+
     <!-- Testes Section -->
-    <section class="dark-section testes-main-section"
-             *ngIf="conteudoEstruturado && conteudoEstruturado.testes?.ativo && conteudoEstruturado.testes?.itens?.length > 0">
+    <section *ngIf="secaoId === 'testes'" class="dark-section testes-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.testes?.ativo || !conteudoEstruturado.testes?.itens?.length">
       <div class="dark-container">
         <div class="dark-header">
           <h2 class="dark-title">
@@ -211,8 +214,8 @@
     </section>
 
     <!-- Próximos Passos Section -->
-    <section class="dark-section proximos-passos-main-section"
-             *ngIf="conteudoEstruturado && conteudoEstruturado.proximosPassos?.ativo && conteudoEstruturado.proximosPassos?.blocos?.length > 0">
+    <section *ngIf="secaoId === 'proximosPassos'" class="dark-section proximos-passos-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.proximosPassos?.ativo || !conteudoEstruturado.proximosPassos?.blocos?.length">
       <div class="dark-container">
         <div class="dark-header">
           <h2 class="dark-title">
@@ -287,8 +290,8 @@
     </section>
 
     <!-- Referências Section -->
-    <section class="dark-section referencias-main-section"
-             *ngIf="conteudoEstruturado && conteudoEstruturado.referencias?.ativo && conteudoEstruturado.referencias?.itens?.length > 0">
+    <section *ngIf="secaoId === 'referencias'" class="dark-section referencias-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.referencias?.ativo || !conteudoEstruturado.referencias?.itens?.length">
       <div class="dark-container">
         <div class="dark-header">
           <h2 class="dark-title">
@@ -367,8 +370,8 @@
     </section>
 
     <!-- Modelo ABC Section -->
-    <section class="dark-section modelo-abc-main-section"
-             *ngIf="conteudoEstruturado && conteudoEstruturado.modeloABC?.ativo">
+    <section *ngIf="secaoId === 'modeloABC'" class="dark-section modelo-abc-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.modeloABC?.ativo">
       <div class="dark-container">
         <div class="dark-header">
           <h2 class="dark-title">
@@ -531,8 +534,8 @@
     </section>
 
     <!-- Zonas de Aprendizado Section -->
-    <section class="dark-section zonas-aprendizado-main-section"
-             *ngIf="conteudoEstruturado && conteudoEstruturado.zonasAprendizado?.ativo">
+    <section *ngIf="secaoId === 'zonasAprendizado'" class="dark-section zonas-aprendizado-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.zonasAprendizado?.ativo">
       <div class="dark-container">
         <div class="dark-header">
           <h2 class="dark-title">
@@ -720,8 +723,8 @@
     </section>
 
     <!-- The Golden Circle Section -->
-    <section class="dark-section golden-circle-main-section"
-             *ngIf="conteudoEstruturado && conteudoEstruturado.goldenCircle?.ativo">
+    <section *ngIf="secaoId === 'goldenCircle'" class="dark-section golden-circle-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.goldenCircle?.ativo">
       <div class="dark-container">
         <div class="dark-header">
           <h2 class="dark-title">
@@ -843,8 +846,8 @@
     </section>
 
     <!-- Mapa Mental Section -->
-    <section class="dark-section mapa-mental-main-section"
-             *ngIf="conteudoEstruturado && conteudoEstruturado.mapaMental?.ativo">
+    <section *ngIf="secaoId === 'mapaMental'" class="dark-section mapa-mental-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaMental?.ativo">
       <div class="dark-container">
         <div class="dark-header">
           <h2 class="dark-title">
@@ -1062,6 +1065,9 @@
 
       </div>
     </section>
+
+    </ng-container>
+    <!-- FIM DAS SEÇÕES REORDENÁVEIS -->
 
     <!-- Encerramento Section -->
     <section class="encerramento-final-section"

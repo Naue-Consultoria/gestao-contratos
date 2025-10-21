@@ -581,11 +581,8 @@
         </div>
       </section>
 
-      </ng-container>
-      <!-- FIM DAS SEÇÕES REORDENÁVEIS -->
-
       <!-- MODELO ABC -->
-      <section class="editor-section">
+      <section *ngIf="secaoId === 'modeloABC'" class="editor-section">
         <div class="section-header">
           <label class="checkbox-label">
             <input
@@ -597,6 +594,24 @@
               Modelo ABC
             </span>
           </label>
+          <div class="section-header-actions">
+            <button
+              type="button"
+              class="btn-reorder-section"
+              (click)="moverSecaoParaCima('modeloABC')"
+              [disabled]="!podeSecaoSubir('modeloABC')"
+              title="Mover seção para cima">
+              <i class="fa-solid fa-arrow-up"></i>
+            </button>
+            <button
+              type="button"
+              class="btn-reorder-section"
+              (click)="moverSecaoParaBaixo('modeloABC')"
+              [disabled]="!podeSecaoDescer('modeloABC')"
+              title="Mover seção para baixo">
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+          </div>
         </div>
 
         <div *ngIf="conteudo.modeloABC.ativo" class="section-content">
@@ -611,7 +626,7 @@
       </section>
 
       <!-- ZONAS DE APRENDIZADO -->
-      <section class="editor-section">
+      <section *ngIf="secaoId === 'zonasAprendizado'" class="editor-section">
         <div class="section-header">
           <label class="checkbox-label">
             <input
@@ -623,6 +638,24 @@
               Zonas de Aprendizado
             </span>
           </label>
+          <div class="section-header-actions">
+            <button
+              type="button"
+              class="btn-reorder-section"
+              (click)="moverSecaoParaCima('zonasAprendizado')"
+              [disabled]="!podeSecaoSubir('zonasAprendizado')"
+              title="Mover seção para cima">
+              <i class="fa-solid fa-arrow-up"></i>
+            </button>
+            <button
+              type="button"
+              class="btn-reorder-section"
+              (click)="moverSecaoParaBaixo('zonasAprendizado')"
+              [disabled]="!podeSecaoDescer('zonasAprendizado')"
+              title="Mover seção para baixo">
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+          </div>
         </div>
 
         <div *ngIf="conteudo.zonasAprendizado.ativo" class="section-content">
@@ -637,7 +670,7 @@
       </section>
 
       <!-- THE GOLDEN CIRCLE -->
-      <section class="editor-section">
+      <section *ngIf="secaoId === 'goldenCircle'" class="editor-section">
         <div class="section-header">
           <label class="checkbox-label">
             <input
@@ -649,6 +682,24 @@
               The Golden Circle
             </span>
           </label>
+          <div class="section-header-actions">
+            <button
+              type="button"
+              class="btn-reorder-section"
+              (click)="moverSecaoParaCima('goldenCircle')"
+              [disabled]="!podeSecaoSubir('goldenCircle')"
+              title="Mover seção para cima">
+              <i class="fa-solid fa-arrow-up"></i>
+            </button>
+            <button
+              type="button"
+              class="btn-reorder-section"
+              (click)="moverSecaoParaBaixo('goldenCircle')"
+              [disabled]="!podeSecaoDescer('goldenCircle')"
+              title="Mover seção para baixo">
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+          </div>
         </div>
 
         <div *ngIf="conteudo.goldenCircle.ativo" class="section-content">
@@ -661,6 +712,9 @@
           </div>
         </div>
       </section>
+
+      </ng-container>
+      <!-- FIM DAS SEÇÕES REORDENÁVEIS -->
 
       <!-- ENCERRAMENTO -->
       <section class="editor-section">
