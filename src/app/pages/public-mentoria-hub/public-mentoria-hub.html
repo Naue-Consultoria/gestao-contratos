@@ -61,13 +61,13 @@
               </div>
             </div>
 
-            <div class="hero-card" *ngIf="mentoria.mentorado_idade" scrollAnimation animationType="zoom" [animationDelay]="1.0">
+            <div class="hero-card" *ngIf="calcularIdade()" scrollAnimation animationType="zoom" [animationDelay]="1.0">
               <div class="hero-card-icon">
                 <i class="fas fa-birthday-cake"></i>
               </div>
               <div class="hero-card-content">
                 <h3>Idade</h3>
-                <p class="hero-card-value">{{mentoria.mentorado_idade}} anos</p>
+                <p class="hero-card-value">{{ calcularIdade() }} anos</p>
                 <span class="hero-card-subtitle">Idade do mentorado</span>
               </div>
             </div>

@@ -66,7 +66,7 @@ export class MentoriaEdit implements OnInit {
       client_id: ['', Validators.required],
       contract_id: ['', Validators.required],
       status: ['ativa', Validators.required],
-      mentorado_idade: [''], // Idade do mentorado (opcional)
+      mentorado_data_nascimento: [''], // Data de nascimento do mentorado (opcional)
       mentorado_profissao: [''], // Profissão do mentorado (opcional)
       mentorado_email: [''] // Email do mentorado (opcional)
     });
@@ -172,7 +172,7 @@ export class MentoriaEdit implements OnInit {
       client_id: this.mentoria.client_id,
       contract_id: this.mentoria.contract_id,
       status: this.mentoria.status,
-      mentorado_idade: this.mentoria.mentorado_idade || '',
+      mentorado_data_nascimento: this.mentoria.mentorado_data_nascimento || '',
       mentorado_profissao: this.mentoria.mentorado_profissao || '',
       mentorado_email: this.mentoria.mentorado_email || ''
     });

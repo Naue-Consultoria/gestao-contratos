@@ -13,7 +13,7 @@ export interface Mentoria {
   foto_url?: string;
   testes?: any; // JSONB field for storing test links
   mentorado_nome?: string; // Nome do mentorado
-  mentorado_idade?: number; // Idade do mentorado
+  mentorado_data_nascimento?: string; // Data de nascimento do mentorado
   mentorado_profissao?: string; // Profissão do mentorado
   mentorado_email?: string; // Email do mentorado
   created_at: string;
@@ -141,7 +141,7 @@ export class MentoriaService {
     contract_id: number;
     numero_encontros: number;
     mentorado_nome: string;
-    mentorado_idade?: number; // Idade do mentorado
+    mentorado_data_nascimento?: string; // Data de nascimento do mentorado
     mentorado_profissao?: string; // Profissão do mentorado
     mentorado_email?: string; // Email do mentorado
     testes?: any; // Optional test links array

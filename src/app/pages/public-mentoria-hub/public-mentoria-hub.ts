@@ -14,7 +14,7 @@ interface MentoriaPublica {
   unique_token?: string;
   foto_url?: string;
   testes?: any;
-  mentorado_idade?: number;
+  mentorado_data_nascimento?: string;
   mentorado_profissao?: string;
   mentorado_email?: string;
   created_at: string;
@@ -260,5 +260,24 @@ export class PublicMentoriaHub implements OnInit {
 
   getTotalEncontros(): number {
     return this.mentoria?.numero_encontros || 0;
+  }
+
+  // Calcular idade a partir da data de nascimento
+  calcularIdade(): number | null {
+    if (!this.mentoria?.mentorado_data_nascimento) return null;
+
+    const dataNascimento = new Date(this.mentoria.mentorado_data_nascimento);
+    const hoje = new Date();
+
+    let idade = hoje.getFullYear() - dataNascimento.getFullYear();
+    const mesAtual = hoje.getMonth();
+    const mesNascimento = dataNascimento.getMonth();
+
+    // Ajustar se ainda não fez aniversário este ano
+    if (mesAtual < mesNascimento || (mesAtual === mesNascimento && hoje.getDate() < dataNascimento.getDate())) {
+      idade--;
+    }
+
+    return idade;
   }
 }
