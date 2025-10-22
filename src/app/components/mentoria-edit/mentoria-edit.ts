@@ -36,9 +36,6 @@ export class MentoriaEdit implements OnInit {
   fotoSelecionadaPreview: string | null = null;
   fotoAtualUrl: string | null = null;
 
-  // Testes da mentoria
-  testes: Array<{titulo: string, descricao: string, link: string}> = [];
-
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -185,25 +182,7 @@ export class MentoriaEdit implements OnInit {
       this.fotoAtualUrl = this.mentoria.foto_url;
     }
 
-    // Carregar testes da mentoria se existir
-    if (this.mentoria.testes) {
-      // Parse JSONB field if it's a string
-      if (typeof this.mentoria.testes === 'string') {
-        try {
-          this.testes = JSON.parse(this.mentoria.testes);
-        } catch (e) {
-          console.error('Erro ao parsear testes:', e);
-          this.testes = [];
-        }
-      } else if (Array.isArray(this.mentoria.testes)) {
-        this.testes = this.mentoria.testes;
-      } else {
-        this.testes = [];
-      }
-    }
-
     console.log('✅ Formulário preenchido:', this.mentoriaForm.value);
-    console.log('✅ Testes carregados:', this.testes);
   }
 
   onClienteChange(clientId: number): void {
@@ -244,10 +223,7 @@ export class MentoriaEdit implements OnInit {
 
     try {
       // 1. Atualizar dados da mentoria
-      const dados = {
-        ...this.mentoriaForm.getRawValue(),
-        testes: this.testes.length > 0 ? this.testes : []
-      };
+      const dados = this.mentoriaForm.getRawValue();
       const response = await this.mentoriaService.atualizarMentoria(this.mentoriaId, dados).toPromise();
 
       if (response?.success) {
@@ -358,20 +334,6 @@ export class MentoriaEdit implements OnInit {
     } finally {
       this.isUploadingFoto = false;
     }
-  }
-
-  // ===== GERENCIAMENTO DE TESTES =====
-
-  adicionarTeste(): void {
-    this.testes.push({
-      titulo: '',
-      descricao: '',
-      link: ''
-    });
-  }
-
-  removerTeste(index: number): void {
-    this.testes.splice(index, 1);
   }
 
   private configurarBreadcrumb(): void {

@@ -323,57 +323,6 @@
         </div>
       </div>
 
-      <!-- Seção de Testes e Avaliações - Apenas no modo Criação -->
-      <div class="form-section" *ngIf="!isEditMode">
-        <div class="section-header">
-          <div class="section-header-left">
-            <i class="fas fa-clipboard-check section-icon"></i>
-            <div>
-              <h3 class="section-title">Testes e Avaliações</h3>
-              <p class="section-subtitle">Adicione links de testes para os mentorados</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="testes-container">
-          <div class="teste-item" *ngFor="let teste of testes; let i = index">
-            <div class="teste-header">
-              <span class="teste-numero">Teste {{ i + 1 }}</span>
-              <button type="button" class="btn-remove-teste" (click)="removerTeste(i)" title="Remover teste">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-            <div class="teste-fields">
-              <input
-                type="text"
-                [(ngModel)]="teste.titulo"
-                placeholder="Título do teste"
-                class="teste-titulo">
-              <input
-                type="text"
-                [(ngModel)]="teste.descricao"
-                placeholder="Descrição breve"
-                class="teste-descricao">
-              <input
-                type="url"
-                [(ngModel)]="teste.link"
-                placeholder="Link do teste (https://...)"
-                class="teste-link">
-            </div>
-          </div>
-
-          <button type="button" class="btn-add-teste" (click)="adicionarTeste()">
-            <i class="fas fa-plus"></i>
-            Adicionar Teste
-          </button>
-
-          <small class="field-hint" *ngIf="testes.length === 0">
-            <i class="fas fa-info-circle"></i>
-            Os testes aparecerão no hub da mentoria para os mentorados realizarem
-          </small>
-        </div>
-      </div>
-
       <!-- Seção Editor de Conteúdo - Apenas no modo Edição -->
       <div class="form-section" *ngIf="isEditMode && encontroId">
         <div class="section-header">
