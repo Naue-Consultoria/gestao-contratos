@@ -37,6 +37,7 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
   showExportModal = false;
   showDeleteModal = false;
   isDeleting = false;
+  expandedServices: { [key: number]: boolean } = {};
 
   constructor() {
     // Recuperar informações do usuário do localStorage
@@ -593,5 +594,17 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
 
   closeExportModal() {
     this.showExportModal = false;
+  }
+
+  toggleServiceDetails(serviceId: number) {
+    this.expandedServices[serviceId] = !this.expandedServices[serviceId];
+  }
+
+  isServiceExpanded(serviceId: number): boolean {
+    return this.expandedServices[serviceId] || false;
+  }
+
+  hasServiceDetails(service: any): boolean {
+    return !!(service.service?.subtitle || service.service?.summary || service.service?.description);
   }
 }

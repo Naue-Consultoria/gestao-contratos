@@ -126,6 +126,9 @@ export interface ApiContractService {
     name: string;
     duration: number;
     category: string;
+    description?: string;
+    summary?: string;
+    subtitle?: string;
     service_stages?: ServiceStage[];
   };
 }

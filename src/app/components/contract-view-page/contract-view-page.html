@@ -101,12 +101,18 @@
         <div class="services-grid" *ngIf="getNonInternalServices().length > 0">
           <div *ngFor="let service of getNonInternalServices(); let i = index" class="service-card">
             <div class="service-card-header">
-              <div class="service-number">{{ i + 1 }}</div>
-              <div class="service-name">{{ service.service.name || 'Serviço ' + service.service.id }}</div>
-              <span class="additive-date" *ngIf="!isAdditiveService(service)">
-                {{ getServiceAddedDate(service) }}
-              </span>
-              <div class="service-badges">
+              <div class="service-header-left">
+                <div class="service-number">{{ i + 1 }}</div>
+                <div class="service-name">{{ service.service.name || 'Serviço ' + service.service.id }}</div>
+              </div>
+
+              <div class="service-header-right">
+                <!-- Data (quando não é aditivo) -->
+                <span class="additive-date" *ngIf="!isAdditiveService(service)">
+                  {{ getServiceAddedDate(service) }}
+                </span>
+
+                <!-- Badge de Aditivo -->
                 <div *ngIf="isAdditiveService(service)" class="additive-container">
                   <span class="additive-badge">
                     Aditivo
@@ -115,12 +121,38 @@
                     {{ getServiceAddedDate(service) }}
                   </span>
                 </div>
+
+                <!-- Botão de Toggle -->
+                <button
+                  *ngIf="hasServiceDetails(service)"
+                  class="btn-toggle-details"
+                  (click)="toggleServiceDetails(service.id)"
+                  [title]="isServiceExpanded(service.id) ? 'Recolher detalhes' : 'Ver detalhes'"
+                >
+                  <i class="fas" [class.fa-chevron-down]="!isServiceExpanded(service.id)" [class.fa-chevron-up]="isServiceExpanded(service.id)"></i>
+                </button>
               </div>
             </div>
-            
+
             <div class="service-card-body">
-              <div class="service-description" *ngIf="service.service.category">
-                Categoria: {{ service.service.category }}
+              <!-- Detalhes expandíveis -->
+              <div class="service-details-content" *ngIf="isServiceExpanded(service.id)">
+                <!-- Subtítulo do serviço -->
+                <div class="service-subtitle" *ngIf="service.service.subtitle">
+                  <i class="fas fa-bookmark"></i> <span [innerHTML]="service.service.subtitle"></span>
+                </div>
+
+                <!-- Resumo do serviço -->
+                <div class="service-summary" *ngIf="service.service.summary" [innerHTML]="service.service.summary">
+                </div>
+
+                <!-- Descrição do serviço -->
+                <div class="service-description" *ngIf="service.service.description" [innerHTML]="service.service.description">
+                </div>
+              </div>
+
+              <div class="service-category" *ngIf="service.service.category">
+                <i class="fas fa-tag"></i> Categoria: {{ service.service.category }}
               </div>
 
               <!-- Valores financeiros - APENAS para Admin -->
