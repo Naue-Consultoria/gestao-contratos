@@ -559,6 +559,152 @@
   box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
 }
 
+/* Multi-select dropdown */
+.multi-select-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.multi-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 200px;
+  text-align: left;
+}
+
+.multi-select-trigger.active {
+  border-color: #0e9b71;
+  background: #f0fdf4;
+}
+
+.multi-select-trigger i {
+  font-size: 0.75rem;
+  color: #6b7280;
+  transition: transform 0.2s;
+}
+
+.multi-select-trigger.active i {
+  transform: rotate(180deg);
+}
+
+.multi-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  min-width: 250px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 400px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.multi-select-options {
+  overflow-y: auto;
+  padding: 0.5rem;
+  max-height: 350px;
+}
+
+.multi-select-option {
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 0.75rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.multi-select-option:hover {
+  background: #f3f4f6;
+}
+
+.multi-select-option input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.multi-select-option .checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.multi-select-option input[type="checkbox"]:checked + .checkbox-custom {
+  background: #0e9b71;
+  border-color: #0e9b71;
+}
+
+.multi-select-option input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: '\f00c';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  color: white;
+  font-size: 0.625rem;
+}
+
+.multi-select-option .option-label {
+  font-size: 0.875rem;
+  color: #374151;
+  user-select: none;
+}
+
+.multi-select-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  background: #f9fafb;
+}
+
+.btn-clear-selection {
+  width: 100%;
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  color: #dc2626;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.btn-clear-selection:hover {
+  background: #fee2e2;
+  border-color: #dc2626;
+}
+
 /* Action Buttons */
 .action-buttons {
   display: flex;

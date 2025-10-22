@@ -1,4 +1,4 @@
-import { Component, OnInit, LOCALE_ID, inject } from '@angular/core';
+import { Component, OnInit, LOCALE_ID, inject, HostListener } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -54,7 +54,8 @@ interface Vaga {
 export class RecrutamentoSelecao implements OnInit {
   isLoading: boolean = false;
   searchTerm: string = '';
-  statusFilter: string = '';
+  statusFilter: string[] = [];  // Array para múltiplos status
+  statusDropdownOpen: boolean = false;  // Controla dropdown de status
   departmentFilter: string = '';
   tipoCargoFilter: string = '';
   fonteRecrutamentoFilter: string = '';
@@ -137,6 +138,15 @@ export class RecrutamentoSelecao implements OnInit {
     this.setBreadcrumb();
     this.initializeFilters();
     this.loadData();
+  }
+
+  // Fechar dropdown quando clicar fora
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.multi-select-wrapper')) {
+      this.statusDropdownOpen = false;
+    }
   }
 
   private initializeFilters() {
@@ -304,7 +314,7 @@ export class RecrutamentoSelecao implements OnInit {
         vaga.usuarioNome.toLowerCase().includes(searchLower) ||
         (vaga.candidatoAprovado && vaga.candidatoAprovado.toLowerCase().includes(searchLower));
 
-      const matchesStatus = !this.statusFilter || vaga.status === this.statusFilter;
+      const matchesStatus = this.statusFilter.length === 0 || this.statusFilter.includes(vaga.status);
       const matchesTipoCargo = !this.tipoCargoFilter || vaga.tipoCargo === this.tipoCargoFilter;
       const matchesFonte = !this.fonteRecrutamentoFilter || vaga.fonteRecrutamento === this.fonteRecrutamentoFilter;
 
@@ -336,7 +346,7 @@ export class RecrutamentoSelecao implements OnInit {
 
   clearFilters() {
     this.searchTerm = '';
-    this.statusFilter = '';
+    this.statusFilter = [];
     this.departmentFilter = '';
     this.tipoCargoFilter = '';
     this.fonteRecrutamentoFilter = '';
@@ -347,7 +357,36 @@ export class RecrutamentoSelecao implements OnInit {
   }
 
   hasFilters(): boolean {
-    return !!(this.searchTerm || this.statusFilter || this.departmentFilter || this.tipoCargoFilter || this.fonteRecrutamentoFilter || this.selectedMonth || this.selectedYear || this.consultoraFilter);
+    return !!(this.searchTerm || this.statusFilter.length > 0 || this.departmentFilter || this.tipoCargoFilter || this.fonteRecrutamentoFilter || this.selectedMonth || this.selectedYear || this.consultoraFilter);
+  }
+
+  // Métodos para controle do multi-select de status
+  toggleStatusDropdown() {
+    this.statusDropdownOpen = !this.statusDropdownOpen;
+  }
+
+  toggleStatusFilter(status: string) {
+    const index = this.statusFilter.indexOf(status);
+    if (index > -1) {
+      this.statusFilter.splice(index, 1);
+    } else {
+      this.statusFilter.push(status);
+    }
+    this.applyFilters();
+  }
+
+  isStatusSelected(status: string): boolean {
+    return this.statusFilter.includes(status);
+  }
+
+  getStatusFilterLabel(): string {
+    if (this.statusFilter.length === 0) {
+      return 'Todos os status';
+    } else if (this.statusFilter.length === 1) {
+      return this.statusLabels[this.statusFilter[0]];
+    } else {
+      return `${this.statusFilter.length} status selecionados`;
+    }
   }
 
   // Helper method to get Object.keys in template

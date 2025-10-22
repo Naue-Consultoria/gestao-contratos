@@ -77,12 +77,41 @@
         </div>
 
         <div class="filter-group">
-          <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()" *ngIf="activeTab === 'geral'">
-            <option value="">Todos os status</option>
-            <option *ngFor="let status of Object.keys(statusLabels)" [value]="status">
-              {{ statusLabels[status] }}
-            </option>
-          </select>
+          <!-- Multi-select dropdown para status -->
+          <div class="multi-select-wrapper" *ngIf="activeTab === 'geral'">
+            <button
+              type="button"
+              class="filter-select multi-select-trigger"
+              (click)="toggleStatusDropdown()"
+              [class.active]="statusFilter.length > 0">
+              <span>{{ getStatusFilterLabel() }}</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+
+            <div class="multi-select-dropdown" *ngIf="statusDropdownOpen">
+              <div class="multi-select-options">
+                <label
+                  *ngFor="let status of Object.keys(statusLabels)"
+                  class="multi-select-option">
+                  <input
+                    type="checkbox"
+                    [checked]="isStatusSelected(status)"
+                    (change)="toggleStatusFilter(status)">
+                  <span class="checkbox-custom"></span>
+                  <span class="option-label">{{ statusLabels[status] }}</span>
+                </label>
+              </div>
+              <div class="multi-select-footer" *ngIf="statusFilter.length > 0">
+                <button
+                  type="button"
+                  class="btn-clear-selection"
+                  (click)="statusFilter = []; applyFilters()">
+                  <i class="fas fa-times"></i>
+                  Limpar seleção
+                </button>
+              </div>
+            </div>
+          </div>
 
           <select class="filter-select" [(ngModel)]="tipoCargoFilter" (change)="applyFilters()">
             <option value="">Todos os tipos de cargo</option>
