@@ -256,13 +256,20 @@
             <div class="item-header">
               <div class="item-header-left">
                 <span class="bloco-tipo-badge">
-                  <i class="fa-solid"
-                     [ngClass]="{
-                       'fa-align-left': bloco.tipo === 'texto',
-                       'fa-question-circle': bloco.tipo === 'perguntas',
-                       'fa-list-check': bloco.tipo === 'tarefas'
-                     }"></i>
-                  {{ bloco.tipo === 'texto' ? 'Texto' : bloco.tipo === 'perguntas' ? 'Perguntas' : 'Tarefas' }}
+                  <div class="badge-content">
+                    <div class="badge-tipo">
+                      <i class="fa-solid"
+                         [ngClass]="{
+                           'fa-align-left': bloco.tipo === 'texto',
+                           'fa-question-circle': bloco.tipo === 'perguntas',
+                           'fa-list-check': bloco.tipo === 'tarefas'
+                         }"></i>
+                      {{ bloco.tipo === 'texto' ? 'Texto' : bloco.tipo === 'perguntas' ? 'Perguntas' : 'Tarefas' }}
+                    </div>
+                    <div class="badge-template" *ngIf="bloco.nomeTemplate">
+                      {{ bloco.nomeTemplate }}
+                    </div>
+                  </div>
                 </span>
               </div>
               <div class="item-header-right">
