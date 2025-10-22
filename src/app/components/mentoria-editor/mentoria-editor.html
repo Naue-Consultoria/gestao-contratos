@@ -1,10 +1,7 @@
-<div class="page mentoria-editor-page" *ngIf="!isLoading">
-
-  <!-- Header -->
+<div class="page" *ngIf="!isLoading">
   <div class="page-header">
     <div class="header-title-section">
       <h1 class="page-title">
-        <i class="fas fa-chalkboard-teacher" style="color: #00594a; margin-right: 0.5rem;"></i>
         {{ isEditMode ? 'Editar Encontro de Mentoria' : 'Criar Nova Mentoria' }}
       </h1>
       <app-breadcrumb></app-breadcrumb>

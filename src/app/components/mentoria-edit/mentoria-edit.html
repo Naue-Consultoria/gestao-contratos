@@ -1,4 +1,4 @@
-<div class="page mentoria-edit-page">
+<div class="page">
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-state">
     <div class="spinner"></div>
@@ -7,11 +7,9 @@
 
   <!-- Content -->
   <div *ngIf="!isLoading">
-    <!-- Header -->
     <div class="page-header">
       <div class="header-title-section">
         <h1 class="page-title">
-          <i class="fas fa-edit" style="color: #00594a; margin-right: 0.5rem;"></i>
           Editar Mentoria
         </h1>
         <app-breadcrumb></app-breadcrumb>

@@ -3,10 +3,15 @@
   animation: fadeInUp 0.5s ease;
 }
 
-.mentoria-edit-page {
-  padding: 1.25rem;
-  max-width: 1600px;
-  margin: 0 auto;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Two Column Layout */
@@ -28,17 +33,6 @@
   .two-column-layout {
     grid-template-columns: 1fr;
     gap: 1.5rem;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
