@@ -302,8 +302,32 @@
         <div class="referencias-grid">
           <ng-container *ngFor="let ref of conteudoEstruturado.referencias.itens; let refIndex = index">
             <div class="ref-card-container">
-              <!-- Com link: elemento clicável -->
-              <a *ngIf="ref.link && ref.link.trim() !== ''"
+              <!-- Vídeo do YouTube incorporado -->
+              <div *ngIf="ref.link && isYouTubeUrl(ref.link)" class="youtube-video-container">
+                <div class="ref-header">
+                  <div class="ref-icon-new">
+                    <i class="fa-solid fa-play-circle"></i>
+                  </div>
+                  <div class="ref-content-new">
+                    <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Vídeo' }}</span>
+                    <h4>{{ ref.titulo }}</h4>
+                  </div>
+                  <a [href]="ref.link" target="_blank" class="ref-external-link" title="Abrir no YouTube">
+                    <i class="fa-solid fa-external-link-alt"></i>
+                  </a>
+                </div>
+                <div class="video-embed">
+                  <iframe
+                    [src]="getYouTubeEmbedUrl(ref.link)"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                  </iframe>
+                </div>
+              </div>
+
+              <!-- Com link (não YouTube): elemento clicável -->
+              <a *ngIf="ref.link && ref.link.trim() !== '' && !isYouTubeUrl(ref.link)"
                  [href]="ref.link"
                  target="_blank"
                  class="ref-card">

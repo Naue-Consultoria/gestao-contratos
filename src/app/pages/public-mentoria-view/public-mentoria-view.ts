@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MentoriaService, MentoriaEncontro, EncontroBloco, BlocoInteracao } from '../../services/mentoria.service';
 import { MentoriaTemplatesService } from '../../services/mentoria-templates.service';
 import { MentoriaHelpers } from '../../types/mentoria.types';
@@ -174,7 +175,8 @@ export class PublicMentoriaViewComponent implements OnInit {
     private router: Router,
     private mentoriaService: MentoriaService,
     private templatesService: MentoriaTemplatesService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -2743,5 +2745,40 @@ export class PublicMentoriaViewComponent implements OnInit {
     container.appendChild(circlesWrapper);
 
     return container;
+  }
+
+  // Métodos para detecção e processamento de vídeos do YouTube
+  isYouTubeUrl(url: string): boolean {
+    if (!url) return false;
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/)|youtu\.be\/)/;
+    return youtubeRegex.test(url);
+  }
+
+  getYouTubeVideoId(url: string): string | null {
+    if (!url) return null;
+
+    // Expressão regular para capturar diferentes formatos de URLs do YouTube
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/v\/|youtu\.be\/)([^&\n?#]+)/,
+      /youtube\.com\/watch.*[?&]v=([^&\n?#]+)/
+    ];
+
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+
+    return null;
+  }
+
+  getYouTubeEmbedUrl(url: string): SafeResourceUrl | null {
+    const videoId = this.getYouTubeVideoId(url);
+    if (videoId) {
+      const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+      return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+    }
+    return null;
   }
 }

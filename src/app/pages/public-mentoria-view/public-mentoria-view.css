@@ -1446,6 +1446,102 @@ html {
   box-shadow: 0 6px 16px rgba(2, 44, 34, 0.4);
 }
 
+/* Container para vídeo do YouTube */
+.youtube-video-container {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.youtube-video-container .ref-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.youtube-video-container .ref-header .ref-icon-new {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #022c22, #014d3a);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 20px rgba(2, 44, 34, 0.25);
+}
+
+.youtube-video-container .ref-header .ref-icon-new i {
+  color: white;
+  font-size: 1.5rem;
+}
+
+.youtube-video-container .ref-header .ref-content-new {
+  flex: 1;
+  min-width: 0;
+}
+
+.youtube-video-container .ref-header .ref-content-new .ref-type {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #022c22;
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.youtube-video-container .ref-header .ref-content-new h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #022c22;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.youtube-video-container .ref-external-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.youtube-video-container .ref-external-link:hover {
+  background: #022c22;
+  border-color: #022c22;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(2, 44, 34, 0.2);
+}
+
+.youtube-video-container .video-embed {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  background: #000;
+}
+
+.youtube-video-container .video-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .btn-save-anotacoes:disabled {
   opacity: 0.6;
   cursor: not-allowed;
