@@ -83,6 +83,19 @@ interface MapaMentalData {
   conexoes: MapaMentalConexao[];
 }
 
+// Tipos de blocos disponíveis
+type TipoBloco = 'visaoGeral' | 'mentoria' | 'testes' | 'proximosPassos' | 'referencias' |
+                  'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'encerramento';
+
+interface BlocoEditor {
+  id: string;
+  tipo: TipoBloco;
+  titulo: string;
+  icone: string;
+  ordem: number;
+  dados?: any; // Dados específicos do bloco
+}
+
 interface SecaoReordenavel {
   id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle';
   titulo: string;
@@ -102,6 +115,7 @@ interface ConteudoMentoria {
   goldenCircle: { ativo: boolean };
   encerramento: { ativo: boolean; conteudo: string };
   ordemSecoes?: string[]; // Nova propriedade para controlar a ordem
+  blocosAtivos?: BlocoEditor[]; // Nova propriedade para controlar blocos ativos
 }
 
 @Component({
@@ -119,6 +133,24 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
   isSaving = false;
   isLoading = false;
   private editorsInitialized = new Set<string>();
+
+  // Controle de blocos dinâmicos
+  blocosAtivos: BlocoEditor[] = [];
+  mostrarBarraFerramentas = true;
+
+  // Definição de todos os blocos disponíveis
+  blocosDisponiveis: Array<{tipo: TipoBloco, titulo: string, icone: string, descricao: string}> = [
+    { tipo: 'visaoGeral', titulo: 'Visão Geral', icone: 'fa-bullseye', descricao: 'Visão geral do encontro' },
+    { tipo: 'mentoria', titulo: 'Mentoria', icone: 'fa-graduation-cap', descricao: 'Conteúdo principal da mentoria' },
+    { tipo: 'testes', titulo: 'Testes', icone: 'fa-clipboard-check', descricao: 'Testes e avaliações' },
+    { tipo: 'proximosPassos', titulo: 'Próximos Passos', icone: 'fa-arrow-right', descricao: 'Ações e tarefas futuras' },
+    { tipo: 'referencias', titulo: 'Referências', icone: 'fa-book', descricao: 'Links e materiais de apoio' },
+    { tipo: 'mapaMental', titulo: 'Mapa Mental', icone: 'fa-diagram-project', descricao: 'Mapa mental estratégico' },
+    { tipo: 'modeloABC', titulo: 'Modelo ABC', icone: 'fa-brain', descricao: 'Análise comportamental' },
+    { tipo: 'zonasAprendizado', titulo: 'Zonas de Aprendizado', icone: 'fa-chart-simple', descricao: 'Níveis de desenvolvimento' },
+    { tipo: 'goldenCircle', titulo: 'Golden Circle', icone: 'fa-bullseye', descricao: 'Why, How, What' },
+    { tipo: 'encerramento', titulo: 'Encerramento', icone: 'fa-flag-checkered', descricao: 'Conclusão do encontro' }
+  ];
 
   // Mapa Mental - Variáveis de controle
   mapaMentalConectando: string | null = null;
@@ -236,6 +268,9 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
             try {
               this.conteudo = JSON.parse(this.encontro.conteudo_html);
 
+              // Migrar para o novo formato de blocos dinâmicos
+              this.migrarParaBlocosDinamicos();
+
               // Converter dados antigos de tarefas (string[]) para novo formato ({ texto: string }[])
               if (this.conteudo.proximosPassos && this.conteudo.proximosPassos.blocos) {
                 this.conteudo.proximosPassos.blocos.forEach(bloco => {
@@ -304,6 +339,196 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
         this.router.navigate(['/home/mentorias']);
       }
     });
+  }
+
+  // ===== GERENCIAMENTO DE BLOCOS DINÂMICOS =====
+
+  migrarParaBlocosDinamicos(): void {
+    // Se já tem blocos ativos salvos, usar eles
+    if (this.conteudo.blocosAtivos && this.conteudo.blocosAtivos.length > 0) {
+      this.blocosAtivos = [...this.conteudo.blocosAtivos];
+      return;
+    }
+
+    // Caso contrário, migrar do formato antigo
+    this.blocosAtivos = [];
+    let ordem = 0;
+
+    // Adicionar blocos existentes que estão ativos
+    if (this.conteudo.visaoGeral.ativo) {
+      this.blocosAtivos.push({
+        id: this.generateId(),
+        tipo: 'visaoGeral',
+        titulo: 'Visão Geral',
+        icone: 'fa-bullseye',
+        ordem: ordem++
+      });
+    }
+
+    if (this.conteudo.mentoria.ativo) {
+      this.blocosAtivos.push({
+        id: this.generateId(),
+        tipo: 'mentoria',
+        titulo: 'Mentoria',
+        icone: 'fa-graduation-cap',
+        ordem: ordem++
+      });
+    }
+
+    // Adicionar seções reordenáveis que estão ativas
+    const secoesMap: Record<string, any> = {
+      'testes': { ativo: this.conteudo.testes.ativo, titulo: 'Testes', icone: 'fa-clipboard-check' },
+      'proximosPassos': { ativo: this.conteudo.proximosPassos.ativo, titulo: 'Próximos Passos', icone: 'fa-arrow-right' },
+      'referencias': { ativo: this.conteudo.referencias.ativo, titulo: 'Referências', icone: 'fa-book' },
+      'mapaMental': { ativo: this.conteudo.mapaMental.ativo, titulo: 'Mapa Mental', icone: 'fa-diagram-project' },
+      'modeloABC': { ativo: this.conteudo.modeloABC.ativo, titulo: 'Modelo ABC', icone: 'fa-brain' },
+      'zonasAprendizado': { ativo: this.conteudo.zonasAprendizado.ativo, titulo: 'Zonas de Aprendizado', icone: 'fa-chart-simple' },
+      'goldenCircle': { ativo: this.conteudo.goldenCircle.ativo, titulo: 'Golden Circle', icone: 'fa-bullseye' }
+    };
+
+    if (this.conteudo.ordemSecoes) {
+      this.conteudo.ordemSecoes.forEach(secaoId => {
+        const secao = secoesMap[secaoId];
+        if (secao && secao.ativo) {
+          this.blocosAtivos.push({
+            id: this.generateId(),
+            tipo: secaoId as TipoBloco,
+            titulo: secao.titulo,
+            icone: secao.icone,
+            ordem: ordem++
+          });
+        }
+      });
+    }
+
+    if (this.conteudo.encerramento.ativo) {
+      this.blocosAtivos.push({
+        id: this.generateId(),
+        tipo: 'encerramento',
+        titulo: 'Encerramento',
+        icone: 'fa-flag-checkered',
+        ordem: ordem++
+      });
+    }
+  }
+
+  adicionarBloco(tipo: TipoBloco): void {
+    // Verificar se o bloco já existe
+    if (this.blocosAtivos.some(b => b.tipo === tipo)) {
+      this.toastr.warning('Este bloco já foi adicionado');
+      return;
+    }
+
+    const blocoConfig = this.blocosDisponiveis.find(b => b.tipo === tipo);
+    if (!blocoConfig) return;
+
+    const novoBloco: BlocoEditor = {
+      id: this.generateId(),
+      tipo,
+      titulo: blocoConfig.titulo,
+      icone: blocoConfig.icone,
+      ordem: this.blocosAtivos.length
+    };
+
+    this.blocosAtivos.push(novoBloco);
+
+    // Ativar o bloco correspondente no conteúdo
+    this.ativarBlocoConteudo(tipo, true);
+
+    // Scroll suave para o novo bloco
+    setTimeout(() => {
+      const elemento = document.getElementById(`bloco-${novoBloco.id}`);
+      if (elemento) {
+        elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  }
+
+  removerBloco(blocoId: string): void {
+    const bloco = this.blocosAtivos.find(b => b.id === blocoId);
+    if (!bloco) return;
+
+    // Desativar o bloco no conteúdo
+    this.ativarBlocoConteudo(bloco.tipo, false);
+
+    // Remover da lista de blocos ativos
+    this.blocosAtivos = this.blocosAtivos.filter(b => b.id !== blocoId);
+
+    // Reordenar os blocos restantes
+    this.blocosAtivos.forEach((b, index) => {
+      b.ordem = index;
+    });
+  }
+
+  ativarBlocoConteudo(tipo: TipoBloco, ativar: boolean): void {
+    switch (tipo) {
+      case 'visaoGeral':
+        this.conteudo.visaoGeral.ativo = ativar;
+        break;
+      case 'mentoria':
+        this.conteudo.mentoria.ativo = ativar;
+        break;
+      case 'testes':
+        this.conteudo.testes.ativo = ativar;
+        break;
+      case 'proximosPassos':
+        this.conteudo.proximosPassos.ativo = ativar;
+        break;
+      case 'referencias':
+        this.conteudo.referencias.ativo = ativar;
+        break;
+      case 'mapaMental':
+        this.conteudo.mapaMental.ativo = ativar;
+        break;
+      case 'modeloABC':
+        this.conteudo.modeloABC.ativo = ativar;
+        break;
+      case 'zonasAprendizado':
+        this.conteudo.zonasAprendizado.ativo = ativar;
+        break;
+      case 'goldenCircle':
+        this.conteudo.goldenCircle.ativo = ativar;
+        break;
+      case 'encerramento':
+        this.conteudo.encerramento.ativo = ativar;
+        break;
+    }
+  }
+
+  moverBlocoCima(blocoId: string): void {
+    const index = this.blocosAtivos.findIndex(b => b.id === blocoId);
+    if (index <= 0) return;
+
+    [this.blocosAtivos[index - 1], this.blocosAtivos[index]] =
+    [this.blocosAtivos[index], this.blocosAtivos[index - 1]];
+
+    // Atualizar ordem
+    this.blocosAtivos.forEach((b, i) => b.ordem = i);
+  }
+
+  moverBlocoBaixo(blocoId: string): void {
+    const index = this.blocosAtivos.findIndex(b => b.id === blocoId);
+    if (index === -1 || index >= this.blocosAtivos.length - 1) return;
+
+    [this.blocosAtivos[index], this.blocosAtivos[index + 1]] =
+    [this.blocosAtivos[index + 1], this.blocosAtivos[index]];
+
+    // Atualizar ordem
+    this.blocosAtivos.forEach((b, i) => b.ordem = i);
+  }
+
+  podeBlocoSubir(blocoId: string): boolean {
+    const index = this.blocosAtivos.findIndex(b => b.id === blocoId);
+    return index > 0;
+  }
+
+  podeBlocoDescer(blocoId: string): boolean {
+    const index = this.blocosAtivos.findIndex(b => b.id === blocoId);
+    return index !== -1 && index < this.blocosAtivos.length - 1;
+  }
+
+  isBlocoAdicionado(tipo: TipoBloco): boolean {
+    return this.blocosAtivos.some(b => b.tipo === tipo);
   }
 
   // ===== TESTES =====
@@ -511,7 +736,10 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
         }
       }
 
-      // 2. Converter para JSON e salvar
+      // 2. Salvar blocos ativos no conteúdo
+      this.conteudo.blocosAtivos = this.blocosAtivos;
+
+      // 3. Converter para JSON e salvar
       const conteudoJson = JSON.stringify(this.conteudo);
 
       this.mentoriaService.atualizarEncontro(

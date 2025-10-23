@@ -34,201 +34,283 @@
     <!-- Formulário -->
     <form class="editor-form">
 
-      <!-- VISÃO GERAL -->
+      <!-- Barra de Ferramentas de Blocos -->
       <section class="editor-section">
         <div class="section-header">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="conteudo.visaoGeral.ativo"
-              name="visaoGeralAtivo">
-            <span class="section-title">
-              <i class="fa-solid fa-bullseye"></i>
-              Visão Geral
-            </span>
-          </label>
+          <span class="section-title">
+            <i class="fa-solid fa-layer-group"></i>
+            Adicionar Seções
+          </span>
+          <div class="section-header-actions">
+            <button type="button" class="btn-toggle-toolbar" (click)="mostrarBarraFerramentas = !mostrarBarraFerramentas">
+              <i class="fas" [class.fa-chevron-up]="mostrarBarraFerramentas" [class.fa-chevron-down]="!mostrarBarraFerramentas"></i>
+            </button>
+          </div>
         </div>
 
-        <div *ngIf="conteudo.visaoGeral.ativo" class="section-content">
-          <textarea
-            class="form-textarea"
-            [(ngModel)]="conteudo.visaoGeral.conteudo"
-            name="visaoGeralConteudo"
-            placeholder="Descreva a visão geral do encontro..."
-            rows="4"></textarea>
+        <div class="section-content" *ngIf="mostrarBarraFerramentas">
+          <div class="toolbar-grid">
+            <button
+              *ngFor="let bloco of blocosDisponiveis"
+              type="button"
+              class="toolbar-item"
+              [class.toolbar-item-disabled]="isBlocoAdicionado(bloco.tipo)"
+              [disabled]="isBlocoAdicionado(bloco.tipo)"
+              (click)="adicionarBloco(bloco.tipo)"
+              [title]="bloco.descricao">
+              <i class="fas {{ bloco.icone }}"></i>
+              <span>{{ bloco.titulo }}</span>
+              <i *ngIf="isBlocoAdicionado(bloco.tipo)" class="fas fa-check toolbar-check"></i>
+            </button>
+          </div>
         </div>
       </section>
 
-      <!-- MENTORIA -->
-      <section class="editor-section">
-        <div class="section-header">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="conteudo.mentoria.ativo"
-              name="mentoriaAtivo">
-            <span class="section-title">
-              <i class="fa-solid fa-graduation-cap"></i>
-              Mentoria
-            </span>
-          </label>
-        </div>
+      <!-- Mensagem quando não há blocos -->
+      <div *ngIf="blocosAtivos.length === 0" class="empty-state">
+        <i class="fas fa-layer-group fa-3x"></i>
+        <h3>Nenhuma seção adicionada</h3>
+        <p>Clique nos botões acima para adicionar seções ao conteúdo da mentoria</p>
+      </div>
 
-        <div *ngIf="conteudo.mentoria.ativo" class="section-content">
-          <textarea
-            class="form-textarea"
-            [(ngModel)]="conteudo.mentoria.conteudo"
-            name="mentoriaConteudo"
-            placeholder="Descreva o conteúdo da mentoria..."
-            rows="6"></textarea>
-        </div>
-      </section>
+      <!-- Blocos Dinâmicos -->
+      <ng-container *ngFor="let bloco of blocosAtivos; let i = index">
 
-      <!-- SEÇÕES REORDENÁVEIS -->
-      <ng-container *ngFor="let secaoId of secoesOrdenadas">
-
-        <!-- TESTES -->
-        <section *ngIf="secaoId === 'testes'" class="editor-section">
+        <!-- VISÃO GERAL -->
+        <section *ngIf="bloco.tipo === 'visaoGeral'" [id]="'bloco-' + bloco.id" class="editor-section">
           <div class="section-header">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [(ngModel)]="conteudo.testes.ativo"
-                name="testesAtivo">
-              <span class="section-title">
-                <i class="fa-solid fa-clipboard-check"></i>
-                Testes
-              </span>
-            </label>
+            <span class="section-title">
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
+            </span>
             <div class="section-header-actions">
               <button
                 type="button"
                 class="btn-reorder-section"
-                (click)="moverSecaoParaCima('testes')"
-                [disabled]="!podeSecaoSubir('testes')"
-                title="Mover seção para cima">
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
                 <i class="fa-solid fa-arrow-up"></i>
               </button>
               <button
                 type="button"
                 class="btn-reorder-section"
-                (click)="moverSecaoParaBaixo('testes')"
-                [disabled]="!podeSecaoDescer('testes')"
-                title="Mover seção para baixo">
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
                 <i class="fa-solid fa-arrow-down"></i>
               </button>
               <button
-                *ngIf="conteudo.testes.ativo"
+                type="button"
+                class="btn-remove"
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="section-content">
+            <textarea
+              class="form-textarea"
+              [(ngModel)]="conteudo.visaoGeral.conteudo"
+              name="visaoGeralConteudo"
+              placeholder="Descreva a visão geral do encontro..."
+              rows="4"></textarea>
+          </div>
+        </section>
+
+        <!-- MENTORIA -->
+        <section *ngIf="bloco.tipo === 'mentoria'" [id]="'bloco-' + bloco.id" class="editor-section">
+          <div class="section-header">
+            <span class="section-title">
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
+            </span>
+            <div class="section-header-actions">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="section-content">
+            <textarea
+              class="form-textarea"
+              [(ngModel)]="conteudo.mentoria.conteudo"
+              name="mentoriaConteudo"
+              placeholder="Descreva o conteúdo da mentoria..."
+              rows="6"></textarea>
+          </div>
+        </section>
+
+        <!-- TESTES -->
+        <section *ngIf="bloco.tipo === 'testes'" [id]="'bloco-' + bloco.id" class="editor-section">
+          <div class="section-header">
+            <span class="section-title">
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
+            </span>
+            <div class="section-header-actions">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
                 type="button"
                 class="btn-add"
                 (click)="adicionarTeste()">
                 <i class="fa-solid fa-plus"></i>
                 Adicionar Teste
               </button>
-            </div>
-          </div>
-
-        <div *ngIf="conteudo.testes.ativo" class="section-content">
-          <div *ngFor="let teste of conteudo.testes.itens; trackBy: trackByFn" class="teste-item">
-            <div class="item-header">
               <button
                 type="button"
                 class="btn-remove"
-                (click)="removerTeste(teste.id)">
-                <i class="fa-solid fa-trash"></i>
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-times"></i>
               </button>
-            </div>
-
-            <div class="form-group">
-              <label>Nome do Teste</label>
-              <input
-                type="text"
-                class="form-input"
-                [(ngModel)]="teste.nome"
-                [name]="'teste-nome-' + teste.id"
-                placeholder="Digite o nome do teste">
-            </div>
-
-            <div class="form-group">
-              <label>Arquivo (Imagem ou PDF)</label>
-              <input
-                type="file"
-                class="form-input-file"
-                accept="image/*,.pdf"
-                (change)="onArquivoSelected($event, teste)">
-              <img
-                *ngIf="teste.imagemUrl && !teste.isPdf"
-                [src]="teste.imagemUrl"
-                class="image-preview"
-                alt="Preview">
-              <div
-                *ngIf="teste.isPdf && teste.nomeArquivo"
-                class="pdf-preview">
-                <i class="fas fa-file-pdf"></i>
-                <span>{{ teste.nomeArquivo }}</span>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Comentário</label>
-              <textarea
-                class="form-textarea"
-                [(ngModel)]="teste.comentario"
-                [name]="'teste-comentario-' + teste.id"
-                placeholder="Adicione um comentário sobre o teste..."
-                rows="3"></textarea>
             </div>
           </div>
 
-          <p *ngIf="conteudo.testes.itens.length === 0" class="empty-state">
-            Nenhum teste adicionado. Clique em "Adicionar Teste" para começar.
-          </p>
-        </div>
-      </section>
+          <div class="section-content">
+            <div *ngFor="let teste of conteudo.testes.itens; trackBy: trackByFn" class="teste-item">
+              <div class="item-header">
+                <button
+                  type="button"
+                  class="btn-remove"
+                  (click)="removerTeste(teste.id)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
 
-      <!-- PRÓXIMOS PASSOS -->
-      <section *ngIf="secaoId === 'proximosPassos'" class="editor-section">
-        <div class="section-header">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="conteudo.proximosPassos.ativo"
-              name="proximosPassosAtivo">
+              <div class="form-group">
+                <label>Nome do Teste</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  [(ngModel)]="teste.nome"
+                  [name]="'teste-nome-' + teste.id"
+                  placeholder="Digite o nome do teste">
+              </div>
+
+              <div class="form-group">
+                <label>Arquivo (Imagem ou PDF)</label>
+                <input
+                  type="file"
+                  class="form-input-file"
+                  accept="image/*,.pdf"
+                  (change)="onArquivoSelected($event, teste)">
+                <img
+                  *ngIf="teste.imagemUrl && !teste.isPdf"
+                  [src]="teste.imagemUrl"
+                  class="image-preview"
+                  alt="Preview">
+                <div
+                  *ngIf="teste.isPdf && teste.nomeArquivo"
+                  class="pdf-preview">
+                  <i class="fas fa-file-pdf"></i>
+                  <span>{{ teste.nomeArquivo }}</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Comentário</label>
+                <textarea
+                  class="form-textarea"
+                  [(ngModel)]="teste.comentario"
+                  [name]="'teste-comentario-' + teste.id"
+                  placeholder="Adicione um comentário sobre o teste..."
+                  rows="3"></textarea>
+              </div>
+            </div>
+
+            <p *ngIf="conteudo.testes.itens.length === 0" class="empty-state">
+              Nenhum teste adicionado. Clique em "Adicionar Teste" para começar.
+            </p>
+          </div>
+        </section>
+
+        <!-- PRÓXIMOS PASSOS -->
+        <section *ngIf="bloco.tipo === 'proximosPassos'" [id]="'bloco-' + bloco.id" class="editor-section">
+          <div class="section-header">
             <span class="section-title">
-              <i class="fa-solid fa-arrow-right"></i>
-              Próximos Passos
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
             </span>
-          </label>
-          <div class="section-header-actions">
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaCima('proximosPassos')"
-              [disabled]="!podeSecaoSubir('proximosPassos')"
-              title="Mover seção para cima">
-              <i class="fa-solid fa-arrow-up"></i>
-            </button>
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaBaixo('proximosPassos')"
-              [disabled]="!podeSecaoDescer('proximosPassos')"
-              title="Mover seção para baixo">
-              <i class="fa-solid fa-arrow-down"></i>
-            </button>
-            <div *ngIf="conteudo.proximosPassos.ativo" class="btn-group">
+            <div class="section-header-actions">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="section-content">
+            <div class="btn-group">
               <button
                 type="button"
                 class="btn-add"
                 (click)="adicionarBlocoProximosPassos('texto')">
-                <i class="fa-solid fa-align-left"></i>
+                <i class="fa-solid fa-paragraph"></i>
                 Texto
               </button>
               <button
                 type="button"
                 class="btn-add"
                 (click)="adicionarBlocoProximosPassos('perguntas')">
-                <i class="fa-solid fa-question-circle"></i>
+                <i class="fa-solid fa-question"></i>
                 Perguntas
               </button>
               <button
@@ -241,535 +323,483 @@
               <button
                 type="button"
                 class="btn-templates"
-                (click)="abrirGerenciadorTemplates()"
-                title="Templates de Perguntas/Tarefas">
-                <i class="fa-solid fa-bookmark"></i>
+                (click)="abrirGerenciadorTemplates()">
+                <i class="fa-solid fa-folder-open"></i>
                 Templates
               </button>
             </div>
-          </div>
-        </div>
 
-        <div *ngIf="conteudo.proximosPassos.ativo" class="section-content">
-          <div *ngFor="let bloco of conteudo.proximosPassos.blocos; let i = index; trackBy: trackByFn"
-               class="bloco-item">
-            <div class="item-header">
-              <div class="item-header-left">
-                <span class="bloco-tipo-badge">
-                  <div class="badge-content">
-                    <div class="badge-tipo">
-                      <i class="fa-solid"
-                         [ngClass]="{
-                           'fa-align-left': bloco.tipo === 'texto',
-                           'fa-question-circle': bloco.tipo === 'perguntas',
-                           'fa-list-check': bloco.tipo === 'tarefas'
-                         }"></i>
-                      {{ bloco.tipo === 'texto' ? 'Texto' : bloco.tipo === 'perguntas' ? 'Perguntas' : 'Tarefas' }}
-                    </div>
-                    <div class="badge-template" *ngIf="bloco.nomeTemplate">
-                      {{ bloco.nomeTemplate }}
+            <!-- Blocos de Próximos Passos -->
+            <div *ngFor="let blocoProx of conteudo.proximosPassos.blocos; let idx = index" class="bloco-item">
+              <div class="item-header">
+                <div class="item-header-left">
+                  <div class="bloco-tipo-badge">
+                    <div class="badge-content">
+                      <div class="badge-tipo">
+                        <i class="fa-solid"
+                           [class.fa-paragraph]="blocoProx.tipo === 'texto'"
+                           [class.fa-question]="blocoProx.tipo === 'perguntas'"
+                           [class.fa-list-check]="blocoProx.tipo === 'tarefas'"></i>
+                        <span>{{ blocoProx.tipo === 'texto' ? 'Texto' :
+                               blocoProx.tipo === 'perguntas' ? 'Perguntas' : 'Tarefas' }}</span>
+                      </div>
+                      <div *ngIf="blocoProx.nomeTemplate" class="badge-template">
+                        {{ blocoProx.nomeTemplate }}
+                      </div>
                     </div>
                   </div>
-                </span>
-              </div>
-              <div class="item-header-right">
-                <button
-                  type="button"
-                  class="btn-reorder"
-                  (click)="moverBlocoParaCima(i)"
-                  [disabled]="!podeSubir(i)"
-                  title="Mover para cima">
-                  <i class="fa-solid fa-arrow-up"></i>
-                </button>
-                <button
-                  type="button"
-                  class="btn-reorder"
-                  (click)="moverBlocoParaBaixo(i)"
-                  [disabled]="!podeDescer(i)"
-                  title="Mover para baixo">
-                  <i class="fa-solid fa-arrow-down"></i>
-                </button>
-                <button
-                  type="button"
-                  class="btn-remove"
-                  (click)="removerBlocoProximosPassos(bloco.id)">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Bloco Texto -->
-            <div *ngIf="bloco.tipo === 'texto'" class="rich-editor-container">
-              <div class="editor-toolbar">
-                <button type="button"
-                        class="toolbar-btn"
-                        (click)="execCommand('bold')"
-                        title="Negrito">
-                  <i class="fa-solid fa-bold"></i>
-                </button>
-                <button type="button"
-                        class="toolbar-btn"
-                        (click)="execCommand('italic')"
-                        title="Itálico">
-                  <i class="fa-solid fa-italic"></i>
-                </button>
-                <button type="button"
-                        class="toolbar-btn"
-                        (click)="execCommand('underline')"
-                        title="Sublinhado">
-                  <i class="fa-solid fa-underline"></i>
-                </button>
-                <div class="toolbar-separator"></div>
-                <button type="button"
-                        class="toolbar-btn"
-                        (click)="execCommand('insertUnorderedList')"
-                        title="Lista com marcadores">
-                  <i class="fa-solid fa-list"></i>
-                </button>
-                <button type="button"
-                        class="toolbar-btn"
-                        (click)="execCommand('insertOrderedList')"
-                        title="Lista numerada">
-                  <i class="fa-solid fa-list-ol"></i>
-                </button>
-                <div class="toolbar-separator"></div>
-                <button type="button"
-                        class="toolbar-btn"
-                        (click)="insertLink()"
-                        title="Inserir link">
-                  <i class="fa-solid fa-link"></i>
-                </button>
-                <button type="button"
-                        class="toolbar-btn"
-                        (click)="imageFileInput.click()"
-                        title="Inserir imagem">
-                  <i class="fa-solid fa-image"></i>
-                </button>
-                <input #imageFileInput
-                       type="file"
-                       accept="image/*"
-                       style="display: none"
-                       (change)="onEditorImageSelected($event, bloco)">
-                <div class="toolbar-separator"></div>
-                <button type="button"
-                        class="toolbar-btn"
-                        (click)="execCommand('justifyLeft')"
-                        title="Alinhar à esquerda">
-                  <i class="fa-solid fa-align-left"></i>
-                </button>
-                <button type="button"
-                        class="toolbar-btn"
-                        (click)="execCommand('justifyCenter')"
-                        title="Centralizar">
-                  <i class="fa-solid fa-align-center"></i>
-                </button>
-                <button type="button"
-                        class="toolbar-btn"
-                        (click)="execCommand('justifyRight')"
-                        title="Alinhar à direita">
-                  <i class="fa-solid fa-align-right"></i>
-                </button>
-              </div>
-              <div class="rich-editor"
-                   contenteditable="true"
-                   (blur)="onEditorChange($event, bloco)"
-                   (input)="onEditorInput($event, bloco)"
-                   (dragover)="onDragOver($event)"
-                   (dragleave)="onDragLeave($event)"
-                   (drop)="onDrop($event, bloco)"
-                   [attr.data-placeholder]="'Escreva o texto...'"
-                   #richEditor>
-              </div>
-            </div>
-
-            <!-- Bloco Perguntas -->
-            <div *ngIf="bloco.tipo === 'perguntas'">
-              <div *ngFor="let pergunta of bloco.perguntas; let i = index" class="pergunta-item">
-                <div class="pergunta-header">
-                  <span>Pergunta {{ i + 1 }}</span>
+                </div>
+                <div class="item-header-right">
                   <button
                     type="button"
-                    class="btn-remove-small"
-                    (click)="removerPergunta(bloco, i)">
-                    <i class="fa-solid fa-times"></i>
+                    class="btn-reorder"
+                    (click)="moverBlocoParaCima(idx)"
+                    [disabled]="!podeSubir(idx)"
+                    title="Mover para cima">
+                    <i class="fa-solid fa-arrow-up"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-reorder"
+                    (click)="moverBlocoParaBaixo(idx)"
+                    [disabled]="!podeDescer(idx)"
+                    title="Mover para baixo">
+                    <i class="fa-solid fa-arrow-down"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-remove"
+                    (click)="removerBlocoProximosPassos(blocoProx.id)">
+                    <i class="fa-solid fa-trash"></i>
                   </button>
                 </div>
-                <textarea
-                  class="form-textarea"
-                  [(ngModel)]="pergunta.pergunta"
-                  [name]="'pergunta-q-' + bloco.id + '-' + i"
-                  placeholder="Digite a pergunta para o mentorado responder"
-                  rows="3">
-                </textarea>
               </div>
-              <button
-                type="button"
-                class="btn-add-small"
-                (click)="adicionarPergunta(bloco)">
-                <i class="fa-solid fa-plus"></i>
-                Adicionar Pergunta
-              </button>
-            </div>
 
-            <!-- Bloco Tarefas -->
-            <div *ngIf="bloco.tipo === 'tarefas' && bloco.tarefas">
-              <div class="form-group">
-                <label>Título da Lista</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  [(ngModel)]="bloco.tarefas.titulo"
-                  [name]="'tarefas-titulo-' + bloco.id"
-                  placeholder="Digite o título da lista de tarefas">
+              <!-- Conteúdo Texto com Editor Rico -->
+              <div *ngIf="blocoProx.tipo === 'texto'" class="rich-editor-container">
+                <div class="editor-toolbar">
+                  <button type="button" class="toolbar-btn" (click)="execCommand('bold')" title="Negrito">
+                    <i class="fas fa-bold"></i>
+                  </button>
+                  <button type="button" class="toolbar-btn" (click)="execCommand('italic')" title="Itálico">
+                    <i class="fas fa-italic"></i>
+                  </button>
+                  <button type="button" class="toolbar-btn" (click)="execCommand('underline')" title="Sublinhado">
+                    <i class="fas fa-underline"></i>
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" (click)="execCommand('insertUnorderedList')" title="Lista">
+                    <i class="fas fa-list-ul"></i>
+                  </button>
+                  <button type="button" class="toolbar-btn" (click)="execCommand('insertOrderedList')" title="Lista Numerada">
+                    <i class="fas fa-list-ol"></i>
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" (click)="insertLink()" title="Inserir Link">
+                    <i class="fas fa-link"></i>
+                  </button>
+                  <label class="toolbar-btn" title="Inserir Imagem" style="margin: 0;">
+                    <i class="fas fa-image"></i>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      (change)="onEditorImageSelected($event, blocoProx)"
+                      style="display: none;">
+                  </label>
+                </div>
+                <div
+                  #richEditor
+                  class="rich-editor"
+                  contenteditable="true"
+                  (input)="onEditorInput($event, blocoProx)"
+                  (dragover)="onDragOver($event)"
+                  (dragleave)="onDragLeave($event)"
+                  (drop)="onDrop($event, blocoProx)"
+                  data-placeholder="Digite o conteúdo aqui..."></div>
               </div>
-              <div *ngFor="let tarefa of bloco.tarefas.itens; let i = index; trackBy: trackByIndex" class="tarefa-item">
-                <input
-                  type="text"
-                  class="form-input"
-                  [(ngModel)]="tarefa.texto"
-                  [name]="'tarefa-' + bloco.id + '-' + i"
-                  placeholder="Digite a tarefa">
+
+              <!-- Conteúdo Perguntas -->
+              <div *ngIf="blocoProx.tipo === 'perguntas'">
+                <div *ngFor="let pergunta of blocoProx.perguntas; let pIdx = index" class="pergunta-item">
+                  <div class="pergunta-header">
+                    <span>Pergunta {{ pIdx + 1 }}</span>
+                    <button
+                      type="button"
+                      class="btn-remove-small"
+                      (click)="removerPergunta(blocoProx, pIdx)"
+                      [disabled]="blocoProx.perguntas!.length === 1">
+                      <i class="fa-solid fa-times"></i>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="pergunta.pergunta"
+                    [name]="'pergunta-' + blocoProx.id + '-' + pIdx"
+                    placeholder="Digite a pergunta...">
+                </div>
                 <button
                   type="button"
-                  class="btn-remove-small"
-                  (click)="removerTarefa(bloco, i)">
-                  <i class="fa-solid fa-times"></i>
+                  class="btn-add-small"
+                  (click)="adicionarPergunta(blocoProx)">
+                  <i class="fa-solid fa-plus"></i>
+                  Adicionar Pergunta
                 </button>
               </div>
+
+              <!-- Conteúdo Tarefas -->
+              <div *ngIf="blocoProx.tipo === 'tarefas'">
+                <div class="form-group">
+                  <label>Título das Tarefas</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="blocoProx.tarefas!.titulo"
+                    [name]="'tarefa-titulo-' + blocoProx.id"
+                    placeholder="Ex: Tarefas para próxima semana">
+                </div>
+                <div class="tarefas-list">
+                  <div *ngFor="let tarefa of blocoProx.tarefas!.itens; let tIdx = index" class="tarefa-item">
+                    <input
+                      type="text"
+                      class="form-input"
+                      [(ngModel)]="tarefa.texto"
+                      [name]="'tarefa-' + blocoProx.id + '-' + tIdx"
+                      placeholder="Descreva a tarefa...">
+                    <button
+                      type="button"
+                      class="btn-remove-small"
+                      (click)="removerTarefa(blocoProx, tIdx)"
+                      [disabled]="blocoProx.tarefas!.itens.length === 1">
+                      <i class="fa-solid fa-times"></i>
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn-add-small"
+                    (click)="adicionarTarefa(blocoProx)">
+                    <i class="fa-solid fa-plus"></i>
+                    Adicionar Tarefa
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p *ngIf="conteudo.proximosPassos.blocos.length === 0" class="empty-state">
+              Nenhum bloco adicionado. Use os botões acima para adicionar conteúdo.
+            </p>
+          </div>
+        </section>
+
+        <!-- REFERÊNCIAS -->
+        <section *ngIf="bloco.tipo === 'referencias'" [id]="'bloco-' + bloco.id" class="editor-section">
+          <div class="section-header">
+            <span class="section-title">
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
+            </span>
+            <div class="section-header-actions">
               <button
                 type="button"
-                class="btn-add-small"
-                (click)="adicionarTarefa(bloco)">
-                <i class="fa-solid fa-plus"></i>
-                Adicionar Tarefa
+                class="btn-reorder-section"
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
               </button>
-            </div>
-          </div>
-
-          <p *ngIf="conteudo.proximosPassos.blocos.length === 0" class="empty-state">
-            Nenhum bloco adicionado. Escolha um tipo acima para começar.
-          </p>
-        </div>
-      </section>
-
-      <!-- REFERÊNCIAS -->
-      <section *ngIf="secaoId === 'referencias'" class="editor-section">
-        <div class="section-header">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="conteudo.referencias.ativo"
-              name="referenciasAtivo">
-            <span class="section-title">
-              <i class="fa-solid fa-book"></i>
-              Referências / Inspirações
-            </span>
-          </label>
-          <div class="section-header-actions">
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaCima('referencias')"
-              [disabled]="!podeSecaoSubir('referencias')"
-              title="Mover seção para cima">
-              <i class="fa-solid fa-arrow-up"></i>
-            </button>
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaBaixo('referencias')"
-              [disabled]="!podeSecaoDescer('referencias')"
-              title="Mover seção para baixo">
-              <i class="fa-solid fa-arrow-down"></i>
-            </button>
-            <button
-              *ngIf="conteudo.referencias.ativo"
-              type="button"
-              class="btn-add"
-              (click)="adicionarReferencia()">
-              <i class="fa-solid fa-plus"></i>
-              Adicionar Referência
-            </button>
-          </div>
-        </div>
-
-        <div *ngIf="conteudo.referencias.ativo" class="section-content">
-          <div *ngFor="let ref of conteudo.referencias.itens; trackBy: trackByFn" class="referencia-item">
-            <div class="item-header">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-add"
+                (click)="adicionarReferencia()">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar Referência
+              </button>
               <button
                 type="button"
                 class="btn-remove"
-                (click)="removerReferencia(ref.id)">
-                <i class="fa-solid fa-trash"></i>
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-times"></i>
               </button>
             </div>
+          </div>
 
-            <div class="form-group">
-              <label>Tipo</label>
-              <select
-                class="form-select"
-                [(ngModel)]="ref.tipo"
-                [name]="'ref-tipo-' + ref.id">
-                <option value="ted">TED Talk</option>
-                <option value="video">Vídeo</option>
-                <option value="livro">Livro</option>
-                <option value="leitura">Artigo/Leitura</option>
-              </select>
+          <div class="section-content">
+            <div *ngFor="let referencia of conteudo.referencias.itens; trackBy: trackByFn" class="referencia-item">
+              <div class="item-header">
+                <button
+                  type="button"
+                  class="btn-remove"
+                  (click)="removerReferencia(referencia.id)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Tipo</label>
+                  <select
+                    class="form-select"
+                    [(ngModel)]="referencia.tipo"
+                    [name]="'ref-tipo-' + referencia.id">
+                    <option value="ted">TED Talk</option>
+                    <option value="livro">Livro</option>
+                    <option value="leitura">Leitura</option>
+                    <option value="video">Vídeo</option>
+                  </select>
+                </div>
+
+                <div class="form-group flex-grow">
+                  <label>Título</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="referencia.titulo"
+                    [name]="'ref-titulo-' + referencia.id"
+                    placeholder="Digite o título...">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Link</label>
+                <input
+                  type="url"
+                  class="form-input"
+                  [(ngModel)]="referencia.link"
+                  [name]="'ref-link-' + referencia.id"
+                  placeholder="https://...">
+              </div>
             </div>
 
-            <div class="form-group">
-              <label>Título</label>
-              <input
-                type="text"
-                class="form-input"
-                [(ngModel)]="ref.titulo"
-                [name]="'ref-titulo-' + ref.id"
-                placeholder="Digite o título">
+            <p *ngIf="conteudo.referencias.itens.length === 0" class="empty-state">
+              Nenhuma referência adicionada. Clique em "Adicionar Referência" para começar.
+            </p>
+          </div>
+        </section>
+
+        <!-- MAPA MENTAL -->
+        <section *ngIf="bloco.tipo === 'mapaMental'" [id]="'bloco-' + bloco.id" class="editor-section">
+          <div class="section-header">
+            <span class="section-title">
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
+            </span>
+            <div class="section-header-actions">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-times"></i>
+              </button>
             </div>
+          </div>
 
-            <div class="form-group">
-              <label>Link</label>
-              <input
-                type="url"
-                class="form-input"
-                [(ngModel)]="ref.link"
-                [name]="'ref-link-' + ref.id"
-                placeholder="https://...">
+          <div class="section-content">
+            <div class="info-box">
+              <i class="fas fa-check-circle"></i>
+              <p>Mapa Mental ativado. O conteúdo será exibido na visualização pública da mentoria.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- MODELO ABC -->
+        <section *ngIf="bloco.tipo === 'modeloABC'" [id]="'bloco-' + bloco.id" class="editor-section">
+          <div class="section-header">
+            <span class="section-title">
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
+            </span>
+            <div class="section-header-actions">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-times"></i>
+              </button>
             </div>
           </div>
 
-          <p *ngIf="conteudo.referencias.itens.length === 0" class="empty-state">
-            Nenhuma referência adicionada. Clique em "Adicionar Referência" para começar.
-          </p>
-        </div>
-      </section>
+          <div class="section-content">
+            <div class="info-box">
+              <i class="fas fa-check-circle"></i>
+              <p>Modelo ABC ativado. O conteúdo será exibido na visualização pública da mentoria.</p>
+            </div>
+          </div>
+        </section>
 
-      <!-- MAPA MENTAL -->
-      <section *ngIf="secaoId === 'mapaMental'" class="editor-section">
-        <div class="section-header">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="conteudo.mapaMental.ativo"
-              name="mapaMentalAtivo">
+        <!-- ZONAS DE APRENDIZADO -->
+        <section *ngIf="bloco.tipo === 'zonasAprendizado'" [id]="'bloco-' + bloco.id" class="editor-section">
+          <div class="section-header">
             <span class="section-title">
-              <i class="fa-solid fa-diagram-project"></i>
-              Mapa Mental Estratégico
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
             </span>
-          </label>
-          <div class="section-header-actions">
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaCima('mapaMental')"
-              [disabled]="!podeSecaoSubir('mapaMental')"
-              title="Mover seção para cima">
-              <i class="fa-solid fa-arrow-up"></i>
-            </button>
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaBaixo('mapaMental')"
-              [disabled]="!podeSecaoDescer('mapaMental')"
-              title="Mover seção para baixo">
-              <i class="fa-solid fa-arrow-down"></i>
-            </button>
+            <div class="section-header-actions">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div *ngIf="conteudo.mapaMental.ativo" class="section-content">
-          <div class="info-box">
-            <i class="fa-solid fa-info-circle"></i>
-            <p>
-              <strong>Mapa Mental ativado!</strong><br>
-              O mentorado poderá criar e organizar seu mapa mental estratégico na visualização pública do encontro.
-            </p>
+          <div class="section-content">
+            <div class="info-box">
+              <i class="fas fa-check-circle"></i>
+              <p>Zonas de Aprendizado ativado. O conteúdo será exibido na visualização pública da mentoria.</p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- MODELO ABC -->
-      <section *ngIf="secaoId === 'modeloABC'" class="editor-section">
-        <div class="section-header">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="conteudo.modeloABC.ativo"
-              name="modeloABCAtivo">
+        <!-- GOLDEN CIRCLE -->
+        <section *ngIf="bloco.tipo === 'goldenCircle'" [id]="'bloco-' + bloco.id" class="editor-section">
+          <div class="section-header">
             <span class="section-title">
-              <i class="fa-solid fa-brain"></i>
-              Modelo ABC
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
             </span>
-          </label>
-          <div class="section-header-actions">
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaCima('modeloABC')"
-              [disabled]="!podeSecaoSubir('modeloABC')"
-              title="Mover seção para cima">
-              <i class="fa-solid fa-arrow-up"></i>
-            </button>
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaBaixo('modeloABC')"
-              [disabled]="!podeSecaoDescer('modeloABC')"
-              title="Mover seção para baixo">
-              <i class="fa-solid fa-arrow-down"></i>
-            </button>
+            <div class="section-header-actions">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div *ngIf="conteudo.modeloABC.ativo" class="section-content">
-          <div class="info-box">
-            <i class="fa-solid fa-info-circle"></i>
-            <p>
-              <strong>Modelo ABC ativado!</strong><br>
-              O mentorado poderá preencher o formulário do Modelo ABC (Adversity, Belief, Consequence) na visualização pública do encontro.
-            </p>
+          <div class="section-content">
+            <div class="info-box">
+              <i class="fas fa-check-circle"></i>
+              <p>Golden Circle ativado. O conteúdo será exibido na visualização pública da mentoria.</p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- ZONAS DE APRENDIZADO -->
-      <section *ngIf="secaoId === 'zonasAprendizado'" class="editor-section">
-        <div class="section-header">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="conteudo.zonasAprendizado.ativo"
-              name="zonasAprendizadoAtivo">
+
+        <!-- ENCERRAMENTO -->
+        <section *ngIf="bloco.tipo === 'encerramento'" [id]="'bloco-' + bloco.id" class="editor-section">
+          <div class="section-header">
             <span class="section-title">
-              <i class="fa-solid fa-chart-simple"></i>
-              Zonas de Aprendizado
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
             </span>
-          </label>
-          <div class="section-header-actions">
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaCima('zonasAprendizado')"
-              [disabled]="!podeSecaoSubir('zonasAprendizado')"
-              title="Mover seção para cima">
-              <i class="fa-solid fa-arrow-up"></i>
-            </button>
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaBaixo('zonasAprendizado')"
-              [disabled]="!podeSecaoDescer('zonasAprendizado')"
-              title="Mover seção para baixo">
-              <i class="fa-solid fa-arrow-down"></i>
-            </button>
+            <div class="section-header-actions">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div *ngIf="conteudo.zonasAprendizado.ativo" class="section-content">
-          <div class="info-box">
-            <i class="fa-solid fa-info-circle"></i>
-            <p>
-              <strong>Zonas de Aprendizado ativado!</strong><br>
-              O mentorado poderá posicionar palavras/conceitos no gráfico de 4 quadrantes (Ansiedade, Aprendizado, Apatia, Conforto) baseado em Segurança Psicológica x Motivação.
-            </p>
+          <div class="section-content">
+            <textarea
+              class="form-textarea"
+              [(ngModel)]="conteudo.encerramento.conteudo"
+              name="encerramentoConteudo"
+              placeholder="Descreva o encerramento do encontro..."
+              rows="4"></textarea>
           </div>
-        </div>
-      </section>
-
-      <!-- THE GOLDEN CIRCLE -->
-      <section *ngIf="secaoId === 'goldenCircle'" class="editor-section">
-        <div class="section-header">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="conteudo.goldenCircle.ativo"
-              name="goldenCircleAtivo">
-            <span class="section-title">
-              <i class="fa-solid fa-bullseye"></i>
-              The Golden Circle
-            </span>
-          </label>
-          <div class="section-header-actions">
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaCima('goldenCircle')"
-              [disabled]="!podeSecaoSubir('goldenCircle')"
-              title="Mover seção para cima">
-              <i class="fa-solid fa-arrow-up"></i>
-            </button>
-            <button
-              type="button"
-              class="btn-reorder-section"
-              (click)="moverSecaoParaBaixo('goldenCircle')"
-              [disabled]="!podeSecaoDescer('goldenCircle')"
-              title="Mover seção para baixo">
-              <i class="fa-solid fa-arrow-down"></i>
-            </button>
-          </div>
-        </div>
-
-        <div *ngIf="conteudo.goldenCircle.ativo" class="section-content">
-          <div class="info-box">
-            <i class="fa-solid fa-info-circle"></i>
-            <p>
-              <strong>The Golden Circle ativado!</strong><br>
-              O mentorado poderá responder às três perguntas fundamentais: Por quê (WHY), Como (HOW) e O quê (WHAT) você faz, visualizadas em círculos concêntricos.
-            </p>
-          </div>
-        </div>
-      </section>
+        </section>
 
       </ng-container>
-      <!-- FIM DAS SEÇÕES REORDENÁVEIS -->
-
-      <!-- ENCERRAMENTO -->
-      <section class="editor-section">
-        <div class="section-header">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="conteudo.encerramento.ativo"
-              name="encerramentoAtivo">
-            <span class="section-title">
-              <i class="fa-solid fa-flag-checkered"></i>
-              Encerramento
-            </span>
-          </label>
-        </div>
-
-        <div *ngIf="conteudo.encerramento.ativo" class="section-content">
-          <input
-            type="text"
-            class="form-input"
-            [(ngModel)]="conteudo.encerramento.conteudo"
-            name="encerramentoConteudo"
-            placeholder="Mensagem de encerramento...">
-        </div>
-      </section>
-
     </form>
-
-    <!-- Footer com Ações -->
-    <div class="editor-footer">
-      <button
-        type="button"
-        class="btn-secondary"
-        (click)="voltar()"
-        [disabled]="isSaving">
-        <i class="fas fa-arrow-left"></i>
-        Voltar
-      </button>
-      <button
-        type="button"
-        class="btn-primary"
-        (click)="salvarConteudo()"
-        [disabled]="isSaving">
-        <i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i>
-        {{ isSaving ? 'Salvando...' : 'Salvar Conteúdo' }}
-      </button>
-    </div>
-
   </div>
 
   <!-- Modal de Templates -->

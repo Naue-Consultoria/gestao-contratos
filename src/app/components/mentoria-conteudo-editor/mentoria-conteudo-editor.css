@@ -1,3 +1,9 @@
+/* ===== PAGE CONTAINER ===== */
+.page {
+  min-height: 100vh;
+  padding: 2rem;
+}
+
 /* ===== PAGE HEADER (PADRONIZADO) ===== */
 .page-header {
   display: flex;
@@ -10,6 +16,13 @@
 
 .header-title-section {
   flex: 1;
+}
+
+.page-title {
+  font-size: 2rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  color: var(--text-dark);
 }
 
 .header-title-section .subtitle {
@@ -1515,5 +1528,107 @@
   font-weight: 600;
   color: #991b1b;
   word-break: break-word;
+}
+
+/* ===== BARRA DE FERRAMENTAS DE SEÇÕES ===== */
+.btn-toggle-toolbar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: #ffffff;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.btn-toggle-toolbar:hover {
+  background: var(--green-500);
+  color: white;
+  border-color: var(--green-500);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 183, 79, 0.3);
+}
+
+/* Grid de Blocos da Toolbar */
+.toolbar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.toolbar-item {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toolbar-item:hover:not(.toolbar-item-disabled) {
+  background: var(--green-500);
+  color: white;
+  border-color: var(--green-500);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 183, 79, 0.3);
+}
+
+.toolbar-item:hover:not(.toolbar-item-disabled) i {
+  color: white;
+}
+
+.toolbar-item.toolbar-item-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f9fafb;
+}
+
+.toolbar-item i {
+  font-size: 1.5rem;
+  color: var(--green-500);
+}
+
+.toolbar-item span {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.toolbar-check {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  color: var(--green-500);
+  font-size: 1rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .toolbar-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  }
+
+  .toolbar-item {
+    padding: 0.75rem;
+  }
+
+  .toolbar-item i {
+    font-size: 1.25rem;
+  }
+
+  .toolbar-item span {
+    font-size: 0.75rem;
+  }
 }
 
