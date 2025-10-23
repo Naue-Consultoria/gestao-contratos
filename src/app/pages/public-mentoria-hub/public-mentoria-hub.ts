@@ -280,4 +280,16 @@ export class PublicMentoriaHub implements OnInit {
 
     return idade;
   }
+
+  // Formatar data de nascimento para exibição
+  formatarDataNascimento(): string {
+    if (!this.mentoria?.mentorado_data_nascimento) return '';
+
+    const dataNascimento = new Date(this.mentoria.mentorado_data_nascimento);
+    const dia = dataNascimento.getDate().toString().padStart(2, '0');
+    const mes = (dataNascimento.getMonth() + 1).toString().padStart(2, '0');
+    const ano = dataNascimento.getFullYear();
+
+    return `${dia}/${mes}/${ano}`;
+  }
 }
