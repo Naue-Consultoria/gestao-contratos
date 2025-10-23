@@ -36,6 +36,10 @@ export class VagaService {
     return this.http.put<Vaga>(`${this.apiUrl}/${id}`, vaga);
   }
 
+  updateVaga(id: number, data: Partial<Vaga>): Observable<Vaga> {
+    return this.update(id, data);
+  }
+
   updateStatus(id: number, status: string): Observable<Vaga> {
     return this.http.patch<Vaga>(`${this.apiUrl}/${id}/status`, { status });
   }

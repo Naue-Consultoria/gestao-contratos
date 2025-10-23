@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { VagaService } from '../../services/vaga.service';
+import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { firstValueFrom } from 'rxjs';
 import localePt from '@angular/common/locales/pt';
 
@@ -46,7 +47,7 @@ interface Vaga {
 @Component({
   selector: 'app-recrutamento-selecao',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, CurrencyMaskDirective],
   providers: [{ provide: LOCALE_ID, useValue: 'pt-BR' }],
   templateUrl: './recrutamento-selecao.html',
   styleUrl: './recrutamento-selecao.css'
@@ -66,6 +67,12 @@ export class RecrutamentoSelecao implements OnInit {
   consultoraFilter: string = '';
   showFecharVagaModal: boolean = false;
   selectedVagaToClose: Vaga | null = null;
+
+  // Dados para fechamento de vaga
+  fechamentoData = {
+    salario: '',
+    fonteRecrutamento: ''
+  };
 
   // Cache for months and years
   cachedMonths: { value: string; label: string }[] = [];
@@ -445,12 +452,27 @@ export class RecrutamentoSelecao implements OnInit {
 
   fecharVaga(vaga: Vaga) {
     this.selectedVagaToClose = vaga;
+    // Preencher com valores atuais da vaga
+    // Formatar o salário para exibir com máscara
+    if (vaga.salario) {
+      // Formatar o valor para exibir com a máscara de moeda
+      const valor = vaga.salario.toFixed(2).replace('.', ',');
+      this.fechamentoData.salario = `R$ ${valor.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+    } else {
+      this.fechamentoData.salario = '';
+    }
+    this.fechamentoData.fonteRecrutamento = vaga.fonteRecrutamento || '';
     this.showFecharVagaModal = true;
   }
 
   closeFecharVagaModal() {
     this.showFecharVagaModal = false;
     this.selectedVagaToClose = null;
+    // Limpar dados do formulário
+    this.fechamentoData = {
+      salario: '',
+      fonteRecrutamento: ''
+    };
   }
 
   onModalBackdropClick(event: MouseEvent) {
@@ -463,7 +485,39 @@ export class RecrutamentoSelecao implements OnInit {
     if (!this.selectedVagaToClose) return;
 
     try {
-      await firstValueFrom(this.vagaService.updateStatus(this.selectedVagaToClose.id, 'fechada'));
+      // Preparar dados para atualização
+      const updateData: any = {
+        status: 'fechada'
+      };
+
+      // Converter salário de string formatada para número
+      if (this.fechamentoData.salario) {
+        // Garantir que o valor é uma string antes de processar
+        const salarioString = String(this.fechamentoData.salario);
+
+        // Remover R$, pontos e vírgulas, e converter para número
+        const salarioNumerico = parseFloat(
+          salarioString
+            .replace('R$', '')
+            .replace(/\./g, '')
+            .replace(',', '.')
+            .trim()
+        );
+
+        // Adicionar salário se foi alterado
+        if (!isNaN(salarioNumerico) && salarioNumerico !== this.selectedVagaToClose.salario) {
+          updateData.salario = salarioNumerico;
+        }
+      }
+
+      // Adicionar fonte de recrutamento se foi preenchida
+      if (this.fechamentoData.fonteRecrutamento) {
+        updateData.fonte_recrutamento = this.fechamentoData.fonteRecrutamento;
+      }
+
+      // Chamar serviço para atualizar vaga
+      await firstValueFrom(this.vagaService.updateVaga(this.selectedVagaToClose.id, updateData));
+
       this.closeFecharVagaModal();
       await this.loadData();
     } catch (error) {

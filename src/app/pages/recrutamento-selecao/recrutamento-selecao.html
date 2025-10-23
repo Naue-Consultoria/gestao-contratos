@@ -553,13 +553,49 @@
 
       <div class="modal-body">
         <div class="confirmation-message">
-          <p>Tem certeza que deseja fechar a vaga?</p>
+          <p>Confirme os dados da vaga antes de fechá-la:</p>
           <div class="vaga-info">
             <strong>Cargo:</strong> {{ selectedVagaToClose?.cargo }}
           </div>
           <div class="vaga-info">
             <strong>Cliente:</strong> {{ selectedVagaToClose?.clienteNome }}
           </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1.5rem;">
+          <label for="salario-final" class="form-label">
+            <i class="fas fa-dollar-sign"></i>
+            Salário Final
+          </label>
+          <input
+            type="text"
+            id="salario-final"
+            class="form-control"
+            [(ngModel)]="fechamentoData.salario"
+            appCurrencyMask
+            placeholder="R$ 0,00"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="fonte-final" class="form-label">
+            <i class="fas fa-share-alt"></i>
+            Fonte de Recrutamento
+          </label>
+          <select
+            id="fonte-final"
+            class="form-control"
+            [(ngModel)]="fechamentoData.fonteRecrutamento"
+          >
+            <option value="">Selecione a fonte</option>
+            <option value="catho">Catho</option>
+            <option value="email">E-mail</option>
+            <option value="indicacao">Indicação</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="trafego">Tráfego</option>
+            <option value="outros">Outros</option>
+          </select>
         </div>
       </div>
 
