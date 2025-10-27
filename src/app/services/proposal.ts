@@ -51,6 +51,7 @@ export interface Proposal {
   solicitante_name?: string;
   solicitante_email?: string;
   solicitante_phone?: string;
+  source?: string; // Fonte da proposta: Indicação, Site, Já era cliente, Redes sociais, etc.
   end_date?: string; // Corresponds to 'end_date' in DB, previously 'valid_until'
   validity_days?: number;
   total_value: number;
@@ -120,6 +121,7 @@ export interface CreateProposalData {
   solicitante_name?: string;
   solicitante_email?: string;
   solicitante_phone?: string;
+  source?: string; // Fonte da proposta: Indicação, Site, Já era cliente, Redes sociais, etc.
   end_date?: string;
   validity_days?: number;
   max_installments?: number;

@@ -145,7 +145,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       status: ['draft'], // Campo de status adicionado
       solicitante_name: [''],
       solicitante_email: ['', Validators.email],
-      solicitante_phone: ['']
+      solicitante_phone: [''],
+      source: [''] // Fonte da proposta: Indicação, Site, Já era cliente, etc.
     });
 
     this.newClientForm = this.fb.group({
@@ -220,7 +221,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       status: proposal.status || 'draft', // Carregar status da proposta
       solicitante_name: proposal.solicitante_name || '',
       solicitante_email: proposal.solicitante_email || '',
-      solicitante_phone: proposal.solicitante_phone || ''
+      solicitante_phone: proposal.solicitante_phone || '',
+      source: proposal.source || ''
     });
 
     // Carregar serviços da proposta
@@ -890,6 +892,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       solicitante_name: this.proposalForm.value.solicitante_name || undefined,
       solicitante_email: this.proposalForm.value.solicitante_email || undefined,
       solicitante_phone: this.proposalForm.value.solicitante_phone || undefined,
+      source: this.proposalForm.value.source || undefined,
       end_date: this.proposalForm.value.end_date || null,
       max_installments: this.proposalForm.value.max_installments || 12,
       vista_discount_percentage: this.proposalForm.value.vista_discount_percentage ?? 6,

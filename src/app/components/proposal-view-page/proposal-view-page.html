@@ -86,6 +86,10 @@
           <span class="info-label">Criado por</span>
           <span class="info-value">{{ proposal.created_by_user?.name }}</span>
         </div>
+        <div class="info-group" *ngIf="proposal.source">
+          <span class="info-label">Fonte</span>
+          <span class="info-value">{{ proposal.source }}</span>
+        </div>
         <div class="info-group">
           <span class="info-label">Válida Até</span>
           <span class="info-value">{{ proposal.end_date ? formatDate(proposal.end_date) : 'Não definido' }}</span>

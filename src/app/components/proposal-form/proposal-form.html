@@ -152,6 +152,30 @@
               </div>
             </div>
 
+            <div class="form-group">
+              <label for="source" class="form-label">
+                <i class="fas fa-bullseye"></i>
+                Fonte
+              </label>
+              <select id="source" formControlName="source" class="form-control">
+                <option value="">Selecione a fonte</option>
+                <option value="Indicação">Indicação</option>
+                <option value="Site">Site</option>
+                <option value="Já era cliente">Já era cliente</option>
+                <option value="Redes Sociais">Redes Sociais</option>
+                <option value="Instagram">Instagram</option>
+                <option value="LinkedIn">LinkedIn</option>
+                <option value="Facebook">Facebook</option>
+                <option value="Google">Google</option>
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="E-mail Marketing">E-mail Marketing</option>
+                <option value="Evento">Evento</option>
+                <option value="Parceiro">Parceiro</option>
+                <option value="Outro">Outro</option>
+              </select>
+              <div class="help-text">Como o cliente conheceu a empresa</div>
+            </div>
+
             <!-- Status field - only visible in edit mode -->
             <div class="form-group" *ngIf="isEditMode">
               <label for="status" class="form-label">Status da Proposta</label>
