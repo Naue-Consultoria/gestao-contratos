@@ -454,8 +454,66 @@
 .service-card-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1rem;
+}
+
+.service-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.service-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.btn-toggle-details {
+  background: rgba(14, 155, 113, 0.1);
+  border: 1px solid rgba(14, 155, 113, 0.3);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--primary-green);
+  font-size: 0.875rem;
+  padding: 0;
+}
+
+.btn-toggle-details:hover {
+  background: rgba(14, 155, 113, 0.2);
+  border-color: var(--primary-green);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(14, 155, 113, 0.2);
+}
+
+.btn-toggle-details:active {
+  transform: translateY(0);
+}
+
+.btn-toggle-details i {
+  transition: transform 0.3s ease;
+}
+
+:host-context(body.dark-mode) .btn-toggle-details {
+  background: rgba(14, 155, 113, 0.15);
+  border-color: rgba(14, 155, 113, 0.4);
+  color: var(--primary-green-light);
+}
+
+:host-context(body.dark-mode) .btn-toggle-details:hover {
+  background: rgba(14, 155, 113, 0.25);
+  border-color: var(--primary-green-light);
 }
 
 .service-number {
@@ -482,10 +540,163 @@
   color: var(--dark-text);
 }
 
+.service-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.service-details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(14, 155, 113, 0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(14, 155, 113, 0.1);
+  animation: slideDown 0.3s ease;
+  margin-bottom: 0.5rem;
+}
+
+:host-context(body.dark-mode) .service-details-content {
+  background: rgba(14, 155, 113, 0.05);
+  border-color: rgba(14, 155, 113, 0.15);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    transform: translateY(0);
+  }
+}
+
+.service-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary-green);
+  font-style: italic;
+}
+
+:host-context(body.dark-mode) .service-subtitle {
+  color: var(--primary-green-light);
+}
+
+.service-subtitle i {
+  font-size: 0.875rem;
+}
+
+.service-summary {
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.6;
+  padding: 0.75rem;
+  background: rgba(14, 155, 113, 0.05);
+  border-left: 3px solid var(--primary-green);
+  border-radius: 4px;
+}
+
+:host-context(body.dark-mode) .service-summary {
+  color: var(--dark-text);
+  background: rgba(14, 155, 113, 0.1);
+}
+
 .service-description {
   color: var(--text-gray);
-  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+:host-context(body.dark-mode) .service-description {
+  color: #aaa;
+}
+
+/* Estilos para HTML dentro de summary e description */
+.service-summary ::ng-deep h1,
+.service-summary ::ng-deep h2,
+.service-summary ::ng-deep h3,
+.service-summary ::ng-deep h4,
+.service-summary ::ng-deep h5,
+.service-summary ::ng-deep h6,
+.service-description ::ng-deep h1,
+.service-description ::ng-deep h2,
+.service-description ::ng-deep h3,
+.service-description ::ng-deep h4,
+.service-description ::ng-deep h5,
+.service-description ::ng-deep h6 {
+  margin: 0.5rem 0 0.25rem 0;
+  font-weight: 600;
+  color: inherit;
+}
+
+.service-summary ::ng-deep h2,
+.service-description ::ng-deep h2 {
+  font-size: 1rem;
+}
+
+.service-summary ::ng-deep h3,
+.service-description ::ng-deep h3 {
+  font-size: 0.95rem;
+}
+
+.service-summary ::ng-deep p,
+.service-description ::ng-deep p {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.service-summary ::ng-deep ul,
+.service-summary ::ng-deep ol,
+.service-description ::ng-deep ul,
+.service-description ::ng-deep ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.service-summary ::ng-deep li,
+.service-description ::ng-deep li {
+  margin: 0.25rem 0;
   line-height: 1.5;
+}
+
+.service-summary ::ng-deep strong,
+.service-summary ::ng-deep b,
+.service-description ::ng-deep strong,
+.service-description ::ng-deep b {
+  font-weight: 600;
+  color: inherit;
+}
+
+.service-summary ::ng-deep em,
+.service-summary ::ng-deep i,
+.service-description ::ng-deep em,
+.service-description ::ng-deep i {
+  font-style: italic;
+}
+
+.service-summary ::ng-deep a,
+.service-description ::ng-deep a {
+  color: var(--primary-green);
+  text-decoration: underline;
+}
+
+.service-summary ::ng-deep a:hover,
+.service-description ::ng-deep a:hover {
+  color: var(--primary-green-dark);
+}
+
+:host-context(body.dark-mode) .service-summary ::ng-deep a,
+:host-context(body.dark-mode) .service-description ::ng-deep a {
+  color: var(--primary-green-light);
 }
 
 .service-pricing {

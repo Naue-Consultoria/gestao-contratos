@@ -20,6 +20,16 @@ export interface ProposalServiceItem {
     operacional: number;
     estagio_jovem: number;
   };
+  service?: {
+    id: number;
+    name: string;
+    duration_amount?: number;
+    duration_unit?: string;
+    category?: string;
+    description?: string;
+    subtitle?: string;
+    summary?: string;
+  };
 }
 
 export interface Proposal {

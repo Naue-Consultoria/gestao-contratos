@@ -27,6 +27,7 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
   error = '';
   isEditMode = false;
   activeTab = 'services';
+  expandedServices: { [key: number]: boolean } = {};
 
   ngOnInit() {
     const id = this.route.snapshot.params['id'];
@@ -807,9 +808,21 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
 
     return !!(
       this.proposal.payment_type === 'vista' &&
-      this.proposal.discount_applied && 
+      this.proposal.discount_applied &&
       this.proposal.discount_applied > 0
     );
+  }
+
+  toggleServiceDetails(serviceId: number) {
+    this.expandedServices[serviceId] = !this.expandedServices[serviceId];
+  }
+
+  isServiceExpanded(serviceId: number): boolean {
+    return this.expandedServices[serviceId] || false;
+  }
+
+  hasServiceDetails(service: any): boolean {
+    return !!(service.service?.subtitle || service.service?.summary || service.service?.description);
   }
 
 }
