@@ -266,7 +266,17 @@ export class PublicMentoriaHub implements OnInit {
   calcularIdade(): number | null {
     if (!this.mentoria?.mentorado_data_nascimento) return null;
 
-    const dataNascimento = new Date(this.mentoria.mentorado_data_nascimento);
+    // Criar data no timezone local para evitar problema de offset UTC
+    const dateString = this.mentoria.mentorado_data_nascimento;
+    let dataNascimento: Date;
+
+    if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = dateString.split('-');
+      dataNascimento = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    } else {
+      dataNascimento = new Date(dateString);
+    }
+
     const hoje = new Date();
 
     let idade = hoje.getFullYear() - dataNascimento.getFullYear();
@@ -285,7 +295,17 @@ export class PublicMentoriaHub implements OnInit {
   formatarDataNascimento(): string {
     if (!this.mentoria?.mentorado_data_nascimento) return '';
 
-    const dataNascimento = new Date(this.mentoria.mentorado_data_nascimento);
+    // Criar data no timezone local para evitar problema de offset UTC
+    const dateString = this.mentoria.mentorado_data_nascimento;
+    let dataNascimento: Date;
+
+    if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = dateString.split('-');
+      dataNascimento = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    } else {
+      dataNascimento = new Date(dateString);
+    }
+
     const dia = dataNascimento.getDate().toString().padStart(2, '0');
     const mes = (dataNascimento.getMonth() + 1).toString().padStart(2, '0');
     const ano = dataNascimento.getFullYear();
