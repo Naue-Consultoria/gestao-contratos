@@ -690,6 +690,89 @@
   margin: 0 0.25rem;
 }
 
+/* Title Dropdown */
+.title-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.title-dropdown .dropdown-toggle {
+  width: auto;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.title-dropdown .dropdown-toggle:hover {
+  background: #022c22;
+  color: white;
+  border-color: #022c22;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.title-dropdown .dropdown-toggle i.fa-heading {
+  font-size: 14px;
+}
+
+.title-dropdown .dropdown-toggle i.fa-caret-down {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.title-dropdown .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  min-width: 140px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+  padding: 4px 0;
+}
+
+.title-dropdown .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  transition: background 0.2s ease;
+}
+
+.title-dropdown .dropdown-item:hover {
+  background: #f0f9ff;
+  color: #022c22;
+}
+
+.dropdown-icon {
+  width: 20px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 12px;
+}
+
 .rich-editor {
   min-height: 150px;
   max-height: 400px;
@@ -738,6 +821,46 @@
 
 .rich-editor p {
   margin: 0.75rem 0;
+}
+
+.rich-editor h1 {
+  font-size: 2em;
+  font-weight: 700;
+  margin: 1rem 0 0.75rem 0;
+  color: #022c22;
+  line-height: 1.3;
+}
+
+.rich-editor h2 {
+  font-size: 1.5em;
+  font-weight: 700;
+  margin: 0.9rem 0 0.65rem 0;
+  color: #022c22;
+  line-height: 1.3;
+}
+
+.rich-editor h3 {
+  font-size: 1.3em;
+  font-weight: 600;
+  margin: 0.8rem 0 0.6rem 0;
+  color: #022c22;
+  line-height: 1.4;
+}
+
+.rich-editor h4 {
+  font-size: 1.15em;
+  font-weight: 600;
+  margin: 0.7rem 0 0.5rem 0;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.rich-editor h5 {
+  font-size: 1em;
+  font-weight: 600;
+  margin: 0.6rem 0 0.4rem 0;
+  color: #374151;
+  line-height: 1.5;
 }
 
 .rich-editor p:first-child {

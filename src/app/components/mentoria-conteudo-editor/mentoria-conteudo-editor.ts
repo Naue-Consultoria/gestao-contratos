@@ -138,6 +138,18 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
   blocosAtivos: BlocoEditor[] = [];
   mostrarBarraFerramentas = true;
 
+  // Rich editor properties
+  showTitleDropdown: { [blocoId: string]: boolean } = {};
+  selectedTitle: { [blocoId: string]: string } = {};
+  titleOptions = [
+    { label: 'Normal', value: 'p', icon: 'T' },
+    { label: 'Título 1', value: 'h1', icon: 'H1' },
+    { label: 'Título 2', value: 'h2', icon: 'H2' },
+    { label: 'Título 3', value: 'h3', icon: 'H3' },
+    { label: 'Título 4', value: 'h4', icon: 'H4' },
+    { label: 'Título 5', value: 'h5', icon: 'H5' }
+  ];
+
   // Definição de todos os blocos disponíveis
   blocosDisponiveis: Array<{tipo: TipoBloco, titulo: string, icone: string, descricao: string}> = [
     { tipo: 'visaoGeral', titulo: 'Visão Geral', icone: 'fa-bullseye', descricao: 'Visão geral do encontro' },
@@ -328,6 +340,15 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
               // Se não for JSON, é conteúdo antigo - manter vazio
               console.log('Conteúdo não é JSON estruturado');
             }
+          }
+
+          // Inicializar selectedTitle para todos os blocos de texto em próximos passos
+          if (this.conteudo.proximosPassos && this.conteudo.proximosPassos.blocos) {
+            this.conteudo.proximosPassos.blocos.forEach(bloco => {
+              if (bloco.tipo === 'texto') {
+                this.selectedTitle[bloco.id] = 'Normal';
+              }
+            });
           }
         }
         this.isLoading = false;
@@ -579,6 +600,10 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       tarefas: tipo === 'tarefas' ? { titulo: '', itens: [{ texto: '' }] } : undefined
     };
     this.conteudo.proximosPassos.blocos.push(bloco);
+    // Inicializar título para blocos de texto
+    if (tipo === 'texto') {
+      this.selectedTitle[bloco.id] = 'Normal';
+    }
   }
 
   removerBlocoProximosPassos(id: string): void {
@@ -887,6 +912,21 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     const url = prompt('Digite a URL do link:');
     if (url) {
       this.execCommand('createLink', url);
+    }
+  }
+
+  toggleTitleDropdown(blocoId: string): void {
+    this.showTitleDropdown[blocoId] = !this.showTitleDropdown[blocoId];
+  }
+
+  applyTitle(option: any, blocoId: string): void {
+    this.selectedTitle[blocoId] = option.label;
+    this.showTitleDropdown[blocoId] = false;
+
+    if (option.value === 'p') {
+      this.execCommand('formatBlock', '<p>');
+    } else {
+      this.execCommand('formatBlock', `<${option.value}>`);
     }
   }
 

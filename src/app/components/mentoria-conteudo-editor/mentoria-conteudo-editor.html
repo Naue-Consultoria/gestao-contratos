@@ -378,6 +378,27 @@
               <!-- Conteúdo Texto com Editor Rico -->
               <div *ngIf="blocoProx.tipo === 'texto'" class="rich-editor-container">
                 <div class="editor-toolbar">
+                  <!-- Dropdown de Título -->
+                  <div class="title-dropdown">
+                    <button type="button"
+                            class="toolbar-btn dropdown-toggle"
+                            (click)="toggleTitleDropdown(blocoProx.id)"
+                            title="Tamanho do texto">
+                      <i class="fas fa-heading"></i>
+                      <span>{{ selectedTitle[blocoProx.id] || 'Normal' }}</span>
+                      <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-menu" *ngIf="showTitleDropdown[blocoProx.id]">
+                      <button type="button"
+                              class="dropdown-item"
+                              *ngFor="let option of titleOptions"
+                              (click)="applyTitle(option, blocoProx.id)">
+                        <span class="dropdown-icon">{{ option.icon }}</span>
+                        {{ option.label }}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="toolbar-separator"></div>
                   <button type="button" class="toolbar-btn" (click)="execCommand('bold')" title="Negrito">
                     <i class="fas fa-bold"></i>
                   </button>
@@ -388,11 +409,25 @@
                     <i class="fas fa-underline"></i>
                   </button>
                   <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" (click)="execCommand('indent')" title="Aumentar Recuo">
+                    <i class="fas fa-indent"></i>
+                  </button>
+                  <button type="button" class="toolbar-btn" (click)="execCommand('outdent')" title="Diminuir Recuo">
+                    <i class="fas fa-outdent"></i>
+                  </button>
+                  <div class="toolbar-separator"></div>
                   <button type="button" class="toolbar-btn" (click)="execCommand('insertUnorderedList')" title="Lista">
                     <i class="fas fa-list-ul"></i>
                   </button>
                   <button type="button" class="toolbar-btn" (click)="execCommand('insertOrderedList')" title="Lista Numerada">
                     <i class="fas fa-list-ol"></i>
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" (click)="execCommand('undo')" title="Desfazer">
+                    <i class="fas fa-undo"></i>
+                  </button>
+                  <button type="button" class="toolbar-btn" (click)="execCommand('redo')" title="Refazer">
+                    <i class="fas fa-redo"></i>
                   </button>
                   <div class="toolbar-separator"></div>
                   <button type="button" class="toolbar-btn" (click)="insertLink()" title="Inserir Link">
