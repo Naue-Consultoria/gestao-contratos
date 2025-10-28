@@ -312,7 +312,7 @@ export class AnalyticsRsComponent implements OnInit, AfterViewInit, OnDestroy {
       'fechada': '#10b981',          // Verde claro
       'fechada_rep': '#14b8a6',      // Teal
       'cancelada_cliente': '#ef4444', // Vermelho
-      'standby': '#6b7280',          // Cinza
+      'standby': '#10b981',          // Verde
       'nao_cobrada': '#f87171',      // Vermelho claro
       'encerramento_cont': '#9ca3af' // Cinza claro
     };

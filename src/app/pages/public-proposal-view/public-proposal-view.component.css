@@ -464,7 +464,7 @@ html {
   z-index: 10;
   position: relative;
   background: rgba(1, 32, 24, 0.9);
-  padding: 3rem 2.5rem;
+  padding: 3rem 2.5rem 3rem 1.5rem;
   border-radius: 20px;
   backdrop-filter: blur(10px);
   width: 100%;
@@ -538,8 +538,8 @@ html {
 }
 
 .map-image {
-  max-width: 600px;
-  max-height: 400px;
+  max-width: 750px;
+  max-height: 500px;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -591,8 +591,8 @@ html {
   }
   
   .map-image {
-    max-width: 350px;
-    max-height: 250px;
+    max-width: 450px;
+    max-height: 350px;
     display: block;
     margin: 0 auto;
     vertical-align: middle;
@@ -617,22 +617,22 @@ html {
 /* Ajustar tamanho da imagem estados.png para diferentes resoluções */
 @media (max-width: 1366px) {
   .map-image {
-    max-width: 500px;
-    max-height: 350px;
+    max-width: 650px;
+    max-height: 450px;
   }
 }
 
 @media (max-width: 1024px) {
   .map-image {
-    max-width: 400px;
-    max-height: 280px;
+    max-width: 500px;
+    max-height: 350px;
   }
 }
 
 @media (max-width: 768px) {
   .map-image {
-    max-width: 300px;
-    max-height: 200px;
+    max-width: 350px;
+    max-height: 250px;
   }
 }
 
