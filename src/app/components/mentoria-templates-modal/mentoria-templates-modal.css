@@ -184,13 +184,160 @@
   color: #9ca3af;
 }
 
-/* Templates Grid */
+/* Templates Grid - Mantido para compatibilidade */
 .templates-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.25rem;
 }
 
+/* Templates List View */
+.templates-list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.template-list-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.template-list-item:hover {
+  border-color: #022c22;
+  border-left-color: #022c22;
+  box-shadow: 0 4px 16px rgba(2, 44, 34, 0.08);
+  background: #f9fafb;
+  transform: translateX(4px);
+}
+
+.template-list-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.template-list-header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.template-list-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.4;
+}
+
+.template-list-description {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.template-list-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.template-list-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.btn-action span {
+  font-weight: 600;
+}
+
+.btn-action.btn-use {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.btn-action.btn-use:hover {
+  background: #16a34a;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.2);
+}
+
+.btn-action.btn-view {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.btn-action.btn-view:hover {
+  background: #2563eb;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.btn-action.btn-delete {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 0.625rem;
+}
+
+.btn-action.btn-delete:hover {
+  background: #dc2626;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.template-count {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.template-count i {
+  font-size: 0.875rem;
+}
+
+.template-date {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.template-list-item .template-type-badge {
+  flex-shrink: 0;
+}
+
+/* Old Card Styles - Mantido para compatibilidade */
 .template-card {
   background: white;
   border: 2px solid #e5e7eb;
@@ -286,18 +433,6 @@
   border-top: 1px solid #e5e7eb;
   font-size: 0.8125rem;
   color: #6b7280;
-}
-
-.template-count {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-weight: 600;
-  color: #022c22;
-}
-
-.template-count i {
-  font-size: 1rem;
 }
 
 /* Save Template Form */
@@ -555,6 +690,28 @@ textarea.form-control {
 
   .templates-grid {
     grid-template-columns: 1fr;
+  }
+
+  .template-list-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .template-list-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .btn-action span {
+    display: none;
+  }
+
+  .btn-action {
+    padding: 0.625rem;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
   }
 
   .modal-tabs {

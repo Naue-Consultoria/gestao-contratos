@@ -75,48 +75,53 @@
           <small>Use a aba "Criar Novo Template" para começar</small>
         </div>
 
-        <div *ngIf="templatesFiltrados.length > 0" class="templates-grid">
-          <div *ngFor="let template of templatesFiltrados" class="template-card">
-            <div class="template-card-header">
-              <h3>{{ template.nome }}</h3>
-              <div class="template-card-actions">
-                <button
-                  class="btn-icon btn-use"
-                  (click)="carregarTemplate(template)"
-                  title="Usar este template"
-                  type="button">
-                  <i class="fas fa-plus-circle"></i>
-                </button>
-                <button
-                  class="btn-icon btn-view"
-                  (click)="visualizarTemplate(template)"
-                  title="Visualizar/Editar"
-                  type="button">
-                  <i class="fas fa-eye"></i>
-                </button>
-                <button
-                  class="btn-icon btn-delete"
-                  (click)="excluirTemplate(template)"
-                  title="Excluir"
-                  type="button">
-                  <i class="fas fa-trash"></i>
-                </button>
+        <div *ngIf="templatesFiltrados.length > 0" class="templates-list-view">
+          <div *ngFor="let template of templatesFiltrados" class="template-list-item">
+            <div class="template-list-content">
+              <div class="template-list-header">
+                <span class="template-type-badge" [class.badge-perguntas]="template.tipo === 'perguntas'" [class.badge-tarefas]="template.tipo === 'tarefas'">
+                  <i class="fas" [class.fa-question-circle]="template.tipo === 'perguntas'" [class.fa-list-check]="template.tipo === 'tarefas'"></i>
+                  {{ template.tipo === 'perguntas' ? 'Perguntas' : 'Tarefas' }}
+                </span>
+                <h3 class="template-list-title">{{ template.nome }}</h3>
+              </div>
+              <p class="template-list-description" *ngIf="template.descricao">
+                {{ template.descricao }}
+              </p>
+              <div class="template-list-meta">
+                <span class="template-count">
+                  {{ getPreviewText(template.content, template.tipo) }}
+                </span>
+                <span class="template-date" *ngIf="template.created_at">
+                  <i class="fas fa-calendar"></i>
+                  {{ template.created_at | date: 'dd/MM/yyyy' }}
+                </span>
               </div>
             </div>
-            <p class="template-description" *ngIf="template.descricao">
-              {{ template.descricao }}
-            </p>
-            <div class="template-meta">
-              <span class="template-type-badge" [class.badge-perguntas]="template.tipo === 'perguntas'" [class.badge-tarefas]="template.tipo === 'tarefas'">
-                <i class="fas" [class.fa-question-circle]="template.tipo === 'perguntas'" [class.fa-list-check]="template.tipo === 'tarefas'"></i>
-                {{ template.tipo === 'perguntas' ? 'Perguntas' : 'Tarefas' }}
-              </span>
-              <span class="template-count">
-                {{ getPreviewText(template.content, template.tipo) }}
-              </span>
-              <span class="template-date" *ngIf="template.created_at">
-                {{ template.created_at | date: 'dd/MM/yyyy' }}
-              </span>
+            <div class="template-list-actions">
+              <button
+                class="btn-action btn-use"
+                (click)="carregarTemplate(template)"
+                title="Usar este template"
+                type="button">
+                <i class="fas fa-plus-circle"></i>
+                <span>Usar</span>
+              </button>
+              <button
+                class="btn-action btn-view"
+                (click)="visualizarTemplate(template)"
+                title="Visualizar/Editar"
+                type="button">
+                <i class="fas fa-eye"></i>
+                <span>Ver</span>
+              </button>
+              <button
+                class="btn-action btn-delete"
+                (click)="excluirTemplate(template)"
+                title="Excluir"
+                type="button">
+                <i class="fas fa-trash"></i>
+              </button>
             </div>
           </div>
         </div>
