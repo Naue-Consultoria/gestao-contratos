@@ -329,6 +329,63 @@
   border-color: #e5e7eb;
 }
 
+/* Status Colors */
+.status-select.status-not-started {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  border-color: #d1d5db;
+  font-weight: 600;
+}
+
+.status-select.status-scheduled {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+  font-weight: 600;
+}
+
+.status-select.status-in-progress {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+  font-weight: 600;
+}
+
+.status-select.status-completed {
+  background-color: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
+  font-weight: 600;
+}
+
+.status-select.status-cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+  font-weight: 600;
+}
+
+/* Hover states for colored selects */
+.status-select.status-not-started:hover {
+  background-color: #e5e7eb;
+}
+
+.status-select.status-scheduled:hover {
+  background-color: #bfdbfe;
+}
+
+.status-select.status-in-progress:hover {
+  background-color: #fde68a;
+}
+
+.status-select.status-completed:hover {
+  background-color: #a7f3d0;
+}
+
+.status-select.status-cancelled:hover {
+  background-color: #fecaca;
+}
+
 :host-context(body.dark-mode) .status-select {
   background-color: #1f2937;
   border-color: #374151;

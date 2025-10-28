@@ -255,6 +255,7 @@ export class ServiceTrackingPageComponent implements OnInit {
     }
 
     const newStatus: 'pending' | 'completed' = event.target.checked ? 'completed' : 'pending';
+    const oldProgress = this.stageProgress;
 
     try {
       const response = await this.serviceStageService.updateStageStatus(stage.id, newStatus).toPromise();
@@ -273,6 +274,9 @@ export class ServiceTrackingPageComponent implements OnInit {
           // Calcular progresso localmente
           this.stageProgress = this.serviceStageService.calculateProgress(this.serviceStages);
         }
+
+        // Lógica automática de mudança de status baseada no progresso
+        await this.updateStatusBasedOnProgress(oldProgress, this.stageProgress);
       }
     } catch (error: any) {
       console.error('Erro ao atualizar status da etapa:', error);
@@ -299,6 +303,7 @@ export class ServiceTrackingPageComponent implements OnInit {
     }
 
     const isNotApplicable = event.target.checked;
+    const oldProgress = this.stageProgress;
 
     try {
       const response = await this.serviceStageService.updateStageNotApplicable(stage.id, isNotApplicable).toPromise();
@@ -318,6 +323,9 @@ export class ServiceTrackingPageComponent implements OnInit {
           this.stageProgress = this.serviceStageService.calculateProgress(this.serviceStages);
         }
 
+        // Lógica automática de mudança de status baseada no progresso
+        await this.updateStatusBasedOnProgress(oldProgress, this.stageProgress);
+
         this.toastr.success(`Etapa marcada como ${isNotApplicable ? 'não aplicável' : 'aplicável'}`);
       }
     } catch (error: any) {
@@ -329,8 +337,54 @@ export class ServiceTrackingPageComponent implements OnInit {
     }
   }
 
+  async updateStatusBasedOnProgress(oldProgress: number, newProgress: number) {
+    // Não fazer nada se o progresso não mudou
+    if (oldProgress === newProgress) {
+      return;
+    }
+
+    let newStatus: 'not_started' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | null = null;
+    let statusMessage = '';
+
+    // Se chegou a 100%, marcar como finalizado (exceto se já estiver cancelado)
+    if (newProgress === 100 && this.selectedStatus !== 'cancelled' && this.selectedStatus !== 'completed') {
+      newStatus = 'completed';
+      statusMessage = 'Rotina marcada como finalizada automaticamente (100% concluído)';
+    }
+    // Se saiu de 0% e não está cancelado, marcar como em andamento
+    else if (oldProgress === 0 && newProgress > 0 && this.selectedStatus === 'not_started') {
+      newStatus = 'in_progress';
+      statusMessage = 'Rotina marcada como em andamento automaticamente';
+    }
+
+    // Se houver mudança de status, atualizar
+    if (newStatus) {
+      try {
+        this.selectedStatus = newStatus;
+
+        const updates = {
+          status: this.selectedStatus,
+          scheduled_date: this.selectedDate || null,
+          notes: this.routineNotes || null
+        };
+
+        // Atualizar a rotina no backend
+        if (this.routine?.id) {
+          const updatedRoutine = await this.routineService.updateRoutine(this.routine.id, updates).toPromise();
+          if (updatedRoutine) {
+            this.routine = updatedRoutine;
+            this.toastr.success(statusMessage);
+          }
+        }
+      } catch (error: any) {
+        console.error('Erro ao atualizar status automaticamente:', error);
+        // Não mostrar erro ao usuário, pois a etapa já foi atualizada com sucesso
+      }
+    }
+  }
+
   getCurrentStatusInfo() {
-    return this.serviceStatuses.find(status => status.value === this.selectedStatus) 
+    return this.serviceStatuses.find(status => status.value === this.selectedStatus)
            || this.serviceStatuses[0];
   }
 

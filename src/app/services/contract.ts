@@ -8,7 +8,7 @@ export interface ContractServiceItem {
   service_id: number;
   unit_value: number; // em reais
   scheduled_start_date?: string | null;
-  status?: 'not_started' | 'scheduled' | 'in_progress' | 'completed';
+  status?: 'not_started' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
   recruitmentPercentages?: {
     administrativo_gestao: number;
     comercial: number;
@@ -119,7 +119,7 @@ export interface ApiContractService {
   unit_value: number;
   total_value: number;
   scheduled_start_date?: string | null;
-  status?: 'not_started' | 'scheduled' | 'in_progress' | 'completed';
+  status?: 'not_started' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
   updated_at?: string;
   service: {
     id: number;

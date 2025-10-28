@@ -19,10 +19,15 @@
       <div class="col-status">
         <!-- Edit Mode -->
         <div class="status-controls" *ngIf="isEditMode()">
-          <select 
-            [(ngModel)]="service.status" 
+          <select
+            [(ngModel)]="service.status"
             (ngModelChange)="updateServiceStatus(service, $event)"
-            class="status-select">
+            class="status-select"
+            [class.status-not-started]="service.status === 'not_started'"
+            [class.status-scheduled]="service.status === 'scheduled'"
+            [class.status-in-progress]="service.status === 'in_progress'"
+            [class.status-completed]="service.status === 'completed'"
+            [class.status-cancelled]="service.status === 'cancelled'">
             <option *ngFor="let status of serviceStatuses" [value]="status.value">
               {{ status.label }}
             </option>
