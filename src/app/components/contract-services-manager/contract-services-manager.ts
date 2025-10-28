@@ -136,8 +136,8 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
       // Definir prioridades numéricas para garantir ordem correta
       const getPriority = (serviceName: string): number => {
         if (serviceName === 'Entrada de Cliente') return 1;
-        if (serviceName === 'Encerramento') return 2;
-        return 3; // Todos os outros serviços
+        if (serviceName === 'Encerramento') return 999; // Sempre por último
+        return 2; // Todos os outros serviços
       };
 
       const priorityA = getPriority(serviceNameA);
