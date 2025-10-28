@@ -185,7 +185,7 @@
 
 .table-header-row {
   display: grid;
-  grid-template-columns: 3fr 1.2fr 1.3fr 1.2fr 1fr;
+  grid-template-columns: 3fr 1.2fr 1.2fr 1fr;
   gap: 16px;
   padding: 16px 20px;
   background: var(--green-50);
@@ -202,7 +202,7 @@
 
 .service-row {
   display: grid;
-  grid-template-columns: 3fr 1.2fr 1.3fr 1.2fr 1fr;
+  grid-template-columns: 3fr 1.2fr 1.2fr 1fr;
   gap: 16px;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border-color);
@@ -224,7 +224,7 @@
   border-bottom: none;
   border-left: 3px solid var(--naue-primary);
   box-shadow: inset 0 0 0 1px rgba(10, 128, 96, 0.1);
-  grid-template-columns: 3fr 1.2fr 1.3fr 1fr;
+  grid-template-columns: 3fr 1.2fr 1.2fr 1fr;
 }
 
 .service-row:last-child {
@@ -543,7 +543,7 @@
 @media (max-width: 1280px) and (min-width: 1200px) {
   .table-header-row,
   .service-row {
-    grid-template-columns: minmax(140px, 2fr) 90px 120px 110px 70px;
+    grid-template-columns: minmax(140px, 2fr) 90px 110px 70px;
     gap: 6px;
     padding: 10px 12px;
     font-size: 11px;
@@ -556,9 +556,8 @@
   .service-category {
     font-size: 10px;
   }
-  
-  .status-select,
-  .date-input {
+
+  .status-select {
     padding: 6px 8px;
     font-size: 11px;
   }
@@ -585,7 +584,7 @@
 @media (max-width: 1200px) {
   .table-header-row,
   .service-row {
-    grid-template-columns: minmax(180px, 1.5fr) 100px 140px 180px 140px 80px;
+    grid-template-columns: minmax(180px, 1.5fr) 100px 180px 140px;
     gap: var(--spacing-xs);
   }
 }
@@ -627,9 +626,9 @@
   
   .table-header-row,
   .service-row {
-    grid-template-columns: 200px 80px 120px 100px 150px 60px;
+    grid-template-columns: 200px 80px 100px 150px;
     gap: var(--spacing-xs);
-    min-width: 830px;
+    min-width: 600px;
   }
   
   .table-header-row {
@@ -2438,7 +2437,7 @@
   .table-header-row,
   .service-row,
   .service-row.expanded {
-    grid-template-columns: 2.2fr 1fr 1.1fr 0.9fr;
+    grid-template-columns: 2.5fr 1fr 1fr 0.9fr;
     gap: 16px;
     padding: 14px 20px;
     min-height: 56px;
@@ -2450,13 +2449,7 @@
     padding: 0 10px;
     padding-right: 28px;
   }
-  
-  .date-input {
-    max-width: 150px;
-    font-size: 13px;
-    padding: 0 10px;
-  }
-  
+
   .comments-toggle-modern {
     max-width: 110px;
     font-size: 12px;
@@ -2490,18 +2483,13 @@
   .table-header-row,
   .service-row,
   .service-row.expanded {
-    grid-template-columns: 2fr 1.1fr 1.2fr 0.8fr;
+    grid-template-columns: 2fr 1fr 1fr 0.8fr;
     gap: 16px;
     padding: 12px 18px;
   }
-  
+
   .status-select {
     max-width: 120px;
-    font-size: 12px;
-  }
-  
-  .date-input {
-    max-width: 140px;
     font-size: 12px;
   }
   
@@ -2588,9 +2576,9 @@
     margin-bottom: 4px;
     text-transform: uppercase;
   }
-  
-  .col-date::before {
-    content: "Data Agendada:";
+
+  .col-progress::before {
+    content: "Progresso:";
     display: block;
     font-size: 12px;
     font-weight: 600;
@@ -2598,7 +2586,7 @@
     margin-bottom: 4px;
     text-transform: uppercase;
   }
-  
+
   .col-actions::before {
     content: "Acompanhamento:";
     display: block;
@@ -2618,16 +2606,7 @@
     border-radius: 8px;
     padding-right: 36px;
   }
-  
-  /* Date input mobile */
-  .date-input {
-    width: 100%;
-    height: 44px;
-    padding: 0 12px;
-    font-size: 16px;
-    border-radius: 8px;
-  }
-  
+
   /* Comments section mobile */
   .service-comments-modern {
     margin: 16px -16px 0 -16px;
@@ -2688,15 +2667,11 @@
   .service-name {
     font-size: 15px;
   }
-  
-  .status-select,
-  .date-input {
+
+  .status-select {
     height: 42px;
     padding: 0 10px;
     font-size: 15px;
-  }
-  
-  .status-select {
     padding-right: 32px;
   }
   

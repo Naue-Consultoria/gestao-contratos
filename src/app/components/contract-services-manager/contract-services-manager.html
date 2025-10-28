@@ -3,7 +3,6 @@
     <div class="table-header-row">
       <div class="col-service">Serviço</div>
       <div class="col-status">Status</div>
-      <div class="col-date">Data Agendada</div>
       <div class="col-progress">Progresso</div>
       <div class="col-actions">Acompanhamento</div>
     </div>
@@ -42,31 +41,7 @@
           </span>
         </div>
       </div>
-      
-      <div class="col-date">
-        <!-- Edit Mode -->
-        <div class="date-controls" *ngIf="isEditMode()">
-          <input 
-            type="date" 
-            [value]="service.scheduled_start_date || ''"
-            (change)="updateServiceDate(service, $event)"
-            class="date-input"
-            placeholder="Selecionar data">
-        </div>
-        
-        <!-- View Mode -->
-        <div class="date-display" *ngIf="!isEditMode()">
-          <span class="date-text" *ngIf="getRoutineDate(service)">
-            <i class="fas fa-calendar-alt"></i>
-            {{ formatDate(getRoutineDate(service)) }}
-          </span>
-          <span class="date-text no-date" *ngIf="!getRoutineDate(service)">
-            <i class="fas fa-calendar"></i>
-            Não agendado
-          </span>
-        </div>
-      </div>
-      
+
       <div class="col-progress">
         <div class="progress-display">
           <div *ngIf="isLoadingProgress(service.id)" class="progress-loading">

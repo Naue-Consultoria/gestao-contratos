@@ -100,7 +100,11 @@ export class RoutinesPageComponent implements OnInit {
         }
 
         this.contracts = response.contracts
-          .filter((contract: ApiContract) => contract.status === 'active')
+          .filter((contract: ApiContract) =>
+            contract.status === 'active' &&
+            contract.type !== 'Recrutamento & Seleção' &&
+            contract.type !== 'Individual'
+          )
           .map((contract: ApiContract) => ({
             id: contract.id,
             contractNumber: contract.contract_number,

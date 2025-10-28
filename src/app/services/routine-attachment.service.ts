@@ -38,7 +38,7 @@ export class RoutineAttachmentService {
    * Validar arquivo antes do upload
    */
   validateFile(file: File): { valid: boolean; error?: string } {
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 50 * 1024 * 1024; // 50MB
     const allowedTypes = [
       'image/jpeg', 'image/png', 'image/gif', 'image/webp',
       'application/pdf',
@@ -60,7 +60,7 @@ export class RoutineAttachmentService {
     if (file.size > maxSize) {
       return {
         valid: false,
-        error: 'Arquivo muito grande. Tamanho máximo: 10MB.'
+        error: 'Arquivo muito grande. Tamanho máximo: 50MB.'
       };
     }
 

@@ -352,9 +352,9 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
     const file: File = event.target.files[0];
     if (!file) return;
 
-    // Validar tamanho (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      this.toastr.error('Imagem muito grande. Máximo 10MB.');
+    // Validar tamanho (50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      this.toastr.error('Imagem muito grande. Máximo 50MB.');
       return;
     }
 
@@ -555,10 +555,10 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
       return;
     }
 
-    // Validar tamanho (10MB)
-    const maxSize = 10 * 1024 * 1024;
+    // Validar tamanho (50MB)
+    const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
-      this.toastr.error('A imagem deve ter no máximo 10MB');
+      this.toastr.error('A imagem deve ter no máximo 50MB');
       return;
     }
 
@@ -622,10 +622,10 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
       return;
     }
 
-    // Validar tamanho (10MB)
-    const maxSize = 10 * 1024 * 1024;
+    // Validar tamanho (50MB)
+    const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
-      this.toastr.error('A imagem deve ter no máximo 10MB');
+      this.toastr.error('A imagem deve ter no máximo 50MB');
       return;
     }
 

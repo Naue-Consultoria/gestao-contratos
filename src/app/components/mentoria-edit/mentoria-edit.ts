@@ -263,10 +263,10 @@ export class MentoriaEdit implements OnInit {
       return;
     }
 
-    // Validar tamanho (10MB)
-    const maxSize = 10 * 1024 * 1024;
+    // Validar tamanho (50MB)
+    const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
-      this.toastr.error('A imagem deve ter no máximo 10MB');
+      this.toastr.error('A imagem deve ter no máximo 50MB');
       return;
     }
 

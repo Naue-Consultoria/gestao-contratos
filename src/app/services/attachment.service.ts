@@ -54,8 +54,8 @@ export class AttachmentService {
     'text/csv'
   ];
 
-  // Tamanho máximo: 10MB
-  private maxFileSize = 10 * 1024 * 1024;
+  // Tamanho máximo: 50MB
+  private maxFileSize = 50 * 1024 * 1024;
 
   constructor(private http: HttpClient) {}
 
@@ -68,7 +68,7 @@ export class AttachmentService {
     }
 
     if (file.size > this.maxFileSize) {
-      return { valid: false, error: 'Arquivo muito grande. Tamanho máximo: 10MB' };
+      return { valid: false, error: 'Arquivo muito grande. Tamanho máximo: 50MB' };
     }
 
     if (!this.allowedTypes.includes(file.type)) {
