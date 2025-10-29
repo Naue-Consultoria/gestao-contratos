@@ -577,6 +577,16 @@ html {
   gap: 3rem;
 }
 
+/* Quando apenas um bloco está presente, centralizar */
+.intro-container.single-block {
+  grid-template-columns: 1fr;
+  max-width: 900px;
+}
+
+.intro-container.single-block .intro-block {
+  max-width: 100%;
+}
+
 .intro-block {
   background: white;
   border-radius: 20px;
@@ -689,7 +699,7 @@ html {
 }
 
 .dark-title i {
-  color: #244e2d;
+  color: white;
   font-size: 2rem;
 }
 

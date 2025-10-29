@@ -407,10 +407,42 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       'goldenCircle': { ativo: this.conteudo.goldenCircle.ativo, titulo: 'Golden Circle', icone: 'fa-bullseye' }
     };
 
-    if (this.conteudo.ordemSecoes) {
+    const secoesJaAdicionadas = new Set<string>();
+
+    // Se existe ordem salva, usar ela primeiro
+    if (this.conteudo.ordemSecoes && this.conteudo.ordemSecoes.length > 0) {
       this.conteudo.ordemSecoes.forEach(secaoId => {
         const secao = secoesMap[secaoId];
         if (secao && secao.ativo) {
+          this.blocosAtivos.push({
+            id: this.generateId(),
+            tipo: secaoId as TipoBloco,
+            titulo: secao.titulo,
+            icone: secao.icone,
+            ordem: ordem++
+          });
+          secoesJaAdicionadas.add(secaoId);
+        }
+      });
+
+      // Adicionar seções ativas que não estão na ordem salva (novas seções ativadas)
+      Object.keys(secoesMap).forEach(secaoId => {
+        const secao = secoesMap[secaoId];
+        if (secao.ativo && !secoesJaAdicionadas.has(secaoId)) {
+          this.blocosAtivos.push({
+            id: this.generateId(),
+            tipo: secaoId as TipoBloco,
+            titulo: secao.titulo,
+            icone: secao.icone,
+            ordem: ordem++
+          });
+        }
+      });
+    } else {
+      // Se não existe ordem salva, usar ordem padrão
+      Object.keys(secoesMap).forEach(secaoId => {
+        const secao = secoesMap[secaoId];
+        if (secao.ativo) {
           this.blocosAtivos.push({
             id: this.generateId(),
             tipo: secaoId as TipoBloco,
@@ -763,6 +795,14 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
       // 2. Salvar blocos ativos no conteúdo
       this.conteudo.blocosAtivos = this.blocosAtivos;
+
+      // 2.1 Extrair ordem das seções reordenáveis para a página pública
+      // Filtra apenas as seções reordenáveis (não incluindo visaoGeral, mentoria e encerramento que têm posições fixas)
+      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle'];
+      this.conteudo.ordemSecoes = this.blocosAtivos
+        .filter(bloco => secoesReordenaveis.includes(bloco.tipo))
+        .sort((a, b) => a.ordem - b.ordem)
+        .map(bloco => bloco.tipo);
 
       // 3. Converter para JSON e salvar
       const conteudoJson = JSON.stringify(this.conteudo);
