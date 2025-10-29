@@ -30,7 +30,7 @@ interface BlocoProximosPassos {
 
 interface Referencia {
   id: string;
-  tipo: 'ted' | 'livro' | 'leitura' | 'video';
+  tipo: 'ted' | 'livro' | 'leitura' | 'video' | 'link' | 'teste' | 'outro';
   titulo: string;
   link: string;
 }

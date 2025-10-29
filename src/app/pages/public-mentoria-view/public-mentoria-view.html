@@ -309,7 +309,7 @@
                     <i class="fa-solid fa-play-circle"></i>
                   </div>
                   <div class="ref-content-new">
-                    <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Vídeo' }}</span>
+                    <span class="ref-type">{{ getReferenciaLabel(ref.tipo) }}</span>
                     <h4>{{ ref.titulo }}</h4>
                   </div>
                   <a [href]="ref.link" target="_blank" class="ref-external-link" title="Abrir no YouTube">
@@ -336,11 +336,15 @@
                      [ngClass]="{
                        'fa-play-circle': ref.tipo === 'ted',
                        'fa-book': ref.tipo === 'livro',
-                       'fa-newspaper': ref.tipo === 'leitura'
+                       'fa-newspaper': ref.tipo === 'leitura',
+                       'fa-video': ref.tipo === 'video',
+                       'fa-link': ref.tipo === 'link',
+                       'fa-clipboard-check': ref.tipo === 'teste',
+                       'fa-circle-info': ref.tipo === 'outro'
                      }"></i>
                 </div>
                 <div class="ref-content-new">
-                  <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Leitura' }}</span>
+                  <span class="ref-type">{{ getReferenciaLabel(ref.tipo) }}</span>
                   <h4>{{ ref.titulo }}</h4>
                 </div>
                 <i class="fa-solid fa-external-link-alt ref-external-new"></i>
@@ -354,11 +358,15 @@
                      [ngClass]="{
                        'fa-play-circle': ref.tipo === 'ted',
                        'fa-book': ref.tipo === 'livro',
-                       'fa-newspaper': ref.tipo === 'leitura'
+                       'fa-newspaper': ref.tipo === 'leitura',
+                       'fa-video': ref.tipo === 'video',
+                       'fa-link': ref.tipo === 'link',
+                       'fa-clipboard-check': ref.tipo === 'teste',
+                       'fa-circle-info': ref.tipo === 'outro'
                      }"></i>
                 </div>
                 <div class="ref-content-new">
-                  <span class="ref-type">{{ ref.tipo === 'ted' ? 'TED Talk' : ref.tipo === 'livro' ? 'Livro' : 'Leitura' }}</span>
+                  <span class="ref-type">{{ getReferenciaLabel(ref.tipo) }}</span>
                   <h4>{{ ref.titulo }}</h4>
                 </div>
               </div>

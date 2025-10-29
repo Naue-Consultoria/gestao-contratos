@@ -2781,4 +2781,18 @@ export class PublicMentoriaViewComponent implements OnInit {
     }
     return null;
   }
+
+  // Método para obter o label do tipo de referência
+  getReferenciaLabel(tipo: string): string {
+    const labels: { [key: string]: string } = {
+      'ted': 'TED Talk',
+      'livro': 'Livro',
+      'leitura': 'Leitura',
+      'video': 'Vídeo',
+      'link': 'Link',
+      'teste': 'Teste',
+      'outro': 'Outro'
+    };
+    return labels[tipo] || tipo;
+  }
 }
