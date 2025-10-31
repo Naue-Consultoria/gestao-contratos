@@ -62,8 +62,18 @@
       <!-- Service Stages Progress -->
       <div class="panel-card full-height" *ngIf="serviceStages && serviceStages.length > 0">
         <div class="panel-header">
-          <i class="fas fa-tasks"></i>
-          <h3>Etapas do Serviço</h3>
+          <div class="panel-header-left">
+            <i class="fas fa-tasks"></i>
+            <h3>Etapas do Serviço</h3>
+          </div>
+          <button
+            class="btn-mark-all"
+            [disabled]="!canEdit || isMarkingAll || stageProgress === 100"
+            (click)="markAllStagesComplete()"
+            title="Marcar todas as etapas como concluídas">
+            <i class="fas fa-check-double"></i>
+            {{ isMarkingAll ? 'Marcando...' : 'Marcar Todas' }}
+          </button>
         </div>
         
         <div class="panel-content">

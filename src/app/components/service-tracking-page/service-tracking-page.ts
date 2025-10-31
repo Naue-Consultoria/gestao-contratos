@@ -38,6 +38,7 @@ export class ServiceTrackingPageComponent implements OnInit {
   serviceStages: ServiceStage[] = [];
   stageProgress = 0;
   isLoadingStages = false;
+  isMarkingAll = false;
 
   // Propriedades do formulário de controle
   selectedStatus: 'not_started' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled' = 'not_started';
@@ -808,11 +809,11 @@ export class ServiceTrackingPageComponent implements OnInit {
 
     try {
       const result = await this.routineService.deleteComment(commentId).toPromise();
-      
+
       if (result && result.success) {
         // Remover comentário da lista
         this.comments = this.comments.filter(comment => comment.id !== commentId);
-        
+
         this.toastr.success('Comentário deletado com sucesso!', 'Sucesso', {
           timeOut: 3000,
           progressBar: true,
@@ -821,7 +822,7 @@ export class ServiceTrackingPageComponent implements OnInit {
       }
     } catch (error: any) {
       console.error('Erro ao deletar comentário:', error);
-      
+
       if (error.status === 403) {
         this.toastr.error('Você só pode deletar seus próprios comentários', 'Erro', {
           timeOut: 5000,
@@ -836,8 +837,8 @@ export class ServiceTrackingPageComponent implements OnInit {
         });
       } else {
         this.toastr.error(
-          error.error?.message || 'Erro ao deletar comentário', 
-          'Erro', 
+          error.error?.message || 'Erro ao deletar comentário',
+          'Erro',
           {
             timeOut: 5000,
             progressBar: true,
@@ -845,6 +846,76 @@ export class ServiceTrackingPageComponent implements OnInit {
           }
         );
       }
+    }
+  }
+
+  async markAllStagesComplete() {
+    if (!this.canEdit || this.isMarkingAll) {
+      return;
+    }
+
+    // Filtrar apenas as etapas que podem ser marcadas (não N/A e não já completas)
+    const stagesToComplete = this.serviceStages.filter(
+      stage => stage.status !== 'completed' && !stage.is_not_applicable
+    );
+
+    if (stagesToComplete.length === 0) {
+      this.toastr.info('Todas as etapas aplicáveis já estão concluídas');
+      return;
+    }
+
+    // Confirmação
+    const confirmMessage = `Tem certeza que deseja marcar ${stagesToComplete.length} etapa(s) como concluída(s)?`;
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      this.isMarkingAll = true;
+      const oldProgress = this.stageProgress;
+      let successCount = 0;
+      let errorCount = 0;
+
+      // Marcar todas as etapas pendentes como concluídas
+      for (const stage of stagesToComplete) {
+        try {
+          const response = await this.serviceStageService.updateStageStatus(stage.id, 'completed').toPromise();
+
+          if (response) {
+            // Atualizar o stage na lista
+            const stageIndex = this.serviceStages.findIndex(s => s.id === stage.id);
+            if (stageIndex !== -1) {
+              this.serviceStages[stageIndex] = response.stage;
+            }
+            successCount++;
+          }
+        } catch (error) {
+          console.error(`Erro ao marcar etapa ${stage.id}:`, error);
+          errorCount++;
+        }
+      }
+
+      // Recarregar o progresso após marcar todas
+      if (successCount > 0) {
+        await this.loadServiceStages();
+
+        // Lógica automática de mudança de status baseada no progresso
+        await this.updateStatusBasedOnProgress(oldProgress, this.stageProgress);
+
+        if (errorCount === 0) {
+          this.toastr.success(`${successCount} etapa(s) marcada(s) como concluída(s) com sucesso!`);
+        } else {
+          this.toastr.warning(`${successCount} etapa(s) marcada(s), mas ${errorCount} falharam`);
+        }
+      } else {
+        this.toastr.error('Não foi possível marcar nenhuma etapa');
+      }
+
+    } catch (error: any) {
+      console.error('Erro ao marcar todas as etapas:', error);
+      this.toastr.error('Erro ao marcar todas as etapas');
+    } finally {
+      this.isMarkingAll = false;
     }
   }
 }

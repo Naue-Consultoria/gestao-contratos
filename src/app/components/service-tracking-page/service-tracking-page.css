@@ -260,10 +260,17 @@
 .panel-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
   padding: 1.25rem 1.5rem;
   background: var(--primary-green);
   color: var(--white);
+}
+
+.panel-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .panel-header i {
@@ -274,6 +281,41 @@
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
+}
+
+.btn-mark-all {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--white);
+  color: var(--primary-green);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-mark-all:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-mark-all:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-mark-all:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-mark-all i {
+  font-size: 0.875rem;
 }
 
 .panel-content {
@@ -1049,22 +1091,27 @@
   .control-panel {
     grid-template-columns: 1fr;
   }
-  
+
   .service-meta {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .meta-item {
     font-size: 0.875rem;
   }
-  
+
   .btn-text {
     display: none;
   }
-  
+
   .btn-action {
     padding: 0.5rem;
+  }
+
+  .btn-mark-all {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
   }
 }
 
@@ -1074,11 +1121,11 @@
     padding: 1.5rem 0;
     margin-bottom: 1rem;
   }
-  
+
   .page-title {
     font-size: 1.25rem;
   }
-  
+
   .service-header {
     border-radius: 0;
     border-left: none;
@@ -1086,9 +1133,18 @@
     margin-left: -1rem;
     margin-right: -1rem;
   }
-  
+
   .service-title {
     font-size: 1.125rem;
+  }
+
+  .panel-header h3 {
+    font-size: 0.95rem;
+  }
+
+  .btn-mark-all {
+    padding: 0.5rem;
+    min-width: auto;
   }
   
   .service-header {
