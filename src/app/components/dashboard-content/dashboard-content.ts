@@ -523,13 +523,14 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     const months = [];
     const createdData = [];
     const activeData = [];
-    
+
     for (let i = 5; i >= 0; i--) {
       const date = new Date();
+      date.setDate(1); // Definir para o dia 1 para evitar problemas com meses de diferentes tamanhos
       date.setMonth(date.getMonth() - i);
       const monthKey = date.toISOString().substring(0, 7); // YYYY-MM
       const monthLabel = date.toLocaleDateString('pt-BR', { month: 'short' });
-      
+
       months.push(monthLabel);
       
       // Contar contratos criados no mês
@@ -560,13 +561,14 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     const months = [];
     const myContractsData = [];
     const myServicesData = [];
-    
+
     for (let i = 5; i >= 0; i--) {
       const date = new Date();
+      date.setDate(1); // Definir para o dia 1 para evitar problemas com meses de diferentes tamanhos
       date.setMonth(date.getMonth() - i);
       const monthKey = date.toISOString().substring(0, 7); // YYYY-MM
       const monthLabel = date.toLocaleDateString('pt-BR', { month: 'short' });
-      
+
       months.push(monthLabel);
       
       // Contar contratos do usuário criados no mês
@@ -618,6 +620,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
 
     for (let i = 5; i >= 0; i--) {
       const date = new Date();
+      date.setDate(1); // Definir para o dia 1 para evitar problemas com meses de diferentes tamanhos
       date.setMonth(date.getMonth() - i);
       const monthKey = date.toISOString().substring(0, 7); // YYYY-MM
       const monthLabel = date.toLocaleDateString('pt-BR', { month: 'short' });
