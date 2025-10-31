@@ -38,6 +38,8 @@ export interface PublicProposal {
   description?: string;
   status: string;
   total_value: number;
+  valor_global?: number; // Valor global fixo da proposta
+  usar_valor_global?: boolean; // Se true, usa valor_global. Se false, usa soma dos serviços
   valid_until?: string;
   end_date?: string;
   observations?: string;

@@ -74,6 +74,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   private totalValue$ = new BehaviorSubject<number>(0);
   updateCounter: number = 0;
   isCreatingClient: boolean = false;
+  private isLoadingData: boolean = false; // Flag para evitar recálculos durante carregamento
 
   private destroy$ = new Subject<void>();
 
@@ -92,7 +93,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadInitialData();
-    
+
     // Verificar se há ID na rota (para edit/view mode)
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId || this.proposalId) {
@@ -107,7 +108,52 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     });
 
     // Adicionar listeners para conversão entre valor e porcentagem
-    this.setupDiscountListeners();
+    // IMPORTANTE: Adicionar delay apenas se estiver em modo de edição
+    if (this.isEditMode) {
+      setTimeout(() => {
+        this.setupDiscountListeners();
+      }, 500); // Delay para garantir que os dados sejam carregados primeiro
+    } else {
+      this.setupDiscountListeners();
+    }
+
+    // Listener para checkbox de usar valor global
+    this.proposalForm.get('usar_valor_global')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(usarValorGlobal => {
+        const valorGlobalControl = this.proposalForm.get('valor_global');
+        if (usarValorGlobal) {
+          valorGlobalControl?.setValidators([Validators.required, Validators.min(0)]);
+        } else {
+          valorGlobalControl?.setValidators([Validators.min(0)]);
+          valorGlobalControl?.setValue(null);
+        }
+        valorGlobalControl?.updateValueAndValidity();
+        this.updateTotalValue();
+      });
+
+    // Listener para campo de valor global
+    this.proposalForm.get('valor_global')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.proposalForm.get('usar_valor_global')?.value) {
+          this.updateTotalValue();
+
+          // Recalcular valores de desconto baseados no novo valor global
+          if (!this.isLoadingData && !this.isUpdatingDiscounts) {
+            const vistaPercentage = this.proposalForm.get('vista_discount_percentage')?.value;
+            const prazoPercentage = this.proposalForm.get('prazo_discount_percentage')?.value;
+
+            if (vistaPercentage !== null && vistaPercentage !== undefined) {
+              this.updateVistaDiscountValue(vistaPercentage);
+            }
+
+            if (prazoPercentage !== null && prazoPercentage !== undefined) {
+              this.updatePrazoDiscountValue(prazoPercentage);
+            }
+          }
+        }
+      });
 
     // Listener para tipo de proposta - resetar descontos e parcelas para R&S
     this.proposalForm.get('type')?.valueChanges
@@ -146,7 +192,9 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       solicitante_name: [''],
       solicitante_email: ['', Validators.email],
       solicitante_phone: [''],
-      source: [''] // Fonte da proposta: Indicação, Site, Já era cliente, etc.
+      source: [''], // Fonte da proposta: Indicação, Site, Já era cliente, etc.
+      usar_valor_global: [false], // Checkbox para usar valor global
+      valor_global: [null, [Validators.min(0)]] // Valor global fixo
     });
 
     this.newClientForm = this.fb.group({
@@ -208,21 +256,34 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   private populateForm(proposal: Proposal): void {
+    // Debug: verificar valores recebidos
+    console.log('🔍 Valores de desconto recebidos:', {
+      vista_discount_percentage: proposal.vista_discount_percentage,
+      prazo_discount_percentage: proposal.prazo_discount_percentage,
+      vista_discount_value: proposal.vista_discount_value,
+      prazo_discount_value: proposal.prazo_discount_value
+    });
+
+    // Desabilitar listeners temporariamente durante o carregamento
+    this.isLoadingData = true;
+
     this.proposalForm.patchValue({
       client_id: proposal.client_id,
       type: proposal.type || 'Full',
       end_date: proposal.end_date ? proposal.end_date.split('T')[0] : '',
       observations: proposal.notes || '',
-      max_installments: proposal.max_installments ?? 12, // Usar nullish coalescing para preservar valor do BD
-      vista_discount_percentage: proposal.vista_discount_percentage ?? 6,
-      prazo_discount_percentage: proposal.prazo_discount_percentage ?? 0,
-      vista_discount_value: (proposal as any).vista_discount_value ?? 0,
-      prazo_discount_value: (proposal as any).prazo_discount_value ?? 0,
+      max_installments: proposal.max_installments ?? 12,
+      vista_discount_percentage: proposal.vista_discount_percentage !== null && proposal.vista_discount_percentage !== undefined ? proposal.vista_discount_percentage : 6,
+      prazo_discount_percentage: proposal.prazo_discount_percentage !== null && proposal.prazo_discount_percentage !== undefined ? proposal.prazo_discount_percentage : 0,
+      vista_discount_value: proposal.vista_discount_value !== null && proposal.vista_discount_value !== undefined ? proposal.vista_discount_value : 0,
+      prazo_discount_value: proposal.prazo_discount_value !== null && proposal.prazo_discount_value !== undefined ? proposal.prazo_discount_value : 0,
       status: proposal.status || 'draft', // Carregar status da proposta
       solicitante_name: proposal.solicitante_name || '',
       solicitante_email: proposal.solicitante_email || '',
       solicitante_phone: proposal.solicitante_phone || '',
-      source: proposal.source || ''
+      source: proposal.source || '',
+      usar_valor_global: proposal.usar_valor_global || false, // Carregar checkbox
+      valor_global: proposal.valor_global || null // Carregar valor global
     });
 
     // Carregar serviços da proposta
@@ -255,8 +316,11 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
       return selectedService;
     }).filter(service => service.id);
-    
-    // Atualização concluída - serviços carregados
+
+    // Atualização concluída - reativar listeners após um pequeno delay
+    setTimeout(() => {
+      this.isLoadingData = false;
+    }, 100);
   }
 
   // Service Modal Methods (igual ao contrato)
@@ -453,18 +517,30 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     const newTotal = this.getTotalValue();
   }
 
-  private updateTotalValue(): void {   
-    // Calcular novo total
-    const newTotal = this.calculateTotal();
+  private updateTotalValue(): void {
+    // Verificar se usa valor global
+    const usarValorGlobal = this.proposalForm.get('usar_valor_global')?.value;
+    const valorGlobal = this.proposalForm.get('valor_global')?.value;
+
+    let newTotal: number;
+
+    if (usarValorGlobal && valorGlobal !== null && valorGlobal !== undefined) {
+      // Usar valor global fixo
+      newTotal = Number(valorGlobal) || 0;
+    } else {
+      // Calcular soma dos serviços
+      newTotal = this.calculateTotal();
+    }
+
     this.updateCounter++;
-    
+
     // Atualizar observable
     this.totalValue$.next(newTotal);
-    
+
     // Forçar detecção de mudanças
     this.cdr.detectChanges();
     this.cdr.markForCheck();
-    
+
     // Backup async update
     setTimeout(() => {
       this.cdr.detectChanges();
@@ -479,11 +555,21 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   getTotalValue(): number {
+    // Verificar se usa valor global
+    const usarValorGlobal = this.proposalForm.get('usar_valor_global')?.value;
+    const valorGlobal = this.proposalForm.get('valor_global')?.value;
+
+    if (usarValorGlobal && valorGlobal !== null && valorGlobal !== undefined) {
+      // Retornar valor global fixo
+      return Number(valorGlobal) || 0;
+    }
+
+    // Caso contrário, calcular soma dos serviços
     const total = this.selectedServices.reduce((sum, service) => {
       const serviceValue = parseFloat(service.unit_value?.toString()) || 0;
       return sum + serviceValue;
     }, 0);
-    
+
     return total;
   }
 
@@ -874,7 +960,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
     // Determinar tipo do cliente baseado no documento
     const clientType = selectedClient.cpf ? 'pf' : 'pj';
-    
+
     const formData: CreateProposalData = {
       client_id: clientId,
       type: this.proposalForm.value.type || 'Full',
@@ -899,6 +985,8 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       prazo_discount_percentage: this.proposalForm.value.prazo_discount_percentage ?? 0,
       vista_discount_value: this.proposalForm.value.vista_discount_value ?? 0,
       prazo_discount_value: this.proposalForm.value.prazo_discount_value ?? 0,
+      usar_valor_global: this.proposalForm.value.usar_valor_global || false,
+      valor_global: this.proposalForm.value.valor_global || null,
       validity_days: 30, // Valor padrão
       services: this.selectedServices.map((service, index) => ({
         service_id: service.id,
@@ -1069,7 +1157,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     this.proposalForm.get('vista_discount_percentage')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((percentage) => {
-        if (percentage !== null && percentage !== undefined && !this.isUpdatingDiscounts) {
+        if (percentage !== null && percentage !== undefined && !this.isUpdatingDiscounts && !this.isLoadingData) {
           this.updateVistaDiscountValue(percentage);
         }
       });
@@ -1078,7 +1166,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     this.proposalForm.get('vista_discount_value')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((value) => {
-        if (value !== null && value !== undefined && !this.isUpdatingDiscounts) {
+        if (value !== null && value !== undefined && !this.isUpdatingDiscounts && !this.isLoadingData) {
           this.updateVistaDiscountPercentage(value);
         }
       });
@@ -1087,7 +1175,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     this.proposalForm.get('prazo_discount_percentage')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((percentage) => {
-        if (percentage !== null && percentage !== undefined && !this.isUpdatingDiscounts) {
+        if (percentage !== null && percentage !== undefined && !this.isUpdatingDiscounts && !this.isLoadingData) {
           this.updatePrazoDiscountValue(percentage);
         }
       });
@@ -1096,16 +1184,64 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     this.proposalForm.get('prazo_discount_value')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((value) => {
-        if (value !== null && value !== undefined && !this.isUpdatingDiscounts) {
+        if (value !== null && value !== undefined && !this.isUpdatingDiscounts && !this.isLoadingData) {
           this.updatePrazoDiscountPercentage(value);
+        }
+      });
+
+    // Listener para usar_valor_global - recalcular descontos quando mudar
+    this.proposalForm.get('usar_valor_global')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((usarValorGlobal) => {
+        if (!this.isLoadingData) {
+          this.recalculateDiscountsOnBaseValueChange();
+        }
+      });
+
+    // Listener para valor_global - recalcular descontos quando mudar
+    this.proposalForm.get('valor_global')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((valorGlobal) => {
+        const usarValorGlobal = this.proposalForm.get('usar_valor_global')?.value;
+        if (usarValorGlobal && !this.isLoadingData) {
+          this.recalculateDiscountsOnBaseValueChange();
         }
       });
   }
 
+  // Recalcular valores de desconto quando o valor base mudar
+  private recalculateDiscountsOnBaseValueChange(): void {
+    if (this.isUpdatingDiscounts) return;
+
+    // Recalcular desconto à vista baseado na porcentagem atual
+    const vistaPercentage = this.proposalForm.get('vista_discount_percentage')?.value;
+    if (vistaPercentage !== null && vistaPercentage !== undefined && vistaPercentage > 0) {
+      this.updateVistaDiscountValue(vistaPercentage);
+    }
+
+    // Recalcular desconto a prazo baseado na porcentagem atual
+    const prazoPercentage = this.proposalForm.get('prazo_discount_percentage')?.value;
+    if (prazoPercentage !== null && prazoPercentage !== undefined && prazoPercentage > 0) {
+      this.updatePrazoDiscountValue(prazoPercentage);
+    }
+  }
+
   private isUpdatingDiscounts = false; // Flag para evitar loops infinitos
 
+  // Método auxiliar para obter valor base para cálculo de desconto
+  private getBaseValueForDiscount(): number {
+    const usarValorGlobal = this.proposalForm.get('usar_valor_global')?.value;
+    const valorGlobal = this.proposalForm.get('valor_global')?.value;
+
+    if (usarValorGlobal && valorGlobal !== null && valorGlobal !== undefined) {
+      return Number(valorGlobal) || 0;
+    }
+
+    return this.calculateTotal();
+  }
+
   private updateVistaDiscountValue(percentage: number): void {
-    const totalValue = this.calculateTotal();
+    const totalValue = this.getBaseValueForDiscount();
     const discountValue = totalValue * (percentage / 100);
     this.isUpdatingDiscounts = true;
     this.proposalForm.patchValue({ vista_discount_value: Number(discountValue.toFixed(2)) }, { emitEvent: false });
@@ -1113,7 +1249,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   private updateVistaDiscountPercentage(value: number): void {
-    const totalValue = this.calculateTotal();
+    const totalValue = this.getBaseValueForDiscount();
     const percentage = totalValue > 0 ? (value / totalValue) * 100 : 0;
     this.isUpdatingDiscounts = true;
     this.proposalForm.patchValue({ vista_discount_percentage: Number(percentage.toFixed(2)) }, { emitEvent: false });
@@ -1121,7 +1257,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   private updatePrazoDiscountValue(percentage: number): void {
-    const totalValue = this.calculateTotal();
+    const totalValue = this.getBaseValueForDiscount();
     const discountValue = totalValue * (percentage / 100);
     this.isUpdatingDiscounts = true;
     this.proposalForm.patchValue({ prazo_discount_value: Number(discountValue.toFixed(2)) }, { emitEvent: false });
@@ -1129,7 +1265,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   private updatePrazoDiscountPercentage(value: number): void {
-    const totalValue = this.calculateTotal();
+    const totalValue = this.getBaseValueForDiscount();
     const percentage = totalValue > 0 ? (value / totalValue) * 100 : 0;
     this.isUpdatingDiscounts = true;
     this.proposalForm.patchValue({ prazo_discount_percentage: Number(percentage.toFixed(2)) }, { emitEvent: false });

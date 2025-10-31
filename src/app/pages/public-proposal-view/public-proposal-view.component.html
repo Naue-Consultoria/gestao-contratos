@@ -357,8 +357,8 @@
                   </div>
                 </div>
 
-                <!-- Investment -->
-                <div class="detail-item highlight">
+                <!-- Investment - Ocultar completamente quando usar valor global -->
+                <div class="detail-item highlight" *ngIf="shouldShowServiceValues()">
                   <div class="detail-label">
                     <i class="fas fa-coins"></i>
                     <span>Investimento</span>
@@ -381,6 +381,8 @@
             <i class="fas fa-check-circle"></i>
             <span>{{ getSelectedServicesCount() }} serviços selecionados</span>
           </div>
+
+
           <div class="summary-total">
             <div class="total-label">Investimento Total</div>
             <div class="total-amount">{{ formatCurrency(getFinalValueWithDiscount()) }}</div>

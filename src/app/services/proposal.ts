@@ -55,6 +55,8 @@ export interface Proposal {
   end_date?: string; // Corresponds to 'end_date' in DB, previously 'valid_until'
   validity_days?: number;
   total_value: number;
+  valor_global?: number; // Valor global fixo da proposta
+  usar_valor_global?: boolean; // Se true, usa valor_global. Se false, usa soma dos serviços
   unique_link?: string; // Corresponds to 'unique_link' in DB, previously 'public_token'
   link_expires_at?: string;
   signed_at?: string;
@@ -129,6 +131,8 @@ export interface CreateProposalData {
   prazo_discount_percentage?: number;
   vista_discount_value?: number;
   prazo_discount_value?: number;
+  valor_global?: number; // Valor global fixo da proposta
+  usar_valor_global?: boolean; // Se true, usa valor_global. Se false, usa soma dos serviços
   services: {
     service_id: number;
     unit_value: number;

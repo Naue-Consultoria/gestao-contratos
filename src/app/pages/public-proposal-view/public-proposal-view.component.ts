@@ -682,7 +682,13 @@ export class PublicProposalViewComponent implements OnInit {
   
   getBaseTotal(): number {
     if (!this.proposal) return 0;
-    
+
+    // Se usar valor global, retornar o valor global
+    if (this.proposal.usar_valor_global && this.proposal.valor_global !== null && this.proposal.valor_global !== undefined) {
+      return Number(this.proposal.valor_global) || 0;
+    }
+
+    // Caso contrário, calcular a soma dos serviços selecionados
     return this.proposal.services
       .filter(service => this.selectedServices.get(service.service_id))
       .reduce((total, service) => {
@@ -691,8 +697,8 @@ export class PublicProposalViewComponent implements OnInit {
   }
   
   getDiscountAmount(): number {
-    // Desconto se aplica se todos os serviços estão selecionados
-    if (this.areAllServicesSelected()) {
+    // Desconto se aplica se usar valor global OU todos os serviços estão selecionados
+    if (this.proposal?.usar_valor_global || this.areAllServicesSelected()) {
       const baseTotal = this.getBaseTotal();
 
       // Determinar qual desconto aplicar baseado no tipo de pagamento
@@ -733,7 +739,8 @@ export class PublicProposalViewComponent implements OnInit {
 
       if ((!isNaN(vistaDiscountValue) && vistaDiscountValue > 0) ||
           (!isNaN(vistaDiscountPercentage) && vistaDiscountPercentage > 0)) {
-        return this.areAllServicesSelected();
+        // Desconto se usar valor global OU todos os serviços selecionados
+        return this.proposal?.usar_valor_global || this.areAllServicesSelected();
       }
     }
     if (this.paymentType === 'prazo') {
@@ -742,7 +749,8 @@ export class PublicProposalViewComponent implements OnInit {
 
       if ((!isNaN(prazoDiscountValue) && prazoDiscountValue > 0) ||
           (!isNaN(prazoDiscountPercentage) && prazoDiscountPercentage > 0)) {
-        return this.areAllServicesSelected();
+        // Desconto se usar valor global OU todos os serviços selecionados
+        return this.proposal?.usar_valor_global || this.areAllServicesSelected();
       }
     }
     return false;
@@ -762,8 +770,8 @@ export class PublicProposalViewComponent implements OnInit {
   getVistaValueWithDiscount(): number {
     const baseTotal = this.getBaseTotal();
 
-    // Se todos os serviços estão selecionados, aplicar desconto
-    if (this.areAllServicesSelected()) {
+    // Se usar valor global OU todos os serviços estão selecionados, aplicar desconto
+    if (this.proposal?.usar_valor_global || this.areAllServicesSelected()) {
       // Primeiro verifica se há valor absoluto de desconto
       const vistaDiscountValue = Number(this.proposal?.vista_discount_value);
       if (!isNaN(vistaDiscountValue) && vistaDiscountValue > 0) {
@@ -786,8 +794,8 @@ export class PublicProposalViewComponent implements OnInit {
   getPrazoValueWithDiscount(): number {
     const baseTotal = this.getBaseTotal();
 
-    // Se todos os serviços estão selecionados, aplicar desconto
-    if (this.areAllServicesSelected()) {
+    // Se usar valor global OU todos os serviços estão selecionados, aplicar desconto
+    if (this.proposal?.usar_valor_global || this.areAllServicesSelected()) {
       // Primeiro verifica se há valor absoluto de desconto
       const prazoDiscountValue = Number(this.proposal?.prazo_discount_value);
       if (!isNaN(prazoDiscountValue) && prazoDiscountValue > 0) {
@@ -963,6 +971,11 @@ export class PublicProposalViewComponent implements OnInit {
   getServiceTotal(service: ProposalServiceItem): number {
     // Use the total_value from proposal data if available, otherwise calculate
     return service.total_value || (this.getServiceValue(service) * service.quantity);
+  }
+
+  shouldShowServiceValues(): boolean {
+    // Não mostrar valores individuais dos serviços quando usar valor global
+    return !this.proposal?.usar_valor_global;
   }
 
   private markFormGroupTouched(formGroup: FormGroup): void {

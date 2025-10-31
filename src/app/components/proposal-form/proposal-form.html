@@ -191,6 +191,33 @@
               <div class="help-text">Alterar o status da proposta pode afetar as ações disponíveis</div>
             </div>
             
+            <!-- Valor Global da Proposta -->
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="usar_valor_global" />
+                <span style="margin-left: 8px;">Usar valor global fixo para a proposta</span>
+              </label>
+              <div class="help-text">
+                Quando marcado, o valor total da proposta será o valor global definido, ignorando a soma dos serviços
+              </div>
+            </div>
+
+            <div class="form-group" *ngIf="proposalForm.get('usar_valor_global')?.value">
+              <label for="valor_global" class="form-label">Valor Global <span class="required">*</span></label>
+              <input
+                id="valor_global"
+                type="text"
+                formControlName="valor_global"
+                class="form-control"
+                appCurrencyMask
+                [class.error]="isFieldInvalid('valor_global')"
+                placeholder="R$ 0,00">
+              <div *ngIf="isFieldInvalid('valor_global')" class="error-message">
+                Valor global é obrigatório quando a opção está marcada
+              </div>
+              <div class="help-text">Este valor substituirá a soma dos serviços como valor total da proposta</div>
+            </div>
+
             <div class="form-group" *ngIf="proposalForm.get('type')?.value !== 'Recrutamento & Seleção'">
               <label for="max_installments" class="form-label">Máximo de Parcelas <span class="required">*</span></label>
               <select id="max_installments" formControlName="max_installments" class="form-control" [class.error]="isFieldInvalid('max_installments')">
