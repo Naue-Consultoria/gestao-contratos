@@ -119,12 +119,12 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
     let pendingCount = 0;
 
     if (this.activeStatusFilter === 'signed') {
-      // When "Assinada" filter is selected, show signed proposals value
+      // When "Fechada" filter is selected, show signed proposals value
       pendingValue = proposals
         .filter((p: any) => p.status === 'signed')
         .reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
       pendingCount = signedProposals;
-      pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} assinada${pendingCount !== 1 ? 's' : ''}`;
+      pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} fechada${pendingCount !== 1 ? 's' : ''}`;
     } else if (this.activeStatusFilter === 'sent') {
       // When "Enviada" filter is selected, show sent proposals value
       pendingValue = proposals
@@ -169,7 +169,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         subtitle: totalProposals > 0 ? `${Math.round((sentProposals / totalProposals) * 100)}% do total` : '0% do total'
       },
       {
-        title: 'Propostas Assinadas',
+        title: 'Propostas Fechadas',
         value: signedProposals + convertedProposals,
         icon: 'fas fa-check-circle',
         color: '#003b2b',
@@ -216,7 +216,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         color: '#003b2b',
       },
       {
-        title: 'Propostas Assinadas',
+        title: 'Propostas Fechadas',
         value: signedProposals + acceptedProposals,
         icon: 'fas fa-check-circle',
         color: '#003b2b',
@@ -253,7 +253,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         color: '#003b2b',
       },
       {
-        title: 'Propostas Assinadas',
+        title: 'Propostas Fechadas',
         value: 0,
         icon: 'fas fa-check-circle',
         color: '#003b2b',
@@ -281,10 +281,10 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
     const statusMap: { [key: string]: string } = {
       'draft': 'rascunho',
       'sent': 'enviada',
-      'signed': 'assinada',
+      'signed': 'fechada',
       'rejected': 'rejeitada',
       'expired': 'expirada',
-      'converted': 'convertida',
+      'converted': 'assinada',
       'contraproposta': 'assinada parcialmente'
     };
     return statusMap[status] || status;

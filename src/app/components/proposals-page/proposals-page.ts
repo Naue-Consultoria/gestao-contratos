@@ -635,10 +635,10 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       const statusMap: { [key: string]: string } = {
         'draft': 'Rascunho',
         'sent': 'Enviada',
-        'signed': 'Assinada',
+        'signed': 'Fechada',
         'rejected': 'Rejeitada',
         'expired': 'Expirada',
-        'converted': 'Convertida',
+        'converted': 'Assinada',
         'contraproposta': 'Assinada Parcialmente'
       };
       doc.text(`Status: ${statusMap[fullProposal.status] || fullProposal.status}`, margin, currentY);
@@ -970,10 +970,11 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     const statusColors: { [key: string]: string } = {
       'draft': '#6c757d',
       'sent': '#007bff',
-      'signed': '#003b2b',
+      'signed': '#003b2b',  // Verde escuro (Fechada)
       'accepted': '#28a745',
       'rejected': '#dc3545',
       'expired': '#fd7e14',
+      'converted': '#10b981',  // Verde claro (Assinada)
       'contraproposta': '#0a8560'  // Verde mais claro que o 'signed'
     };
     return statusColors[status] || '#6c757d';
@@ -1300,6 +1301,52 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   closeConvertModal() {
     this.showConvertModal = false;
     this.selectedProposalForConversion = null;
+  }
+
+  /**
+   * Atualizar status da proposta diretamente da tabela
+   */
+  async updateProposalStatus(proposal: ProposalDisplay, event: Event) {
+    event.stopPropagation();
+
+    const newStatus = proposal.status as 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta';
+    const previousStatus = proposal.raw.status;
+
+    // Se o status não mudou, não faz nada
+    if (newStatus === previousStatus) {
+      return;
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.proposalService.updateProposalStatus(proposal.id, newStatus)
+      );
+
+      if (response && response.success) {
+        // Atualizar o status no objeto raw também
+        proposal.raw.status = newStatus;
+        proposal.statusText = this.proposalService.getStatusText(newStatus);
+
+        this.modalService.showSuccess('Status da proposta atualizado com sucesso!');
+      } else {
+        // Se falhou, reverter o status no select
+        proposal.status = previousStatus;
+        this.modalService.showError(response?.message || 'Erro ao atualizar o status da proposta.');
+      }
+    } catch (error: any) {
+      console.error('❌ Error updating proposal status:', error);
+
+      // Reverter o status no select
+      proposal.status = previousStatus;
+
+      if (error?.status === 404) {
+        this.modalService.showError('Proposta não encontrada.');
+      } else if (error?.status === 403) {
+        this.modalService.showError('Você não tem permissão para alterar o status desta proposta.');
+      } else {
+        this.modalService.showError('Não foi possível atualizar o status da proposta.');
+      }
+    }
   }
 
 }

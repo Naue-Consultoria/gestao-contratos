@@ -230,10 +230,10 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
       const statusMap: { [key: string]: string } = {
         'draft': 'Rascunho',
         'sent': 'Enviada',
-        'signed': 'Assinada',
+        'signed': 'Fechada',
         'rejected': 'Rejeitada',
         'expired': 'Expirada',
-        'converted': 'Convertida',
+        'converted': 'Assinada',
         'contraproposta': 'Assinada Parcialmente'
       };
       doc.text(`Status: ${statusMap[fullProposal.status] || fullProposal.status}`, margin, currentY);

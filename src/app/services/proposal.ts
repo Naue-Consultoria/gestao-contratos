@@ -408,10 +408,10 @@ export class ProposalService {
     const colors: { [key: string]: string } = {
       'draft': '#6b7280', // Cinza
       'sent': '#3b82f6', // Azul
-      'signed': '#003b2b', // Verde escuro da marca
+      'signed': '#003b2b', // Verde escuro da marca (Fechada)
       'rejected': '#ef4444', // Vermelho
       'expired': '#f59e0b', // Amarelo
-      'converted': '#6366f1', // Roxo (novo status)
+      'converted': '#10b981', // Verde claro (Assinada)
       'contraproposta': '#ef4444' // Vermelho para Assinada Parcialmente
     };
     return colors[status] || '#6b7280';
@@ -424,10 +424,10 @@ export class ProposalService {
     const texts: { [key: string]: string } = {
       'draft': 'Rascunho',
       'sent': 'Enviada',
-      'signed': 'Assinada',
+      'signed': 'Fechada',
       'rejected': 'Rejeitada',
       'expired': 'Expirada',
-      'converted': 'Convertida',
+      'converted': 'Assinada',
       'contraproposta': 'Ass. Parcial'
     };
     return texts[status] || status;

@@ -825,6 +825,52 @@
     100% { transform: rotate(360deg); }
 }
 
+/* Status Select - editable na tabela */
+.status-select {
+    padding: 0.3rem 0.7rem;
+    border: 1px solid transparent;
+    border-radius: 16px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='white' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.4rem center;
+    padding-right: 1.5rem;
+    min-width: 120px;
+}
+
+.status-select:hover {
+    opacity: 0.9;
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.status-select:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.status-select option {
+    background-color: #fff;
+    color: #333;
+    padding: 0.5rem;
+    font-weight: 500;
+}
+
+:host-context(body.dark-mode) .status-select option {
+    background-color: #333;
+    color: #fff;
+}
+
 /* Específico para 1280x800 - otimizado para essa resolução */
 /* Responsividade adicional para filtros alinhados */
 @media (max-width: 1400px) {

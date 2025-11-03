@@ -533,10 +533,12 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
     const texts: { [key: string]: string } = {
       'draft': 'Rascunho',
       'sent': 'Enviada',
-      'signed': 'Assinada',
+      'signed': 'Fechada',
       'accepted': 'Aceita',
       'rejected': 'Rejeitada',
-      'expired': 'Expirada'
+      'expired': 'Expirada',
+      'converted': 'Assinada',
+      'contraproposta': 'Assinada Parcialmente'
     };
     return texts[status] || status;
   }

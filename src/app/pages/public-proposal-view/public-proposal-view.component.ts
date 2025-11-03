@@ -1000,10 +1000,11 @@ export class PublicProposalViewComponent implements OnInit {
     const texts: { [key: string]: string } = {
       'draft': 'Rascunho',
       'sent': 'Enviada',
-      'signed': 'Assinada',
+      'signed': 'Fechada',
       'accepted': 'Aceita',
       'rejected': 'Rejeitada',
       'expired': 'Expirada',
+      'converted': 'Assinada',
       'contraproposta': 'Assinada Parcialmente'
     };
     return texts[status] || status;

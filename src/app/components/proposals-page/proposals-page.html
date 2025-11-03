@@ -47,10 +47,10 @@
               <option value="">Todos</option>
               <option value="draft">Rascunho</option>
               <option value="sent">Enviada</option>
-              <option value="signed">Assinada</option>
+              <option value="signed">Fechada</option>
               <option value="rejected">Rejeitada</option>
               <option value="expired">Expirada</option>
-              <option value="converted">Convertida</option>
+              <option value="converted">Assinada</option>
               <option value="contraproposta">Assinada Parcialmente</option>
             </select>
           </div>
@@ -217,13 +217,21 @@
               <span class="type-badge">{{ getProposalTypeText(proposal.raw.type) }}</span>
             </td>
 
-            <td>
-              <span
-                class="status-badge"
+            <td (click)="$event.stopPropagation()">
+              <select
+                class="status-select"
+                [(ngModel)]="proposal.status"
+                (change)="updateProposalStatus(proposal, $event)"
                 [style.background-color]="getStatusColor(proposal.status)"
               >
-                {{ proposal.statusText }}
-              </span>
+                <option value="draft">Rascunho</option>
+                <option value="sent">Enviada</option>
+                <option value="signed">Fechada</option>
+                <option value="rejected">Rejeitada</option>
+                <option value="expired">Expirada</option>
+                <option value="converted">Assinada</option>
+                <option value="contraproposta">Assinada Parcialmente</option>
+              </select>
             </td>
             <td>
               <span class="value-amount">{{ proposal.totalValue }}</span>
