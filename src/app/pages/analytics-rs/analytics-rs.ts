@@ -108,9 +108,10 @@ export class AnalyticsRsComponent implements OnInit, AfterViewInit, OnDestroy {
   private extractAvailableYears() {
     const years = new Set<number>();
     this.allVagas.forEach(vaga => {
-      // Extrair anos da data de fechamento
+      // Extrair anos da data de fechamento (sem conversão de timezone)
       if (vaga.data_fechamento_cancelamento) {
-        const year = new Date(vaga.data_fechamento_cancelamento).getFullYear();
+        const dateOnly = vaga.data_fechamento_cancelamento.split('T')[0];
+        const year = parseInt(dateOnly.split('-')[0]);
         years.add(year);
       }
     });
@@ -124,7 +125,9 @@ export class AnalyticsRsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.selectedYear) {
       filteredVagas = filteredVagas.filter(vaga => {
         if (!vaga.data_fechamento_cancelamento) return false;
-        const year = new Date(vaga.data_fechamento_cancelamento).getFullYear();
+        // Extrair ano sem conversão de timezone
+        const dateOnly = vaga.data_fechamento_cancelamento.split('T')[0];
+        const year = parseInt(dateOnly.split('-')[0]);
         return year === parseInt(this.selectedYear);
       });
     }
@@ -132,7 +135,9 @@ export class AnalyticsRsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.selectedMonth) {
       filteredVagas = filteredVagas.filter(vaga => {
         if (!vaga.data_fechamento_cancelamento) return false;
-        const month = new Date(vaga.data_fechamento_cancelamento).getMonth() + 1;
+        // Extrair mês sem conversão de timezone
+        const dateOnly = vaga.data_fechamento_cancelamento.split('T')[0];
+        const month = parseInt(dateOnly.split('-')[1]);
         return month === parseInt(this.selectedMonth);
       });
     }
@@ -207,8 +212,12 @@ export class AnalyticsRsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (vagasFechadas.length === 0) return 0;
 
     const totalDays = vagasFechadas.reduce((sum, vaga) => {
-      const dataAbertura = new Date(vaga.data_abertura);
-      const dataFechamento = new Date(vaga.data_fechamento_cancelamento || new Date());
+      // Extrair apenas as datas sem timezone
+      const aberturaDate = vaga.data_abertura.split('T')[0];
+      const fechamentoDate = vaga.data_fechamento_cancelamento ? vaga.data_fechamento_cancelamento.split('T')[0] : new Date().toISOString().split('T')[0];
+
+      const dataAbertura = new Date(aberturaDate + 'T00:00:00');
+      const dataFechamento = new Date(fechamentoDate + 'T00:00:00');
       const diffTime = Math.abs(dataFechamento.getTime() - dataAbertura.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return sum + diffDays;

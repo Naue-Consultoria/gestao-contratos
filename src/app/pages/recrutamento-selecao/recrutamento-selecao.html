@@ -270,11 +270,11 @@
               <span class="fonte-badge">{{ fonteRecrutamentoLabels[vaga.fonteRecrutamento] }}</span>
             </td>
             <td>
-              <span class="date-text">{{ vaga.dataAbertura | date:'dd/MM/yyyy' }}</span>
+              <span class="date-text">{{ vaga.dataAbertura | dateNoTimezone }}</span>
             </td>
             <td>
               <span class="date-text" *ngIf="vaga.dataFechamentoCancelamento">
-                {{ vaga.dataFechamentoCancelamento | date:'dd/MM/yyyy' }}
+                {{ vaga.dataFechamentoCancelamento | dateNoTimezone }}
               </span>
               <span class="date-text empty" *ngIf="!vaga.dataFechamentoCancelamento">-</span>
             </td>
@@ -396,11 +396,11 @@
               <span class="consultant-name">{{ vaga.usuarioNome || '-' }}</span>
             </td>
             <td>
-              <span class="date-text">{{ vaga.dataAbertura | date:'dd/MM/yyyy' }}</span>
+              <span class="date-text">{{ vaga.dataAbertura | dateNoTimezone }}</span>
             </td>
             <td>
               <span class="date-text" *ngIf="vaga.dataFechamentoCancelamento">
-                {{ vaga.dataFechamentoCancelamento | date:'dd/MM/yyyy' }}
+                {{ vaga.dataFechamentoCancelamento | dateNoTimezone }}
               </span>
               <span class="date-text empty" *ngIf="!vaga.dataFechamentoCancelamento">-</span>
             </td>
@@ -520,7 +520,7 @@
             </td>
             <td>
               <span class="date-text" *ngIf="vaga.dataFechamentoCancelamento">
-                {{ vaga.dataFechamentoCancelamento | date:'dd/MM/yyyy' }}
+                {{ vaga.dataFechamentoCancelamento | dateNoTimezone }}
               </span>
               <span class="date-text empty" *ngIf="!vaga.dataFechamentoCancelamento">-</span>
             </td>

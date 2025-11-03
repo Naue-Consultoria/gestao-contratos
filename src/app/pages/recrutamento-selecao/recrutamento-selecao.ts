@@ -6,6 +6,7 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
 import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { VagaService } from '../../services/vaga.service';
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
+import { DateNoTimezonePipe } from '../../pipes/date-no-timezone-pipe';
 import { firstValueFrom } from 'rxjs';
 import localePt from '@angular/common/locales/pt';
 
@@ -31,8 +32,8 @@ interface Vaga {
   statusEntrevista?: 'realizada' | 'desistiu' | 'remarcou';
   salario: number;
   pretensaoSalarial?: number;
-  dataAbertura: Date;
-  dataFechamentoCancelamento?: Date;
+  dataAbertura: string;
+  dataFechamentoCancelamento?: string;
   observacoes?: string;
   candidatoAprovado?: string;
   contatoCandidato?: string;
@@ -47,7 +48,7 @@ interface Vaga {
 @Component({
   selector: 'app-recrutamento-selecao',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent, CurrencyMaskDirective],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, CurrencyMaskDirective, DateNoTimezonePipe],
   providers: [{ provide: LOCALE_ID, useValue: 'pt-BR' }],
   templateUrl: './recrutamento-selecao.html',
   styleUrl: './recrutamento-selecao.css'
@@ -239,8 +240,10 @@ export class RecrutamentoSelecao implements OnInit {
           fonteRecrutamento: vaga.fonte_recrutamento,
           salario: parseFloat(vaga.salario || 0),
           pretensaoSalarial: vaga.pretensao_salarial ? parseFloat(vaga.pretensao_salarial) : undefined,
-          dataAbertura: new Date(vaga.data_abertura),
-          dataFechamentoCancelamento: vaga.data_fechamento_cancelamento ? new Date(vaga.data_fechamento_cancelamento) : undefined,
+          dataAbertura: typeof vaga.data_abertura === 'string' ? vaga.data_abertura : vaga.data_abertura.toISOString(),
+          dataFechamentoCancelamento: vaga.data_fechamento_cancelamento
+            ? (typeof vaga.data_fechamento_cancelamento === 'string' ? vaga.data_fechamento_cancelamento : vaga.data_fechamento_cancelamento.toISOString())
+            : undefined,
           observacoes: vaga.observacoes,
           candidatoAprovado: candidatoAprovadoNome,
           totalCandidatos: Array.isArray(vaga.vaga_candidatos) ? vaga.vaga_candidatos.length : 0,
@@ -273,14 +276,14 @@ export class RecrutamentoSelecao implements OnInit {
     const years = new Set<string>();
 
     this.vagas.forEach(vaga => {
-      // Add year from data de abertura
-      const aberturaDate = new Date(vaga.dataAbertura);
-      years.add(aberturaDate.getFullYear().toString());
+      // Add year from data de abertura (sem conversão de timezone)
+      const aberturaYear = vaga.dataAbertura.split('T')[0].split('-')[0];
+      years.add(aberturaYear);
 
-      // Add year from data de fechamento if exists
+      // Add year from data de fechamento if exists (sem conversão de timezone)
       if (vaga.dataFechamentoCancelamento) {
-        const fechamentoDate = new Date(vaga.dataFechamentoCancelamento);
-        years.add(fechamentoDate.getFullYear().toString());
+        const fechamentoYear = vaga.dataFechamentoCancelamento.split('T')[0].split('-')[0];
+        years.add(fechamentoYear);
       }
     });
 
@@ -332,11 +335,11 @@ export class RecrutamentoSelecao implements OnInit {
         if (!vaga.dataFechamentoCancelamento) {
           matchesMonthYear = false;
         } else {
-          const fechamentoDate = new Date(vaga.dataFechamentoCancelamento);
-          const year = fechamentoDate.getFullYear().toString();
-          const month = (fechamentoDate.getMonth() + 1).toString();
+          // Extrair ano e mês da string de data sem conversão de timezone
+          const dateOnly = vaga.dataFechamentoCancelamento.split('T')[0];
+          const [year, month, day] = dateOnly.split('-');
 
-          const matchesMonth = !this.selectedMonth || month === this.selectedMonth;
+          const matchesMonth = !this.selectedMonth || month === this.selectedMonth.padStart(2, '0');
           const matchesYear = !this.selectedYear || year === this.selectedYear;
 
           matchesMonthYear = matchesMonth && matchesYear;
@@ -564,16 +567,23 @@ export class RecrutamentoSelecao implements OnInit {
     if (!vaga.dataFechamentoCancelamento) {
       return 0;
     }
-    const start = new Date(vaga.dataAbertura);
-    const end = new Date(vaga.dataFechamentoCancelamento);
+    // Extrair apenas as datas sem timezone
+    const startDate = vaga.dataAbertura.split('T')[0];
+    const endDate = vaga.dataFechamentoCancelamento.split('T')[0];
+
+    const start = new Date(startDate + 'T00:00:00');
+    const end = new Date(endDate + 'T00:00:00');
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   }
 
   calculateActiveSla(vaga: Vaga): number {
-    const start = new Date(vaga.dataAbertura);
+    // Extrair apenas a data sem timezone
+    const startDate = vaga.dataAbertura.split('T')[0];
+    const start = new Date(startDate + 'T00:00:00');
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const diffTime = Math.abs(today.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
@@ -605,11 +615,11 @@ export class RecrutamentoSelecao implements OnInit {
     if (this.selectedMonth || this.selectedYear) {
       vagasFechadas = vagasFechadas.filter(vaga => {
         if (vaga.dataFechamentoCancelamento) {
-          const fechamentoDate = new Date(vaga.dataFechamentoCancelamento);
-          const year = fechamentoDate.getFullYear().toString();
-          const month = (fechamentoDate.getMonth() + 1).toString();
+          // Extrair ano e mês da string de data sem conversão de timezone
+          const dateOnly = vaga.dataFechamentoCancelamento.split('T')[0];
+          const [year, month, day] = dateOnly.split('-');
 
-          const matchesMonth = !this.selectedMonth || month === this.selectedMonth;
+          const matchesMonth = !this.selectedMonth || month === this.selectedMonth.padStart(2, '0');
           const matchesYear = !this.selectedYear || year === this.selectedYear;
 
           return matchesMonth && matchesYear;
@@ -663,11 +673,11 @@ export class RecrutamentoSelecao implements OnInit {
     if (this.selectedMonth || this.selectedYear) {
       filteredVagas = filteredVagas.filter(vaga => {
         if (vaga.dataFechamentoCancelamento) {
-          const fechamentoDate = new Date(vaga.dataFechamentoCancelamento);
-          const year = fechamentoDate.getFullYear().toString();
-          const month = (fechamentoDate.getMonth() + 1).toString();
+          // Extrair ano e mês da string de data sem conversão de timezone
+          const dateOnly = vaga.dataFechamentoCancelamento.split('T')[0];
+          const [year, month, day] = dateOnly.split('-');
 
-          const matchesMonth = !this.selectedMonth || month === this.selectedMonth;
+          const matchesMonth = !this.selectedMonth || month === this.selectedMonth.padStart(2, '0');
           const matchesYear = !this.selectedYear || year === this.selectedYear;
 
           return matchesMonth && matchesYear;

@@ -99,11 +99,11 @@
         </div>
         <div class="info-group">
           <span class="info-label">Data de Abertura</span>
-          <span class="info-value">{{ vaga.dataAbertura | date:'dd/MM/yyyy' }}</span>
+          <span class="info-value">{{ vaga.dataAbertura | dateNoTimezone }}</span>
         </div>
         <div class="info-group" *ngIf="vaga.dataFechamentoCancelamento">
           <span class="info-label">Data de Fechamento</span>
-          <span class="info-value">{{ vaga.dataFechamentoCancelamento | date:'dd/MM/yyyy' }}</span>
+          <span class="info-value">{{ vaga.dataFechamentoCancelamento | dateNoTimezone }}</span>
         </div>
       </div>
     </div>
@@ -164,11 +164,11 @@
                   </span>
                 </td>
                 <td>
-                  <span class="date-text">{{ vagaCandidato.data_inscricao | date:'dd/MM/yyyy' }}</span>
+                  <span class="date-text">{{ vagaCandidato.data_inscricao | dateNoTimezone }}</span>
                 </td>
                 <td>
                   <span class="date-text" *ngIf="getLatestInterview(vagaCandidato)">
-                    {{ getLatestInterview(vagaCandidato).data_entrevista | date:'dd/MM/yyyy' }}
+                    {{ getLatestInterview(vagaCandidato).data_entrevista | dateNoTimezone }}
                   </span>
                   <span class="empty-text" *ngIf="!getLatestInterview(vagaCandidato)">-</span>
                 </td>

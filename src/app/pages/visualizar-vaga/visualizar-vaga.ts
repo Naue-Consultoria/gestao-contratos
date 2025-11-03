@@ -11,6 +11,7 @@ import { Entrevista, EntrevistaService } from '../../services/entrevista.service
 import { Candidato } from '../../services/candidato.service';
 import { VagaService } from '../../services/vaga.service';
 import { UserService } from '../../services/user.service';
+import { DateNoTimezonePipe } from '../../pipes/date-no-timezone-pipe';
 import { firstValueFrom } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
@@ -31,8 +32,8 @@ interface Vaga {
   statusEntrevista?: string;
   salario: number;
   pretensaoSalarial?: number;
-  dataAbertura: Date;
-  dataFechamentoCancelamento?: Date;
+  dataAbertura: string;
+  dataFechamentoCancelamento?: string;
   observacoes?: string;
   candidatoAprovado?: string;
   emailCandidato?: string;
@@ -48,7 +49,7 @@ interface VagaCandidato {
   vaga_id: number;
   candidato: Candidato;
   status: string;
-  data_inscricao: Date;
+  data_inscricao: string;
   observacoes?: string;
   entrevistas: any[]; // Temporário até integrar com backend
 }
@@ -66,7 +67,7 @@ interface CandidateForm {
 @Component({
   selector: 'app-visualizar-vaga',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent, CandidatoModalComponent, EntrevistaModal, ObservacoesModalComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, CandidatoModalComponent, EntrevistaModal, ObservacoesModalComponent, DateNoTimezonePipe],
   templateUrl: './visualizar-vaga.html',
   styleUrl: './visualizar-vaga.css'
 })
@@ -229,8 +230,10 @@ export class VisualizarVagaComponent implements OnInit {
         fonteRecrutamento: vagaData.fonte_recrutamento,
         salario: Number(vagaData.salario || 0),
         pretensaoSalarial: vagaData.pretensao_salarial ? Number(vagaData.pretensao_salarial) : undefined,
-        dataAbertura: new Date(vagaData.data_abertura),
-        dataFechamentoCancelamento: vagaData.data_fechamento_cancelamento ? new Date(vagaData.data_fechamento_cancelamento) : undefined,
+        dataAbertura: typeof vagaData.data_abertura === 'string' ? vagaData.data_abertura : vagaData.data_abertura.toISOString(),
+        dataFechamentoCancelamento: vagaData.data_fechamento_cancelamento
+          ? (typeof vagaData.data_fechamento_cancelamento === 'string' ? vagaData.data_fechamento_cancelamento : vagaData.data_fechamento_cancelamento.toISOString())
+          : undefined,
         observacoes: vagaData.observacoes,
         candidatoAprovado: vagaData.candidato_aprovado?.nome,
         porcentagemFaturamento: Number(vagaData.porcentagem_faturamento || 100),
@@ -258,7 +261,7 @@ export class VisualizarVagaComponent implements OnInit {
         vaga_id: vagaCandidato.vaga_id,
         candidato: vagaCandidato.candidato,
         status: vagaCandidato.status,
-        data_inscricao: new Date(vagaCandidato.data_inscricao),
+        data_inscricao: vagaCandidato.data_inscricao,
         observacoes: vagaCandidato.observacoes,
         entrevistas: vagaCandidato.entrevistas || []
       }));
@@ -297,8 +300,14 @@ export class VisualizarVagaComponent implements OnInit {
   calculateSLA(): number {
     if (!this.vaga) return 0;
 
-    const endDate = this.vaga.dataFechamentoCancelamento || new Date();
-    const startDate = this.vaga.dataAbertura;
+    // Extrair apenas as datas sem timezone
+    const startDateOnly = this.vaga.dataAbertura.split('T')[0];
+    const endDateOnly = this.vaga.dataFechamentoCancelamento
+      ? this.vaga.dataFechamentoCancelamento.split('T')[0]
+      : new Date().toISOString().split('T')[0];
+
+    const startDate = new Date(startDateOnly + 'T00:00:00');
+    const endDate = new Date(endDateOnly + 'T00:00:00');
 
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -360,7 +369,7 @@ export class VisualizarVagaComponent implements OnInit {
       vaga_id: this.vagaId,
       candidato: novoCandidato,
       status: 'inscrito',
-      data_inscricao: new Date(),
+      data_inscricao: new Date().toISOString(),
       observacoes: this.candidateForm.observacoes,
       entrevistas: []
     };
@@ -404,7 +413,7 @@ export class VisualizarVagaComponent implements OnInit {
         if (!this.selectedEntrevista) {
           this.candidatos[candidatoIndex].entrevistas.push({
             id: entrevista.id || Date.now(),
-            data_entrevista: new Date(entrevista.data_entrevista),
+            data_entrevista: entrevista.data_entrevista,
             hora_entrevista: entrevista.hora_entrevista,
             status: entrevista.status || 'agendada',
             link_chamada: entrevista.link_chamada,
