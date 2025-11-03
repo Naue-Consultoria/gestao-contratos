@@ -34,16 +34,16 @@ export class RelatoriosRsComponent implements OnInit {
   rsGeneralReport: ReportConfig = { format: 'pdf', isLoading: false };
 
   // Relatório por Cliente
-  rsClientReport: ReportConfig = { format: 'pdf', isLoading: false };
+  rsClientReport: ReportConfig = { format: 'pdf', isLoading: false, clientId: '' };
 
   // Relatório por Consultora
-  rsConsultoraReport: ReportConfig = { format: 'pdf', isLoading: false };
+  rsConsultoraReport: ReportConfig = { format: 'pdf', isLoading: false, userId: '' };
 
   // Relatório de Vagas Abertas
   rsOpenVacanciesReport: ReportConfig = { format: 'pdf', isLoading: false };
 
   // Relatório Individual de Vaga
-  rsIndividualReport: ReportConfig = { format: 'pdf', isLoading: false };
+  rsIndividualReport: ReportConfig = { format: 'pdf', isLoading: false, clientId: '', vagaId: '' };
 
   constructor(
     private reportService: ReportService,

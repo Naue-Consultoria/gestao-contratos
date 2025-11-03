@@ -575,9 +575,7 @@ export class RecrutamentoSelecao implements OnInit {
   }
 
   getSlaClass(days: number): string {
-    if (days <= 7) {
-      return 'sla-excellent';
-    } else if (days <= 15) {
+    if (days <= 15) {
       return 'sla-good';
     } else if (days <= 30) {
       return 'sla-warning';

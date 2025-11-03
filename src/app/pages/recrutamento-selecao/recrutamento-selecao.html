@@ -284,7 +284,9 @@
                     *ngIf="vaga.dataFechamentoCancelamento">
                 {{ calculateSla(vaga) }} dias
               </span>
-              <span class="sla-badge active" *ngIf="!vaga.dataFechamentoCancelamento">
+              <span class="sla-badge"
+                    [ngClass]="getSlaClass(calculateActiveSla(vaga))"
+                    *ngIf="!vaga.dataFechamentoCancelamento">
                 {{ calculateActiveSla(vaga) }} dias
               </span>
             </td>
@@ -408,7 +410,9 @@
                     *ngIf="vaga.dataFechamentoCancelamento">
                 {{ calculateSla(vaga) }} dias
               </span>
-              <span class="sla-badge active" *ngIf="!vaga.dataFechamentoCancelamento">
+              <span class="sla-badge"
+                    [ngClass]="getSlaClass(calculateActiveSla(vaga))"
+                    *ngIf="!vaga.dataFechamentoCancelamento">
                 {{ calculateActiveSla(vaga) }} dias
               </span>
             </td>

@@ -884,13 +884,13 @@
 
 /* Status de Vagas */
 .status-aberta {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background-color: rgba(6, 182, 212, 0.1);
+  color: #06b6d4;
 }
 
 .status-divulgacao_prospec {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background-color: rgba(249, 115, 22, 0.1);
+  color: #f97316;
 }
 
 .status-entrevista_nc {
@@ -914,18 +914,18 @@
 }
 
 .status-fechada_rep {
-  background-color: rgba(16, 185, 129, 0.15);
-  color: #059669;
+  background-color: rgba(0, 59, 43, 0.1);
+  color: #003b2b;
 }
 
 .status-cancelada_cliente {
-  background-color: rgba(107, 114, 128, 0.1);
-  color: #6b7280;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
 .status-standby {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background-color: rgba(234, 179, 8, 0.1);
+  color: #eab308;
 }
 
 .status-nao_cobrada {
@@ -934,8 +934,8 @@
 }
 
 .status-encerramento_cont {
-  background-color: rgba(75, 85, 99, 0.1);
-  color: #4b5563;
+  background-color: rgba(146, 64, 14, 0.1);
+  color: #92400e;
 }
 
 /* Status Candidatos */
@@ -1053,13 +1053,13 @@
 }
 
 .abertura-badge.nova {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background-color: rgba(0, 59, 43, 0.1);
+  color: #003b2b;
 }
 
 .abertura-badge.reposicao {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background-color: rgba(10, 98, 84, 0.1);
+  color: #0a6254;
 }
 
 .salary-value {
@@ -1157,19 +1157,13 @@
 }
 
 .sla-badge.sla-warning {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #059669;
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #d97706;
 }
 
 .sla-badge.sla-danger {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #059669;
-}
-
-.sla-badge.active {
-  background-color: rgba(251, 191, 36, 0.1);
-  color: #d97706;
-  font-style: italic;
+  background-color: rgba(139, 0, 0, 0.1);
+  color: #8B0000;
 }
 
 .candidate-info {
@@ -1661,5 +1655,234 @@
 
   .modal-footer .btn {
     width: 100%;
+  }
+}
+
+/* Otimização para notebooks 15" - 1920x1080 */
+@media (min-width: 1920px) and (max-width: 1920px) and (min-height: 1080px) and (max-height: 1080px) {
+  :host {
+    max-width: 1860px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Tabs maiores e mais legíveis */
+  .tab-button {
+    padding: 1rem 2rem;
+    font-size: 0.95rem;
+  }
+
+  /* Container da tabela otimizado */
+  .table-container {
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Header da tabela */
+  .table-header {
+    margin-bottom: 1.25rem;
+    gap: 1rem;
+  }
+
+  /* Filtros organizados em linha única */
+  .table-header {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .filters-section {
+    display: flex;
+    gap: 0.625rem;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex: 1;
+  }
+
+  .search-box {
+    flex: 0 1 240px;
+    min-width: 200px;
+  }
+
+  .search-input {
+    padding: 0.5rem 2rem 0.5rem 2rem;
+    font-size: 0.8125rem;
+    height: 38px;
+  }
+
+  .filter-group {
+    display: flex;
+    gap: 0.625rem;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex: 1;
+  }
+
+  .filter-select,
+  .multi-select-trigger {
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    height: 38px;
+    min-width: 150px;
+    max-width: 180px;
+    flex: 0 1 auto;
+  }
+
+  .btn-clear {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Botões alinhados com filtros */
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    height: 38px;
+  }
+
+  .btn i {
+    font-size: 1rem;
+  }
+
+  /* Tabela otimizada */
+  .data-table th {
+    padding: 0.875rem 1rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.4px;
+  }
+
+  .data-table td {
+    padding: 1rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Títulos de vagas com mais espaço */
+  .vaga-title {
+    font-size: 0.9375rem;
+    max-width: 250px !important;
+  }
+
+  .vaga-subtitle {
+    font-size: 0.8125rem;
+  }
+
+  /* Badges maiores e mais legíveis */
+  .status-badge {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+  }
+
+  .type-badge,
+  .abertura-badge {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.75rem;
+  }
+
+  .sla-badge {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8125rem;
+    min-width: 70px;
+  }
+
+  /* Salário mais destacado */
+  .salary-value {
+    font-size: 0.9375rem;
+  }
+
+  /* Candidatos */
+  .candidate-name {
+    font-size: 0.875rem;
+  }
+
+  .candidate-status {
+    font-size: 0.75rem;
+  }
+
+  /* Ações */
+  .action-buttons-cell {
+    min-width: 100px;
+  }
+
+  .action-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.875rem;
+  }
+
+  /* Dropdown */
+  .dropdown-menu {
+    min-width: 180px;
+  }
+
+  .dropdown-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Stats cards */
+  .stats-container {
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    padding: 1.5rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+  }
+
+  /* Fechamento filters */
+  .fechamento-filters {
+    padding: 1.25rem;
+    gap: 1.25rem;
+  }
+
+  .filter-label {
+    font-size: 0.875rem;
+  }
+
+  /* Modal otimizado */
+  .modal-container {
+    max-width: 900px;
+  }
+
+  .modal-title {
+    font-size: 1.5rem;
+  }
+
+  .modal-body {
+    padding: 1.75rem;
+    font-size: 0.9375rem;
+  }
+
+  /* Espaçamento geral melhorado */
+  .empty-state {
+    padding: 4rem 2rem;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.5rem;
+  }
+
+  .empty-state p {
+    font-size: 1rem;
   }
 }

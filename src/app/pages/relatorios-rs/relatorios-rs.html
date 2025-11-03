@@ -99,8 +99,9 @@
           <select
             class="form-select client-select"
             [(ngModel)]="rsClientReport.clientId"
-            [disabled]="rsClientReport.isLoading">
-            <option value="">Escolha um cliente...</option>
+            [disabled]="rsClientReport.isLoading"
+            [class.placeholder-active]="!rsClientReport.clientId">
+            <option value="" disabled selected hidden>Selecione o cliente</option>
             <option *ngFor="let client of clients" [value]="client.id">
               {{ client.name }}
             </option>
@@ -182,8 +183,9 @@
           <select
             class="form-select"
             [(ngModel)]="rsConsultoraReport.userId"
-            [disabled]="rsConsultoraReport.isLoading">
-            <option value="">Escolha uma consultora...</option>
+            [disabled]="rsConsultoraReport.isLoading"
+            [class.placeholder-active]="!rsConsultoraReport.userId">
+            <option value="" disabled selected hidden>Selecione a consultora</option>
             <option *ngFor="let user of consultores" [value]="user.id">
               {{ user.name }}
             </option>
@@ -316,8 +318,9 @@
             class="form-select"
             [(ngModel)]="rsIndividualReport.clientId"
             (change)="onClientChangeIndividual()"
-            [disabled]="rsIndividualReport.isLoading">
-            <option value="">Escolha um cliente...</option>
+            [disabled]="rsIndividualReport.isLoading"
+            [class.placeholder-active]="!rsIndividualReport.clientId">
+            <option value="" disabled selected hidden>Selecione o cliente</option>
             <option *ngFor="let client of clients" [value]="client.id">
               {{ client.name }}
             </option>
@@ -329,8 +332,9 @@
           <select
             class="form-select"
             [(ngModel)]="rsIndividualReport.vagaId"
-            [disabled]="!rsIndividualReport.clientId || rsIndividualReport.isLoading || vagasByClient.length === 0">
-            <option value="">{{ rsIndividualReport.clientId ? 'Escolha uma vaga...' : 'Selecione um cliente primeiro' }}</option>
+            [disabled]="!rsIndividualReport.clientId || rsIndividualReport.isLoading || vagasByClient.length === 0"
+            [class.placeholder-active]="!rsIndividualReport.vagaId">
+            <option value="" disabled selected hidden>{{ rsIndividualReport.clientId ? 'Selecione a vaga' : 'Selecione um cliente primeiro' }}</option>
             <option *ngFor="let vaga of vagasByClient" [value]="vaga.id">
               {{ vaga.codigo }} - {{ vaga.cargo }}
             </option>

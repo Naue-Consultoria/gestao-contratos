@@ -1,16 +1,16 @@
-/* Remove o wrapper do componente e aplica estilos diretamente ao conte�do */
+/* Remove o wrapper do componente e aplica estilos diretamente ao conteúdo */
 :host {
   display: contents !important;
   animation: none;
 }
 
-/* Anima��o aplicada aos elementos internos */
+/* Animação aplicada aos elementos internos */
 .page-header,
 .reports-grid {
   animation: fadeInUp 0.5s ease;
 }
 
-/* Header da P�gina */
+/* Header da Página */
 .page-header {
   margin-bottom: 2rem;
   flex-shrink: 0;
@@ -41,17 +41,17 @@
   margin: 0;
 }
 
-/* Grid de Relat�rios - 5 Colunas */
+/* Grid de Relatórios - 3 Colunas */
 .reports-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   width: 100%;
   container-type: inline-size;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Card de Relat�rio */
+/* Card de Relatório */
 .report-card {
   background: white;
   border-radius: 12px;
@@ -116,23 +116,23 @@
 
 /* R&S specific icon colors - System Green Theme */
 .card-icon.rs-general {
-  background: linear-gradient(135deg, #0A8060 0%, #0a7d5a 100%);
+  background: linear-gradient(135deg, var(--primary-green, #00b894) 0%, #088a5b 100%);
 }
 
 .card-icon.rs-client {
-  background: linear-gradient(135deg, #0A8060 0%, #0a7d5a 100%);
+  background: linear-gradient(135deg, var(--primary-green, #00b894) 0%, #088a5b 100%);
 }
 
 .card-icon.rs-consultora {
-  background: linear-gradient(135deg, #0A8060 0%, #0a7d5a 100%);
+  background: linear-gradient(135deg, var(--primary-green, #00b894) 0%, #088a5b 100%);
 }
 
 .card-icon.rs-open {
-  background: linear-gradient(135deg, #0A8060 0%, #0a7d5a 100%);
+  background: linear-gradient(135deg, var(--primary-green, #00b894) 0%, #088a5b 100%);
 }
 
 .card-icon.rs-performance {
-  background: linear-gradient(135deg, #0A8060 0%, #0a7d5a 100%);
+  background: linear-gradient(135deg, var(--primary-green, #00b894) 0%, #088a5b 100%);
 }
 
 /* Body do Card */
@@ -229,6 +229,29 @@
   opacity: 0.6;
 }
 
+/* Placeholder styling for selects */
+.form-select.placeholder-active {
+  color: #9ca3af !important;
+  font-style: italic;
+}
+
+.form-select option {
+  color: var(--text-dark, #282C2A);
+  font-style: normal;
+  font-weight: 400;
+}
+
+.form-select option[disabled] {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Estilo específico para option placeholder */
+.form-select option:first-child {
+  color: #9ca3af;
+  font-style: italic;
+}
+
 /* Seletor de Formato - Responsivo */
 .format-selector {
   display: flex;
@@ -284,7 +307,7 @@
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Bot�o Gerar Relat�rio */
+/* Botão Gerar Relatório */
 .btn-generate {
   width: 100%;
   padding: 0.625rem 1rem;
@@ -342,7 +365,7 @@
   font-weight: 600;
 }
 
-/* Anima��es */
+/* Animações */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -410,24 +433,24 @@
 
 /* Responsividade para diferentes estados da sidebar */
 
-/* Breakpoints espec�ficos para diferentes layouts de grid */
+/* Breakpoints específicos para diferentes layouts de grid */
 @media (min-width: 1600px) {
   .reports-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
   }
 }
 
 @media (min-width: 1400px) and (max-width: 1599px) {
   .reports-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.75rem;
   }
 }
 
 @media (min-width: 1200px) and (max-width: 1399px) {
   .reports-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
   }
 }
@@ -439,7 +462,7 @@
   }
 }
 
-/* Tablets e telas m�dias */
+/* Tablets e telas médias */
 @media (max-width: 1024px) {
   .reports-grid {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -450,7 +473,7 @@
     font-size: 1.75rem;
   }
 
-  /* Ajustes nos controles para telas m�dias */
+  /* Ajustes nos controles para telas médias */
   .card-controls {
     gap: 1.125rem;
   }
@@ -468,7 +491,7 @@
   }
 }
 
-/* Breakpoint espec�fico para cards entre 300px-400px */
+/* Breakpoint específico para cards entre 300px-400px */
 @media (max-width: 900px) and (min-width: 769px) {
   .control-row {
     grid-template-columns: 1fr;
@@ -596,7 +619,7 @@
   }
 }
 
-/* Container queries para melhor adapta��o dentro dos cards */
+/* Container queries para melhor adaptação dentro dos cards */
 @container (max-width: 400px) {
   .report-card {
     font-size: 0.925rem;
