@@ -108,8 +108,9 @@ export class AnalyticsRsComponent implements OnInit, AfterViewInit, OnDestroy {
   private extractAvailableYears() {
     const years = new Set<number>();
     this.allVagas.forEach(vaga => {
-      if (vaga.data_abertura) {
-        const year = new Date(vaga.data_abertura).getFullYear();
+      // Extrair anos da data de fechamento
+      if (vaga.data_fechamento_cancelamento) {
+        const year = new Date(vaga.data_fechamento_cancelamento).getFullYear();
         years.add(year);
       }
     });
@@ -117,21 +118,21 @@ export class AnalyticsRsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   applyFilters() {
-    // Filtrar vagas baseado em mês e ano
+    // Filtrar vagas baseado em mês e ano usando data de fechamento
     let filteredVagas = [...this.allVagas];
 
     if (this.selectedYear) {
       filteredVagas = filteredVagas.filter(vaga => {
-        if (!vaga.data_abertura) return false;
-        const year = new Date(vaga.data_abertura).getFullYear();
+        if (!vaga.data_fechamento_cancelamento) return false;
+        const year = new Date(vaga.data_fechamento_cancelamento).getFullYear();
         return year === parseInt(this.selectedYear);
       });
     }
 
     if (this.selectedMonth) {
       filteredVagas = filteredVagas.filter(vaga => {
-        if (!vaga.data_abertura) return false;
-        const month = new Date(vaga.data_abertura).getMonth() + 1;
+        if (!vaga.data_fechamento_cancelamento) return false;
+        const month = new Date(vaga.data_fechamento_cancelamento).getMonth() + 1;
         return month === parseInt(this.selectedMonth);
       });
     }

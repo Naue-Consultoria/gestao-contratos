@@ -325,17 +325,22 @@ export class RecrutamentoSelecao implements OnInit {
       const matchesTipoCargo = !this.tipoCargoFilter || vaga.tipoCargo === this.tipoCargoFilter;
       const matchesFonte = !this.fonteRecrutamentoFilter || vaga.fonteRecrutamento === this.fonteRecrutamentoFilter;
 
-      // Apply month and year filters based on data de abertura
+      // Apply month and year filters based on data de fechamento
       let matchesMonthYear = true;
       if (this.selectedMonth || this.selectedYear) {
-        const aberturaDate = new Date(vaga.dataAbertura);
-        const year = aberturaDate.getFullYear().toString();
-        const month = (aberturaDate.getMonth() + 1).toString();
+        // Se a vaga não tem data de fechamento, não deve aparecer no filtro de mês/ano
+        if (!vaga.dataFechamentoCancelamento) {
+          matchesMonthYear = false;
+        } else {
+          const fechamentoDate = new Date(vaga.dataFechamentoCancelamento);
+          const year = fechamentoDate.getFullYear().toString();
+          const month = (fechamentoDate.getMonth() + 1).toString();
 
-        const matchesMonth = !this.selectedMonth || month === this.selectedMonth;
-        const matchesYear = !this.selectedYear || year === this.selectedYear;
+          const matchesMonth = !this.selectedMonth || month === this.selectedMonth;
+          const matchesYear = !this.selectedYear || year === this.selectedYear;
 
-        matchesMonthYear = matchesMonth && matchesYear;
+          matchesMonthYear = matchesMonth && matchesYear;
+        }
       }
 
       return matchesSearch && matchesStatus && matchesTipoCargo && matchesFonte && matchesMonthYear;
