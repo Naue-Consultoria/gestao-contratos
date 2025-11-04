@@ -1,0 +1,372 @@
+<div class="public-hub-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Carregando vagas...</p>
+  </div>
+
+  <!-- Not Found State -->
+  <div *ngIf="!isLoading && notFound" class="error-container">
+    <div class="error-icon">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+        <line x1="12" y1="8" x2="12" y2="12" stroke-width="2"/>
+        <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"/>
+      </svg>
+    </div>
+    <h2>Hub não encontrado</h2>
+    <p>O link que você acessou não é válido ou não está mais disponível.</p>
+  </div>
+
+  <!-- Link Expired State -->
+  <div *ngIf="!isLoading && linkExpirado" class="error-container">
+    <div class="error-icon">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+        <polyline points="12 6 12 12 16 14" stroke-width="2"/>
+      </svg>
+    </div>
+    <h2>Link expirado</h2>
+    <p>Este link de acesso ao hub de vagas expirou. Entre em contato para obter um novo link.</p>
+  </div>
+
+  <!-- Hub Content -->
+  <div *ngIf="!isLoading && !notFound && !linkExpirado && hubData" class="hub-content">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-content">
+        <div class="company-logo" *ngIf="hubData.client.logo_url">
+          <img [src]="hubData.client.logo_url" [alt]="getClientName()">
+        </div>
+        <div class="company-logo placeholder" *ngIf="!hubData.client.logo_url">
+          <span>{{ getClientName().substring(0, 2).toUpperCase() }}</span>
+        </div>
+
+        <h1 class="hero-title">Acompanhamento de Vagas R&S</h1>
+        <p class="hero-subtitle">{{ getClientName() }}</p>
+
+        <div class="hero-stats">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ hubData.vagas.length }}</span>
+              <span class="stat-label">Vagas Totais</span>
+            </div>
+          </div>
+
+          <div class="stat-card highlight" *ngIf="getVagasAbertas().length > 0">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ getVagasAbertas().length }}</span>
+              <span class="stat-label">Vagas Abertas</span>
+            </div>
+          </div>
+
+          <div class="stat-card" *ngIf="getClientLocation()">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-location">{{ getClientLocation() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vagas Abertas -->
+    <div class="vagas-section" *ngIf="getVagasAbertas().length > 0">
+      <div class="section-header">
+        <div class="section-title-group">
+          <h2>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            </svg>
+            Vagas em Aberto
+          </h2>
+          <p class="section-description">Posições abertas aguardando candidatos</p>
+        </div>
+        <span class="section-badge aberta">{{ getVagasAbertas().length }}</span>
+      </div>
+
+      <div class="vagas-grid">
+        <div class="vaga-card premium aberta" *ngFor="let vaga of getVagasAbertas()">
+          <!-- Ribbon Badge -->
+          <div class="vaga-ribbon">
+            <span>ABERTA</span>
+          </div>
+
+          <!-- Card Header -->
+          <div class="vaga-card-header">
+            <h3 class="vaga-title">{{ vaga.cargo }}</h3>
+            <span class="vaga-tipo-badge">
+              <i class="fas fa-tag"></i>
+              {{ getTipoCargoLabel(vaga.tipo_cargo) }}
+            </span>
+          </div>
+
+          <!-- Highlights - Status e Candidatos em DESTAQUE -->
+          <div class="vaga-highlights-premium">
+            <div class="highlight-box status-box" [ngClass]="getStatusClass(vaga.status)">
+              <div class="highlight-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+              <div class="highlight-info">
+                <span class="highlight-label">Status Atual</span>
+                <span class="highlight-value-big">{{ getStatusLabel(vaga.status) }}</span>
+              </div>
+            </div>
+
+            <div class="highlight-box candidatos-box">
+              <div class="highlight-icon-wrapper candidatos">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <div class="highlight-info">
+                <span class="highlight-label">Candidatos</span>
+                <span class="highlight-value-big candidatos-count">{{ vaga.total_candidatos || 0 }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Info List -->
+          <div class="vaga-info-grid">
+            <div class="info-item">
+              <i class="fas fa-calendar-plus"></i>
+              <div class="info-content">
+                <span class="info-label">Abertura</span>
+                <span class="info-value">{{ formatDate(vaga.data_abertura) }}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-sync-alt"></i>
+              <div class="info-content">
+                <span class="info-label">Tipo</span>
+                <span class="info-value">{{ getTipoAberturaLabel(vaga.tipo_abertura) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline de Histórico -->
+          <div class="vaga-timeline-section" *ngIf="hasHistorico(vaga.id)">
+            <button class="timeline-toggle" (click)="toggleHistorico(vaga.id)">
+              <i class="fas fa-history"></i>
+              <span>{{ isHistoricoExpanded(vaga.id) ? 'Ocultar' : 'Ver' }} Histórico da Vaga</span>
+              <i class="fas fa-chevron-down" [class.rotated]="isHistoricoExpanded(vaga.id)"></i>
+            </button>
+
+            <div class="timeline-wrapper" *ngIf="isHistoricoExpanded(vaga.id)">
+              <div class="timeline">
+                <div class="timeline-item" *ngFor="let item of getHistorico(vaga.id); let first = first">
+                  <div class="timeline-marker" [class.current]="first"></div>
+                  <div class="timeline-content" [class.current]="first">
+                    <div class="timeline-header">
+                      <span class="timeline-status" [ngClass]="getStatusClass(item.status_novo)">
+                        <i class="fas fa-circle"></i>
+                        {{ getStatusLabel(item.status_novo) }}
+                      </span>
+                      <span class="timeline-date">{{ formatDateTime(item.changed_at) }}</span>
+                    </div>
+                    <div class="timeline-transition" *ngIf="item.status_anterior">
+                      <i class="fas fa-arrow-left"></i>
+                      <span>De: {{ getStatusLabel(item.status_anterior) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vagas Em Andamento -->
+    <div class="vagas-section" *ngIf="getVagasEmAndamento().length > 0">
+      <div class="section-header">
+        <div class="section-title-group">
+          <h2>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Processo Seletivo em Andamento
+          </h2>
+          <p class="section-description">Vagas em fase de entrevistas e avaliações</p>
+        </div>
+        <span class="section-badge andamento">{{ getVagasEmAndamento().length }}</span>
+      </div>
+
+      <div class="vagas-grid">
+        <div class="vaga-card premium andamento" *ngFor="let vaga of getVagasEmAndamento()">
+          <!-- Card Header -->
+          <div class="vaga-card-header">
+            <h3 class="vaga-title">{{ vaga.cargo }}</h3>
+            <span class="vaga-tipo-badge">
+              <i class="fas fa-tag"></i>
+              {{ getTipoCargoLabel(vaga.tipo_cargo) }}
+            </span>
+          </div>
+
+          <!-- Highlights - Status e Candidatos -->
+          <div class="vaga-highlights-premium">
+            <div class="highlight-box status-box" [ngClass]="getStatusClass(vaga.status)">
+              <div class="highlight-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+              <div class="highlight-info">
+                <span class="highlight-label">Status Atual</span>
+                <span class="highlight-value-big">{{ getStatusLabel(vaga.status) }}</span>
+              </div>
+            </div>
+
+            <div class="highlight-box candidatos-box">
+              <div class="highlight-icon-wrapper candidatos">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <div class="highlight-info">
+                <span class="highlight-label">Candidatos</span>
+                <span class="highlight-value-big candidatos-count">{{ vaga.total_candidatos || 0 }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Info Grid -->
+          <div class="vaga-info-grid">
+            <div class="info-item">
+              <i class="fas fa-calendar-plus"></i>
+              <div class="info-content">
+                <span class="info-label">Abertura</span>
+                <span class="info-value">{{ formatDate(vaga.data_abertura) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline -->
+          <div class="vaga-timeline-section" *ngIf="hasHistorico(vaga.id)">
+            <button class="timeline-toggle" (click)="toggleHistorico(vaga.id)">
+              <i class="fas fa-history"></i>
+              <span>{{ isHistoricoExpanded(vaga.id) ? 'Ocultar' : 'Ver' }} Histórico</span>
+              <i class="fas fa-chevron-down" [class.rotated]="isHistoricoExpanded(vaga.id)"></i>
+            </button>
+
+            <div class="timeline-wrapper" *ngIf="isHistoricoExpanded(vaga.id)">
+              <div class="timeline">
+                <div class="timeline-item" *ngFor="let item of getHistorico(vaga.id); let first = first">
+                  <div class="timeline-marker" [class.current]="first"></div>
+                  <div class="timeline-content" [class.current]="first">
+                    <div class="timeline-header">
+                      <span class="timeline-status" [ngClass]="getStatusClass(item.status_novo)">
+                        <i class="fas fa-circle"></i>
+                        {{ getStatusLabel(item.status_novo) }}
+                      </span>
+                      <span class="timeline-date">{{ formatDateTime(item.changed_at) }}</span>
+                    </div>
+                    <div class="timeline-transition" *ngIf="item.status_anterior">
+                      <i class="fas fa-arrow-left"></i>
+                      De: {{ getStatusLabel(item.status_anterior) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vagas Fechadas -->
+    <div class="vagas-section vagas-fechadas" *ngIf="getVagasFechadas().length > 0">
+      <div class="section-header">
+        <div class="section-title-group">
+          <h2>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Vagas Preenchidas
+          </h2>
+          <p class="section-description">Posições já fechadas com sucesso</p>
+        </div>
+        <span class="section-badge fechada">{{ getVagasFechadas().length }}</span>
+      </div>
+
+      <div class="vagas-grid compact">
+        <div class="vaga-card-compact" *ngFor="let vaga of getVagasFechadas()">
+          <div class="compact-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="vaga-compact-info">
+            <h4>{{ vaga.cargo }}</h4>
+            <div class="compact-meta">
+              <span class="compact-tipo">{{ getTipoCargoLabel(vaga.tipo_cargo) }}</span>
+              <span class="compact-separator">•</span>
+              <span class="compact-date">Fechada em {{ formatDate(vaga.data_fechamento_cancelamento || vaga.data_abertura) }}</span>
+            </div>
+          </div>
+          <div class="compact-badge">
+            <i class="fas fa-check-circle"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Vagas State -->
+    <div *ngIf="hubData.vagas.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+      </div>
+      <h3>Nenhuma vaga disponível no momento</h3>
+      <p>Fique atento! Novas oportunidades podem surgir em breve.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-section">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+        </div>
+        <div class="footer-text">
+          <p class="footer-main">Acompanhamento de Vagas - NAUE Consultoria</p>
+          <p class="footer-sub">Sistema de Gestão de Contratos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

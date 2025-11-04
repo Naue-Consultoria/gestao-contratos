@@ -53,6 +53,7 @@ export class SidebarComponent {
           isExpanded: false,
           children: [
             { id: 'rs-vagas', icon: 'fas fa-briefcase', text: 'Vagas', route: '/home/recrutamento-selecao' },
+            { id: 'rs-gerenciar', icon: 'fas fa-cog', text: 'Gerenciar R&S', route: '/home/gerenciar-rs' },
             { id: 'rs-analytics', icon: 'fas fa-chart-line', text: 'Analytics R&S', route: '/home/analytics-rs' },
             { id: 'rs-relatorios', icon: 'fas fa-chart-bar', text: 'Relatórios R&S', route: '/home/relatorios-rs' }
           ]

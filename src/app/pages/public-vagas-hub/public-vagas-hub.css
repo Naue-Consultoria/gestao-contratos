@@ -1,0 +1,1096 @@
+/* ============================================================================
+   PUBLIC VAGAS HUB - DESIGN PREMIUM
+   Visual atrativo mostrando a "vida" de cada vaga
+   ============================================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.public-hub-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* ============================================================================
+   LOADING & ERROR STATES
+   ============================================================================ */
+
+.loading-container,
+.error-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 40px;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(2, 44, 34, 0.1);
+  border-top-color: #022c22;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  font-size: 18px;
+  color: #022c22;
+  font-weight: 600;
+}
+
+.error-icon {
+  color: #ef4444;
+  opacity: 0.8;
+}
+
+.error-container h2 {
+  font-size: 32px;
+  color: #022c22;
+  font-weight: 700;
+}
+
+.error-container p {
+  font-size: 16px;
+  color: #64748b;
+  max-width: 500px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ============================================================================
+   HERO SECTION - Premium com decorações
+   ============================================================================ */
+
+.hero-section {
+  position: relative;
+  background: linear-gradient(135deg, #022c22 0%, #033d2f 50%, #044d38 100%);
+  padding: 100px 40px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.company-logo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 40px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  border: 4px solid rgba(255,255,255,0.2);
+  animation: logoEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes logoEntry {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.company-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.company-logo.placeholder {
+  font-size: 40px;
+  font-weight: 700;
+  color: #022c22;
+  background: linear-gradient(135deg, #e8ece9 0%, #d0ddd5 100%);
+}
+
+.hero-title {
+  font-size: 52px;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 16px 0;
+  line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.hero-subtitle {
+  font-size: 28px;
+  color: rgba(255,255,255,0.95);
+  margin: 0 0 50px 0;
+  font-weight: 500;
+  animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hero Stats */
+.hero-stats {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeInUp 0.6s ease-out 0.6s both;
+}
+
+.stat-card {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  background: rgba(255,255,255,0.25);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.stat-card.highlight {
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(16,185,129,0.3) 100%);
+  border-color: rgba(255,255,255,0.4);
+  box-shadow: 0 10px 30px rgba(16,185,129,0.3);
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon svg {
+  stroke: white;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 800;
+  color: white;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.9);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.stat-location {
+  font-size: 16px;
+  color: white;
+  font-weight: 600;
+}
+
+/* ============================================================================
+   SEÇÕES DE VAGAS
+   ============================================================================ */
+
+.vagas-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px 40px;
+}
+
+.vagas-section.vagas-fechadas {
+  padding-top: 40px;
+  padding-bottom: 60px;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  gap: 24px;
+}
+
+.section-title-group h2 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #022c22;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.section-title-group h2 svg {
+  stroke: #022c22;
+}
+
+.section-description {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
+}
+
+.section-badge {
+  padding: 12px 24px;
+  border-radius: 100px;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.section-badge.aberta {
+  background: linear-gradient(135deg, #022c22 0%, #011f18 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(2, 44, 34, 0.4);
+}
+
+.section-badge.andamento {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+}
+
+.section-badge.fechada {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(100, 116, 139, 0.4);
+}
+
+/* ============================================================================
+   CARDS DE VAGAS - PREMIUM
+   ============================================================================ */
+
+.vagas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 32px;
+}
+
+.vagas-grid.compact {
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.vaga-card.premium {
+  background: white;
+  border-radius: 24px;
+  padding: 0;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  border: 3px solid transparent;
+}
+
+.vaga-card.premium.aberta {
+  border-color: rgba(2, 44, 34, 0.2);
+}
+
+.vaga-card.premium.aberta:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 20px 60px rgba(2, 44, 34, 0.25);
+  border-color: #022c22;
+}
+
+.vaga-card.premium.andamento {
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.vaga-card.premium.andamento:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 20px 60px rgba(139, 92, 246, 0.25);
+  border-color: #8b5cf6;
+}
+
+/* Ribbon Badge - Profissional */
+.vaga-ribbon {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: #022c22;
+  color: white;
+  padding: 6px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  border-radius: 6px;
+  z-index: 10;
+}
+
+/* Card Header */
+.vaga-card-header {
+  padding: 32px 32px 24px 32px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.vaga-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+}
+
+.vaga-tipo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #022c22 0%, #011f18 100%);
+  color: white;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================================
+   HIGHLIGHTS PREMIUM - STATUS E CANDIDATOS EM DESTAQUE
+   ============================================================================ */
+
+.vaga-highlights-premium {
+  padding: 24px 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.highlight-box {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.highlight-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.highlight-box:hover::before {
+  opacity: 1;
+}
+
+.highlight-box.status-box {
+  border-left: 4px solid;
+}
+
+.highlight-box.status-box.status-aberta {
+  border-left-color: #022c22;
+  background: linear-gradient(135deg, #e8ece9 0%, #d0ddd5 100%);
+}
+
+.highlight-box.status-box.status-divulgacao {
+  border-left-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.highlight-box.status-box.status-entrevista {
+  border-left-color: #8b5cf6;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+}
+
+.highlight-box.status-box.status-testes {
+  border-left-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+}
+
+.highlight-box.candidatos-box {
+  border-left: 4px solid #022c22;
+  background: linear-gradient(135deg, #e8ece9 0%, #d0ddd5 100%);
+}
+
+.highlight-icon-wrapper {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.highlight-box.status-box .highlight-icon-wrapper {
+  background: white;
+}
+
+.highlight-box.status-box.status-aberta .highlight-icon-wrapper svg {
+  stroke: #022c22;
+}
+
+.highlight-box.status-box.status-divulgacao .highlight-icon-wrapper svg {
+  stroke: #3b82f6;
+}
+
+.highlight-box.status-box.status-entrevista .highlight-icon-wrapper svg {
+  stroke: #8b5cf6;
+}
+
+.highlight-box.status-box.status-testes .highlight-icon-wrapper svg {
+  stroke: #f59e0b;
+}
+
+.highlight-icon-wrapper.candidatos {
+  background: white;
+}
+
+.highlight-icon-wrapper.candidatos svg {
+  stroke: #022c22;
+}
+
+/* Pulse ring removido - visual mais profissional */
+
+.highlight-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.highlight-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.highlight-value-big {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.status-box.status-aberta .highlight-value-big {
+  color: #022c22;
+}
+
+.status-box.status-divulgacao .highlight-value-big {
+  color: #1e40af;
+}
+
+.status-box.status-entrevista .highlight-value-big {
+  color: #6b21a8;
+}
+
+.status-box.status-testes .highlight-value-big {
+  color: #92400e;
+}
+
+.candidatos-count {
+  background: linear-gradient(135deg, #022c22 0%, #011f18 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 32px !important;
+}
+
+/* ============================================================================
+   INFO GRID
+   ============================================================================ */
+
+.vaga-info-grid {
+  padding: 20px 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  background: #fafafa;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.info-item i {
+  font-size: 18px;
+  color: #022c22;
+  width: 20px;
+  text-align: center;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* ============================================================================
+   TIMELINE - HISTÓRICO DA VAGA
+   ============================================================================ */
+
+.vaga-timeline-section {
+  padding: 24px 32px 32px 32px;
+  border-top: 2px dashed #e2e8f0;
+}
+
+.timeline-toggle {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.timeline-toggle:hover {
+  background: linear-gradient(135deg, #022c22 0%, #011f18 100%);
+  color: white;
+  border-color: #022c22;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(2, 44, 34, 0.3);
+}
+
+.timeline-toggle i.fa-chevron-down {
+  transition: transform 0.3s ease;
+}
+
+.timeline-toggle i.fa-chevron-down.rotated {
+  transform: rotate(180deg);
+}
+
+.timeline-wrapper {
+  margin-top: 24px;
+  animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+.timeline {
+  position: relative;
+  padding-left: 40px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  background: linear-gradient(to bottom, #022c22, #d0ddd5);
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 32px;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -29px;
+  top: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid #022c22;
+  z-index: 2;
+}
+
+.timeline-marker.current {
+  width: 18px;
+  height: 18px;
+  left: -31px;
+  top: 4px;
+  background: #022c22;
+  box-shadow: 0 0 0 4px rgba(2, 44, 34, 0.2);
+  animation: pulse 2s ease-out infinite;
+}
+
+.timeline-content {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+  border-color: #022c22;
+  box-shadow: 0 4px 16px rgba(2, 44, 34, 0.15);
+}
+
+.timeline-content.current {
+  background: linear-gradient(135deg, #e8ece9 0%, #d0ddd5 100%);
+  border-color: #022c22;
+  border-width: 3px;
+  box-shadow: 0 8px 24px rgba(2, 44, 34, 0.2);
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.timeline-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.timeline-status i {
+  font-size: 8px;
+}
+
+.timeline-status.status-aberta {
+  background: #d0ddd5;
+  color: #022c22;
+}
+
+.timeline-status.status-divulgacao {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.timeline-status.status-entrevista {
+  background: #ede9fe;
+  color: #6b21a8;
+}
+
+.timeline-status.status-testes {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.timeline-status.status-fechada {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.timeline-date {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.timeline-transition {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timeline-transition i {
+  color: #022c22;
+  font-size: 10px;
+}
+
+/* ============================================================================
+   VAGAS FECHADAS - COMPACT
+   ============================================================================ */
+
+.vaga-card-compact {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.vaga-card-compact:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+}
+
+.compact-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #022c22 0%, #011f18 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.compact-icon svg {
+  stroke: white;
+}
+
+.vaga-compact-info {
+  flex: 1;
+}
+
+.vaga-compact-info h4 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.compact-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.compact-tipo {
+  font-weight: 600;
+}
+
+.compact-separator {
+  color: #cbd5e1;
+}
+
+.compact-badge {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.compact-badge i {
+  font-size: 20px;
+  color: #64748b;
+}
+
+/* ============================================================================
+   EMPTY STATE
+   ============================================================================ */
+
+.empty-state {
+  text-align: center;
+  padding: 100px 40px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 32px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-icon svg {
+  stroke: #94a3b8;
+  opacity: 0.6;
+}
+
+.empty-state h3 {
+  color: #475569;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  color: #94a3b8;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* ============================================================================
+   FOOTER - Profissional e Clean
+   ============================================================================ */
+
+.footer-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 40px 60px 40px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.footer-logo {
+  width: 40px;
+  height: 40px;
+  background: #022c22;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-logo svg {
+  stroke: white;
+  width: 20px;
+  height: 20px;
+}
+
+.footer-text {
+  text-align: center;
+}
+
+.footer-main {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.footer-sub {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+  .vagas-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 60px 20px;
+  }
+
+  .hero-title {
+    font-size: 36px;
+  }
+
+  .hero-subtitle {
+    font-size: 20px;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .stat-card {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .vagas-section {
+    padding: 60px 20px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .section-title-group h2 {
+    font-size: 28px;
+  }
+
+  .vagas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vagas-grid.compact {
+    grid-template-columns: 1fr;
+  }
+
+  .vaga-highlights-premium {
+    grid-template-columns: 1fr;
+  }
+
+  .vaga-card-header,
+  .vaga-highlights-premium,
+  .vaga-info-grid,
+  .vaga-timeline-section {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 40px 15px;
+  }
+
+  .company-logo {
+    width: 100px;
+    height: 100px;
+  }
+
+  .hero-title {
+    font-size: 28px;
+  }
+
+  .hero-subtitle {
+    font-size: 18px;
+  }
+
+  .stat-number {
+    font-size: 28px;
+  }
+
+  .vaga-card-header {
+    padding: 24px 20px 20px 20px;
+  }
+
+  .vaga-title {
+    font-size: 22px;
+  }
+
+  .vaga-highlights-premium {
+    padding: 20px;
+  }
+
+  .highlight-box {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .vaga-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+.vaga-card.premium {
+  animation: cardEntry 0.6s ease-out both;
+}
+
+.vaga-card.premium:nth-child(1) { animation-delay: 0.1s; }
+.vaga-card.premium:nth-child(2) { animation-delay: 0.2s; }
+.vaga-card.premium:nth-child(3) { animation-delay: 0.3s; }
+.vaga-card.premium:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes cardEntry {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

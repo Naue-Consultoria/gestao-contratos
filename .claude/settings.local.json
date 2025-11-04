@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"C:\\Users\\liass\\Downloads\\contratos-naue\\gestao-contratos\\src\\app\\pages\\visualizar-vaga\\visualizar-vaga.css.tmp\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

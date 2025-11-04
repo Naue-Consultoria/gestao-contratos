@@ -41,6 +41,8 @@ import { MentoriaView } from './components/mentoria-view/mentoria-view';
 import { MentoriaConteudoEditor } from './components/mentoria-conteudo-editor/mentoria-conteudo-editor';
 import { PublicMentoriaViewComponent } from './pages/public-mentoria-view/public-mentoria-view';
 import { PublicMentoriaHub } from './pages/public-mentoria-hub/public-mentoria-hub';
+import { PublicVagasHubComponent } from './pages/public-vagas-hub/public-vagas-hub';
+import { GerenciarRsComponent } from './pages/gerenciar-rs/gerenciar-rs';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -99,6 +101,13 @@ export const routes: Routes = [
     path: 'mentoria-hub/:token',
     component: PublicMentoriaHub,
     title: 'Programa de Mentoria - NAUE Consultoria',
+  },
+
+  // Rota pública para hub de vagas do cliente
+  {
+    path: 'vagas-hub/:token',
+    component: PublicVagasHubComponent,
+    title: 'Vagas Disponíveis - NAUE Consultoria',
   },
 
   // Rota de acesso negado
@@ -316,6 +325,14 @@ export const routes: Routes = [
         component: EditarVagaComponent,
         canActivate: [rsGuard],
         title: 'Editar Vaga - NAUE Consultoria',
+      },
+
+      // Gerenciar Vagas R&S (Hub Público) - Admin, Admin Gerencial e Consultor R&S
+      {
+        path: 'gerenciar-rs',
+        component: GerenciarRsComponent,
+        canActivate: [rsGuard],
+        title: 'Gerenciar Vagas R&S - NAUE Consultoria',
       },
 
       // Mentorias - Lista

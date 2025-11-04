@@ -30,6 +30,10 @@ export interface Vaga {
   created_by?: number;
   updated_by?: number;
   vaga_candidatos?: VagaCandidato[];
+  // Campos para acesso público
+  unique_token?: string;
+  token_expires_at?: Date | string;
+  is_public?: boolean;
 }
 
 export interface VagaCandidato {
@@ -67,4 +71,41 @@ export interface Entrevista {
   created_at: Date | string;
   updated_at: Date | string;
   created_by?: number;
+}
+
+export interface VagaStatusHistory {
+  id: number;
+  vaga_id: number;
+  status_anterior: string | null;
+  status_novo: string;
+  motivo?: string;
+  changed_by?: number;
+  changed_at: Date | string;
+  metadata?: any;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
+export interface VagaPublicAccessLog {
+  id: number;
+  vaga_id: number;
+  ip_address?: string;
+  user_agent?: string;
+  accessed_at: Date | string;
+  metadata?: any;
+}
+
+export interface GerarLinkPublicoRequest {
+  expires_in_days?: number;
+}
+
+export interface GerarLinkPublicoResponse {
+  id: number;
+  unique_token: string;
+  token_expires_at: Date | string | null;
+  is_public: boolean;
+  public_url: string;
 }

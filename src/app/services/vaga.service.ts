@@ -2,7 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Vaga } from '../types/vaga';
+import {
+  Vaga,
+  VagaStatusHistory,
+  GerarLinkPublicoRequest,
+  GerarLinkPublicoResponse
+} from '../types/vaga';
 
 @Injectable({
   providedIn: 'root'
@@ -66,5 +71,47 @@ export class VagaService {
 
   vincularCandidato(vagaId: number, candidatoId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/${vagaId}/candidatos`, { candidato_id: candidatoId });
+  }
+
+  // ============================================================================
+  // MÉTODOS PÚBLICOS (acesso via token)
+  // ============================================================================
+
+  getVagaPublica(token: string): Observable<{ success: boolean; data: Vaga; message?: string }> {
+    return this.http.get<{ success: boolean; data: Vaga; message?: string }>(
+      `${this.apiUrl}/publico/${token}`
+    );
+  }
+
+  getHistoricoStatusPublico(token: string): Observable<{ success: boolean; data: VagaStatusHistory[] }> {
+    return this.http.get<{ success: boolean; data: VagaStatusHistory[] }>(
+      `${this.apiUrl}/publico/${token}/historico`
+    );
+  }
+
+  // ============================================================================
+  // MÉTODOS PRIVADOS (requerem autenticação)
+  // ============================================================================
+
+  gerarLinkPublico(
+    vagaId: number,
+    request?: GerarLinkPublicoRequest
+  ): Observable<{ success: boolean; data: GerarLinkPublicoResponse; message: string }> {
+    return this.http.post<{ success: boolean; data: GerarLinkPublicoResponse; message: string }>(
+      `${this.apiUrl}/${vagaId}/gerar-link-publico`,
+      request || {}
+    );
+  }
+
+  removerLinkPublico(vagaId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.apiUrl}/${vagaId}/remover-link-publico`
+    );
+  }
+
+  getHistoricoStatusPrivado(vagaId: number): Observable<{ success: boolean; data: VagaStatusHistory[] }> {
+    return this.http.get<{ success: boolean; data: VagaStatusHistory[] }>(
+      `${this.apiUrl}/${vagaId}/historico-status`
+    );
   }
 }
