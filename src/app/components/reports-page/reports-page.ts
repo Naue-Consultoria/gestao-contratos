@@ -35,7 +35,7 @@ export class ReportsPage implements OnInit {
   
   monthlyReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
   financialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
-  commercialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
+  commercialReport: GeneralReportConfig = { clientId: '', format: 'pdf', isLoading: false };
   clientReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
   servicesReport: ReportConfig = { clientId: '', serviceId: '', format: 'pdf', isLoading: false };
   serviceRoutinesReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
@@ -120,7 +120,7 @@ export class ReportsPage implements OnInit {
 
     config.isLoading = true;
     const requestData: ReportRequest = {
-      clientId: config.clientId || '',
+      clientId: config.clientId && config.clientId !== '' ? config.clientId : undefined,
       serviceId: config.serviceId,
       contractId: config.contractId && config.contractId !== '' ? config.contractId : undefined,
       format: config.format,

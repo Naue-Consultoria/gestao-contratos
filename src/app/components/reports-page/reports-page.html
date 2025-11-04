@@ -206,7 +206,7 @@
             class="form-select client-select"
             [(ngModel)]="commercialReport.clientId"
             [disabled]="commercialReport.isLoading">
-            <option [value]="null">Todos os clientes</option>
+            <option value="">Todos os clientes</option>
             <option *ngFor="let client of clients" [value]="client.id">
               {{ client.name }}
             </option>
