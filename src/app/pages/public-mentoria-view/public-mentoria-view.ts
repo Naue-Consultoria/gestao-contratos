@@ -1328,7 +1328,7 @@ export class PublicMentoriaViewComponent implements OnInit {
       const mdLines: string[] = [];
 
       // Cabeçalho
-      mdLines.push(`# Mapa Mental Estratégico`);
+      mdLines.push(`# PDM | Plano de Desenvolvimento de Metas`);
       mdLines.push('');
       mdLines.push(`**Mentorado:** ${this.encontro?.mentorado_nome || 'Mentoria'}`);
       mdLines.push(`**Encontro:** ${this.encontro?.numero_encontro || ''}`);
@@ -1480,7 +1480,7 @@ export class PublicMentoriaViewComponent implements OnInit {
 
     // Título
     const h1 = document.createElement('h1');
-    h1.textContent = 'Mapa Mental Estratégico';
+    h1.textContent = 'PDM | Plano de Desenvolvimento de Metas';
     h1.style.fontSize = '36px';
     h1.style.margin = '0 0 15px 0';
     h1.style.fontWeight = 'bold';

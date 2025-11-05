@@ -1,12 +1,14 @@
 <div class="public-hub-container">
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-container">
+    <img src="/logoNaue.png" alt="NAUE Consultoria" class="loading-logo">
     <div class="loading-spinner"></div>
     <p>Carregando vagas...</p>
   </div>
 
   <!-- Not Found State -->
   <div *ngIf="!isLoading && notFound" class="error-container">
+    <img src="/logoNaue.png" alt="NAUE Consultoria" class="error-logo">
     <div class="error-icon">
       <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
         <circle cx="12" cy="12" r="10" stroke-width="2"/>
@@ -20,6 +22,7 @@
 
   <!-- Link Expired State -->
   <div *ngIf="!isLoading && linkExpirado" class="error-container">
+    <img src="/logoNaue.png" alt="NAUE Consultoria" class="error-logo">
     <div class="error-icon">
       <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
         <circle cx="12" cy="12" r="10" stroke-width="2"/>
@@ -35,52 +38,130 @@
     <!-- Hero Section -->
     <div class="hero-section">
       <div class="hero-content">
-        <div class="company-logo" *ngIf="hubData.client.logo_url">
-          <img [src]="hubData.client.logo_url" [alt]="getClientName()">
-        </div>
-        <div class="company-logo placeholder" *ngIf="!hubData.client.logo_url">
-          <span>{{ getClientName().substring(0, 2).toUpperCase() }}</span>
+        <!-- Container destacado com as logos -->
+        <div class="logos-wrapper">
+          <div class="logos-container">
+            <!-- Logo NAUE -->
+            <img src="/logoNaue.png" alt="NAUE Consultoria" class="naue-logo">
+
+            <!-- Barra separadora -->
+            <div class="logo-divider"></div>
+
+            <!-- Logo do Cliente -->
+            <img
+              *ngIf="hasClientLogo()"
+              [src]="getClientLogoUrl()"
+              [alt]="getClientName()"
+              (error)="onLogoError($event)"
+              class="company-logo">
+
+            <!-- Placeholder quando não tem logo -->
+            <div class="company-logo-placeholder" *ngIf="!hasClientLogo()">
+              <span>{{ getClientName().substring(0, 2).toUpperCase() }}</span>
+            </div>
+          </div>
         </div>
 
         <h1 class="hero-title">Acompanhamento de Vagas R&S</h1>
         <p class="hero-subtitle">{{ getClientName() }}</p>
 
         <div class="hero-stats">
+          <!-- Total de Vagas -->
           <div class="stat-card">
             <div class="stat-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-              </svg>
+              <i class="fas fa-briefcase"></i>
             </div>
             <div class="stat-content">
-              <span class="stat-number">{{ hubData.vagas.length }}</span>
-              <span class="stat-label">Vagas Totais</span>
+              <span class="stat-number">{{ getTotalVagas() }}</span>
+              <span class="stat-label">Total de Vagas</span>
             </div>
           </div>
 
-          <div class="stat-card highlight" *ngIf="getVagasAbertas().length > 0">
+          <!-- Aberta -->
+          <div class="stat-card stat-aberta" *ngIf="getVagasPorStatus('aberta') > 0">
             <div class="stat-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
+              <i class="fas fa-door-open"></i>
             </div>
             <div class="stat-content">
-              <span class="stat-number">{{ getVagasAbertas().length }}</span>
-              <span class="stat-label">Vagas Abertas</span>
+              <span class="stat-number">{{ getVagasPorStatus('aberta') }}</span>
+              <span class="stat-label">Aberta</span>
             </div>
           </div>
 
-          <div class="stat-card" *ngIf="getClientLocation()">
+          <!-- Divulgação/Prospecção -->
+          <div class="stat-card stat-divulgacao" *ngIf="getVagasPorStatus('divulgacao_prospec') > 0">
             <div class="stat-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
+              <i class="fas fa-bullhorn"></i>
             </div>
             <div class="stat-content">
-              <span class="stat-location">{{ getClientLocation() }}</span>
+              <span class="stat-number">{{ getVagasPorStatus('divulgacao_prospec') }}</span>
+              <span class="stat-label">Em Divulgação</span>
+            </div>
+          </div>
+
+          <!-- Entrevista NC -->
+          <div class="stat-card stat-entrevista" *ngIf="getVagasPorStatus('entrevista_nc') > 0">
+            <div class="stat-icon">
+              <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ getVagasPorStatus('entrevista_nc') }}</span>
+              <span class="stat-label">Entrevista NAUE</span>
+            </div>
+          </div>
+
+          <!-- Entrevista Empresa -->
+          <div class="stat-card stat-entrevista" *ngIf="getVagasPorStatus('entrevista_empresa') > 0">
+            <div class="stat-icon">
+              <i class="fas fa-handshake"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ getVagasPorStatus('entrevista_empresa') }}</span>
+              <span class="stat-label">Entrevista Cliente</span>
+            </div>
+          </div>
+
+          <!-- Testes -->
+          <div class="stat-card stat-testes" *ngIf="getVagasPorStatus('testes') > 0">
+            <div class="stat-icon">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ getVagasPorStatus('testes') }}</span>
+              <span class="stat-label">Em Testes</span>
+            </div>
+          </div>
+
+          <!-- Standby -->
+          <div class="stat-card stat-standby" *ngIf="getVagasPorStatus('standby') > 0">
+            <div class="stat-icon">
+              <i class="fas fa-pause-circle"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ getVagasPorStatus('standby') }}</span>
+              <span class="stat-label">Standby</span>
+            </div>
+          </div>
+
+          <!-- Encerramento do Contrato -->
+          <div class="stat-card stat-encerramento" *ngIf="getVagasPorStatus('encerramento_cont') > 0">
+            <div class="stat-icon">
+              <i class="fas fa-file-contract"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ getVagasPorStatus('encerramento_cont') }}</span>
+              <span class="stat-label">Encerramento</span>
+            </div>
+          </div>
+
+          <!-- Fechadas -->
+          <div class="stat-card stat-fechada" *ngIf="getVagasFechadas().length > 0">
+            <div class="stat-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ getVagasFechadas().length }}</span>
+              <span class="stat-label">Preenchidas</span>
             </div>
           </div>
         </div>
@@ -105,11 +186,6 @@
 
       <div class="vagas-grid">
         <div class="vaga-card premium aberta" *ngFor="let vaga of getVagasAbertas()">
-          <!-- Ribbon Badge -->
-          <div class="vaga-ribbon">
-            <span>ABERTA</span>
-          </div>
-
           <!-- Card Header -->
           <div class="vaga-card-header">
             <h3 class="vaga-title">{{ vaga.cargo }}</h3>
@@ -356,15 +432,9 @@
     <!-- Footer -->
     <div class="footer-section">
       <div class="footer-content">
-        <div class="footer-logo">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-          </svg>
-        </div>
+        <img src="/logoNaue.png" alt="NAUE Consultoria" class="footer-logo-img">
         <div class="footer-text">
-          <p class="footer-main">Acompanhamento de Vagas - NAUE Consultoria</p>
-          <p class="footer-sub">Sistema de Gestão de Contratos</p>
+          <p class="footer-sub">Todos os direitos reservados © 2025 NAUE Consultoria</p>
         </div>
       </div>
     </div>

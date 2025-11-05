@@ -157,7 +157,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { tipo: 'testes', titulo: 'Testes', icone: 'fa-clipboard-check', descricao: 'Testes e avaliações' },
     { tipo: 'proximosPassos', titulo: 'Próximos Passos', icone: 'fa-arrow-right', descricao: 'Ações e tarefas futuras' },
     { tipo: 'referencias', titulo: 'Referências', icone: 'fa-book', descricao: 'Links e materiais de apoio' },
-    { tipo: 'mapaMental', titulo: 'Mapa Mental', icone: 'fa-diagram-project', descricao: 'Mapa mental estratégico' },
+    { tipo: 'mapaMental', titulo: 'Mapa Mental', icone: 'fa-diagram-project', descricao: 'PDM | Plano de Desenvolvimento de Metas' },
     { tipo: 'modeloABC', titulo: 'Modelo ABC', icone: 'fa-brain', descricao: 'Análise comportamental' },
     { tipo: 'zonasAprendizado', titulo: 'Zonas de Aprendizado', icone: 'fa-chart-simple', descricao: 'Níveis de desenvolvimento' },
     { tipo: 'goldenCircle', titulo: 'Golden Circle', icone: 'fa-bullseye', descricao: 'Why, How, What' },
@@ -211,7 +211,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { id: 'testes', titulo: 'Testes', icone: 'fa-clipboard-check', ordem: 0 },
     { id: 'proximosPassos', titulo: 'Próximos Passos', icone: 'fa-arrow-right', ordem: 1 },
     { id: 'referencias', titulo: 'Referências / Inspirações', icone: 'fa-book', ordem: 2 },
-    { id: 'mapaMental', titulo: 'Mapa Mental Estratégico', icone: 'fa-diagram-project', ordem: 3 },
+    { id: 'mapaMental', titulo: 'PDM | Plano de Desenvolvimento de Metas', icone: 'fa-diagram-project', ordem: 3 },
     { id: 'modeloABC', titulo: 'Modelo ABC', icone: 'fa-brain', ordem: 4 },
     { id: 'zonasAprendizado', titulo: 'Zonas de Aprendizado', icone: 'fa-chart-simple', ordem: 5 },
     { id: 'goldenCircle', titulo: 'The Golden Circle', icone: 'fa-bullseye', ordem: 6 }

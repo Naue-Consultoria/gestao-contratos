@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { VagasHubService } from '../../services/vagas-hub.service';
 import { VagaService } from '../../services/vaga.service';
 import { ClientVagasHub } from '../../types/vagas-hub';
@@ -28,7 +29,8 @@ export class PublicVagasHubComponent implements OnInit {
     private router: Router,
     private vagasHubService: VagasHubService,
     private vagaService: VagaService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -136,6 +138,30 @@ export class PublicVagasHubComponent implements OnInit {
     return `${client.city || ''}, ${client.state || ''}`.trim();
   }
 
+  getClientLogoUrl(): SafeUrl | null {
+    if (!this.hubData?.client?.logo_url) return null;
+
+    // Se a URL já é completa (http/https), retorna diretamente
+    if (this.hubData.client.logo_url.startsWith('http')) {
+      return this.sanitizer.bypassSecurityTrustUrl(this.hubData.client.logo_url);
+    }
+
+    // Se é um caminho relativo, retorna sanitizado
+    return this.sanitizer.bypassSecurityTrustUrl(this.hubData.client.logo_url);
+  }
+
+  hasClientLogo(): boolean {
+    return !!this.hubData?.client?.logo_url;
+  }
+
+  onLogoError(event: Event): void {
+    console.error('Erro ao carregar logo do cliente:', this.hubData?.client?.logo_url);
+    // Esconder a logo e mostrar placeholder
+    if (this.hubData?.client) {
+      this.hubData.client.logo_url = undefined;
+    }
+  }
+
   // Método removido - não há mais visualização individual de vaga
   // As informações são exibidas diretamente nos cards do hub
 
@@ -223,4 +249,19 @@ export class PublicVagasHubComponent implements OnInit {
   getTipoAberturaLabel(tipo: string): string {
     return tipo === 'nova' ? 'Nova Vaga' : 'Reposição';
   }
+
+  // Métodos para estatísticas dinâmicas
+  getTotalVagas(): number {
+    // Conta apenas as vagas que realmente aparecem nas seções
+    return this.getVagasAbertas().length +
+           this.getVagasEmAndamento().length +
+           this.getVagasFechadas().length;
+  }
+
+  getVagasPorStatus(status: string): number {
+    if (!this.hubData?.vagas) return 0;
+    return this.hubData.vagas.filter(v => v.status === status).length;
+  }
 }
+
+
