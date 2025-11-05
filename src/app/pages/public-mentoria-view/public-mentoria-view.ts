@@ -2791,6 +2791,7 @@ export class PublicMentoriaViewComponent implements OnInit {
       'video': 'Vídeo',
       'link': 'Link',
       'teste': 'Teste',
+      'gymrats': 'GymRats',
       'outro': 'Outro'
     };
     return labels[tipo] || tipo;

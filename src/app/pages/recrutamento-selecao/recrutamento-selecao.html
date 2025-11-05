@@ -209,6 +209,8 @@
           <tr *ngFor="let vaga of filteredVagas" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
             <td>
               <div class="client-info">
+                <span class="sla-indicator"
+                      [ngClass]="getSlaClass(vaga.dataFechamentoCancelamento ? calculateSla(vaga) : calculateActiveSla(vaga))"></span>
                 <div class="client-name-container">
                   <span class="client-name">{{ vaga.clienteNome }}</span>
                   <span class="client-company-name" *ngIf="vaga.clienteType === 'PJ' && vaga.clienteCompanyName && vaga.clienteTradeName && vaga.clienteTradeName !== vaga.clienteCompanyName">
@@ -353,6 +355,8 @@
           <tr *ngFor="let vaga of getVagasFechamento()" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
             <td>
               <div class="client-info">
+                <span class="sla-indicator"
+                      [ngClass]="getSlaClass(vaga.dataFechamentoCancelamento ? calculateSla(vaga) : calculateActiveSla(vaga))"></span>
                 <div class="client-name-container">
                   <span class="client-name">{{ vaga.clienteNome }}</span>
                   <span class="client-company-name" *ngIf="vaga.clienteType === 'PJ' && vaga.clienteCompanyName && vaga.clienteTradeName && vaga.clienteTradeName !== vaga.clienteCompanyName">
@@ -478,6 +482,8 @@
           <tr *ngFor="let vaga of getVagasComissoes()" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
             <td>
               <div class="client-info">
+                <span class="sla-indicator"
+                      [ngClass]="getSlaClass(vaga.dataFechamentoCancelamento ? calculateSla(vaga) : calculateActiveSla(vaga))"></span>
                 <div class="client-name-container">
                   <span class="client-name">{{ vaga.clienteNome }}</span>
                   <span class="client-company-name" *ngIf="vaga.clienteType === 'PJ' && vaga.clienteCompanyName && vaga.clienteTradeName && vaga.clienteTradeName !== vaga.clienteCompanyName">
