@@ -881,6 +881,295 @@
       </div>
     </section>
 
+    <!-- Termômetro de Gestão Section -->
+    <section *ngIf="secaoId === 'termometroGestao'" class="dark-section termometro-gestao-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.termometroGestao?.ativo">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-chart-column"></i>
+            Termômetro de Gestão
+          </h2>
+          <p class="dark-subtitle">Classifique suas atividades e compare com perfis de referência</p>
+        </div>
+
+        <div class="termometro-gestao-content">
+
+          <!-- Layout Principal: 2 Colunas -->
+          <div class="termometro-main-grid">
+
+            <!-- Coluna Esquerda: Formulário e Lista -->
+            <div class="termometro-left-column">
+              <div class="termometro-card">
+                <h3 class="termometro-card-title">Adicionar Atividades</h3>
+
+                <div class="termometro-form-group">
+                  <input
+                    type="text"
+                    class="termometro-input"
+                    [(ngModel)]="novaAtividade"
+                    (keyup.enter)="adicionarAtividade()"
+                    placeholder="Nome da atividade"
+                    [disabled]="expired">
+
+                  <select
+                    class="termometro-select"
+                    [(ngModel)]="novaAtividadeCategoria"
+                    [disabled]="expired">
+                    <option value="strategic">Estratégico</option>
+                    <option value="tactical">Tático</option>
+                    <option value="operational">Operacional</option>
+                  </select>
+
+                  <button
+                    class="termometro-btn-add"
+                    (click)="adicionarAtividade()"
+                    [disabled]="expired">
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                </div>
+
+                <!-- Lista de Atividades -->
+                <div class="termometro-activity-list" *ngIf="termometroGestao.atividades.length > 0">
+                  <div
+                    *ngFor="let atividade of termometroGestao.atividades"
+                    class="termometro-activity-item">
+                    <span class="termometro-activity-name">{{ atividade.nome }}</span>
+                    <span class="termometro-activity-badge" [ngClass]="getCategoriaClass(atividade.categoria)">
+                      {{ getCategoriaNome(atividade.categoria) }}
+                    </span>
+                    <button
+                      class="termometro-activity-remove-btn"
+                      (click)="removerAtividade(atividade.id)"
+                      [disabled]="expired"
+                      title="Remover atividade">
+                      ×
+                    </button>
+                  </div>
+                </div>
+
+                <p *ngIf="termometroGestao.atividades.length === 0" class="termometro-empty-message">
+                  Nenhuma atividade adicionada. Clique em "Adicionar" para começar.
+                </p>
+              </div>
+            </div>
+
+            <!-- Coluna Direita: Resumo e Perfil -->
+            <div class="termometro-right-column">
+              <div class="termometro-card">
+                <h3 class="termometro-card-title">Resumo das Atividades</h3>
+
+                <!-- Contadores -->
+                <div class="termometro-counters">
+                  <div class="termometro-counter-item">
+                    <div class="termometro-counter-value">{{ getAtividadesEstrategicasCount() }}</div>
+                    <div class="termometro-counter-label">Estratégicas</div>
+                  </div>
+                  <div class="termometro-counter-item">
+                    <div class="termometro-counter-value">{{ getAtividadesTaticasCount() }}</div>
+                    <div class="termometro-counter-label">Táticas</div>
+                  </div>
+                  <div class="termometro-counter-item">
+                    <div class="termometro-counter-value">{{ getAtividadesOperacionaisCount() }}</div>
+                    <div class="termometro-counter-label">Operacionais</div>
+                  </div>
+                </div>
+
+                <!-- Resumo de Percentuais -->
+                <div class="termometro-summary-box">
+                  <h4 class="termometro-summary-subtitle">Distribuição Atual</h4>
+                  <div class="termometro-summary-grid">
+                    <div class="termometro-summary-item">
+                      <div class="termometro-summary-value strategic">{{ termometroGestao.percentualEstrategico }}%</div>
+                      <div class="termometro-summary-label">Estratégico</div>
+                    </div>
+                    <div class="termometro-summary-item">
+                      <div class="termometro-summary-value">{{ termometroGestao.percentualTatico }}%</div>
+                      <div class="termometro-summary-label">Tático</div>
+                    </div>
+                    <div class="termometro-summary-item">
+                      <div class="termometro-summary-value">{{ termometroGestao.percentualOperacional }}%</div>
+                      <div class="termometro-summary-label">Operacional</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Perfil de Comparação -->
+                <div class="termometro-perfil-select">
+                  <label>Perfil de comparação</label>
+                  <select
+                    class="termometro-select-full"
+                    [(ngModel)]="termometroGestao.perfilComparacao"
+                    (change)="onPerfilComparacaoChange()"
+                    [disabled]="expired">
+                    <option value="direção">Direção</option>
+                    <option value="gerencial">Gerencial</option>
+                    <option value="profissional">Profissional/Suporte</option>
+                  </select>
+                </div>
+
+                <!-- Botão Gerar Análise -->
+                <button
+                  class="termometro-btn-calculate"
+                  (click)="salvarTermometroGestao()"
+                  [disabled]="salvandoTermometro || expired || termometroGestao.atividades.length === 0">
+                  <i class="fa-solid" [ngClass]="salvandoTermometro ? 'fa-spinner fa-spin' : 'fa-chart-line'"></i>
+                  {{ salvandoTermometro ? 'Salvando...' : 'Gerar Análise' }}
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Visualização de Gráficos e Análise (se houver atividades) -->
+          <div class="termometro-charts-container" *ngIf="termometroGestao.atividades.length > 0">
+
+            <!-- Gráficos de Perfil -->
+            <div class="termometro-profiles-grid">
+
+              <!-- Seu Perfil Atual -->
+              <div class="termometro-profile-card">
+                <h3 class="termometro-profile-title">Seu Perfil Atual</h3>
+
+                <!-- Donut Chart -->
+                <div class="termometro-donut-chart" id="userDonutTermometro" #userDonutTermometro>
+                  <svg width="200" height="200" viewBox="0 0 200 200">
+                    <circle cx="100" cy="100" r="80" fill="none" stroke="#f5f5f5" stroke-width="30"/>
+                  </svg>
+                  <div class="termometro-donut-center">
+                    <div class="termometro-donut-value" id="userMainPercentTermometro">0%</div>
+                    <div class="termometro-donut-label" id="userMainLabelTermometro">-</div>
+                  </div>
+                </div>
+
+                <!-- Barra de Perfil -->
+                <div class="termometro-profile-bar-wrapper">
+                  <div class="termometro-profile-header">SEU PERFIL</div>
+                  <div class="termometro-profile-segments" id="userProfileTermometro">
+                    <!-- Preenchido dinamicamente -->
+                  </div>
+                </div>
+
+                <!-- Legenda -->
+                <div class="termometro-legend">
+                  <div class="termometro-legend-item">
+                    <div class="termometro-legend-color strategic"></div>
+                    <span>Estratégico</span>
+                  </div>
+                  <div class="termometro-legend-item">
+                    <div class="termometro-legend-color tactical"></div>
+                    <span>Tático</span>
+                  </div>
+                  <div class="termometro-legend-item">
+                    <div class="termometro-legend-color operational"></div>
+                    <span>Operacional</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Perfil de Referência -->
+              <div class="termometro-profile-card">
+                <h3 class="termometro-profile-title">Perfil de Referência</h3>
+
+                <!-- Donut Chart -->
+                <div class="termometro-donut-chart" id="referenceDonutTermometro" #referenceDonutTermometro>
+                  <svg width="200" height="200" viewBox="0 0 200 200">
+                    <circle cx="100" cy="100" r="80" fill="none" stroke="#f5f5f5" stroke-width="30"/>
+                  </svg>
+                  <div class="termometro-donut-center">
+                    <div class="termometro-donut-value" id="refMainPercentTermometro">0%</div>
+                    <div class="termometro-donut-label" id="refMainLabelTermometro">-</div>
+                  </div>
+                </div>
+
+                <!-- Barra de Perfil -->
+                <div class="termometro-profile-bar-wrapper">
+                  <div class="termometro-profile-header" id="referenceTitleTermometro">DIREÇÃO</div>
+                  <div class="termometro-profile-segments" id="referenceProfileTermometro">
+                    <!-- Preenchido dinamicamente -->
+                  </div>
+                </div>
+
+                <!-- Legenda -->
+                <div class="termometro-legend">
+                  <div class="termometro-legend-item">
+                    <div class="termometro-legend-color strategic"></div>
+                    <span>Estratégico</span>
+                  </div>
+                  <div class="termometro-legend-item">
+                    <div class="termometro-legend-color tactical"></div>
+                    <span>Tático</span>
+                  </div>
+                  <div class="termometro-legend-item">
+                    <div class="termometro-legend-color operational"></div>
+                    <span>Operacional</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Análise Comparativa -->
+            <div class="termometro-comparison-card">
+              <div class="termometro-comparison-header">
+                <h3 class="termometro-comparison-title">Análise Comparativa</h3>
+                <button
+                  class="btn-export-termometro"
+                  (click)="exportarTermometroGestaoPDF()"
+                  [disabled]="termometroGestao.atividades.length === 0">
+                  <i class="fa-solid fa-file-pdf"></i>
+                  Exportar PDF
+                </button>
+              </div>
+
+              <div class="termometro-comparison-grid">
+                <!-- Card Estratégico -->
+                <div class="termometro-comparison-item strategic">
+                  <h4>Estratégico</h4>
+                  <div class="comparison-diff-main">{{ getComparacaoDiff('strategic') > 0 ? '+' : '' }}{{ getComparacaoDiff('strategic') }}%</div>
+                  <div class="comparison-values">
+                    <div>Atual: {{ termometroGestao.percentualEstrategico }}%</div>
+                    <div>Referência: {{ perfisReferencia[termometroGestao.perfilComparacao].strategic }}%</div>
+                  </div>
+                  <div class="comparison-status" [ngClass]="getComparacaoStatus(getComparacaoDiff('strategic'))">
+                    {{ getComparacaoLabel(getComparacaoDiff('strategic')) }}
+                  </div>
+                </div>
+
+                <!-- Card Tático -->
+                <div class="termometro-comparison-item tactical">
+                  <h4>Tático</h4>
+                  <div class="comparison-diff-main">{{ getComparacaoDiff('tactical') > 0 ? '+' : '' }}{{ getComparacaoDiff('tactical') }}%</div>
+                  <div class="comparison-values">
+                    <div>Atual: {{ termometroGestao.percentualTatico }}%</div>
+                    <div>Referência: {{ perfisReferencia[termometroGestao.perfilComparacao].tactical }}%</div>
+                  </div>
+                  <div class="comparison-status" [ngClass]="getComparacaoStatus(getComparacaoDiff('tactical'))">
+                    {{ getComparacaoLabel(getComparacaoDiff('tactical')) }}
+                  </div>
+                </div>
+
+                <!-- Card Operacional -->
+                <div class="termometro-comparison-item operational">
+                  <h4>Operacional</h4>
+                  <div class="comparison-diff-main">{{ getComparacaoDiff('operational') > 0 ? '+' : '' }}{{ getComparacaoDiff('operational') }}%</div>
+                  <div class="comparison-values">
+                    <div>Atual: {{ termometroGestao.percentualOperacional }}%</div>
+                    <div>Referência: {{ perfisReferencia[termometroGestao.perfilComparacao].operational }}%</div>
+                  </div>
+                  <div class="comparison-status" [ngClass]="getComparacaoStatus(getComparacaoDiff('operational'))">
+                    {{ getComparacaoLabel(getComparacaoDiff('operational')) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section *ngIf="secaoId === 'mapaMental'" class="dark-section mapa-mental-main-section"
              [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaMental?.ativo">

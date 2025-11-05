@@ -49,6 +49,21 @@ interface GoldenCircleData {
   what: string; // O que você faz? Seu resultado.
 }
 
+// ===== TERMÔMETRO DE GESTÃO =====
+interface TermometroGestaoAtividade {
+  id: string;
+  nome: string;
+  categoria: 'strategic' | 'tactical' | 'operational';
+}
+
+interface TermometroGestaoData {
+  atividades: TermometroGestaoAtividade[];
+  perfilComparacao: 'direção' | 'gerencial' | 'profissional';
+  percentualEstrategico: number;
+  percentualTatico: number;
+  percentualOperacional: number;
+}
+
 // ===== MAPA MENTAL =====
 interface MapaMentalCard {
   id: string;
@@ -164,11 +179,35 @@ export class PublicMentoriaViewComponent implements OnInit {
   goldenCircleId: number | null = null;
   salvandoGoldenCircle: boolean = false;
 
+  // Termômetro de Gestão
+  termometroGestao: TermometroGestaoData = {
+    atividades: [],
+    perfilComparacao: 'direção',
+    percentualEstrategico: 0,
+    percentualTatico: 0,
+    percentualOperacional: 0
+  };
+  termometroGestaoId: number | null = null;
+  salvandoTermometro: boolean = false;
+  novaAtividade: string = '';
+  novaAtividadeCategoria: 'strategic' | 'tactical' | 'operational' = 'strategic';
+
+  // Perfis de referência do Termômetro de Gestão
+  perfisReferencia = {
+    'direção': { strategic: 60, tactical: 30, operational: 10 },
+    'gerencial': { strategic: 30, tactical: 50, operational: 20 },
+    'profissional': { strategic: 10, tactical: 30, operational: 60 }
+  };
+
   // Referências - Anotações
   salvandoAnotacoes: boolean = false;
 
   // ViewChild para o container de visualização do mapa
   @ViewChild('mapaMentalVisualizacao', { static: false }) mapaMentalVisualizacao?: ElementRef;
+
+  // ViewChild para gráficos do Termômetro de Gestão
+  @ViewChild('userDonutTermometro', { static: false }) userDonutTermometro?: ElementRef;
+  @ViewChild('referenceDonutTermometro', { static: false }) referenceDonutTermometro?: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -229,7 +268,7 @@ export class PublicMentoriaViewComponent implements OnInit {
   // Getter para obter seções ordenadas conforme configuração do editor
   get secoesOrdenadas(): string[] {
     if (!this.conteudoEstruturado?.ordemSecoes || this.conteudoEstruturado.ordemSecoes.length === 0) {
-      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle'];
+      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'termometroGestao'];
     }
     return this.conteudoEstruturado.ordemSecoes;
   }
@@ -815,6 +854,38 @@ export class PublicMentoriaViewComponent implements OnInit {
         }
       });
     }
+
+    // Carregar Termômetro de Gestão do banco de dados
+    this.mentoriaService.obterTermometroGestaoPublico(this.token).subscribe({
+      next: (response: any) => {
+        if (response.success && response.data) {
+          this.termometroGestaoId = response.data.id;
+
+          // Parsear atividades do JSON
+          const atividades = typeof response.data.atividades === 'string'
+            ? JSON.parse(response.data.atividades)
+            : response.data.atividades;
+
+          this.termometroGestao = {
+            atividades: atividades || [],
+            perfilComparacao: response.data.perfil_comparacao || 'direção',
+            percentualEstrategico: response.data.percentual_estrategico || 0,
+            percentualTatico: response.data.percentual_tatico || 0,
+            percentualOperacional: response.data.percentual_operacional || 0
+          };
+
+          // Atualizar gráficos após carregar dados
+          if (this.termometroGestao.atividades.length > 0) {
+            setTimeout(() => {
+              this.atualizarGraficosTermometro();
+            }, 500);
+          }
+        }
+      },
+      error: (error: any) => {
+        console.error('Erro ao carregar Termômetro de Gestão:', error);
+      }
+    });
   }
 
   // ===== AUTO-SAVE PARA RESPOSTAS =====
@@ -2795,5 +2866,679 @@ export class PublicMentoriaViewComponent implements OnInit {
       'outro': 'Outro'
     };
     return labels[tipo] || tipo;
+  }
+
+  // ===== TERMÔMETRO DE GESTÃO =====
+
+  adicionarAtividade(): void {
+    if (!this.novaAtividade || !this.novaAtividade.trim()) {
+      this.toastr.warning('Digite o nome da atividade');
+      return;
+    }
+
+    const novaAtividade: TermometroGestaoAtividade = {
+      id: `ativ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      nome: this.novaAtividade.trim(),
+      categoria: this.novaAtividadeCategoria
+    };
+
+    this.termometroGestao.atividades.push(novaAtividade);
+    this.novaAtividade = '';
+
+    // Recalcular percentuais
+    this.calcularPercentuais();
+
+    this.toastr.success('Atividade adicionada! Clique em "Gerar Análise" para visualizar os gráficos.');
+  }
+
+  removerAtividade(atividadeId: string): void {
+    this.termometroGestao.atividades = this.termometroGestao.atividades.filter(
+      a => a.id !== atividadeId
+    );
+
+    // Recalcular percentuais
+    this.calcularPercentuais();
+  }
+
+  calcularPercentuais(): void {
+    const total = this.termometroGestao.atividades.length;
+
+    if (total === 0) {
+      this.termometroGestao.percentualEstrategico = 0;
+      this.termometroGestao.percentualTatico = 0;
+      this.termometroGestao.percentualOperacional = 0;
+      return;
+    }
+
+    const counts = {
+      strategic: 0,
+      tactical: 0,
+      operational: 0
+    };
+
+    this.termometroGestao.atividades.forEach(ativ => {
+      counts[ativ.categoria]++;
+    });
+
+    this.termometroGestao.percentualEstrategico = Math.round((counts.strategic / total) * 100);
+    this.termometroGestao.percentualTatico = Math.round((counts.tactical / total) * 100);
+    this.termometroGestao.percentualOperacional = Math.round((counts.operational / total) * 100);
+  }
+
+  onPerfilComparacaoChange(): void {
+    // Atualizar apenas gráfico de referência se já tiver atividades
+    if (this.termometroGestao.atividades.length > 0) {
+      setTimeout(() => {
+        const perfil = this.perfisReferencia[this.termometroGestao.perfilComparacao];
+        this.criarDonutChartTermometro('referenceDonutTermometro', perfil, 'ref');
+        this.criarBarraPerfilTermometro('referenceProfileTermometro', perfil);
+
+        const tituloElement = document.getElementById('referenceTitleTermometro');
+        if (tituloElement) {
+          tituloElement.textContent = this.termometroGestao.perfilComparacao.toUpperCase();
+        }
+      }, 100);
+    }
+  }
+
+  salvarTermometroGestao(): void {
+    if (!this.token || this.expired) {
+      return;
+    }
+
+    if (this.termometroGestao.atividades.length === 0) {
+      this.toastr.warning('Adicione pelo menos uma atividade para gerar a análise');
+      return;
+    }
+
+    this.salvandoTermometro = true;
+
+    // Atualizar gráficos
+    this.atualizarGraficosTermometro();
+
+    const dadosParaSalvar = {
+      atividades: JSON.stringify(this.termometroGestao.atividades),
+      perfil_comparacao: this.termometroGestao.perfilComparacao,
+      percentual_estrategico: this.termometroGestao.percentualEstrategico,
+      percentual_tatico: this.termometroGestao.percentualTatico,
+      percentual_operacional: this.termometroGestao.percentualOperacional
+    };
+
+    this.mentoriaService.salvarTermometroGestao(this.token, dadosParaSalvar).subscribe({
+      next: (response: any) => {
+        if (response.data && response.data.id) {
+          this.termometroGestaoId = response.data.id;
+        }
+        this.toastr.success('Análise gerada e salva com sucesso!');
+        this.salvandoTermometro = false;
+      },
+      error: (error: any) => {
+        console.error('Erro ao salvar Termômetro de Gestão:', error);
+        this.toastr.error('Erro ao salvar análise');
+        this.salvandoTermometro = false;
+      }
+    });
+  }
+
+  getCategoriaNome(categoria: string): string {
+    const nomes = {
+      'strategic': 'Estratégico',
+      'tactical': 'Tático',
+      'operational': 'Operacional'
+    };
+    return nomes[categoria as keyof typeof nomes] || categoria;
+  }
+
+  getCategoriaClass(categoria: string): string {
+    const classes = {
+      'strategic': 'badge-strategic',
+      'tactical': 'badge-tactical',
+      'operational': 'badge-operational'
+    };
+    return classes[categoria as keyof typeof classes] || '';
+  }
+
+  getComparacaoDiff(tipo: 'strategic' | 'tactical' | 'operational'): number {
+    const perfil = this.perfisReferencia[this.termometroGestao.perfilComparacao];
+    const atual = tipo === 'strategic'
+      ? this.termometroGestao.percentualEstrategico
+      : tipo === 'tactical'
+      ? this.termometroGestao.percentualTatico
+      : this.termometroGestao.percentualOperacional;
+
+    return atual - perfil[tipo];
+  }
+
+  getComparacaoStatus(diff: number): 'match' | 'close' | 'far' {
+    const absDiff = Math.abs(diff);
+    if (absDiff <= 5) return 'match';
+    if (absDiff <= 15) return 'close';
+    return 'far';
+  }
+
+  getComparacaoLabel(diff: number): string {
+    const status = this.getComparacaoStatus(diff);
+    const labels = {
+      'match': 'Alinhado',
+      'close': 'Próximo',
+      'far': 'Distante'
+    };
+    return labels[status];
+  }
+
+  // Métodos auxiliares para contagem de atividades
+  getAtividadesEstrategicasCount(): number {
+    return this.termometroGestao.atividades.filter(a => a.categoria === 'strategic').length;
+  }
+
+  getAtividadesTaticasCount(): number {
+    return this.termometroGestao.atividades.filter(a => a.categoria === 'tactical').length;
+  }
+
+  getAtividadesOperacionaisCount(): number {
+    return this.termometroGestao.atividades.filter(a => a.categoria === 'operational').length;
+  }
+
+  // Atualizar gráficos visuais
+  atualizarGraficosTermometro(): void {
+    if (this.termometroGestao.atividades.length === 0) {
+      return;
+    }
+
+    // Aguardar o Angular renderizar o *ngIf
+    setTimeout(() => {
+      // Verificar se elementos existem
+      const userDonutEl = document.getElementById('userDonutTermometro');
+      const refDonutEl = document.getElementById('referenceDonutTermometro');
+      const userProfileEl = document.getElementById('userProfileTermometro');
+      const refProfileEl = document.getElementById('referenceProfileTermometro');
+
+      if (!userDonutEl || !refDonutEl || !userProfileEl || !refProfileEl) {
+        // Tentar novamente após mais tempo
+        setTimeout(() => {
+          this.renderizarGraficosTermometro();
+        }, 500);
+        return;
+      }
+
+      this.renderizarGraficosTermometro();
+    }, 300);
+  }
+
+  renderizarGraficosTermometro(): void {
+    // Atualizar gráfico do usuário
+    this.criarDonutChartTermometro('userDonutTermometro', {
+      strategic: this.termometroGestao.percentualEstrategico,
+      tactical: this.termometroGestao.percentualTatico,
+      operational: this.termometroGestao.percentualOperacional
+    }, 'user');
+
+    // Atualizar barra do usuário
+    this.criarBarraPerfilTermometro('userProfileTermometro', {
+      strategic: this.termometroGestao.percentualEstrategico,
+      tactical: this.termometroGestao.percentualTatico,
+      operational: this.termometroGestao.percentualOperacional
+    });
+
+    // Atualizar gráfico de referência
+    const perfil = this.perfisReferencia[this.termometroGestao.perfilComparacao];
+    this.criarDonutChartTermometro('referenceDonutTermometro', perfil, 'ref');
+    this.criarBarraPerfilTermometro('referenceProfileTermometro', perfil);
+
+    // Atualizar título do perfil de referência
+    const tituloElement = document.getElementById('referenceTitleTermometro');
+    if (tituloElement) {
+      tituloElement.textContent = this.termometroGestao.perfilComparacao.toUpperCase();
+    }
+  }
+
+  criarDonutChartTermometro(elementId: string, data: any, type: 'user' | 'ref'): void {
+    const container = document.getElementById(elementId);
+    if (!container) return;
+
+    const svg = container.querySelector('svg');
+    if (!svg) return;
+
+    // Remover circles antigos (exceto o primeiro que é o background)
+    const circles = svg.querySelectorAll('circle:not(:first-child)');
+    circles.forEach(c => c.remove());
+
+    const values = [
+      { value: data.strategic, color: '#10b981', label: 'Estratégico' },
+      { value: data.tactical, color: '#9ca3af', label: 'Tático' },
+      { value: data.operational, color: '#1a1a1a', label: 'Operacional' }
+    ];
+
+    // Verificar se há valores válidos
+    const totalPercentual = values.reduce((sum, item) => sum + item.value, 0);
+    if (totalPercentual === 0) return;
+
+    // Ordenar para pegar o maior
+    const sorted = [...values].sort((a, b) => b.value - a.value);
+    const main = sorted[0];
+
+    const radius = 80;
+    const circumference = 2 * Math.PI * radius;
+    let offset = 0;
+
+    values.forEach((item) => {
+      if (item.value > 0) {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        const strokeLength = (item.value / 100) * circumference;
+
+        circle.setAttribute('cx', '100');
+        circle.setAttribute('cy', '100');
+        circle.setAttribute('r', String(radius));
+        circle.setAttribute('fill', 'none');
+        circle.setAttribute('stroke', item.color);
+        circle.setAttribute('stroke-width', '30');
+        circle.setAttribute('stroke-dasharray', `${strokeLength} ${circumference}`);
+        circle.setAttribute('stroke-dashoffset', String(-offset));
+
+        svg.appendChild(circle);
+        offset += strokeLength;
+      }
+    });
+
+    // Atualizar centro do donut
+    const valueEl = container.querySelector('.termometro-donut-value');
+    const labelEl = container.querySelector('.termometro-donut-label');
+
+    if (valueEl) valueEl.textContent = main.value + '%';
+    if (labelEl) labelEl.textContent = main.label;
+  }
+
+  criarBarraPerfilTermometro(elementId: string, data: any): void {
+    const container = document.getElementById(elementId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const segments = [
+      { value: data.operational, class: 'termometro-segment-operational', label: 'Operacional', color: '#1a1a1a' },
+      { value: data.tactical, class: 'termometro-segment-tactical', label: 'Tático', color: '#e5e5e5' },
+      { value: data.strategic, class: 'termometro-segment-strategic', label: 'Estratégico', color: '#10b981' }
+    ];
+
+    segments.forEach(segment => {
+      if (segment.value > 0) {
+        const div = document.createElement('div');
+        div.className = `termometro-segment ${segment.class}`;
+        div.style.height = `${segment.value}%`;
+        div.style.backgroundColor = segment.color;
+
+        // Definir cor do texto baseado no fundo
+        if (segment.label === 'Operacional' || segment.label === 'Estratégico') {
+          div.style.color = 'white';
+        } else {
+          div.style.color = '#666';
+        }
+
+        div.textContent = `${segment.value}%`;
+        container.appendChild(div);
+      }
+    });
+  }
+
+  // ===== EXPORTAR TERMÔMETRO DE GESTÃO PARA PDF =====
+  async exportarTermometroGestaoPDF(): Promise<void> {
+    if (this.termometroGestao.atividades.length === 0) {
+      this.toastr.warning('Adicione atividades antes de exportar');
+      return;
+    }
+
+    try {
+      this.toastr.info('Gerando PDF do Termômetro de Gestão...');
+
+      const container = this.criarContainerTermometroVisualizacao();
+      document.body.appendChild(container);
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        width: container.scrollWidth,
+        height: container.scrollHeight
+      });
+
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`termometro-gestao-${this.encontro?.mentorado_nome || 'mentoria'}-${Date.now()}.pdf`);
+
+      this.toastr.success('PDF exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      this.toastr.error('Erro ao exportar PDF');
+    }
+  }
+
+  private criarContainerTermometroVisualizacao(): HTMLElement {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.background = '#ffffff';
+    container.style.padding = '60px';
+    container.style.width = '1400px';
+    container.style.fontFamily = 'Inter, Arial, sans-serif';
+
+    // Logo
+    const logo = document.createElement('img');
+    logo.src = '/logoNaue.png';
+    logo.style.position = 'absolute';
+    logo.style.top = '40px';
+    logo.style.left = '40px';
+    logo.style.height = '45px';
+    container.appendChild(logo);
+
+    // Título
+    const header = document.createElement('div');
+    header.style.textAlign = 'center';
+    header.style.marginBottom = '40px';
+
+    const h1 = document.createElement('h1');
+    h1.textContent = 'Termômetro de Gestão';
+    h1.style.fontSize = '32px';
+    h1.style.fontWeight = '700';
+    h1.style.color = '#2d3748';
+    h1.style.marginBottom = '10px';
+    header.appendChild(h1);
+
+    const subtitle = document.createElement('p');
+    subtitle.textContent = 'Análise de Perfil Profissional';
+    subtitle.style.fontSize = '18px';
+    subtitle.style.color = '#718096';
+    subtitle.style.fontWeight = '500';
+    header.appendChild(subtitle);
+
+    container.appendChild(header);
+
+    // Informações do mentorado
+    if (this.encontro) {
+      const info = document.createElement('div');
+      info.style.textAlign = 'center';
+      info.style.marginBottom = '40px';
+      info.style.fontSize = '16px';
+      info.style.color = '#4a5568';
+      info.innerHTML = `
+        <strong>${this.encontro.mentorado_nome}</strong> | Encontro #${this.encontro.numero_encontro} |
+        ${new Date(this.encontro.data_encontro).toLocaleDateString('pt-BR')}
+      `;
+      container.appendChild(info);
+    }
+
+    // Conteúdo principal em grid
+    const mainGrid = document.createElement('div');
+    mainGrid.style.display = 'grid';
+    mainGrid.style.gridTemplateColumns = '1fr 1fr';
+    mainGrid.style.gap = '40px';
+    mainGrid.style.marginBottom = '40px';
+
+    // Resumo dos Percentuais
+    const resumoCard = document.createElement('div');
+    resumoCard.style.background = '#f7fafc';
+    resumoCard.style.border = '2px solid #e2e8f0';
+    resumoCard.style.borderRadius = '16px';
+    resumoCard.style.padding = '30px';
+
+    const resumoTitle = document.createElement('h3');
+    resumoTitle.textContent = 'Distribuição Atual';
+    resumoTitle.style.fontSize = '20px';
+    resumoTitle.style.fontWeight = '700';
+    resumoTitle.style.marginBottom = '20px';
+    resumoTitle.style.color = '#2d3748';
+    resumoCard.appendChild(resumoTitle);
+
+    const resumoGrid = document.createElement('div');
+    resumoGrid.style.display = 'grid';
+    resumoGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    resumoGrid.style.gap = '20px';
+    resumoGrid.style.textAlign = 'center';
+
+    const categorias = [
+      { label: 'Estratégico', valor: this.termometroGestao.percentualEstrategico, cor: '#10b981' },
+      { label: 'Tático', valor: this.termometroGestao.percentualTatico, cor: '#9ca3af' },
+      { label: 'Operacional', valor: this.termometroGestao.percentualOperacional, cor: '#1a1a1a' }
+    ];
+
+    categorias.forEach(cat => {
+      const item = document.createElement('div');
+      const value = document.createElement('div');
+      value.textContent = `${cat.valor}%`;
+      value.style.fontSize = '36px';
+      value.style.fontWeight = '700';
+      value.style.color = cat.cor;
+      value.style.marginBottom = '8px';
+      item.appendChild(value);
+
+      const label = document.createElement('div');
+      label.textContent = cat.label;
+      label.style.fontSize = '14px';
+      label.style.color = '#718096';
+      label.style.textTransform = 'uppercase';
+      label.style.letterSpacing = '1px';
+      label.style.fontWeight = '600';
+      item.appendChild(label);
+
+      resumoGrid.appendChild(item);
+    });
+
+    resumoCard.appendChild(resumoGrid);
+    mainGrid.appendChild(resumoCard);
+
+    // Perfil de Comparação
+    const perfilCard = document.createElement('div');
+    perfilCard.style.background = '#f7fafc';
+    perfilCard.style.border = '2px solid #e2e8f0';
+    perfilCard.style.borderRadius = '16px';
+    perfilCard.style.padding = '30px';
+
+    const perfilTitle = document.createElement('h3');
+    perfilTitle.textContent = `Perfil de Comparação: ${this.termometroGestao.perfilComparacao}`;
+    perfilTitle.style.fontSize = '20px';
+    perfilTitle.style.fontWeight = '700';
+    perfilTitle.style.marginBottom = '20px';
+    perfilTitle.style.color = '#2d3748';
+    perfilTitle.style.textTransform = 'capitalize';
+    perfilCard.appendChild(perfilTitle);
+
+    const perfil = this.perfisReferencia[this.termometroGestao.perfilComparacao];
+    const perfilGrid = document.createElement('div');
+    perfilGrid.style.display = 'grid';
+    perfilGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    perfilGrid.style.gap = '20px';
+    perfilGrid.style.textAlign = 'center';
+
+    const referenciaCats = [
+      { label: 'Estratégico', valor: perfil.strategic, cor: '#10b981' },
+      { label: 'Tático', valor: perfil.tactical, cor: '#9ca3af' },
+      { label: 'Operacional', valor: perfil.operational, cor: '#1a1a1a' }
+    ];
+
+    referenciaCats.forEach(cat => {
+      const item = document.createElement('div');
+      const value = document.createElement('div');
+      value.textContent = `${cat.valor}%`;
+      value.style.fontSize = '36px';
+      value.style.fontWeight = '700';
+      value.style.color = cat.cor;
+      value.style.marginBottom = '8px';
+      item.appendChild(value);
+
+      const label = document.createElement('div');
+      label.textContent = cat.label;
+      label.style.fontSize = '14px';
+      label.style.color = '#718096';
+      label.style.textTransform = 'uppercase';
+      label.style.letterSpacing = '1px';
+      label.style.fontWeight = '600';
+      item.appendChild(label);
+
+      perfilGrid.appendChild(item);
+    });
+
+    perfilCard.appendChild(perfilGrid);
+    mainGrid.appendChild(perfilCard);
+
+    container.appendChild(mainGrid);
+
+    // Análise Comparativa
+    const comparacaoTitle = document.createElement('h3');
+    comparacaoTitle.textContent = 'Análise Comparativa';
+    comparacaoTitle.style.fontSize = '24px';
+    comparacaoTitle.style.fontWeight = '700';
+    comparacaoTitle.style.marginBottom = '30px';
+    comparacaoTitle.style.color = '#2d3748';
+    comparacaoTitle.style.textAlign = 'center';
+    container.appendChild(comparacaoTitle);
+
+    const comparacaoGrid = document.createElement('div');
+    comparacaoGrid.style.display = 'grid';
+    comparacaoGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    comparacaoGrid.style.gap = '30px';
+    comparacaoGrid.style.marginBottom = '40px';
+
+    const tipos: Array<'strategic' | 'tactical' | 'operational'> = ['strategic', 'tactical', 'operational'];
+    const labels = { strategic: 'Estratégico', tactical: 'Tático', operational: 'Operacional' };
+    const cores = { strategic: '#10b981', tactical: '#9ca3af', operational: '#1a1a1a' };
+
+    tipos.forEach(tipo => {
+      const diff = this.getComparacaoDiff(tipo);
+      const status = this.getComparacaoStatus(diff);
+      const statusLabel = this.getComparacaoLabel(diff);
+
+      const atual = tipo === 'strategic' ? this.termometroGestao.percentualEstrategico :
+                    tipo === 'tactical' ? this.termometroGestao.percentualTatico :
+                    this.termometroGestao.percentualOperacional;
+
+      const ref = perfil[tipo];
+
+      const card = document.createElement('div');
+      card.style.background = '#ffffff';
+      card.style.border = `3px solid ${cores[tipo]}`;
+      card.style.borderRadius = '16px';
+      card.style.padding = '30px 20px';
+      card.style.textAlign = 'center';
+
+      const title = document.createElement('h4');
+      title.textContent = labels[tipo];
+      title.style.fontSize = '16px';
+      title.style.fontWeight = '700';
+      title.style.marginBottom = '20px';
+      title.style.color = '#2d3748';
+      title.style.textTransform = 'uppercase';
+      card.appendChild(title);
+
+      const diffValue = document.createElement('div');
+      diffValue.textContent = `${diff > 0 ? '+' : ''}${diff}%`;
+      diffValue.style.fontSize = '48px';
+      diffValue.style.fontWeight = '700';
+      diffValue.style.color = diff > 0 ? '#10b981' : diff < 0 ? '#ef4444' : '#2d3748';
+      diffValue.style.marginBottom = '15px';
+      card.appendChild(diffValue);
+
+      const values = document.createElement('div');
+      values.style.fontSize = '14px';
+      values.style.color = '#4a5568';
+      values.style.marginBottom = '15px';
+      values.innerHTML = `
+        <div style="margin: 5px 0;">Atual: ${atual}%</div>
+        <div style="margin: 5px 0;">Referência: ${ref}%</div>
+      `;
+      card.appendChild(values);
+
+      const statusBadge = document.createElement('div');
+      statusBadge.textContent = statusLabel;
+      statusBadge.style.display = 'inline-block';
+      statusBadge.style.padding = '8px 16px';
+      statusBadge.style.borderRadius = '20px';
+      statusBadge.style.fontSize = '12px';
+      statusBadge.style.fontWeight = '700';
+      statusBadge.style.textTransform = 'uppercase';
+      statusBadge.style.letterSpacing = '1px';
+
+      if (status === 'match') {
+        statusBadge.style.background = '#d1fae5';
+        statusBadge.style.color = '#065f46';
+      } else if (status === 'close') {
+        statusBadge.style.background = '#fef3c7';
+        statusBadge.style.color = '#92400e';
+      } else {
+        statusBadge.style.background = '#fee2e2';
+        statusBadge.style.color = '#991b1b';
+      }
+
+      card.appendChild(statusBadge);
+      comparacaoGrid.appendChild(card);
+    });
+
+    container.appendChild(comparacaoGrid);
+
+    // Lista de Atividades
+    const atividadesTitle = document.createElement('h3');
+    atividadesTitle.textContent = 'Atividades Cadastradas';
+    atividadesTitle.style.fontSize = '24px';
+    atividadesTitle.style.fontWeight = '700';
+    atividadesTitle.style.marginBottom = '20px';
+    atividadesTitle.style.color = '#2d3748';
+    container.appendChild(atividadesTitle);
+
+    const atividadesList = document.createElement('div');
+    atividadesList.style.display = 'grid';
+    atividadesList.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    atividadesList.style.gap = '15px';
+
+    this.termometroGestao.atividades.forEach(ativ => {
+      const item = document.createElement('div');
+      item.style.background = '#f7fafc';
+      item.style.border = '2px solid #e2e8f0';
+      item.style.borderRadius = '12px';
+      item.style.padding = '15px 20px';
+      item.style.display = 'flex';
+      item.style.justifyContent = 'space-between';
+      item.style.alignItems = 'center';
+
+      const name = document.createElement('span');
+      name.textContent = ativ.nome;
+      name.style.fontSize = '14px';
+      name.style.color = '#2d3748';
+      name.style.fontWeight = '500';
+      item.appendChild(name);
+
+      const badge = document.createElement('span');
+      badge.textContent = this.getCategoriaNome(ativ.categoria);
+      badge.style.padding = '6px 12px';
+      badge.style.borderRadius = '20px';
+      badge.style.fontSize = '11px';
+      badge.style.fontWeight = '700';
+      badge.style.textTransform = 'uppercase';
+      badge.style.letterSpacing = '0.5px';
+      badge.style.color = 'white';
+
+      if (ativ.categoria === 'strategic') {
+        badge.style.background = '#10b981';
+      } else if (ativ.categoria === 'tactical') {
+        badge.style.background = '#9ca3af';
+      } else {
+        badge.style.background = '#1a1a1a';
+      }
+
+      item.appendChild(badge);
+      atividadesList.appendChild(item);
+    });
+
+    container.appendChild(atividadesList);
+
+    return container;
   }
 }

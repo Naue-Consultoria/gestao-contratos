@@ -3955,3 +3955,731 @@ html {
   }
 }
 
+/* ===== TERMÔMETRO DE GESTÃO ===== */
+
+.termometro-gestao-main-section {
+  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.termometro-gestao-content {
+  background: white;
+  border-radius: 24px;
+  padding: 3rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+/* Layout principal em grid 2 colunas */
+.termometro-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  margin-bottom: 3rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .termometro-main-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* Colunas com altura igual */
+.termometro-left-column,
+.termometro-right-column {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Cards brancos internos */
+.termometro-card {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.termometro-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.termometro-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Formulário de adicionar atividade */
+.termometro-form-group {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .termometro-form-group {
+    grid-template-columns: 1fr;
+  }
+}
+
+.termometro-input,
+.termometro-select,
+.termometro-select-full {
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #f7fafc;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #2d3748;
+  font-weight: 500;
+}
+
+.termometro-input:focus,
+.termometro-select:focus,
+.termometro-select-full:focus {
+  outline: none;
+  border-color: #00B74F;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 183, 79, 0.1);
+}
+
+.termometro-input::placeholder {
+  color: #a0aec0;
+  font-weight: 400;
+}
+
+.termometro-select-full {
+  width: 100%;
+}
+
+.termometro-btn-add {
+  background: #022c22;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(2, 44, 34, 0.3);
+}
+
+.termometro-btn-add:hover:not(:disabled) {
+  background: #014d3a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 183, 79, 0.4);
+}
+
+.termometro-btn-add:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.termometro-btn-add:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Contadores */
+.termometro-counters {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 0;
+}
+
+.termometro-counter-item {
+  flex: 1;
+  text-align: center;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.termometro-counter-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 183, 79, 0.15);
+  border-color: #00B74F;
+}
+
+.termometro-counter-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #022c22;
+  line-height: 1;
+  font-family: 'Inter', sans-serif;
+}
+
+.termometro-counter-label {
+  font-size: 0.75rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+/* Lista de atividades */
+.termometro-activity-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 1.5rem;
+  padding-right: 0.5rem;
+}
+
+.termometro-activity-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.termometro-activity-list::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 3px;
+}
+
+.termometro-activity-list::-webkit-scrollbar-thumb {
+  background: #d4d4d4;
+  border-radius: 3px;
+}
+
+.termometro-activity-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.termometro-activity-item:hover {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-color: #cbd5e0;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.termometro-activity-name {
+  font-size: 0.9375rem;
+  color: #2d3748;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+}
+
+.termometro-activity-badge {
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.badge-strategic {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.badge-tactical {
+  background: #9ca3af;
+  color: white;
+  box-shadow: 0 2px 8px rgba(156, 163, 175, 0.3);
+}
+
+.badge-operational {
+  background: #1a1a1a;
+  color: white;
+  box-shadow: 0 2px 8px rgba(26, 26, 26, 0.3);
+}
+
+.termometro-activity-remove-btn {
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 0.375rem;
+  font-size: 1.125rem;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.termometro-activity-remove-btn:hover:not(:disabled) {
+  color: #1a1a1a;
+}
+
+.termometro-activity-remove-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.termometro-empty-message {
+  text-align: center;
+  color: #999;
+  padding: 2rem 1rem;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+/* Botão Gerar Análise */
+.termometro-btn-calculate {
+  background: #022c22;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 1.5rem;
+  font-size: 15px;
+  box-shadow: 0 4px 16px rgba(2, 44, 34, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.termometro-btn-calculate:hover:not(:disabled) {
+  background: #014d3a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 183, 79, 0.4);
+}
+
+.termometro-btn-calculate:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.termometro-btn-calculate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Resumo Box */
+.termometro-summary-box {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.termometro-summary-subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.termometro-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.termometro-summary-item {
+  text-align: center;
+}
+
+.termometro-summary-value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #2d3748;
+  font-family: 'Inter', sans-serif;
+}
+
+.termometro-summary-value.strategic {
+  color: #10b981;
+}
+
+.termometro-summary-label {
+  color: #718096;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+/* Seletor de Perfil */
+.termometro-perfil-select {
+  margin-top: 1.5rem;
+}
+
+.termometro-perfil-select label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+/* Container de Gráficos */
+.termometro-charts-container {
+  margin-top: 2.5rem;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.termometro-profiles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .termometro-profiles-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.termometro-profile-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.termometro-profile-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.termometro-profile-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #2d3748;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Donut Chart */
+.termometro-donut-chart {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 2rem;
+}
+
+.termometro-donut-chart svg {
+  transform: rotate(-90deg);
+}
+
+.termometro-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.termometro-donut-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #022c22;
+  line-height: 1;
+  font-family: 'Inter', sans-serif;
+}
+
+.termometro-donut-label {
+  font-size: 0.75rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+/* Barra de Perfil Vertical */
+.termometro-profile-bar-wrapper {
+  width: 120px;
+  margin: 0 auto 2rem;
+}
+
+.termometro-profile-header {
+  background: #022c22;
+  color: white;
+  padding: 0.875rem 0.75rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: 'Inter', sans-serif;
+}
+
+.termometro-profile-segments {
+  height: 280px;
+  width: 100%;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-top: none;
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.termometro-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  position: relative;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.termometro-segment-strategic {
+  background: #10b981;
+  color: white;
+}
+
+.termometro-segment-tactical {
+  background: #e5e5e5;
+  color: #666;
+}
+
+.termometro-segment-operational {
+  background: #1a1a1a;
+  color: white;
+}
+
+/* Legenda */
+.termometro-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f5f5f5;
+}
+
+.termometro-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #666;
+}
+
+.termometro-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.termometro-legend-color.strategic {
+  background: #10b981;
+}
+
+.termometro-legend-color.tactical {
+  background: #e5e5e5;
+}
+
+.termometro-legend-color.operational {
+  background: #1a1a1a;
+}
+
+/* Card de Comparação */
+.termometro-comparison-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.termometro-comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.termometro-comparison-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+}
+
+.btn-export-termometro {
+  padding: 0.75rem 1.5rem;
+  background: #022c22;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(2, 44, 34, 0.3);
+}
+
+.btn-export-termometro:hover:not(:disabled) {
+  background: #014d3a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 183, 79, 0.4);
+}
+
+.btn-export-termometro:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .termometro-comparison-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .btn-export-termometro {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.termometro-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .termometro-comparison-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.termometro-comparison-item {
+  background: #ffffff;
+  border: 2px solid;
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.termometro-comparison-item.strategic {
+  border-color: #10b981;
+}
+
+.termometro-comparison-item.tactical {
+  border-color: #9ca3af;
+}
+
+.termometro-comparison-item.operational {
+  border-color: #1a1a1a;
+}
+
+.termometro-comparison-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.termometro-comparison-item h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #2d3748;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Diferença principal (grande) */
+.comparison-diff-main {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0.75rem 0;
+  font-family: 'Inter', sans-serif;
+  color: #2d3748;
+}
+
+/* Valores Atual e Referência */
+.comparison-values {
+  font-size: 0.8125rem;
+  color: #4a5568;
+  margin: 0.75rem 0;
+  line-height: 1.6;
+}
+
+.comparison-values div {
+  margin: 0.25rem 0;
+}
+
+/* Status */
+.comparison-status {
+  display: inline-block;
+  padding: 0.375rem 0.875rem;
+  border-radius: 12px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.75rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.comparison-status.match {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.comparison-status.close {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.comparison-status.far {
+  background: #fee2e2;
+  color: #991b1b;
+}
+

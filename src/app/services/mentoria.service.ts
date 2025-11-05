@@ -662,4 +662,20 @@ export class MentoriaService {
       dados
     );
   }
+
+  // ===== TERMÔMETRO DE GESTÃO =====
+
+  /**
+   * Obter Termômetro de Gestão (via token público)
+   */
+  obterTermometroGestaoPublico(token: string): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/mentoria/termometro-gestao/publico/${token}`);
+  }
+
+  /**
+   * Salvar Termômetro de Gestão (via token público)
+   */
+  salvarTermometroGestao(token: string, dados: any): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/mentoria/termometro-gestao/publico/${token}`, dados);
+  }
 }

@@ -259,7 +259,8 @@ export class PublicMentoriaHub implements OnInit {
   }
 
   getTotalEncontros(): number {
-    return this.mentoria?.numero_encontros || 0;
+    // Retorna a quantidade real de encontros existentes (dinâmico)
+    return this.mentoria?.encontros?.length || 0;
   }
 
   // Calcular idade a partir da data de nascimento
