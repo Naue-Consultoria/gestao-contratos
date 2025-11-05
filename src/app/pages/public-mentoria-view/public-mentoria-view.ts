@@ -3166,6 +3166,10 @@ export class PublicMentoriaViewComponent implements OnInit {
         div.className = `termometro-segment ${segment.class}`;
         div.style.height = `${segment.value}%`;
         div.style.backgroundColor = segment.color;
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        div.style.justifyContent = 'center';
+        div.style.textAlign = 'center';
 
         // Definir cor do texto baseado no fundo
         if (segment.label === 'Operacional' || segment.label === 'Estratégico') {
@@ -3193,26 +3197,38 @@ export class PublicMentoriaViewComponent implements OnInit {
       const container = this.criarContainerTermometroVisualizacao();
       document.body.appendChild(container);
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Aguardar renderização completa dos SVGs
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       const canvas = await html2canvas(container, {
         backgroundColor: '#ffffff',
         scale: 2,
-        logging: false,
-        width: container.scrollWidth,
-        height: container.scrollHeight
+        logging: true,
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
+        imageTimeout: 0
       });
 
       document.body.removeChild(container);
 
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/jpeg', 0.9);
+
+      // Criar PDF com dimensões personalizadas baseadas no conteúdo
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
+      // Converter pixels para mm (aproximadamente 96 DPI)
+      const pdfWidth = imgWidth * 0.264583; // conversão de px para mm
+      const pdfHeight = imgHeight * 0.264583;
+
       const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'px',
-        format: [canvas.width, canvas.height]
+        orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+        unit: 'mm',
+        format: [pdfWidth, pdfHeight]
       });
 
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`termometro-gestao-${this.encontro?.mentorado_nome || 'mentoria'}-${Date.now()}.pdf`);
 
       this.toastr.success('PDF exportado com sucesso!');
@@ -3231,6 +3247,9 @@ export class PublicMentoriaViewComponent implements OnInit {
     container.style.padding = '60px';
     container.style.width = '1400px';
     container.style.fontFamily = 'Inter, Arial, sans-serif';
+    container.style.minHeight = 'auto';
+    container.style.overflow = 'visible';
+    container.style.boxSizing = 'border-box';
 
     // Logo
     const logo = document.createElement('img');
@@ -3392,6 +3411,174 @@ export class PublicMentoriaViewComponent implements OnInit {
 
     container.appendChild(mainGrid);
 
+    // Gráficos Visuais (Donuts e Barras)
+    const graficosTitle = document.createElement('h3');
+    graficosTitle.textContent = 'Visualização dos Perfis';
+    graficosTitle.style.fontSize = '24px';
+    graficosTitle.style.fontWeight = '700';
+    graficosTitle.style.marginBottom = '30px';
+    graficosTitle.style.color = '#2d3748';
+    graficosTitle.style.textAlign = 'center';
+    container.appendChild(graficosTitle);
+
+    const graficosGrid = document.createElement('div');
+    graficosGrid.style.display = 'grid';
+    graficosGrid.style.gridTemplateColumns = '1fr 1fr';
+    graficosGrid.style.gap = '40px';
+    graficosGrid.style.marginBottom = '50px';
+
+    // Card Seu Perfil
+    const seuPerfilCard = document.createElement('div');
+    seuPerfilCard.style.background = '#ffffff';
+    seuPerfilCard.style.border = '2px solid #e2e8f0';
+    seuPerfilCard.style.borderRadius = '16px';
+    seuPerfilCard.style.padding = '30px';
+    seuPerfilCard.style.textAlign = 'center';
+
+    const seuPerfilTitle = document.createElement('h4');
+    seuPerfilTitle.textContent = 'Seu Perfil Atual';
+    seuPerfilTitle.style.fontSize = '18px';
+    seuPerfilTitle.style.fontWeight = '700';
+    seuPerfilTitle.style.marginBottom = '20px';
+    seuPerfilTitle.style.color = '#2d3748';
+    seuPerfilCard.appendChild(seuPerfilTitle);
+
+    // Criar Donut Canvas para Seu Perfil (melhor compatibilidade com PDF)
+    const seuDonutCanvas = this.criarDonutCanvas({
+      strategic: this.termometroGestao.percentualEstrategico,
+      tactical: this.termometroGestao.percentualTatico,
+      operational: this.termometroGestao.percentualOperacional
+    });
+    seuPerfilCard.appendChild(seuDonutCanvas);
+
+    // Criar Barra para Seu Perfil
+    const seuBarraWrapper = document.createElement('div');
+    seuBarraWrapper.style.marginTop = '30px';
+    const seuBarraHeader = document.createElement('div');
+    seuBarraHeader.textContent = 'SEU PERFIL';
+    seuBarraHeader.style.background = '#022c22';
+    seuBarraHeader.style.color = 'white';
+    seuBarraHeader.style.padding = '12px';
+    seuBarraHeader.style.textAlign = 'center';
+    seuBarraHeader.style.fontWeight = '700';
+    seuBarraHeader.style.fontSize = '12px';
+    seuBarraHeader.style.letterSpacing = '1.5px';
+    seuBarraHeader.style.width = '120px';
+    seuBarraHeader.style.margin = '0 auto';
+    seuBarraHeader.style.boxSizing = 'border-box';
+    seuBarraWrapper.appendChild(seuBarraHeader);
+
+    const seuBarraSegments = document.createElement('div');
+    seuBarraSegments.style.height = '280px';
+    seuBarraSegments.style.width = '120px';
+    seuBarraSegments.style.margin = '0 auto';
+    seuBarraSegments.style.background = '#fafafa';
+    seuBarraSegments.style.border = '1px solid #e5e5e5';
+    seuBarraSegments.style.borderTop = 'none';
+    seuBarraSegments.style.display = 'flex';
+    seuBarraSegments.style.flexDirection = 'column-reverse';
+
+    const seuSegments = [
+      { value: this.termometroGestao.percentualOperacional, color: '#1a1a1a', textColor: 'white' },
+      { value: this.termometroGestao.percentualTatico, color: '#e5e5e5', textColor: '#666' },
+      { value: this.termometroGestao.percentualEstrategico, color: '#10b981', textColor: 'white' }
+    ];
+
+    seuSegments.forEach(seg => {
+      if (seg.value > 0) {
+        const segDiv = document.createElement('div');
+        segDiv.style.height = `${seg.value}%`;
+        segDiv.style.background = seg.color;
+        segDiv.style.color = seg.textColor;
+        segDiv.style.display = 'flex';
+        segDiv.style.alignItems = 'center';
+        segDiv.style.justifyContent = 'center';
+        segDiv.style.fontWeight = '600';
+        segDiv.style.fontSize = '14px';
+        segDiv.textContent = `${seg.value}%`;
+        seuBarraSegments.appendChild(segDiv);
+      }
+    });
+
+    seuBarraWrapper.appendChild(seuBarraSegments);
+    seuPerfilCard.appendChild(seuBarraWrapper);
+    graficosGrid.appendChild(seuPerfilCard);
+
+    // Card Perfil de Referência
+    const refPerfilCard = document.createElement('div');
+    refPerfilCard.style.background = '#ffffff';
+    refPerfilCard.style.border = '2px solid #e2e8f0';
+    refPerfilCard.style.borderRadius = '16px';
+    refPerfilCard.style.padding = '30px';
+    refPerfilCard.style.textAlign = 'center';
+
+    const refPerfilTitle = document.createElement('h4');
+    refPerfilTitle.textContent = 'Perfil de Referência';
+    refPerfilTitle.style.fontSize = '18px';
+    refPerfilTitle.style.fontWeight = '700';
+    refPerfilTitle.style.marginBottom = '20px';
+    refPerfilTitle.style.color = '#2d3748';
+    refPerfilCard.appendChild(refPerfilTitle);
+
+    // Criar Donut Canvas para Referência (melhor compatibilidade com PDF)
+    const refDonutCanvas = this.criarDonutCanvas(perfil);
+    refPerfilCard.appendChild(refDonutCanvas);
+
+    // Criar Barra para Referência
+    const refBarraWrapper = document.createElement('div');
+    refBarraWrapper.style.marginTop = '30px';
+    const refBarraHeader = document.createElement('div');
+    refBarraHeader.textContent = this.termometroGestao.perfilComparacao.toUpperCase();
+    refBarraHeader.style.background = '#022c22';
+    refBarraHeader.style.color = 'white';
+    refBarraHeader.style.padding = '12px';
+    refBarraHeader.style.textAlign = 'center';
+    refBarraHeader.style.fontWeight = '700';
+    refBarraHeader.style.fontSize = '12px';
+    refBarraHeader.style.letterSpacing = '1.5px';
+    refBarraHeader.style.width = '120px';
+    refBarraHeader.style.margin = '0 auto';
+    refBarraHeader.style.boxSizing = 'border-box';
+    refBarraWrapper.appendChild(refBarraHeader);
+
+    const refBarraSegments = document.createElement('div');
+    refBarraSegments.style.height = '280px';
+    refBarraSegments.style.width = '120px';
+    refBarraSegments.style.margin = '0 auto';
+    refBarraSegments.style.background = '#fafafa';
+    refBarraSegments.style.border = '1px solid #e5e5e5';
+    refBarraSegments.style.borderTop = 'none';
+    refBarraSegments.style.display = 'flex';
+    refBarraSegments.style.flexDirection = 'column-reverse';
+
+    const refSegments = [
+      { value: perfil.operational, color: '#1a1a1a', textColor: 'white' },
+      { value: perfil.tactical, color: '#e5e5e5', textColor: '#666' },
+      { value: perfil.strategic, color: '#10b981', textColor: 'white' }
+    ];
+
+    refSegments.forEach(seg => {
+      if (seg.value > 0) {
+        const segDiv = document.createElement('div');
+        segDiv.style.height = `${seg.value}%`;
+        segDiv.style.background = seg.color;
+        segDiv.style.color = seg.textColor;
+        segDiv.style.display = 'flex';
+        segDiv.style.alignItems = 'center';
+        segDiv.style.justifyContent = 'center';
+        segDiv.style.fontWeight = '600';
+        segDiv.style.fontSize = '14px';
+        segDiv.textContent = `${seg.value}%`;
+        refBarraSegments.appendChild(segDiv);
+      }
+    });
+
+    refBarraWrapper.appendChild(refBarraSegments);
+    refPerfilCard.appendChild(refBarraWrapper);
+    graficosGrid.appendChild(refPerfilCard);
+
+    container.appendChild(graficosGrid);
+
     // Análise Comparativa
     const comparacaoTitle = document.createElement('h3');
     comparacaoTitle.textContent = 'Análise Comparativa';
@@ -3540,5 +3727,158 @@ export class PublicMentoriaViewComponent implements OnInit {
     container.appendChild(atividadesList);
 
     return container;
+  }
+
+  // Função auxiliar para criar gráfico donut em Canvas (melhor para PDF)
+  private criarDonutCanvas(data: any): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    canvas.width = 200;
+    canvas.height = 200;
+    canvas.style.margin = '0 auto';
+    canvas.style.display = 'block';
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return canvas;
+
+    const centerX = 100;
+    const centerY = 100;
+    const radius = 70;
+    const lineWidth = 30;
+
+    const values = [
+      { value: data.strategic, color: '#10b981', label: 'Estratégico' },
+      { value: data.tactical, color: '#9ca3af', label: 'Tático' },
+      { value: data.operational, color: '#1a1a1a', label: 'Operacional' }
+    ];
+
+    const totalPercentual = values.reduce((sum, item) => sum + item.value, 0);
+    if (totalPercentual === 0) return canvas;
+
+    const sorted = [...values].sort((a, b) => b.value - a.value);
+    const main = sorted[0];
+
+    // Desenhar círculo de fundo
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = '#f5f5f5';
+    ctx.stroke();
+
+    // Desenhar segmentos
+    let startAngle = -Math.PI / 2; // Começar no topo
+
+    values.forEach((item) => {
+      if (item.value > 0) {
+        const angle = (item.value / 100) * 2 * Math.PI;
+        const endAngle = startAngle + angle;
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = item.color;
+        ctx.stroke();
+
+        startAngle = endAngle;
+      }
+    });
+
+    // Desenhar texto central
+    ctx.fillStyle = '#2d3748';
+    ctx.font = 'bold 36px Inter, Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${main.value}%`, centerX, centerY - 10);
+
+    ctx.fillStyle = '#718096';
+    ctx.font = '500 12px Inter, Arial, sans-serif';
+    ctx.fillText(main.label.toUpperCase(), centerX, centerY + 15);
+
+    return canvas;
+  }
+
+  // Função auxiliar para criar gráfico donut em SVG
+  private criarDonutSVG(data: any): SVGElement {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '200');
+    svg.setAttribute('height', '200');
+    svg.setAttribute('viewBox', '0 0 200 200');
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.style.margin = '0 auto';
+    svg.style.display = 'block';
+    svg.style.backgroundColor = 'transparent';
+
+    // Círculo de fundo
+    const bgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    bgCircle.setAttribute('cx', '100');
+    bgCircle.setAttribute('cy', '100');
+    bgCircle.setAttribute('r', '80');
+    bgCircle.setAttribute('fill', 'none');
+    bgCircle.setAttribute('stroke', '#f5f5f5');
+    bgCircle.setAttribute('stroke-width', '30');
+    svg.appendChild(bgCircle);
+
+    const values = [
+      { value: data.strategic, color: '#10b981', label: 'Estratégico' },
+      { value: data.tactical, color: '#9ca3af', label: 'Tático' },
+      { value: data.operational, color: '#1a1a1a', label: 'Operacional' }
+    ];
+
+    const totalPercentual = values.reduce((sum, item) => sum + item.value, 0);
+    if (totalPercentual === 0) return svg;
+
+    const sorted = [...values].sort((a, b) => b.value - a.value);
+    const main = sorted[0];
+
+    const radius = 80;
+    const circumference = 2 * Math.PI * radius;
+    let offset = 0;
+
+    values.forEach((item) => {
+      if (item.value > 0) {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        const strokeLength = (item.value / 100) * circumference;
+
+        circle.setAttribute('cx', '100');
+        circle.setAttribute('cy', '100');
+        circle.setAttribute('r', String(radius));
+        circle.setAttribute('fill', 'none');
+        circle.setAttribute('stroke', item.color);
+        circle.setAttribute('stroke-width', '30');
+        circle.setAttribute('stroke-dasharray', `${strokeLength} ${circumference}`);
+        circle.setAttribute('stroke-dashoffset', String(-offset));
+        circle.setAttribute('transform', 'rotate(-90 100 100)');
+
+        svg.appendChild(circle);
+        offset += strokeLength;
+      }
+    });
+
+    // Texto central
+    const centerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+    const percentText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    percentText.setAttribute('x', '100');
+    percentText.setAttribute('y', '95');
+    percentText.setAttribute('text-anchor', 'middle');
+    percentText.setAttribute('font-size', '36');
+    percentText.setAttribute('font-weight', 'bold');
+    percentText.setAttribute('fill', '#2d3748');
+    percentText.textContent = `${main.value}%`;
+    centerGroup.appendChild(percentText);
+
+    const labelText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    labelText.setAttribute('x', '100');
+    labelText.setAttribute('y', '115');
+    labelText.setAttribute('text-anchor', 'middle');
+    labelText.setAttribute('font-size', '12');
+    labelText.setAttribute('font-weight', '500');
+    labelText.setAttribute('fill', '#718096');
+    labelText.setAttribute('text-transform', 'uppercase');
+    labelText.textContent = main.label.toUpperCase();
+    centerGroup.appendChild(labelText);
+
+    svg.appendChild(centerGroup);
+
+    return svg;
   }
 }
