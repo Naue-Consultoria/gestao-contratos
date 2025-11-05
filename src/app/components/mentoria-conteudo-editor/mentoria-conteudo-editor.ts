@@ -598,26 +598,72 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     this.conteudo.testes.itens = this.conteudo.testes.itens.filter(t => t.id !== id);
   }
 
-  onArquivoSelected(event: Event, teste: Teste): void {
+  async onArquivoSelected(event: Event, teste: Teste): Promise<void> {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      teste.imagem = file;
-      teste.nomeArquivo = file.name;
 
-      // Verificar se é PDF
-      if (file.type === 'application/pdf') {
-        teste.isPdf = true;
-        teste.imagemUrl = undefined;
-      } else {
-        // É uma imagem - criar preview
-        teste.isPdf = false;
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          teste.imagemUrl = e.target.result;
-        };
-        reader.readAsDataURL(file);
+      // Fazer upload imediatamente
+      if (!this.encontroId) {
+        this.toastr.error('ID do encontro não encontrado');
+        return;
       }
+
+      try {
+        this.toastr.info('Fazendo upload do arquivo...');
+
+        const uploadResponse = await this.mentoriaService
+          .uploadArquivoTeste(this.encontroId, file)
+          .toPromise();
+
+        if (uploadResponse?.success && uploadResponse.data) {
+          // Atualizar com a URL do Supabase Storage
+          teste.imagemUrl = uploadResponse.data.url;
+          teste.isPdf = uploadResponse.data.isPdf;
+          teste.nomeArquivo = uploadResponse.data.originalName;
+          teste.imagem = undefined; // Remover File object
+
+          this.toastr.success('Arquivo enviado com sucesso!');
+
+          // Salvar automaticamente o conteúdo após upload
+          await this.salvarConteudoAposUpload();
+        }
+      } catch (error: any) {
+        console.error('Erro ao fazer upload:', error);
+        this.toastr.error('Erro ao fazer upload do arquivo');
+      }
+
+      // Limpar input
+      input.value = '';
+    }
+  }
+
+  // Método auxiliar para salvar apenas o conteúdo após upload
+  private async salvarConteudoAposUpload(): Promise<void> {
+    if (!this.encontroId) return;
+
+    try {
+      // Salvar blocos ativos
+      this.conteudo.blocosAtivos = this.blocosAtivos;
+
+      // Extrair ordem das seções
+      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle'];
+      this.conteudo.ordemSecoes = this.blocosAtivos
+        .filter(bloco => secoesReordenaveis.includes(bloco.tipo))
+        .sort((a, b) => a.ordem - b.ordem)
+        .map(bloco => bloco.tipo);
+
+      const conteudoJson = JSON.stringify(this.conteudo);
+
+      await this.mentoriaService.atualizarEncontro(
+        this.encontroId,
+        { conteudo_html: conteudoJson }
+      ).toPromise();
+
+      this.toastr.success('Arquivo salvo com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar conteúdo após upload:', error);
+      this.toastr.warning('Arquivo enviado mas houve erro ao salvar. Clique em Salvar para confirmar.');
     }
   }
 
