@@ -881,6 +881,164 @@
       </div>
     </section>
 
+    <!-- Roda da Vida MAAS Section -->
+    <section *ngIf="secaoId === 'rodaDaVida'" class="dark-section roda-da-vida-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.rodaDaVida?.ativo">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-dharmachakra"></i>
+            Roda da Vida MAAS®
+          </h2>
+          <p class="dark-subtitle">Mapa de Autoavaliação Sistêmico - "A Única Coisa"</p>
+        </div>
+
+        <div class="roda-da-vida-content">
+
+          <!-- Layout: 2 Colunas -->
+          <div class="roda-two-columns">
+
+            <!-- Coluna Esquerda: Gráfico -->
+            <div class="roda-left-side">
+              <!-- Canvas da Roda (sem limites de container) -->
+              <div class="roda-canvas-wrapper">
+                <canvas id="rodaDaVidaCanvas" width="550" height="550"></canvas>
+              </div>
+            </div>
+
+            <!-- Coluna Direita: Controles das Áreas -->
+            <div class="roda-right-side">
+              <div class="roda-controls-header">
+                <h3 class="roda-controls-title">
+                  <i class="fa-solid fa-sliders"></i>
+                  Avalie suas Áreas
+                </h3>
+                <p class="roda-controls-subtitle">
+                  Ajuste os valores de 1 a 10 usando o slider ou digitando diretamente
+                </p>
+              </div>
+
+              <div class="roda-controls-list">
+                <div *ngFor="let area of rodaDaVidaAreas" class="roda-control-item">
+                  <div class="roda-control-header">
+                    <label class="roda-control-label">{{ area.label }}</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="10"
+                      class="roda-control-input"
+                      [(ngModel)]="rodaDaVida[area.key].score"
+                      (input)="onRodaDaVidaSliderChange(area.key)">
+                  </div>
+                  <p class="roda-control-hint">{{ area.hint }}</p>
+                  <div class="roda-control-slider-wrapper">
+                    <span class="roda-control-min">1</span>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      step="1"
+                      class="roda-control-slider"
+                      [(ngModel)]="rodaDaVida[area.key].score"
+                      (input)="onRodaDaVidaSliderChange(area.key)">
+                    <span class="roda-control-max">10</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Card de Resumo (largura total abaixo das colunas) -->
+          <div class="roda-resume-card">
+            <h3 class="roda-resume-title">
+              <i class="fa-solid fa-chart-line"></i>
+              Resumo Geral
+            </h3>
+            <div class="roda-resume-stats">
+              <div class="roda-stat-item">
+                <span class="roda-stat-label">Média Geral</span>
+                <span class="roda-stat-value roda-stat-primary">{{ calcularMediaRodaDaVida() | number:'1.1-1' }}</span>
+              </div>
+              <div class="roda-stat-item">
+                <span class="roda-stat-label">Maior Área</span>
+                <span class="roda-stat-value">{{ getMelhorAreaRodaDaVida() }}</span>
+              </div>
+              <div class="roda-stat-item">
+                <span class="roda-stat-label">Menor Área</span>
+                <span class="roda-stat-value">{{ getPiorAreaRodaDaVida() }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Decisões -->
+          <div class="roda-decisions-section">
+            <h3 class="roda-section-title">
+              <i class="fa-solid fa-lightbulb"></i>
+              Suas Decisões e Ações
+            </h3>
+            <p class="roda-section-subtitle">
+              Para cada área, defina que decisão você tomará para melhorar
+            </p>
+
+            <div class="roda-decisions-grid">
+              <div *ngFor="let area of rodaDaVidaAreas" class="roda-decision-item">
+                <label class="roda-decision-label">
+                  <i class="fa-solid fa-circle-dot"></i>
+                  {{ area.label }}
+                </label>
+                <textarea
+                  class="roda-decision-input"
+                  [(ngModel)]="rodaDaVida[area.key].note"
+                  placeholder="Qual decisão vou tomar para esta área?"
+                  rows="3"></textarea>
+              </div>
+
+              <!-- Pergunta Especial -->
+              <div class="roda-decision-item roda-special-question">
+                <label class="roda-decision-label roda-special-label">
+                  <i class="fa-solid fa-star"></i>
+                  Que fichas caem?
+                </label>
+                <textarea
+                  class="roda-decision-input"
+                  [(ngModel)]="rodaDaVida.fichas_caem"
+                  placeholder="Quais áreas da minha vida serão impactadas positivamente quando eu melhorar essa área principal?"
+                  rows="4"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botões de Ação -->
+          <div class="roda-actions">
+            <button
+              type="button"
+              class="btn-save-roda"
+              (click)="salvarRodaDaVida()"
+              [disabled]="salvandoRodaDaVida">
+              <i class="fa-solid" [ngClass]="salvandoRodaDaVida ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+              {{ salvandoRodaDaVida ? 'Salvando...' : 'Salvar Roda da Vida' }}
+            </button>
+
+            <button
+              type="button"
+              class="btn-export-roda"
+              (click)="exportarRodaDaVidaPDF()">
+              <i class="fa-solid fa-file-pdf"></i>
+              Exportar PDF
+            </button>
+          </div>
+
+          <!-- Nota Legal -->
+          <p class="roda-legal-hint">
+            <i class="fa-solid fa-info-circle"></i>
+            Campos e nomes inspirados no Mapa de Autoavaliação Sistêmico – MAAS® / "A Única Coisa". Uso pessoal.
+          </p>
+
+        </div>
+      </div>
+    </section>
+
     <!-- Termômetro de Gestão Section -->
     <section *ngIf="secaoId === 'termometroGestao'" class="dark-section termometro-gestao-main-section"
              [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.termometroGestao?.ativo">

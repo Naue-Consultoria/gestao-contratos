@@ -663,6 +663,25 @@ export class MentoriaService {
     );
   }
 
+  // ===== RODA DA VIDA MAAS =====
+
+  /**
+   * Obter Roda da Vida (via token público)
+   */
+  obterRodaDaVidaPublico(token: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/publico/${token}/roda-da-vida`);
+  }
+
+  /**
+   * Salvar Roda da Vida (via token público)
+   */
+  salvarRodaDaVida(token: string, dados: any): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/publico/${token}/roda-da-vida`,
+      dados
+    );
+  }
+
   // ===== TERMÔMETRO DE GESTÃO =====
 
   /**

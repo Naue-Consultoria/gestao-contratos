@@ -3376,6 +3376,657 @@ html {
   }
 }
 
+/* ===== RODA DA VIDA MAAS ===== */
+
+.roda-da-vida-main-section {
+  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.roda-da-vida-content {
+  background: white;
+  border-radius: 24px;
+  padding: 3rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* ===== LAYOUT 2 COLUNAS ===== */
+
+.roda-two-columns {
+  display: grid;
+  grid-template-columns: minmax(500px, 600px) 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+  align-items: start;
+}
+
+/* ===== COLUNA ESQUERDA: GRÁFICO ===== */
+
+.roda-left-side {
+  display: flex;
+  flex-direction: column;
+}
+
+.roda-canvas-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f8fdf9 0%, #f0f9f4 100%);
+  border-radius: 24px;
+  padding: 2rem;
+  border: 2px solid rgba(26, 77, 46, 0.08);
+}
+
+#rodaDaVidaCanvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Card de Resumo */
+
+.roda-resume-card {
+  background: white;
+  border-radius: 20px;
+  border: 2px solid rgba(26, 77, 46, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  padding: 1.75rem 2rem;
+  margin-bottom: 3rem;
+}
+
+.roda-resume-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #022c22;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid rgba(2, 44, 34, 0.1);
+}
+
+.roda-resume-title i {
+  font-size: 22px;
+  color: #022c22;
+}
+
+.roda-resume-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.roda-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8fdf9 0%, #f0f9f4 100%);
+  border-radius: 16px;
+  border: 2px solid rgba(26, 77, 46, 0.08);
+  transition: all 0.3s ease;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.roda-stat-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(2, 44, 34, 0.15);
+  border-color: rgba(2, 44, 34, 0.25);
+}
+
+.roda-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.roda-stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #022c22;
+  line-height: 1;
+}
+
+.roda-stat-primary {
+  font-size: 36px;
+  color: #022c22;
+}
+
+/* ===== COLUNA DIREITA: CONTROLES ===== */
+
+.roda-right-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 100%;
+}
+
+.roda-controls-header {
+  background: #022c22;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  color: white;
+  box-shadow: 0 6px 25px rgba(2, 44, 34, 0.3);
+}
+
+.roda-controls-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.roda-controls-title i {
+  font-size: 22px;
+}
+
+.roda-controls-subtitle {
+  font-size: 13px;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.roda-controls-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 480px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.5rem;
+  max-width: 100%;
+}
+
+.roda-controls-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.roda-controls-list::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 10px;
+}
+
+.roda-controls-list::-webkit-scrollbar-thumb {
+  background: #022c22;
+  border-radius: 10px;
+}
+
+.roda-controls-list::-webkit-scrollbar-thumb:hover {
+  background: #014d3a;
+}
+
+.roda-control-item {
+  background: white;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1.5px solid rgba(26, 77, 46, 0.12);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  min-width: 0;
+  width: 100%;
+}
+
+.roda-control-item:hover {
+  transform: translateX(3px);
+  box-shadow: 0 4px 18px rgba(2, 44, 34, 0.12);
+  border-color: rgba(2, 44, 34, 0.25);
+}
+
+.roda-control-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 1rem;
+  width: 100%;
+}
+
+.roda-control-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #022c22;
+  letter-spacing: 0.2px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roda-control-input {
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+  padding: 6px 10px;
+  border: 1.5px solid rgba(2, 44, 34, 0.2);
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+  color: #022c22;
+  background: linear-gradient(135deg, #f8fdf9 0%, #f0f9f4 100%);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.roda-control-input:focus {
+  outline: none;
+  border-color: #022c22;
+  background: white;
+  box-shadow: 0 0 0 2px rgba(2, 44, 34, 0.12);
+}
+
+.roda-control-input::-webkit-inner-spin-button,
+.roda-control-input::-webkit-outer-spin-button {
+  opacity: 1;
+  height: 24px;
+}
+
+.roda-control-hint {
+  display: none;
+}
+
+.roda-control-slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.roda-control-min,
+.roda-control-max {
+  font-size: 11px;
+  font-weight: 700;
+  color: #999;
+  min-width: 18px;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.roda-control-slider {
+  flex: 1;
+  height: 8px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #e8f5e9 0%, #a5d6a7 100%);
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.roda-control-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #022c22;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(2, 44, 34, 0.45);
+  border: 3px solid white;
+}
+
+.roda-control-slider::-webkit-slider-thumb:hover {
+  background: #014d3a;
+  transform: scale(1.3);
+  box-shadow: 0 6px 22px rgba(2, 44, 34, 0.55);
+}
+
+.roda-control-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #022c22;
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 4px 15px rgba(2, 44, 34, 0.45);
+  transition: all 0.3s ease;
+}
+
+.roda-control-slider::-moz-range-thumb:hover {
+  background: #014d3a;
+  transform: scale(1.3);
+  box-shadow: 0 6px 22px rgba(2, 44, 34, 0.55);
+}
+
+/* ===== SEÇÃO DE DECISÕES ===== */
+
+.roda-decisions-section {
+  background: linear-gradient(135deg, #f0f4f0 0%, #e8f5e9 100%);
+  padding: 3rem;
+  border-radius: 24px;
+  margin-bottom: 3rem;
+  border: 2px solid rgba(26, 77, 46, 0.08);
+}
+
+.roda-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #022c22;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.roda-section-title i {
+  font-size: 28px;
+  color: #022c22;
+}
+
+.roda-section-subtitle {
+  text-align: center;
+  color: #666;
+  font-size: 15px;
+  margin-bottom: 2.5rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.roda-decisions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+.roda-decision-item {
+  background: white;
+  padding: 1.75rem;
+  border-radius: 18px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 2px solid rgba(26, 77, 46, 0.1);
+}
+
+.roda-decision-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 35px rgba(2, 44, 34, 0.15);
+  border-color: rgba(2, 44, 34, 0.25);
+}
+
+.roda-decision-label {
+  font-weight: 700;
+  color: #022c22;
+  margin-bottom: 14px;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.roda-decision-label i {
+  font-size: 14px;
+  color: #022c22;
+}
+
+.roda-decision-input {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #e5e5e5;
+  border-radius: 14px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  resize: vertical;
+  font-family: inherit;
+  background: #fafafa;
+  line-height: 1.6;
+}
+
+.roda-decision-input:focus {
+  outline: none;
+  border-color: #022c22;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(2, 44, 34, 0.12);
+}
+
+.roda-special-question {
+  grid-column: 1 / -1;
+  background: #022c22;
+  border: none;
+  padding: 2.5rem;
+}
+
+.roda-special-label {
+  color: white !important;
+  font-size: 20px !important;
+  margin-bottom: 16px !important;
+}
+
+.roda-special-label i {
+  color: #ffd700 !important;
+  font-size: 18px !important;
+}
+
+.roda-special-question .roda-decision-input {
+  background: white;
+  font-weight: 500;
+  border: none;
+  font-size: 15px;
+  padding: 18px;
+}
+
+.roda-special-question .roda-decision-input:focus {
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.35);
+}
+
+/* ===== AÇÕES E OUTROS ===== */
+
+.roda-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+.btn-save-roda {
+  padding: 1.125rem 3rem;
+  background: #022c22;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 8px 24px rgba(2, 44, 34, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-save-roda:hover:not(:disabled) {
+  background: #014d3a;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 183, 79, 0.4);
+}
+
+.btn-save-roda:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-export-roda {
+  padding: 1.125rem 3rem;
+  background: #022c22;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 8px 24px rgba(2, 44, 34, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-export-roda:hover {
+  background: #014d3a;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 183, 79, 0.4);
+}
+
+.roda-legal-hint {
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  margin-top: 1rem;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.roda-legal-hint i {
+  font-size: 14px;
+  color: #bbb;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+
+@media (max-width: 1400px) {
+  .roda-two-columns {
+    grid-template-columns: minmax(450px, 550px) 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .roda-two-columns {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .roda-left-side {
+    max-width: 600px;
+    margin: 0 auto;
+    height: auto;
+  }
+
+  .roda-canvas-wrapper {
+    min-height: auto;
+    height: auto;
+  }
+
+  .roda-right-side {
+    height: auto;
+    min-height: auto;
+  }
+
+  .roda-controls-list {
+    max-height: 500px;
+  }
+
+  .roda-resume-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .roda-decisions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .roda-da-vida-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .roda-two-columns {
+    gap: 2rem;
+  }
+
+  .roda-left-side {
+    height: auto;
+  }
+
+  .roda-canvas-wrapper {
+    padding: 1.5rem;
+    min-height: auto;
+    height: auto;
+  }
+
+  #rodaDaVidaCanvas {
+    max-width: 100%;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .roda-right-side {
+    height: auto;
+    min-height: auto;
+  }
+
+  .roda-controls-list {
+    max-height: 400px;
+  }
+
+  .roda-resume-card {
+    padding: 1.5rem;
+  }
+
+  .roda-resume-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .roda-stat-item {
+    padding: 1.25rem;
+  }
+
+  .roda-stat-value {
+    font-size: 24px;
+  }
+
+  .roda-stat-primary {
+    font-size: 32px;
+  }
+
+  .roda-controls-header {
+    padding: 1.5rem;
+  }
+
+  .roda-controls-title {
+    font-size: 20px;
+  }
+
+  .roda-control-item {
+    padding: 1.25rem;
+  }
+
+  .roda-decisions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .roda-decisions-section {
+    padding: 2rem 1.5rem;
+  }
+
+  .roda-section-title {
+    font-size: 22px;
+  }
+}
+
 /* ===== ZONAS DE APRENDIZADO ===== */
 
 .zonas-aprendizado-main-section {

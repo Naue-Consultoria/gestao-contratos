@@ -85,7 +85,7 @@ interface MapaMentalData {
 
 // Tipos de blocos disponíveis
 type TipoBloco = 'visaoGeral' | 'mentoria' | 'testes' | 'proximosPassos' | 'referencias' |
-                  'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'termometroGestao' | 'encerramento';
+                  'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'encerramento';
 
 interface BlocoEditor {
   id: string;
@@ -97,7 +97,7 @@ interface BlocoEditor {
 }
 
 interface SecaoReordenavel {
-  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'termometroGestao';
+  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao';
   titulo: string;
   icone: string;
   ordem: number;
@@ -113,6 +113,7 @@ interface ConteudoMentoria {
   modeloABC: { ativo: boolean };
   zonasAprendizado: { ativo: boolean };
   goldenCircle: { ativo: boolean };
+  rodaDaVida: { ativo: boolean };
   termometroGestao: { ativo: boolean };
   encerramento: { ativo: boolean; conteudo: string };
   ordemSecoes?: string[]; // Nova propriedade para controlar a ordem
@@ -162,6 +163,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { tipo: 'modeloABC', titulo: 'Modelo ABC', icone: 'fa-brain', descricao: 'Análise comportamental' },
     { tipo: 'zonasAprendizado', titulo: 'Zonas de Aprendizado', icone: 'fa-chart-simple', descricao: 'Níveis de desenvolvimento' },
     { tipo: 'goldenCircle', titulo: 'Golden Circle', icone: 'fa-bullseye', descricao: 'Why, How, What' },
+    { tipo: 'rodaDaVida', titulo: 'Roda da Vida MAAS', icone: 'fa-dharmachakra', descricao: 'Autoavaliação Sistêmica' },
     { tipo: 'termometroGestao', titulo: 'Termômetro de Gestão', icone: 'fa-chart-column', descricao: 'Análise de Perfil Profissional' },
     { tipo: 'encerramento', titulo: 'Encerramento', icone: 'fa-flag-checkered', descricao: 'Conclusão do encontro' }
   ];
@@ -204,9 +206,10 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     modeloABC: { ativo: false },
     zonasAprendizado: { ativo: false },
     goldenCircle: { ativo: false },
+    rodaDaVida: { ativo: false },
     termometroGestao: { ativo: false },
     encerramento: { ativo: true, conteudo: '' },
-    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'termometroGestao'] // Ordem padrão
+    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao'] // Ordem padrão
   };
 
   // Lista de seções reordenáveis
@@ -218,7 +221,8 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { id: 'modeloABC', titulo: 'Modelo ABC', icone: 'fa-brain', ordem: 4 },
     { id: 'zonasAprendizado', titulo: 'Zonas de Aprendizado', icone: 'fa-chart-simple', ordem: 5 },
     { id: 'goldenCircle', titulo: 'The Golden Circle', icone: 'fa-bullseye', ordem: 6 },
-    { id: 'termometroGestao', titulo: 'Termômetro de Gestão', icone: 'fa-chart-column', ordem: 7 }
+    { id: 'rodaDaVida', titulo: 'Roda da Vida MAAS', icone: 'fa-dharmachakra', ordem: 7 },
+    { id: 'termometroGestao', titulo: 'Termômetro de Gestão', icone: 'fa-chart-column', ordem: 8 }
   ];
 
   constructor(
@@ -333,6 +337,11 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
                 this.conteudo.goldenCircle = { ativo: false };
               }
 
+              // Adicionar rodaDaVida se não existir (retrocompatibilidade)
+              if (!this.conteudo.rodaDaVida) {
+                this.conteudo.rodaDaVida = { ativo: false };
+              }
+
               // Adicionar termometroGestao se não existir (retrocompatibilidade)
               if (!this.conteudo.termometroGestao) {
                 this.conteudo.termometroGestao = { ativo: false };
@@ -340,13 +349,16 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
               // Adicionar ordem de seções se não existir (retrocompatibilidade)
               if (!this.conteudo.ordemSecoes) {
-                this.conteudo.ordemSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'termometroGestao'];
+                this.conteudo.ordemSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao'];
               } else if (this.conteudo.ordemSecoes.length === 4) {
-                // Migrar ordens antigas (4 seções) para o novo formato (8 seções)
-                this.conteudo.ordemSecoes = [...this.conteudo.ordemSecoes, 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'termometroGestao'];
+                // Migrar ordens antigas (4 seções) para o novo formato (9 seções)
+                this.conteudo.ordemSecoes = [...this.conteudo.ordemSecoes, 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao'];
               } else if (this.conteudo.ordemSecoes.length === 7) {
-                // Migrar de 7 para 8 seções (adicionar termometroGestao)
-                this.conteudo.ordemSecoes = [...this.conteudo.ordemSecoes, 'termometroGestao'];
+                // Migrar de 7 para 9 seções (adicionar rodaDaVida e termometroGestao)
+                this.conteudo.ordemSecoes = [...this.conteudo.ordemSecoes, 'rodaDaVida', 'termometroGestao'];
+              } else if (this.conteudo.ordemSecoes.length === 8) {
+                // Migrar de 8 para 9 seções (adicionar rodaDaVida)
+                this.conteudo.ordemSecoes = [...this.conteudo.ordemSecoes, 'rodaDaVida'];
               }
             } catch (e) {
               // Se não for JSON, é conteúdo antigo - manter vazio
@@ -417,6 +429,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       'modeloABC': { ativo: this.conteudo.modeloABC.ativo, titulo: 'Modelo ABC', icone: 'fa-brain' },
       'zonasAprendizado': { ativo: this.conteudo.zonasAprendizado.ativo, titulo: 'Zonas de Aprendizado', icone: 'fa-chart-simple' },
       'goldenCircle': { ativo: this.conteudo.goldenCircle.ativo, titulo: 'Golden Circle', icone: 'fa-bullseye' },
+      'rodaDaVida': { ativo: this.conteudo.rodaDaVida.ativo, titulo: 'Roda da Vida MAAS', icone: 'fa-dharmachakra' },
       'termometroGestao': { ativo: this.conteudo.termometroGestao.ativo, titulo: 'Termômetro de Gestão', icone: 'fa-chart-column' }
     };
 
@@ -555,6 +568,9 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       case 'goldenCircle':
         this.conteudo.goldenCircle.ativo = ativar;
         break;
+      case 'rodaDaVida':
+        this.conteudo.rodaDaVida.ativo = ativar;
+        break;
       case 'termometroGestao':
         this.conteudo.termometroGestao.ativo = ativar;
         break;
@@ -663,7 +679,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       this.conteudo.blocosAtivos = this.blocosAtivos;
 
       // Extrair ordem das seções
-      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'termometroGestao'];
+      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao'];
       this.conteudo.ordemSecoes = this.blocosAtivos
         .filter(bloco => secoesReordenaveis.includes(bloco.tipo))
         .sort((a, b) => a.ordem - b.ordem)
@@ -710,7 +726,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
   get secoesOrdenadas(): string[] {
     if (!this.conteudo.ordemSecoes || this.conteudo.ordemSecoes.length === 0) {
-      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle'];
+      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao'];
     }
     return this.conteudo.ordemSecoes;
   }
@@ -860,7 +876,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
       // 2.1 Extrair ordem das seções reordenáveis para a página pública
       // Filtra apenas as seções reordenáveis (não incluindo visaoGeral, mentoria e encerramento que têm posições fixas)
-      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'termometroGestao'];
+      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao'];
       this.conteudo.ordemSecoes = this.blocosAtivos
         .filter(bloco => secoesReordenaveis.includes(bloco.tipo))
         .sort((a, b) => a.ordem - b.ordem)

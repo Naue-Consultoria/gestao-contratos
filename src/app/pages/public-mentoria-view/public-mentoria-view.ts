@@ -179,6 +179,38 @@ export class PublicMentoriaViewComponent implements OnInit {
   goldenCircleId: number | null = null;
   salvandoGoldenCircle: boolean = false;
 
+  // Roda da Vida MAAS
+  rodaDaVida: any = {
+    espiritual: { score: 5, note: '' },
+    parentes: { score: 5, note: '' },
+    conjugal: { score: 5, note: '' },
+    filhos: { score: 5, note: '' },
+    social: { score: 5, note: '' },
+    saude: { score: 5, note: '' },
+    servir: { score: 5, note: '' },
+    intelectual: { score: 5, note: '' },
+    financeiro: { score: 5, note: '' },
+    profissional: { score: 5, note: '' },
+    emocional: { score: 5, note: '' },
+    fichas_caem: ''
+  };
+  rodaDaVidaAreas = [
+    { key: 'espiritual', label: 'ESPIRITUAL', hint: 'Servir / Propósito / Fé' },
+    { key: 'parentes', label: 'PARENTES', hint: 'Família de origem / vínculo' },
+    { key: 'conjugal', label: 'CONJUGAL', hint: 'Relacionamento amoroso' },
+    { key: 'filhos', label: 'FILHOS', hint: 'Relação, presença, educação' },
+    { key: 'social', label: 'SOCIAL', hint: 'Amigos / Rede de apoio' },
+    { key: 'saude', label: 'SAÚDE', hint: 'Energia / Sono / Corpo' },
+    { key: 'servir', label: 'SERVIR', hint: 'Contribuição / Impacto social' },
+    { key: 'intelectual', label: 'INTELECTUAL', hint: 'Aprendizado / Estudos' },
+    { key: 'financeiro', label: 'FINANCEIRO', hint: 'Renda / Dívidas / Plano' },
+    { key: 'profissional', label: 'PROFISSIONAL', hint: 'Carreira / Negócio' },
+    { key: 'emocional', label: 'EMOCIONAL', hint: 'Estado interno / Autogestão' }
+  ];
+  rodaDaVidaId: number | null = null;
+  salvandoRodaDaVida: boolean = false;
+  rodaDaVidaChart: any = null;
+
   // Termômetro de Gestão
   termometroGestao: TermometroGestaoData = {
     atividades: [],
@@ -884,6 +916,29 @@ export class PublicMentoriaViewComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('Erro ao carregar Termômetro de Gestão:', error);
+      }
+    });
+
+    // Carregar Roda da Vida MAAS do banco de dados
+    console.log('🎯 Carregando Roda da Vida do banco de dados...');
+    this.carregarRodaDaVida();
+
+    // Carregar Golden Circle do banco de dados
+    console.log('⭕ Carregando Golden Circle do banco de dados...');
+    this.mentoriaService.obterGoldenCirclePublico(this.token).subscribe({
+      next: (response: any) => {
+        if (response.success && response.data) {
+          console.log('✅ Golden Circle carregado do banco:', response.data);
+          this.goldenCircleId = response.data.id;
+          this.goldenCircle = {
+            why: response.data.why || '',
+            how: response.data.how || '',
+            what: response.data.what || ''
+          };
+        }
+      },
+      error: (error: any) => {
+        console.warn('⚠️ Erro ao carregar Golden Circle:', error);
       }
     });
   }
@@ -2558,6 +2613,445 @@ export class PublicMentoriaViewComponent implements OnInit {
         this.salvandoGoldenCircle = false;
       }
     });
+  }
+
+  // ===== RODA DA VIDA MAAS =====
+
+  carregarRodaDaVida(): void {
+    if (!this.token) return;
+
+    this.mentoriaService.obterRodaDaVidaPublico(this.token).subscribe({
+      next: (response: any) => {
+        if (response.data) {
+          console.log('✅ Roda da Vida carregada:', response.data);
+          this.rodaDaVidaId = response.data.id;
+
+          // Carregar dados das áreas
+          this.rodaDaVidaAreas.forEach(area => {
+            if (response.data[area.key]) {
+              this.rodaDaVida[area.key] = response.data[area.key];
+            }
+          });
+
+          // Carregar pergunta especial
+          if (response.data.fichas_caem) {
+            this.rodaDaVida.fichas_caem = response.data.fichas_caem;
+          }
+        }
+
+        // Sempre desenhar gráfico, mesmo sem dados salvos
+        setTimeout(() => this.desenharRodaDaVida(), 100);
+      },
+      error: (error: any) => {
+        console.error('❌ Erro ao carregar Roda da Vida:', error);
+
+        // Desenhar gráfico com valores padrão mesmo em caso de erro
+        setTimeout(() => this.desenharRodaDaVida(), 100);
+      }
+    });
+  }
+
+  salvarRodaDaVida(): void {
+    if (!this.token || this.expired) {
+      this.toastr.warning('Não foi possível salvar a Roda da Vida');
+      return;
+    }
+
+    this.salvandoRodaDaVida = true;
+
+    console.log('💾 Salvando Roda da Vida...', this.rodaDaVida);
+
+    this.mentoriaService.salvarRodaDaVida(this.token, this.rodaDaVida).subscribe({
+      next: (response: any) => {
+        console.log('✅ Roda da Vida salva com sucesso!', response);
+        if (response.data && response.data.id) {
+          this.rodaDaVidaId = response.data.id;
+        }
+        this.toastr.success('Roda da Vida salva com sucesso!');
+        this.salvandoRodaDaVida = false;
+      },
+      error: (error: any) => {
+        console.error('❌ Erro ao salvar Roda da Vida:', error);
+        this.toastr.error('Erro ao salvar Roda da Vida');
+        this.salvandoRodaDaVida = false;
+      }
+    });
+  }
+
+  desenharRodaDaVida(): void {
+    const canvas = document.getElementById('rodaDaVidaCanvas') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 160; // Reduzido para dar mais espaço aos labels (canvas 550x550)
+    const segments = this.rodaDaVidaAreas.length;
+    const angleStep = (2 * Math.PI) / segments;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Desenhar círculos de fundo
+    for (let i = 1; i <= 10; i++) {
+      ctx.strokeStyle = i % 2 === 0 ? '#f0f0f0' : '#fafafa';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, (radius / 10) * i, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+
+    // Desenhar segmentos
+    for (let i = 0; i < segments; i++) {
+      const area = this.rodaDaVidaAreas[i];
+      const startAngle = angleStep * i - Math.PI / 2;
+      const endAngle = startAngle + angleStep;
+      const value = this.rodaDaVida[area.key]?.score ?? 5;
+      const segmentRadius = (radius / 10) * value;
+
+      // Gradiente de cor
+      const hue = (360 / segments) * i;
+      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, segmentRadius);
+      gradient.addColorStop(0, `hsla(${hue}, 65%, 72%, 0.85)`);
+      gradient.addColorStop(1, `hsla(${hue}, 65%, 58%, 0.95)`);
+
+      // Desenhar segmento preenchido
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.arc(centerX, centerY, segmentRadius, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fill();
+
+      // Desenhar borda do segmento
+      ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(
+        centerX + radius * Math.cos(startAngle),
+        centerY + radius * Math.sin(startAngle)
+      );
+      ctx.stroke();
+
+      // Desenhar labels com quebra de linha e melhor posicionamento
+      const labelAngle = startAngle + angleStep / 2;
+      const labelDistance = radius + 75; // 75 pixels de distância = 235 total (bem dentro do canvas 550)
+      const labelX = centerX + labelDistance * Math.cos(labelAngle);
+      const labelY = centerY + labelDistance * Math.sin(labelAngle);
+
+      ctx.fillStyle = '#1a4d2e';
+      ctx.font = 'bold 11px Inter, Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Quebrar texto longo em múltiplas linhas
+      const maxWidth = 95;
+      const words = area.label.split(' ');
+      const lines: string[] = [];
+      let currentLine = words[0];
+
+      for (let j = 1; j < words.length; j++) {
+        const testLine = currentLine + ' ' + words[j];
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth) {
+          lines.push(currentLine);
+          currentLine = words[j];
+        } else {
+          currentLine = testLine;
+        }
+      }
+      lines.push(currentLine);
+
+      // Desenhar cada linha
+      const lineHeight = 13;
+      const startY = labelY - ((lines.length - 1) * lineHeight) / 2;
+      lines.forEach((line, index) => {
+        ctx.fillText(line, labelX, startY + index * lineHeight);
+      });
+
+      // Desenhar valor no segmento
+      if (value > 3) {
+        const valueDistance = segmentRadius * 0.65;
+        const valueX = centerX + valueDistance * Math.cos(labelAngle);
+        const valueY = centerY + valueDistance * Math.sin(labelAngle);
+
+        ctx.fillStyle = 'rgba(26, 77, 46, 0.9)';
+        ctx.beginPath();
+        ctx.arc(valueX, valueY, 14, 0, 2 * Math.PI);
+        ctx.fill();
+
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 14px Inter, Arial';
+        ctx.fillText(value.toString(), valueX, valueY);
+      }
+    }
+
+    // Desenhar círculo central
+    const centerGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 12);
+    centerGradient.addColorStop(0, '#ffffff');
+    centerGradient.addColorStop(1, '#e8f5e9');
+    ctx.fillStyle = centerGradient;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 10, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.strokeStyle = '#1a4d2e';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  calcularMediaRodaDaVida(): number {
+    let soma = 0;
+    this.rodaDaVidaAreas.forEach(area => {
+      soma += this.rodaDaVida[area.key]?.score ?? 5;
+    });
+    return soma / this.rodaDaVidaAreas.length;
+  }
+
+  getMelhorAreaRodaDaVida(): string {
+    let melhorArea = this.rodaDaVidaAreas[0];
+    let melhorScore = this.rodaDaVida[melhorArea.key]?.score ?? 5;
+
+    this.rodaDaVidaAreas.forEach(area => {
+      const score = this.rodaDaVida[area.key]?.score ?? 5;
+      if (score > melhorScore) {
+        melhorScore = score;
+        melhorArea = area;
+      }
+    });
+
+    return `${melhorArea.label} (${melhorScore})`;
+  }
+
+  getPiorAreaRodaDaVida(): string {
+    let piorArea = this.rodaDaVidaAreas[0];
+    let piorScore = this.rodaDaVida[piorArea.key]?.score ?? 5;
+
+    this.rodaDaVidaAreas.forEach(area => {
+      const score = this.rodaDaVida[area.key]?.score ?? 5;
+      if (score < piorScore) {
+        piorScore = score;
+        piorArea = area;
+      }
+    });
+
+    return `${piorArea.label} (${piorScore})`;
+  }
+
+  onRodaDaVidaSliderChange(areaKey: string): void {
+    // Redesenhar gráfico quando o slider muda
+    setTimeout(() => this.desenharRodaDaVida(), 10);
+  }
+
+  async exportarRodaDaVidaPDF(): Promise<void> {
+    try {
+      this.toastr.info('Gerando PDF da Roda da Vida...');
+
+      // Criar container temporário para renderização
+      const container = this.criarContainerRodaDaVidaVisualizacao();
+      document.body.appendChild(container);
+
+      // Aguardar renderização
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Capturar como imagem
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        width: container.scrollWidth,
+        height: container.scrollHeight
+      });
+
+      // Remover container temporário
+      document.body.removeChild(container);
+
+      // Converter para PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`roda-da-vida-${this.encontro?.mentorado_nome || 'mentoria'}-${Date.now()}.pdf`);
+
+      this.toastr.success('PDF exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      this.toastr.error('Erro ao exportar PDF');
+    }
+  }
+
+  private criarContainerRodaDaVidaVisualizacao(): HTMLElement {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.background = '#ffffff';
+    container.style.padding = '60px';
+    container.style.minWidth = '1200px';
+    container.style.fontFamily = 'Inter, Arial, sans-serif';
+
+    // Criar título
+    const titulo = document.createElement('div');
+    titulo.style.textAlign = 'center';
+    titulo.style.marginBottom = '40px';
+    titulo.innerHTML = `
+      <h1 style="color: #1a4d2e; font-size: 36px; font-weight: 800; margin-bottom: 10px;">
+        Roda da Vida MAAS®
+      </h1>
+      <p style="color: #666; font-size: 18px; margin: 0;">
+        Mapa de Autoavaliação Sistêmico - "A Única Coisa"
+      </p>
+      <p style="color: #999; font-size: 14px; margin-top: 20px;">
+        ${this.encontro?.mentorado_nome || 'Mentorado'} - ${new Date().toLocaleDateString('pt-BR')}
+      </p>
+    `;
+    container.appendChild(titulo);
+
+    // Criar seção do gráfico
+    const graficosSection = document.createElement('div');
+    graficosSection.style.display = 'flex';
+    graficosSection.style.gap = '40px';
+    graficosSection.style.marginBottom = '40px';
+    graficosSection.style.justifyContent = 'center';
+    graficosSection.style.alignItems = 'flex-start';
+
+    // Canvas da roda
+    const canvasWrapper = document.createElement('div');
+    canvasWrapper.style.display = 'flex';
+    canvasWrapper.style.justifyContent = 'center';
+    canvasWrapper.style.padding = '30px';
+    canvasWrapper.style.background = 'linear-gradient(135deg, #f8fdf9 0%, #f0f9f4 100%)';
+    canvasWrapper.style.borderRadius = '24px';
+    canvasWrapper.style.border = '2px solid rgba(26, 77, 46, 0.1)';
+
+    const canvasClone = document.getElementById('rodaDaVidaCanvas') as HTMLCanvasElement;
+    if (canvasClone) {
+      const newCanvas = document.createElement('canvas');
+      newCanvas.width = 550;
+      newCanvas.height = 550;
+      const ctx = newCanvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(canvasClone, 0, 0);
+      }
+      canvasWrapper.appendChild(newCanvas);
+    }
+
+    graficosSection.appendChild(canvasWrapper);
+
+    // Card de resumo
+    const resumoCard = document.createElement('div');
+    resumoCard.style.background = '#ffffff';
+    resumoCard.style.borderRadius = '20px';
+    resumoCard.style.border = '2px solid rgba(26, 77, 46, 0.15)';
+    resumoCard.style.padding = '30px';
+    resumoCard.style.minWidth = '300px';
+    resumoCard.innerHTML = `
+      <h3 style="color: #1a4d2e; font-size: 22px; font-weight: 800; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 3px solid rgba(26, 77, 46, 0.1);">
+        <i class="fa-solid fa-chart-line" style="margin-right: 10px; color: #2d7a4d;"></i>
+        Resumo Geral
+      </h3>
+      <div style="display: flex; flex-direction: column; gap: 15px;">
+        <div style="padding: 15px; background: linear-gradient(135deg, #f8fdf9 0%, #f0f9f4 100%); border-radius: 14px; border: 2px solid rgba(26, 77, 46, 0.08); text-align: center;">
+          <div style="font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 8px;">MÉDIA GERAL</div>
+          <div style="font-size: 32px; font-weight: 800; color: #2d7a4d;">${this.calcularMediaRodaDaVida().toFixed(1)}</div>
+        </div>
+        <div style="padding: 15px; background: linear-gradient(135deg, #f8fdf9 0%, #f0f9f4 100%); border-radius: 14px; border: 2px solid rgba(26, 77, 46, 0.08); text-align: center;">
+          <div style="font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 8px;">MAIOR ÁREA</div>
+          <div style="font-size: 18px; font-weight: 800; color: #1a4d2e;">${this.getMelhorAreaRodaDaVida()}</div>
+        </div>
+        <div style="padding: 15px; background: linear-gradient(135deg, #f8fdf9 0%, #f0f9f4 100%); border-radius: 14px; border: 2px solid rgba(26, 77, 46, 0.08); text-align: center;">
+          <div style="font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 8px;">MENOR ÁREA</div>
+          <div style="font-size: 18px; font-weight: 800; color: #1a4d2e;">${this.getPiorAreaRodaDaVida()}</div>
+        </div>
+      </div>
+    `;
+
+    graficosSection.appendChild(resumoCard);
+    container.appendChild(graficosSection);
+
+    // Tabela de valores
+    const tabelaSection = document.createElement('div');
+    tabelaSection.style.marginTop = '40px';
+
+    const tabelaTitulo = document.createElement('h3');
+    tabelaTitulo.style.color = '#1a4d2e';
+    tabelaTitulo.style.fontSize = '24px';
+    tabelaTitulo.style.fontWeight = '800';
+    tabelaTitulo.style.marginBottom = '20px';
+    tabelaTitulo.textContent = 'Detalhamento das Áreas';
+    tabelaSection.appendChild(tabelaTitulo);
+
+    const tabela = document.createElement('table');
+    tabela.style.width = '100%';
+    tabela.style.borderCollapse = 'collapse';
+
+    let tabelaHTML = `
+      <thead>
+        <tr style="background: linear-gradient(135deg, #1a4d2e 0%, #2d7a4d 100%); color: white;">
+          <th style="padding: 15px; text-align: left; border-radius: 10px 0 0 0;">Área</th>
+          <th style="padding: 15px; text-align: center;">Pontuação</th>
+          <th style="padding: 15px; text-align: left; border-radius: 0 10px 0 0;">Decisão</th>
+        </tr>
+      </thead>
+      <tbody>
+    `;
+
+    this.rodaDaVidaAreas.forEach((area, index) => {
+      const score = this.rodaDaVida[area.key]?.score ?? 5;
+      const note = this.rodaDaVida[area.key]?.note || '-';
+      const bgColor = index % 2 === 0 ? '#f8fdf9' : '#ffffff';
+
+      tabelaHTML += `
+        <tr style="background: ${bgColor}; border-bottom: 1px solid #e5e5e5;">
+          <td style="padding: 15px; font-weight: 600; color: #1a4d2e;">${area.label}</td>
+          <td style="padding: 15px; text-align: center;">
+            <span style="display: inline-block; background: linear-gradient(135deg, #1a4d2e 0%, #2d7a4d 100%); color: white; padding: 8px 20px; border-radius: 12px; font-weight: 800; font-size: 16px;">
+              ${score}
+            </span>
+          </td>
+          <td style="padding: 15px; color: #666; font-size: 14px;">${note}</td>
+        </tr>
+      `;
+    });
+
+    // Adicionar "Que fichas caem?"
+    tabelaHTML += `
+      <tr style="background: linear-gradient(135deg, #1a4d2e 0%, #2d7a4d 100%); color: white;">
+        <td colspan="3" style="padding: 20px; border-radius: 0 0 10px 10px;">
+          <div style="font-weight: 700; font-size: 18px; margin-bottom: 10px; color: white;">
+            <i class="fa-solid fa-star" style="color: #ffd700; margin-right: 8px;"></i>
+            Que fichas caem?
+          </div>
+          <div style="font-size: 15px; line-height: 1.6; color: white;">
+            ${this.rodaDaVida.fichas_caem || 'Não preenchido'}
+          </div>
+        </td>
+      </tr>
+    `;
+
+    tabelaHTML += '</tbody>';
+    tabela.innerHTML = tabelaHTML;
+    tabelaSection.appendChild(tabela);
+    container.appendChild(tabelaSection);
+
+    // Rodapé
+    const rodape = document.createElement('div');
+    rodape.style.marginTop = '40px';
+    rodape.style.textAlign = 'center';
+    rodape.style.color = '#999';
+    rodape.style.fontSize = '11px';
+    rodape.style.fontStyle = 'italic';
+    rodape.innerHTML = `
+      <p>Campos e nomes inspirados no Mapa de Autoavaliação Sistêmico – MAAS® / "A Única Coisa". Uso pessoal.</p>
+    `;
+    container.appendChild(rodape);
+
+    return container;
   }
 
   // ===== REFERÊNCIAS - ANOTAÇÕES =====
