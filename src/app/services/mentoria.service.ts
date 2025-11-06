@@ -682,6 +682,25 @@ export class MentoriaService {
     );
   }
 
+  // ===== GANHOS E PERDAS =====
+
+  /**
+   * Obter Ganhos e Perdas (via token público)
+   */
+  obterGanhosPerdasPublico(token: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/publico/${token}/ganhos-perdas`);
+  }
+
+  /**
+   * Salvar Ganhos e Perdas (via token público)
+   */
+  salvarGanhosPerdas(token: string, dados: any): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/publico/${token}/ganhos-perdas`,
+      dados
+    );
+  }
+
   // ===== TERMÔMETRO DE GESTÃO =====
 
   /**

@@ -64,6 +64,20 @@ interface TermometroGestaoData {
   percentualOperacional: number;
 }
 
+// ===== GANHOS E PERDAS =====
+interface GanhosPerdidaItem {
+  id: string;
+  texto: string;
+}
+
+interface GanhosPerdasData {
+  meta: string;
+  ganhos_obtiver: GanhosPerdidaItem[];      // O que você ganha se obtiver (busca do prazer)
+  perdas_obtiver: GanhosPerdidaItem[];      // O que você perde se obtiver (perda de valores)
+  ganhos_nao_obtiver: GanhosPerdidaItem[];  // O que você ganha se NÃO obtiver (sabotadores)
+  perdas_nao_obtiver: GanhosPerdidaItem[];  // O que você perde se NÃO obtiver (motivadores-dor)
+}
+
 // ===== MAPA MENTAL =====
 interface MapaMentalCard {
   id: string;
@@ -231,6 +245,17 @@ export class PublicMentoriaViewComponent implements OnInit {
     'profissional': { strategic: 10, tactical: 30, operational: 60 }
   };
 
+  // Ganhos e Perdas
+  ganhosPerdas: GanhosPerdasData = {
+    meta: '',
+    ganhos_obtiver: [],
+    perdas_obtiver: [],
+    ganhos_nao_obtiver: [],
+    perdas_nao_obtiver: []
+  };
+  ganhosPerdasId: number | null = null;
+  salvandoGanhosPerdas: boolean = false;
+
   // Referências - Anotações
   salvandoAnotacoes: boolean = false;
 
@@ -300,7 +325,7 @@ export class PublicMentoriaViewComponent implements OnInit {
   // Getter para obter seções ordenadas conforme configuração do editor
   get secoesOrdenadas(): string[] {
     if (!this.conteudoEstruturado?.ordemSecoes || this.conteudoEstruturado.ordemSecoes.length === 0) {
-      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'termometroGestao'];
+      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas'];
     }
     return this.conteudoEstruturado.ordemSecoes;
   }
@@ -922,6 +947,10 @@ export class PublicMentoriaViewComponent implements OnInit {
     // Carregar Roda da Vida MAAS do banco de dados
     console.log('🎯 Carregando Roda da Vida do banco de dados...');
     this.carregarRodaDaVida();
+
+    // Carregar Ganhos e Perdas do banco de dados
+    console.log('⚖️ Carregando Ganhos e Perdas do banco de dados...');
+    this.carregarGanhosPerdas();
 
     // Carregar Golden Circle do banco de dados
     console.log('⭕ Carregando Golden Circle do banco de dados...');
@@ -2844,6 +2873,246 @@ export class PublicMentoriaViewComponent implements OnInit {
     setTimeout(() => this.desenharRodaDaVida(), 10);
   }
 
+  // ===== GANHOS E PERDAS =====
+
+  carregarGanhosPerdas(): void {
+    if (!this.token) return;
+
+    this.mentoriaService.obterGanhosPerdasPublico(this.token).subscribe({
+      next: (response: any) => {
+        if (response.data) {
+          console.log('✅ Ganhos e Perdas carregados:', response.data);
+          this.ganhosPerdasId = response.data.id;
+
+          // Carregar meta
+          this.ganhosPerdas.meta = response.data.meta || '';
+
+          // Carregar quadrantes (parse JSON arrays)
+          const parseQuadrante = (data: any) => {
+            if (!data) return [];
+            if (typeof data === 'string') {
+              try {
+                return JSON.parse(data);
+              } catch {
+                return [];
+              }
+            }
+            return data;
+          };
+
+          this.ganhosPerdas.ganhos_obtiver = parseQuadrante(response.data.ganhos_obtiver);
+          this.ganhosPerdas.perdas_obtiver = parseQuadrante(response.data.perdas_obtiver);
+          this.ganhosPerdas.ganhos_nao_obtiver = parseQuadrante(response.data.ganhos_nao_obtiver);
+          this.ganhosPerdas.perdas_nao_obtiver = parseQuadrante(response.data.perdas_nao_obtiver);
+
+          // Garantir pelo menos 1 item em cada quadrante
+          if (this.ganhosPerdas.ganhos_obtiver.length === 0) {
+            this.ganhosPerdas.ganhos_obtiver = [{ id: this.generateId(), texto: '' }];
+          }
+          if (this.ganhosPerdas.perdas_obtiver.length === 0) {
+            this.ganhosPerdas.perdas_obtiver = [{ id: this.generateId(), texto: '' }];
+          }
+          if (this.ganhosPerdas.ganhos_nao_obtiver.length === 0) {
+            this.ganhosPerdas.ganhos_nao_obtiver = [{ id: this.generateId(), texto: '' }];
+          }
+          if (this.ganhosPerdas.perdas_nao_obtiver.length === 0) {
+            this.ganhosPerdas.perdas_nao_obtiver = [{ id: this.generateId(), texto: '' }];
+          }
+        }
+      },
+      error: (error: any) => {
+        console.error('❌ Erro ao carregar Ganhos e Perdas:', error);
+        // Inicializar com 1 item em cada quadrante em caso de erro
+        this.inicializarGanhosPerdasVazio();
+      }
+    });
+  }
+
+  inicializarGanhosPerdasVazio(): void {
+    this.ganhosPerdas.ganhos_obtiver = [{ id: this.generateId(), texto: '' }];
+    this.ganhosPerdas.perdas_obtiver = [{ id: this.generateId(), texto: '' }];
+    this.ganhosPerdas.ganhos_nao_obtiver = [{ id: this.generateId(), texto: '' }];
+    this.ganhosPerdas.perdas_nao_obtiver = [{ id: this.generateId(), texto: '' }];
+  }
+
+  adicionarItemGanhosPerdas(quadrante: 'ganhos_obtiver' | 'perdas_obtiver' | 'ganhos_nao_obtiver' | 'perdas_nao_obtiver'): void {
+    this.ganhosPerdas[quadrante].push({
+      id: this.generateId(),
+      texto: ''
+    });
+  }
+
+  removerItemGanhosPerdas(quadrante: 'ganhos_obtiver' | 'perdas_obtiver' | 'ganhos_nao_obtiver' | 'perdas_nao_obtiver', itemId: string): void {
+    if (this.ganhosPerdas[quadrante].length <= 1) {
+      this.toastr.warning('Deve haver pelo menos um item em cada quadrante!');
+      return;
+    }
+
+    this.ganhosPerdas[quadrante] = this.ganhosPerdas[quadrante].filter(item => item.id !== itemId);
+  }
+
+  salvarGanhosPerdas(): void {
+    if (!this.token || this.expired) {
+      this.toastr.warning('Não foi possível salvar Ganhos e Perdas');
+      return;
+    }
+
+    this.salvandoGanhosPerdas = true;
+
+    console.log('💾 Salvando Ganhos e Perdas...', this.ganhosPerdas);
+
+    this.mentoriaService.salvarGanhosPerdas(this.token, this.ganhosPerdas).subscribe({
+      next: (response: any) => {
+        console.log('✅ Ganhos e Perdas salvos com sucesso!', response);
+        if (response.data && response.data.id) {
+          this.ganhosPerdasId = response.data.id;
+        }
+        this.toastr.success('Ganhos e Perdas salvos com sucesso!');
+        this.salvandoGanhosPerdas = false;
+      },
+      error: (error: any) => {
+        console.error('❌ Erro ao salvar Ganhos e Perdas:', error);
+        this.toastr.error('Erro ao salvar Ganhos e Perdas');
+        this.salvandoGanhosPerdas = false;
+      }
+    });
+  }
+
+  async exportarGanhosPerdasPDF(): Promise<void> {
+    try {
+      this.toastr.info('Gerando PDF de Ganhos e Perdas...');
+
+      // Criar container temporário para renderização
+      const container = this.criarContainerGanhosPerdasVisualizacao();
+      document.body.appendChild(container);
+
+      // Aguardar renderização
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Capturar como imagem
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        width: container.scrollWidth,
+        height: container.scrollHeight
+      });
+
+      // Remover container temporário
+      document.body.removeChild(container);
+
+      // Converter para PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`ganhos-perdas-${this.encontro?.mentorado_nome || 'mentoria'}-${Date.now()}.pdf`);
+
+      this.toastr.success('PDF exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      this.toastr.error('Erro ao exportar PDF');
+    }
+  }
+
+  private criarContainerGanhosPerdasVisualizacao(): HTMLElement {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.background = '#ffffff';
+    container.style.padding = '60px';
+    container.style.minWidth = '1400px';
+    container.style.fontFamily = 'Inter, Arial, sans-serif';
+
+    // Título
+    const titulo = document.createElement('div');
+    titulo.style.textAlign = 'center';
+    titulo.style.marginBottom = '40px';
+    titulo.innerHTML = `
+      <h1 style="color: #022c22; font-size: 42px; font-weight: 800; margin-bottom: 10px; letter-spacing: 2px;">
+        GANHOS E PERDAS
+      </h1>
+      <p style="color: #666; font-size: 18px; margin: 0;">
+        Matriz de Decisão Estratégica
+      </p>
+      <p style="color: #999; font-size: 14px; margin-top: 20px;">
+        ${this.encontro?.mentorado_nome || 'Mentorado'} - ${new Date().toLocaleDateString('pt-BR')}
+      </p>
+    `;
+    container.appendChild(titulo);
+
+    // Meta
+    if (this.ganhosPerdas.meta) {
+      const metaSection = document.createElement('div');
+      metaSection.style.background = 'linear-gradient(to bottom, #f8fdf9, #ffffff)';
+      metaSection.style.padding = '25px';
+      metaSection.style.borderRadius = '16px';
+      metaSection.style.marginBottom = '40px';
+      metaSection.style.border = '2px solid rgba(2, 44, 34, 0.15)';
+      metaSection.innerHTML = `
+        <div style="font-size: 16px; font-weight: 700; color: #022c22; margin-bottom: 10px; text-transform: uppercase;">META:</div>
+        <div style="font-size: 20px; font-weight: 600; color: #022c22;">${this.ganhosPerdas.meta}</div>
+      `;
+      container.appendChild(metaSection);
+    }
+
+    // Grid de quadrantes
+    const grid = document.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = '1fr 1fr';
+    grid.style.gap = '0';
+    grid.style.borderRadius = '16px';
+    grid.style.overflow = 'hidden';
+    grid.style.border = '2px solid rgba(2, 44, 34, 0.2)';
+
+    const quadrantes = [
+      { titulo: 'O QUE VOCÊ GANHA SE OBTIVER ISTO?', subtitulo: '(busca do prazer)', items: this.ganhosPerdas.ganhos_obtiver, bg: '#d4f4dd' },
+      { titulo: 'O QUE VOCÊ PERDE SE OBTIVER ISTO?', subtitulo: '(perda de valores)', items: this.ganhosPerdas.perdas_obtiver, bg: '#b8e6c9' },
+      { titulo: 'O QUE VOCÊ GANHA SE NÃO OBTIVER ISTO?', subtitulo: '(sabotadores)', items: this.ganhosPerdas.ganhos_nao_obtiver, bg: '#9cd4af' },
+      { titulo: 'O QUE VOCÊ PERDE SE NÃO OBTIVER ISTO?', subtitulo: '(motivadores-dor)', items: this.ganhosPerdas.perdas_nao_obtiver, bg: '#7fc299' }
+    ];
+
+    quadrantes.forEach((quadrante) => {
+      const quadDiv = document.createElement('div');
+      quadDiv.style.padding = '30px';
+      quadDiv.style.background = quadrante.bg;
+      quadDiv.style.border = '2px solid rgba(2, 44, 34, 0.2)';
+      quadDiv.style.minHeight = '400px';
+
+      let htmlQuad = `
+        <div style="background: #022c22; color: white; padding: 14px; margin: -30px -30px 20px -30px; font-weight: 700; font-size: 14px; text-align: center; text-transform: uppercase;">
+          ${quadrante.titulo}
+        </div>
+        <div style="color: #022c22; font-size: 13px; text-align: center; margin-bottom: 20px; font-style: italic; font-weight: 600;">
+          ${quadrante.subtitulo}
+        </div>
+      `;
+
+      quadrante.items.forEach((item, index) => {
+        if (item.texto.trim()) {
+          htmlQuad += `
+            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+              <span style="color: #022c22; font-weight: 700; min-width: 25px;">${index + 1}.</span>
+              <div style="flex: 1; color: #022c22; font-size: 14px; line-height: 1.5;">${item.texto}</div>
+            </div>
+          `;
+        }
+      });
+
+      quadDiv.innerHTML = htmlQuad;
+      grid.appendChild(quadDiv);
+    });
+
+    container.appendChild(grid);
+
+    return container;
+  }
+
   async exportarRodaDaVidaPDF(): Promise<void> {
     try {
       this.toastr.info('Gerando PDF da Roda da Vida...');
@@ -4374,5 +4643,11 @@ export class PublicMentoriaViewComponent implements OnInit {
     svg.appendChild(centerGroup);
 
     return svg;
+  }
+
+  // ===== UTILITÁRIOS =====
+
+  private generateId(): string {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 }

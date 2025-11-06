@@ -5353,3 +5353,335 @@ html {
   color: #991b1b;
 }
 
+/* ===== GANHOS E PERDAS ===== */
+
+.ganhos-perdas-main-section {
+  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ganhos-perdas-content {
+  background: white;
+  border-radius: 24px;
+  padding: 3rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Campo de Meta */
+
+.ganhos-perdas-meta-section {
+  background: linear-gradient(to bottom, #f8fdf9, #ffffff);
+  padding: 2rem;
+  border-radius: 20px;
+  margin-bottom: 3rem;
+  border: 2px solid rgba(2, 44, 34, 0.15);
+}
+
+.ganhos-perdas-meta-label {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #022c22;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.ganhos-perdas-meta-input {
+  width: 100%;
+  padding: 16px;
+  font-size: 17px;
+  border: 2px solid #022c22;
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.3s;
+  background: white;
+  font-weight: 500;
+  color: #022c22;
+}
+
+.ganhos-perdas-meta-input:focus {
+  border-color: #014d3a;
+  box-shadow: 0 0 0 4px rgba(2, 44, 34, 0.12);
+  transform: translateY(-2px);
+}
+
+.ganhos-perdas-meta-input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+/* Grid 2x2 dos Quadrantes */
+
+.ganhos-perdas-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-bottom: 3rem;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.ganhos-perdas-quadrant {
+  padding: 2rem;
+  border: 2px solid rgba(2, 44, 34, 0.2);
+  min-height: 450px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tons diferentes de verde para cada quadrante */
+
+.ganhos-perdas-q1 {
+  background: linear-gradient(135deg, #d4f4dd 0%, #c8f0d4 100%);
+}
+
+.ganhos-perdas-q2 {
+  background: linear-gradient(135deg, #b8e6c9 0%, #a5ddb8 100%);
+}
+
+.ganhos-perdas-q3 {
+  background: linear-gradient(135deg, #9cd4af 0%, #88ca9d 100%);
+}
+
+.ganhos-perdas-q4 {
+  background: linear-gradient(135deg, #7fc299 0%, #6bb888 100%);
+}
+
+.ganhos-perdas-quadrant-title {
+  background: #022c22;
+  color: white;
+  padding: 16px;
+  margin: -2rem -2rem 1.5rem -2rem;
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ganhos-perdas-quadrant-subtitle {
+  color: #022c22;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.ganhos-perdas-items {
+  flex: 1;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ganhos-perdas-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.ganhos-perdas-number {
+  color: #022c22;
+  font-weight: 700;
+  font-size: 15px;
+  min-width: 30px;
+  padding-top: 10px;
+}
+
+.ganhos-perdas-textarea {
+  flex: 1;
+  padding: 12px 14px;
+  border: 2px solid rgba(2, 44, 34, 0.25);
+  border-radius: 10px;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 50px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.3s;
+  background: white;
+  color: #022c22;
+}
+
+.ganhos-perdas-textarea:focus {
+  border-color: #022c22;
+  box-shadow: 0 0 0 3px rgba(2, 44, 34, 0.1);
+  transform: translateY(-1px);
+}
+
+.ganhos-perdas-textarea:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.ganhos-perdas-btn-remove {
+  padding: 8px;
+  background: transparent;
+  color: #022c22;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+}
+
+.ganhos-perdas-btn-remove:hover:not(:disabled) {
+  background: rgba(2, 44, 34, 0.1);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.ganhos-perdas-btn-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.ganhos-perdas-item:hover .ganhos-perdas-btn-remove {
+  opacity: 0.7;
+}
+
+.ganhos-perdas-btn-add {
+  width: 100%;
+  padding: 12px;
+  background: rgba(2, 44, 34, 0.08);
+  border: 2px dashed #022c22;
+  border-radius: 10px;
+  color: #022c22;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ganhos-perdas-btn-add:hover:not(:disabled) {
+  background: rgba(2, 44, 34, 0.15);
+  border-color: #014d3a;
+  transform: translateY(-2px);
+}
+
+.ganhos-perdas-btn-add:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ganhos-perdas-btn-add i {
+  font-size: 16px;
+}
+
+/* Botões de Ação */
+
+.ganhos-perdas-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  padding-top: 2rem;
+  border-top: 3px solid rgba(2, 44, 34, 0.1);
+}
+
+.btn-save-ganhos-perdas,
+.btn-export-ganhos-perdas {
+  padding: 1.125rem 3rem;
+  background: #022c22;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 8px 24px rgba(2, 44, 34, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-save-ganhos-perdas:hover:not(:disabled),
+.btn-export-ganhos-perdas:hover {
+  background: #014d3a;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 183, 79, 0.4);
+}
+
+.btn-save-ganhos-perdas:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsividade */
+
+@media (max-width: 1024px) {
+  .ganhos-perdas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ganhos-perdas-quadrant {
+    min-height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ganhos-perdas-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .ganhos-perdas-meta-section {
+    padding: 1.5rem;
+  }
+
+  .ganhos-perdas-quadrant {
+    padding: 1.5rem;
+    min-height: 300px;
+  }
+
+  .ganhos-perdas-quadrant-title {
+    margin: -1.5rem -1.5rem 1.25rem -1.5rem;
+    font-size: 13px;
+    padding: 14px;
+  }
+
+  .ganhos-perdas-actions {
+    flex-direction: column;
+  }
+
+  .btn-save-ganhos-perdas,
+  .btn-export-ganhos-perdas {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

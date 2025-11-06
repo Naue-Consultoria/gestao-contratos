@@ -1328,6 +1328,192 @@
       </div>
     </section>
 
+    <!-- Ganhos e Perdas Section -->
+    <section *ngIf="secaoId === 'ganhosPerdas'" class="dark-section ganhos-perdas-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.ganhosPerdas?.ativo">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-scale-balanced"></i>
+            Ganhos e Perdas
+          </h2>
+          <p class="dark-subtitle">Matriz de Decisão Estratégica</p>
+        </div>
+
+        <div class="ganhos-perdas-content">
+
+          <!-- Campo de Meta -->
+          <div class="ganhos-perdas-meta-section">
+            <label class="ganhos-perdas-meta-label">META:</label>
+            <input
+              type="text"
+              class="ganhos-perdas-meta-input"
+              [(ngModel)]="ganhosPerdas.meta"
+              placeholder="Digite sua meta aqui..."
+              [disabled]="expired">
+          </div>
+
+          <!-- Grid 2x2 dos Quadrantes -->
+          <div class="ganhos-perdas-grid">
+
+            <!-- Quadrante 1: Ganhos se Obtiver -->
+            <div class="ganhos-perdas-quadrant ganhos-perdas-q1">
+              <div class="ganhos-perdas-quadrant-title">O QUE VOCÊ GANHA SE OBTIVER ISTO?</div>
+              <div class="ganhos-perdas-quadrant-subtitle">(busca do prazer)</div>
+
+              <div class="ganhos-perdas-items">
+                <div *ngFor="let item of ganhosPerdas.ganhos_obtiver; let i = index" class="ganhos-perdas-item">
+                  <span class="ganhos-perdas-number">{{ i + 1 }}.</span>
+                  <textarea
+                    class="ganhos-perdas-textarea"
+                    [(ngModel)]="item.texto"
+                    placeholder="Digite aqui..."
+                    [disabled]="expired"
+                    rows="2"></textarea>
+                  <button
+                    class="ganhos-perdas-btn-remove"
+                    (click)="removerItemGanhosPerdas('ganhos_obtiver', item.id)"
+                    [disabled]="expired || ganhosPerdas.ganhos_obtiver.length <= 1"
+                    title="Remover linha">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+              <button
+                class="ganhos-perdas-btn-add"
+                (click)="adicionarItemGanhosPerdas('ganhos_obtiver')"
+                [disabled]="expired">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar linha
+              </button>
+            </div>
+
+            <!-- Quadrante 2: Perdas se Obtiver -->
+            <div class="ganhos-perdas-quadrant ganhos-perdas-q2">
+              <div class="ganhos-perdas-quadrant-title">O QUE VOCÊ PERDE SE OBTIVER ISTO?</div>
+              <div class="ganhos-perdas-quadrant-subtitle">(perda de valores)</div>
+
+              <div class="ganhos-perdas-items">
+                <div *ngFor="let item of ganhosPerdas.perdas_obtiver; let i = index" class="ganhos-perdas-item">
+                  <span class="ganhos-perdas-number">{{ i + 1 }}.</span>
+                  <textarea
+                    class="ganhos-perdas-textarea"
+                    [(ngModel)]="item.texto"
+                    placeholder="Digite aqui..."
+                    [disabled]="expired"
+                    rows="2"></textarea>
+                  <button
+                    class="ganhos-perdas-btn-remove"
+                    (click)="removerItemGanhosPerdas('perdas_obtiver', item.id)"
+                    [disabled]="expired || ganhosPerdas.perdas_obtiver.length <= 1"
+                    title="Remover linha">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+              <button
+                class="ganhos-perdas-btn-add"
+                (click)="adicionarItemGanhosPerdas('perdas_obtiver')"
+                [disabled]="expired">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar linha
+              </button>
+            </div>
+
+            <!-- Quadrante 3: Ganhos se NÃO Obtiver -->
+            <div class="ganhos-perdas-quadrant ganhos-perdas-q3">
+              <div class="ganhos-perdas-quadrant-title">O QUE VOCÊ GANHA SE NÃO OBTIVER ISTO?</div>
+              <div class="ganhos-perdas-quadrant-subtitle">(sabotadores)</div>
+
+              <div class="ganhos-perdas-items">
+                <div *ngFor="let item of ganhosPerdas.ganhos_nao_obtiver; let i = index" class="ganhos-perdas-item">
+                  <span class="ganhos-perdas-number">{{ i + 1 }}.</span>
+                  <textarea
+                    class="ganhos-perdas-textarea"
+                    [(ngModel)]="item.texto"
+                    placeholder="Digite aqui..."
+                    [disabled]="expired"
+                    rows="2"></textarea>
+                  <button
+                    class="ganhos-perdas-btn-remove"
+                    (click)="removerItemGanhosPerdas('ganhos_nao_obtiver', item.id)"
+                    [disabled]="expired || ganhosPerdas.ganhos_nao_obtiver.length <= 1"
+                    title="Remover linha">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+              <button
+                class="ganhos-perdas-btn-add"
+                (click)="adicionarItemGanhosPerdas('ganhos_nao_obtiver')"
+                [disabled]="expired">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar linha
+              </button>
+            </div>
+
+            <!-- Quadrante 4: Perdas se NÃO Obtiver -->
+            <div class="ganhos-perdas-quadrant ganhos-perdas-q4">
+              <div class="ganhos-perdas-quadrant-title">O QUE VOCÊ PERDE SE NÃO OBTIVER ISTO?</div>
+              <div class="ganhos-perdas-quadrant-subtitle">(motivadores-dor)</div>
+
+              <div class="ganhos-perdas-items">
+                <div *ngFor="let item of ganhosPerdas.perdas_nao_obtiver; let i = index" class="ganhos-perdas-item">
+                  <span class="ganhos-perdas-number">{{ i + 1 }}.</span>
+                  <textarea
+                    class="ganhos-perdas-textarea"
+                    [(ngModel)]="item.texto"
+                    placeholder="Digite aqui..."
+                    [disabled]="expired"
+                    rows="2"></textarea>
+                  <button
+                    class="ganhos-perdas-btn-remove"
+                    (click)="removerItemGanhosPerdas('perdas_nao_obtiver', item.id)"
+                    [disabled]="expired || ganhosPerdas.perdas_nao_obtiver.length <= 1"
+                    title="Remover linha">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+              <button
+                class="ganhos-perdas-btn-add"
+                (click)="adicionarItemGanhosPerdas('perdas_nao_obtiver')"
+                [disabled]="expired">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar linha
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Botões de Ação -->
+          <div class="ganhos-perdas-actions">
+            <button
+              type="button"
+              class="btn-save-ganhos-perdas"
+              (click)="salvarGanhosPerdas()"
+              [disabled]="salvandoGanhosPerdas || expired">
+              <i class="fa-solid" [ngClass]="salvandoGanhosPerdas ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+              {{ salvandoGanhosPerdas ? 'Salvando...' : 'Salvar Ganhos e Perdas' }}
+            </button>
+
+            <button
+              type="button"
+              class="btn-export-ganhos-perdas"
+              (click)="exportarGanhosPerdasPDF()">
+              <i class="fa-solid fa-file-pdf"></i>
+              Exportar PDF
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section *ngIf="secaoId === 'mapaMental'" class="dark-section mapa-mental-main-section"
              [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaMental?.ativo">

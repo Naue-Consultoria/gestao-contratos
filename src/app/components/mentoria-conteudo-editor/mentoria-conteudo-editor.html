@@ -876,6 +876,48 @@
           </div>
         </section>
 
+        <!-- GANHOS E PERDAS -->
+        <section *ngIf="bloco.tipo === 'ganhosPerdas'" [id]="'bloco-' + bloco.id" class="editor-section">
+          <div class="section-header">
+            <span class="section-title">
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
+            </span>
+            <div class="section-header-actions">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="section-content">
+            <div class="info-box">
+              <i class="fas fa-check-circle"></i>
+              <p>Ganhos e Perdas ativado. Matriz de Decisão Estratégica será exibida na visualização pública da mentoria.</p>
+            </div>
+          </div>
+        </section>
+
         <!-- ENCERRAMENTO -->
         <section *ngIf="bloco.tipo === 'encerramento'" [id]="'bloco-' + bloco.id" class="editor-section">
           <div class="section-header">
