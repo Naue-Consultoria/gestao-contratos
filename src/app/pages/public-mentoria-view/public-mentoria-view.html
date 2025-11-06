@@ -1535,33 +1535,36 @@
             </div>
 
             <div class="habitos-controls">
-              <input
-                type="number"
-                class="habitos-year-input"
-                [(ngModel)]="controleHabitos.ano"
-                (change)="atualizarMesHabitos()"
-                min="2020"
-                max="2030"
-                [disabled]="expired">
+              <div class="habitos-date-selectors">
+                <input
+                  type="number"
+                  class="habitos-year-input"
+                  [(ngModel)]="controleHabitos.ano"
+                  (change)="atualizarMesHabitos()"
+                  min="2020"
+                  max="2030"
+                  placeholder="Ano"
+                  [disabled]="expired">
 
-              <select
-                class="habitos-month-select"
-                [(ngModel)]="controleHabitos.mes"
-                (change)="atualizarMesHabitos()"
-                [disabled]="expired">
-                <option [value]="0">Janeiro</option>
-                <option [value]="1">Fevereiro</option>
-                <option [value]="2">Março</option>
-                <option [value]="3">Abril</option>
-                <option [value]="4">Maio</option>
-                <option [value]="5">Junho</option>
-                <option [value]="6">Julho</option>
-                <option [value]="7">Agosto</option>
-                <option [value]="8">Setembro</option>
-                <option [value]="9">Outubro</option>
-                <option [value]="10">Novembro</option>
-                <option [value]="11">Dezembro</option>
-              </select>
+                <select
+                  class="habitos-month-select"
+                  [(ngModel)]="controleHabitos.mes"
+                  (change)="atualizarMesHabitos()"
+                  [disabled]="expired">
+                  <option [value]="0">Janeiro</option>
+                  <option [value]="1">Fevereiro</option>
+                  <option [value]="2">Março</option>
+                  <option [value]="3">Abril</option>
+                  <option [value]="4">Maio</option>
+                  <option [value]="5">Junho</option>
+                  <option [value]="6">Julho</option>
+                  <option [value]="7">Agosto</option>
+                  <option [value]="8">Setembro</option>
+                  <option [value]="9">Outubro</option>
+                  <option [value]="10">Novembro</option>
+                  <option [value]="11">Dezembro</option>
+                </select>
+              </div>
 
               <button
                 class="habitos-btn-add-habit"
@@ -1603,19 +1606,19 @@
           <div class="habitos-legend">
             <div class="habitos-legend-item">
               <div class="habitos-legend-box habitos-done"></div>
-              <span>✅ Feito</span>
+              <span>Feito</span>
             </div>
             <div class="habitos-legend-item">
               <div class="habitos-legend-box habitos-not-done"></div>
-              <span>❌ Não Feito</span>
+              <span>Não Feito</span>
             </div>
             <div class="habitos-legend-item">
               <div class="habitos-legend-box habitos-not-needed"></div>
-              <span>⚪ Não Necessário</span>
+              <span>Não Necessário</span>
             </div>
             <div class="habitos-legend-item">
               <div class="habitos-legend-box habitos-empty"></div>
-              <span>⬜ Clique para alternar</span>
+              <span>Clique para alternar</span>
             </div>
           </div>
 
@@ -1634,19 +1637,10 @@
                   <!-- Nome do Hábito -->
                   <td class="habitos-td-name">
                     <div class="habitos-name-container">
-                      <input
-                        type="text"
-                        class="habitos-name-input"
-                        [(ngModel)]="habito.nome"
-                        placeholder="Nome do hábito..."
-                        [disabled]="expired">
-                      <button
-                        class="habitos-btn-notes"
-                        (click)="abrirNotasHabito(habito)"
-                        [disabled]="expired"
-                        title="Adicionar notas">
-                        <i class="fa-solid fa-note-sticky"></i>
-                      </button>
+                      <div class="habitos-name-display">
+                        <strong>{{ habito.nome }}</strong>
+                        <span *ngIf="habito.descricao" class="habitos-description">{{ habito.descricao }}</span>
+                      </div>
                       <button
                         class="habitos-btn-delete"
                         (click)="removerHabito(habito.id)"
@@ -1662,23 +1656,14 @@
                           [class.habitos-goal-reached]="getHabitoProgresso(habito) >= habito.meta"
                           [style.width.%]="getHabitoProgressoPercentual(habito)"></div>
                       </div>
-                      <div class="habitos-progress-text" *ngIf="habito.descricao">
-                        {{ habito.descricao }}
-                      </div>
                     </div>
                   </td>
 
                   <!-- Meta / Progresso -->
                   <td class="habitos-td-goal">
                     <div class="habitos-goal-container">
-                      <div class="habitos-goal-label">Meta</div>
-                      <input
-                        type="number"
-                        class="habitos-goal-input"
-                        [(ngModel)]="habito.meta"
-                        min="1"
-                        [max]="controleHabitos.totalDias"
-                        [disabled]="expired">
+                      <div class="habitos-goal-label">META</div>
+                      <div class="habitos-goal-value">{{ habito.meta }}</div>
                       <div class="habitos-current-count">
                         {{ getHabitoProgresso(habito) }}/{{ habito.meta }}
                       </div>
@@ -1728,6 +1713,46 @@
         </div>
       </div>
     </section>
+
+    <!-- Modal para adicionar hábito -->
+    <div class="modal-overlay" *ngIf="showAddHabitoModal" (click)="fecharModalHabito()">
+      <div class="modal-habito-content" (click)="$event.stopPropagation()">
+        <h2 class="modal-habito-title">Adicionar Novo Hábito</h2>
+        <div class="modal-habito-form">
+          <label>
+            Nome do Hábito:
+            <input
+              type="text"
+              [(ngModel)]="novoHabitoNome"
+              placeholder="Ex: Exercícios físicos"
+              [disabled]="expired"
+              (keyup.enter)="confirmarAdicionarHabito()">
+          </label>
+          <label>
+            Meta (quantas vezes por mês):
+            <input
+              type="number"
+              [(ngModel)]="novoHabitoMeta"
+              min="1"
+              [max]="controleHabitos.totalDias"
+              value="20"
+              placeholder="Ex: 20"
+              [disabled]="expired">
+          </label>
+          <label>
+            Descrição (opcional):
+            <textarea
+              [(ngModel)]="novoHabitoDescricao"
+              placeholder="Ex: 30 minutos de caminhada"
+              [disabled]="expired"></textarea>
+          </label>
+        </div>
+        <div class="modal-habito-buttons">
+          <button class="modal-btn-cancel" (click)="fecharModalHabito()">Cancelar</button>
+          <button class="modal-btn-confirm" (click)="confirmarAdicionarHabito()" [disabled]="expired">Adicionar</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Mapa Mental Section -->
     <section *ngIf="secaoId === 'mapaMental'" class="dark-section mapa-mental-main-section"

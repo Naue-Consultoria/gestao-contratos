@@ -3189,11 +3189,32 @@ export class PublicMentoriaViewComponent implements OnInit {
   }
 
   adicionarHabito(): void {
+    this.novoHabitoNome = '';
+    this.novoHabitoMeta = 20;
+    this.novoHabitoDescricao = '';
+    this.showAddHabitoModal = true;
+  }
+
+  fecharModalHabito(): void {
+    this.showAddHabitoModal = false;
+  }
+
+  confirmarAdicionarHabito(): void {
+    if (!this.novoHabitoNome.trim()) {
+      alert('Por favor, insira o nome do hábito!');
+      return;
+    }
+
+    if (!this.novoHabitoMeta || this.novoHabitoMeta < 1) {
+      alert('Por favor, insira uma meta válida!');
+      return;
+    }
+
     const novoHabito: Habito = {
       id: this.generateId(),
-      nome: '',
-      meta: 20,
-      descricao: '',
+      nome: this.novoHabitoNome,
+      meta: this.novoHabitoMeta,
+      descricao: this.novoHabitoDescricao,
       notas: '',
       dias: Array.from({ length: this.controleHabitos.totalDias }, (_, i) => ({
         dia: i + 1,
@@ -3202,6 +3223,7 @@ export class PublicMentoriaViewComponent implements OnInit {
     };
 
     this.controleHabitos.habitos.push(novoHabito);
+    this.fecharModalHabito();
   }
 
   removerHabito(habitoId: string): void {
@@ -3254,18 +3276,11 @@ export class PublicMentoriaViewComponent implements OnInit {
     return totalPossivel > 0 ? Math.round((totalRealizado / totalPossivel) * 100) : 0;
   }
 
-  habitoModalAberto: Habito | null = null;
-  habitoNotasTexto: string = '';
-
-  abrirNotasHabito(habito: Habito): void {
-    this.habitoModalAberto = habito;
-    this.habitoNotasTexto = habito.notas || '';
-    // Aqui você poderia abrir um modal, mas por simplicidade vamos usar prompt
-    const notas = prompt('Notas do hábito:', habito.notas || '');
-    if (notas !== null) {
-      habito.notas = notas;
-    }
-  }
+  // Modal de adicionar hábito
+  showAddHabitoModal: boolean = false;
+  novoHabitoNome: string = '';
+  novoHabitoMeta: number = 20;
+  novoHabitoDescricao: string = '';
 
   carregarControleHabitos(): void {
     if (!this.token) return;

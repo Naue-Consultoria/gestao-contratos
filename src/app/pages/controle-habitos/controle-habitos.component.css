@@ -31,32 +31,56 @@ h1 {
   align-items: center;
 }
 
-.add-habit {
-  padding: 10px 20px;
-  background: #43a047;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background 0.3s;
-}
-
-.add-habit:hover {
-  background: #2e7d32;
+.date-selectors {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .month-selector,
 .year-input {
-  padding: 10px;
+  padding: 12px 16px;
   border: 2px solid #66bb6a;
-  border-radius: 5px;
-  font-size: 16px;
+  border-radius: 8px;
+  font-size: 15px;
   color: #2e7d32;
+  font-weight: 500;
+  background: white;
+  transition: all 0.3s;
+  height: 48px;
 }
 
 .year-input {
-  width: 100px;
+  width: 110px;
+  text-align: center;
+}
+
+.month-selector {
+  min-width: 180px;
+}
+
+.month-selector:focus,
+.year-input:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.1);
+}
+
+.add-habit {
+  padding: 12px 20px;
+  background: #43a047;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background 0.3s;
+  height: 48px;
+}
+
+.add-habit:hover {
+  background: #2e7d32;
 }
 
 .legend {
@@ -197,24 +221,28 @@ td:nth-child(2) {
 .habit-name-container {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   margin-bottom: 5px;
 }
 
-.habit-input {
+.habit-name-display {
   flex: 1;
-  padding: 4px 8px;
-  border: none;
-  background: transparent;
-  font-size: 12px;
-  color: #2e7d32;
-  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.habit-input:focus {
-  outline: 2px solid #66bb6a;
-  background: white;
-  border-radius: 3px;
+.habit-name-display strong {
+  font-size: 14px;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.habit-description {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
 }
 
 .progress-container {
@@ -259,28 +287,30 @@ td:nth-child(2) {
 .goal-container {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 5px;
-}
-
-.goal-input {
-  width: 45px;
-  padding: 4px;
-  border: 1px solid #c8e6c9;
-  border-radius: 3px;
+  gap: 8px;
+  padding: 8px;
+  align-items: center;
   text-align: center;
-  font-size: 11px;
 }
 
 .goal-label {
   font-size: 10px;
   color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.goal-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2e7d32;
 }
 
 .current-count {
   font-weight: bold;
   color: #43a047;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .day-cell {
@@ -501,6 +531,22 @@ td:nth-child(2) {
 
   h1 {
     font-size: 1.8em;
+  }
+
+  .controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .date-selectors {
+    width: 100%;
+  }
+
+  .year-input,
+  .month-selector,
+  .add-habit,
+  .export-btn {
+    width: 100%;
   }
 
   th,

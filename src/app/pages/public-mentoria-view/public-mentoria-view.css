@@ -5727,14 +5727,20 @@ html {
 
 .habitos-controls {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
   flex-wrap: wrap;
 }
 
+.habitos-date-selectors {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .habitos-year-input,
 .habitos-month-select {
-  padding: 10px 14px;
+  padding: 12px 16px;
   border: 2px solid #022c22;
   border-radius: 8px;
   font-size: 15px;
@@ -5742,11 +5748,16 @@ html {
   font-weight: 500;
   background: white;
   transition: all 0.3s;
+  height: 48px;
 }
 
 .habitos-year-input {
-  width: 100px;
+  width: 110px;
   text-align: center;
+}
+
+.habitos-month-select {
+  min-width: 160px;
 }
 
 .habitos-year-input:focus,
@@ -5955,34 +5966,30 @@ html {
 .habitos-name-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 8px;
 }
 
-.habitos-name-input {
+.habitos-name-display {
   flex: 1;
-  padding: 8px 12px;
-  border: 2px solid rgba(2, 44, 34, 0.15);
-  border-radius: 6px;
-  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.habitos-name-display strong {
   font-size: 14px;
   color: #022c22;
-  font-weight: 500;
-  transition: all 0.3s;
+  font-weight: 600;
 }
 
-.habitos-name-input:focus {
-  outline: none;
-  border-color: #022c22;
-  box-shadow: 0 0 0 2px rgba(2, 44, 34, 0.1);
+.habitos-description {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
 }
 
-.habitos-name-input:disabled {
-  background: #fafafa;
-  cursor: not-allowed;
-}
-
-.habitos-btn-notes,
 .habitos-btn-delete {
   background: transparent;
   border: none;
@@ -5995,18 +6002,12 @@ html {
   color: #022c22;
 }
 
-.habitos-btn-notes:hover:not(:disabled),
 .habitos-btn-delete:hover:not(:disabled) {
   opacity: 1;
-  background: rgba(2, 44, 34, 0.1);
-}
-
-.habitos-btn-delete:hover:not(:disabled) {
-  color: #ef5350;
   background: rgba(239, 83, 80, 0.1);
+  color: #ef5350;
 }
 
-.habitos-btn-notes:disabled,
 .habitos-btn-delete:disabled {
   cursor: not-allowed;
   opacity: 0.3;
@@ -6040,19 +6041,13 @@ html {
   50% { opacity: 0.75; }
 }
 
-.habitos-progress-text {
-  font-size: 11px;
-  color: #666;
-  margin-top: 4px;
-  font-style: italic;
-}
-
 .habitos-goal-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 8px;
+  gap: 8px;
+  padding: 12px;
+  text-align: center;
 }
 
 .habitos-goal-label {
@@ -6060,36 +6055,19 @@ html {
   color: #666;
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.habitos-goal-input {
-  width: 60px;
-  padding: 6px;
-  border: 2px solid rgba(2, 44, 34, 0.2);
-  border-radius: 6px;
-  text-align: center;
-  font-size: 14px;
-  font-weight: 700;
+.habitos-goal-value {
+  font-size: 28px;
+  font-weight: bold;
   color: #022c22;
-  background: white;
-  transition: all 0.3s;
-}
-
-.habitos-goal-input:focus {
-  outline: none;
-  border-color: #022c22;
-  box-shadow: 0 0 0 2px rgba(2, 44, 34, 0.1);
-}
-
-.habitos-goal-input:disabled {
-  background: #fafafa;
-  cursor: not-allowed;
 }
 
 .habitos-current-count {
   font-weight: 700;
   color: #022c22;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .habitos-day-cell {
@@ -6203,6 +6181,11 @@ html {
     width: 100%;
   }
 
+  .habitos-date-selectors {
+    width: 100%;
+    flex-direction: column;
+  }
+
   .habitos-year-input,
   .habitos-month-select,
   .habitos-btn-add-habit {
@@ -6233,5 +6216,132 @@ html {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Modal de Adicionar Hábito */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-habito-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+  animation: slideDown 0.3s;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-habito-title {
+  color: #2e7d32;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+}
+
+.modal-habito-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-habito-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #2e7d32;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.modal-habito-form input,
+.modal-habito-form textarea {
+  padding: 10px;
+  border: 2px solid #c8e6c9;
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.modal-habito-form input:disabled,
+.modal-habito-form textarea:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.modal-habito-form textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.modal-habito-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-btn-cancel,
+.modal-btn-confirm {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+  font-weight: 500;
+}
+
+.modal-btn-confirm {
+  background: #43a047;
+  color: white;
+}
+
+.modal-btn-confirm:hover:not(:disabled) {
+  background: #2e7d32;
+}
+
+.modal-btn-confirm:disabled {
+  background: #9e9e9e;
+  cursor: not-allowed;
+}
+
+.modal-btn-cancel {
+  background: #e0e0e0;
+  color: #666;
+}
+
+.modal-btn-cancel:hover {
+  background: #bdbdbd;
 }
 

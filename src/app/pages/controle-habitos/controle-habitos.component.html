@@ -6,25 +6,27 @@
   <div class="period-display">{{ periodDisplay }}</div>
 
   <div class="controls">
+    <div class="date-selectors">
+      <input
+        type="number"
+        class="year-input"
+        [(ngModel)]="currentYear"
+        min="2000"
+        max="2100"
+        (change)="loadHabits()"
+        placeholder="Ano">
+
+      <select
+        class="month-selector"
+        [(ngModel)]="currentMonth"
+        (change)="onMonthChange($any($event.target).value)">
+        <option *ngFor="let month of monthOptions" [value]="month.index">
+          {{ month.label }}
+        </option>
+      </select>
+    </div>
+
     <button class="add-habit" (click)="openAddHabitModal()">+ Adicionar Hábito</button>
-
-    <input
-      type="number"
-      class="year-input"
-      [(ngModel)]="currentYear"
-      min="2000"
-      max="2100"
-      (change)="loadHabits()"
-      placeholder="Ano">
-
-    <select
-      class="month-selector"
-      [(ngModel)]="currentMonth"
-      (change)="onMonthChange($any($event.target).value)">
-      <option *ngFor="let month of monthOptions" [value]="month.index">
-        {{ month.label }}
-      </option>
-    </select>
 
     <button class="export-btn" (click)="saveHabits()" [disabled]="isSaving">
       {{ isSaving ? '💾 Salvando...' : '💾 Salvar' }}
@@ -103,11 +105,10 @@
           <!-- Nome do hábito -->
           <td>
             <div class="habit-name-container">
-              <input
-                type="text"
-                class="habit-input"
-                [(ngModel)]="habit.name"
-                placeholder="Nome do hábito...">
+              <div class="habit-name-display">
+                <strong>{{ habit.name }}</strong>
+                <span *ngIf="habit.description" class="habit-description">{{ habit.description }}</span>
+              </div>
 
               <button
                 class="delete-habit"
@@ -124,22 +125,14 @@
                   [style.width.%]="getHabitProgress(habit)">
                 </div>
               </div>
-              <div class="progress-text" *ngIf="habit.description">
-                {{ habit.description }}
-              </div>
             </div>
           </td>
 
           <!-- Meta / Progresso -->
           <td>
             <div class="goal-container">
-              <div class="goal-label">Meta</div>
-              <input
-                type="number"
-                class="goal-input"
-                [(ngModel)]="habit.goal"
-                min="1"
-                [max]="currentDays">
+              <div class="goal-label">META</div>
+              <div class="goal-value">{{ habit.goal }}</div>
               <div class="current-count">{{ getHabitProgressText(habit) }}</div>
             </div>
           </td>
@@ -185,6 +178,7 @@
           [(ngModel)]="newHabitGoal"
           min="1"
           [max]="currentDays"
+          value="20"
           placeholder="Ex: 20">
       </label>
       <label>
