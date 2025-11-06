@@ -39,6 +39,7 @@ export class SidebarComponent {
       title: 'PRINCIPAL',
       items: [
         { id: 'dashboard', icon: 'fas fa-chart-line', text: 'Dashboard', route: '/home/dashboard' },
+        { id: 'controle-habitos', icon: 'fas fa-check-circle', text: 'Controle de Hábitos', route: '/home/controle-habitos' },
         { id: 'rotinas', icon: 'fas fa-calendar-check', text: 'Rotinas', route: '/home/rotinas', excludeConsultorRS: true },
         { id: 'servicos', icon: 'fas fa-briefcase', text: 'Serviços', route: '/home/servicos', excludeConsultorRS: true },
         { id: 'clientes', icon: 'fas fa-users', text: 'Clientes', route: '/home/clientes', adminOnly: true, excludeConsultorRS: true },

@@ -701,6 +701,25 @@ export class MentoriaService {
     );
   }
 
+  // ===== CONTROLE DE HÁBITOS =====
+
+  /**
+   * Obter Controle de Hábitos (via token público)
+   */
+  obterControleHabitosPublico(token: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/publico/${token}/controle-habitos`);
+  }
+
+  /**
+   * Salvar Controle de Hábitos (via token público)
+   */
+  salvarControleHabitos(token: string, dados: any): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/publico/${token}/controle-habitos`,
+      dados
+    );
+  }
+
   // ===== TERMÔMETRO DE GESTÃO =====
 
   /**

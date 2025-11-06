@@ -78,6 +78,28 @@ interface GanhosPerdasData {
   perdas_nao_obtiver: GanhosPerdidaItem[];  // O que você perde se NÃO obtiver (motivadores-dor)
 }
 
+// ===== CONTROLE DE HÁBITOS =====
+interface HabitoDia {
+  dia: number;
+  status: 'empty' | 'done' | 'not-done' | 'not-needed';
+}
+
+interface Habito {
+  id: string;
+  nome: string;
+  meta: number;
+  descricao: string;
+  notas: string;
+  dias: HabitoDia[];
+}
+
+interface ControleHabitosData {
+  ano: number;
+  mes: number;  // 0-11 (Janeiro = 0)
+  totalDias: number;  // 28, 29, 30 ou 31
+  habitos: Habito[];
+}
+
 // ===== MAPA MENTAL =====
 interface MapaMentalCard {
   id: string;
@@ -256,6 +278,16 @@ export class PublicMentoriaViewComponent implements OnInit {
   ganhosPerdasId: number | null = null;
   salvandoGanhosPerdas: boolean = false;
 
+  // Controle de Hábitos
+  controleHabitos: ControleHabitosData = {
+    ano: new Date().getFullYear(),
+    mes: new Date().getMonth(),
+    totalDias: this.getDiasNoMes(new Date().getMonth(), new Date().getFullYear()),
+    habitos: []
+  };
+  controleHabitosId: number | null = null;
+  salvandoControleHabitos: boolean = false;
+
   // Referências - Anotações
   salvandoAnotacoes: boolean = false;
 
@@ -325,9 +357,18 @@ export class PublicMentoriaViewComponent implements OnInit {
   // Getter para obter seções ordenadas conforme configuração do editor
   get secoesOrdenadas(): string[] {
     if (!this.conteudoEstruturado?.ordemSecoes || this.conteudoEstruturado.ordemSecoes.length === 0) {
-      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas'];
+      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos'];
     }
     return this.conteudoEstruturado.ordemSecoes;
+  }
+
+  getDiasNoMes(mes: number, ano: number): number {
+    const diasPorMes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    // Verifica ano bissexto
+    if (mes === 1 && ((ano % 4 === 0 && ano % 100 !== 0) || ano % 400 === 0)) {
+      return 29;
+    }
+    return diasPorMes[mes];
   }
 
   carregarEncontro(): void {
@@ -951,6 +992,10 @@ export class PublicMentoriaViewComponent implements OnInit {
     // Carregar Ganhos e Perdas do banco de dados
     console.log('⚖️ Carregando Ganhos e Perdas do banco de dados...');
     this.carregarGanhosPerdas();
+
+    // Carregar Controle de Hábitos do banco de dados
+    console.log('📅 Carregando Controle de Hábitos do banco de dados...');
+    this.carregarControleHabitos();
 
     // Carregar Golden Circle do banco de dados
     console.log('⭕ Carregando Golden Circle do banco de dados...');
@@ -3109,6 +3154,322 @@ export class PublicMentoriaViewComponent implements OnInit {
     });
 
     container.appendChild(grid);
+
+    return container;
+  }
+
+  // ===== CONTROLE DE HÁBITOS =====
+
+  getNomeMes(mes: number): string {
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    return meses[mes] || 'Janeiro';
+  }
+
+  getDiasArray(): number[] {
+    return Array.from({ length: this.controleHabitos.totalDias }, (_, i) => i + 1);
+  }
+
+  atualizarMesHabitos(): void {
+    const novoTotalDias = this.getDiasNoMes(this.controleHabitos.mes, this.controleHabitos.ano);
+    this.controleHabitos.totalDias = novoTotalDias;
+
+    // Atualizar dias de cada hábito
+    this.controleHabitos.habitos.forEach(habito => {
+      if (habito.dias.length < novoTotalDias) {
+        // Adicionar dias faltantes
+        for (let i = habito.dias.length; i < novoTotalDias; i++) {
+          habito.dias.push({ dia: i + 1, status: 'empty' });
+        }
+      } else if (habito.dias.length > novoTotalDias) {
+        // Remover dias excedentes
+        habito.dias = habito.dias.slice(0, novoTotalDias);
+      }
+    });
+  }
+
+  adicionarHabito(): void {
+    const novoHabito: Habito = {
+      id: this.generateId(),
+      nome: '',
+      meta: 20,
+      descricao: '',
+      notas: '',
+      dias: Array.from({ length: this.controleHabitos.totalDias }, (_, i) => ({
+        dia: i + 1,
+        status: 'empty'
+      }))
+    };
+
+    this.controleHabitos.habitos.push(novoHabito);
+  }
+
+  removerHabito(habitoId: string): void {
+    if (confirm('Tem certeza que deseja excluir este hábito?')) {
+      this.controleHabitos.habitos = this.controleHabitos.habitos.filter(h => h.id !== habitoId);
+    }
+  }
+
+  toggleDiaStatus(habito: Habito, dia: number): void {
+    const diaData = habito.dias.find(d => d.dia === dia);
+    if (!diaData) return;
+
+    // Ciclo: empty → done → not-done → not-needed → empty
+    if (diaData.status === 'empty') {
+      diaData.status = 'done';
+    } else if (diaData.status === 'done') {
+      diaData.status = 'not-done';
+    } else if (diaData.status === 'not-done') {
+      diaData.status = 'not-needed';
+    } else {
+      diaData.status = 'empty';
+    }
+  }
+
+  getHabitoProgresso(habito: Habito): number {
+    return habito.dias.filter(d => d.status === 'done').length;
+  }
+
+  getHabitoProgressoPercentual(habito: Habito): number {
+    const progresso = this.getHabitoProgresso(habito);
+    return Math.min((progresso / habito.meta) * 100, 100);
+  }
+
+  getMetasAlcancadas(): number {
+    return this.controleHabitos.habitos.filter(h => this.getHabitoProgresso(h) >= h.meta).length;
+  }
+
+  getTotalDiasRealizados(): number {
+    return this.controleHabitos.habitos.reduce((total, habito) => {
+      return total + this.getHabitoProgresso(habito);
+    }, 0);
+  }
+
+  getTaxaConclusao(): number {
+    if (this.controleHabitos.habitos.length === 0) return 0;
+
+    const totalPossivel = this.controleHabitos.habitos.length * this.controleHabitos.totalDias;
+    const totalRealizado = this.getTotalDiasRealizados();
+
+    return totalPossivel > 0 ? Math.round((totalRealizado / totalPossivel) * 100) : 0;
+  }
+
+  habitoModalAberto: Habito | null = null;
+  habitoNotasTexto: string = '';
+
+  abrirNotasHabito(habito: Habito): void {
+    this.habitoModalAberto = habito;
+    this.habitoNotasTexto = habito.notas || '';
+    // Aqui você poderia abrir um modal, mas por simplicidade vamos usar prompt
+    const notas = prompt('Notas do hábito:', habito.notas || '');
+    if (notas !== null) {
+      habito.notas = notas;
+    }
+  }
+
+  carregarControleHabitos(): void {
+    if (!this.token) return;
+
+    this.mentoriaService.obterControleHabitosPublico(this.token).subscribe({
+      next: (response: any) => {
+        if (response.data) {
+          console.log('✅ Controle de Hábitos carregado:', response.data);
+          this.controleHabitosId = response.data.id;
+
+          this.controleHabitos.ano = response.data.ano || new Date().getFullYear();
+          this.controleHabitos.mes = response.data.mes || new Date().getMonth();
+          this.controleHabitos.totalDias = response.data.total_dias || this.getDiasNoMes(this.controleHabitos.mes, this.controleHabitos.ano);
+
+          // Parse habitos (JSONB)
+          const parseHabitos = (data: any) => {
+            if (!data) return [];
+            if (typeof data === 'string') {
+              try {
+                return JSON.parse(data);
+              } catch {
+                return [];
+              }
+            }
+            return data;
+          };
+
+          this.controleHabitos.habitos = parseHabitos(response.data.habitos);
+        } else {
+          // Inicializar vazio se não houver dados
+          this.inicializarControleHabitosVazio();
+        }
+      },
+      error: (error: any) => {
+        console.error('❌ Erro ao carregar Controle de Hábitos:', error);
+        this.inicializarControleHabitosVazio();
+      }
+    });
+  }
+
+  inicializarControleHabitosVazio(): void {
+    this.controleHabitos.habitos = [];
+  }
+
+  salvarControleHabitos(): void {
+    if (!this.token || this.expired) {
+      this.toastr.warning('Não foi possível salvar Controle de Hábitos');
+      return;
+    }
+
+    this.salvandoControleHabitos = true;
+
+    console.log('💾 Salvando Controle de Hábitos...', this.controleHabitos);
+
+    this.mentoriaService.salvarControleHabitos(this.token, this.controleHabitos).subscribe({
+      next: (response: any) => {
+        console.log('✅ Controle de Hábitos salvo com sucesso!', response);
+        if (response.data && response.data.id) {
+          this.controleHabitosId = response.data.id;
+        }
+        this.toastr.success('Controle de Hábitos salvo com sucesso!');
+        this.salvandoControleHabitos = false;
+      },
+      error: (error: any) => {
+        console.error('❌ Erro ao salvar Controle de Hábitos:', error);
+        this.toastr.error('Erro ao salvar Controle de Hábitos');
+        this.salvandoControleHabitos = false;
+      }
+    });
+  }
+
+  async exportarControleHabitosPDF(): Promise<void> {
+    try {
+      this.toastr.info('Gerando PDF do Controle de Hábitos...');
+
+      const container = this.criarContainerControleHabitosVisualizacao();
+      document.body.appendChild(container);
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        width: container.scrollWidth,
+        height: container.scrollHeight
+      });
+
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`controle-habitos-${this.encontro?.mentorado_nome || 'mentoria'}-${this.getNomeMes(this.controleHabitos.mes)}-${this.controleHabitos.ano}.pdf`);
+
+      this.toastr.success('PDF exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      this.toastr.error('Erro ao exportar PDF');
+    }
+  }
+
+  private criarContainerControleHabitosVisualizacao(): HTMLElement {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.background = '#ffffff';
+    container.style.padding = '40px';
+    container.style.minWidth = '1600px';
+    container.style.fontFamily = 'Inter, Arial, sans-serif';
+
+    // Título
+    const titulo = document.createElement('div');
+    titulo.style.textAlign = 'center';
+    titulo.style.marginBottom = '30px';
+    titulo.innerHTML = `
+      <h1 style="color: #022c22; font-size: 36px; font-weight: 800; margin-bottom: 8px;">
+        🌱 CONTROLE DE HÁBITOS
+      </h1>
+      <p style="color: #666; font-size: 18px; margin: 0;">
+        ${this.getNomeMes(this.controleHabitos.mes)} de ${this.controleHabitos.ano}
+      </p>
+      <p style="color: #999; font-size: 14px; margin-top: 15px;">
+        ${this.encontro?.mentorado_nome || 'Mentorado'} - ${new Date().toLocaleDateString('pt-BR')}
+      </p>
+    `;
+    container.appendChild(titulo);
+
+    // Estatísticas
+    const stats = document.createElement('div');
+    stats.style.display = 'grid';
+    stats.style.gridTemplateColumns = 'repeat(4, 1fr)';
+    stats.style.gap = '15px';
+    stats.style.marginBottom = '30px';
+    stats.innerHTML = `
+      <div style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5e9 100%); padding: 20px; border-radius: 12px; border: 2px solid rgba(2, 44, 34, 0.1); text-align: center;">
+        <div style="font-size: 11px; color: #666; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">TOTAL DE HÁBITOS</div>
+        <div style="font-size: 28px; font-weight: 800; color: #022c22;">${this.controleHabitos.habitos.length}</div>
+      </div>
+      <div style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5e9 100%); padding: 20px; border-radius: 12px; border: 2px solid rgba(2, 44, 34, 0.1); text-align: center;">
+        <div style="font-size: 11px; color: #666; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">METAS ALCANÇADAS</div>
+        <div style="font-size: 28px; font-weight: 800; color: #022c22;">${this.getMetasAlcancadas()}/${this.controleHabitos.habitos.length}</div>
+      </div>
+      <div style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5e9 100%); padding: 20px; border-radius: 12px; border: 2px solid rgba(2, 44, 34, 0.1); text-align: center;">
+        <div style="font-size: 11px; color: #666; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">TOTAL REALIZADO</div>
+        <div style="font-size: 28px; font-weight: 800; color: #022c22;">${this.getTotalDiasRealizados()}</div>
+      </div>
+      <div style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5e9 100%); padding: 20px; border-radius: 12px; border: 2px solid rgba(2, 44, 34, 0.1); text-align: center;">
+        <div style="font-size: 11px; color: #666; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">TAXA DE CONCLUSÃO</div>
+        <div style="font-size: 28px; font-weight: 800; color: #022c22;">${this.getTaxaConclusao()}%</div>
+      </div>
+    `;
+    container.appendChild(stats);
+
+    // Tabela
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+    table.style.fontSize = '13px';
+
+    let tableHTML = `
+      <thead>
+        <tr style="background: #022c22; color: white;">
+          <th style="padding: 12px; text-align: left; border: 1px solid rgba(2, 44, 34, 0.3);">Hábito</th>
+          <th style="padding: 12px; text-align: center; border: 1px solid rgba(2, 44, 34, 0.3);">Meta</th>
+          <th style="padding: 12px; text-align: center; border: 1px solid rgba(2, 44, 34, 0.3);">Progresso</th>
+          ${Array.from({ length: this.controleHabitos.totalDias }, (_, i) =>
+            `<th style="padding: 8px; text-align: center; border: 1px solid rgba(2, 44, 34, 0.3); min-width: 30px;">${i + 1}</th>`
+          ).join('')}
+        </tr>
+      </thead>
+      <tbody>
+    `;
+
+    this.controleHabitos.habitos.forEach((habito, index) => {
+      const progresso = this.getHabitoProgresso(habito);
+      const bgColor = index % 2 === 0 ? '#f8fdf9' : '#ffffff';
+
+      tableHTML += `
+        <tr style="background: ${bgColor};">
+          <td style="padding: 12px; border: 1px solid #c8e6c9; font-weight: 600; color: #022c22;">${habito.nome || 'Sem nome'}</td>
+          <td style="padding: 12px; text-align: center; border: 1px solid #c8e6c9; font-weight: 700; color: #022c22;">${habito.meta}</td>
+          <td style="padding: 12px; text-align: center; border: 1px solid #c8e6c9; font-weight: 700; color: ${progresso >= habito.meta ? '#ffa000' : '#022c22'};">${progresso}/${habito.meta}</td>
+          ${habito.dias.map(diaData => {
+            let bgCell = 'white';
+            if (diaData.status === 'done') bgCell = '#66bb6a';
+            else if (diaData.status === 'not-done') bgCell = '#ff9800';
+            else if (diaData.status === 'not-needed') bgCell = '#9e9e9e';
+
+            return `<td style="padding: 0; height: 40px; border: 1px solid #c8e6c9; background: ${bgCell};"></td>`;
+          }).join('')}
+        </tr>
+      `;
+    });
+
+    tableHTML += '</tbody>';
+    table.innerHTML = tableHTML;
+    container.appendChild(table);
 
     return container;
   }

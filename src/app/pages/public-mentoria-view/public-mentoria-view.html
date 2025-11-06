@@ -1514,6 +1514,221 @@
       </div>
     </section>
 
+    <!-- Controle de Hábitos Section -->
+    <section *ngIf="secaoId === 'controleHabitos'" class="dark-section controle-habitos-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.controleHabitos?.ativo">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-calendar-check"></i>
+            Controle de Hábitos
+          </h2>
+          <p class="dark-subtitle">Rastreador Mensal de Hábitos</p>
+        </div>
+
+        <div class="controle-habitos-content">
+
+          <!-- Período e Controles -->
+          <div class="habitos-header-section">
+            <div class="habitos-period-display">
+              {{ getNomeMes(controleHabitos.mes) }} de {{ controleHabitos.ano }}
+            </div>
+
+            <div class="habitos-controls">
+              <input
+                type="number"
+                class="habitos-year-input"
+                [(ngModel)]="controleHabitos.ano"
+                (change)="atualizarMesHabitos()"
+                min="2020"
+                max="2030"
+                [disabled]="expired">
+
+              <select
+                class="habitos-month-select"
+                [(ngModel)]="controleHabitos.mes"
+                (change)="atualizarMesHabitos()"
+                [disabled]="expired">
+                <option [value]="0">Janeiro</option>
+                <option [value]="1">Fevereiro</option>
+                <option [value]="2">Março</option>
+                <option [value]="3">Abril</option>
+                <option [value]="4">Maio</option>
+                <option [value]="5">Junho</option>
+                <option [value]="6">Julho</option>
+                <option [value]="7">Agosto</option>
+                <option [value]="8">Setembro</option>
+                <option [value]="9">Outubro</option>
+                <option [value]="10">Novembro</option>
+                <option [value]="11">Dezembro</option>
+              </select>
+
+              <button
+                class="habitos-btn-add-habit"
+                (click)="adicionarHabito()"
+                [disabled]="expired">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar Hábito
+              </button>
+            </div>
+          </div>
+
+          <!-- Estatísticas -->
+          <div class="habitos-statistics">
+            <h3 class="habitos-stats-title">
+              <i class="fa-solid fa-chart-bar"></i>
+              Estatísticas do Mês
+            </h3>
+            <div class="habitos-stats-grid">
+              <div class="habitos-stat-card">
+                <div class="habitos-stat-value">{{ controleHabitos.habitos.length }}</div>
+                <div class="habitos-stat-label">Total de Hábitos</div>
+              </div>
+              <div class="habitos-stat-card">
+                <div class="habitos-stat-value">{{ getMetasAlcancadas() }}/{{ controleHabitos.habitos.length }}</div>
+                <div class="habitos-stat-label">Metas Alcançadas</div>
+              </div>
+              <div class="habitos-stat-card">
+                <div class="habitos-stat-value">{{ getTotalDiasRealizados() }}</div>
+                <div class="habitos-stat-label">Total Realizado</div>
+              </div>
+              <div class="habitos-stat-card">
+                <div class="habitos-stat-value">{{ getTaxaConclusao() }}%</div>
+                <div class="habitos-stat-label">Taxa de Conclusão</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Legenda -->
+          <div class="habitos-legend">
+            <div class="habitos-legend-item">
+              <div class="habitos-legend-box habitos-done"></div>
+              <span>✅ Feito</span>
+            </div>
+            <div class="habitos-legend-item">
+              <div class="habitos-legend-box habitos-not-done"></div>
+              <span>❌ Não Feito</span>
+            </div>
+            <div class="habitos-legend-item">
+              <div class="habitos-legend-box habitos-not-needed"></div>
+              <span>⚪ Não Necessário</span>
+            </div>
+            <div class="habitos-legend-item">
+              <div class="habitos-legend-box habitos-empty"></div>
+              <span>⬜ Clique para alternar</span>
+            </div>
+          </div>
+
+          <!-- Tabela de Hábitos -->
+          <div class="habitos-table-wrapper">
+            <table class="habitos-table">
+              <thead>
+                <tr>
+                  <th class="habitos-th-habit">Hábito</th>
+                  <th class="habitos-th-goal">Meta / Progresso</th>
+                  <th *ngFor="let dia of getDiasArray()" class="habitos-th-day">{{ dia }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let habito of controleHabitos.habitos" class="habitos-row">
+                  <!-- Nome do Hábito -->
+                  <td class="habitos-td-name">
+                    <div class="habitos-name-container">
+                      <input
+                        type="text"
+                        class="habitos-name-input"
+                        [(ngModel)]="habito.nome"
+                        placeholder="Nome do hábito..."
+                        [disabled]="expired">
+                      <button
+                        class="habitos-btn-notes"
+                        (click)="abrirNotasHabito(habito)"
+                        [disabled]="expired"
+                        title="Adicionar notas">
+                        <i class="fa-solid fa-note-sticky"></i>
+                      </button>
+                      <button
+                        class="habitos-btn-delete"
+                        (click)="removerHabito(habito.id)"
+                        [disabled]="expired"
+                        title="Remover hábito">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+                    <div class="habitos-progress-container">
+                      <div class="habitos-progress-bar">
+                        <div
+                          class="habitos-progress-fill"
+                          [class.habitos-goal-reached]="getHabitoProgresso(habito) >= habito.meta"
+                          [style.width.%]="getHabitoProgressoPercentual(habito)"></div>
+                      </div>
+                      <div class="habitos-progress-text" *ngIf="habito.descricao">
+                        {{ habito.descricao }}
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Meta / Progresso -->
+                  <td class="habitos-td-goal">
+                    <div class="habitos-goal-container">
+                      <div class="habitos-goal-label">Meta</div>
+                      <input
+                        type="number"
+                        class="habitos-goal-input"
+                        [(ngModel)]="habito.meta"
+                        min="1"
+                        [max]="controleHabitos.totalDias"
+                        [disabled]="expired">
+                      <div class="habitos-current-count">
+                        {{ getHabitoProgresso(habito) }}/{{ habito.meta }}
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Dias do Mês -->
+                  <td
+                    *ngFor="let diaData of habito.dias"
+                    class="habitos-day-cell"
+                    [class.habitos-done]="diaData.status === 'done'"
+                    [class.habitos-not-done]="diaData.status === 'not-done'"
+                    [class.habitos-not-needed]="diaData.status === 'not-needed'"
+                    (click)="!expired && toggleDiaStatus(habito, diaData.dia)">
+                  </td>
+                </tr>
+
+                <tr *ngIf="controleHabitos.habitos.length === 0">
+                  <td [attr.colspan]="controleHabitos.totalDias + 2" class="habitos-empty-message">
+                    Nenhum hábito adicionado. Clique em "Adicionar Hábito" para começar.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Botões de Ação -->
+          <div class="habitos-actions">
+            <button
+              type="button"
+              class="btn-save-habitos"
+              (click)="salvarControleHabitos()"
+              [disabled]="salvandoControleHabitos || expired">
+              <i class="fa-solid" [ngClass]="salvandoControleHabitos ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+              {{ salvandoControleHabitos ? 'Salvando...' : 'Salvar Controle de Hábitos' }}
+            </button>
+
+            <button
+              type="button"
+              class="btn-export-habitos"
+              (click)="exportarControleHabitosPDF()">
+              <i class="fa-solid fa-file-pdf"></i>
+              Exportar PDF
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section *ngIf="secaoId === 'mapaMental'" class="dark-section mapa-mental-main-section"
              [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaMental?.ativo">

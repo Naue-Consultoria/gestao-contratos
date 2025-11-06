@@ -43,6 +43,7 @@ import { PublicMentoriaViewComponent } from './pages/public-mentoria-view/public
 import { PublicMentoriaHub } from './pages/public-mentoria-hub/public-mentoria-hub';
 import { PublicVagasHubComponent } from './pages/public-vagas-hub/public-vagas-hub';
 import { GerenciarRsComponent } from './pages/gerenciar-rs/gerenciar-rs';
+import { ControleHabitosComponent } from './pages/controle-habitos/controle-habitos.component';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -443,6 +444,13 @@ export const routes: Routes = [
         path: 'ajuda',
         component: HelpPageComponent,
         title: 'Ajuda - NAUE Consultoria',
+      },
+
+      // Controle de Hábitos
+      {
+        path: 'controle-habitos',
+        component: ControleHabitosComponent,
+        title: 'Controle de Hábitos - NAUE Consultoria',
       },
 
       // Redirecionamentos para compatibilidade com rotas antigas
