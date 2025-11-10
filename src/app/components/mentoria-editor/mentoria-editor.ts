@@ -130,7 +130,7 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
       this.contractService.getContracts().subscribe({
         next: (response: ContractsResponse) => {
           this.contratos = response.contracts || [];
-          this.contratosFiltrados = this.contratos;
+          this.contratosFiltrados = []; // Começar vazio, só popular quando cliente for selecionado
           this.loadingContratos = false;
           resolve();
         },
