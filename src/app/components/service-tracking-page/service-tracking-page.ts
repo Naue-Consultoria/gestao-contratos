@@ -630,9 +630,34 @@ export class ServiceTrackingPageComponent implements OnInit {
 
     try {
       this.isSendingComment = true;
-      
-      // Enviar comentário para a rotina
-      const newComment = await this.routineService.addComment(this.routine.id!, this.newComment.trim(), this.selectedStageId || undefined).toPromise();
+
+      // BUGFIX: Validar se this.routine.id corresponde ao routineId da URL
+      // Previne race condition onde this.routine ainda não foi atualizado
+      if (!this.routine || !this.routine.id) {
+        this.toastr.error('Erro: Rotina não carregada. Aguarde o carregamento completo.');
+        this.isSendingComment = false;
+        return;
+      }
+
+      if (this.routine.id !== this.routineId) {
+        console.error('🚨 RACE CONDITION DETECTADA!', {
+          routineIdFromObject: this.routine.id,
+          routineIdFromURL: this.routineId,
+          timestamp: new Date().toISOString()
+        });
+        this.toastr.error('Erro: Dados desatualizados. Aguarde o carregamento completo.');
+        this.isSendingComment = false;
+        return;
+      }
+
+      console.log('✅ Validação OK: Enviando comentário para rotina', {
+        routineId: this.routine.id,
+        routineIdFromURL: this.routineId,
+        comment: this.newComment.substring(0, 50)
+      });
+
+      // Enviar comentário para a rotina usando o ID da URL (fonte da verdade)
+      const newComment = await this.routineService.addComment(this.routineId, this.newComment.trim(), this.selectedStageId || undefined).toPromise();
       
       if (newComment) {
         // Se houver arquivos selecionados, fazer upload primeiro

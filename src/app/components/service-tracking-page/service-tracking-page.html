@@ -240,10 +240,10 @@
             </div>
             
             <div class="input-wrapper">
-              <textarea 
+              <textarea
                 class="comment-input"
                 [(ngModel)]="newComment"
-                [disabled]="!canEdit || isSendingComment"
+                [disabled]="!canEdit || isSendingComment || isLoading"
                 placeholder="Digite seu comentário..."
                 (keydown)="onCommentKeydown($event)"
                 rows="3">
@@ -281,10 +281,10 @@
                   </select>
                 </div>
                 
-                <button 
+                <button
                   class="btn-send"
                   (click)="sendComment()"
-                  [disabled]="!canEdit || !newComment.trim() || isSendingComment">
+                  [disabled]="!canEdit || !newComment.trim() || isSendingComment || isLoading">
                   <i class="fas fa-paper-plane" *ngIf="!isSendingComment"></i>
                   <i class="fas fa-spinner fa-spin" *ngIf="isSendingComment"></i>
                   {{ isSendingComment ? 'Enviando...' : 'Enviar' }}
