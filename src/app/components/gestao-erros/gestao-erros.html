@@ -1,0 +1,247 @@
+<div class="gestao-erros-container">
+  <!-- Dark Header -->
+  <div class="dark-header">
+    <h2 class="dark-title">
+      <i class="fa-solid fa-exclamation-triangle"></i>
+      Gestão de Erros
+    </h2>
+    <p class="dark-subtitle">Analise e aprenda com os erros para evoluir continuamente</p>
+  </div>
+
+  <!-- Content Box -->
+  <div class="gestao-erros-content">
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'personal'"
+        [class.completed]="activeTab === 'team' || activeTab === 'summary'"
+        data-number="1"
+        (click)="switchTab('personal')">
+        Meus Erros
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'team'"
+        [class.completed]="activeTab === 'summary'"
+        data-number="2"
+        (click)="switchTab('team')">
+        Erros da Equipe
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'summary'"
+        data-number="3"
+        (click)="switchTab('summary')">
+        Resumo Final
+      </button>
+    </div>
+
+    <!-- Tab: Meus Erros -->
+    <div class="tab-content" [class.active]="activeTab === 'personal'">
+      <div class="section-title">
+        <span class="step-indicator">1</span>
+        Registre seus últimos 4 erros
+      </div>
+
+      <div class="errors-grid">
+        <div class="error-card" *ngFor="let erro of data.errosPessoais; let i = index">
+          <span class="error-number">Erro #{{ i + 1 }}</span>
+
+          <textarea
+            class="error-input"
+            [(ngModel)]="erro.description"
+            (ngModelChange)="triggerSave()"
+            [disabled]="readOnly"
+            placeholder="Descreva o erro..."
+            rows="4"></textarea>
+
+          <div class="select-wrapper">
+            <label class="select-label">Posicionamento</label>
+            <select
+              class="select-input"
+              [(ngModel)]="erro.position"
+              (ngModelChange)="triggerSave()"
+              [disabled]="readOnly">
+              <option value="">Selecione...</option>
+              <option *ngFor="let opt of positionOptions" [value]="opt.value">
+                {{ opt.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="select-wrapper">
+            <label class="select-label">Status</label>
+            <select
+              class="select-input"
+              [(ngModel)]="erro.status"
+              (ngModelChange)="triggerSave()"
+              [disabled]="readOnly">
+              <option value="">Selecione...</option>
+              <option *ngFor="let opt of statusOptions" [value]="opt.value">
+                {{ opt.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-container">
+        <button class="btn-action-erros btn-primary" (click)="switchTab('team')">
+          Próximo: Erros da Equipe
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab: Erros da Equipe -->
+    <div class="tab-content" [class.active]="activeTab === 'team'">
+      <div class="section-title">
+        <span class="step-indicator">2</span>
+        Registre os últimos 4 erros da equipe
+      </div>
+
+      <div class="errors-grid">
+        <div class="error-card" *ngFor="let erro of data.errosEquipe; let i = index">
+          <span class="error-number">Erro #{{ i + 1 }}</span>
+
+          <textarea
+            class="error-input"
+            [(ngModel)]="erro.description"
+            (ngModelChange)="triggerSave()"
+            [disabled]="readOnly"
+            placeholder="Descreva o erro da equipe..."
+            rows="4"></textarea>
+
+          <div class="select-wrapper">
+            <label class="select-label">Posicionamento</label>
+            <select
+              class="select-input"
+              [(ngModel)]="erro.position"
+              (ngModelChange)="triggerSave()"
+              [disabled]="readOnly">
+              <option value="">Selecione...</option>
+              <option *ngFor="let opt of positionOptions" [value]="opt.value">
+                {{ opt.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="select-wrapper">
+            <label class="select-label">Status</label>
+            <select
+              class="select-input"
+              [(ngModel)]="erro.status"
+              (ngModelChange)="triggerSave()"
+              [disabled]="readOnly">
+              <option value="">Selecione...</option>
+              <option *ngFor="let opt of statusOptions" [value]="opt.value">
+                {{ opt.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-container">
+        <button class="btn-action-erros btn-secondary" (click)="switchTab('personal')">
+          <i class="fa-solid fa-arrow-left"></i>
+          Voltar
+        </button>
+        <button class="btn-action-erros btn-primary" (click)="switchTab('summary')">
+          Finalizar e Ver Resumo
+          <i class="fa-solid fa-check"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab: Resumo -->
+    <div class="tab-content" [class.active]="activeTab === 'summary'">
+      <div class="summary-section">
+        <h3 class="summary-main-title">
+          <i class="fa-solid fa-chart-pie"></i>
+          Análise Completa
+        </h3>
+
+        <!-- Erros Pessoais e da Equipe -->
+        <div class="summary-grid">
+          <div class="summary-card">
+            <h4>Meus Erros</h4>
+            <div class="error-item" *ngFor="let erro of data.errosPessoais; let i = index">
+              <span class="status-badge" [ngClass]="getStatusClass(erro.status)">
+                {{ getStatusLabel(erro.status) }}
+              </span>
+              <strong>Erro {{ i + 1 }}:</strong> {{ erro.description }}
+              <br>
+              <small>Posicionamento: {{ getPositionLabel(erro.position) }}</small>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <h4>Erros da Equipe</h4>
+            <div class="error-item" *ngFor="let erro of data.errosEquipe; let i = index">
+              <span class="status-badge" [ngClass]="getStatusClass(erro.status)">
+                {{ getStatusLabel(erro.status) }}
+              </span>
+              <strong>Erro {{ i + 1 }}:</strong> {{ erro.description }}
+              <br>
+              <small>Posicionamento: {{ getPositionLabel(erro.position) }}</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="summary-grid stats-grid">
+          <div class="summary-card">
+            <h4>Estatísticas de Posicionamento</h4>
+            <div class="stat-item" *ngFor="let item of getPositionStats() | keyvalue">
+              <div class="stat-header">
+                <span>{{ getPositionLabel(item.key) }}</span>
+                <span>{{ item.value }} ({{ getPercentage(item.value, 8) }}%)</span>
+              </div>
+              <div class="stat-bar-bg">
+                <div class="stat-bar-fill" [style.width.%]="getPercentage(item.value, 8)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <h4>Estatísticas de Status</h4>
+            <div class="stat-item" *ngFor="let item of getStatusStats() | keyvalue">
+              <div class="stat-header">
+                <span>{{ getStatusLabel(item.key) }}</span>
+                <span>{{ item.value }} ({{ getPercentage(item.value, 8) }}%)</span>
+              </div>
+              <div class="stat-bar-bg">
+                <div class="stat-bar-fill" [style.width.%]="getPercentage(item.value, 8)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-container">
+        <button class="btn-action-erros btn-secondary" (click)="switchTab('team')">
+          <i class="fa-solid fa-arrow-left"></i>
+          Voltar
+        </button>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button *ngIf="!readOnly"
+              class="btn-action-erros btn-primary"
+              (click)="saveManually()"
+              [disabled]="isSaving">
+        <i class="fa-solid" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+        {{ isSaving ? 'Salvando...' : 'Salvar' }}
+      </button>
+      <button class="btn-action-erros" (click)="exportPDF()">
+        <i class="fa-solid fa-file-pdf"></i>
+        Exportar PDF
+      </button>
+    </div>
+  </div>
+</div>

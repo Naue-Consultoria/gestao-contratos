@@ -1044,6 +1044,48 @@
           </div>
         </section>
 
+        <!-- GESTÃO DE ERROS -->
+        <section *ngIf="bloco.tipo === 'erros'" [id]="'bloco-' + bloco.id" class="editor-section">
+          <div class="section-header">
+            <span class="section-title">
+              <i class="fa-solid {{ bloco.icone }}"></i>
+              {{ bloco.titulo }}
+            </span>
+            <div class="section-header-actions">
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoCima(bloco.id)"
+                [disabled]="!podeBlocoSubir(bloco.id)"
+                title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-reorder-section"
+                (click)="moverBlocoBaixo(bloco.id)"
+                [disabled]="!podeBlocoDescer(bloco.id)"
+                title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-remove-section"
+                (click)="removerBloco(bloco.id)"
+                title="Remover seção">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="section-content">
+            <div class="info-box">
+              <i class="fas fa-check-circle"></i>
+              <p>Gestão de Erros ativada. A ferramenta de análise e gestão de erros será exibida na visualização pública da mentoria.</p>
+            </div>
+          </div>
+        </section>
+
         <!-- ENCERRAMENTO -->
         <section *ngIf="bloco.tipo === 'encerramento'" [id]="'bloco-' + bloco.id" class="editor-section">
           <div class="section-header">

@@ -1776,6 +1776,17 @@
       </div>
     </section>
 
+    <!-- Gestão de Erros Section -->
+    <section *ngIf="secaoId === 'erros'" class="dark-section gestao-erros-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.erros?.ativo">
+      <div class="dark-container">
+        <app-gestao-erros
+          [token]="token"
+          [readOnly]="false">
+        </app-gestao-erros>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section *ngIf="secaoId === 'mapaMental'" class="dark-section mapa-mental-main-section"
              [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaMental?.ativo">

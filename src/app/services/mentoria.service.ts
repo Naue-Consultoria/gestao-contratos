@@ -794,4 +794,32 @@ export class MentoriaService {
       dados
     );
   }
+
+  /**
+   * Obter Gestão de Erros por token público
+   */
+  obterErrosPublico(token: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/publico/${token}/erros`);
+  }
+
+  /**
+   * Salvar Gestão de Erros (via token público)
+   */
+  salvarErros(token: string, dados: {
+    errosPessoais: Array<{
+      description: string;
+      position: string;
+      status: string;
+    }>;
+    errosEquipe: Array<{
+      description: string;
+      position: string;
+      status: string;
+    }>;
+  }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/publico/${token}/erros`,
+      dados
+    );
+  }
 }
