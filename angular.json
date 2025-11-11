@@ -40,8 +40,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "4MB",
-                  "maximumError": "5MB"
+                  "maximumWarning": "5MB",
+                  "maximumError": "7MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -55,6 +55,7 @@
                 "docx",
                 "jspdf",
                 "html2canvas",
+                "xlsx-js-style",
                 "canvg",
                 "rgbcolor",
                 "raf",
