@@ -85,7 +85,7 @@ interface MapaMentalData {
 
 // Tipos de blocos disponíveis
 type TipoBloco = 'visaoGeral' | 'mentoria' | 'testes' | 'proximosPassos' | 'referencias' |
-                  'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'encerramento';
+                  'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'analiseProblemas' | 'encerramento';
 
 interface BlocoEditor {
   id: string;
@@ -97,7 +97,7 @@ interface BlocoEditor {
 }
 
 interface SecaoReordenavel {
-  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci';
+  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'analiseProblemas';
   titulo: string;
   icone: string;
   ordem: number;
@@ -118,6 +118,7 @@ interface ConteudoMentoria {
   ganhosPerdas: { ativo: boolean };
   controleHabitos: { ativo: boolean };
   matrizRaci: { ativo: boolean };
+  analiseProblemas: { ativo: boolean };
   encerramento: { ativo: boolean; conteudo: string };
   ordemSecoes?: string[]; // Nova propriedade para controlar a ordem
   blocosAtivos?: BlocoEditor[]; // Nova propriedade para controlar blocos ativos
@@ -171,6 +172,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { tipo: 'ganhosPerdas', titulo: 'Ganhos e Perdas', icone: 'fa-scale-balanced', descricao: 'Matriz de Decisão Estratégica' },
     { tipo: 'controleHabitos', titulo: 'Controle de Hábitos', icone: 'fa-calendar-check', descricao: 'Rastreador Mensal de Hábitos' },
     { tipo: 'matrizRaci', titulo: 'Matriz RACI', icone: 'fa-table', descricao: 'Matriz de Responsabilidades RACI' },
+    { tipo: 'analiseProblemas', titulo: 'Análise de Problemas', icone: 'fa-sitemap', descricao: 'Análise Sistêmica de Problemas' },
     { tipo: 'encerramento', titulo: 'Encerramento', icone: 'fa-flag-checkered', descricao: 'Conclusão do encontro' }
   ];
 
@@ -217,8 +219,9 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     ganhosPerdas: { ativo: false },
     controleHabitos: { ativo: false },
     matrizRaci: { ativo: false },
+    analiseProblemas: { ativo: false },
     encerramento: { ativo: true, conteudo: '' },
-    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci'] // Ordem padrão
+    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas'] // Ordem padrão
   };
 
   // Lista de seções reordenáveis
@@ -234,7 +237,8 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { id: 'termometroGestao', titulo: 'Termômetro de Gestão', icone: 'fa-chart-column', ordem: 8 },
     { id: 'ganhosPerdas', titulo: 'Ganhos e Perdas', icone: 'fa-scale-balanced', ordem: 9 },
     { id: 'controleHabitos', titulo: 'Controle de Hábitos', icone: 'fa-calendar-check', ordem: 10 },
-    { id: 'matrizRaci', titulo: 'Matriz RACI', icone: 'fa-table', ordem: 11 }
+    { id: 'matrizRaci', titulo: 'Matriz RACI', icone: 'fa-table', ordem: 11 },
+    { id: 'analiseProblemas', titulo: 'Análise de Problemas', icone: 'fa-sitemap', ordem: 12 }
   ];
 
   constructor(
@@ -462,7 +466,8 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       'termometroGestao': { ativo: this.conteudo.termometroGestao.ativo, titulo: 'Termômetro de Gestão', icone: 'fa-chart-column' },
       'ganhosPerdas': { ativo: this.conteudo.ganhosPerdas.ativo, titulo: 'Ganhos e Perdas', icone: 'fa-scale-balanced' },
       'controleHabitos': { ativo: this.conteudo.controleHabitos.ativo, titulo: 'Controle de Hábitos', icone: 'fa-calendar-check' },
-      'matrizRaci': { ativo: this.conteudo.matrizRaci.ativo, titulo: 'Matriz RACI', icone: 'fa-table' }
+      'matrizRaci': { ativo: this.conteudo.matrizRaci.ativo, titulo: 'Matriz RACI', icone: 'fa-table' },
+      'analiseProblemas': { ativo: this.conteudo.analiseProblemas.ativo, titulo: 'Análise de Problemas', icone: 'fa-sitemap' }
     };
 
     const secoesJaAdicionadas = new Set<string>();
@@ -614,6 +619,9 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
         break;
       case 'matrizRaci':
         this.conteudo.matrizRaci.ativo = ativar;
+        break;
+      case 'analiseProblemas':
+        this.conteudo.analiseProblemas.ativo = ativar;
         break;
       case 'encerramento':
         this.conteudo.encerramento.ativo = ativar;

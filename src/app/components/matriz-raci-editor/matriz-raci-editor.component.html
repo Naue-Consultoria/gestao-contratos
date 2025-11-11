@@ -136,10 +136,10 @@
         <span class="matrix-corner-text">Atividades</span>
         <span class="matrix-corner-text2">RACI</span>
       </div>
-      <div class="matrix-raci-header">R</div>
-      <div class="matrix-raci-header">A</div>
-      <div class="matrix-raci-header">C</div>
-      <div class="matrix-raci-header">I</div>
+      <div class="matrix-raci-header" *ngFor="let type of raciTypes">
+        <div class="raci-header-letter">{{ type }}</div>
+        <div class="raci-header-name">{{ getRaciLabel(type) }}</div>
+      </div>
 
       <!-- Activity rows -->
       <ng-container *ngFor="let activity of activities">

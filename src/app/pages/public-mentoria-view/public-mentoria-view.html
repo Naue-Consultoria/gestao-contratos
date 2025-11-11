@@ -1765,6 +1765,17 @@
       </div>
     </section>
 
+    <!-- Análise de Problemas Section -->
+    <section *ngIf="secaoId === 'analiseProblemas'" class="dark-section analise-problemas-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.analiseProblemas?.ativo">
+      <div class="dark-container">
+        <app-analise-problemas
+          [token]="token"
+          [readOnly]="false">
+        </app-analise-problemas>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section *ngIf="secaoId === 'mapaMental'" class="dark-section mapa-mental-main-section"
              [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaMental?.ativo">

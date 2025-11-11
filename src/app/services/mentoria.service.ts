@@ -765,4 +765,33 @@ export class MentoriaService {
       dados
     );
   }
+
+  // ===== ANÁLISE DE PROBLEMAS =====
+
+  /**
+   * Obter Análise de Problemas por token público
+   */
+  obterAnaliseProblemasPublico(token: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/publico/${token}/analise-problemas`);
+  }
+
+  /**
+   * Salvar Análise de Problemas (via token público)
+   */
+  salvarAnaliseProblemas(token: string, dados: {
+    problem: string;
+    stages: {
+      [key: string]: Array<{
+        id: string;
+        text: string;
+        stage: number;
+      }>;
+    };
+    postitCounter: number;
+  }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/publico/${token}/analise-problemas`,
+      dados
+    );
+  }
 }

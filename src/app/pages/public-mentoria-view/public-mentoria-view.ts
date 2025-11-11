@@ -11,6 +11,7 @@ import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { MatrizRaciEditorComponent } from '../../components/matriz-raci-editor/matriz-raci-editor.component';
+import { AnaliseProblemasComponent } from '../../components/analise-problemas/analise-problemas';
 
 interface TocItem {
   id: string;
@@ -132,7 +133,7 @@ interface MapaMentalData {
 @Component({
   selector: 'app-public-mentoria-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule, MatrizRaciEditorComponent],
+  imports: [CommonModule, FormsModule, DragDropModule, MatrizRaciEditorComponent, AnaliseProblemasComponent],
   templateUrl: './public-mentoria-view.html',
   styleUrl: './public-mentoria-view.css'
 })
@@ -358,7 +359,7 @@ export class PublicMentoriaViewComponent implements OnInit {
   // Getter para obter seções ordenadas conforme configuração do editor
   get secoesOrdenadas(): string[] {
     if (!this.conteudoEstruturado?.ordemSecoes || this.conteudoEstruturado.ordemSecoes.length === 0) {
-      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci'];
+      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas'];
     }
     return this.conteudoEstruturado.ordemSecoes;
   }

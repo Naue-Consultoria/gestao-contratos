@@ -1,0 +1,135 @@
+<div class="analise-problemas-container">
+  <!-- Dark Header -->
+  <div class="dark-header">
+    <h2 class="dark-title">
+      <i class="fa-solid fa-sitemap"></i>
+      Análise de Problemas
+    </h2>
+    <p class="dark-subtitle">Análise Sistêmica de Problemas</p>
+  </div>
+
+  <!-- Content Box -->
+  <div class="analise-problemas-content">
+    <!-- Problem Input -->
+    <div class="problem-section">
+      <label class="problem-label">Problema Principal:</label>
+      <input
+        type="text"
+        class="problem-input"
+        [(ngModel)]="data.problem"
+        (ngModelChange)="onProblemChange()"
+        [disabled]="readOnly"
+        placeholder="Defina o problema a ser investigado..." />
+    </div>
+
+    <!-- Board Container -->
+  <div class="board-container">
+    <!-- Loop através dos estágios -->
+    <div *ngFor="let stage of stageConfig"
+         class="stage-column"
+         [class.brainstorm]="stage.class === 'brainstorm'">
+
+      <!-- Stage Header -->
+      <div class="stage-header">
+        <div class="stage-title">
+          <i class="stage-icon" [ngClass]="stage.icon"></i>
+          {{ stage.title }}
+        </div>
+        <span class="stage-count">{{ getStageCount(stage.id) }}</span>
+      </div>
+
+      <!-- Add Postit Button (only for Brainstorm) -->
+      <button *ngIf="stage.canAdd && !readOnly"
+              class="add-postit-btn"
+              (click)="addPostit()">
+        + Adicionar ideia
+      </button>
+
+      <!-- Postits Area -->
+      <div class="postits-area"
+           [attr.data-stage]="stage.id"
+           [class.drag-over]="dragOverStage === stage.id"
+           (dragover)="onDragOver($event, stage.id)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event, stage.id)">
+
+        <!-- Empty State -->
+        <div *ngIf="getStageCount(stage.id) === 0" class="empty-state">
+          {{ stage.emptyMessage }}
+        </div>
+
+        <!-- Postits -->
+        <div *ngFor="let postit of getStagePostits(stage.id); trackBy: trackByPostitId"
+             class="postit"
+             [attr.data-id]="postit.id"
+             [attr.draggable]="!readOnly"
+             [class.dragging]="draggedElement?.id === postit.id"
+             (dragstart)="onDragStart($event, postit, stage.id)"
+             (dragend)="onDragEnd($event)">
+
+          <div class="postit-header">
+            <span class="postit-number">#{{ postit.id.split('-')[1] }}</span>
+            <button *ngIf="!readOnly"
+                    class="postit-delete"
+                    (click)="deletePostit(postit.id)">×</button>
+          </div>
+
+          <textarea
+            class="postit-text"
+            [(ngModel)]="postit.text"
+            (ngModelChange)="updatePostitText(postit, $event)"
+            [disabled]="readOnly"
+            placeholder="Digite aqui..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button *ngIf="!readOnly"
+            class="btn-action-analise btn-primary"
+            (click)="saveManually()"
+            [disabled]="isSaving">
+      <i class="fa-solid" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+      {{ isSaving ? 'Salvando...' : 'Salvar' }}
+    </button>
+    <button class="btn-action-analise" (click)="openSummaryModal()">
+      <i class="fa-solid fa-chart-bar"></i>
+      Ver Resumo
+    </button>
+    <button class="btn-action-analise" (click)="exportPDF()">
+      <i class="fa-solid fa-file-pdf"></i>
+      Exportar PDF
+    </button>
+  </div>
+  </div> <!-- Close analise-problemas-content -->
+
+  <!-- Summary Modal -->
+  <div class="modal" [class.active]="showSummaryModal" (click)="closeSummaryModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Resumo da Análise</h2>
+        <button class="modal-close" (click)="closeSummaryModal()">×</button>
+      </div>
+
+      <div class="summary-content">
+        <!-- Problem -->
+        <div class="summary-section">
+          <div class="summary-title">Problema:</div>
+          <div class="summary-item">{{ data.problem || 'Não definido' }}</div>
+        </div>
+
+        <!-- Each Stage -->
+        <div *ngFor="let stage of stageConfig" class="summary-section">
+          <ng-container *ngIf="getStageCount(stage.id) > 0">
+            <div class="summary-title">{{ stage.title }}:</div>
+            <div *ngFor="let postit of getStagePostits(stage.id)" class="summary-item">
+              {{ postit.text || '(vazio)' }}
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
