@@ -284,7 +284,7 @@ export class GestaoErrosComponent implements OnInit, OnDestroy {
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(107, 114, 128);
-      doc.text('Gestao de Erros | NAUE Consultoria', pageWidth / 2, 8, { align: 'center' });
+      doc.text('Erros | NAUE Consultoria', pageWidth / 2, 8, { align: 'center' });
     };
 
     // Header principal (primeira página)
@@ -295,7 +295,7 @@ export class GestaoErrosComponent implements OnInit, OnDestroy {
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(255, 255, 255);
-    doc.text('GESTAO DE ERROS', pageWidth / 2, 20, { align: 'center' });
+    doc.text('ERROS', pageWidth / 2, 20, { align: 'center' });
 
     // Subtítulo
     doc.setFontSize(11);

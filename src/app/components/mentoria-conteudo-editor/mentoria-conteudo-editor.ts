@@ -174,7 +174,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { tipo: 'controleHabitos', titulo: 'Controle de Hábitos', icone: 'fa-calendar-check', descricao: 'Rastreador Mensal de Hábitos' },
     { tipo: 'matrizRaci', titulo: 'Matriz RACI', icone: 'fa-table', descricao: 'Matriz de Responsabilidades RACI' },
     { tipo: 'analiseProblemas', titulo: 'Análise de Problemas', icone: 'fa-sitemap', descricao: 'Análise Sistêmica de Problemas' },
-    { tipo: 'erros', titulo: 'Gestão de Erros', icone: 'fa-exclamation-triangle', descricao: 'Análise e Gestão de Erros' },
+    { tipo: 'erros', titulo: 'Erros', icone: 'fa-exclamation-triangle', descricao: 'Análise e Gestão de Erros' },
     { tipo: 'encerramento', titulo: 'Encerramento', icone: 'fa-flag-checkered', descricao: 'Conclusão do encontro' }
   ];
 
@@ -242,7 +242,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { id: 'controleHabitos', titulo: 'Controle de Hábitos', icone: 'fa-calendar-check', ordem: 10 },
     { id: 'matrizRaci', titulo: 'Matriz RACI', icone: 'fa-table', ordem: 11 },
     { id: 'analiseProblemas', titulo: 'Análise de Problemas', icone: 'fa-sitemap', ordem: 12 },
-    { id: 'erros', titulo: 'Gestão de Erros', icone: 'fa-bug', ordem: 13 }
+    { id: 'erros', titulo: 'Erros', icone: 'fa-exclamation-triangle', ordem: 13 }
   ];
 
   constructor(
@@ -472,7 +472,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       'controleHabitos': { ativo: this.conteudo.controleHabitos.ativo, titulo: 'Controle de Hábitos', icone: 'fa-calendar-check' },
       'matrizRaci': { ativo: this.conteudo.matrizRaci.ativo, titulo: 'Matriz RACI', icone: 'fa-table' },
       'analiseProblemas': { ativo: this.conteudo.analiseProblemas.ativo, titulo: 'Análise de Problemas', icone: 'fa-sitemap' },
-      'erros': { ativo: this.conteudo.erros.ativo, titulo: 'Gestão de Erros', icone: 'fa-bug' }
+      'erros': { ativo: this.conteudo.erros.ativo, titulo: 'Erros', icone: 'fa-exclamation-triangle' }
     };
 
     const secoesJaAdicionadas = new Set<string>();
