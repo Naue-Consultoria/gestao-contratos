@@ -5703,6 +5703,14 @@ html {
   margin: 0 auto;
 }
 
+/* ===== MATRIZ RACI ===== */
+
+.matriz-raci-main-section {
+  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* Header Section */
 
 .habitos-header-section {

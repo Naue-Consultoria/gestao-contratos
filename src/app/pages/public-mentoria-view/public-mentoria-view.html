@@ -1754,6 +1754,17 @@
       </div>
     </div>
 
+    <!-- Matriz RACI Section -->
+    <section *ngIf="secaoId === 'matrizRaci'" class="dark-section matriz-raci-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.matrizRaci?.ativo">
+      <div class="dark-container">
+        <app-matriz-raci-editor
+          [token]="token"
+          [modoVisualizacao]="false">
+        </app-matriz-raci-editor>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section *ngIf="secaoId === 'mapaMental'" class="dark-section mapa-mental-main-section"
              [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaMental?.ativo">

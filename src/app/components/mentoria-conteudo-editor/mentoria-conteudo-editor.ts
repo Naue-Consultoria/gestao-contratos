@@ -85,7 +85,7 @@ interface MapaMentalData {
 
 // Tipos de blocos disponíveis
 type TipoBloco = 'visaoGeral' | 'mentoria' | 'testes' | 'proximosPassos' | 'referencias' |
-                  'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'encerramento';
+                  'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'encerramento';
 
 interface BlocoEditor {
   id: string;
@@ -97,7 +97,7 @@ interface BlocoEditor {
 }
 
 interface SecaoReordenavel {
-  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos';
+  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci';
   titulo: string;
   icone: string;
   ordem: number;
@@ -117,6 +117,7 @@ interface ConteudoMentoria {
   termometroGestao: { ativo: boolean };
   ganhosPerdas: { ativo: boolean };
   controleHabitos: { ativo: boolean };
+  matrizRaci: { ativo: boolean };
   encerramento: { ativo: boolean; conteudo: string };
   ordemSecoes?: string[]; // Nova propriedade para controlar a ordem
   blocosAtivos?: BlocoEditor[]; // Nova propriedade para controlar blocos ativos
@@ -169,6 +170,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { tipo: 'termometroGestao', titulo: 'Termômetro de Gestão', icone: 'fa-chart-column', descricao: 'Análise de Perfil Profissional' },
     { tipo: 'ganhosPerdas', titulo: 'Ganhos e Perdas', icone: 'fa-scale-balanced', descricao: 'Matriz de Decisão Estratégica' },
     { tipo: 'controleHabitos', titulo: 'Controle de Hábitos', icone: 'fa-calendar-check', descricao: 'Rastreador Mensal de Hábitos' },
+    { tipo: 'matrizRaci', titulo: 'Matriz RACI', icone: 'fa-table', descricao: 'Matriz de Responsabilidades RACI' },
     { tipo: 'encerramento', titulo: 'Encerramento', icone: 'fa-flag-checkered', descricao: 'Conclusão do encontro' }
   ];
 
@@ -214,8 +216,9 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     termometroGestao: { ativo: false },
     ganhosPerdas: { ativo: false },
     controleHabitos: { ativo: false },
+    matrizRaci: { ativo: false },
     encerramento: { ativo: true, conteudo: '' },
-    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos'] // Ordem padrão
+    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci'] // Ordem padrão
   };
 
   // Lista de seções reordenáveis
@@ -230,7 +233,8 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { id: 'rodaDaVida', titulo: 'Roda da Vida MAAS', icone: 'fa-dharmachakra', ordem: 7 },
     { id: 'termometroGestao', titulo: 'Termômetro de Gestão', icone: 'fa-chart-column', ordem: 8 },
     { id: 'ganhosPerdas', titulo: 'Ganhos e Perdas', icone: 'fa-scale-balanced', ordem: 9 },
-    { id: 'controleHabitos', titulo: 'Controle de Hábitos', icone: 'fa-calendar-check', ordem: 10 }
+    { id: 'controleHabitos', titulo: 'Controle de Hábitos', icone: 'fa-calendar-check', ordem: 10 },
+    { id: 'matrizRaci', titulo: 'Matriz RACI', icone: 'fa-table', ordem: 11 }
   ];
 
   constructor(
@@ -365,16 +369,24 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
                 this.conteudo.controleHabitos = { ativo: false };
               }
 
+              // Adicionar matrizRaci se não existir (retrocompatibilidade)
+              if (!this.conteudo.matrizRaci) {
+                this.conteudo.matrizRaci = { ativo: false };
+              }
+
               // Adicionar ordem de seções se não existir (retrocompatibilidade)
               if (!this.conteudo.ordemSecoes) {
-                this.conteudo.ordemSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos'];
-              } else if (this.conteudo.ordemSecoes.length < 11) {
+                this.conteudo.ordemSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci'];
+              } else if (this.conteudo.ordemSecoes.length < 12) {
                 // Migrar para incluir novas ferramentas se ainda não estiverem
                 if (!this.conteudo.ordemSecoes.includes('ganhosPerdas')) {
                   this.conteudo.ordemSecoes.push('ganhosPerdas');
                 }
                 if (!this.conteudo.ordemSecoes.includes('controleHabitos')) {
                   this.conteudo.ordemSecoes.push('controleHabitos');
+                }
+                if (!this.conteudo.ordemSecoes.includes('matrizRaci')) {
+                  this.conteudo.ordemSecoes.push('matrizRaci');
                 }
               }
             } catch (e) {
@@ -449,7 +461,8 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       'rodaDaVida': { ativo: this.conteudo.rodaDaVida.ativo, titulo: 'Roda da Vida MAAS', icone: 'fa-dharmachakra' },
       'termometroGestao': { ativo: this.conteudo.termometroGestao.ativo, titulo: 'Termômetro de Gestão', icone: 'fa-chart-column' },
       'ganhosPerdas': { ativo: this.conteudo.ganhosPerdas.ativo, titulo: 'Ganhos e Perdas', icone: 'fa-scale-balanced' },
-      'controleHabitos': { ativo: this.conteudo.controleHabitos.ativo, titulo: 'Controle de Hábitos', icone: 'fa-calendar-check' }
+      'controleHabitos': { ativo: this.conteudo.controleHabitos.ativo, titulo: 'Controle de Hábitos', icone: 'fa-calendar-check' },
+      'matrizRaci': { ativo: this.conteudo.matrizRaci.ativo, titulo: 'Matriz RACI', icone: 'fa-table' }
     };
 
     const secoesJaAdicionadas = new Set<string>();
@@ -599,6 +612,9 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       case 'controleHabitos':
         this.conteudo.controleHabitos.ativo = ativar;
         break;
+      case 'matrizRaci':
+        this.conteudo.matrizRaci.ativo = ativar;
+        break;
       case 'encerramento':
         this.conteudo.encerramento.ativo = ativar;
         break;
@@ -704,7 +720,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       this.conteudo.blocosAtivos = this.blocosAtivos;
 
       // Extrair ordem das seções
-      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos'];
+      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci'];
       this.conteudo.ordemSecoes = this.blocosAtivos
         .filter(bloco => secoesReordenaveis.includes(bloco.tipo))
         .sort((a, b) => a.ordem - b.ordem)
@@ -901,7 +917,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
       // 2.1 Extrair ordem das seções reordenáveis para a página pública
       // Filtra apenas as seções reordenáveis (não incluindo visaoGeral, mentoria e encerramento que têm posições fixas)
-      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos'];
+      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci'];
       this.conteudo.ordemSecoes = this.blocosAtivos
         .filter(bloco => secoesReordenaveis.includes(bloco.tipo))
         .sort((a, b) => a.ordem - b.ordem)

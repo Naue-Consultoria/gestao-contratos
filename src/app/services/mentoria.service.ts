@@ -735,4 +735,34 @@ export class MentoriaService {
   salvarTermometroGestao(token: string, dados: any): Observable<any> {
     return this.http.post(`${environment.apiUrl}/mentoria/termometro-gestao/publico/${token}`, dados);
   }
+
+  // ===== MATRIZ RACI =====
+
+  /**
+   * Obter Matriz RACI por token público
+   */
+  obterMatrizRACIPublico(token: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/publico/${token}/matriz-raci`);
+  }
+
+  /**
+   * Salvar Matriz RACI (via token público)
+   */
+  salvarMatrizRACI(token: string, dados: {
+    activities: Array<{
+      id: number;
+      name: string;
+      raci: {
+        R: { enabled: boolean; name: string };
+        A: { enabled: boolean; name: string };
+        C: { enabled: boolean; name: string };
+        I: { enabled: boolean; name: string };
+      };
+    }>;
+  }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/publico/${token}/matriz-raci`,
+      dados
+    );
+  }
 }

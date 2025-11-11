@@ -1,0 +1,208 @@
+<div class="matriz-raci-container">
+  <!-- Header padrão do sistema -->
+  <div class="dark-header">
+    <h2 class="dark-title">
+      <i class="fa-solid fa-table"></i>
+      Matriz RACI
+    </h2>
+    <p class="dark-subtitle">Sistema de Análise de Responsabilidades</p>
+  </div>
+
+  <!-- Content container (padrão do sistema) -->
+  <div class="matriz-raci-content">
+
+    <div class="legend">
+      <h3>Legenda:</h3>
+      <div class="legend-items">
+        <div class="legend-item">
+          <span class="legend-badge">R</span>
+          <span>Responsável pela execução</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-badge">A</span>
+          <span>Prestador de Contas</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-badge">C</span>
+          <span>Consultado</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-badge">I</span>
+          <span>Informado</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls" *ngIf="!showMatrixView">
+      <button class="btn btn-add" (click)="addActivity()" [disabled]="modoVisualizacao">
+        <i class="fa-solid fa-plus"></i>
+        Nova Atividade
+      </button>
+      <button class="btn btn-clear" (click)="clearAll()" [disabled]="modoVisualizacao || activities.length === 0">
+        <i class="fa-solid fa-trash"></i>
+        Limpar Tudo
+      </button>
+    </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <p>Carregando...</p>
+  </div>
+
+  <!-- Table View -->
+  <div class="table-container" *ngIf="!showMatrixView && !isLoading">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 30%;">Atividade</th>
+          <th style="width: 60%;">Responsabilidades RACI</th>
+          <th style="width: 10%;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let activity of activities">
+          <td>
+            <input
+              type="text"
+              class="activity-input"
+              placeholder="Digite a atividade..."
+              [(ngModel)]="activity.name"
+              (blur)="salvarAutomaticamente()"
+              [disabled]="modoVisualizacao"
+            />
+          </td>
+          <td>
+            <div class="raci-group">
+              <div class="raci-row" *ngFor="let type of raciTypes">
+                <div class="raci-checkbox">
+                  <input
+                    type="checkbox"
+                    [id]="'raci-' + activity.id + '-' + type"
+                    [checked]="activity.raci[type].enabled"
+                    (change)="toggleRaci(activity.id, type); salvarAutomaticamente()"
+                    [disabled]="modoVisualizacao"
+                  />
+                  <label [for]="'raci-' + activity.id + '-' + type">{{ type }}</label>
+                </div>
+                <input
+                  type="text"
+                  class="raci-input"
+                  [placeholder]="getRaciPlaceholder(type)"
+                  [(ngModel)]="activity.raci[type].name"
+                  [disabled]="!activity.raci[type].enabled || modoVisualizacao"
+                  (blur)="salvarAutomaticamente()"
+                />
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button
+                class="icon-btn delete"
+                (click)="removeActivity(activity.id)"
+                title="Remover atividade"
+                [disabled]="modoVisualizacao"
+              >
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="activities.length === 0" class="empty-state">
+      <h3>Nenhuma atividade cadastrada</h3>
+      <p>Clique em "Nova Atividade" para começar a construir sua matriz RACI</p>
+    </div>
+  </div>
+
+  <!-- Matrix Visualization -->
+  <div class="matrix-view" [class.show]="showMatrixView">
+    <div class="matrix-header-controls">
+      <h2>
+        <i class="fa-solid fa-table"></i>
+        Matriz RACI - Visualização
+      </h2>
+      <button class="btn btn-secondary" (click)="print()">
+        <i class="fa-solid fa-file-pdf"></i>
+        Exportar PDF
+      </button>
+    </div>
+
+    <div class="matrix-grid">
+      <!-- Header row -->
+      <div class="matrix-corner">
+        <span class="matrix-corner-text">Atividades</span>
+        <span class="matrix-corner-text2">RACI</span>
+      </div>
+      <div class="matrix-raci-header">R</div>
+      <div class="matrix-raci-header">A</div>
+      <div class="matrix-raci-header">C</div>
+      <div class="matrix-raci-header">I</div>
+
+      <!-- Activity rows -->
+      <ng-container *ngFor="let activity of activities">
+        <ng-container *ngIf="activity.name">
+          <div class="matrix-activity-cell">{{ activity.name }}</div>
+
+          <div
+            *ngFor="let type of raciTypes"
+            class="matrix-person-cell"
+            [class.filled]="activity.raci[type].enabled && activity.raci[type].name"
+            [class.empty]="!activity.raci[type].enabled || !activity.raci[type].name"
+          >
+            {{
+              activity.raci[type].enabled && activity.raci[type].name
+                ? activity.raci[type].name
+                : '-'
+            }}
+          </div>
+        </ng-container>
+      </ng-container>
+
+      <div *ngIf="!hasActivitiesWithName" class="no-data-message">
+        Nenhuma atividade com nome preenchido foi encontrada.
+      </div>
+    </div>
+  </div>
+
+  <!-- Botões de ação principais (Salvar, Exportar, Visualizar) -->
+  <div class="main-actions" *ngIf="!showMatrixView && !modoVisualizacao && activities.length > 0">
+    <button class="btn btn-save-main" (click)="salvar()" [disabled]="isSaving">
+      <i class="fa-solid" [class.fa-save]="!isSaving" [class.fa-spinner]="isSaving" [class.fa-spin]="isSaving"></i>
+      {{ isSaving ? 'Salvando...' : 'Salvar Alterações' }}
+    </button>
+
+    <div class="export-menu">
+      <button class="btn btn-export-main" (click)="toggleExportMenu()">
+        <i class="fa-solid fa-download"></i>
+        Exportar
+      </button>
+      <div class="export-dropdown" [class.show]="showExportMenu">
+        <div class="export-option" (click)="exportToExcel()">
+          <i class="fa-solid fa-file-excel"></i>
+          Exportar como Excel
+        </div>
+        <div class="export-option" (click)="exportToPDF()">
+          <i class="fa-solid fa-file-pdf"></i>
+          Exportar como PDF
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-view-matrix" (click)="toggleMatrixView()">
+      <i class="fa-solid fa-eye"></i>
+      Visualizar Matriz
+    </button>
+  </div>
+
+  <div class="view-toggle" *ngIf="showMatrixView">
+    <button class="toggle-btn" (click)="toggleMatrixView()">
+      <i class="fa-solid fa-arrow-left"></i>
+      Voltar para Edição
+    </button>
+  </div>
+
+  </div> <!-- fecha matriz-raci-content -->
+</div> <!-- fecha matriz-raci-container -->
