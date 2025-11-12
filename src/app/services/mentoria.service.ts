@@ -164,6 +164,13 @@ export class MentoriaService {
   }
 
   /**
+   * Expirar mentoria (hub) e todos os encontros associados
+   */
+  expirarMentoria(id: number): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/mentorias/${id}/expirar`, {});
+  }
+
+  /**
    * Adicionar novos encontros a uma mentoria existente
    */
   adicionarEncontros(mentoriaId: number, quantidade: number): Observable<ApiResponse<MentoriaEncontro[]>> {
@@ -218,6 +225,13 @@ export class MentoriaService {
    */
   deletarEncontro(id: number): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/encontros/${id}`);
+  }
+
+  /**
+   * Expirar encontro individual
+   */
+  expirarEncontro(id: number): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/encontros/${id}/expirar`, {});
   }
 
   /**

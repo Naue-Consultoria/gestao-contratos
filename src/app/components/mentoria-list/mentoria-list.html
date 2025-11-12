@@ -169,6 +169,10 @@
                       <i class="fas fa-edit"></i>
                       <span>Editar Mentoria</span>
                     </button>
+                    <button class="dropdown-item warning" (click)="expirarMentoria(mentoria); closeDropdown()">
+                      <i class="fas fa-clock"></i>
+                      <span>Expirar Mentoria</span>
+                    </button>
                     <button class="dropdown-item danger" (click)="deletarMentoria(mentoria); closeDropdown()">
                       <i class="fas fa-trash"></i>
                       <span>Deletar Mentoria</span>
@@ -182,4 +186,16 @@
       </table>
     </div>
   </div>
+
+  <!-- Modal de Confirmação de Expiração -->
+  <app-delete-confirmation-modal
+    [isVisible]="showExpirarModal"
+    [title]="'Confirmar Expiração'"
+    [message]="getMensagemExpiracao()"
+    [deleteButtonText]="'Expirar'"
+    [cancelButtonText]="'Cancelar'"
+    [isDeleting]="isExpirando"
+    (onConfirm)="confirmarExpiracao()"
+    (onCancel)="fecharModalExpiracao()">
+  </app-delete-confirmation-modal>
 </div>

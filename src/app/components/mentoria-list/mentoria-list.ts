@@ -6,11 +6,12 @@ import { ToastrService } from 'ngx-toastr';
 import { MentoriaService, Mentoria, MentoriaEncontro } from '../../services/mentoria.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
+import { DeleteConfirmationModalComponent } from '../delete-confirmation-modal/delete-confirmation-modal.component';
 
 @Component({
   selector: 'app-mentoria-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, DeleteConfirmationModalComponent],
   templateUrl: './mentoria-list.html',
   styleUrl: './mentoria-list.css'
 })
@@ -35,6 +36,11 @@ export class MentoriaList implements OnInit {
 
   // Mentoria expandida
   mentoriaExpandida: number | null = null;
+
+  // Modal de expiração
+  showExpirarModal = false;
+  mentoriaParaExpirar: Mentoria | null = null;
+  isExpirando = false;
 
   constructor(
     private mentoriaService: MentoriaService,
@@ -292,6 +298,49 @@ export class MentoriaList implements OnInit {
         this.toastr.error('Erro ao deletar mentoria');
       }
     });
+  }
+
+  expirarMentoria(mentoria: Mentoria): void {
+    this.mentoriaParaExpirar = mentoria;
+    this.showExpirarModal = true;
+  }
+
+  confirmarExpiracao(): void {
+    if (!this.mentoriaParaExpirar) return;
+
+    this.isExpirando = true;
+    this.mentoriaService.expirarMentoria(this.mentoriaParaExpirar.id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success('Mentoria expirada com sucesso');
+          this.carregarMentorias();
+          this.fecharModalExpiracao();
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao expirar mentoria:', error);
+        this.toastr.error('Erro ao expirar mentoria');
+        this.isExpirando = false;
+      }
+    });
+  }
+
+  fecharModalExpiracao(): void {
+    this.showExpirarModal = false;
+    this.mentoriaParaExpirar = null;
+    this.isExpirando = false;
+  }
+
+  getMensagemExpiracao(): string {
+    if (!this.mentoriaParaExpirar) return '';
+
+    const nomeCliente = this.mentoriaParaExpirar.client?.clients_pj?.company_name ||
+                        this.mentoriaParaExpirar.client?.clients_pf?.full_name ||
+                        'Cliente';
+
+    return `Tem certeza que deseja expirar a mentoria do cliente "${nomeCliente}"?\n\n` +
+           `Isso irá expirar TODOS os ${this.mentoriaParaExpirar.numero_encontros} encontros associados.\n\n` +
+           `Os links públicos deixarão de funcionar.`;
   }
 
   toggleExpandirMentoria(mentoriaId: number): void {

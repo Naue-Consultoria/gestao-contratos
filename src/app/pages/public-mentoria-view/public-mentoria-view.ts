@@ -428,7 +428,14 @@ export class PublicMentoriaViewComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erro ao carregar encontro:', error);
-        this.notFound = true;
+
+        // Verificar se é erro 410 (link expirado)
+        if (error.status === 410) {
+          this.expired = true;
+        } else {
+          this.notFound = true;
+        }
+
         this.isLoading = false;
       }
     });

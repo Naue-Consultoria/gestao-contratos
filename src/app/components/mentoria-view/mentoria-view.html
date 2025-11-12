@@ -41,6 +41,9 @@
           <button class="btn-icon-action" (click)="editarMentoria()" title="Editar Mentoria">
             <i class="fas fa-edit"></i>
           </button>
+          <button class="btn-icon-action warning" (click)="expirarMentoria()" title="Expirar Mentoria">
+            <i class="fas fa-clock"></i>
+          </button>
           <button class="btn-icon-action danger" (click)="excluirMentoria()" title="Excluir Mentoria">
             <i class="fas fa-trash"></i>
           </button>
@@ -61,22 +64,6 @@
           <div class="info-details">
             <span class="info-label">Total de Encontros</span>
             <span class="info-value">{{ mentoria.numero_encontros }}</span>
-          </div>
-        </div>
-
-        <div class="info-item">
-          <i class="fas fa-check-circle"></i>
-          <div class="info-details">
-            <span class="info-label">Publicados</span>
-            <span class="info-value">{{ getEncontrosPublicados() }}</span>
-          </div>
-        </div>
-
-        <div class="info-item">
-          <i class="fas fa-edit"></i>
-          <div class="info-details">
-            <span class="info-label">Rascunhos</span>
-            <span class="info-value">{{ getEncontrosRascunho() }}</span>
           </div>
         </div>
 
@@ -190,6 +177,14 @@
           </button>
 
           <button
+            class="btn-action-card warning"
+            (click)="expirarEncontro(encontro)"
+            title="Expirar Encontro">
+            <i class="fas fa-clock"></i>
+            <span>Expirar</span>
+          </button>
+
+          <button
             class="btn-action-card danger"
             (click)="excluirEncontro(encontro)"
             title="Excluir Encontro">
@@ -211,4 +206,28 @@
       </button>
     </div>
   </div>
+
+  <!-- Modal de Confirmação de Expiração de Mentoria -->
+  <app-delete-confirmation-modal
+    [isVisible]="showExpirarMentoriaModal"
+    [title]="'Confirmar Expiração'"
+    [message]="getMensagemExpiracaoMentoria()"
+    [deleteButtonText]="'Expirar'"
+    [cancelButtonText]="'Cancelar'"
+    [isDeleting]="isExpirandoMentoria"
+    (onConfirm)="confirmarExpiracaoMentoria()"
+    (onCancel)="fecharModalExpiracaoMentoria()">
+  </app-delete-confirmation-modal>
+
+  <!-- Modal de Confirmação de Expiração de Encontro -->
+  <app-delete-confirmation-modal
+    [isVisible]="showExpirarEncontroModal"
+    [title]="'Confirmar Expiração'"
+    [message]="getMensagemExpiracaoEncontro()"
+    [deleteButtonText]="'Expirar'"
+    [cancelButtonText]="'Cancelar'"
+    [isDeleting]="isExpirandoEncontro"
+    (onConfirm)="confirmarExpiracaoEncontro()"
+    (onCancel)="fecharModalExpiracaoEncontro()">
+  </app-delete-confirmation-modal>
 </div>

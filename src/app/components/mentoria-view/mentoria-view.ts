@@ -5,11 +5,12 @@ import { ToastrService } from 'ngx-toastr';
 import { MentoriaService, Mentoria, MentoriaEncontro } from '../../services/mentoria.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
+import { DeleteConfirmationModalComponent } from '../delete-confirmation-modal/delete-confirmation-modal.component';
 
 @Component({
   selector: 'app-mentoria-view',
   standalone: true,
-  imports: [CommonModule, BreadcrumbComponent],
+  imports: [CommonModule, BreadcrumbComponent, DeleteConfirmationModalComponent],
   templateUrl: './mentoria-view.html',
   styleUrl: './mentoria-view.css'
 })
@@ -17,6 +18,15 @@ export class MentoriaView implements OnInit {
   mentoria: Mentoria | null = null;
   isLoading = false;
   mentoriaId: number | null = null;
+
+  // Modal de expiração de mentoria
+  showExpirarMentoriaModal = false;
+  isExpirandoMentoria = false;
+
+  // Modal de expiração de encontro
+  showExpirarEncontroModal = false;
+  encontroParaExpirar: MentoriaEncontro | null = null;
+  isExpirandoEncontro = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -246,6 +256,46 @@ export class MentoriaView implements OnInit {
     });
   }
 
+  expirarMentoria(): void {
+    this.showExpirarMentoriaModal = true;
+  }
+
+  confirmarExpiracaoMentoria(): void {
+    if (!this.mentoria) return;
+
+    this.isExpirandoMentoria = true;
+    this.mentoriaService.expirarMentoria(this.mentoria.id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success('Mentoria expirada com sucesso!');
+          if (this.mentoriaId) {
+            this.carregarMentoria(this.mentoriaId);
+          }
+          this.fecharModalExpiracaoMentoria();
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao expirar mentoria:', error);
+        this.toastr.error('Erro ao expirar mentoria');
+        this.isExpirandoMentoria = false;
+      }
+    });
+  }
+
+  fecharModalExpiracaoMentoria(): void {
+    this.showExpirarMentoriaModal = false;
+    this.isExpirandoMentoria = false;
+  }
+
+  getMensagemExpiracaoMentoria(): string {
+    if (!this.mentoria) return '';
+
+    const clienteNome = this.getClienteNome();
+    return `Tem certeza que deseja expirar a mentoria de "${clienteNome}"?\n\n` +
+           `Isso irá expirar TODOS os ${this.mentoria.numero_encontros} encontros associados.\n\n` +
+           `Os links públicos deixarão de funcionar.`;
+  }
+
   excluirEncontro(encontro: MentoriaEncontro): void {
     if (!encontro.id) return;
 
@@ -272,6 +322,47 @@ export class MentoriaView implements OnInit {
         this.toastr.error('Erro ao excluir encontro');
       }
     });
+  }
+
+  expirarEncontro(encontro: MentoriaEncontro): void {
+    this.encontroParaExpirar = encontro;
+    this.showExpirarEncontroModal = true;
+  }
+
+  confirmarExpiracaoEncontro(): void {
+    if (!this.encontroParaExpirar || !this.encontroParaExpirar.id) return;
+
+    this.isExpirandoEncontro = true;
+    this.mentoriaService.expirarEncontro(this.encontroParaExpirar.id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success('Encontro expirado com sucesso!');
+          if (this.mentoriaId) {
+            this.carregarMentoria(this.mentoriaId);
+          }
+          this.fecharModalExpiracaoEncontro();
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao expirar encontro:', error);
+        this.toastr.error('Erro ao expirar encontro');
+        this.isExpirandoEncontro = false;
+      }
+    });
+  }
+
+  fecharModalExpiracaoEncontro(): void {
+    this.showExpirarEncontroModal = false;
+    this.encontroParaExpirar = null;
+    this.isExpirandoEncontro = false;
+  }
+
+  getMensagemExpiracaoEncontro(): string {
+    if (!this.encontroParaExpirar) return '';
+
+    return `Tem certeza que deseja expirar o Encontro ${this.encontroParaExpirar.numero_encontro}?\n\n` +
+           `Mentorado: ${this.encontroParaExpirar.mentorado_nome}\n\n` +
+           `O link público deste encontro deixará de funcionar.`;
   }
 
   visualizarHub(): void {
