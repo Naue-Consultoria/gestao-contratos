@@ -3915,6 +3915,52 @@ export class PublicMentoriaViewComponent implements OnInit {
     textWhy.textContent = 'WHY';
     svg.appendChild(textWhy);
 
+    // Definição da ponta de seta
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+    marker.setAttribute('id', 'arrowhead');
+    marker.setAttribute('markerWidth', '10');
+    marker.setAttribute('markerHeight', '10');
+    marker.setAttribute('refX', '9');
+    marker.setAttribute('refY', '3');
+    marker.setAttribute('orient', 'auto');
+
+    const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    polygon.setAttribute('points', '0 0, 10 3, 0 6');
+    polygon.setAttribute('fill', '#022c22');
+    marker.appendChild(polygon);
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+
+    // Seta para WHY (do círculo interno para cima-direita)
+    const arrowWhy = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    arrowWhy.setAttribute('d', 'M 316 240 Q 400 80 500 80');
+    arrowWhy.setAttribute('stroke', '#022c22');
+    arrowWhy.setAttribute('stroke-width', '3');
+    arrowWhy.setAttribute('fill', 'none');
+    arrowWhy.setAttribute('marker-end', 'url(#arrowhead)');
+    svg.appendChild(arrowWhy);
+
+    // Seta para HOW (horizontal do círculo médio)
+    const arrowHow = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    arrowHow.setAttribute('x1', '383');
+    arrowHow.setAttribute('y1', '250');
+    arrowHow.setAttribute('x2', '500');
+    arrowHow.setAttribute('y2', '250');
+    arrowHow.setAttribute('stroke', '#022c22');
+    arrowHow.setAttribute('stroke-width', '3');
+    arrowHow.setAttribute('marker-end', 'url(#arrowhead)');
+    svg.appendChild(arrowHow);
+
+    // Seta para WHAT (do círculo externo para baixo-direita)
+    const arrowWhat = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    arrowWhat.setAttribute('d', 'M 391 391 Q 440 420 500 420');
+    arrowWhat.setAttribute('stroke', '#022c22');
+    arrowWhat.setAttribute('stroke-width', '3');
+    arrowWhat.setAttribute('fill', 'none');
+    arrowWhat.setAttribute('marker-end', 'url(#arrowhead)');
+    svg.appendChild(arrowWhat);
+
     circlesWrapper.appendChild(svg);
 
     // Textos explicativos
