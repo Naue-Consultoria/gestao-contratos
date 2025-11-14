@@ -143,20 +143,15 @@
       </div>
     </header>
 
-    <!-- Botão de Exportação Completa -->
-    <div class="exportacao-completa-section" *ngIf="conteudoEstruturado">
-      <div class="exportacao-completa-container">
-        <button
-          class="btn-exportacao-completa"
-          (click)="exportarTodasFerramentasPDF()">
-          <i class="fa-solid fa-file-pdf"></i>
-          <span>Exportar Todas as Ferramentas em PDF</span>
-        </button>
-        <p class="exportacao-hint">
-          <i class="fa-solid fa-info-circle"></i>
-          Clique para baixar um PDF com todas as ferramentas deste encontro em um único arquivo
-        </p>
-      </div>
+    <!-- Botão de Exportação Completa (fixo no canto superior direito) -->
+    <div class="btn-exportacao-pdf-fixed" *ngIf="conteudoEstruturado">
+      <button
+        class="btn-exportacao-toggle"
+        (click)="exportarTodasFerramentasPDF()"
+        title="Exportar todas as ferramentas em PDF">
+        <i class="fa-solid fa-file-pdf"></i>
+        <span class="export-text">Exportar PDF Completo</span>
+      </button>
     </div>
 
     <!-- Seção de Visão Geral e Mentoria -->
