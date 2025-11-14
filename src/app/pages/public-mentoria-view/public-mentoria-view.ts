@@ -139,6 +139,10 @@ interface MapaMentalData {
   styleUrl: './public-mentoria-view.css'
 })
 export class PublicMentoriaViewComponent implements OnInit {
+  @ViewChild(MatrizRaciEditorComponent) matrizRaciComponent?: MatrizRaciEditorComponent;
+  @ViewChild(AnaliseProblemasComponent) analiseProblemasComponent?: AnaliseProblemasComponent;
+  @ViewChild(GestaoErrosComponent) gestaoErrosComponent?: GestaoErrosComponent;
+
   encontro: MentoriaEncontro | null = null;
   blocos: EncontroBloco[] = [];
   token: string = '';
@@ -5319,6 +5323,1014 @@ export class PublicMentoriaViewComponent implements OnInit {
     svg.appendChild(centerGroup);
 
     return svg;
+  }
+
+  // ===== MODELO ABC =====
+
+  async exportarModeloABCPDF(): Promise<void> {
+    const temDados = this.modeloABC.adversidade || this.modeloABC.pensamento ||
+                     this.modeloABC.consequencia || this.modeloABC.antidotoExigencia ||
+                     this.modeloABC.antidotoRotulo || this.modeloABC.fraseNocaute ||
+                     this.modeloABC.planoAcao || this.modeloABC.impedimentos ||
+                     this.modeloABC.acaoImpedimentos;
+
+    if (!temDados) {
+      this.toastr.warning('Preencha os dados do Modelo ABC antes de exportar');
+      return;
+    }
+
+    try {
+      this.toastr.info('Gerando PDF do Modelo ABC...');
+
+      const container = this.criarContainerModeloABCVisualizacao();
+      document.body.appendChild(container);
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#022c22',
+        scale: 2,
+        logging: false,
+        width: container.scrollWidth,
+        height: container.scrollHeight
+      });
+
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`modelo-abc-${this.encontro?.mentorado_nome || 'mentoria'}-${Date.now()}.pdf`);
+
+      this.toastr.success('PDF exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      this.toastr.error('Erro ao exportar PDF');
+    }
+  }
+
+  private criarContainerModeloABCVisualizacao(): HTMLElement {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.background = '#022c22';
+    container.style.padding = '60px';
+    container.style.width = '1200px';
+    container.style.fontFamily = 'Inter, Arial, sans-serif';
+    container.style.color = 'white';
+
+    // Título
+    const header = document.createElement('div');
+    header.style.textAlign = 'center';
+    header.style.marginBottom = '40px';
+
+    const h1 = document.createElement('h1');
+    h1.textContent = 'Modelo ABC';
+    h1.style.fontSize = '32px';
+    h1.style.fontWeight = '700';
+    h1.style.color = 'white';
+    h1.style.marginBottom = '10px';
+    header.appendChild(h1);
+
+    const subtitle = document.createElement('p');
+    subtitle.textContent = 'Adversity, Belief, Consequence';
+    subtitle.style.fontSize = '18px';
+    subtitle.style.color = 'rgba(255, 255, 255, 0.7)';
+    header.appendChild(subtitle);
+
+    container.appendChild(header);
+
+    // Cabeçalho ABC
+    const abcHeader = document.createElement('div');
+    abcHeader.style.display = 'grid';
+    abcHeader.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    abcHeader.style.gap = '20px';
+    abcHeader.style.marginBottom = '30px';
+
+    const abcCards = [
+      { letter: 'A', title: 'Adversity', desc: 'Adversidade: acontecimento que funciona como "gatilho"', value: this.modeloABC.adversidade, color: '#EF4444' },
+      { letter: 'B', title: 'Belief', desc: 'Pensamento/Crença irracional', value: this.modeloABC.pensamento, color: '#3B82F6' },
+      { letter: 'C', title: 'Consequence', desc: 'Consequência: emoção e comportamento', value: this.modeloABC.consequencia, color: '#10B981' }
+    ];
+
+    abcCards.forEach(card => {
+      const cardDiv = document.createElement('div');
+      cardDiv.style.background = 'rgba(255, 255, 255, 0.1)';
+      cardDiv.style.borderRadius = '12px';
+      cardDiv.style.padding = '20px';
+      cardDiv.style.border = `2px solid ${card.color}`;
+
+      const letter = document.createElement('div');
+      letter.textContent = card.letter;
+      letter.style.fontSize = '48px';
+      letter.style.fontWeight = '700';
+      letter.style.color = card.color;
+      letter.style.marginBottom = '10px';
+      cardDiv.appendChild(letter);
+
+      const title = document.createElement('h3');
+      title.textContent = card.title;
+      title.style.fontSize = '18px';
+      title.style.fontWeight = '600';
+      title.style.marginBottom = '12px';
+      title.style.color = 'white';
+      cardDiv.appendChild(title);
+
+      const value = document.createElement('p');
+      value.textContent = card.value || '(não preenchido)';
+      value.style.fontSize = '13px';
+      value.style.color = card.value ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.4)';
+      value.style.lineHeight = '1.5';
+      value.style.whiteSpace = 'pre-wrap';
+      value.style.minHeight = '60px';
+      cardDiv.appendChild(value);
+
+      abcHeader.appendChild(cardDiv);
+    });
+
+    container.appendChild(abcHeader);
+
+    // Antídotos
+    const antidotosTitle = document.createElement('h3');
+    antidotosTitle.textContent = 'Antídotos';
+    antidotosTitle.style.fontSize = '20px';
+    antidotosTitle.style.fontWeight = '600';
+    antidotosTitle.style.marginTop = '30px';
+    antidotosTitle.style.marginBottom = '20px';
+    antidotosTitle.style.color = 'white';
+    container.appendChild(antidotosTitle);
+
+    const antidotos = [
+      { label: 'Antídoto para exigência:', value: this.modeloABC.antidotoExigencia },
+      { label: 'Antídoto para o rótulo:', value: this.modeloABC.antidotoRotulo },
+      { label: 'Frase de nocaute:', value: this.modeloABC.fraseNocaute }
+    ];
+
+    antidotos.forEach(item => {
+      const fieldDiv = document.createElement('div');
+      fieldDiv.style.marginBottom = '15px';
+      fieldDiv.style.background = 'rgba(255, 255, 255, 0.05)';
+      fieldDiv.style.borderRadius = '8px';
+      fieldDiv.style.padding = '12px';
+      fieldDiv.style.borderLeft = '3px solid #10B981';
+
+      const label = document.createElement('div');
+      label.textContent = item.label;
+      label.style.fontSize = '13px';
+      label.style.fontWeight = '600';
+      label.style.marginBottom = '6px';
+      label.style.color = 'rgba(255, 255, 255, 0.8)';
+      fieldDiv.appendChild(label);
+
+      const value = document.createElement('div');
+      value.textContent = item.value || '(não preenchido)';
+      value.style.fontSize = '14px';
+      value.style.color = item.value ? 'white' : 'rgba(255, 255, 255, 0.4)';
+      value.style.lineHeight = '1.5';
+      value.style.whiteSpace = 'pre-wrap';
+      fieldDiv.appendChild(value);
+
+      container.appendChild(fieldDiv);
+    });
+
+    // Plano de Ação
+    const planoTitle = document.createElement('h3');
+    planoTitle.textContent = 'Plano de Ação';
+    planoTitle.style.fontSize = '20px';
+    planoTitle.style.fontWeight = '600';
+    planoTitle.style.marginTop = '30px';
+    planoTitle.style.marginBottom = '15px';
+    planoTitle.style.color = 'white';
+    container.appendChild(planoTitle);
+
+    const planoDiv = document.createElement('div');
+    planoDiv.style.background = 'rgba(255, 255, 255, 0.05)';
+    planoDiv.style.borderRadius = '8px';
+    planoDiv.style.padding = '15px';
+    planoDiv.style.borderLeft = '3px solid #10B981';
+    planoDiv.textContent = this.modeloABC.planoAcao || '(não preenchido)';
+    planoDiv.style.fontSize = '14px';
+    planoDiv.style.color = this.modeloABC.planoAcao ? 'white' : 'rgba(255, 255, 255, 0.4)';
+    planoDiv.style.lineHeight = '1.6';
+    planoDiv.style.whiteSpace = 'pre-wrap';
+    container.appendChild(planoDiv);
+
+    // Nível de Disposição
+    const nivelDiv = document.createElement('div');
+    nivelDiv.style.marginTop = '20px';
+    nivelDiv.style.background = 'rgba(255, 255, 255, 0.05)';
+    nivelDiv.style.borderRadius = '8px';
+    nivelDiv.style.padding = '20px';
+    nivelDiv.style.textAlign = 'center';
+
+    const nivelLabel = document.createElement('div');
+    nivelLabel.textContent = 'Nível de Disposição';
+    nivelLabel.style.fontSize = '14px';
+    nivelLabel.style.color = 'rgba(255, 255, 255, 0.7)';
+    nivelLabel.style.marginBottom = '10px';
+    nivelDiv.appendChild(nivelLabel);
+
+    const nivelValue = document.createElement('div');
+    nivelValue.textContent = `${this.modeloABC.nivelDisposicao} / 10`;
+    nivelValue.style.fontSize = '32px';
+    nivelValue.style.fontWeight = '700';
+    nivelValue.style.color = '#10B981';
+    nivelDiv.appendChild(nivelValue);
+
+    container.appendChild(nivelDiv);
+
+    return container;
+  }
+
+  // ===== FERRAMENTAS AUXILIARES PARA EXPORTAÇÃO =====
+
+  private async carregarMatrizRaciParaExportacao(): Promise<any[] | null> {
+    return new Promise((resolve) => {
+      console.log('📞 Chamando API de Matriz RACI...');
+      this.mentoriaService.obterMatrizRACIPublico(this.token).subscribe({
+        next: (response) => {
+          console.log('📥 Resposta Matriz RACI:', response);
+          if (response.success && response.data?.activities && response.data.activities.length > 0) {
+            console.log('✅ Matriz RACI tem atividades:', response.data.activities.length);
+            resolve(response.data.activities);
+          } else {
+            console.log('⚠️ Matriz RACI sem atividades');
+            resolve(null);
+          }
+        },
+        error: (err) => {
+          console.error('❌ Erro ao carregar Matriz RACI:', err);
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  private criarContainerMatrizRaciVisualizacao(activities: any[]): HTMLElement {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.background = 'white';
+    container.style.padding = '60px 40px';
+    container.style.width = '1400px';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.color = '#022c22';
+
+    // Título
+    const header = document.createElement('div');
+    header.style.textAlign = 'center';
+    header.style.marginBottom = '20px';
+
+    const h1 = document.createElement('h1');
+    h1.textContent = 'Matriz RACI - Análise de Responsabilidades';
+    h1.style.fontSize = '28px';
+    h1.style.fontWeight = '700';
+    h1.style.color = '#022c22';
+    h1.style.marginBottom = '15px';
+    h1.style.margin = '0 0 15px 0';
+    header.appendChild(h1);
+
+    container.appendChild(header);
+
+    // Legenda (como no PDF original)
+    const legend = document.createElement('div');
+    legend.style.textAlign = 'center';
+    legend.style.fontSize = '13px';
+    legend.style.color = '#666';
+    legend.style.marginBottom = '30px';
+    legend.textContent = 'R = Responsável pela execução  |  A = Prestador de Contas  |  C = Consultado  |  I = Informado';
+    container.appendChild(legend);
+
+    // Matriz Grid (estilo idêntico ao componente original)
+    const matrixGrid = document.createElement('div');
+    matrixGrid.style.display = 'grid';
+    matrixGrid.style.gridTemplateColumns = '220px repeat(4, 1fr)';
+    matrixGrid.style.gap = '12px';
+    matrixGrid.style.background = 'rgba(2, 44, 34, 0.02)';
+    matrixGrid.style.padding = '24px';
+    matrixGrid.style.borderRadius = '12px';
+    matrixGrid.style.border = '1px solid rgba(2, 44, 34, 0.1)';
+
+    // Header corner
+    const corner = document.createElement('div');
+    corner.style.background = '#022c22';
+    corner.style.borderRadius = '8px';
+    corner.style.padding = '16px';
+    corner.style.display = 'flex';
+    corner.style.flexDirection = 'column';
+    corner.style.justifyContent = 'center';
+    corner.style.alignItems = 'center';
+    corner.style.gap = '4px';
+
+    const cornerText1 = document.createElement('span');
+    cornerText1.textContent = 'Atividades';
+    cornerText1.style.color = 'white';
+    cornerText1.style.fontWeight = '700';
+    cornerText1.style.fontSize = '14px';
+    corner.appendChild(cornerText1);
+
+    const cornerText2 = document.createElement('span');
+    cornerText2.textContent = 'RACI';
+    cornerText2.style.color = 'rgba(255,255,255,0.6)';
+    cornerText2.style.fontSize = '12px';
+    corner.appendChild(cornerText2);
+
+    matrixGrid.appendChild(corner);
+
+    // RACI Headers
+    const raciTypes = ['R', 'A', 'C', 'I'];
+    const raciLabels: any = {
+      'R': 'Responsável pela execução',
+      'A': 'Prestador de Contas',
+      'C': 'Consultado',
+      'I': 'Informado'
+    };
+    const raciColors: any = {
+      'R': '#10B981',
+      'A': '#3B82F6',
+      'C': '#F59E0B',
+      'I': '#8B5CF6'
+    };
+
+    raciTypes.forEach(type => {
+      const headerCell = document.createElement('div');
+      headerCell.style.background = 'linear-gradient(135deg, #022c22 0%, #014d3a 100%)';
+      headerCell.style.borderRadius = '8px';
+      headerCell.style.padding = '16px';
+      headerCell.style.textAlign = 'center';
+
+      const letterDiv = document.createElement('div');
+      letterDiv.textContent = type;
+      letterDiv.style.color = 'white';
+      letterDiv.style.fontWeight = '700';
+      letterDiv.style.fontSize = '22px';
+      letterDiv.style.marginBottom = '6px';
+      headerCell.appendChild(letterDiv);
+
+      const nameDiv = document.createElement('div');
+      nameDiv.textContent = raciLabels[type];
+      nameDiv.style.color = 'rgba(255,255,255,0.7)';
+      nameDiv.style.fontSize = '11px';
+      headerCell.appendChild(nameDiv);
+
+      matrixGrid.appendChild(headerCell);
+    });
+
+    // Activity rows
+    activities.forEach((activity: any) => {
+      if (activity.name) {
+        // Activity name cell
+        const activityCell = document.createElement('div');
+        activityCell.style.background = 'white';
+        activityCell.style.border = '2px solid #022c22';
+        activityCell.style.borderRadius = '8px';
+        activityCell.style.padding = '16px';
+        activityCell.style.fontWeight = '600';
+        activityCell.style.color = '#022c22';
+        activityCell.style.fontSize = '14px';
+        activityCell.style.display = 'flex';
+        activityCell.style.alignItems = 'center';
+        activityCell.textContent = activity.name;
+        matrixGrid.appendChild(activityCell);
+
+        // RACI cells
+        raciTypes.forEach(type => {
+          const personCell = document.createElement('div');
+          const hasName = activity.raci?.[type]?.enabled && activity.raci?.[type]?.name;
+          personCell.style.background = hasName ? 'white' : 'rgba(2, 44, 34, 0.03)';
+          personCell.style.border = hasName ? '2px solid #10b981' : '2px dashed rgba(2, 44, 34, 0.2)';
+          personCell.style.borderRadius = '8px';
+          personCell.style.padding = '16px';
+          personCell.style.textAlign = 'center';
+          personCell.style.color = hasName ? '#022c22' : 'rgba(2, 44, 34, 0.3)';
+          personCell.style.fontSize = '13px';
+          personCell.style.fontWeight = hasName ? '500' : '400';
+          personCell.style.display = 'flex';
+          personCell.style.alignItems = 'center';
+          personCell.style.justifyContent = 'center';
+          personCell.textContent = hasName ? activity.raci[type].name : '-';
+          matrixGrid.appendChild(personCell);
+        });
+      }
+    });
+
+    container.appendChild(matrixGrid);
+
+    // Footer (como no PDF original)
+    const footer = document.createElement('div');
+    footer.style.textAlign = 'center';
+    footer.style.marginTop = '30px';
+    footer.style.fontSize = '11px';
+    footer.style.color = '#999';
+    footer.textContent = `Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`;
+    container.appendChild(footer);
+
+    return container;
+  }
+
+  private async carregarAnaliseProblemasParaExportacao(): Promise<any | null> {
+    return new Promise((resolve) => {
+      console.log('📞 Chamando API de Análise de Problemas...');
+      this.mentoriaService.obterAnaliseProblemasPublico(this.token).subscribe({
+        next: (response) => {
+          console.log('📥 Resposta Análise de Problemas:', response);
+          if (response.success && response.data) {
+            const hasData = response.data.problem || Object.values(response.data.stages || {}).some((stage: any) => stage.length > 0);
+            console.log('🔍 Tem dados?', hasData, 'Problem:', response.data.problem, 'Stages:', response.data.stages);
+            resolve(hasData ? response.data : null);
+          } else {
+            console.log('⚠️ Análise de Problemas sem sucesso ou data');
+            resolve(null);
+          }
+        },
+        error: (err) => {
+          console.error('❌ Erro ao carregar Análise de Problemas:', err);
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  private criarContainerAnaliseProblemasVisualizacao(data: any): HTMLElement {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.background = 'white';
+    container.style.padding = '60px 40px';
+    container.style.width = '1000px';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.color = '#1a1a1a';
+
+    // Título Principal
+    const header = document.createElement('div');
+    header.style.textAlign = 'center';
+    header.style.marginBottom = '30px';
+
+    const h1 = document.createElement('h1');
+    h1.textContent = 'Análise de Problemas';
+    h1.style.fontSize = '28px';
+    h1.style.fontWeight = '700';
+    h1.style.color = '#022c22';
+    h1.style.marginBottom = '5px';
+    h1.style.margin = '0';
+    header.appendChild(h1);
+
+    container.appendChild(header);
+
+    // Problema Principal
+    const problemSection = document.createElement('div');
+    problemSection.style.background = '#f0fdf4';
+    problemSection.style.borderRadius = '8px';
+    problemSection.style.padding = '20px';
+    problemSection.style.marginBottom = '25px';
+    problemSection.style.borderLeft = '4px solid #022c22';
+
+    const problemLabel = document.createElement('div');
+    problemLabel.textContent = 'PROBLEMA PRINCIPAL:';
+    problemLabel.style.fontSize = '11px';
+    problemLabel.style.fontWeight = '700';
+    problemLabel.style.color = '#022c22';
+    problemLabel.style.marginBottom = '8px';
+    problemSection.appendChild(problemLabel);
+
+    const problemText = document.createElement('div');
+    problemText.textContent = data.problem || 'Não definido';
+    problemText.style.fontSize = '14px';
+    problemText.style.color = '#166534';
+    problemText.style.lineHeight = '1.6';
+    problemText.style.fontWeight = '500';
+    problemSection.appendChild(problemText);
+
+    container.appendChild(problemSection);
+
+    // Estágios
+    const stageConfigs = [
+      { id: '0', title: 'BRAINSTORM', bgColor: '#fef3c7', borderColor: '#fde68a', textColor: '#422006' },
+      { id: '1', title: '1. SINTOMAS', bgColor: '#022c22', borderColor: '#022c22', textColor: '#ffffff' },
+      { id: '2', title: '2. DESCULPAS', bgColor: '#022c22', borderColor: '#022c22', textColor: '#ffffff' },
+      { id: '3', title: '3. CULPADOS', bgColor: '#022c22', borderColor: '#022c22', textColor: '#ffffff' },
+      { id: '4', title: '4. MOTIVOS', bgColor: '#022c22', borderColor: '#022c22', textColor: '#ffffff' },
+      { id: '5', title: '5. CAUSA RAIZ', bgColor: '#022c22', borderColor: '#022c22', textColor: '#ffffff' }
+    ];
+
+    stageConfigs.forEach(stage => {
+      const postits = data.stages?.[stage.id] || [];
+
+      // Header do estágio
+      const stageHeader = document.createElement('div');
+      stageHeader.style.background = stage.bgColor;
+      stageHeader.style.borderRadius = '6px';
+      stageHeader.style.padding = '12px 16px';
+      stageHeader.style.marginBottom = '15px';
+      stageHeader.style.marginTop = '10px';
+
+      const stageTitle = document.createElement('div');
+      stageTitle.textContent = stage.title;
+      stageTitle.style.fontSize = '14px';
+      stageTitle.style.fontWeight = '700';
+      stageTitle.style.color = stage.textColor;
+      stageHeader.appendChild(stageTitle);
+
+      container.appendChild(stageHeader);
+
+      // Post-its ou mensagem vazia
+      if (postits.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.textContent = 'Nenhum item nesta etapa';
+        emptyMessage.style.fontSize = '12px';
+        emptyMessage.style.fontStyle = 'italic';
+        emptyMessage.style.color = '#9ca3af';
+        emptyMessage.style.padding = '10px 16px';
+        emptyMessage.style.marginBottom = '15px';
+        container.appendChild(emptyMessage);
+      } else {
+        const postitContainer = document.createElement('div');
+        postitContainer.style.marginBottom = '20px';
+
+        postits.forEach((postit: any) => {
+          const postitDiv = document.createElement('div');
+          postitDiv.style.background = '#fef3c7';
+          postitDiv.style.border = '1px solid #fde68a';
+          postitDiv.style.borderRadius = '6px';
+          postitDiv.style.padding = '12px 16px';
+          postitDiv.style.marginBottom = '8px';
+          postitDiv.style.fontSize = '13px';
+          postitDiv.style.color = '#422006';
+          postitDiv.style.lineHeight = '1.5';
+          postitDiv.textContent = postit.text || '(vazio)';
+          postitContainer.appendChild(postitDiv);
+        });
+
+        container.appendChild(postitContainer);
+      }
+    });
+
+    // Footer
+    const footer = document.createElement('div');
+    footer.style.marginTop = '40px';
+    footer.style.paddingTop = '20px';
+    footer.style.borderTop = '1px solid #e5e7eb';
+    footer.style.textAlign = 'center';
+    footer.style.fontSize = '11px';
+    footer.style.color = '#6b7280';
+    footer.textContent = `Gerado em ${new Date().toLocaleString('pt-BR')} | Sistema de Gestão NAUE`;
+    container.appendChild(footer);
+
+    return container;
+  }
+
+  private async carregarErrosParaExportacao(): Promise<any | null> {
+    return new Promise((resolve) => {
+      console.log('📞 Chamando API de Gestão de Erros...');
+      this.mentoriaService.obterErrosPublico(this.token).subscribe({
+        next: (response) => {
+          console.log('📥 Resposta Gestão de Erros:', response);
+          if (response.success && response.data) {
+            const hasData = response.data.erros_pessoais?.some((e: any) => e.description) ||
+                           response.data.erros_equipe?.some((e: any) => e.description);
+            console.log('🔍 Tem dados?', hasData, 'Erros Pessoais:', response.data.erros_pessoais, 'Erros Equipe:', response.data.erros_equipe);
+            resolve(hasData ? response.data : null);
+          } else {
+            console.log('⚠️ Gestão de Erros sem sucesso ou data');
+            resolve(null);
+          }
+        },
+        error: (err) => {
+          console.error('❌ Erro ao carregar Gestão de Erros:', err);
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  private criarContainerErrosVisualizacao(data: any): HTMLElement {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.background = 'white';
+    container.style.width = '1200px';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.minHeight = '1400px';
+
+    // Header Principal (estilo do PDF original)
+    const headerBg = document.createElement('div');
+    headerBg.style.background = '#022c22';
+    headerBg.style.padding = '60px 40px';
+    headerBg.style.textAlign = 'center';
+    headerBg.style.marginBottom = '40px';
+
+    const h1 = document.createElement('h1');
+    h1.textContent = 'ERROS';
+    h1.style.fontSize = '48px';
+    h1.style.fontWeight = '700';
+    h1.style.color = 'white';
+    h1.style.marginBottom = '15px';
+    h1.style.margin = '0 0 15px 0';
+    headerBg.appendChild(h1);
+
+    const subtitle = document.createElement('p');
+    subtitle.textContent = 'Analise e aprenda com os erros para evoluir continuamente';
+    subtitle.style.fontSize = '16px';
+    subtitle.style.color = 'white';
+    subtitle.style.marginBottom = '15px';
+    subtitle.style.margin = '0 0 15px 0';
+    headerBg.appendChild(subtitle);
+
+    const dataGeracao = document.createElement('p');
+    dataGeracao.textContent = `Gerado em ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`;
+    dataGeracao.style.fontSize = '13px';
+    dataGeracao.style.color = '#c8c8c8';
+    dataGeracao.style.margin = '0';
+    headerBg.appendChild(dataGeracao);
+
+    container.appendChild(headerBg);
+
+    const contentArea = document.createElement('div');
+    contentArea.style.padding = '0 40px 40px 40px';
+
+    const positionLabels: any = {
+      'negacao': 'Negação',
+      'justificacao': 'Justificação',
+      'culpamos': 'Culpamos',
+      'corrigimos': 'Corrigimos'
+    };
+
+    const statusLabels: any = {
+      'concluido': 'Concluído',
+      'andamento': 'Em Andamento',
+      'sem-iniciativa': 'Sem Iniciativa'
+    };
+
+    const statusColors: any = {
+      'concluido': '#10B981',
+      'andamento': '#F59E0B',
+      'sem-iniciativa': '#EF4444'
+    };
+
+    const renderErrorSection = (title: string, errors: any[], sectionNumber: number) => {
+      // Header da Seção (com círculo numerado)
+      const sectionHeader = document.createElement('div');
+      sectionHeader.style.background = '#022c22';
+      sectionHeader.style.borderRadius = '8px';
+      sectionHeader.style.padding = '15px 20px';
+      sectionHeader.style.marginBottom = '20px';
+      sectionHeader.style.display = 'flex';
+      sectionHeader.style.alignItems = 'center';
+      sectionHeader.style.gap = '12px';
+
+      const numberCircle = document.createElement('div');
+      numberCircle.textContent = String(sectionNumber);
+      numberCircle.style.background = 'white';
+      numberCircle.style.color = '#022c22';
+      numberCircle.style.width = '32px';
+      numberCircle.style.height = '32px';
+      numberCircle.style.borderRadius = '50%';
+      numberCircle.style.display = 'flex';
+      numberCircle.style.alignItems = 'center';
+      numberCircle.style.justifyContent = 'center';
+      numberCircle.style.fontWeight = '700';
+      numberCircle.style.fontSize = '16px';
+      sectionHeader.appendChild(numberCircle);
+
+      const sectionTitle = document.createElement('h3');
+      sectionTitle.textContent = title;
+      sectionTitle.style.fontSize = '20px';
+      sectionTitle.style.fontWeight = '700';
+      sectionTitle.style.color = 'white';
+      sectionTitle.style.margin = '0';
+      sectionHeader.appendChild(sectionTitle);
+
+      contentArea.appendChild(sectionHeader);
+
+      // Grid de 2 colunas para os erros
+      const errorGrid = document.createElement('div');
+      errorGrid.style.display = 'grid';
+      errorGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+      errorGrid.style.gap = '15px';
+      errorGrid.style.marginBottom = '30px';
+
+      errors.forEach((erro: any) => {
+        if (erro.description) {
+          const erroCard = document.createElement('div');
+          erroCard.style.background = '#fafafa';
+          erroCard.style.border = '1px solid #022c22';
+          erroCard.style.borderRadius = '8px';
+          erroCard.style.padding = '16px';
+          erroCard.style.minHeight = '120px';
+          erroCard.style.display = 'flex';
+          erroCard.style.flexDirection = 'column';
+          erroCard.style.gap = '10px';
+
+          // Descrição do erro
+          const erroDesc = document.createElement('div');
+          erroDesc.textContent = erro.description;
+          erroDesc.style.fontSize = '13px';
+          erroDesc.style.color = '#022c22';
+          erroDesc.style.lineHeight = '1.5';
+          erroDesc.style.fontWeight = '600';
+          erroDesc.style.flex = '1';
+          erroCard.appendChild(erroDesc);
+
+          // Linha com badges de Posição e Status
+          const badgesRow = document.createElement('div');
+          badgesRow.style.display = 'flex';
+          badgesRow.style.gap = '8px';
+          badgesRow.style.flexWrap = 'wrap';
+          badgesRow.style.alignItems = 'center';
+
+          // Badge de Posição
+          if (erro.position) {
+            const posBadge = document.createElement('div');
+            posBadge.textContent = positionLabels[erro.position] || erro.position;
+            posBadge.style.fontSize = '11px';
+            posBadge.style.color = '#6b7280';
+            posBadge.style.fontStyle = 'italic';
+            posBadge.style.background = '#f3f4f6';
+            posBadge.style.padding = '4px 10px';
+            posBadge.style.borderRadius = '6px';
+            badgesRow.appendChild(posBadge);
+          }
+
+          // Badge de Status
+          if (erro.status) {
+            const statusBadge = document.createElement('div');
+            statusBadge.textContent = statusLabels[erro.status] || erro.status;
+            statusBadge.style.fontSize = '11px';
+            statusBadge.style.fontWeight = '600';
+            statusBadge.style.background = statusColors[erro.status] || '#6B7280';
+            statusBadge.style.color = 'white';
+            statusBadge.style.padding = '4px 10px';
+            statusBadge.style.borderRadius = '6px';
+            badgesRow.appendChild(statusBadge);
+          }
+
+          erroCard.appendChild(badgesRow);
+          errorGrid.appendChild(erroCard);
+        }
+      });
+
+      contentArea.appendChild(errorGrid);
+    };
+
+    // Erros Pessoais
+    if (data.erros_pessoais?.some((e: any) => e.description)) {
+      renderErrorSection('Erros Pessoais', data.erros_pessoais, 1);
+    }
+
+    // Erros da Equipe
+    if (data.erros_equipe?.some((e: any) => e.description)) {
+      renderErrorSection('Erros da Equipe', data.erros_equipe, 2);
+    }
+
+    container.appendChild(contentArea);
+
+    return container;
+  }
+
+  // ===== EXPORTAÇÃO COMPLETA =====
+
+  async exportarTodasFerramentasPDF(): Promise<void> {
+    try {
+      this.toastr.info('Gerando PDF completo com todas as ferramentas...');
+
+      // Lista de ferramentas disponíveis
+      const ferramentasDisponiveis: Array<{
+        nome: string;
+        verificar: () => boolean;
+        criarContainer: () => HTMLElement | null;
+        timeout: number;
+        backgroundColor: string;
+      }> = [];
+
+      // Verificar quais ferramentas estão disponíveis
+      if (this.conteudoEstruturado?.mapaMental) {
+        ferramentasDisponiveis.push({
+          nome: 'Mapa Mental',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerVisualizacao(),
+          timeout: 100,
+          backgroundColor: '#ffffff'
+        });
+      }
+
+      if (this.zonasAprendizado?.palavras?.length > 0) {
+        ferramentasDisponiveis.push({
+          nome: 'Zonas de Aprendizado',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerZonasVisualizacao(),
+          timeout: 300,
+          backgroundColor: '#022c22'
+        });
+      }
+
+      if (this.ganhosPerdas?.ganhos_obtiver?.length > 0 || this.ganhosPerdas?.perdas_obtiver?.length > 0) {
+        ferramentasDisponiveis.push({
+          nome: 'Ganhos e Perdas',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerGanhosPerdasVisualizacao(),
+          timeout: 100,
+          backgroundColor: '#ffffff'
+        });
+      }
+
+      if (this.controleHabitos?.habitos?.length > 0) {
+        ferramentasDisponiveis.push({
+          nome: 'Controle de Hábitos',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerControleHabitosVisualizacao(),
+          timeout: 100,
+          backgroundColor: '#ffffff'
+        });
+      }
+
+      if (this.rodaDaVida) {
+        ferramentasDisponiveis.push({
+          nome: 'Roda da Vida',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerRodaDaVidaVisualizacao(),
+          timeout: 100,
+          backgroundColor: '#ffffff'
+        });
+      }
+
+      if (this.goldenCircle?.why || this.goldenCircle?.how || this.goldenCircle?.what) {
+        ferramentasDisponiveis.push({
+          nome: 'Golden Circle',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerGoldenCircleVisualizacao(),
+          timeout: 100,
+          backgroundColor: '#ffffff'
+        });
+      }
+
+      if (this.conteudoEstruturado?.proximosPassos?.blocos?.length > 0) {
+        ferramentasDisponiveis.push({
+          nome: 'Próximos Passos',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerProximosPassosVisualizacao(),
+          timeout: 100,
+          backgroundColor: '#ffffff'
+        });
+      }
+
+      if (this.termometroGestao?.atividades?.length > 0) {
+        ferramentasDisponiveis.push({
+          nome: 'Termômetro de Gestão',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerTermometroVisualizacao(),
+          timeout: 1500,
+          backgroundColor: '#ffffff'
+        });
+      }
+
+      // Modelo ABC
+      const temDadosModeloABC = this.modeloABC.adversidade || this.modeloABC.pensamento ||
+                                 this.modeloABC.consequencia || this.modeloABC.antidotoExigencia ||
+                                 this.modeloABC.antidotoRotulo || this.modeloABC.fraseNocaute ||
+                                 this.modeloABC.planoAcao || this.modeloABC.impedimentos ||
+                                 this.modeloABC.acaoImpedimentos;
+
+      if (temDadosModeloABC) {
+        ferramentasDisponiveis.push({
+          nome: 'Modelo ABC',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerModeloABCVisualizacao(),
+          timeout: 100,
+          backgroundColor: '#022c22'
+        });
+      }
+
+      // Carregar Matriz RACI
+      console.log('🔍 Carregando Matriz RACI...');
+      const matrizRaciData = await this.carregarMatrizRaciParaExportacao();
+      console.log('📊 Matriz RACI Data:', matrizRaciData);
+      if (matrizRaciData) {
+        console.log('✅ Adicionando Matriz RACI à lista');
+        ferramentasDisponiveis.push({
+          nome: 'Matriz RACI',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerMatrizRaciVisualizacao(matrizRaciData),
+          timeout: 300,
+          backgroundColor: '#ffffff'
+        });
+      } else {
+        console.log('❌ Matriz RACI sem dados');
+      }
+
+      // Carregar Análise de Problemas
+      console.log('🔍 Carregando Análise de Problemas...');
+      const analiseProblemasData = await this.carregarAnaliseProblemasParaExportacao();
+      console.log('📊 Análise de Problemas Data:', analiseProblemasData);
+      if (analiseProblemasData) {
+        console.log('✅ Adicionando Análise de Problemas à lista');
+        ferramentasDisponiveis.push({
+          nome: 'Análise de Problemas',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerAnaliseProblemasVisualizacao(analiseProblemasData),
+          timeout: 100,
+          backgroundColor: '#ffffff'
+        });
+      } else {
+        console.log('❌ Análise de Problemas sem dados');
+      }
+
+      // Carregar Gestão de Erros
+      console.log('🔍 Carregando Gestão de Erros...');
+      const errosData = await this.carregarErrosParaExportacao();
+      console.log('📊 Gestão de Erros Data:', errosData);
+      if (errosData) {
+        console.log('✅ Adicionando Gestão de Erros à lista');
+        ferramentasDisponiveis.push({
+          nome: 'Gestão de Erros',
+          verificar: () => true,
+          criarContainer: () => this.criarContainerErrosVisualizacao(errosData),
+          timeout: 100,
+          backgroundColor: '#ffffff'
+        });
+      } else {
+        console.log('❌ Gestão de Erros sem dados');
+      }
+
+      console.log('📋 Total de ferramentas disponíveis:', ferramentasDisponiveis.length);
+      console.log('📝 Lista de ferramentas:', ferramentasDisponiveis.map(f => f.nome));
+
+      if (ferramentasDisponiveis.length === 0) {
+        this.toastr.warning('Nenhuma ferramenta com dados disponível para exportar');
+        return;
+      }
+
+      this.toastr.info(`Exportando ${ferramentasDisponiveis.length} ferramenta(s)...`);
+
+      let pdf: jsPDF | null = null;
+
+      // Processar cada ferramenta
+      for (let i = 0; i < ferramentasDisponiveis.length; i++) {
+        const ferramenta = ferramentasDisponiveis[i];
+
+        try {
+          this.toastr.info(`Processando ${ferramenta.nome} (${i + 1}/${ferramentasDisponiveis.length})...`);
+
+          const container = ferramenta.criarContainer();
+          if (!container) continue;
+
+          document.body.appendChild(container);
+
+          await new Promise(resolve => setTimeout(resolve, ferramenta.timeout));
+
+          const canvas = await html2canvas(container, {
+            backgroundColor: ferramenta.backgroundColor,
+            scale: 2,
+            logging: false,
+            useCORS: true,
+            allowTaint: true,
+            width: container.scrollWidth,
+            height: container.scrollHeight
+          });
+
+          document.body.removeChild(container);
+
+          const imgData = canvas.toDataURL('image/png');
+
+          if (pdf === null) {
+            pdf = new jsPDF({
+              orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+              unit: 'px',
+              format: [canvas.width, canvas.height]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+          } else {
+            pdf.addPage([canvas.width, canvas.height], canvas.width > canvas.height ? 'landscape' : 'portrait');
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+          }
+
+        } catch (error) {
+          console.error(`Erro ao processar ${ferramenta.nome}:`, error);
+          this.toastr.warning(`Não foi possível incluir: ${ferramenta.nome}`);
+        }
+      }
+
+      if (pdf) {
+        // Salvar PDF
+        const nomeArquivo = `mentoria-completa-${this.encontro?.mentorado_nome || 'mentoria'}-${Date.now()}.pdf`;
+        pdf.save(nomeArquivo);
+        this.toastr.success(`PDF exportado com ${ferramentasDisponiveis.length} ferramenta(s)!`);
+      } else {
+        this.toastr.error('Erro ao gerar PDF');
+      }
+
+    } catch (error) {
+      console.error('Erro ao exportar PDF completo:', error);
+      this.toastr.error('Erro ao exportar PDF completo');
+    }
   }
 
   // ===== UTILITÁRIOS =====
