@@ -1256,7 +1256,6 @@ html {
 
 .tarefa-checkbox input[type="checkbox"]:checked ~ .tarefa-text {
   color: #9ca3af;
-  text-decoration: line-through;
 }
 
 /* === REFERÊNCIAS SECTION === */
@@ -3358,6 +3357,46 @@ html {
 }
 
 .btn-save-golden:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* === CLASSES GENÉRICAS PARA AÇÕES DAS SEÇÕES === */
+.section-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding-top: 2rem;
+  border-top: 2px solid #e5e7eb;
+  margin-top: 2rem;
+}
+
+.btn-section-save,
+.btn-section-export {
+  padding: 1.125rem 3rem;
+  background: #022c22;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 8px 24px rgba(2, 44, 34, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-section-save:hover:not(:disabled),
+.btn-section-export:hover {
+  background: #014d3a;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 183, 79, 0.4);
+}
+
+.btn-section-save:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;

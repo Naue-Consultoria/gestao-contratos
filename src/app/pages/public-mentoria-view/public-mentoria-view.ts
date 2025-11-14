@@ -4013,6 +4013,250 @@ export class PublicMentoriaViewComponent implements OnInit {
     return container;
   }
 
+  async exportarProximosPassosPDF(): Promise<void> {
+    const temDados = this.conteudoEstruturado?.proximosPassos?.blocos?.length > 0;
+
+    if (!temDados) {
+      this.toastr.warning('Não há próximos passos para exportar');
+      return;
+    }
+
+    try {
+      this.toastr.info('Gerando PDF de Próximos Passos...');
+
+      const container = this.criarContainerProximosPassosVisualizacao();
+      document.body.appendChild(container);
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        width: container.scrollWidth,
+        height: container.scrollHeight
+      });
+
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`proximos-passos-${this.encontro?.mentorado_nome || 'mentoria'}-${Date.now()}.pdf`);
+
+      this.toastr.success('PDF exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      this.toastr.error('Erro ao exportar PDF');
+    }
+  }
+
+  private criarContainerProximosPassosVisualizacao(): HTMLElement {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.background = '#ffffff';
+    container.style.padding = '60px';
+    container.style.minWidth = '800px';
+    container.style.maxWidth = '1000px';
+    container.style.fontFamily = 'Arial, sans-serif';
+
+    // Logo
+    const logo = document.createElement('img');
+    logo.src = '/logoNaue.png';
+    logo.style.position = 'absolute';
+    logo.style.top = '40px';
+    logo.style.left = '40px';
+    logo.style.height = '45px';
+    container.appendChild(logo);
+
+    // Título
+    const header = document.createElement('div');
+    header.style.textAlign = 'center';
+    header.style.marginBottom = '60px';
+
+    const h1 = document.createElement('h1');
+    h1.textContent = 'Próximos Passos';
+    h1.style.fontSize = '36px';
+    h1.style.margin = '0 0 10px 0';
+    h1.style.fontWeight = 'bold';
+    h1.style.color = '#022c22';
+    header.appendChild(h1);
+
+    const info = document.createElement('div');
+    info.textContent = `${this.encontro?.mentorado_nome || 'Mentoria'}`;
+    info.style.fontSize = '18px';
+    info.style.fontWeight = '600';
+    info.style.color = '#666';
+    header.appendChild(info);
+
+    container.appendChild(header);
+
+    // Blocos de Próximos Passos
+    const passosWrapper = document.createElement('div');
+    passosWrapper.style.display = 'flex';
+    passosWrapper.style.flexDirection = 'column';
+    passosWrapper.style.gap = '30px';
+
+    this.conteudoEstruturado.proximosPassos.blocos.forEach((bloco: any) => {
+      const blocoDiv = document.createElement('div');
+      blocoDiv.style.background = '#f8f9fa';
+      blocoDiv.style.border = '2px solid #022c22';
+      blocoDiv.style.borderRadius = '16px';
+      blocoDiv.style.padding = '30px';
+      blocoDiv.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+
+      // Bloco de Texto
+      if (bloco.tipo === 'texto' && bloco.conteudo) {
+        const textoDiv = document.createElement('div');
+        textoDiv.style.borderLeft = '4px solid #022c22';
+        textoDiv.style.paddingLeft = '20px';
+        textoDiv.style.fontSize = '16px';
+        textoDiv.style.lineHeight = '1.6';
+        textoDiv.style.color = '#333';
+        textoDiv.innerHTML = bloco.conteudo;
+        blocoDiv.appendChild(textoDiv);
+      }
+
+      // Bloco de Perguntas
+      if (bloco.tipo === 'perguntas' && bloco.perguntas?.length > 0) {
+        const titleDiv = document.createElement('div');
+        titleDiv.style.fontSize = '22px';
+        titleDiv.style.fontWeight = 'bold';
+        titleDiv.style.color = '#022c22';
+        titleDiv.style.marginBottom = '20px';
+        titleDiv.style.display = 'flex';
+        titleDiv.style.alignItems = 'center';
+        titleDiv.style.gap = '10px';
+        titleDiv.innerHTML = `<i class="fa-solid fa-question-circle"></i> ${this.getNomeTemplate(bloco)}`;
+        blocoDiv.appendChild(titleDiv);
+
+        bloco.perguntas.forEach((pergunta: any, index: number) => {
+          const perguntaDiv = document.createElement('div');
+          perguntaDiv.style.marginBottom = '25px';
+          perguntaDiv.style.paddingBottom = '25px';
+          if (index < bloco.perguntas.length - 1) {
+            perguntaDiv.style.borderBottom = '1px solid #dee2e6';
+          }
+
+          const numDiv = document.createElement('div');
+          numDiv.style.display = 'inline-block';
+          numDiv.style.background = '#022c22';
+          numDiv.style.color = 'white';
+          numDiv.style.borderRadius = '50%';
+          numDiv.style.width = '32px';
+          numDiv.style.height = '32px';
+          numDiv.style.lineHeight = '32px';
+          numDiv.style.textAlign = 'center';
+          numDiv.style.fontWeight = 'bold';
+          numDiv.style.fontSize = '14px';
+          numDiv.style.marginBottom = '10px';
+          numDiv.textContent = (index + 1).toString();
+          perguntaDiv.appendChild(numDiv);
+
+          const questionText = document.createElement('p');
+          questionText.textContent = pergunta.pergunta;
+          questionText.style.fontWeight = 'bold';
+          questionText.style.fontSize = '16px';
+          questionText.style.color = '#022c22';
+          questionText.style.margin = '10px 0';
+          questionText.style.whiteSpace = 'pre-wrap';
+          perguntaDiv.appendChild(questionText);
+
+          const answerDiv = document.createElement('div');
+          answerDiv.textContent = pergunta.respostaUsuario || '(Não respondido)';
+          answerDiv.style.fontSize = '15px';
+          answerDiv.style.color = pergunta.respostaUsuario ? '#333' : '#999';
+          answerDiv.style.fontStyle = pergunta.respostaUsuario ? 'normal' : 'italic';
+          answerDiv.style.lineHeight = '1.6';
+          answerDiv.style.paddingLeft = '20px';
+          answerDiv.style.borderLeft = '3px solid #dee2e6';
+          answerDiv.style.marginTop = '10px';
+          answerDiv.style.whiteSpace = 'pre-wrap';
+          perguntaDiv.appendChild(answerDiv);
+
+          blocoDiv.appendChild(perguntaDiv);
+        });
+      }
+
+      // Bloco de Tarefas
+      if (bloco.tipo === 'tarefas' && bloco.tarefas?.itens?.length > 0) {
+        const titleDiv = document.createElement('div');
+        titleDiv.style.fontSize = '22px';
+        titleDiv.style.fontWeight = 'bold';
+        titleDiv.style.color = '#022c22';
+        titleDiv.style.marginBottom = '20px';
+        titleDiv.style.display = 'flex';
+        titleDiv.style.alignItems = 'center';
+        titleDiv.style.gap = '10px';
+        titleDiv.innerHTML = `<i class="fa-solid fa-list-check"></i> ${bloco.tarefas.titulo || 'Tarefas'}`;
+        blocoDiv.appendChild(titleDiv);
+
+        const listDiv = document.createElement('ul');
+        listDiv.style.listStyle = 'none';
+        listDiv.style.padding = '0';
+        listDiv.style.margin = '0';
+
+        bloco.tarefas.itens.forEach((tarefa: any) => {
+          const tarefaItem = document.createElement('li');
+          tarefaItem.style.display = 'flex';
+          tarefaItem.style.alignItems = 'center';
+          tarefaItem.style.gap = '12px';
+          tarefaItem.style.padding = '12px 0';
+          tarefaItem.style.borderBottom = '1px solid #dee2e6';
+
+          const checkbox = document.createElement('span');
+          checkbox.style.display = 'inline-block';
+          checkbox.style.width = '24px';
+          checkbox.style.height = '24px';
+          checkbox.style.border = '2px solid #022c22';
+          checkbox.style.borderRadius = '6px';
+          checkbox.style.flexShrink = '0';
+          checkbox.style.position = 'relative';
+
+          if (tarefa.checked) {
+            checkbox.style.background = '#022c22';
+            const checkmark = document.createElement('span');
+            checkmark.innerHTML = '✓';
+            checkmark.style.color = 'white';
+            checkmark.style.position = 'absolute';
+            checkmark.style.top = '50%';
+            checkmark.style.left = '50%';
+            checkmark.style.transform = 'translate(-50%, -50%)';
+            checkmark.style.fontSize = '16px';
+            checkmark.style.fontWeight = 'bold';
+            checkbox.appendChild(checkmark);
+          }
+
+          tarefaItem.appendChild(checkbox);
+
+          const tarefaText = document.createElement('span');
+          tarefaText.textContent = tarefa.texto || tarefa;
+          tarefaText.style.fontSize = '15px';
+          tarefaText.style.color = '#333';
+          tarefaText.style.lineHeight = '1.5';
+          tarefaItem.appendChild(tarefaText);
+
+          listDiv.appendChild(tarefaItem);
+        });
+
+        blocoDiv.appendChild(listDiv);
+      }
+
+      passosWrapper.appendChild(blocoDiv);
+    });
+
+    container.appendChild(passosWrapper);
+
+    return container;
+  }
+
   // Métodos para detecção e processamento de vídeos do YouTube
   isYouTubeUrl(url: string): boolean {
     if (!url) return false;
