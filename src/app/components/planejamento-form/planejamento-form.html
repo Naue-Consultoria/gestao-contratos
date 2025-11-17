@@ -1,0 +1,253 @@
+<!-- Page Header with Breadcrumb -->
+<div class="page-header">
+  <h1 class="page-title">{{ isEditMode ? 'Editar' : 'Novo' }} Planejamento Estratégico</h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<!-- Error State -->
+<div *ngIf="error" class="error-message">
+  <i class="fas fa-exclamation-circle"></i>
+  {{ error }}
+</div>
+
+<!-- Loading State -->
+<div *ngIf="isLoading" class="loading-container">
+  <i class="fas fa-spinner fa-spin"></i>
+  Carregando...
+</div>
+
+<!-- Form -->
+<div *ngIf="!isLoading" class="form-container">
+  <form (ngSubmit)="onSubmit()" #planejamentoForm="ngForm">
+
+    <!-- Layout de 2 Colunas (apenas em modo de criação) -->
+    <div class="form-layout" [class.two-columns]="!isEditMode">
+
+      <!-- COLUNA ESQUERDA -->
+      <div class="left-column">
+
+        <!-- Seção: Informações Básicas -->
+        <div class="form-section">
+          <h2 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            Informações Básicas
+          </h2>
+
+          <div class="form-grid">
+            <!-- Cliente -->
+            <div class="form-group">
+              <label for="client_id" class="required">Cliente</label>
+              <select
+                id="client_id"
+                name="client_id"
+                [(ngModel)]="formData.client_id"
+                (change)="onClientChange()"
+                [disabled]="isEditMode"
+                class="form-control"
+                required
+              >
+                <option value="0">Selecione um cliente</option>
+                <option *ngFor="let client of clients" [value]="client.id">
+                  {{ client.name }}
+                </option>
+              </select>
+              <small class="form-hint" *ngIf="isEditMode">
+                Cliente não pode ser alterado após criação
+              </small>
+            </div>
+
+            <!-- Contrato -->
+            <div class="form-group">
+              <label for="contract_id" class="required">Contrato</label>
+              <select
+                id="contract_id"
+                name="contract_id"
+                [(ngModel)]="formData.contract_id"
+                [disabled]="!formData.client_id || isEditMode"
+                class="form-control"
+                required
+              >
+                <option value="0">
+                  {{ formData.client_id ? 'Selecione um contrato' : 'Selecione um cliente primeiro' }}
+                </option>
+                <option *ngFor="let contract of filteredContracts" [value]="contract.id">
+                  {{ contract.contract_number }} - {{ contract.type }}
+                </option>
+              </select>
+              <small class="form-hint" *ngIf="isEditMode">
+                Contrato não pode ser alterado após criação
+              </small>
+            </div>
+
+            <!-- Título -->
+            <div class="form-group full-width">
+              <label for="titulo" class="required">Título</label>
+              <input
+                type="text"
+                id="titulo"
+                name="titulo"
+                [(ngModel)]="formData.titulo"
+                class="form-control"
+                placeholder="Ex: Planejamento Estratégico 2025"
+                maxlength="255"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção: Datas -->
+        <div class="form-section">
+          <h2 class="section-title">
+            <i class="fas fa-calendar"></i>
+            Datas e Prazos
+          </h2>
+
+          <div class="form-grid">
+            <!-- Prazo de Preenchimento -->
+            <div class="form-group full-width">
+              <label for="prazo_preenchimento">Prazo para Preenchimento da Matriz</label>
+              <input
+                type="date"
+                id="prazo_preenchimento"
+                name="prazo_preenchimento"
+                [(ngModel)]="formData.prazo_preenchimento"
+                class="form-control"
+              />
+              <small class="form-hint">
+                <i class="fas fa-info-circle"></i>
+                Data limite para os departamentos editarem suas matrizes
+              </small>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COLUNA DIREITA (apenas em modo de criação) -->
+      <div class="right-column" *ngIf="!isEditMode">
+        <!-- Seção: Departamentos -->
+        <div class="form-section departamentos-section">
+          <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-building"></i>
+          Departamentos Participantes
+        </h2>
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          (click)="addDepartamento()"
+          [disabled]="isSaving"
+        >
+          <i class="fas fa-plus"></i>
+          Novo Departamento
+        </button>
+      </div>
+
+      <!-- Estado vazio -->
+      <div class="empty-departamentos" *ngIf="departamentos.length === 0">
+        <div class="empty-icon">
+          <i class="fas fa-building"></i>
+        </div>
+        <h4>Nenhum departamento adicionado</h4>
+        <p>Adicione os departamentos que participarão deste planejamento estratégico</p>
+        <button type="button" class="btn btn-primary btn-sm" (click)="addDepartamento()">
+          <i class="fas fa-plus"></i>
+          Adicionar Primeiro Departamento
+        </button>
+      </div>
+
+      <!-- Lista de departamentos -->
+      <div class="departamentos-list" *ngIf="departamentos.length > 0">
+        <div class="departamento-item" *ngFor="let departamento of departamentos; let i = index">
+          <button type="button" class="btn-remove-departamento"
+                  (click)="removeDepartamento(i)"
+                  title="Remover departamento">
+            <i class="fas fa-trash"></i>
+          </button>
+          <div class="departamento-content">
+            <div class="form-group">
+              <label [for]="'depNome' + i" class="required">Nome do Departamento</label>
+              <input
+                type="text"
+                [id]="'depNome' + i"
+                class="form-control"
+                [(ngModel)]="departamento.nome_departamento"
+                [name]="'depNome' + i"
+                placeholder="Ex: Recursos Humanos, Financeiro, Marketing..."
+                [class.error]="formSubmitted && departamento.error">
+              <span class="error-message" *ngIf="formSubmitted && departamento.error">{{ departamento.error }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botão Novo Departamento no rodapé -->
+      <div class="departamentos-footer" *ngIf="departamentos.length > 0">
+        <button
+          type="button"
+          class="btn btn-primary btn-sm btn-add-departamento"
+          (click)="addDepartamento()"
+          [disabled]="isSaving"
+        >
+          <i class="fas fa-plus"></i>
+          Novo Departamento
+        </button>
+      </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Seção: Status (apenas em modo de edição) -->
+    <div class="form-section" *ngIf="isEditMode">
+      <h2 class="section-title">
+        <i class="fas fa-toggle-on"></i>
+        Status
+      </h2>
+
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label for="status" class="required">Status do Planejamento</label>
+          <select
+            id="status"
+            name="status"
+            [(ngModel)]="formData.status"
+            class="form-control"
+            required
+          >
+            <option value="ativo">Ativo</option>
+            <option value="concluido">Concluído</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+          <small class="form-hint">
+            Status atual do planejamento estratégico
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cancel()"
+        [disabled]="isSaving"
+      >
+        <i class="fas fa-times"></i>
+        Cancelar
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="isSaving || !planejamentoForm.valid"
+      >
+        <i class="fas" [class.fa-save]="!isSaving" [class.fa-spinner]="isSaving" [class.fa-spin]="isSaving"></i>
+        {{ isSaving ? 'Salvando...' : (isEditMode ? 'Salvar Alterações' : 'Criar Planejamento') }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -43,6 +43,10 @@ import { PublicMentoriaViewComponent } from './pages/public-mentoria-view/public
 import { PublicMentoriaHub } from './pages/public-mentoria-hub/public-mentoria-hub';
 import { PublicVagasHubComponent } from './pages/public-vagas-hub/public-vagas-hub';
 import { GerenciarRsComponent } from './pages/gerenciar-rs/gerenciar-rs';
+import { PlanejamentoEstrategicoPageComponent } from './components/planejamento-estrategico-page/planejamento-estrategico-page';
+import { PlanejamentoFormComponent } from './components/planejamento-form/planejamento-form';
+import { PlanejamentoViewComponent } from './components/planejamento-view/planejamento-view';
+import { PublicPlanejamentoViewComponent } from './pages/public-planejamento-view/public-planejamento-view';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -94,6 +98,13 @@ export const routes: Routes = [
     path: 'mentoria/:token',
     component: PublicMentoriaViewComponent,
     title: 'Encontro de Mentoria - NAUE Consultoria',
+  },
+
+  // Rota pública para visualização de planejamento estratégico
+  {
+    path: 'planejamento-estrategico/:token',
+    component: PublicPlanejamentoViewComponent,
+    title: 'Planejamento Estratégico - NAUE Consultoria',
   },
 
   // Rota pública para visualização do hub de mentoria
@@ -293,6 +304,32 @@ export const routes: Routes = [
         component: AnalyticsPageComponent,
         canActivate: [AdminOnlyGuard],
         title: 'Analytics - NAUE Consultoria',
+      },
+
+      // Planejamento Estratégico - Admin e Admin Gerencial
+      {
+        path: 'planejamento-estrategico',
+        component: PlanejamentoEstrategicoPageComponent,
+        canActivate: [AdminGerencialGuard],
+        title: 'Planejamento Estratégico - NAUE Consultoria',
+      },
+      {
+        path: 'planejamento-estrategico/novo',
+        component: PlanejamentoFormComponent,
+        canActivate: [AdminGerencialGuard],
+        title: 'Novo Planejamento Estratégico - NAUE Consultoria',
+      },
+      {
+        path: 'planejamento-estrategico/editar/:id',
+        component: PlanejamentoFormComponent,
+        canActivate: [AdminGerencialGuard],
+        title: 'Editar Planejamento Estratégico - NAUE Consultoria',
+      },
+      {
+        path: 'planejamento-estrategico/visualizar/:id',
+        component: PlanejamentoViewComponent,
+        canActivate: [AdminGerencialGuard],
+        title: 'Visualizar Planejamento Estratégico - NAUE Consultoria',
       },
 
       // Recrutamento & Seleção - Admin, Admin Gerencial e Consultor R&S

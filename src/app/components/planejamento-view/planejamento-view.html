@@ -1,0 +1,171 @@
+<div class="page-header">
+  <h1 class="page-title">Detalhes do Planejamento Estratégico</h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<div *ngIf="error" class="error-message">
+  <i class="fas fa-exclamation-circle"></i>
+  {{ error }}
+</div>
+
+<div *ngIf="isLoading" class="loading-container">
+  <i class="fas fa-spinner fa-spin"></i>
+  Carregando...
+</div>
+
+<div *ngIf="!isLoading && planejamento" class="content">
+  <!-- Info Card -->
+  <div class="info-card">
+    <div class="card-header">
+      <div>
+        <h2>{{ planejamento.titulo }}</h2>
+        <span class="status-badge" [ngClass]="getStatusBadgeClass(planejamento.status)">
+          {{ getStatusLabel(planejamento.status) }}
+        </span>
+      </div>
+      <div class="actions">
+        <button class="btn btn-secondary" (click)="editarPlanejamento()">
+          <i class="fas fa-edit"></i> Editar
+        </button>
+        <button class="btn btn-primary" (click)="visualizarPlanejamento()">
+          <i class="fas fa-eye"></i> Visualizar
+        </button>
+        <button class="btn btn-primary" (click)="copiarLinkPublico()">
+          <i class="fas fa-link"></i> Copiar Link Público
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="info-row">
+        <strong>Cliente:</strong> {{ getClientName() }}
+      </div>
+      <div class="info-row">
+        <strong>Contrato:</strong> {{ planejamento.contract?.contract_number }}
+      </div>
+      <div class="info-row" *ngIf="planejamento.descricao">
+        <strong>Descrição:</strong> {{ planejamento.descricao }}
+      </div>
+      <div class="info-row" *ngIf="planejamento.data_inicio">
+        <strong>Período:</strong> {{ formatDate(planejamento.data_inicio) }}
+        <span *ngIf="planejamento.data_fim">- {{ formatDate(planejamento.data_fim) }}</span>
+      </div>
+      <div class="info-row" *ngIf="planejamento.prazo_preenchimento">
+        <strong>Prazo Preenchimento:</strong>
+        <span [class.text-danger]="isPrazoVencido()">
+          {{ formatDate(planejamento.prazo_preenchimento) }}
+          <span *ngIf="isPrazoVencido()" class="badge-danger">Vencido</span>
+        </span>
+      </div>
+      <div class="info-row">
+        <strong>Progresso de Preenchimento:</strong>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getMatrizPreenchimentoPercentage()"></div>
+        </div>
+        <span>{{ getMatrizPreenchimentoPercentage() }}% ({{ getMatrizesPreenchidas() }}/{{ departamentos.length }})</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Departamentos -->
+  <div class="section">
+    <div class="section-header">
+      <h3>Departamentos</h3>
+      <button class="btn btn-primary" (click)="openNovoDepartamentoModal()">
+        <i class="fas fa-plus"></i> Novo Departamento
+      </button>
+    </div>
+
+    <div *ngIf="departamentos.length === 0" class="empty-state">
+      <i class="fas fa-building"></i>
+      <p>Nenhum departamento cadastrado</p>
+    </div>
+
+    <div class="departamentos-grid" *ngIf="departamentos.length > 0">
+      <div *ngFor="let dep of departamentos" class="dep-card">
+        <div class="dep-header">
+          <h4>{{ dep.nome_departamento }}</h4>
+          <div class="dep-actions">
+            <button class="btn-menu" (click)="toggleMenu(dep.id)" title="Mais opções">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <div class="dropdown-menu" *ngIf="openMenuId === dep.id">
+              <button class="dropdown-item" (click)="openEditarDepartamentoModal(dep); closeMenu()">
+                <i class="fas fa-edit"></i> Editar
+              </button>
+              <button class="dropdown-item dropdown-item-danger" (click)="openDeleteModal(dep); closeMenu()">
+                <i class="fas fa-trash"></i> Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="dep-body">
+          <div *ngIf="dep.responsavel_nome">
+            <i class="fas fa-user"></i> {{ dep.responsavel_nome }}
+          </div>
+          <div *ngIf="dep.responsavel_email">
+            <i class="fas fa-envelope"></i> {{ dep.responsavel_email }}
+          </div>
+          <div class="matriz-status">
+            <span *ngIf="isMatrizPreenchida(dep)" class="badge-success">
+              <i class="fas fa-check-circle"></i> Matriz Preenchida
+            </span>
+            <span *ngIf="!isMatrizPreenchida(dep)" class="badge-warning">
+              <i class="fas fa-clock"></i> Aguardando Preenchimento
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Departamento -->
+<div class="modal-overlay" *ngIf="showDepartamentoModal" (click)="closeDepartamentoModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditingDepartamento ? 'Editar' : 'Novo' }} Departamento</h2>
+      <button class="modal-close" (click)="closeDepartamentoModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nome do Departamento *</label>
+        <input type="text" [(ngModel)]="departamentoForm.nome_departamento" class="form-control" placeholder="Ex: Financeiro">
+      </div>
+      <div class="form-group">
+        <label>Responsável</label>
+        <input type="text" [(ngModel)]="departamentoForm.responsavel_nome" class="form-control" placeholder="Nome do responsável">
+      </div>
+      <div class="form-group">
+        <label>E-mail do Responsável</label>
+        <input type="email" [(ngModel)]="departamentoForm.responsavel_email" class="form-control" placeholder="email@exemplo.com">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDepartamentoModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="saveDepartamento()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Delete -->
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirmar Exclusão</h2>
+      <button class="modal-close" (click)="closeDeleteModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Tem certeza que deseja excluir o departamento <strong>{{ departamentoToDelete?.nome_departamento }}</strong>?</p>
+      <p class="text-warning">A matriz associada também será excluída.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmDeleteDepartamento()">Excluir</button>
+    </div>
+  </div>
+</div>

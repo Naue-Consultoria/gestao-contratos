@@ -1,0 +1,182 @@
+<!-- Page Header with Breadcrumb -->
+<div class="page-header">
+  <h1 class="page-title">Planejamento Estratégico</h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<!-- Table Container -->
+<div class="table-container">
+  <div class="table-header">
+    <h2 class="table-title">Planejamentos Estratégicos</h2>
+
+    <!-- Filters -->
+    <div class="filters-row">
+      <!-- Search Input -->
+      <div class="search-input-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Buscar por título, cliente, contrato..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+        />
+        <button
+          *ngIf="searchTerm"
+          class="clear-search-btn"
+          (click)="clearSearch()"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Status Filter -->
+      <select
+        class="status-filter"
+        [(ngModel)]="statusFilter"
+        (change)="onStatusFilterChange()"
+      >
+        <option value="todos">Todos os Status</option>
+        <option value="ativo">Ativo</option>
+        <option value="concluido">Concluído</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+    </div>
+
+    <!-- Action Button -->
+    <button class="btn btn-primary" (click)="novoPlanejamento()">
+      <i class="fas fa-plus"></i>
+      Novo Planejamento
+    </button>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-message">
+    <i class="fas fa-exclamation-circle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <i class="fas fa-spinner fa-spin"></i>
+    Carregando planejamentos...
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper" *ngIf="!isLoading">
+    <!-- Empty State -->
+    <div *ngIf="filteredPlanejamentos.length === 0" class="empty-state">
+      <i class="fas fa-chess empty-icon"></i>
+      <h3>{{ searchTerm || statusFilter !== 'todos' ? 'Nenhum planejamento encontrado' : 'Nenhum planejamento cadastrado' }}</h3>
+      <p *ngIf="!searchTerm && statusFilter === 'todos'">Clique em "Novo Planejamento" para começar.</p>
+      <p *ngIf="searchTerm || statusFilter !== 'todos'">Tente ajustar os filtros de busca.</p>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="cards-grid" *ngIf="filteredPlanejamentos.length > 0">
+      <div
+        *ngFor="let planejamento of filteredPlanejamentos"
+        class="planejamento-card"
+        (click)="visualizarPlanejamento(planejamento.id)"
+      >
+        <!-- Card Header -->
+        <div class="card-header">
+          <div class="card-title-section">
+            <h3 class="card-title">{{ planejamento.titulo }}</h3>
+            <span
+              class="status-badge"
+              [ngClass]="getStatusBadgeClass(planejamento.status)"
+            >
+              {{ getStatusLabel(planejamento.status) }}
+            </span>
+          </div>
+
+          <!-- Actions Dropdown -->
+          <div class="card-actions">
+            <button
+              class="btn-icon"
+              (click)="editarPlanejamento(planejamento.id); $event.stopPropagation()"
+              title="Editar"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            <button
+              class="btn-icon"
+              (click)="copiarLinkPublico(planejamento, $event)"
+              title="Copiar Link Público"
+            >
+              <i class="fas fa-link"></i>
+            </button>
+            <button
+              class="btn-icon btn-danger"
+              (click)="openDeleteModal(planejamento, $event)"
+              title="Deletar"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+          <div class="card-info-row">
+            <span class="info-label"><i class="fas fa-user"></i> Cliente:</span>
+            <span class="info-value">{{ getClientName(planejamento) }}</span>
+          </div>
+
+          <div class="card-info-row">
+            <span class="info-label"><i class="fas fa-file-contract"></i> Contrato:</span>
+            <span class="info-value">{{ planejamento.contract?.contract_number || 'N/A' }}</span>
+          </div>
+
+          <div class="card-info-row" *ngIf="planejamento.data_inicio">
+            <span class="info-label"><i class="fas fa-calendar"></i> Período:</span>
+            <span class="info-value">
+              {{ formatDate(planejamento.data_inicio) }}
+              <span *ngIf="planejamento.data_fim"> - {{ formatDate(planejamento.data_fim) }}</span>
+            </span>
+          </div>
+
+          <div class="card-info-row" *ngIf="planejamento.prazo_preenchimento">
+            <span class="info-label"><i class="fas fa-clock"></i> Prazo Preenchimento:</span>
+            <span
+              class="info-value"
+              [class.prazo-vencido]="isPrazoVencido(planejamento.prazo_preenchimento)"
+            >
+              {{ formatDate(planejamento.prazo_preenchimento) }}
+              <span *ngIf="isPrazoVencido(planejamento.prazo_preenchimento)" class="badge-danger small-badge">Vencido</span>
+            </span>
+          </div>
+
+          <div class="card-info-row" *ngIf="planejamento.descricao">
+            <span class="info-label"><i class="fas fa-align-left"></i> Descrição:</span>
+            <span class="info-value description">{{ planejamento.descricao }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirmar Exclusão</h2>
+      <button class="modal-close" (click)="closeDeleteModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Tem certeza que deseja excluir o planejamento estratégico <strong>{{ planejamentoToDelete?.titulo }}</strong>?</p>
+      <p class="warning-text">
+        <i class="fas fa-exclamation-triangle"></i>
+        Esta ação também excluirá todos os departamentos e matrizes associadas. Esta ação não pode ser desfeita.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmDelete()">Excluir</button>
+    </div>
+  </div>
+</div>

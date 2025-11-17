@@ -128,6 +128,25 @@ export class BreadcrumbService {
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Analytics' }
     ],
+    '/home/planejamento-estrategico': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Planejamento Estratégico' }
+    ],
+    '/home/planejamento-estrategico/novo': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+      { label: 'Novo Planejamento' }
+    ],
+    '/home/planejamento-estrategico/editar': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+      { label: 'Editar Planejamento' }
+    ],
+    '/home/planejamento-estrategico/visualizar': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+      { label: 'Visualizar Planejamento' }
+    ],
     '/home/ajuda': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Ajuda' }
@@ -280,6 +299,7 @@ export class BreadcrumbService {
       'servicos': 'Serviço',
       'propostas': 'Proposta',
       'usuarios': 'Usuário',
+      'planejamento-estrategico': 'Planejamento',
       // Manter mapeamento antigo para compatibilidade
       'contracts': 'Contrato',
       'clients': 'Cliente',
@@ -308,6 +328,7 @@ export class BreadcrumbService {
       'recrutamento-selecao': 'R&S',
       'analytics-rs': 'Analytics R&S',
       'relatorios-rs': 'Relatórios R&S',
+      'planejamento-estrategico': 'Planejamento Estratégico',
       // Manter mapeamento antigo para compatibilidade
       'contracts': 'Contratos',
       'clients': 'Clientes',

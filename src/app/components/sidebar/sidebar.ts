@@ -45,6 +45,7 @@ export class SidebarComponent {
         { id: 'propostas', icon: 'fas fa-file-alt', text: 'Propostas', route: '/home/propostas', adminOnly: true, excludeConsultorRS: true },
         { id: 'contratos', icon: 'fas fa-file-contract', text: 'Contratos', route: '/home/contratos', adminOnly: true, excludeConsultorRS: true },
         { id: 'mentorias', icon: 'fas fa-chalkboard-teacher', text: 'Mentorias', route: '/home/mentorias', adminOnly: true, excludeConsultorRS: true },
+        { id: 'planejamento-estrategico', icon: 'fas fa-chess', text: 'Planejamento Estratégico', route: '/home/planejamento-estrategico', adminOnly: true, excludeConsultorRS: true },
         {
           id: 'recrutamento-selecao',
           icon: 'fas fa-user-tie',

@@ -1,0 +1,245 @@
+<div class="public-planejamento-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando planejamento estratégico...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <div class="error-icon">⚠️</div>
+    <h2>Erro ao carregar planejamento</h2>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !error && planejamento" class="content-container">
+
+    <!-- Header -->
+    <header class="planejamento-header">
+      <div class="logo-section">
+        <img src="/assets/logo-naue.png" alt="NAUE Consultoria" class="logo" />
+      </div>
+
+      <div class="title-section">
+        <h1>{{ planejamento.titulo }}</h1>
+        <h2>Matriz de Evolução Consciente</h2>
+      </div>
+
+      <div class="info-section">
+        <div class="info-item">
+          <strong>Cliente:</strong> {{ getClientName() }}
+        </div>
+        <div class="info-item" *ngIf="planejamento.data_inicio">
+          <strong>Período:</strong> {{ formatDate(planejamento.data_inicio) }}
+          <span *ngIf="planejamento.data_fim"> até {{ formatDate(planejamento.data_fim) }}</span>
+        </div>
+        <div class="info-item" *ngIf="planejamento.prazo_preenchimento">
+          <strong>Prazo para preenchimento:</strong>
+          <span [class.expired]="isPrazoVencido()">
+            {{ formatDateTime(planejamento.prazo_preenchimento) }}
+          </span>
+          <span *ngIf="isPrazoVencido()" class="expired-badge">Expirado</span>
+        </div>
+        <div class="info-item">
+          <strong>Progresso:</strong>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getMatrizPreenchimentoPercentage()"></div>
+          </div>
+          <span class="progress-text">{{ getMatrizPreenchimentoPercentage() }}% preenchido</span>
+        </div>
+      </div>
+
+      <div *ngIf="planejamento.descricao" class="description-section">
+        <p>{{ planejamento.descricao }}</p>
+      </div>
+    </header>
+
+    <!-- Instructions -->
+    <div class="instructions-box">
+      <h3>📋 Instruções</h3>
+      <p>
+        Cada departamento deve preencher sua matriz de evolução consciente.
+        Clique no botão "Editar Matriz" correspondente ao seu departamento para preencher as quatro colunas:
+      </p>
+      <ul>
+        <li><strong>Vulnerabilidades:</strong> Pontos fracos ou áreas que necessitam atenção</li>
+        <li><strong>Conquistas:</strong> Realizações e sucessos obtidos</li>
+        <li><strong>Lições Aprendidas:</strong> Conhecimentos adquiridos através da experiência</li>
+        <li><strong>Compromissos:</strong> Ações e metas para o futuro</li>
+      </ul>
+    </div>
+
+    <!-- Departamentos sem matriz preenchida -->
+    <div *ngIf="departamentos.length > 0 && !hasAnyMatrizPreenchida()" class="empty-state">
+      <p>Nenhum departamento preencheu a matriz ainda.</p>
+      <p>Clique em "Editar Matriz" abaixo para começar.</p>
+    </div>
+
+    <!-- Tabela de Departamentos com Cards -->
+    <div class="departamentos-grid">
+      <div *ngFor="let departamento of departamentos; let i = index" class="departamento-card">
+
+        <!-- Cabeçalho do Card -->
+        <div class="card-header">
+          <div class="departamento-info">
+            <h3>{{ departamento.nome_departamento }}</h3>
+            <div *ngIf="departamento.responsavel_nome" class="responsavel-info">
+              <span class="icon">👤</span>
+              <span>{{ departamento.responsavel_nome }}</span>
+              <span *ngIf="departamento.responsavel_email" class="email">
+                ({{ departamento.responsavel_email }})
+              </span>
+            </div>
+          </div>
+
+          <div class="card-status">
+            <span *ngIf="isMatrizPreenchida(departamento)" class="status-badge filled">
+              ✓ Preenchida
+            </span>
+            <span *ngIf="!isMatrizPreenchida(departamento)" class="status-badge pending">
+              ⏳ Pendente
+            </span>
+          </div>
+        </div>
+
+        <!-- Corpo do Card - Matriz -->
+        <div class="card-body">
+          <div class="matriz-grid">
+            <div class="matriz-column">
+              <div class="column-header vulnerabilidades">
+                <span class="icon">⚠️</span>
+                <span>Vulnerabilidades</span>
+              </div>
+              <div class="column-content">
+                <p [innerHTML]="getMatrizColuna(departamento, 'vulnerabilidades') | newlineToBr"></p>
+              </div>
+            </div>
+
+            <div class="matriz-column">
+              <div class="column-header conquistas">
+                <span class="icon">🏆</span>
+                <span>Conquistas</span>
+              </div>
+              <div class="column-content">
+                <p [innerHTML]="getMatrizColuna(departamento, 'conquistas') | newlineToBr"></p>
+              </div>
+            </div>
+
+            <div class="matriz-column">
+              <div class="column-header licoes">
+                <span class="icon">💡</span>
+                <span>Lições Aprendidas</span>
+              </div>
+              <div class="column-content">
+                <p [innerHTML]="getMatrizColuna(departamento, 'licoes_aprendidas') | newlineToBr"></p>
+              </div>
+            </div>
+
+            <div class="matriz-column">
+              <div class="column-header compromissos">
+                <span class="icon">🎯</span>
+                <span>Compromissos</span>
+              </div>
+              <div class="column-content">
+                <p [innerHTML]="getMatrizColuna(departamento, 'compromissos') | newlineToBr"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer do Card - Ações -->
+        <div class="card-footer">
+          <button
+            class="btn-edit-matriz"
+            (click)="openEditModal(departamento)"
+            [disabled]="isPrazoVencido()">
+            <span class="icon">✏️</span>
+            {{ isMatrizPreenchida(departamento) ? 'Editar Matriz' : 'Preencher Matriz' }}
+          </button>
+
+          <div *ngIf="isMatrizPreenchida(departamento)" class="last-update">
+            Última atualização: {{ formatDateTime(departamento.matriz?.atualizado_em) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="planejamento-footer">
+      <p>© {{ getCurrentYear() }} NAUE Consultoria - Todos os direitos reservados</p>
+    </footer>
+  </div>
+
+  <!-- Modal de Edição -->
+  <div *ngIf="showEditModal" class="modal-overlay" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>Editar Matriz de Evolução Consciente</h2>
+        <h3>{{ selectedDepartamento?.nome_departamento }}</h3>
+        <button class="btn-close" (click)="closeEditModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="vulnerabilidades">
+            <span class="icon">⚠️</span>
+            Vulnerabilidades
+          </label>
+          <textarea
+            id="vulnerabilidades"
+            [(ngModel)]="matrizForm.vulnerabilidades"
+            rows="5"
+            placeholder="Descreva as vulnerabilidades identificadas..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="conquistas">
+            <span class="icon">🏆</span>
+            Conquistas
+          </label>
+          <textarea
+            id="conquistas"
+            [(ngModel)]="matrizForm.conquistas"
+            rows="5"
+            placeholder="Descreva as conquistas alcançadas..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="licoes_aprendidas">
+            <span class="icon">💡</span>
+            Lições Aprendidas
+          </label>
+          <textarea
+            id="licoes_aprendidas"
+            [(ngModel)]="matrizForm.licoes_aprendidas"
+            rows="5"
+            placeholder="Descreva as lições aprendidas..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="compromissos">
+            <span class="icon">🎯</span>
+            Compromissos
+          </label>
+          <textarea
+            id="compromissos"
+            [(ngModel)]="matrizForm.compromissos"
+            rows="5"
+            placeholder="Descreva os compromissos assumidos..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeEditModal()" [disabled]="isSaving">
+          Cancelar
+        </button>
+        <button class="btn-save" (click)="saveMatriz()" [disabled]="isSaving">
+          <span *ngIf="!isSaving">Salvar Matriz</span>
+          <span *ngIf="isSaving">Salvando...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
