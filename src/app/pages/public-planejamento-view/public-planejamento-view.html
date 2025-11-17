@@ -22,9 +22,9 @@
         <!-- Logos -->
         <div class="logos-container">
           <div class="logo-naue">
-            <img src="/assets/logo-naue.png" alt="NAUE Consultoria" />
+            <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
           </div>
-          <div class="logo-divider"></div>
+          <div class="logo-divider" *ngIf="planejamento.client?.logo_path"></div>
           <div class="logo-client" *ngIf="planejamento.client?.logo_path">
             <img [src]="planejamento.client.logo_path" [alt]="getClientName()" />
           </div>
