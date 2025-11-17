@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,20 +10,18 @@ import {
   UpdateMatrizRequest
 } from '../../services/planejamento-estrategico.service';
 import { firstValueFrom } from 'rxjs';
-import { NewlineToBrPipe } from '../../pipes/newline-to-br.pipe';
 
 @Component({
   selector: 'app-public-planejamento-view',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    NewlineToBrPipe
+    FormsModule
   ],
   templateUrl: './public-planejamento-view.html',
   styleUrls: ['./public-planejamento-view.css'],
 })
-export class PublicPlanejamentoViewComponent implements OnInit {
+export class PublicPlanejamentoViewComponent implements OnInit, AfterViewChecked {
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -38,23 +36,43 @@ export class PublicPlanejamentoViewComponent implements OnInit {
   isSaving = false;
   error = '';
 
-  // Departamento selecionado para edição
+  // Departamento em salvamento (para mostrar loading)
   selectedDepartamento: Departamento | null = null;
-  showEditModal = false;
 
-  // Form data da matriz
-  matrizForm = {
-    vulnerabilidades: '',
-    conquistas: '',
-    licoes_aprendidas: '',
-    compromissos: ''
-  };
+  // Cache local dos itens de cada departamento (para edição em tempo real)
+  departamentosItensCache = new Map<number, {
+    vulnerabilidades: string[];
+    conquistas: string[];
+    licoes_aprendidas: string[];
+    compromissos: string[];
+  }>();
+
+  // Departamentos expandidos/colapsados
+  expandedDepartamentos = new Set<number>();
+
+  // Flag para controlar resize
+  private lastResizeCheck = 0;
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.token = params['token'];
       if (this.token) {
         this.loadPlanejamento();
+      }
+    });
+  }
+
+  ngAfterViewChecked(): void {
+    // Limitar checks para evitar loops
+    const now = Date.now();
+    if (now - this.lastResizeCheck < 100) return;
+    this.lastResizeCheck = now;
+
+    // Auto-resize todos os textareas visíveis após renderização
+    const textareas = document.querySelectorAll('.item-textarea') as NodeListOf<HTMLTextAreaElement>;
+    textareas.forEach(textarea => {
+      if (textarea.scrollHeight > textarea.clientHeight) {
+        this.autoResizeTextarea(textarea);
       }
     });
   }
@@ -71,6 +89,15 @@ export class PublicPlanejamentoViewComponent implements OnInit {
       if (response.success && response.data) {
         this.planejamento = response.data;
         this.departamentos = response.data.departamentos || [];
+
+        // Inicializar cache de itens para cada departamento
+        this.departamentos.forEach(dep => {
+          this.initializeDepartamentoCache(dep);
+          // Expandir primeiro departamento por padrão
+          if (this.departamentos.indexOf(dep) === 0) {
+            this.expandedDepartamentos.add(dep.id);
+          }
+        });
       }
     } catch (err: any) {
       console.error('Erro ao carregar planejamento:', err);
@@ -84,13 +111,20 @@ export class PublicPlanejamentoViewComponent implements OnInit {
   getClientName(): string {
     if (!this.planejamento?.client) return 'N/A';
 
-    const clientPF = this.planejamento.client.clients_pf?.[0];
-    const clientPJ = this.planejamento.client.clients_pj?.[0];
+    const client = this.planejamento.client;
 
-    if (clientPF) {
-      return clientPF.full_name || 'N/A';
-    } else if (clientPJ) {
-      return clientPJ.company_name || clientPJ.trade_name || 'N/A';
+    // Tenta campos diretos primeiro
+    if (client.name) return client.name;
+    if (client.full_name) return client.full_name;
+    if (client.trade_name) return client.trade_name;
+    if (client.company_name) return client.company_name;
+
+    // Tenta estruturas aninhadas (objeto direto, não array)
+    if (client.clients_pf) {
+      return client.clients_pf.full_name || 'N/A';
+    }
+    if (client.clients_pj) {
+      return client.clients_pj.trade_name || client.clients_pj.company_name || 'N/A';
     }
 
     return 'N/A';
@@ -123,59 +157,115 @@ export class PublicPlanejamentoViewComponent implements OnInit {
     return Math.round((preenchidos / this.departamentos.length) * 100);
   }
 
-  openEditModal(departamento: Departamento): void {
+  initializeDepartamentoCache(departamento: Departamento): void {
+    if (!this.departamentosItensCache.has(departamento.id)) {
+      this.departamentosItensCache.set(departamento.id, {
+        vulnerabilidades: this.stringToArray(departamento.matriz?.vulnerabilidades),
+        conquistas: this.stringToArray(departamento.matriz?.conquistas),
+        licoes_aprendidas: this.stringToArray(departamento.matriz?.licoes_aprendidas),
+        compromissos: this.stringToArray(departamento.matriz?.compromissos)
+      });
+    }
+  }
+
+  stringToArray(text: string | null | undefined): string[] {
+    if (!text || !text.trim()) return [];
+    return text.split('\n').filter(item => item.trim() !== '');
+  }
+
+  arrayToString(items: string[]): string {
+    return items.filter(item => item.trim() !== '').join('\n');
+  }
+
+  // Funções para gerenciar itens de cada departamento
+  getDepartamentoItens(departamento: Departamento, coluna: 'vulnerabilidades' | 'conquistas' | 'licoes_aprendidas' | 'compromissos'): string[] {
+    this.initializeDepartamentoCache(departamento);
+    const cache = this.departamentosItensCache.get(departamento.id);
+    return cache ? cache[coluna] : [];
+  }
+
+  addItemToDepartamento(departamento: Departamento, coluna: 'vulnerabilidades' | 'conquistas' | 'licoes_aprendidas' | 'compromissos'): void {
+    if (this.isPrazoVencido()) return;
+
+    this.initializeDepartamentoCache(departamento);
+    const cache = this.departamentosItensCache.get(departamento.id);
+    if (cache) {
+      cache[coluna].push('');
+    }
+  }
+
+  updateItemInDepartamento(departamento: Departamento, coluna: 'vulnerabilidades' | 'conquistas' | 'licoes_aprendidas' | 'compromissos', index: number, event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    const cache = this.departamentosItensCache.get(departamento.id);
+    if (cache) {
+      cache[coluna][index] = textarea.value;
+    }
+
+    // Auto-resize textarea
+    this.autoResizeTextarea(textarea);
+  }
+
+  autoResizeTextarea(textarea: HTMLTextAreaElement): void {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
+
+  removeItemFromDepartamento(departamento: Departamento, coluna: 'vulnerabilidades' | 'conquistas' | 'licoes_aprendidas' | 'compromissos', index: number): void {
+    if (this.isPrazoVencido()) return;
+
+    const cache = this.departamentosItensCache.get(departamento.id);
+    if (cache) {
+      cache[coluna].splice(index, 1);
+    }
+  }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
+
+  // Toggle de departamento
+  toggleDepartamento(depId: number): void {
+    if (this.expandedDepartamentos.has(depId)) {
+      this.expandedDepartamentos.delete(depId);
+    } else {
+      this.expandedDepartamentos.add(depId);
+    }
+  }
+
+  isDepartamentoExpanded(depId: number): boolean {
+    return this.expandedDepartamentos.has(depId);
+  }
+
+  async saveDepartamentoMatriz(departamento: Departamento): Promise<void> {
     if (this.isPrazoVencido()) {
       this.toastr.warning('O prazo para edição desta matriz expirou', 'Atenção');
       return;
     }
 
     this.selectedDepartamento = departamento;
-
-    // Preencher formulário com dados existentes ou vazios
-    this.matrizForm = {
-      vulnerabilidades: departamento.matriz?.vulnerabilidades || '',
-      conquistas: departamento.matriz?.conquistas || '',
-      licoes_aprendidas: departamento.matriz?.licoes_aprendidas || '',
-      compromissos: departamento.matriz?.compromissos || ''
-    };
-
-    this.showEditModal = true;
-  }
-
-  closeEditModal(): void {
-    this.showEditModal = false;
-    this.selectedDepartamento = null;
-    this.matrizForm = {
-      vulnerabilidades: '',
-      conquistas: '',
-      licoes_aprendidas: '',
-      compromissos: ''
-    };
-  }
-
-  async saveMatriz(): Promise<void> {
-    if (!this.selectedDepartamento) return;
-
     this.isSaving = true;
 
     try {
+      const cache = this.departamentosItensCache.get(departamento.id);
+      if (!cache) return;
+
+      // Converter arrays para strings (compatibilidade com backend)
       const updateData: UpdateMatrizRequest = {
-        vulnerabilidades: this.matrizForm.vulnerabilidades,
-        conquistas: this.matrizForm.conquistas,
-        licoes_aprendidas: this.matrizForm.licoes_aprendidas,
-        compromissos: this.matrizForm.compromissos
+        vulnerabilidades: this.arrayToString(cache.vulnerabilidades),
+        conquistas: this.arrayToString(cache.conquistas),
+        licoes_aprendidas: this.arrayToString(cache.licoes_aprendidas),
+        compromissos: this.arrayToString(cache.compromissos)
       };
 
       const response = await firstValueFrom(
         this.planejamentoService.atualizarMatrizPublico(
-          this.selectedDepartamento.id,
+          departamento.id,
           updateData
         )
       );
 
       if (response.success) {
         this.toastr.success('Matriz salva com sucesso', 'Sucesso');
-        this.closeEditModal();
         this.loadPlanejamento(); // Recarregar para mostrar dados atualizados
       }
     } catch (err: any) {
@@ -186,14 +276,8 @@ export class PublicPlanejamentoViewComponent implements OnInit {
       );
     } finally {
       this.isSaving = false;
+      this.selectedDepartamento = null;
     }
-  }
-
-  // Helpers para visualização da matriz completa
-  getMatrizColuna(departamento: Departamento, coluna: 'vulnerabilidades' | 'conquistas' | 'licoes_aprendidas' | 'compromissos'): string {
-    if (!departamento.matriz) return '-';
-    const valor = departamento.matriz[coluna];
-    return valor || '-';
   }
 
   hasAnyMatrizPreenchida(): boolean {
