@@ -27,12 +27,6 @@
         <button class="btn btn-secondary" (click)="editarPlanejamento()">
           <i class="fas fa-edit"></i> Editar
         </button>
-        <button class="btn btn-primary" (click)="visualizarPlanejamento()">
-          <i class="fas fa-eye"></i> Visualizar
-        </button>
-        <button class="btn btn-primary" (click)="copiarLinkPublico()">
-          <i class="fas fa-link"></i> Copiar Link Público
-        </button>
       </div>
     </div>
 
@@ -67,13 +61,37 @@
     </div>
   </div>
 
+  <!-- Tabs -->
+  <div class="tabs-container">
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'departamentos'"
+      (click)="activeTab = 'departamentos'">
+      <i class="fas fa-building"></i> Departamentos (Matriz Consciente)
+    </button>
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'grupos'"
+      (click)="activeTab = 'grupos'; loadGrupos()">
+      <i class="fas fa-users"></i> Grupos (Matriz SWOT)
+    </button>
+  </div>
+
   <!-- Departamentos -->
-  <div class="section">
+  <div class="section" *ngIf="activeTab === 'departamentos'">
     <div class="section-header">
       <h3>Departamentos</h3>
-      <button class="btn btn-primary" (click)="openNovoDepartamentoModal()">
-        <i class="fas fa-plus"></i> Novo Departamento
-      </button>
+      <div class="section-actions">
+        <button class="btn btn-primary btn-sm" (click)="visualizarPlanejamento()">
+          <i class="fas fa-eye"></i> Visualizar Público
+        </button>
+        <button class="btn btn-primary btn-sm" (click)="copiarLinkPublico()">
+          <i class="fas fa-link"></i> Copiar Link
+        </button>
+        <button class="btn btn-primary" (click)="openNovoDepartamentoModal()">
+          <i class="fas fa-plus"></i> Novo Departamento
+        </button>
+      </div>
     </div>
 
     <div *ngIf="departamentos.length === 0" class="empty-state">
@@ -118,6 +136,68 @@
       </div>
     </div>
   </div>
+
+  <!-- Grupos (Matriz SWOT) -->
+  <div class="section" *ngIf="activeTab === 'grupos'">
+    <div class="section-header">
+      <h3>Grupos</h3>
+      <div class="section-actions">
+        <button class="btn btn-primary btn-sm" (click)="visualizarConsolidado()" *ngIf="grupos.length > 0">
+          <i class="fas fa-th"></i> Ver Consolidado
+        </button>
+        <button class="btn btn-primary" (click)="openNovoGrupoModal()">
+          <i class="fas fa-plus"></i> Novo Grupo
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="grupos.length === 0" class="empty-state">
+      <i class="fas fa-users"></i>
+      <p>Nenhum grupo cadastrado</p>
+    </div>
+
+    <div class="departamentos-grid" *ngIf="grupos.length > 0">
+      <div *ngFor="let grupo of grupos" class="dep-card">
+        <div class="dep-header">
+          <h4>{{ grupo.nome_grupo }}</h4>
+          <div class="dep-actions">
+            <button class="btn-menu" (click)="toggleGrupoMenu(grupo.id)" title="Mais opções">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <div class="dropdown-menu" *ngIf="openGrupoMenuId === grupo.id">
+              <button class="dropdown-item" (click)="copiarLinkGrupo(grupo); closeGrupoMenu()">
+                <i class="fas fa-link"></i> Copiar Link do Grupo
+              </button>
+              <button class="dropdown-item" (click)="openEditarGrupoModal(grupo); closeGrupoMenu()">
+                <i class="fas fa-edit"></i> Editar
+              </button>
+              <button class="dropdown-item dropdown-item-danger" (click)="openDeleteGrupoModal(grupo); closeGrupoMenu()">
+                <i class="fas fa-trash"></i> Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="dep-body">
+          <div *ngIf="grupo.integrantes" class="integrantes-row">
+            <i class="fas fa-users"></i> {{ grupo.integrantes }}
+          </div>
+          <div class="matriz-status">
+            <span *ngIf="isMatrizSwotPreenchida(grupo)" class="badge-success">
+              <i class="fas fa-check-circle"></i> Matriz Preenchida
+            </span>
+            <span *ngIf="!isMatrizSwotPreenchida(grupo)" class="badge-warning">
+              <i class="fas fa-clock"></i> Aguardando Preenchimento
+            </span>
+          </div>
+          <div class="grupo-actions">
+            <button class="btn btn-sm btn-primary" (click)="copiarLinkGrupo(grupo)">
+              <i class="fas fa-link"></i> Copiar Link
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Modal Departamento -->
@@ -150,7 +230,7 @@
   </div>
 </div>
 
-<!-- Modal Delete -->
+<!-- Modal Delete Departamento -->
 <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -166,6 +246,52 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
       <button class="btn btn-danger" (click)="confirmDeleteDepartamento()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Grupo -->
+<div class="modal-overlay" *ngIf="showGrupoModal" (click)="closeGrupoModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditingGrupo ? 'Editar' : 'Novo' }} Grupo</h2>
+      <button class="modal-close" (click)="closeGrupoModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nome do Grupo *</label>
+        <input type="text" [(ngModel)]="grupoForm.nome_grupo" class="form-control" placeholder="Ex: Grupo 1">
+      </div>
+      <div class="form-group">
+        <label>Integrantes</label>
+        <textarea [(ngModel)]="grupoForm.integrantes" class="form-control" placeholder="Nome dos integrantes (separados por vírgula ou quebra de linha)" rows="4"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeGrupoModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="saveGrupo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Delete Grupo -->
+<div class="modal-overlay" *ngIf="showDeleteGrupoModal" (click)="closeDeleteGrupoModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirmar Exclusão</h2>
+      <button class="modal-close" (click)="closeDeleteGrupoModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Tem certeza que deseja excluir o grupo <strong>{{ grupoToDelete?.nome_grupo }}</strong>?</p>
+      <p class="text-warning">A matriz SWOT associada também será excluída.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteGrupoModal()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmDeleteGrupo()">Excluir</button>
     </div>
   </div>
 </div>

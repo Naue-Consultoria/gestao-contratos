@@ -1,0 +1,346 @@
+<div class="page-header">
+  <h1 class="page-title">Matrizes SWOT Consolidadas</h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<div *ngIf="error" class="error-message">
+  <i class="fas fa-exclamation-circle"></i>
+  {{ error }}
+</div>
+
+<div *ngIf="isLoading" class="loading-container">
+  <i class="fas fa-spinner fa-spin"></i>
+  Carregando...
+</div>
+
+<div *ngIf="!isLoading && planejamento" class="content">
+  <!-- Info Card -->
+  <div class="info-card">
+    <div class="card-header">
+      <div>
+        <h2>{{ planejamento.titulo }}</h2>
+        <p class="subtitle">Visualização Consolidada das Matrizes SWOT</p>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="info-row">
+        <strong>Cliente:</strong> {{ getClientName() }}
+      </div>
+      <div class="info-row">
+        <strong>Contrato:</strong> {{ planejamento.contract?.contract_number }}
+      </div>
+      <div class="info-row">
+        <strong>Total de Grupos:</strong> {{ grupos.length }}
+      </div>
+      <div class="info-row">
+        <strong>Progresso de Preenchimento:</strong>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getProgressoPreenchimento()"></div>
+        </div>
+        <span>{{ getProgressoPreenchimento() }}%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="grupos.length === 0" class="empty-state">
+    <i class="fas fa-users empty-icon"></i>
+    <h3>Nenhum grupo cadastrado</h3>
+    <p>Adicione grupos na página de visualização do planejamento para começar.</p>
+  </div>
+
+  <!-- Matriz SWOT Final -->
+  <div *ngIf="grupos.length > 0" class="matriz-final-section">
+    <div class="section-header-final">
+      <h2><i class="fas fa-star"></i> Matriz SWOT Final (Consolidada)</h2>
+      <button class="btn btn-primary" (click)="toggleEditarFinal()" *ngIf="!editandoFinal">
+        <i class="fas fa-edit"></i> {{ matrizFinal ? 'Editar Final' : 'Criar Final' }}
+      </button>
+      <div *ngIf="editandoFinal" class="btn-group">
+        <button class="btn btn-secondary" (click)="cancelarEdicaoFinal()">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button class="btn btn-primary" (click)="salvarMatrizFinal()">
+          <i class="fas fa-save"></i> Salvar Final
+        </button>
+      </div>
+    </div>
+
+    <!-- Modo Visualização -->
+    <div *ngIf="!editandoFinal && matrizFinal" class="swot-grid-final">
+      <div class="swot-quadrante forcas">
+        <div class="quadrante-header">
+          <span class="label-vertical">INTERNO</span>
+          <span class="label-horizontal">FORÇAS</span>
+        </div>
+        <div class="quadrante-content">
+          <ul *ngIf="getMatrizFinalItens('forcas').length > 0" class="item-list">
+            <li *ngFor="let item of getMatrizFinalItens('forcas')">{{ item }}</li>
+          </ul>
+          <p *ngIf="getMatrizFinalItens('forcas').length === 0" class="empty-text">-</p>
+        </div>
+      </div>
+
+      <div class="swot-quadrante fraquezas">
+        <div class="quadrante-header">
+          <span class="label-vertical">INTERNO</span>
+          <span class="label-horizontal">FRAQUEZAS</span>
+        </div>
+        <div class="quadrante-content">
+          <ul *ngIf="getMatrizFinalItens('fraquezas').length > 0" class="item-list">
+            <li *ngFor="let item of getMatrizFinalItens('fraquezas')">{{ item }}</li>
+          </ul>
+          <p *ngIf="getMatrizFinalItens('fraquezas').length === 0" class="empty-text">-</p>
+        </div>
+      </div>
+
+      <div class="swot-quadrante oportunidades">
+        <div class="quadrante-header">
+          <span class="label-vertical">EXTERNO</span>
+          <span class="label-horizontal">OPORTUNIDADES</span>
+        </div>
+        <div class="quadrante-content">
+          <ul *ngIf="getMatrizFinalItens('oportunidades').length > 0" class="item-list">
+            <li *ngFor="let item of getMatrizFinalItens('oportunidades')">{{ item }}</li>
+          </ul>
+          <p *ngIf="getMatrizFinalItens('oportunidades').length === 0" class="empty-text">-</p>
+        </div>
+      </div>
+
+      <div class="swot-quadrante ameacas">
+        <div class="quadrante-header">
+          <span class="label-vertical">EXTERNO</span>
+          <span class="label-horizontal">AMEAÇAS</span>
+        </div>
+        <div class="quadrante-content">
+          <ul *ngIf="getMatrizFinalItens('ameacas').length > 0" class="item-list">
+            <li *ngFor="let item of getMatrizFinalItens('ameacas')">{{ item }}</li>
+          </ul>
+          <p *ngIf="getMatrizFinalItens('ameacas').length === 0" class="empty-text">-</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modo Edição -->
+    <div *ngIf="editandoFinal" class="matriz-wrapper">
+      <!-- Label INTERNO (rotacionado) -->
+      <div class="label-side label-interno">INTERNO</div>
+
+      <!-- Primeira Linha: Forças e Fraquezas -->
+      <div class="matriz-row">
+        <!-- Forças -->
+        <div class="matriz-quadrante forcas">
+          <div class="quadrante-header-edit">
+            <span class="label-horizontal">FORÇAS</span>
+            <button type="button" class="btn-add-item" (click)="addItemFinal('forcas')" [disabled]="getItensFinal('forcas').length >= 5">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          <div class="quadrante-items">
+            <div *ngIf="getItensFinal('forcas').length === 0" class="empty-quadrante">
+              Clique no + para adicionar itens (máx. 5)
+            </div>
+            <div *ngFor="let item of getItensFinal('forcas'); let i = index; trackBy: trackByIndex" class="item-edit">
+              <textarea
+                [value]="item"
+                (input)="updateItemFinal('forcas', i, $event)"
+                placeholder="Digite o item..."
+                class="item-textarea"
+                rows="1"></textarea>
+              <button type="button" class="btn-remove-item" (click)="removeItemFinal('forcas', i)">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fraquezas -->
+        <div class="matriz-quadrante fraquezas">
+          <div class="quadrante-header-edit">
+            <span class="label-horizontal">FRAQUEZAS</span>
+            <button type="button" class="btn-add-item" (click)="addItemFinal('fraquezas')" [disabled]="getItensFinal('fraquezas').length >= 5">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          <div class="quadrante-items">
+            <div *ngIf="getItensFinal('fraquezas').length === 0" class="empty-quadrante">
+              Clique no + para adicionar itens (máx. 5)
+            </div>
+            <div *ngFor="let item of getItensFinal('fraquezas'); let i = index; trackBy: trackByIndex" class="item-edit">
+              <textarea
+                [value]="item"
+                (input)="updateItemFinal('fraquezas', i, $event)"
+                placeholder="Digite o item..."
+                class="item-textarea"
+                rows="1"></textarea>
+              <button type="button" class="btn-remove-item" (click)="removeItemFinal('fraquezas', i)">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Label EXTERNO (rotacionado) -->
+      <div class="label-side label-externo">EXTERNO</div>
+
+      <!-- Segunda Linha: Oportunidades e Ameaças -->
+      <div class="matriz-row">
+        <!-- Oportunidades -->
+        <div class="matriz-quadrante oportunidades">
+          <div class="quadrante-header-edit">
+            <span class="label-horizontal">OPORTUNIDADES</span>
+            <button type="button" class="btn-add-item" (click)="addItemFinal('oportunidades')" [disabled]="getItensFinal('oportunidades').length >= 5">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          <div class="quadrante-items">
+            <div *ngIf="getItensFinal('oportunidades').length === 0" class="empty-quadrante">
+              Clique no + para adicionar itens (máx. 5)
+            </div>
+            <div *ngFor="let item of getItensFinal('oportunidades'); let i = index; trackBy: trackByIndex" class="item-edit">
+              <textarea
+                [value]="item"
+                (input)="updateItemFinal('oportunidades', i, $event)"
+                placeholder="Digite o item..."
+                class="item-textarea"
+                rows="1"></textarea>
+              <button type="button" class="btn-remove-item" (click)="removeItemFinal('oportunidades', i)">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ameaças -->
+        <div class="matriz-quadrante ameacas">
+          <div class="quadrante-header-edit">
+            <span class="label-horizontal">AMEAÇAS</span>
+            <button type="button" class="btn-add-item" (click)="addItemFinal('ameacas')" [disabled]="getItensFinal('ameacas').length >= 5">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          <div class="quadrante-items">
+            <div *ngIf="getItensFinal('ameacas').length === 0" class="empty-quadrante">
+              Clique no + para adicionar itens (máx. 5)
+            </div>
+            <div *ngFor="let item of getItensFinal('ameacas'); let i = index; trackBy: trackByIndex" class="item-edit">
+              <textarea
+                [value]="item"
+                (input)="updateItemFinal('ameacas', i, $event)"
+                placeholder="Digite o item..."
+                class="item-textarea"
+                rows="1"></textarea>
+              <button type="button" class="btn-remove-item" (click)="removeItemFinal('ameacas', i)">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state para matriz final -->
+    <div *ngIf="!editandoFinal && !matrizFinal" class="empty-final">
+      <p>Ainda não foi criada uma matriz SWOT final consolidada.</p>
+      <p>Clique em "Criar Final" para consolidar as matrizes de todos os grupos.</p>
+    </div>
+  </div>
+
+  <!-- Matrizes SWOT -->
+  <div *ngIf="grupos.length > 0" class="matrizes-container">
+    <div *ngFor="let grupo of grupos" class="matriz-card">
+      <!-- Header do Card -->
+      <div class="matriz-header" (click)="toggleGrupo(grupo.id)">
+        <div class="grupo-info">
+          <button class="btn-toggle" type="button">
+            <i class="fas" [class.fa-chevron-down]="!isGrupoExpanded(grupo.id)" [class.fa-chevron-up]="isGrupoExpanded(grupo.id)"></i>
+          </button>
+          <div>
+            <h3>{{ grupo.nome_grupo }}</h3>
+            <div *ngIf="grupo.integrantes" class="integrantes">
+              <i class="fas fa-users"></i> {{ grupo.integrantes }}
+            </div>
+          </div>
+        </div>
+        <div class="status-info">
+          <span *ngIf="isMatrizPreenchida(grupo)" class="badge-success">
+            <i class="fas fa-check"></i> Preenchida
+          </span>
+          <span *ngIf="!isMatrizPreenchida(grupo)" class="badge-warning">
+            <i class="fas fa-clock"></i> Pendente
+          </span>
+        </div>
+      </div>
+
+      <!-- Corpo do Card - Matriz SWOT -->
+      <div class="matriz-body" *ngIf="isGrupoExpanded(grupo.id)">
+        <div class="swot-grid">
+          <!-- Forças -->
+          <div class="swot-quadrante forcas">
+            <div class="quadrante-header">
+              <span class="label-vertical">INTERNO</span>
+              <span class="label-horizontal">FORÇAS</span>
+            </div>
+            <div class="quadrante-content">
+              <ul *ngIf="getMatrizItens(grupo, 'forcas').length > 0" class="item-list">
+                <li *ngFor="let item of getMatrizItens(grupo, 'forcas')">{{ item }}</li>
+              </ul>
+              <p *ngIf="getMatrizItens(grupo, 'forcas').length === 0" class="empty-text">-</p>
+            </div>
+          </div>
+
+          <!-- Fraquezas -->
+          <div class="swot-quadrante fraquezas">
+            <div class="quadrante-header">
+              <span class="label-vertical">INTERNO</span>
+              <span class="label-horizontal">FRAQUEZAS</span>
+            </div>
+            <div class="quadrante-content">
+              <ul *ngIf="getMatrizItens(grupo, 'fraquezas').length > 0" class="item-list">
+                <li *ngFor="let item of getMatrizItens(grupo, 'fraquezas')">{{ item }}</li>
+              </ul>
+              <p *ngIf="getMatrizItens(grupo, 'fraquezas').length === 0" class="empty-text">-</p>
+            </div>
+          </div>
+
+          <!-- Oportunidades -->
+          <div class="swot-quadrante oportunidades">
+            <div class="quadrante-header">
+              <span class="label-vertical">EXTERNO</span>
+              <span class="label-horizontal">OPORTUNIDADES</span>
+            </div>
+            <div class="quadrante-content">
+              <ul *ngIf="getMatrizItens(grupo, 'oportunidades').length > 0" class="item-list">
+                <li *ngFor="let item of getMatrizItens(grupo, 'oportunidades')">{{ item }}</li>
+              </ul>
+              <p *ngIf="getMatrizItens(grupo, 'oportunidades').length === 0" class="empty-text">-</p>
+            </div>
+          </div>
+
+          <!-- Ameaças -->
+          <div class="swot-quadrante ameacas">
+            <div class="quadrante-header">
+              <span class="label-vertical">EXTERNO</span>
+              <span class="label-horizontal">AMEAÇAS</span>
+            </div>
+            <div class="quadrante-content">
+              <ul *ngIf="getMatrizItens(grupo, 'ameacas').length > 0" class="item-list">
+                <li *ngFor="let item of getMatrizItens(grupo, 'ameacas')">{{ item }}</li>
+              </ul>
+              <p *ngIf="getMatrizItens(grupo, 'ameacas').length === 0" class="empty-text">-</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer com ações -->
+        <div class="matriz-footer">
+          <button class="btn btn-sm btn-primary" (click)="exportarPDF(grupo.id)" [disabled]="!isMatrizPreenchida(grupo)">
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

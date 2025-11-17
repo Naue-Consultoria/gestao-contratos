@@ -47,6 +47,8 @@ import { PlanejamentoEstrategicoPageComponent } from './components/planejamento-
 import { PlanejamentoFormComponent } from './components/planejamento-form/planejamento-form';
 import { PlanejamentoViewComponent } from './components/planejamento-view/planejamento-view';
 import { PublicPlanejamentoViewComponent } from './pages/public-planejamento-view/public-planejamento-view';
+import { PublicMatrizSwotComponent } from './pages/public-matriz-swot/public-matriz-swot';
+import { MatrizSwotConsolidadoComponent } from './components/matriz-swot-consolidado/matriz-swot-consolidado';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -100,11 +102,18 @@ export const routes: Routes = [
     title: 'Encontro de Mentoria - NAUE Consultoria',
   },
 
-  // Rota pública para visualização de planejamento estratégico
+  // Rota pública para visualização de planejamento estratégico (Matriz Consciente)
   {
     path: 'planejamento-estrategico/:token',
     component: PublicPlanejamentoViewComponent,
-    title: 'Planejamento Estratégico - NAUE Consultoria',
+    title: 'Matriz de Evolução Consciente - NAUE Consultoria',
+  },
+
+  // Rota pública para visualização de Matriz SWOT
+  {
+    path: 'matriz-swot/:token',
+    component: PublicMatrizSwotComponent,
+    title: 'Matriz SWOT - NAUE Consultoria',
   },
 
   // Rota pública para visualização do hub de mentoria
@@ -330,6 +339,12 @@ export const routes: Routes = [
         component: PlanejamentoViewComponent,
         canActivate: [AdminGerencialGuard],
         title: 'Visualizar Planejamento Estratégico - NAUE Consultoria',
+      },
+      {
+        path: 'planejamento-estrategico/swot-consolidado/:id',
+        component: MatrizSwotConsolidadoComponent,
+        canActivate: [AdminGerencialGuard],
+        title: 'Matrizes SWOT Consolidadas - NAUE Consultoria',
       },
 
       // Recrutamento & Seleção - Admin, Admin Gerencial e Consultor R&S

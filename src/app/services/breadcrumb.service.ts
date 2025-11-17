@@ -147,6 +147,11 @@ export class BreadcrumbService {
       { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
       { label: 'Visualizar Planejamento' }
     ],
+    '/home/planejamento-estrategico/swot-consolidado': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+      { label: 'SWOT Consolidado' }
+    ],
     '/home/ajuda': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Ajuda' }
@@ -251,7 +256,18 @@ export class BreadcrumbService {
           return;
         }
       }
-      
+
+      // Para URLs como /home/planejamento-estrategico/swot-consolidado/123
+      if (urlParts.length === 5 && urlParts[2] === 'planejamento-estrategico' && urlParts[3] === 'swot-consolidado') {
+        const breadcrumbs = [
+          { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+          { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+          { label: 'SWOT Consolidado' }
+        ];
+        this.setBreadcrumbs(breadcrumbs);
+        return;
+      }
+
       // Para URLs como /home/rotinas/123 (detalhes da rotina - redirecionamento antigo)
       if (urlParts.length === 4 && urlParts[2] === 'rotinas' && !isNaN(Number(urlParts[3]))) {
         const breadcrumbs: any[] = [

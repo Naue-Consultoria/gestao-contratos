@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
-import { PlanejamentoEstrategicoService, PlanejamentoEstrategico, Departamento, CreateDepartamentoRequest, UpdateDepartamentoRequest } from '../../services/planejamento-estrategico.service';
+import { PlanejamentoEstrategicoService, PlanejamentoEstrategico, Departamento, Grupo, CreateDepartamentoRequest, UpdateDepartamentoRequest, CreateGrupoRequest, UpdateGrupoRequest } from '../../services/planejamento-estrategico.service';
 import { AuthService } from '../../services/auth';
 import { firstValueFrom } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -30,9 +30,13 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   planejamentoId: number | null = null;
   planejamento: PlanejamentoEstrategico | null = null;
   departamentos: Departamento[] = [];
+  grupos: Grupo[] = [];
 
   isLoading = true;
   error = '';
+
+  // Tabs
+  activeTab: 'departamentos' | 'grupos' = 'departamentos';
 
   // Modal de departamento
   showDepartamentoModal = false;
@@ -44,12 +48,28 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     responsavel_email: ''
   };
 
-  // Modal de exclusão
+  // Modal de exclusão departamento
   showDeleteModal = false;
   departamentoToDelete: Departamento | null = null;
 
-  // Menu dropdown
+  // Menu dropdown departamento
   openMenuId: number | null = null;
+
+  // Modal de grupo
+  showGrupoModal = false;
+  isEditingGrupo = false;
+  grupoForm = {
+    id: 0,
+    nome_grupo: '',
+    integrantes: ''
+  };
+
+  // Modal de exclusão grupo
+  showDeleteGrupoModal = false;
+  grupoToDelete: Grupo | null = null;
+
+  // Menu dropdown grupo
+  openGrupoMenuId: number | null = null;
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -69,6 +89,9 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLElement;
     if (!target.closest('.dep-actions')) {
       this.closeMenu();
+    }
+    if (!target.closest('.dep-actions')) {
+      this.closeGrupoMenu();
     }
   }
 
@@ -189,13 +212,30 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  async loadGrupos(): Promise<void> {
+    if (!this.planejamentoId) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.listarGrupos(this.planejamentoId)
+      );
+
+      if (response.success) {
+        this.grupos = response.data;
+      }
+    } catch (err: any) {
+      console.error('Erro ao carregar grupos:', err);
+      this.toastr.error('Erro ao carregar grupos', 'Erro');
+    }
+  }
+
   copiarLinkPublico(): void {
     if (!this.planejamento) return;
 
     const url = this.planejamentoService.gerarUrlPublica(this.planejamento.unique_token);
 
     navigator.clipboard.writeText(url).then(() => {
-      this.toastr.success('Link copiado para a área de transferência', 'Sucesso');
+      this.toastr.success('Link da Matriz Consciente copiado', 'Sucesso');
     }).catch(err => {
       console.error('Erro ao copiar link:', err);
       this.toastr.error('Erro ao copiar link', 'Erro');
@@ -204,6 +244,12 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
 
   voltarParaLista(): void {
     this.router.navigate(['/home/planejamento-estrategico']);
+  }
+
+  visualizarConsolidado(): void {
+    if (this.planejamentoId) {
+      this.router.navigate(['/home/planejamento-estrategico/swot-consolidado', this.planejamentoId]);
+    }
   }
 
   // Menu dropdown actions
@@ -324,5 +370,135 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
       console.error('Erro ao deletar departamento:', err);
       this.toastr.error('Erro ao deletar departamento', 'Erro');
     }
+  }
+
+  // ===== GESTÃO DE GRUPOS (MATRIZ SWOT) =====
+
+  toggleGrupoMenu(grupoId: number): void {
+    this.openGrupoMenuId = this.openGrupoMenuId === grupoId ? null : grupoId;
+  }
+
+  closeGrupoMenu(): void {
+    this.openGrupoMenuId = null;
+  }
+
+  openNovoGrupoModal(): void {
+    this.isEditingGrupo = false;
+    this.grupoForm = {
+      id: 0,
+      nome_grupo: '',
+      integrantes: ''
+    };
+    this.showGrupoModal = true;
+  }
+
+  openEditarGrupoModal(grupo: Grupo): void {
+    this.isEditingGrupo = true;
+    this.grupoForm = {
+      id: grupo.id,
+      nome_grupo: grupo.nome_grupo,
+      integrantes: grupo.integrantes || ''
+    };
+    this.showGrupoModal = true;
+  }
+
+  closeGrupoModal(): void {
+    this.showGrupoModal = false;
+    this.grupoForm = {
+      id: 0,
+      nome_grupo: '',
+      integrantes: ''
+    };
+  }
+
+  async saveGrupo(): Promise<void> {
+    if (!this.grupoForm.nome_grupo.trim()) {
+      this.toastr.warning('Por favor, informe o nome do grupo', 'Atenção');
+      return;
+    }
+
+    if (!this.planejamentoId) return;
+
+    try {
+      if (this.isEditingGrupo && this.grupoForm.id) {
+        // Atualizar grupo
+        const updateData: UpdateGrupoRequest = {
+          nome_grupo: this.grupoForm.nome_grupo,
+          integrantes: this.grupoForm.integrantes || undefined
+        };
+
+        const response = await firstValueFrom(
+          this.planejamentoService.atualizarGrupo(this.grupoForm.id, updateData)
+        );
+
+        if (response.success) {
+          this.toastr.success('Grupo atualizado com sucesso', 'Sucesso');
+        }
+      } else {
+        // Criar novo grupo
+        const createData: CreateGrupoRequest = {
+          nome_grupo: this.grupoForm.nome_grupo,
+          integrantes: this.grupoForm.integrantes || undefined
+        };
+
+        const response = await firstValueFrom(
+          this.planejamentoService.adicionarGrupo(this.planejamentoId, createData)
+        );
+
+        if (response.success) {
+          this.toastr.success('Grupo adicionado com sucesso', 'Sucesso');
+        }
+      }
+
+      this.closeGrupoModal();
+      this.loadGrupos();
+    } catch (err: any) {
+      console.error('Erro ao salvar grupo:', err);
+      this.toastr.error(err.error?.message || 'Erro ao salvar grupo', 'Erro');
+    }
+  }
+
+  openDeleteGrupoModal(grupo: Grupo): void {
+    this.grupoToDelete = grupo;
+    this.showDeleteGrupoModal = true;
+  }
+
+  closeDeleteGrupoModal(): void {
+    this.showDeleteGrupoModal = false;
+    this.grupoToDelete = null;
+  }
+
+  async confirmDeleteGrupo(): Promise<void> {
+    if (!this.grupoToDelete) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.deletarGrupo(this.grupoToDelete.id)
+      );
+
+      if (response.success) {
+        this.toastr.success('Grupo excluído com sucesso', 'Sucesso');
+        this.closeDeleteGrupoModal();
+        this.loadGrupos();
+      }
+    } catch (err: any) {
+      console.error('Erro ao deletar grupo:', err);
+      this.toastr.error('Erro ao deletar grupo', 'Erro');
+    }
+  }
+
+  isMatrizSwotPreenchida(grupo: Grupo): boolean {
+    return !!grupo.matriz_swot?.preenchido_em;
+  }
+
+  copiarLinkGrupo(grupo: Grupo): void {
+    const url = this.planejamentoService.gerarUrlPublicaSwot(grupo.unique_token);
+
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastr.success('Link do grupo copiado', 'Sucesso');
+    }).catch(err => {
+      console.error('Erro ao copiar link:', err);
+      this.toastr.error('Erro ao copiar link', 'Erro');
+    });
   }
 }

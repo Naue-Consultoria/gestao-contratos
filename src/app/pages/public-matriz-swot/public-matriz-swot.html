@@ -1,0 +1,264 @@
+<div class="public-matriz-swot-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando planejamento estratégico...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <div class="error-icon">⚠️</div>
+    <h2>Erro ao carregar planejamento</h2>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !error && planejamento" class="content-container">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-background"></div>
+      <div class="hero-content">
+        <!-- Logos -->
+        <div class="logos-container">
+          <div class="logo-naue">
+            <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
+          </div>
+          <div class="logo-divider" *ngIf="planejamento.client?.logo_path"></div>
+          <div class="logo-client" *ngIf="planejamento.client?.logo_path">
+            <img [src]="planejamento.client.logo_path" [alt]="getClientName()" />
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="hero-title">
+          <h1>{{ planejamento.titulo }}</h1>
+          <h2>Matriz SWOT</h2>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="hero-info-cards">
+          <div class="info-card" *ngIf="planejamento.data_inicio">
+            <div class="info-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Período</span>
+              <span class="info-value">
+                {{ formatDate(planejamento.data_inicio) }}
+                <span *ngIf="planejamento.data_fim"> - {{ formatDate(planejamento.data_fim) }}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="info-card" *ngIf="planejamento.prazo_preenchimento">
+            <div class="info-icon" [class.expired]="isPrazoVencido()">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Prazo de Preenchimento</span>
+              <span class="info-value" [class.expired]="isPrazoVencido()">
+                {{ formatDate(planejamento.prazo_preenchimento) }}
+                <span *ngIf="isPrazoVencido()" class="expired-badge">Vencido</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-chart-pie"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Progresso</span>
+              <div class="progress-container">
+                <div class="progress-bar-hero">
+                  <div class="progress-fill-hero" [style.width.%]="getMatrizSwotPreenchimentoPercentage()"></div>
+                </div>
+                <span class="progress-text-hero">{{ getMatrizSwotPreenchimentoPercentage() }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div *ngIf="planejamento.descricao" class="hero-description">
+          <p>{{ planejamento.descricao }}</p>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator">
+          <i class="fas fa-chevron-down"></i>
+          <span>Role para preencher</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Informações do Grupo -->
+    <div class="grupo-info-section" *ngIf="grupo">
+      <div class="grupo-header-public">
+        <h2>{{ grupo.nome_grupo }}</h2>
+        <div *ngIf="grupo.integrantes" class="integrantes-list">
+          <i class="fas fa-users"></i> {{ grupo.integrantes }}
+        </div>
+        <div class="status-badge-large" [class.filled]="isMatrizSwotPreenchida()" [class.pending]="!isMatrizSwotPreenchida()">
+          <i class="fas" [class.fa-check]="isMatrizSwotPreenchida()" [class.fa-clock]="!isMatrizSwotPreenchida()"></i>
+          {{ isMatrizSwotPreenchida() ? 'Matriz Preenchida' : 'Matriz Pendente' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Matriz SWOT -->
+    <div class="matriz-swot-container" *ngIf="grupo">
+      <div class="grupo-card">
+        <!-- Corpo do Card - Matriz SWOT (Sempre editável) -->
+        <div class="card-body-edit">
+          <div class="matriz-wrapper">
+            <!-- Label INTERNO (rotacionado) -->
+            <div class="label-side label-interno">INTERNO</div>
+
+            <!-- Primeira Linha: Forças e Fraquezas -->
+            <div class="matriz-row">
+              <!-- Forças -->
+              <div class="matriz-quadrante forcas">
+                <div class="quadrante-header-edit">
+                  <span class="label-horizontal">FORÇAS</span>
+                  <button type="button" class="btn-add-item" (click)="addItem('forcas')" [disabled]="isPrazoVencido()">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              <div class="quadrante-items">
+                <div *ngIf="getItens('forcas').length === 0" class="empty-quadrante">
+                  Clique no + para adicionar itens
+                </div>
+                <div *ngFor="let item of getItens('forcas'); let i = index; trackBy: trackByIndex" class="item-edit">
+                  <textarea
+                    [value]="item"
+                    (input)="updateItem('forcas', i, $event)"
+                    placeholder="Digite o item..."
+                    class="item-textarea"
+                    [disabled]="isPrazoVencido()"
+                    rows="1"></textarea>
+                  <button type="button" class="btn-remove-item" (click)="removeItem('forcas', i)" [disabled]="isPrazoVencido()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              </div>
+
+              <!-- Fraquezas -->
+              <div class="matriz-quadrante fraquezas">
+                <div class="quadrante-header-edit">
+                  <span class="label-horizontal">FRAQUEZAS</span>
+                  <button type="button" class="btn-add-item" (click)="addItem('fraquezas')" [disabled]="isPrazoVencido()">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              <div class="quadrante-items">
+                <div *ngIf="getItens('fraquezas').length === 0" class="empty-quadrante">
+                  Clique no + para adicionar itens
+                </div>
+                <div *ngFor="let item of getItens('fraquezas'); let i = index; trackBy: trackByIndex" class="item-edit">
+                  <textarea
+                    [value]="item"
+                    (input)="updateItem('fraquezas', i, $event)"
+                    placeholder="Digite o item..."
+                    class="item-textarea"
+                    [disabled]="isPrazoVencido()"
+                    rows="1"></textarea>
+                  <button type="button" class="btn-remove-item" (click)="removeItem('fraquezas', i)" [disabled]="isPrazoVencido()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              </div>
+            </div>
+
+            <!-- Label EXTERNO (rotacionado) -->
+            <div class="label-side label-externo">EXTERNO</div>
+
+            <!-- Segunda Linha: Oportunidades e Ameaças -->
+            <div class="matriz-row">
+              <!-- Oportunidades -->
+              <div class="matriz-quadrante oportunidades">
+                <div class="quadrante-header-edit">
+                  <span class="label-horizontal">OPORTUNIDADES</span>
+                  <button type="button" class="btn-add-item" (click)="addItem('oportunidades')" [disabled]="isPrazoVencido()">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              <div class="quadrante-items">
+                <div *ngIf="getItens('oportunidades').length === 0" class="empty-quadrante">
+                  Clique no + para adicionar itens
+                </div>
+                <div *ngFor="let item of getItens('oportunidades'); let i = index; trackBy: trackByIndex" class="item-edit">
+                  <textarea
+                    [value]="item"
+                    (input)="updateItem('oportunidades', i, $event)"
+                    placeholder="Digite o item..."
+                    class="item-textarea"
+                    [disabled]="isPrazoVencido()"
+                    rows="1"></textarea>
+                  <button type="button" class="btn-remove-item" (click)="removeItem('oportunidades', i)" [disabled]="isPrazoVencido()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              </div>
+
+              <!-- Ameaças -->
+              <div class="matriz-quadrante ameacas">
+                <div class="quadrante-header-edit">
+                  <span class="label-horizontal">AMEAÇAS</span>
+                  <button type="button" class="btn-add-item" (click)="addItem('ameacas')" [disabled]="isPrazoVencido()">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              <div class="quadrante-items">
+                <div *ngIf="getItens('ameacas').length === 0" class="empty-quadrante">
+                  Clique no + para adicionar itens
+                </div>
+                <div *ngFor="let item of getItens('ameacas'); let i = index; trackBy: trackByIndex" class="item-edit">
+                  <textarea
+                    [value]="item"
+                    (input)="updateItem('ameacas', i, $event)"
+                    placeholder="Digite o item..."
+                    class="item-textarea"
+                    [disabled]="isPrazoVencido()"
+                    rows="1"></textarea>
+                  <button type="button" class="btn-remove-item" (click)="removeItem('ameacas', i)" [disabled]="isPrazoVencido()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer do Card - Ações -->
+        <div class="card-footer">
+          <div class="footer-edit">
+            <div class="footer-left">
+              <div *ngIf="isMatrizSwotPreenchida()" class="last-update">
+                Última atualização: {{ formatDateTime(grupo?.matriz_swot?.atualizado_em) }}
+              </div>
+            </div>
+            <div class="footer-actions">
+              <button class="btn-export-pdf" (click)="exportarPDF()" [disabled]="!isMatrizSwotPreenchida()">
+                <i class="fas fa-file-pdf"></i> Exportar PDF
+              </button>
+              <button class="btn-save-edit" (click)="salvarMatrizSwot()" [disabled]="isSaving || isPrazoVencido()">
+                <i class="fas fa-save"></i> {{ isSaving ? 'Salvando...' : 'Salvar Matriz' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="planejamento-footer">
+      <p>© {{ getCurrentYear() }} NAUE Consultoria - Todos os direitos reservados</p>
+    </footer>
+  </div>
+</div>

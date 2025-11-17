@@ -37,6 +37,45 @@ export interface Departamento {
   matriz?: MatrizEvolucao | null;
 }
 
+export interface Grupo {
+  id: number;
+  planejamento_id: number;
+  nome_grupo: string;
+  integrantes?: string | null;
+  unique_token: string;
+  created_at: string;
+  updated_at: string;
+  matriz_swot?: MatrizSwot | null;
+  planejamento?: any; // Para quando vem do endpoint público
+}
+
+export interface MatrizSwot {
+  id: number;
+  grupo_id: number;
+  forcas?: string | null;
+  fraquezas?: string | null;
+  oportunidades?: string | null;
+  ameacas?: string | null;
+  preenchido_em?: string | null;
+  atualizado_em?: string | null;
+}
+
+export interface MatrizSwotFinal {
+  id: number;
+  planejamento_id: number;
+  forcas?: string | null;
+  fraquezas?: string | null;
+  oportunidades?: string | null;
+  ameacas?: string | null;
+  observacoes?: string | null;
+  created_at: string;
+  updated_at: string;
+  created_by?: number | null;
+  updated_by?: number | null;
+  criador?: any;
+  atualizador?: any;
+}
+
 export interface MatrizEvolucao {
   id: number;
   departamento_id: number;
@@ -78,6 +117,31 @@ export interface UpdateDepartamentoRequest {
   nome_departamento?: string;
   responsavel_nome?: string;
   responsavel_email?: string;
+}
+
+export interface CreateGrupoRequest {
+  nome_grupo: string;
+  integrantes?: string;
+}
+
+export interface UpdateGrupoRequest {
+  nome_grupo?: string;
+  integrantes?: string;
+}
+
+export interface UpdateMatrizSwotRequest {
+  forcas?: string;
+  fraquezas?: string;
+  oportunidades?: string;
+  ameacas?: string;
+}
+
+export interface UpdateMatrizSwotFinalRequest {
+  forcas?: string;
+  fraquezas?: string;
+  oportunidades?: string;
+  ameacas?: string;
+  observacoes?: string;
 }
 
 export interface UpdateMatrizRequest {
@@ -339,11 +403,28 @@ export class PlanejamentoEstrategicoService {
   }
 
   /**
-   * Gerar URL pública para preenchimento da matriz
+   * Gerar URL pública para preenchimento da Matriz Consciente
    */
   gerarUrlPublica(token: string): string {
     const baseUrl = window.location.origin;
     return `${baseUrl}/planejamento-estrategico/${token}`;
+  }
+
+  /**
+   * Gerar URL pública para preenchimento da Matriz SWOT (por grupo)
+   */
+  gerarUrlPublicaSwot(grupoToken: string): string {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/matriz-swot/${grupoToken}`;
+  }
+
+  /**
+   * Obter grupo via token público
+   */
+  obterGrupoPublico(token: string): Observable<{ success: boolean; data: Grupo }> {
+    return this.http.get<{ success: boolean; data: Grupo }>(
+      `${this.apiUrl}/publico/grupo/${token}`
+    );
   }
 
   /**
@@ -360,5 +441,113 @@ export class PlanejamentoEstrategicoService {
     }
 
     return 'N/A';
+  }
+
+  // ===== GRUPOS (MATRIZ SWOT) =====
+
+  /**
+   * Listar grupos de um planejamento
+   */
+  listarGrupos(planejamentoId: number): Observable<{ success: boolean; data: Grupo[] }> {
+    return this.http.get<{ success: boolean; data: Grupo[] }>(
+      `${this.apiUrl}/${planejamentoId}/grupos`
+    );
+  }
+
+  /**
+   * Adicionar grupo a um planejamento
+   */
+  adicionarGrupo(planejamentoId: number, data: CreateGrupoRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: Grupo;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: Grupo;
+    }>(`${this.apiUrl}/${planejamentoId}/grupos`, data);
+  }
+
+  /**
+   * Atualizar grupo
+   */
+  atualizarGrupo(grupoId: number, data: UpdateGrupoRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: Grupo;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: Grupo;
+    }>(`${this.apiUrl}/grupos/${grupoId}`, data);
+  }
+
+  /**
+   * Deletar grupo
+   */
+  deletarGrupo(grupoId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.apiUrl}/grupos/${grupoId}`
+    );
+  }
+
+  /**
+   * Obter planejamento com grupos e matrizes SWOT
+   */
+  obterPlanejamentoComSwot(planejamentoId: number): Observable<{
+    success: boolean;
+    data: PlanejamentoEstrategico & { grupos?: Grupo[] };
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: PlanejamentoEstrategico & { grupos?: Grupo[] };
+    }>(`${this.apiUrl}/${planejamentoId}/swot`);
+  }
+
+  /**
+   * Atualizar matriz SWOT via link público
+   */
+  atualizarMatrizSwotPublico(grupoId: number, data: UpdateMatrizSwotRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: MatrizSwot;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: MatrizSwot;
+    }>(`${this.apiUrl}/publico/matriz-swot/${grupoId}`, data);
+  }
+
+  // ===== MATRIZ SWOT FINAL (CONSOLIDADA) =====
+
+  /**
+   * Obter matriz SWOT final consolidada
+   */
+  obterMatrizSwotFinal(planejamentoId: number): Observable<{
+    success: boolean;
+    data: MatrizSwotFinal | null;
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: MatrizSwotFinal | null;
+    }>(`${this.apiUrl}/${planejamentoId}/swot-final`);
+  }
+
+  /**
+   * Salvar matriz SWOT final consolidada
+   */
+  salvarMatrizSwotFinal(planejamentoId: number, data: UpdateMatrizSwotFinalRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: MatrizSwotFinal;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: MatrizSwotFinal;
+    }>(`${this.apiUrl}/${planejamentoId}/swot-final`, data);
   }
 }
