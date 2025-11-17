@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../environments/environment';
 import {
   PlanejamentoEstrategicoService,
   PlanejamentoEstrategico,
@@ -286,5 +287,16 @@ export class PublicPlanejamentoViewComponent implements OnInit, AfterViewChecked
 
   getCurrentYear(): number {
     return new Date().getFullYear();
+  }
+
+  exportarPDF(departamento: Departamento): void {
+    if (!this.isMatrizPreenchida(departamento)) {
+      this.toastr.warning('Esta matriz ainda não foi preenchida', 'Atenção');
+      return;
+    }
+
+    const url = `${environment.apiUrl}/planejamento-estrategico/publico/matriz/${departamento.id}/pdf`;
+    window.open(url, '_blank');
+    this.toastr.info('PDF sendo gerado...', 'Download');
   }
 }

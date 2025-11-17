@@ -163,17 +163,6 @@ export class PlanejamentoFormComponent implements OnInit, OnDestroy {
     this.formData.client_id = Number(this.formData.client_id);
     this.formData.contract_id = 0;
     this.filterContractsByClient();
-
-    // Auto-preencher título
-    if (this.formData.client_id && !this.isEditMode) {
-      const selectedClient = this.clients.find(c => c.id === this.formData.client_id);
-      if (selectedClient) {
-        const currentYear = new Date().getFullYear();
-        const nameParts = selectedClient.name.split(' ');
-        const shortName = nameParts.slice(0, 2).join(' ');
-        this.formData.titulo = `Planejamento Estratégico ${currentYear} - ${shortName}`;
-      }
-    }
   }
 
   filterContractsByClient(): void {

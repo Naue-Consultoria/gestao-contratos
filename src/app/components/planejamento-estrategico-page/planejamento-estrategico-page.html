@@ -72,89 +72,70 @@
       <p *ngIf="searchTerm || statusFilter !== 'todos'">Tente ajustar os filtros de busca.</p>
     </div>
 
-    <!-- Cards Grid -->
-    <div class="cards-grid" *ngIf="filteredPlanejamentos.length > 0">
-      <div
-        *ngFor="let planejamento of filteredPlanejamentos"
-        class="planejamento-card"
-        (click)="visualizarPlanejamento(planejamento.id)"
-      >
-        <!-- Card Header -->
-        <div class="card-header">
-          <div class="card-title-section">
-            <h3 class="card-title">{{ planejamento.titulo }}</h3>
+    <!-- Table -->
+    <table class="data-table" *ngIf="filteredPlanejamentos.length > 0">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Cliente</th>
+          <th>Contrato</th>
+          <th>Prazo Preenchimento</th>
+          <th>Status</th>
+          <th class="actions-column">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let planejamento of filteredPlanejamentos"
+          (click)="visualizarPlanejamento(planejamento.id)"
+          class="table-row-clickable"
+        >
+          <td class="titulo-cell" data-label="Título">
+            <strong>{{ planejamento.titulo }}</strong>
+          </td>
+          <td data-label="Cliente">{{ getClientName(planejamento) }}</td>
+          <td data-label="Contrato">{{ planejamento.contract?.contract_number || 'N/A' }}</td>
+          <td data-label="Prazo Preenchimento">
+            <span
+              [class.prazo-vencido]="isPrazoVencido(planejamento.prazo_preenchimento)"
+            >
+              {{ planejamento.prazo_preenchimento ? formatDate(planejamento.prazo_preenchimento) : '-' }}
+              <span *ngIf="isPrazoVencido(planejamento.prazo_preenchimento)" class="badge-danger small-badge">Vencido</span>
+            </span>
+          </td>
+          <td data-label="Status">
             <span
               class="status-badge"
               [ngClass]="getStatusBadgeClass(planejamento.status)"
             >
               {{ getStatusLabel(planejamento.status) }}
             </span>
-          </div>
-
-          <!-- Actions Dropdown -->
-          <div class="card-actions">
-            <button
-              class="btn-icon"
-              (click)="editarPlanejamento(planejamento.id); $event.stopPropagation()"
-              title="Editar"
-            >
-              <i class="fas fa-edit"></i>
-            </button>
-            <button
-              class="btn-icon"
-              (click)="copiarLinkPublico(planejamento, $event)"
-              title="Copiar Link Público"
-            >
-              <i class="fas fa-link"></i>
-            </button>
-            <button
-              class="btn-icon btn-danger"
-              (click)="openDeleteModal(planejamento, $event)"
-              title="Deletar"
-            >
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Card Body -->
-        <div class="card-body">
-          <div class="card-info-row">
-            <span class="info-label"><i class="fas fa-user"></i> Cliente:</span>
-            <span class="info-value">{{ getClientName(planejamento) }}</span>
-          </div>
-
-          <div class="card-info-row">
-            <span class="info-label"><i class="fas fa-file-contract"></i> Contrato:</span>
-            <span class="info-value">{{ planejamento.contract?.contract_number || 'N/A' }}</span>
-          </div>
-
-          <div class="card-info-row" *ngIf="planejamento.data_inicio">
-            <span class="info-label"><i class="fas fa-calendar"></i> Período:</span>
-            <span class="info-value">
-              {{ formatDate(planejamento.data_inicio) }}
-              <span *ngIf="planejamento.data_fim"> - {{ formatDate(planejamento.data_fim) }}</span>
-            </span>
-          </div>
-
-          <div class="card-info-row" *ngIf="planejamento.prazo_preenchimento">
-            <span class="info-label"><i class="fas fa-clock"></i> Prazo Preenchimento:</span>
-            <span
-              class="info-value"
-              [class.prazo-vencido]="isPrazoVencido(planejamento.prazo_preenchimento)"
-            >
-              {{ formatDate(planejamento.prazo_preenchimento) }}
-              <span *ngIf="isPrazoVencido(planejamento.prazo_preenchimento)" class="badge-danger small-badge">Vencido</span>
-            </span>
-          </div>
-
-          <div class="card-info-row" *ngIf="planejamento.descricao">
-            <span class="info-label"><i class="fas fa-align-left"></i> Descrição:</span>
-            <span class="info-value description">{{ planejamento.descricao }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+          </td>
+          <td class="actions-cell" data-label="Ações">
+            <div class="action-menu">
+              <button
+                class="btn-menu"
+                (click)="toggleMenu(planejamento.id); $event.stopPropagation()"
+                title="Mais opções"
+              >
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+              <div class="dropdown-menu" *ngIf="openMenuId === planejamento.id" (click)="$event.stopPropagation()">
+                <button class="dropdown-item" (click)="editarPlanejamento(planejamento.id); closeMenu()">
+                  <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="dropdown-item" (click)="copiarLinkPublico(planejamento, $event); closeMenu()">
+                  <i class="fas fa-link"></i> Copiar Link Público
+                </button>
+                <button class="dropdown-item dropdown-item-danger" (click)="openDeleteModal(planejamento, $event); closeMenu()">
+                  <i class="fas fa-trash"></i> Excluir
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 

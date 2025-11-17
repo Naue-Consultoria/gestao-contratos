@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -39,12 +39,31 @@ export class PlanejamentoEstrategicoPageComponent implements OnInit, OnDestroy {
   showDeleteModal = false;
   planejamentoToDelete: PlanejamentoEstrategico | null = null;
 
+  // Menu dropdown
+  openMenuId: number | null = null;
+
   ngOnInit(): void {
     this.loadPlanejamentos();
   }
 
   ngOnDestroy(): void {
     // Limpeza de recursos
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.action-menu')) {
+      this.closeMenu();
+    }
+  }
+
+  toggleMenu(planejamentoId: number): void {
+    this.openMenuId = this.openMenuId === planejamentoId ? null : planejamentoId;
+  }
+
+  closeMenu(): void {
+    this.openMenuId = null;
   }
 
   async loadPlanejamentos(): Promise<void> {
@@ -106,13 +125,24 @@ export class PlanejamentoEstrategicoPageComponent implements OnInit, OnDestroy {
   getClientName(planejamento: PlanejamentoEstrategico): string {
     if (!planejamento.client) return 'N/A';
 
-    const clientPF = planejamento.client.clients_pf?.[0];
-    const clientPJ = planejamento.client.clients_pj?.[0];
+    const client = planejamento.client;
 
-    if (clientPF) {
-      return clientPF.full_name || 'N/A';
-    } else if (clientPJ) {
-      return clientPJ.company_name || clientPJ.trade_name || 'N/A';
+    // Tenta campos diretos primeiro
+    if (client.name) return client.name;
+    if (client.full_name) return client.full_name;
+    if (client.trade_name) return client.trade_name;
+    if (client.company_name) return client.company_name;
+
+    // Tenta estruturas aninhadas (objeto direto ou array)
+    if (client.clients_pf) {
+      const pf = Array.isArray(client.clients_pf) ? client.clients_pf[0] : client.clients_pf;
+      if (pf?.full_name) return pf.full_name;
+    }
+
+    if (client.clients_pj) {
+      const pj = Array.isArray(client.clients_pj) ? client.clients_pj[0] : client.clients_pj;
+      if (pj?.trade_name) return pj.trade_name;
+      if (pj?.company_name) return pj.company_name;
     }
 
     return 'N/A';

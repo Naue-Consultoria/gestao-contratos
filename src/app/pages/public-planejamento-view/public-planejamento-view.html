@@ -109,7 +109,7 @@
         <div class="icon-circle">
           <i class="fas fa-star"></i>
         </div>
-        <h4>Conquistas de 2025</h4>
+        <h4>Conquistas</h4>
         <p>Momento de se vendarem</p>
       </div>
 
@@ -288,12 +288,19 @@
         <!-- Footer do Card - Ações -->
         <div class="card-footer" *ngIf="isDepartamentoExpanded(departamento.id)" (click)="$event.stopPropagation()">
           <div class="footer-edit">
-            <div *ngIf="isMatrizPreenchida(departamento)" class="last-update">
-              Última atualização: {{ formatDateTime(departamento.matriz?.atualizado_em) }}
+            <div class="footer-left">
+              <div *ngIf="isMatrizPreenchida(departamento)" class="last-update">
+                Última atualização: {{ formatDateTime(departamento.matriz?.atualizado_em) }}
+              </div>
             </div>
-            <button class="btn-save-edit" (click)="saveDepartamentoMatriz(departamento); $event.stopPropagation()" [disabled]="isSaving || isPrazoVencido()">
-              <i class="fas fa-save"></i> {{ isSaving && selectedDepartamento?.id === departamento.id ? 'Salvando...' : 'Salvar Matriz' }}
-            </button>
+            <div class="footer-actions">
+              <button class="btn-export-pdf" (click)="exportarPDF(departamento); $event.stopPropagation()" [disabled]="!isMatrizPreenchida(departamento)">
+                <i class="fas fa-file-pdf"></i> Exportar PDF
+              </button>
+              <button class="btn-save-edit" (click)="saveDepartamentoMatriz(departamento); $event.stopPropagation()" [disabled]="isSaving || isPrazoVencido()">
+                <i class="fas fa-save"></i> {{ isSaving && selectedDepartamento?.id === departamento.id ? 'Salvando...' : 'Salvar Matriz' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>

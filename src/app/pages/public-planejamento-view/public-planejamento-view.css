@@ -643,6 +643,17 @@
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+  width: 100%;
+}
+
+.footer-left {
+  flex: 1;
+}
+
+.footer-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .btn-edit-matriz {
@@ -671,7 +682,8 @@
 }
 
 .btn-cancel-edit,
-.btn-save-edit {
+.btn-save-edit,
+.btn-export-pdf {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
@@ -703,8 +715,20 @@
   box-shadow: 0 4px 8px rgba(0, 59, 43, 0.4);
 }
 
+.btn-export-pdf {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-export-pdf:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+}
+
 .btn-cancel-edit:disabled,
-.btn-save-edit:disabled {
+.btn-save-edit:disabled,
+.btn-export-pdf:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -993,14 +1017,24 @@
     align-items: stretch;
   }
 
-  .footer-edit .last-update {
+  .footer-left {
     order: 2;
+  }
+
+  .footer-left .last-update {
     text-align: center;
+  }
+
+  .footer-actions {
+    order: 1;
+    flex-direction: column;
+    width: 100%;
   }
 
   .btn-edit-matriz,
   .btn-cancel-edit,
-  .btn-save-edit {
+  .btn-save-edit,
+  .btn-export-pdf {
     width: 100%;
     justify-content: center;
   }
