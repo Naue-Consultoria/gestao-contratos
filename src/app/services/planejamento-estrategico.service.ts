@@ -152,6 +152,28 @@ export interface UpdateMatrizSwotFinalRequest {
   observacoes?: string;
 }
 
+export interface MatrizSwotCruzamento {
+  id: number;
+  planejamento_id: number;
+  alavancas: number[][]; // Oportunidades × Forças (array 2D)
+  defesas: number[][]; // Ameaças × Forças (array 2D)
+  restricoes: number[][]; // Oportunidades × Fraquezas (array 2D)
+  problemas: number[][]; // Ameaças × Fraquezas (array 2D)
+  created_at: string;
+  updated_at: string;
+  created_by?: number | null;
+  updated_by?: number | null;
+  criador?: any;
+  atualizador?: any;
+}
+
+export interface UpdateMatrizCruzamentoRequest {
+  alavancas: number[][];
+  defesas: number[][];
+  restricoes: number[][];
+  problemas: number[][];
+}
+
 export interface UpdateMatrizRequest {
   vulnerabilidades?: string;
   conquistas?: string;
@@ -557,5 +579,35 @@ export class PlanejamentoEstrategicoService {
       message: string;
       data: MatrizSwotFinal;
     }>(`${this.apiUrl}/${planejamentoId}/swot-final`, data);
+  }
+
+  // ===== MATRIZ DE CRUZAMENTO SWOT =====
+
+  /**
+   * Obter matriz de cruzamento SWOT
+   */
+  obterMatrizCruzamento(planejamentoId: number): Observable<{
+    success: boolean;
+    data: MatrizSwotCruzamento | null;
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: MatrizSwotCruzamento | null;
+    }>(`${this.apiUrl}/${planejamentoId}/swot-cruzamento`);
+  }
+
+  /**
+   * Salvar matriz de cruzamento SWOT
+   */
+  salvarMatrizCruzamento(planejamentoId: number, data: UpdateMatrizCruzamentoRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: MatrizSwotCruzamento;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: MatrizSwotCruzamento;
+    }>(`${this.apiUrl}/${planejamentoId}/swot-cruzamento`, data);
   }
 }

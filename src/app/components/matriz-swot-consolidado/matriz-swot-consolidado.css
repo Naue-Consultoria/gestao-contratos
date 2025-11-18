@@ -331,6 +331,7 @@
   .matriz-header { flex-direction: column; align-items: stretch; gap: 1rem; }
   .status-info { align-self: flex-start; }
   .section-header-final { flex-direction: column; align-items: stretch; }
+  .section-header-final .btn, .section-header-final .btn-group { position: static; }
   .btn-group { flex-direction: column; }
 
   .matriz-wrapper {

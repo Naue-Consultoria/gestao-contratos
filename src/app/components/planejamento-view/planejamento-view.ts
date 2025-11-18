@@ -252,6 +252,12 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  visualizarCruzamento(): void {
+    if (this.planejamentoId) {
+      this.router.navigate(['/home/planejamento-estrategico/swot-cruzamento', this.planejamentoId]);
+    }
+  }
+
   // Menu dropdown actions
   toggleMenu(depId: number): void {
     this.openMenuId = this.openMenuId === depId ? null : depId;

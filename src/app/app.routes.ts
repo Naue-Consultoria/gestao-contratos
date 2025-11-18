@@ -49,6 +49,7 @@ import { PlanejamentoViewComponent } from './components/planejamento-view/planej
 import { PublicPlanejamentoViewComponent } from './pages/public-planejamento-view/public-planejamento-view';
 import { PublicMatrizSwotComponent } from './pages/public-matriz-swot/public-matriz-swot';
 import { MatrizSwotConsolidadoComponent } from './components/matriz-swot-consolidado/matriz-swot-consolidado';
+import { MatrizCruzamentoSwotComponent } from './components/matriz-cruzamento-swot/matriz-cruzamento-swot';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -344,7 +345,13 @@ export const routes: Routes = [
         path: 'planejamento-estrategico/swot-consolidado/:id',
         component: MatrizSwotConsolidadoComponent,
         canActivate: [AdminGerencialGuard],
-        title: 'Matrizes SWOT Consolidadas - NAUE Consultoria',
+        title: 'Matriz SWOT - NAUE Consultoria',
+      },
+      {
+        path: 'planejamento-estrategico/swot-cruzamento/:id',
+        component: MatrizCruzamentoSwotComponent,
+        canActivate: [AdminGerencialGuard],
+        title: 'Matriz de Cruzamento SWOT - NAUE Consultoria',
       },
 
       // Recrutamento & Seleção - Admin, Admin Gerencial e Consultor R&S

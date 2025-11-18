@@ -1,0 +1,175 @@
+<div class="page-header">
+  <div class="header-content">
+    <h1 class="page-title">Matriz de Cruzamento SWOT</h1>
+    <button class="btn btn-secondary" (click)="voltarParaPlanejamento()">
+      <i class="fas fa-arrow-left"></i> Voltar
+    </button>
+  </div>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<div *ngIf="error" class="error-message">
+  <i class="fas fa-exclamation-circle"></i>
+  {{ error }}
+</div>
+
+<div *ngIf="isLoading" class="loading-container">
+  <i class="fas fa-spinner fa-spin"></i>
+  Carregando...
+</div>
+
+<div *ngIf="!isLoading && planejamento" class="content">
+  <!-- Info Card -->
+  <div class="info-card">
+    <div class="info-row">
+      <strong>Cliente:</strong> <span>{{ getClientName() }}</span>
+    </div>
+    <div class="info-row">
+      <strong>Contrato:</strong> <span>{{ planejamento.contract?.contract_number }}</span>
+    </div>
+    <div class="info-row">
+      <strong>Planejamento:</strong> <span>{{ planejamento.titulo }}</span>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!matrizFinal || oportunidades.length === 0 || ameacas.length === 0 || forcas.length === 0 || fraquezas.length === 0" class="empty-state">
+    <i class="fas fa-exclamation-triangle empty-icon"></i>
+    <h3>Matriz SWOT Consolidada necessária</h3>
+    <p>Para criar a matriz de cruzamento, é necessário primeiro criar a <strong>Matriz SWOT Consolidada</strong> com todos os quadrantes preenchidos (Forças, Fraquezas, Oportunidades e Ameaças).</p>
+    <div class="empty-actions">
+      <button class="btn btn-primary" (click)="irParaMatrizConsolidada()">
+        <i class="fas fa-th"></i> Ir para Matriz SWOT Consolidada
+      </button>
+      <button class="btn btn-secondary" (click)="voltarParaPlanejamento()">
+        <i class="fas fa-arrow-left"></i> Voltar ao Planejamento
+      </button>
+    </div>
+  </div>
+
+  <!-- Matriz de Cruzamento -->
+  <div *ngIf="oportunidades.length > 0 && ameacas.length > 0 && forcas.length > 0 && fraquezas.length > 0" class="matriz-container">
+
+    <!-- Botões de ação -->
+    <div class="action-bar">
+      <button class="btn btn-primary" (click)="salvarMatrizCruzamento()" [disabled]="isSaving">
+        <i class="fas fa-save"></i> {{ isSaving ? 'Salvando...' : 'Salvar Matriz' }}
+      </button>
+    </div>
+
+    <!-- Matriz Completa -->
+    <div class="matriz-completa">
+      <!-- Linha 1: Labels Verticais + Grids Superiores -->
+      <div class="matriz-row-1">
+        <!-- Coluna Esquerda: Oportunidades -->
+        <div class="col-labels-verticais">
+          <div class="label-vert-section oportunidades-label">
+            <div class="label-vert-titulo">OPORTUNIDADES</div>
+            <div class="label-vert-itens">
+              <div *ngFor="let item of oportunidades; trackBy: trackByIndex" class="label-vert-item">
+                {{ item }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid Restrições -->
+        <div class="col-grid restricoes-grid">
+          <div class="grid-header">RESTRIÇÕES</div>
+          <div class="grid-content">
+            <div *ngFor="let linha of restricoes; let i = index; trackBy: trackByIndex" class="grid-linha">
+              <input *ngFor="let val of linha; let j = index; trackBy: trackByIndex"
+                type="number" [(ngModel)]="restricoes[i][j]"
+                min="0" max="50" step="10"
+                class="grid-cell" (blur)="validarCelula(restricoes, i, j)" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid Alavancas -->
+        <div class="col-grid alavancas-grid">
+          <div class="grid-header">ALAVANCAS</div>
+          <div class="grid-content">
+            <div *ngFor="let linha of alavancas; let i = index; trackBy: trackByIndex" class="grid-linha">
+              <input *ngFor="let val of linha; let j = index; trackBy: trackByIndex"
+                type="number" [(ngModel)]="alavancas[i][j]"
+                min="0" max="50" step="10"
+                class="grid-cell" (blur)="validarCelula(alavancas, i, j)" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linha 2: Labels Verticais + Grids Inferiores -->
+      <div class="matriz-row-2">
+        <!-- Coluna Esquerda: Ameaças -->
+        <div class="col-labels-verticais">
+          <div class="label-vert-section ameacas-label">
+            <div class="label-vert-titulo">AMEAÇAS</div>
+            <div class="label-vert-itens">
+              <div *ngFor="let item of ameacas; trackBy: trackByIndex" class="label-vert-item">
+                {{ item }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid Problemas -->
+        <div class="col-grid problemas-grid">
+          <div class="grid-header">PROBLEMAS</div>
+          <div class="grid-content">
+            <div *ngFor="let linha of problemas; let i = index; trackBy: trackByIndex" class="grid-linha">
+              <input *ngFor="let val of linha; let j = index; trackBy: trackByIndex"
+                type="number" [(ngModel)]="problemas[i][j]"
+                min="0" max="50" step="10"
+                class="grid-cell" (blur)="validarCelula(problemas, i, j)" />
+            </div>
+          </div>
+          <div class="grid-footer fraquezas-footer">
+            <div class="footer-itens">
+              <div *ngFor="let item of fraquezas; trackBy: trackByIndex" class="footer-item">
+                {{ item }}
+              </div>
+            </div>
+            <div class="footer-titulo">FRAQUEZAS</div>
+          </div>
+        </div>
+
+        <!-- Grid Defesas -->
+        <div class="col-grid defesas-grid">
+          <div class="grid-header">DEFESAS</div>
+          <div class="grid-content">
+            <div *ngFor="let linha of defesas; let i = index; trackBy: trackByIndex" class="grid-linha">
+              <input *ngFor="let val of linha; let j = index; trackBy: trackByIndex"
+                type="number" [(ngModel)]="defesas[i][j]"
+                min="0" max="50" step="10"
+                class="grid-cell" (blur)="validarCelula(defesas, i, j)" />
+            </div>
+          </div>
+          <div class="grid-footer forcas-footer">
+            <div class="footer-itens">
+              <div *ngFor="let item of forcas; trackBy: trackByIndex" class="footer-item">
+                {{ item }}
+              </div>
+            </div>
+            <div class="footer-titulo">FORÇAS</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Legenda -->
+    <div class="legenda">
+      <h4>Nível de Impacto</h4>
+      <div class="legenda-items">
+        <div class="legenda-item"><span class="legenda-valor">0</span> - Nulo</div>
+        <div class="legenda-item"><span class="legenda-valor">10</span> - Muito baixo</div>
+        <div class="legenda-item"><span class="legenda-valor">20</span> - Baixo</div>
+        <div class="legenda-item"><span class="legenda-valor">30</span> - Médio</div>
+        <div class="legenda-item"><span class="legenda-valor">40</span> - Alto</div>
+        <div class="legenda-item"><span class="legenda-valor">50</span> - Muito alto</div>
+      </div>
+    </div>
+  </div>
+</div>
