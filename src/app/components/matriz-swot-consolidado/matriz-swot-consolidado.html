@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1 class="page-title">Matrizes SWOT Consolidadas</h1>
+  <h1 class="page-title">Matriz SWOT</h1>
   <app-breadcrumb></app-breadcrumb>
 </div>
 
@@ -25,16 +25,13 @@
 
     <div class="card-body">
       <div class="info-row">
-        <strong>Cliente:</strong> {{ getClientName() }}
+        <strong>Cliente:</strong> <span>{{ getClientName() }}</span>
       </div>
       <div class="info-row">
-        <strong>Contrato:</strong> {{ planejamento.contract?.contract_number }}
+        <strong>Contrato:</strong> <span>{{ planejamento.contract?.contract_number }}</span>
       </div>
       <div class="info-row">
-        <strong>Total de Grupos:</strong> {{ grupos.length }}
-      </div>
-      <div class="info-row">
-        <strong>Progresso de Preenchimento:</strong>
+        <strong>Progresso:</strong>
         <div class="progress-bar">
           <div class="progress-fill" [style.width.%]="getProgressoPreenchimento()"></div>
         </div>
@@ -50,10 +47,110 @@
     <p>Adicione grupos na página de visualização do planejamento para começar.</p>
   </div>
 
-  <!-- Matriz SWOT Final -->
+  <!-- Matrizes SWOT dos Grupos -->
+  <div *ngIf="grupos.length > 0" class="matrizes-container">
+    <div class="section-header">
+      <h2><i class="fas fa-layer-group"></i> Matrizes SWOT dos Grupos</h2>
+    </div>
+
+    <div *ngFor="let grupo of grupos" class="matriz-card">
+      <!-- Header do Card -->
+      <div class="matriz-header" (click)="toggleGrupo(grupo.id)">
+        <div class="grupo-info">
+          <button class="btn-toggle" type="button">
+            <i class="fas" [class.fa-chevron-down]="!isGrupoExpanded(grupo.id)" [class.fa-chevron-up]="isGrupoExpanded(grupo.id)"></i>
+          </button>
+          <div>
+            <h3>{{ grupo.nome_grupo }}</h3>
+            <div *ngIf="grupo.integrantes" class="integrantes">
+              <i class="fas fa-users"></i> {{ grupo.integrantes }}
+            </div>
+          </div>
+        </div>
+        <div class="status-info">
+          <span *ngIf="isMatrizPreenchida(grupo)" class="badge-success">
+            <i class="fas fa-check"></i> Preenchida
+          </span>
+          <span *ngIf="!isMatrizPreenchida(grupo)" class="badge-warning">
+            <i class="fas fa-clock"></i> Pendente
+          </span>
+        </div>
+      </div>
+
+      <!-- Corpo do Card - Matriz SWOT -->
+      <div class="matriz-body" *ngIf="isGrupoExpanded(grupo.id)">
+        <div class="swot-grid">
+          <!-- Forças -->
+          <div class="swot-quadrante forcas">
+            <div class="quadrante-header">
+              <span class="label-vertical">INTERNO</span>
+              <span class="label-horizontal">FORÇAS</span>
+            </div>
+            <div class="quadrante-content">
+              <ul *ngIf="getMatrizItens(grupo, 'forcas').length > 0" class="item-list">
+                <li *ngFor="let item of getMatrizItens(grupo, 'forcas')">{{ item }}</li>
+              </ul>
+              <p *ngIf="getMatrizItens(grupo, 'forcas').length === 0" class="empty-text">-</p>
+            </div>
+          </div>
+
+          <!-- Fraquezas -->
+          <div class="swot-quadrante fraquezas">
+            <div class="quadrante-header">
+              <span class="label-vertical">INTERNO</span>
+              <span class="label-horizontal">FRAQUEZAS</span>
+            </div>
+            <div class="quadrante-content">
+              <ul *ngIf="getMatrizItens(grupo, 'fraquezas').length > 0" class="item-list">
+                <li *ngFor="let item of getMatrizItens(grupo, 'fraquezas')">{{ item }}</li>
+              </ul>
+              <p *ngIf="getMatrizItens(grupo, 'fraquezas').length === 0" class="empty-text">-</p>
+            </div>
+          </div>
+
+          <!-- Oportunidades -->
+          <div class="swot-quadrante oportunidades">
+            <div class="quadrante-header">
+              <span class="label-vertical">EXTERNO</span>
+              <span class="label-horizontal">OPORTUNIDADES</span>
+            </div>
+            <div class="quadrante-content">
+              <ul *ngIf="getMatrizItens(grupo, 'oportunidades').length > 0" class="item-list">
+                <li *ngFor="let item of getMatrizItens(grupo, 'oportunidades')">{{ item }}</li>
+              </ul>
+              <p *ngIf="getMatrizItens(grupo, 'oportunidades').length === 0" class="empty-text">-</p>
+            </div>
+          </div>
+
+          <!-- Ameaças -->
+          <div class="swot-quadrante ameacas">
+            <div class="quadrante-header">
+              <span class="label-vertical">EXTERNO</span>
+              <span class="label-horizontal">AMEAÇAS</span>
+            </div>
+            <div class="quadrante-content">
+              <ul *ngIf="getMatrizItens(grupo, 'ameacas').length > 0" class="item-list">
+                <li *ngFor="let item of getMatrizItens(grupo, 'ameacas')">{{ item }}</li>
+              </ul>
+              <p *ngIf="getMatrizItens(grupo, 'ameacas').length === 0" class="empty-text">-</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer com ações -->
+        <div class="matriz-footer">
+          <button class="btn btn-sm btn-primary" (click)="exportarPDF(grupo.id)" [disabled]="!isMatrizPreenchida(grupo)">
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Matriz SWOT Final (Consolidada) -->
   <div *ngIf="grupos.length > 0" class="matriz-final-section">
     <div class="section-header-final">
-      <h2><i class="fas fa-star"></i> Matriz SWOT Final (Consolidada)</h2>
+      <h2>Matriz SWOT Consolidada</h2>
       <button class="btn btn-primary" (click)="toggleEditarFinal()" *ngIf="!editandoFinal">
         <i class="fas fa-edit"></i> {{ matrizFinal ? 'Editar Final' : 'Criar Final' }}
       </button>
@@ -245,102 +342,6 @@
     <div *ngIf="!editandoFinal && !matrizFinal" class="empty-final">
       <p>Ainda não foi criada uma matriz SWOT final consolidada.</p>
       <p>Clique em "Criar Final" para consolidar as matrizes de todos os grupos.</p>
-    </div>
-  </div>
-
-  <!-- Matrizes SWOT -->
-  <div *ngIf="grupos.length > 0" class="matrizes-container">
-    <div *ngFor="let grupo of grupos" class="matriz-card">
-      <!-- Header do Card -->
-      <div class="matriz-header" (click)="toggleGrupo(grupo.id)">
-        <div class="grupo-info">
-          <button class="btn-toggle" type="button">
-            <i class="fas" [class.fa-chevron-down]="!isGrupoExpanded(grupo.id)" [class.fa-chevron-up]="isGrupoExpanded(grupo.id)"></i>
-          </button>
-          <div>
-            <h3>{{ grupo.nome_grupo }}</h3>
-            <div *ngIf="grupo.integrantes" class="integrantes">
-              <i class="fas fa-users"></i> {{ grupo.integrantes }}
-            </div>
-          </div>
-        </div>
-        <div class="status-info">
-          <span *ngIf="isMatrizPreenchida(grupo)" class="badge-success">
-            <i class="fas fa-check"></i> Preenchida
-          </span>
-          <span *ngIf="!isMatrizPreenchida(grupo)" class="badge-warning">
-            <i class="fas fa-clock"></i> Pendente
-          </span>
-        </div>
-      </div>
-
-      <!-- Corpo do Card - Matriz SWOT -->
-      <div class="matriz-body" *ngIf="isGrupoExpanded(grupo.id)">
-        <div class="swot-grid">
-          <!-- Forças -->
-          <div class="swot-quadrante forcas">
-            <div class="quadrante-header">
-              <span class="label-vertical">INTERNO</span>
-              <span class="label-horizontal">FORÇAS</span>
-            </div>
-            <div class="quadrante-content">
-              <ul *ngIf="getMatrizItens(grupo, 'forcas').length > 0" class="item-list">
-                <li *ngFor="let item of getMatrizItens(grupo, 'forcas')">{{ item }}</li>
-              </ul>
-              <p *ngIf="getMatrizItens(grupo, 'forcas').length === 0" class="empty-text">-</p>
-            </div>
-          </div>
-
-          <!-- Fraquezas -->
-          <div class="swot-quadrante fraquezas">
-            <div class="quadrante-header">
-              <span class="label-vertical">INTERNO</span>
-              <span class="label-horizontal">FRAQUEZAS</span>
-            </div>
-            <div class="quadrante-content">
-              <ul *ngIf="getMatrizItens(grupo, 'fraquezas').length > 0" class="item-list">
-                <li *ngFor="let item of getMatrizItens(grupo, 'fraquezas')">{{ item }}</li>
-              </ul>
-              <p *ngIf="getMatrizItens(grupo, 'fraquezas').length === 0" class="empty-text">-</p>
-            </div>
-          </div>
-
-          <!-- Oportunidades -->
-          <div class="swot-quadrante oportunidades">
-            <div class="quadrante-header">
-              <span class="label-vertical">EXTERNO</span>
-              <span class="label-horizontal">OPORTUNIDADES</span>
-            </div>
-            <div class="quadrante-content">
-              <ul *ngIf="getMatrizItens(grupo, 'oportunidades').length > 0" class="item-list">
-                <li *ngFor="let item of getMatrizItens(grupo, 'oportunidades')">{{ item }}</li>
-              </ul>
-              <p *ngIf="getMatrizItens(grupo, 'oportunidades').length === 0" class="empty-text">-</p>
-            </div>
-          </div>
-
-          <!-- Ameaças -->
-          <div class="swot-quadrante ameacas">
-            <div class="quadrante-header">
-              <span class="label-vertical">EXTERNO</span>
-              <span class="label-horizontal">AMEAÇAS</span>
-            </div>
-            <div class="quadrante-content">
-              <ul *ngIf="getMatrizItens(grupo, 'ameacas').length > 0" class="item-list">
-                <li *ngFor="let item of getMatrizItens(grupo, 'ameacas')">{{ item }}</li>
-              </ul>
-              <p *ngIf="getMatrizItens(grupo, 'ameacas').length === 0" class="empty-text">-</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Footer com ações -->
-        <div class="matriz-footer">
-          <button class="btn btn-sm btn-primary" (click)="exportarPDF(grupo.id)" [disabled]="!isMatrizPreenchida(grupo)">
-            <i class="fas fa-file-pdf"></i> Exportar PDF
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 </div>
