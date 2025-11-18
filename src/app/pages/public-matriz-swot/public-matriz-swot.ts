@@ -45,6 +45,23 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
     ameacas: [] as string[]
   };
 
+  // Cache local das classificações dos itens
+  classificacoesCache = {
+    forcas: {} as { [key: number]: string },
+    fraquezas: {} as { [key: number]: string },
+    oportunidades: {} as { [key: number]: string },
+    ameacas: {} as { [key: number]: string }
+  };
+
+  // Opções de classificação
+  opcoesClassificacao = [
+    { value: '', label: 'Selecione...' },
+    { value: 'C', label: 'C - Certeza' },
+    { value: 'D', label: 'D - Dúvida' },
+    { value: 'S', label: 'S - Suposição' },
+    { value: 'N/A', label: 'N/A - Não se Aplica' }
+  ];
+
   // Flag para controlar resize
   private lastResizeCheck = 0;
 
@@ -85,6 +102,8 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
         this.grupo = response.data;
         this.planejamento = response.data.planejamento;
 
+        console.log('📥 Dados carregados do servidor:', this.grupo.matriz_swot);
+
         // Inicializar cache de itens do grupo
         this.itensCache = {
           forcas: this.stringToArray(this.grupo.matriz_swot?.forcas),
@@ -92,6 +111,29 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
           oportunidades: this.stringToArray(this.grupo.matriz_swot?.oportunidades),
           ameacas: this.stringToArray(this.grupo.matriz_swot?.ameacas)
         };
+
+        // Inicializar cache de classificações
+        const initClassificacoes = (quadrante: 'forcas' | 'fraquezas' | 'oportunidades' | 'ameacas') => {
+          const matrizSwot = this.grupo?.matriz_swot;
+          const classifSalvas = (matrizSwot && matrizSwot[`${quadrante}_classificacao` as keyof typeof matrizSwot]) || {};
+          const result: { [key: number]: string } = {};
+
+          // Inicializar um índice para cada item
+          this.itensCache[quadrante].forEach((_, index) => {
+            result[index] = (classifSalvas as any)[index] || '';
+          });
+
+          return result;
+        };
+
+        this.classificacoesCache = {
+          forcas: initClassificacoes('forcas'),
+          fraquezas: initClassificacoes('fraquezas'),
+          oportunidades: initClassificacoes('oportunidades'),
+          ameacas: initClassificacoes('ameacas')
+        };
+
+        console.log('🔄 Classificações carregadas:', this.classificacoesCache);
       }
     } catch (err: any) {
       console.error('Erro ao carregar grupo:', err);
@@ -166,6 +208,9 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
   addItem(quadrante: 'forcas' | 'fraquezas' | 'oportunidades' | 'ameacas'): void {
     if (this.isPrazoVencido()) return;
     this.itensCache[quadrante].push('');
+    // Inicializar classificação vazia para o novo item
+    const newIndex = this.itensCache[quadrante].length - 1;
+    this.classificacoesCache[quadrante][newIndex] = '';
   }
 
   updateItem(quadrante: 'forcas' | 'fraquezas' | 'oportunidades' | 'ameacas', index: number, event: Event): void {
@@ -184,10 +229,34 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
   removeItem(quadrante: 'forcas' | 'fraquezas' | 'oportunidades' | 'ameacas', index: number): void {
     if (this.isPrazoVencido()) return;
     this.itensCache[quadrante].splice(index, 1);
+
+    // Reorganizar classificações após remover item
+    const newClassificacoes: { [key: number]: string } = {};
+    Object.keys(this.classificacoesCache[quadrante]).forEach(key => {
+      const keyNum = parseInt(key);
+      if (keyNum < index) {
+        newClassificacoes[keyNum] = this.classificacoesCache[quadrante][keyNum];
+      } else if (keyNum > index) {
+        newClassificacoes[keyNum - 1] = this.classificacoesCache[quadrante][keyNum];
+      }
+    });
+    this.classificacoesCache[quadrante] = newClassificacoes;
   }
 
   trackByIndex(index: number): number {
     return index;
+  }
+
+  // Funções para gerenciar classificações
+  getClassificacao(quadrante: 'forcas' | 'fraquezas' | 'oportunidades' | 'ameacas', index: number): string {
+    return this.classificacoesCache[quadrante][index] || '';
+  }
+
+  updateClassificacao(quadrante: 'forcas' | 'fraquezas' | 'oportunidades' | 'ameacas', index: number, event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.classificacoesCache[quadrante][index] = select.value;
+    console.log(`✏️ Classificação atualizada: ${quadrante}[${index}] = ${select.value}`);
+    console.log('📝 Cache de classificações:', this.classificacoesCache);
   }
 
   async salvarMatrizSwot(): Promise<void> {
@@ -201,13 +270,30 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
     this.isSaving = true;
 
     try {
+      // Converter índices numéricos para strings nas classificações
+      const convertClassificacoes = (classif: { [key: number]: string }): { [key: string]: string } => {
+        const result: { [key: string]: string } = {};
+        Object.keys(classif).forEach(key => {
+          if (classif[parseInt(key)]) {
+            result[key] = classif[parseInt(key)];
+          }
+        });
+        return result;
+      };
+
       // Converter arrays para strings (compatibilidade com backend)
       const updateData: UpdateMatrizSwotRequest = {
         forcas: this.arrayToString(this.itensCache.forcas),
         fraquezas: this.arrayToString(this.itensCache.fraquezas),
         oportunidades: this.arrayToString(this.itensCache.oportunidades),
-        ameacas: this.arrayToString(this.itensCache.ameacas)
+        ameacas: this.arrayToString(this.itensCache.ameacas),
+        forcas_classificacao: convertClassificacoes(this.classificacoesCache.forcas),
+        fraquezas_classificacao: convertClassificacoes(this.classificacoesCache.fraquezas),
+        oportunidades_classificacao: convertClassificacoes(this.classificacoesCache.oportunidades),
+        ameacas_classificacao: convertClassificacoes(this.classificacoesCache.ameacas)
       };
+
+      console.log('📊 Dados sendo enviados:', updateData);
 
       const response = await firstValueFrom(
         this.planejamentoService.atualizarMatrizSwotPublico(

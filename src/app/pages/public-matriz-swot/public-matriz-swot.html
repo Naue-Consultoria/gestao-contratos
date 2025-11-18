@@ -138,6 +138,12 @@
                     class="item-textarea"
                     [disabled]="isPrazoVencido()"
                     rows="1"></textarea>
+                  <select
+                    [(ngModel)]="classificacoesCache.forcas[i]"
+                    class="item-classificacao"
+                    [disabled]="isPrazoVencido() || !item.trim()">
+                    <option *ngFor="let opcao of opcoesClassificacao" [value]="opcao.value">{{ opcao.label }}</option>
+                  </select>
                   <button type="button" class="btn-remove-item" (click)="removeItem('forcas', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
@@ -165,6 +171,12 @@
                     class="item-textarea"
                     [disabled]="isPrazoVencido()"
                     rows="1"></textarea>
+                  <select
+                    [(ngModel)]="classificacoesCache.fraquezas[i]"
+                    class="item-classificacao"
+                    [disabled]="isPrazoVencido() || !item.trim()">
+                    <option *ngFor="let opcao of opcoesClassificacao" [value]="opcao.value">{{ opcao.label }}</option>
+                  </select>
                   <button type="button" class="btn-remove-item" (click)="removeItem('fraquezas', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
@@ -198,6 +210,12 @@
                     class="item-textarea"
                     [disabled]="isPrazoVencido()"
                     rows="1"></textarea>
+                  <select
+                    [(ngModel)]="classificacoesCache.oportunidades[i]"
+                    class="item-classificacao"
+                    [disabled]="isPrazoVencido() || !item.trim()">
+                    <option *ngFor="let opcao of opcoesClassificacao" [value]="opcao.value">{{ opcao.label }}</option>
+                  </select>
                   <button type="button" class="btn-remove-item" (click)="removeItem('oportunidades', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
@@ -225,6 +243,12 @@
                     class="item-textarea"
                     [disabled]="isPrazoVencido()"
                     rows="1"></textarea>
+                  <select
+                    [(ngModel)]="classificacoesCache.ameacas[i]"
+                    class="item-classificacao"
+                    [disabled]="isPrazoVencido() || !item.trim()">
+                    <option *ngFor="let opcao of opcoesClassificacao" [value]="opcao.value">{{ opcao.label }}</option>
+                  </select>
                   <button type="button" class="btn-remove-item" (click)="removeItem('ameacas', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
@@ -240,7 +264,7 @@
           <div class="footer-edit">
             <div class="footer-left">
               <div *ngIf="isMatrizSwotPreenchida()" class="last-update">
-                Última atualização: {{ formatDateTime(grupo?.matriz_swot?.atualizado_em) }}
+                Última atualização: {{ formatDateTime(grupo.matriz_swot?.atualizado_em) }}
               </div>
             </div>
             <div class="footer-actions">

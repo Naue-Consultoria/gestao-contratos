@@ -627,7 +627,7 @@
 
 .item-edit {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
   background: white;
   border: 1px solid #e2e8f0;
@@ -654,26 +654,64 @@
   min-height: 28px;
 }
 
+.item-classificacao {
+  width: 60px;
+  padding: 0.25rem 0.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #2d3748;
+  background-color: #f7fafc;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.item-classificacao:focus {
+  border-color: #003b2b;
+  background-color: white;
+}
+
+.item-classificacao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #edf2f7;
+}
+
+.item-classificacao option {
+  padding: 0.5rem;
+}
+
 .btn-remove-item {
   background: transparent;
   border: none;
   color: #e53e3e;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   flex-shrink: 0;
-  margin-top: 0.25rem;
 }
 
 .btn-remove-item:hover {
   background: #e53e3e;
   color: white;
+}
+
+.btn-remove-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-remove-item:disabled:hover {
+  background: transparent;
+  color: #e53e3e;
 }
 
 /* Card Footer */

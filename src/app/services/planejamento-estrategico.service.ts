@@ -56,6 +56,10 @@ export interface MatrizSwot {
   fraquezas?: string | null;
   oportunidades?: string | null;
   ameacas?: string | null;
+  forcas_classificacao?: { [key: string]: string } | null;
+  fraquezas_classificacao?: { [key: string]: string } | null;
+  oportunidades_classificacao?: { [key: string]: string } | null;
+  ameacas_classificacao?: { [key: string]: string } | null;
   preenchido_em?: string | null;
   atualizado_em?: string | null;
 }
@@ -134,6 +138,10 @@ export interface UpdateMatrizSwotRequest {
   fraquezas?: string;
   oportunidades?: string;
   ameacas?: string;
+  forcas_classificacao?: { [key: string]: string };
+  fraquezas_classificacao?: { [key: string]: string };
+  oportunidades_classificacao?: { [key: string]: string };
+  ameacas_classificacao?: { [key: string]: string };
 }
 
 export interface UpdateMatrizSwotFinalRequest {
