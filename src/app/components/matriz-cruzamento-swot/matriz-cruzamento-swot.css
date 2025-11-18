@@ -190,11 +190,11 @@
 }
 
 .oportunidades-label {
-  background: #2563eb;
+  background: #003b2b; /* Verde escuro */
 }
 
 .ameacas-label {
-  background: #dc2626;
+  background: #991b1b; /* Vermelho sangue */
 }
 
 .label-vert-titulo {
@@ -254,19 +254,19 @@
 }
 
 .restricoes-grid {
-  background: #fed7aa;
+  background: #fef3c7; /* Amarelo claro */
 }
 
 .alavancas-grid {
-  background: #a7f3d0;
+  background: #dbeafe; /* Azul claro */
 }
 
 .problemas-grid {
-  background: #fecaca;
+  background: #fecaca; /* Vermelho claro */
 }
 
 .defesas-grid {
-  background: #a7f3d0;
+  background: #d1fae5; /* Verde claro */
 }
 
 .grid-header {
@@ -343,11 +343,11 @@
 }
 
 .fraquezas-footer {
-  background: #fb923c;
+  background: #f97316; /* Laranja mais claro */
 }
 
 .forcas-footer {
-  background: #14b8a6;
+  background: #059669; /* Verde menos escuro */
 }
 
 .footer-itens {
