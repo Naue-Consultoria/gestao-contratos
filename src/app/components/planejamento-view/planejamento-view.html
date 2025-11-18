@@ -293,6 +293,9 @@
   <div class="section" *ngIf="activeTab === 'arvore-problemas'">
     <div class="section-header">
       <h3>Árvore de Problemas</h3>
+      <button class="btn btn-secondary" (click)="exportarArvoresPDF()" *ngIf="arvores.length > 0">
+        <i class="fas fa-file-pdf"></i> Exportar PDF
+      </button>
     </div>
 
     <!-- Formulário inline para criar nova árvore -->

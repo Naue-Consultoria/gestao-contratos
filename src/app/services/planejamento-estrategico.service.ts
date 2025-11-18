@@ -784,4 +784,11 @@ export class PlanejamentoEstrategicoService {
       message: string;
     }>(`${this.apiUrl}/arvore-problemas/${itemId}`);
   }
+
+  /**
+   * Gerar URL para exportar árvores de problemas em PDF
+   */
+  gerarUrlPdfArvores(planejamentoId: number): string {
+    return `${this.apiUrl}/${planejamentoId}/arvores/pdf`;
+  }
 }
