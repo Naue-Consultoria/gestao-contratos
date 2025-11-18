@@ -75,7 +75,7 @@ export class MatrizCruzamentoSwotComponent implements OnInit {
     this.error = '';
 
     try {
-      // Carregar planejamento
+      // Carregar planejamento com dados do cliente
       const planejamentoResponse = await firstValueFrom(
         this.planejamentoService.obterPlanejamento(this.planejamentoId)
       );
@@ -122,15 +122,12 @@ export class MatrizCruzamentoSwotComponent implements OnInit {
 
   extrairItensDaMatrizFinal(): void {
     if (!this.matrizFinal) {
-      console.warn('⚠️ Matriz SWOT Consolidada não encontrada');
       this.oportunidades = [];
       this.ameacas = [];
       this.forcas = [];
       this.fraquezas = [];
       return;
     }
-
-    console.log('📊 Matriz Final:', this.matrizFinal);
 
     const extrairItens = (texto: string | null | undefined): string[] => {
       if (!texto || !texto.trim()) return [];
@@ -141,12 +138,6 @@ export class MatrizCruzamentoSwotComponent implements OnInit {
     this.ameacas = extrairItens(this.matrizFinal.ameacas);
     this.forcas = extrairItens(this.matrizFinal.forcas);
     this.fraquezas = extrairItens(this.matrizFinal.fraquezas);
-
-    console.log('✅ Itens extraídos:');
-    console.log('  Oportunidades:', this.oportunidades);
-    console.log('  Ameaças:', this.ameacas);
-    console.log('  Forças:', this.forcas);
-    console.log('  Fraquezas:', this.fraquezas);
   }
 
   inicializarGrids(): void {
@@ -228,17 +219,29 @@ export class MatrizCruzamentoSwotComponent implements OnInit {
 
     const client = this.planejamento.client;
 
-    if (client.name) return client.name;
-    if (client.full_name) return client.full_name;
+    // Para PJ - Priorizar nome fantasia (trade_name)
+    if (client.clients_pj) {
+      if (Array.isArray(client.clients_pj) && client.clients_pj.length > 0) {
+        return client.clients_pj[0].trade_name || client.clients_pj[0].company_name || 'N/A';
+      } else if (typeof client.clients_pj === 'object') {
+        return client.clients_pj.trade_name || client.clients_pj.company_name || 'N/A';
+      }
+    }
+
+    // Para PF - Nome completo
+    if (client.clients_pf) {
+      if (Array.isArray(client.clients_pf) && client.clients_pf.length > 0) {
+        return client.clients_pf[0].full_name || 'N/A';
+      } else if (typeof client.clients_pf === 'object') {
+        return client.clients_pf.full_name || 'N/A';
+      }
+    }
+
+    // Fallbacks diretos
     if (client.trade_name) return client.trade_name;
     if (client.company_name) return client.company_name;
-
-    if (client.clients_pf && client.clients_pf.length > 0) {
-      return client.clients_pf[0].full_name || 'N/A';
-    }
-    if (client.clients_pj && client.clients_pj.length > 0) {
-      return client.clients_pj[0].trade_name || client.clients_pj[0].company_name || 'N/A';
-    }
+    if (client.full_name) return client.full_name;
+    if (client.name) return client.name;
 
     return 'N/A';
   }

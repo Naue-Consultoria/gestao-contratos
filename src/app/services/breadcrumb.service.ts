@@ -150,7 +150,12 @@ export class BreadcrumbService {
     '/home/planejamento-estrategico/swot-consolidado': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
-      { label: 'SWOT Consolidado' }
+      { label: 'Matriz SWOT' }
+    ],
+    '/home/planejamento-estrategico/swot-cruzamento': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+      { label: 'Matriz de Cruzamento SWOT' }
     ],
     '/home/ajuda': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
@@ -262,7 +267,18 @@ export class BreadcrumbService {
         const breadcrumbs = [
           { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
           { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
-          { label: 'SWOT Consolidado' }
+          { label: 'Matriz SWOT' }
+        ];
+        this.setBreadcrumbs(breadcrumbs);
+        return;
+      }
+
+      // Para URLs como /home/planejamento-estrategico/swot-cruzamento/123
+      if (urlParts.length === 5 && urlParts[2] === 'planejamento-estrategico' && urlParts[3] === 'swot-cruzamento') {
+        const breadcrumbs = [
+          { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+          { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+          { label: 'Matriz de Cruzamento SWOT' }
         ];
         this.setBreadcrumbs(breadcrumbs);
         return;
