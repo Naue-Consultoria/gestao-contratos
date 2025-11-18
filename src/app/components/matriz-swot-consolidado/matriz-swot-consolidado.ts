@@ -291,4 +291,12 @@ export class MatrizSwotConsolidadoComponent implements OnInit {
     if (!valor || !valor.trim()) return [];
     return valor.split('\n').filter(item => item.trim() !== '');
   }
+
+  exportarMatrizConsolidadaPDF(): void {
+    if (!this.planejamentoId) return;
+
+    const url = this.planejamentoService.gerarUrlPdfMatrizConsolidada(this.planejamentoId);
+    window.open(url, '_blank');
+    this.toastr.info('PDF sendo gerado...', 'Download');
+  }
 }

@@ -151,16 +151,21 @@
   <div *ngIf="grupos.length > 0" class="matriz-final-section">
     <div class="section-header-final">
       <h2>Matriz SWOT Consolidada</h2>
-      <button class="btn btn-primary" (click)="toggleEditarFinal()" *ngIf="!editandoFinal">
-        <i class="fas fa-edit"></i> {{ matrizFinal ? 'Editar Final' : 'Criar Final' }}
-      </button>
-      <div *ngIf="editandoFinal" class="btn-group">
-        <button class="btn btn-secondary" (click)="cancelarEdicaoFinal()">
-          <i class="fas fa-times"></i> Cancelar
+      <div class="header-actions">
+        <button class="btn btn-secondary" (click)="exportarMatrizConsolidadaPDF()" *ngIf="matrizFinal && !editandoFinal">
+          <i class="fas fa-file-pdf"></i> Exportar PDF
         </button>
-        <button class="btn btn-primary" (click)="salvarMatrizFinal()">
-          <i class="fas fa-save"></i> Salvar Final
+        <button class="btn btn-primary" (click)="toggleEditarFinal()" *ngIf="!editandoFinal">
+          <i class="fas fa-edit"></i> {{ matrizFinal ? 'Editar Final' : 'Criar Final' }}
         </button>
+        <div *ngIf="editandoFinal" class="btn-group">
+          <button class="btn btn-secondary" (click)="cancelarEdicaoFinal()">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+          <button class="btn btn-primary" (click)="salvarMatrizFinal()">
+            <i class="fas fa-save"></i> Salvar Final
+          </button>
+        </div>
       </div>
     </div>
 

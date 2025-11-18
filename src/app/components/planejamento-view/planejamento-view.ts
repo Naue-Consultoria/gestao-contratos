@@ -911,6 +911,15 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     this.toastr.info('PDF sendo gerado...', 'Download');
   }
 
+  // Exportar OKRs para PDF
+  exportarOkrsPDF(): void {
+    if (!this.planejamentoId) return;
+
+    const url = this.planejamentoService.gerarUrlPdfOkrs(this.planejamentoId);
+    window.open(url, '_blank');
+    this.toastr.info('PDF sendo gerado...', 'Download');
+  }
+
   // Obter pilares de dor (itens com nota > 20)
   getPilaresDeDor(): any[] {
     const pilares: any[] = [];

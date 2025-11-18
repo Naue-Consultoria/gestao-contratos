@@ -791,4 +791,18 @@ export class PlanejamentoEstrategicoService {
   gerarUrlPdfArvores(planejamentoId: number): string {
     return `${this.apiUrl}/${planejamentoId}/arvores/pdf`;
   }
+
+  /**
+   * Gerar URL para exportar objetivos estratégicos em PDF
+   */
+  gerarUrlPdfOkrs(planejamentoId: number): string {
+    return `${this.apiUrl}/${planejamentoId}/okrs/pdf`;
+  }
+
+  /**
+   * Gerar URL para exportar matriz SWOT consolidada em PDF
+   */
+  gerarUrlPdfMatrizConsolidada(planejamentoId: number): string {
+    return `${this.apiUrl}/${planejamentoId}/swot-final/pdf`;
+  }
 }
