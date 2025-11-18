@@ -51,6 +51,8 @@ import { PublicMatrizSwotComponent } from './pages/public-matriz-swot/public-mat
 import { MatrizSwotConsolidadoComponent } from './components/matriz-swot-consolidado/matriz-swot-consolidado';
 import { MatrizCruzamentoSwotComponent } from './components/matriz-cruzamento-swot/matriz-cruzamento-swot';
 import { AnaliseCenariosComponent } from './components/analise-cenarios/analise-cenarios';
+import { AniseOportunidadesComponent } from './components/analise-oportunidades/analise-oportunidades';
+import { AnaliseAmeacasComponent } from './components/analise-ameacas/analise-ameacas';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -359,6 +361,18 @@ export const routes: Routes = [
         component: AnaliseCenariosComponent,
         canActivate: [AdminGerencialGuard],
         title: 'Análise de Cenários - NAUE Consultoria',
+      },
+      {
+        path: 'planejamento-estrategico/analise-oportunidades/:id',
+        component: AniseOportunidadesComponent,
+        canActivate: [AdminGerencialGuard],
+        title: 'Análise de Oportunidades - NAUE Consultoria',
+      },
+      {
+        path: 'planejamento-estrategico/analise-ameacas/:id',
+        component: AnaliseAmeacasComponent,
+        canActivate: [AdminGerencialGuard],
+        title: 'Análise de Ameaças - NAUE Consultoria',
       },
 
       // Recrutamento & Seleção - Admin, Admin Gerencial e Consultor R&S

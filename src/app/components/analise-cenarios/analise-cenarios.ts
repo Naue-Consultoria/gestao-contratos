@@ -261,6 +261,18 @@ export class AnaliseCenariosComponent implements OnInit, AfterViewInit {
     }
   }
 
+  irParaAnaliseOportunidades(): void {
+    if (this.planejamentoId) {
+      this.router.navigate(['/home/planejamento-estrategico/analise-oportunidades', this.planejamentoId]);
+    }
+  }
+
+  irParaAnaliseAmeacas(): void {
+    if (this.planejamentoId) {
+      this.router.navigate(['/home/planejamento-estrategico/analise-ameacas', this.planejamentoId]);
+    }
+  }
+
   ngAfterViewInit(): void {
     // Criar gráficos após a view estar pronta
     if (this.analiseOportunidades && this.analiseAmeacas) {

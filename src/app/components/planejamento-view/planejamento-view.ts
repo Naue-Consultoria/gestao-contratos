@@ -36,7 +36,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   error = '';
 
   // Tabs
-  activeTab: 'departamentos' | 'grupos' = 'departamentos';
+  activeTab: 'departamentos' | 'grupos' | 'okrs' = 'departamentos';
 
   // Modal de departamento
   showDepartamentoModal = false;
@@ -71,6 +71,15 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   // Menu dropdown grupo
   openGrupoMenuId: number | null = null;
 
+  // OKRs
+  okrs: any[] = [];
+  novoObjetivo: string = '';
+  editingOkrId: number | null = null;
+  editingOkrText: string = '';
+  showDeleteOkrModal = false;
+  okrToDelete: any = null;
+  openOkrMenuId: number | null = null;
+
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       if (params['id']) {
@@ -92,6 +101,9 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     }
     if (!target.closest('.dep-actions')) {
       this.closeGrupoMenu();
+    }
+    if (!target.closest('.dep-actions')) {
+      this.closeOkrMenu();
     }
   }
 
@@ -506,5 +518,123 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
       console.error('Erro ao copiar link:', err);
       this.toastr.error('Erro ao copiar link', 'Erro');
     });
+  }
+
+  // ===== GESTÃO DE OKRs =====
+
+  async loadOkrs(): Promise<void> {
+    if (!this.planejamentoId) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.listarOkrs(this.planejamentoId)
+      );
+
+      if (response.success) {
+        this.okrs = response.data;
+      }
+    } catch (err: any) {
+      console.error('Erro ao carregar OKRs:', err);
+      this.toastr.error('Erro ao carregar OKRs', 'Erro');
+    }
+  }
+
+  async adicionarNovoOkr(): Promise<void> {
+    if (!this.novoObjetivo.trim()) {
+      this.toastr.warning('Por favor, informe o objetivo', 'Atenção');
+      return;
+    }
+
+    if (!this.planejamentoId) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.adicionarOkr(this.planejamentoId, {
+          objetivo: this.novoObjetivo.trim()
+        })
+      );
+
+      if (response.success) {
+        this.toastr.success('Objetivo adicionado com sucesso', 'Sucesso');
+        this.novoObjetivo = '';
+        this.loadOkrs();
+      }
+    } catch (err: any) {
+      console.error('Erro ao adicionar objetivo:', err);
+      this.toastr.error(err.error?.message || 'Erro ao adicionar objetivo', 'Erro');
+    }
+  }
+
+  iniciarEdicaoOkr(okr: any): void {
+    this.editingOkrId = okr.id;
+    this.editingOkrText = okr.objetivo;
+    this.closeOkrMenu();
+  }
+
+  cancelarEdicaoOkr(): void {
+    this.editingOkrId = null;
+    this.editingOkrText = '';
+  }
+
+  async salvarEdicaoOkr(okrId: number): Promise<void> {
+    if (!this.editingOkrText.trim()) {
+      this.toastr.warning('Por favor, informe o objetivo', 'Atenção');
+      return;
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.atualizarOkr(okrId, {
+          objetivo: this.editingOkrText.trim()
+        })
+      );
+
+      if (response.success) {
+        this.toastr.success('Objetivo atualizado com sucesso', 'Sucesso');
+        this.editingOkrId = null;
+        this.editingOkrText = '';
+        this.loadOkrs();
+      }
+    } catch (err: any) {
+      console.error('Erro ao atualizar objetivo:', err);
+      this.toastr.error(err.error?.message || 'Erro ao atualizar objetivo', 'Erro');
+    }
+  }
+
+  openDeleteOkrModal(okr: any): void {
+    this.okrToDelete = okr;
+    this.showDeleteOkrModal = true;
+  }
+
+  closeDeleteOkrModal(): void {
+    this.showDeleteOkrModal = false;
+    this.okrToDelete = null;
+  }
+
+  async confirmDeleteOkr(): Promise<void> {
+    if (!this.okrToDelete) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.deletarOkr(this.okrToDelete.id)
+      );
+
+      if (response.success) {
+        this.toastr.success('OKR excluído com sucesso', 'Sucesso');
+        this.closeDeleteOkrModal();
+        this.loadOkrs();
+      }
+    } catch (err: any) {
+      console.error('Erro ao deletar OKR:', err);
+      this.toastr.error('Erro ao deletar OKR', 'Erro');
+    }
+  }
+
+  toggleOkrMenu(okrId: number): void {
+    this.openOkrMenuId = this.openOkrMenuId === okrId ? null : okrId;
+  }
+
+  closeOkrMenu(): void {
+    this.openOkrMenuId = null;
   }
 }

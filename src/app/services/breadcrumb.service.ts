@@ -162,6 +162,18 @@ export class BreadcrumbService {
       { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
       { label: 'Análise de Cenários' }
     ],
+    '/home/planejamento-estrategico/analise-oportunidades': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+      { label: 'Análise de Cenários', url: '/home/planejamento-estrategico/analise-cenarios' },
+      { label: 'Análise de Oportunidades' }
+    ],
+    '/home/planejamento-estrategico/analise-ameacas': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+      { label: 'Análise de Cenários', url: '/home/planejamento-estrategico/analise-cenarios' },
+      { label: 'Análise de Ameaças' }
+    ],
     '/home/ajuda': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Ajuda' }
@@ -295,6 +307,32 @@ export class BreadcrumbService {
           { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
           { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
           { label: 'Análise de Cenários' }
+        ];
+        this.setBreadcrumbs(breadcrumbs);
+        return;
+      }
+
+      // Para URLs como /home/planejamento-estrategico/analise-oportunidades/123
+      if (urlParts.length === 5 && urlParts[2] === 'planejamento-estrategico' && urlParts[3] === 'analise-oportunidades') {
+        const planejamentoId = urlParts[4];
+        const breadcrumbs = [
+          { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+          { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+          { label: 'Análise de Cenários', url: `/home/planejamento-estrategico/analise-cenarios/${planejamentoId}` },
+          { label: 'Análise de Oportunidades' }
+        ];
+        this.setBreadcrumbs(breadcrumbs);
+        return;
+      }
+
+      // Para URLs como /home/planejamento-estrategico/analise-ameacas/123
+      if (urlParts.length === 5 && urlParts[2] === 'planejamento-estrategico' && urlParts[3] === 'analise-ameacas') {
+        const planejamentoId = urlParts[4];
+        const breadcrumbs = [
+          { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+          { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+          { label: 'Análise de Cenários', url: `/home/planejamento-estrategico/analise-cenarios/${planejamentoId}` },
+          { label: 'Análise de Ameaças' }
         ];
         this.setBreadcrumbs(breadcrumbs);
         return;

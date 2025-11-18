@@ -75,6 +75,12 @@
       (click)="activeTab = 'grupos'; loadGrupos()">
       <i class="fas fa-users"></i> Grupos (Matriz SWOT)
     </button>
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'okrs'"
+      (click)="activeTab = 'okrs'; loadOkrs()">
+      <i class="fas fa-bullseye"></i> OKRs
+    </button>
   </div>
 
   <!-- Departamentos -->
@@ -201,6 +207,80 @@
       </div>
     </div>
   </div>
+
+  <!-- OKRs -->
+  <div class="section" *ngIf="activeTab === 'okrs'">
+    <div class="section-header">
+      <h3>Objetivos e Resultados-Chave (OKRs)</h3>
+    </div>
+
+    <!-- Formulário inline para adicionar objetivo -->
+    <div class="add-okr-inline">
+      <input
+        type="text"
+        [(ngModel)]="novoObjetivo"
+        class="form-control"
+        placeholder="Digite um novo objetivo..."
+        (keyup.enter)="adicionarNovoOkr()">
+      <button class="btn btn-primary" (click)="adicionarNovoOkr()">
+        <i class="fas fa-plus"></i> Adicionar
+      </button>
+    </div>
+
+    <div *ngIf="okrs.length === 0" class="empty-state">
+      <i class="fas fa-bullseye"></i>
+      <p>Nenhum objetivo cadastrado</p>
+    </div>
+
+    <div *ngIf="okrs.length > 0" class="okrs-table-container">
+      <table class="okrs-table">
+        <thead>
+          <tr>
+            <th style="width: 10%;">#</th>
+            <th style="width: 75%;">Objetivo</th>
+            <th style="width: 15%;">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let okr of okrs; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>
+              <div *ngIf="editingOkrId !== okr.id">{{ okr.objetivo }}</div>
+              <div *ngIf="editingOkrId === okr.id" class="editing-row">
+                <input
+                  type="text"
+                  [(ngModel)]="editingOkrText"
+                  class="form-control form-control-sm"
+                  (keyup.enter)="salvarEdicaoOkr(okr.id)"
+                  (keyup.escape)="cancelarEdicaoOkr()">
+                <button class="btn btn-sm btn-primary" (click)="salvarEdicaoOkr(okr.id)" title="Salvar">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button class="btn btn-sm btn-secondary" (click)="cancelarEdicaoOkr()" title="Cancelar">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </td>
+            <td>
+              <div class="dep-actions" *ngIf="editingOkrId !== okr.id">
+                <button class="btn-menu" (click)="toggleOkrMenu(okr.id)" title="Mais opções">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="dropdown-menu" *ngIf="openOkrMenuId === okr.id">
+                  <button class="dropdown-item" (click)="iniciarEdicaoOkr(okr)">
+                    <i class="fas fa-edit"></i> Editar
+                  </button>
+                  <button class="dropdown-item dropdown-item-danger" (click)="openDeleteOkrModal(okr); closeOkrMenu()">
+                    <i class="fas fa-trash"></i> Excluir
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <!-- Modal Departamento -->
@@ -295,6 +375,25 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="closeDeleteGrupoModal()">Cancelar</button>
       <button class="btn btn-danger" (click)="confirmDeleteGrupo()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Delete OKR -->
+<div class="modal-overlay" *ngIf="showDeleteOkrModal" (click)="closeDeleteOkrModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirmar Exclusão</h2>
+      <button class="modal-close" (click)="closeDeleteOkrModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Tem certeza que deseja excluir o objetivo <strong>{{ okrToDelete?.objetivo }}</strong>?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteOkrModal()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmDeleteOkr()">Excluir</button>
     </div>
   </div>
 </div>

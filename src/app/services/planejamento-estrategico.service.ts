@@ -610,4 +610,62 @@ export class PlanejamentoEstrategicoService {
       data: MatrizSwotCruzamento;
     }>(`${this.apiUrl}/${planejamentoId}/swot-cruzamento`, data);
   }
+
+  // ===== OKRs =====
+
+  /**
+   * Listar OKRs de um planejamento
+   */
+  listarOkrs(planejamentoId: number): Observable<{
+    success: boolean;
+    data: any[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: any[];
+    }>(`${this.apiUrl}/${planejamentoId}/okrs`);
+  }
+
+  /**
+   * Adicionar OKR a um planejamento
+   */
+  adicionarOkr(planejamentoId: number, data: { objetivo: string }): Observable<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`${this.apiUrl}/${planejamentoId}/okrs`, data);
+  }
+
+  /**
+   * Atualizar OKR
+   */
+  atualizarOkr(okrId: number, data: { objetivo: string }): Observable<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`${this.apiUrl}/okrs/${okrId}`, data);
+  }
+
+  /**
+   * Deletar OKR
+   */
+  deletarOkr(okrId: number): Observable<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.http.delete<{
+      success: boolean;
+      message: string;
+    }>(`${this.apiUrl}/okrs/${okrId}`);
+  }
 }

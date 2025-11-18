@@ -85,7 +85,49 @@
 .text-danger { color: #dc3545; }
 .text-warning { color: #856404; }
 
+/* OKRs - Formulário inline para adicionar */
+.add-okr-inline {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.add-okr-inline .form-control {
+  flex: 1;
+}
+
+/* OKRs Table */
+.okrs-table-container { overflow-x: auto; margin-top: 1rem; }
+.okrs-table { width: 100%; border-collapse: collapse; }
+.okrs-table thead { background: #f8f9fa; }
+.okrs-table th { padding: 1rem; text-align: left; font-weight: 600; color: #495057; border-bottom: 2px solid #dee2e6; }
+.okrs-table td { padding: 1rem; border-bottom: 1px solid #e9ecef; vertical-align: middle; }
+.okrs-table tbody tr:hover { background: #f8f9fa; }
+.okrs-table tbody tr:last-child td { border-bottom: none; }
+
+/* Edição inline */
+.editing-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.editing-row .form-control-sm {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.form-control-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
 @media (max-width: 768px) {
   .card-header, .section-header, .actions { flex-direction: column; align-items: stretch; }
   .departamentos-grid { grid-template-columns: 1fr; }
+  .okrs-table-container { overflow-x: auto; }
+  .add-okr-inline { flex-direction: column; }
+  .add-okr-inline .form-control, .add-okr-inline .btn { width: 100%; }
 }

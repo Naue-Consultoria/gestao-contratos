@@ -104,7 +104,6 @@
   line-height: 1.6;
 }
 
-/* Análise Container */
 .analise-container {
   background: white;
   border-radius: 12px;
@@ -126,54 +125,40 @@
   margin: 0;
 }
 
-/* Seção de Análise */
-.analise-section {
-  margin-bottom: 3rem;
+.analise-content-single {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
 }
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+.table-section,
+.charts-section {
+  width: 100%;
 }
 
 .section-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #003b2b;
-  margin: 0;
+  color: #991b1b;
+  margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #003b2b;
-  flex: 1;
+  border-bottom: 2px solid #991b1b;
 }
 
-.btn-sm {
-  padding: 0.5rem 0.875rem;
-  font-size: 0.85rem;
-}
-
-/* Análise Content - Tabela + Gráfico */
-.analise-content {
+.charts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  align-items: start;
 }
 
-/* Gráfico */
-.chart-container {
+.chart-box {
   background: #f8f9fa;
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  height: 500px;
-  width: 100%;
 }
 
-.chart-title {
+.chart-subtitle {
   font-size: 1rem;
   font-weight: 600;
   color: #2c3e50;
@@ -181,15 +166,13 @@
   text-align: center;
 }
 
-#chartOportunidades,
-#chartAmeacas {
-  max-height: 450px;
+.chart-container-pie {
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Tabela */
-.table-container {
-  overflow-x: auto;
-}
 .analise-table {
   width: 100%;
   border-collapse: collapse;
@@ -233,7 +216,6 @@
 
 .col-descricao {
   text-align: left;
-  min-width: 300px;
   color: #2d3748;
 }
 
@@ -249,7 +231,7 @@
   width: 120px;
   text-align: center;
   font-weight: 600;
-  color: #003b2b;
+  color: #991b1b;
   font-size: 1rem;
 }
 
@@ -270,16 +252,72 @@
   color: #2d3748;
 }
 
-/* Responsive */
+/* Gráficos Individuais */
+.graficos-individuais-section {
+  margin-top: 3rem;
+  padding-top: 3rem;
+  border-top: 3px solid #e9ecef;
+}
+
+.item-individual {
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.item-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.item-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.chart-box-small {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.chart-subtitle-small {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 0.75rem 0;
+  text-align: center;
+}
+
+.chart-container-small {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @media (max-width: 1024px) {
-  .analise-content {
+  .charts-grid {
     grid-template-columns: 1fr;
   }
 
-  .chart-container {
-    max-width: 100%;
-    height: 450px;
-    margin: 0 auto 2rem auto;
+  .chart-container-pie {
+    height: 350px;
+  }
+
+  .item-charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-container-small {
+    height: 280px;
   }
 }
 
@@ -296,43 +334,5 @@
   .analise-table th,
   .analise-table td {
     padding: 0.5rem;
-  }
-
-  .col-descricao {
-    min-width: 200px;
-  }
-
-  .col-valor,
-  .col-percentual {
-    width: 80px;
-  }
-}
-
-@media (max-width: 480px) {
-  .page-title {
-    font-size: 1.5rem;
-  }
-
-  .analise-table {
-    font-size: 0.75rem;
-  }
-
-  .analise-table th,
-  .analise-table td {
-    padding: 0.4rem;
-  }
-
-  .col-numero {
-    width: 40px;
-  }
-
-  .col-descricao {
-    min-width: 150px;
-  }
-
-  .col-valor,
-  .col-percentual {
-    width: 70px;
-    font-size: 0.85rem;
   }
 }
