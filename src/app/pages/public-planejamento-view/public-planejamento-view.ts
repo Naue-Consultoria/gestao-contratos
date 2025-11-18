@@ -94,10 +94,7 @@ export class PublicPlanejamentoViewComponent implements OnInit, AfterViewChecked
         // Inicializar cache de itens para cada departamento
         this.departamentos.forEach(dep => {
           this.initializeDepartamentoCache(dep);
-          // Expandir primeiro departamento por padrão
-          if (this.departamentos.indexOf(dep) === 0) {
-            this.expandedDepartamentos.add(dep.id);
-          }
+          // Todos os departamentos iniciam retraídos
         });
       }
     } catch (err: any) {

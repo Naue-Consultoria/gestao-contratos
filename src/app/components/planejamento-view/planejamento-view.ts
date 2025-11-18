@@ -133,6 +133,11 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
       if (response.success && response.data) {
         this.planejamento = response.data;
         this.departamentos = response.data.departamentos || [];
+
+        // Carregar árvores de problemas já que é a aba padrão
+        if (this.activeTab === 'arvore-problemas') {
+          await this.loadArvores();
+        }
       }
     } catch (err: any) {
       console.error('Erro ao carregar planejamento:', err);
