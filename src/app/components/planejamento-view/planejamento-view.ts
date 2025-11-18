@@ -78,7 +78,6 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   editingOkrText: string = '';
   showDeleteOkrModal = false;
   okrToDelete: any = null;
-  openOkrMenuId: number | null = null;
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -101,9 +100,6 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     }
     if (!target.closest('.dep-actions')) {
       this.closeGrupoMenu();
-    }
-    if (!target.closest('.dep-actions')) {
-      this.closeOkrMenu();
     }
   }
 
@@ -509,6 +505,11 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     return !!grupo.matriz_swot?.preenchido_em;
   }
 
+  visualizarGrupo(grupo: Grupo): void {
+    const url = this.planejamentoService.gerarUrlPublicaSwot(grupo.unique_token);
+    window.open(url, '_blank');
+  }
+
   copiarLinkGrupo(grupo: Grupo): void {
     const url = this.planejamentoService.gerarUrlPublicaSwot(grupo.unique_token);
 
@@ -568,7 +569,6 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   iniciarEdicaoOkr(okr: any): void {
     this.editingOkrId = okr.id;
     this.editingOkrText = okr.objetivo;
-    this.closeOkrMenu();
   }
 
   cancelarEdicaoOkr(): void {
@@ -628,13 +628,5 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
       console.error('Erro ao deletar OKR:', err);
       this.toastr.error('Erro ao deletar OKR', 'Erro');
     }
-  }
-
-  toggleOkrMenu(okrId: number): void {
-    this.openOkrMenuId = this.openOkrMenuId === okrId ? null : okrId;
-  }
-
-  closeOkrMenu(): void {
-    this.openOkrMenuId = null;
   }
 }

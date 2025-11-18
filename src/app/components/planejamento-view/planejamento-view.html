@@ -174,6 +174,9 @@
               <i class="fas fa-ellipsis-v"></i>
             </button>
             <div class="dropdown-menu" *ngIf="openGrupoMenuId === grupo.id">
+              <button class="dropdown-item" (click)="visualizarGrupo(grupo); closeGrupoMenu()">
+                <i class="fas fa-eye"></i> Visualizar
+              </button>
               <button class="dropdown-item" (click)="copiarLinkGrupo(grupo); closeGrupoMenu()">
                 <i class="fas fa-link"></i> Copiar Link do Grupo
               </button>
@@ -199,6 +202,9 @@
             </span>
           </div>
           <div class="grupo-actions">
+            <button class="btn btn-sm btn-primary" (click)="visualizarGrupo(grupo)">
+              <i class="fas fa-eye"></i> Visualizar
+            </button>
             <button class="btn btn-sm btn-primary" (click)="copiarLinkGrupo(grupo)">
               <i class="fas fa-link"></i> Copiar Link
             </button>
@@ -237,8 +243,8 @@
         <thead>
           <tr>
             <th style="width: 10%;">#</th>
-            <th style="width: 75%;">Objetivo</th>
-            <th style="width: 15%;">Ações</th>
+            <th style="width: 65%;">Objetivo</th>
+            <th style="width: 25%;">Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -262,18 +268,13 @@
               </div>
             </td>
             <td>
-              <div class="dep-actions" *ngIf="editingOkrId !== okr.id">
-                <button class="btn-menu" (click)="toggleOkrMenu(okr.id)" title="Mais opções">
-                  <i class="fas fa-ellipsis-v"></i>
+              <div class="okr-actions" *ngIf="editingOkrId !== okr.id">
+                <button class="btn btn-sm btn-white" (click)="iniciarEdicaoOkr(okr)" title="Editar">
+                  <i class="fas fa-edit"></i>
                 </button>
-                <div class="dropdown-menu" *ngIf="openOkrMenuId === okr.id">
-                  <button class="dropdown-item" (click)="iniciarEdicaoOkr(okr)">
-                    <i class="fas fa-edit"></i> Editar
-                  </button>
-                  <button class="dropdown-item dropdown-item-danger" (click)="openDeleteOkrModal(okr); closeOkrMenu()">
-                    <i class="fas fa-trash"></i> Excluir
-                  </button>
-                </div>
+                <button class="btn btn-sm btn-danger" (click)="openDeleteOkrModal(okr)" title="Excluir">
+                  <i class="fas fa-trash"></i>
+                </button>
               </div>
             </td>
           </tr>
