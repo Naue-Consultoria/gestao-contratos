@@ -668,4 +668,120 @@ export class PlanejamentoEstrategicoService {
       message: string;
     }>(`${this.apiUrl}/okrs/${okrId}`);
   }
+
+  // ===== ÁRVORE DE PROBLEMAS =====
+
+  // Métodos de Árvores (container)
+  /**
+   * Listar árvores de um planejamento
+   */
+  listarArvores(planejamentoId: number): Observable<{
+    success: boolean;
+    data: any[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: any[];
+    }>(`${this.apiUrl}/${planejamentoId}/arvores`);
+  }
+
+  /**
+   * Criar nova árvore de problemas
+   */
+  criarArvore(planejamentoId: number, data: { nome_arvore: string }): Observable<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`${this.apiUrl}/${planejamentoId}/arvores`, data);
+  }
+
+  /**
+   * Atualizar nome de uma árvore
+   */
+  atualizarArvore(arvoreId: number, data: { nome_arvore: string }): Observable<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`${this.apiUrl}/arvores/${arvoreId}`, data);
+  }
+
+  /**
+   * Deletar uma árvore
+   */
+  deletarArvore(arvoreId: number): Observable<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.http.delete<{
+      success: boolean;
+      message: string;
+    }>(`${this.apiUrl}/arvores/${arvoreId}`);
+  }
+
+  // Métodos de Itens (dentro de cada árvore)
+  /**
+   * Listar itens de uma árvore
+   */
+  listarItensArvore(arvoreId: number): Observable<{
+    success: boolean;
+    data: any[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: any[];
+    }>(`${this.apiUrl}/arvores/${arvoreId}/itens`);
+  }
+
+  /**
+   * Adicionar item à árvore de problemas
+   */
+  adicionarItemArvore(arvoreId: number, data: any): Observable<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`${this.apiUrl}/arvores/${arvoreId}/itens`, data);
+  }
+
+  /**
+   * Atualizar item da árvore de problemas
+   */
+  atualizarItemArvore(itemId: number, data: any): Observable<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`${this.apiUrl}/arvore-problemas/${itemId}`, data);
+  }
+
+  /**
+   * Deletar item da árvore de problemas
+   */
+  deletarItemArvore(itemId: number): Observable<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.http.delete<{
+      success: boolean;
+      message: string;
+    }>(`${this.apiUrl}/arvore-problemas/${itemId}`);
+  }
 }

@@ -20,6 +20,7 @@
 .info-row strong { min-width: 180px; color: #6c757d; }
 
 .status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
 .badge-success { background: #d4edda; color: #155724; }
 .badge-info { background: #d1ecf1; color: #0c5460; }
 .badge-danger { background: #f8d7da; color: #721c24; }
@@ -133,10 +134,166 @@
   justify-content: flex-start;
 }
 
+/* Árvore de Problemas - Tabela */
+.arvore-table-container { overflow-x: auto; margin-top: 1rem; }
+.arvore-table { width: 100%; border-collapse: collapse; }
+.arvore-table thead { background: #f8f9fa; }
+.arvore-table th { padding: 1rem; text-align: left; font-weight: 600; color: #495057; border-bottom: 2px solid #dee2e6; font-size: 0.9rem; }
+.arvore-table td { padding: 0.75rem; border-bottom: 1px solid #e9ecef; vertical-align: middle; font-size: 0.9rem; }
+.arvore-table tbody tr:hover { background: #f8f9fa; }
+.arvore-table tbody tr:last-child td { border-bottom: none; }
+.arvore-table .text-center { text-align: center; }
+
+/* Ações da Árvore de Problemas */
+.arvore-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+/* Nota alta (acima de 20) */
+.nota-alta {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+/* Pilares de Dor */
+.pilares-dor-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #fffbeb;
+  border: 2px solid #f59e0b;
+  border-radius: 8px;
+}
+
+.pilares-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pilares-subtitle {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: #92400e;
+}
+
+.pilares-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.pilares-list li {
+  padding: 0.75rem 1rem;
+  background: white;
+  border-left: 4px solid #f59e0b;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #1f2937;
+  flex: 0 0 auto;
+}
+
+/* Container de Árvores */
+.arvores-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Card de Árvore */
+.arvore-card {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Formulário inline para criar árvore */
+.add-arvore-inline {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.add-arvore-inline .form-control {
+  flex: 1;
+}
+
+.arvore-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.arvore-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.arvore-title-row:hover {
+  opacity: 0.8;
+}
+
+.arvore-title-row i {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.arvore-title-row h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.arvore-title-row .badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.arvore-header-actions {
+  position: relative;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.arvore-body {
+  padding: 1.5rem;
+}
+
+.arvore-body-header {
+  margin-bottom: 1rem;
+}
+
+.empty-state-small {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 768px) {
   .card-header, .section-header, .actions { flex-direction: column; align-items: stretch; }
   .departamentos-grid { grid-template-columns: 1fr; }
   .okrs-table-container { overflow-x: auto; }
+  .arvore-table-container { overflow-x: auto; }
+  .pilares-table-container { overflow-x: auto; }
   .add-okr-inline { flex-direction: column; }
   .add-okr-inline .form-control, .add-okr-inline .btn { width: 100%; }
+  .add-arvore-inline { flex-direction: column; }
+  .add-arvore-inline .form-control, .add-arvore-inline .btn { width: 100%; }
 }

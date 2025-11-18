@@ -65,6 +65,12 @@
   <div class="tabs-container">
     <button
       class="tab-button"
+      [class.active]="activeTab === 'arvore-problemas'"
+      (click)="activeTab = 'arvore-problemas'; loadArvores()">
+      <i class="fas fa-project-diagram"></i> Árvore de Problemas
+    </button>
+    <button
+      class="tab-button"
       [class.active]="activeTab === 'departamentos'"
       (click)="activeTab = 'departamentos'">
       <i class="fas fa-building"></i> Departamentos (Matriz Consciente)
@@ -282,6 +288,140 @@
       </table>
     </div>
   </div>
+
+  <!-- Árvore de Problemas -->
+  <div class="section" *ngIf="activeTab === 'arvore-problemas'">
+    <div class="section-header">
+      <h3>Árvore de Problemas</h3>
+    </div>
+
+    <!-- Formulário inline para criar nova árvore -->
+    <div class="add-arvore-inline">
+      <input
+        type="text"
+        [(ngModel)]="novaArvoreNome"
+        class="form-control"
+        placeholder="Digite o nome da nova árvore..."
+        (keyup.enter)="criarNovaArvore()">
+      <button class="btn btn-primary" (click)="criarNovaArvore()">
+        <i class="fas fa-plus"></i> Criar Árvore
+      </button>
+    </div>
+
+    <div *ngIf="arvores.length === 0" class="empty-state">
+      <i class="fas fa-project-diagram"></i>
+      <p>Nenhuma árvore cadastrada</p>
+    </div>
+
+    <!-- Lista de Árvores -->
+    <div *ngIf="arvores.length > 0" class="arvores-container">
+      <div *ngFor="let arvore of arvores" class="arvore-card">
+        <!-- Cabeçalho da Árvore -->
+        <div class="arvore-header">
+          <div class="arvore-title-row" (click)="toggleArvore(arvore.id)">
+            <i class="fas" [ngClass]="isArvoreExpanded(arvore.id) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+            <h4>{{ arvore.nome_arvore }}</h4>
+            <span class="badge badge-info">{{ getItensArvore(arvore.id).length }} itens</span>
+          </div>
+          <div class="arvore-header-actions">
+            <button class="btn-menu" (click)="toggleArvoreMenu(arvore.id)" title="Mais opções">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <div class="dropdown-menu" *ngIf="openArvoreMenuId === arvore.id">
+              <button class="dropdown-item dropdown-item-danger" (click)="openDeleteArvoreModal(arvore); closeArvoreMenu()">
+                <i class="fas fa-trash"></i> Excluir Árvore
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conteúdo da Árvore -->
+        <div class="arvore-body" *ngIf="isArvoreExpanded(arvore.id)">
+          <div class="arvore-body-header">
+            <button class="btn btn-sm btn-primary" (click)="adicionarNovaLinha(arvore.id)">
+              <i class="fas fa-plus"></i> Adicionar Linha
+            </button>
+          </div>
+
+          <div *ngIf="getItensArvore(arvore.id).length === 0" class="empty-state-small">
+            <p>Nenhum item adicionado nesta árvore</p>
+          </div>
+
+          <div *ngIf="getItensArvore(arvore.id).length > 0" class="arvore-table-container">
+            <table class="arvore-table">
+              <thead>
+                <tr>
+                  <th style="width: 30%;">Tópico</th>
+                  <th style="width: 35%;">Pergunta Norteadora</th>
+                  <th style="width: 7%;">Gravidade</th>
+                  <th style="width: 7%;">Urgência</th>
+                  <th style="width: 7%;">Tendência</th>
+                  <th style="width: 7%;">Nota</th>
+                  <th style="width: 7%;">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of getItensArvore(arvore.id); let i = index">
+                  <ng-container *ngIf="!isItemEditing(arvore.id, i)">
+                    <td>{{ item.topico }}</td>
+                    <td>{{ item.pergunta_norteadora || '-' }}</td>
+                    <td class="text-center">{{ formatarNumero(item.gravidade) }}</td>
+                    <td class="text-center">{{ formatarNumero(item.urgencia) }}</td>
+                    <td class="text-center">{{ formatarNumero(item.tendencia) }}</td>
+                    <td class="text-center" [ngClass]="{'nota-alta': item.nota > 20}">{{ formatarNumero(item.nota) }}</td>
+                    <td>
+                      <button class="btn btn-sm btn-danger" (click)="openDeleteItemModal(item, arvore.id)" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container *ngIf="isItemEditing(arvore.id, i)">
+                    <td>
+                      <input type="text" [(ngModel)]="getEditingItem(arvore.id).topico" class="form-control form-control-sm" placeholder="Tópico">
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="getEditingItem(arvore.id).pergunta_norteadora" class="form-control form-control-sm" placeholder="Pergunta norteadora">
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="getEditingItem(arvore.id).gravidade" class="form-control form-control-sm text-center" placeholder="1-5">
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="getEditingItem(arvore.id).urgencia" class="form-control form-control-sm text-center" placeholder="1-5">
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="getEditingItem(arvore.id).tendencia" class="form-control form-control-sm text-center" placeholder="1-5">
+                    </td>
+                    <td class="text-center">-</td>
+                    <td>
+                      <div class="arvore-actions">
+                        <button class="btn btn-sm btn-primary" (click)="salvarItem(arvore.id, i)" title="Salvar">
+                          <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-sm btn-secondary" (click)="cancelarEdicaoItem(arvore.id)" title="Cancelar">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </ng-container>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pilares de Dor -->
+    <div *ngIf="arvores.length > 0 && getPilaresDeDor().length > 0" class="pilares-dor-section">
+      <h3 class="pilares-title">
+        <i class="fas fa-exclamation-triangle"></i> Pilares de Dor
+      </h3>
+
+      <ul class="pilares-list">
+        <li *ngFor="let pilar of getPilaresDeDor()">{{ pilar.topico }}</li>
+      </ul>
+    </div>
+  </div>
 </div>
 
 <!-- Modal Departamento -->
@@ -395,6 +535,45 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="closeDeleteOkrModal()">Cancelar</button>
       <button class="btn btn-danger" (click)="confirmDeleteOkr()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Delete Árvore -->
+<div class="modal-overlay" *ngIf="showDeleteArvoreModal" (click)="closeDeleteArvoreModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirmar Exclusão</h2>
+      <button class="modal-close" (click)="closeDeleteArvoreModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Tem certeza que deseja excluir a árvore <strong>{{ arvoreToDelete?.nome_arvore }}</strong>?</p>
+      <p class="text-warning">Todos os itens desta árvore também serão excluídos.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteArvoreModal()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmDeleteArvore()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Delete Item Árvore de Problemas -->
+<div class="modal-overlay" *ngIf="showDeleteItemModal" (click)="closeDeleteItemModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirmar Exclusão</h2>
+      <button class="modal-close" (click)="closeDeleteItemModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Tem certeza que deseja excluir o item <strong>{{ itemToDelete?.topico }}</strong>?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteItemModal()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmDeleteItem()">Excluir</button>
     </div>
   </div>
 </div>

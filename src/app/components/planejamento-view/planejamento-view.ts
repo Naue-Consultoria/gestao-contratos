@@ -36,7 +36,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   error = '';
 
   // Tabs
-  activeTab: 'departamentos' | 'grupos' | 'okrs' = 'departamentos';
+  activeTab: 'departamentos' | 'grupos' | 'okrs' | 'arvore-problemas' = 'arvore-problemas';
 
   // Modal de departamento
   showDepartamentoModal = false;
@@ -79,6 +79,19 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   showDeleteOkrModal = false;
   okrToDelete: any = null;
 
+  // Árvore de Problemas
+  arvores: any[] = [];
+  arvoresItens: { [arvoreId: number]: any[] } = {};
+  editingItemId: { [arvoreId: number]: number | null } = {};
+  editingItem: { [arvoreId: number]: any } = {};
+  showDeleteItemModal = false;
+  itemToDelete: any = null;
+  showDeleteArvoreModal = false;
+  arvoreToDelete: any = null;
+  novaArvoreNome: string = '';
+  expandedArvores: { [arvoreId: number]: boolean } = {};
+  openArvoreMenuId: number | null = null;
+
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       if (params['id']) {
@@ -100,6 +113,9 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     }
     if (!target.closest('.dep-actions')) {
       this.closeGrupoMenu();
+    }
+    if (!target.closest('.arvore-header-actions')) {
+      this.closeArvoreMenu();
     }
   }
 
@@ -627,6 +643,308 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     } catch (err: any) {
       console.error('Erro ao deletar objetivo estratégico:', err);
       this.toastr.error('Erro ao deletar objetivo estratégico', 'Erro');
+    }
+  }
+
+  // ===== GESTÃO DE ÁRVORE DE PROBLEMAS =====
+
+  async loadArvores(): Promise<void> {
+    if (!this.planejamentoId) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.listarArvores(this.planejamentoId)
+      );
+
+      if (response.success) {
+        this.arvores = response.data;
+        // Carregar itens de cada árvore
+        for (const arvore of this.arvores) {
+          await this.loadItensArvore(arvore.id);
+          this.expandedArvores[arvore.id] = false; // Retraídas por padrão
+        }
+      }
+    } catch (err: any) {
+      console.error('Erro ao carregar árvores:', err);
+      this.toastr.error('Erro ao carregar árvores', 'Erro');
+    }
+  }
+
+  async loadItensArvore(arvoreId: number): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.listarItensArvore(arvoreId)
+      );
+
+      if (response.success) {
+        this.arvoresItens[arvoreId] = response.data;
+      }
+    } catch (err: any) {
+      console.error('Erro ao carregar itens da árvore:', err);
+    }
+  }
+
+  async criarNovaArvore(): Promise<void> {
+    if (!this.novaArvoreNome.trim()) {
+      this.toastr.warning('Por favor, informe o nome da árvore', 'Atenção');
+      return;
+    }
+
+    if (!this.planejamentoId) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.criarArvore(this.planejamentoId, {
+          nome_arvore: this.novaArvoreNome.trim()
+        })
+      );
+
+      if (response.success) {
+        this.toastr.success('Árvore criada com sucesso', 'Sucesso');
+        this.novaArvoreNome = '';
+        this.loadArvores();
+      }
+    } catch (err: any) {
+      console.error('Erro ao criar árvore:', err);
+      this.toastr.error(err.error?.message || 'Erro ao criar árvore', 'Erro');
+    }
+  }
+
+  openDeleteArvoreModal(arvore: any): void {
+    this.arvoreToDelete = arvore;
+    this.showDeleteArvoreModal = true;
+  }
+
+  closeDeleteArvoreModal(): void {
+    this.showDeleteArvoreModal = false;
+    this.arvoreToDelete = null;
+  }
+
+  async confirmDeleteArvore(): Promise<void> {
+    if (!this.arvoreToDelete) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.deletarArvore(this.arvoreToDelete.id)
+      );
+
+      if (response.success) {
+        this.toastr.success('Árvore excluída com sucesso', 'Sucesso');
+        this.closeDeleteArvoreModal();
+        this.loadArvores();
+      }
+    } catch (err: any) {
+      console.error('Erro ao deletar árvore:', err);
+      this.toastr.error('Erro ao deletar árvore', 'Erro');
+    }
+  }
+
+  toggleArvore(arvoreId: number): void {
+    this.expandedArvores[arvoreId] = !this.expandedArvores[arvoreId];
+  }
+
+  isArvoreExpanded(arvoreId: number): boolean {
+    return this.expandedArvores[arvoreId] || false;
+  }
+
+  toggleArvoreMenu(arvoreId: number): void {
+    this.openArvoreMenuId = this.openArvoreMenuId === arvoreId ? null : arvoreId;
+  }
+
+  closeArvoreMenu(): void {
+    this.openArvoreMenuId = null;
+  }
+
+  adicionarNovaLinha(arvoreId: number): void {
+    const novaLinha = {
+      id: null,
+      topico: '',
+      pergunta_norteadora: '',
+      gravidade: null,
+      urgencia: null,
+      tendencia: null,
+      nota: null,
+      isNew: true
+    };
+
+    if (!this.arvoresItens[arvoreId]) {
+      this.arvoresItens[arvoreId] = [];
+    }
+
+    this.arvoresItens[arvoreId].push(novaLinha);
+    const index = this.arvoresItens[arvoreId].length - 1;
+    this.editingItemId[arvoreId] = index;
+    this.editingItem[arvoreId] = { ...novaLinha };
+  }
+
+  iniciarEdicaoItem(arvoreId: number, item: any, index: number): void {
+    this.editingItemId[arvoreId] = index;
+    this.editingItem[arvoreId] = { ...item };
+  }
+
+  cancelarEdicaoItem(arvoreId: number): void {
+    const itens = this.arvoresItens[arvoreId] || [];
+    const editingIndex = this.editingItemId[arvoreId];
+
+    // Se for item novo, remove da lista
+    if (editingIndex !== null && itens[editingIndex]?.isNew) {
+      this.arvoresItens[arvoreId].splice(editingIndex, 1);
+    }
+
+    this.editingItemId[arvoreId] = null;
+    this.editingItem[arvoreId] = null;
+  }
+
+  // Converter vírgula para ponto e validar número
+  converterNumero(valor: any): number | null {
+    if (!valor) return null;
+
+    // Converter para string e trocar vírgula por ponto
+    const valorStr = String(valor).replace(',', '.');
+    const num = parseFloat(valorStr);
+
+    if (isNaN(num)) return null;
+
+    // Arredondar para 1 casa decimal
+    return Math.round(num * 10) / 10;
+  }
+
+  async salvarItem(arvoreId: number, index: number): Promise<void> {
+    const item = this.editingItem[arvoreId];
+
+    if (!item.topico || !item.topico.trim()) {
+      this.toastr.warning('O tópico é obrigatório', 'Atenção');
+      return;
+    }
+
+    // Converter vírgula para ponto nos números
+    const gravidade = this.converterNumero(item.gravidade);
+    const urgencia = this.converterNumero(item.urgencia);
+    const tendencia = this.converterNumero(item.tendencia);
+
+    // Validar range
+    if (gravidade !== null && (gravidade < 1 || gravidade > 5)) {
+      this.toastr.warning('Gravidade deve estar entre 1 e 5', 'Atenção');
+      return;
+    }
+    if (urgencia !== null && (urgencia < 1 || urgencia > 5)) {
+      this.toastr.warning('Urgência deve estar entre 1 e 5', 'Atenção');
+      return;
+    }
+    if (tendencia !== null && (tendencia < 1 || tendencia > 5)) {
+      this.toastr.warning('Tendência deve estar entre 1 e 5', 'Atenção');
+      return;
+    }
+
+    try {
+      if (item.isNew) {
+        // Criar novo item
+        const response = await firstValueFrom(
+          this.planejamentoService.adicionarItemArvore(arvoreId, {
+            topico: item.topico.trim(),
+            pergunta_norteadora: item.pergunta_norteadora?.trim() || null,
+            gravidade,
+            urgencia,
+            tendencia
+          })
+        );
+
+        if (response.success) {
+          this.toastr.success('Item adicionado com sucesso', 'Sucesso');
+          await this.loadItensArvore(arvoreId);
+        }
+      } else {
+        // Atualizar item existente
+        const response = await firstValueFrom(
+          this.planejamentoService.atualizarItemArvore(item.id, {
+            topico: item.topico.trim(),
+            pergunta_norteadora: item.pergunta_norteadora?.trim() || null,
+            gravidade,
+            urgencia,
+            tendencia
+          })
+        );
+
+        if (response.success) {
+          this.toastr.success('Item atualizado com sucesso', 'Sucesso');
+          await this.loadItensArvore(arvoreId);
+        }
+      }
+
+      this.editingItemId[arvoreId] = null;
+      this.editingItem[arvoreId] = null;
+    } catch (err: any) {
+      console.error('Erro ao salvar item:', err);
+      this.toastr.error(err.error?.message || 'Erro ao salvar item', 'Erro');
+    }
+  }
+
+  getItensArvore(arvoreId: number): any[] {
+    return this.arvoresItens[arvoreId] || [];
+  }
+
+  isItemEditing(arvoreId: number, index: number): boolean {
+    return this.editingItemId[arvoreId] === index;
+  }
+
+  getEditingItem(arvoreId: number): any {
+    return this.editingItem[arvoreId];
+  }
+
+  // Formatar número com vírgula
+  formatarNumero(valor: any): string {
+    if (valor === null || valor === undefined) return '-';
+    return String(valor).replace('.', ',');
+  }
+
+  // Obter pilares de dor (itens com nota > 20)
+  getPilaresDeDor(): any[] {
+    const pilares: any[] = [];
+
+    for (const arvore of this.arvores) {
+      const itens = this.arvoresItens[arvore.id] || [];
+      for (const item of itens) {
+        if (item.nota && item.nota > 20) {
+          pilares.push({
+            ...item,
+            arvore_nome: arvore.nome_arvore
+          });
+        }
+      }
+    }
+
+    // Ordenar por nota decrescente
+    return pilares.sort((a, b) => (b.nota || 0) - (a.nota || 0));
+  }
+
+  openDeleteItemModal(item: any, arvoreId: number): void {
+    this.itemToDelete = { ...item, arvoreId };
+    this.showDeleteItemModal = true;
+  }
+
+  closeDeleteItemModal(): void {
+    this.showDeleteItemModal = false;
+    this.itemToDelete = null;
+  }
+
+  async confirmDeleteItem(): Promise<void> {
+    if (!this.itemToDelete) return;
+
+    const arvoreId = this.itemToDelete.arvoreId;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.deletarItemArvore(this.itemToDelete.id)
+      );
+
+      if (response.success) {
+        this.toastr.success('Item excluído com sucesso', 'Sucesso');
+        this.closeDeleteItemModal();
+        await this.loadItensArvore(arvoreId);
+      }
+    } catch (err: any) {
+      console.error('Erro ao deletar item:', err);
+      this.toastr.error('Erro ao deletar item', 'Erro');
     }
   }
 }
