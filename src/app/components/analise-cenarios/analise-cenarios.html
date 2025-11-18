@@ -1,0 +1,128 @@
+<div class="page-header-wrapper">
+  <div class="page-header">
+    <h1 class="page-title">Análise de Cenários</h1>
+    <button class="btn btn-secondary" (click)="voltarParaDefinicaoImpacto()">
+      <i class="fas fa-arrow-left"></i> Voltar
+    </button>
+  </div>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<div *ngIf="error" class="error-message">
+  <i class="fas fa-exclamation-circle"></i>
+  {{ error }}
+</div>
+
+<div *ngIf="isLoading" class="loading-container">
+  <i class="fas fa-spinner fa-spin"></i>
+  Carregando...
+</div>
+
+<div *ngIf="!isLoading && planejamento" class="content">
+
+  <!-- Empty State -->
+  <div *ngIf="!matrizCruzamento || !matrizFinal" class="empty-state">
+    <i class="fas fa-exclamation-triangle empty-icon"></i>
+    <h3>Definição de Impacto necessária</h3>
+    <p>Para visualizar a análise de cenários, é necessário primeiro preencher a <strong>Definição de Impacto</strong>.</p>
+    <button class="btn btn-primary" (click)="voltarParaDefinicaoImpacto()">
+      <i class="fas fa-chart-line"></i> Ir para Definição de Impacto
+    </button>
+  </div>
+
+  <!-- Análise -->
+  <div *ngIf="matrizCruzamento && matrizFinal && analiseOportunidades && analiseAmeacas" class="analise-container">
+
+    <!-- Cliente -->
+    <div class="cliente-header">
+      <h2>{{ getClientName() }}</h2>
+    </div>
+
+    <!-- Análise de Oportunidades -->
+    <div class="analise-section">
+      <h3 class="section-title">OPORTUNIDADES</h3>
+
+      <div class="analise-content">
+        <!-- Gráfico -->
+        <div class="chart-container">
+          <h4 class="chart-title">Análise de Oportunidades</h4>
+          <canvas id="chartOportunidades"></canvas>
+        </div>
+
+        <!-- Tabela -->
+        <div class="table-container">
+          <table class="analise-table">
+        <thead>
+          <tr>
+            <th class="col-numero">#</th>
+            <th class="col-descricao">DESCRIÇÃO</th>
+            <th class="col-valor">FRAQUEZA</th>
+            <th class="col-valor">FORÇA</th>
+            <th class="col-percentual">PERCENTUAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of analiseOportunidades.items; let i = index">
+            <td class="col-numero">{{ i + 1 }}</td>
+            <td class="col-descricao">{{ item.texto }}</td>
+            <td class="col-valor">{{ item.fraqueza }}</td>
+            <td class="col-valor">{{ item.forca }}</td>
+            <td class="col-percentual">{{ item.percentual }}%</td>
+          </tr>
+          <tr class="row-total">
+            <td colspan="2" class="col-total-label">SOMA</td>
+            <td class="col-valor"><strong>{{ analiseOportunidades.somaFraqueza }}</strong></td>
+            <td class="col-valor"><strong>{{ analiseOportunidades.somaForca }}</strong></td>
+            <td class="col-percentual"><strong>100%</strong></td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Análise de Ameaças -->
+    <div class="analise-section">
+      <h3 class="section-title">AMEAÇAS</h3>
+
+      <div class="analise-content">
+        <!-- Gráfico -->
+        <div class="chart-container">
+          <h4 class="chart-title">Análise de Ameaças</h4>
+          <canvas id="chartAmeacas"></canvas>
+        </div>
+
+        <!-- Tabela -->
+        <div class="table-container">
+          <table class="analise-table">
+        <thead>
+          <tr>
+            <th class="col-numero">#</th>
+            <th class="col-descricao">DESCRIÇÃO</th>
+            <th class="col-valor">FRAQUEZA</th>
+            <th class="col-valor">FORÇA</th>
+            <th class="col-percentual">PERCENTUAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of analiseAmeacas.items; let i = index">
+            <td class="col-numero">{{ i + 1 }}</td>
+            <td class="col-descricao">{{ item.texto }}</td>
+            <td class="col-valor">{{ item.fraqueza }}</td>
+            <td class="col-valor">{{ item.forca }}</td>
+            <td class="col-percentual">{{ item.percentual }}%</td>
+          </tr>
+          <tr class="row-total">
+            <td colspan="2" class="col-total-label">SOMA</td>
+            <td class="col-valor"><strong>{{ analiseAmeacas.somaFraqueza }}</strong></td>
+            <td class="col-valor"><strong>{{ analiseAmeacas.somaForca }}</strong></td>
+            <td class="col-percentual"><strong>100%</strong></td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

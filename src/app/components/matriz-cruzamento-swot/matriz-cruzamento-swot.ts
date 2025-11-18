@@ -258,6 +258,12 @@ export class MatrizCruzamentoSwotComponent implements OnInit {
     }
   }
 
+  irParaAnalise(): void {
+    if (this.planejamentoId) {
+      this.router.navigate(['/home/planejamento-estrategico/analise-cenarios', this.planejamentoId]);
+    }
+  }
+
   trackByIndex(index: number): number {
     return index;
   }

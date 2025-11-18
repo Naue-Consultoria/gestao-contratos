@@ -1,6 +1,6 @@
 <div class="page-header-wrapper">
   <div class="page-header">
-    <h1 class="page-title">Matriz de Cruzamento SWOT</h1>
+    <h1 class="page-title">Definição de Impacto - Cenários</h1>
     <button class="btn btn-secondary" (click)="voltarParaPlanejamento()">
       <i class="fas fa-arrow-left"></i> Voltar
     </button>
@@ -42,9 +42,14 @@
       <div class="cliente-info">
         {{ getClientName() }}
       </div>
-      <button class="btn btn-primary" (click)="salvarMatrizCruzamento()" [disabled]="isSaving">
-        <i class="fas fa-save"></i> {{ isSaving ? 'Salvando...' : 'Salvar Matriz' }}
-      </button>
+      <div class="action-buttons">
+        <button class="btn btn-secondary" (click)="irParaAnalise()" *ngIf="matrizCruzamento">
+          <i class="fas fa-chart-bar"></i> Ver Análise
+        </button>
+        <button class="btn btn-primary" (click)="salvarMatrizCruzamento()" [disabled]="isSaving">
+          <i class="fas fa-save"></i> {{ isSaving ? 'Salvando...' : 'Salvar Matriz' }}
+        </button>
+      </div>
     </div>
 
     <!-- Wrapper da Matriz -->

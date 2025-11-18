@@ -155,7 +155,12 @@ export class BreadcrumbService {
     '/home/planejamento-estrategico/swot-cruzamento': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
-      { label: 'Matriz de Cruzamento SWOT' }
+      { label: 'Definição de Impacto - Cenários' }
+    ],
+    '/home/planejamento-estrategico/analise-cenarios': [
+      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+      { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+      { label: 'Análise de Cenários' }
     ],
     '/home/ajuda': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
@@ -278,7 +283,18 @@ export class BreadcrumbService {
         const breadcrumbs = [
           { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
           { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
-          { label: 'Matriz de Cruzamento SWOT' }
+          { label: 'Definição de Impacto - Cenários' }
+        ];
+        this.setBreadcrumbs(breadcrumbs);
+        return;
+      }
+
+      // Para URLs como /home/planejamento-estrategico/analise-cenarios/123
+      if (urlParts.length === 5 && urlParts[2] === 'planejamento-estrategico' && urlParts[3] === 'analise-cenarios') {
+        const breadcrumbs = [
+          { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
+          { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+          { label: 'Análise de Cenários' }
         ];
         this.setBreadcrumbs(breadcrumbs);
         return;

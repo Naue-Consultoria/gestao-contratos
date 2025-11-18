@@ -1,0 +1,323 @@
+.page-header-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 1rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #fff3cd;
+  color: #856404;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
+  margin-bottom: 1.5rem;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem;
+}
+
+.loading-container i {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.btn {
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background: #003b2b;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #002821;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.empty-state {
+  background: white;
+  border-radius: 12px;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #dee2e6;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  color: #495057;
+  margin-bottom: 0.75rem;
+}
+
+.empty-state p {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+/* Análise Container */
+.analise-container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.cliente-header {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.cliente-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+/* Seção de Análise */
+.analise-section {
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #003b2b;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #003b2b;
+}
+
+/* Análise Content - Tabela + Gráfico */
+.analise-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Gráfico */
+.chart-container {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  height: 500px;
+  width: 100%;
+}
+
+.chart-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+#chartOportunidades,
+#chartAmeacas {
+  max-height: 450px;
+}
+
+/* Tabela */
+.table-container {
+  overflow-x: auto;
+}
+.analise-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #2d3748;
+}
+
+.analise-table thead {
+  background: #f8f9fa;
+}
+
+.analise-table th {
+  padding: 0.75rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: #2d3748;
+  border: 1px solid #cbd5e1;
+}
+
+.analise-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.analise-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.analise-table td {
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  font-size: 0.9rem;
+}
+
+.col-numero {
+  width: 60px;
+  text-align: center;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.col-descricao {
+  text-align: left;
+  min-width: 300px;
+  color: #2d3748;
+}
+
+.col-valor {
+  width: 120px;
+  text-align: center;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.col-percentual {
+  width: 120px;
+  text-align: center;
+  font-weight: 600;
+  color: #003b2b;
+  font-size: 1rem;
+}
+
+.row-total {
+  background: #f1f5f9;
+  font-weight: 700;
+}
+
+.row-total td {
+  border-top: 2px solid #2d3748;
+}
+
+.col-total-label {
+  text-align: right;
+  padding-right: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #2d3748;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .analise-content {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-container {
+    max-width: 100%;
+    height: 450px;
+    margin: 0 auto 2rem auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .analise-table {
+    font-size: 0.85rem;
+  }
+
+  .analise-table th,
+  .analise-table td {
+    padding: 0.5rem;
+  }
+
+  .col-descricao {
+    min-width: 200px;
+  }
+
+  .col-valor,
+  .col-percentual {
+    width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .analise-table {
+    font-size: 0.75rem;
+  }
+
+  .analise-table th,
+  .analise-table td {
+    padding: 0.4rem;
+  }
+
+  .col-numero {
+    width: 40px;
+  }
+
+  .col-descricao {
+    min-width: 150px;
+  }
+
+  .col-valor,
+  .col-percentual {
+    width: 70px;
+    font-size: 0.85rem;
+  }
+}

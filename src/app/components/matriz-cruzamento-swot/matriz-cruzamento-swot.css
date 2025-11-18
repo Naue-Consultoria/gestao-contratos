@@ -142,9 +142,11 @@
   flex: 1;
 }
 
-.action-bar .btn {
+.action-buttons {
   position: absolute;
   right: 0;
+  display: flex;
+  gap: 0.5rem;
 }
 
 /* Matriz Wrapper Master */
@@ -462,10 +464,14 @@
     align-items: stretch;
   }
 
-  .action-bar .btn {
+  .action-buttons {
     position: static;
     width: 100%;
-    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  .action-buttons .btn {
+    flex: 1;
   }
 
   .cliente-info {
