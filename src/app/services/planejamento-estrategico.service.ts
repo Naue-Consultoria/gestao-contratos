@@ -611,10 +611,10 @@ export class PlanejamentoEstrategicoService {
     }>(`${this.apiUrl}/${planejamentoId}/swot-cruzamento`, data);
   }
 
-  // ===== OKRs =====
+  // ===== OBJETIVOS ESTRATÉGICOS =====
 
   /**
-   * Listar OKRs de um planejamento
+   * Listar objetivos estratégicos de um planejamento
    */
   listarOkrs(planejamentoId: number): Observable<{
     success: boolean;
@@ -627,7 +627,7 @@ export class PlanejamentoEstrategicoService {
   }
 
   /**
-   * Adicionar OKR a um planejamento
+   * Adicionar objetivo estratégico a um planejamento
    */
   adicionarOkr(planejamentoId: number, data: { objetivo: string }): Observable<{
     success: boolean;
@@ -642,7 +642,7 @@ export class PlanejamentoEstrategicoService {
   }
 
   /**
-   * Atualizar OKR
+   * Atualizar objetivo estratégico
    */
   atualizarOkr(okrId: number, data: { objetivo: string }): Observable<{
     success: boolean;
@@ -657,7 +657,7 @@ export class PlanejamentoEstrategicoService {
   }
 
   /**
-   * Deletar OKR
+   * Deletar objetivo estratégico
    */
   deletarOkr(okrId: number): Observable<{
     success: boolean;

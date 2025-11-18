@@ -87,7 +87,7 @@
 .text-danger { color: #dc3545; }
 .text-warning { color: #856404; }
 
-/* OKRs - Formulário inline para adicionar */
+/* Objetivos Estratégicos - Formulário inline para adicionar */
 .add-okr-inline {
   display: flex;
   gap: 0.75rem;
@@ -99,7 +99,7 @@
   flex: 1;
 }
 
-/* OKRs Table */
+/* Objetivos Estratégicos - Tabela */
 .okrs-table-container { overflow-x: auto; margin-top: 1rem; }
 .okrs-table { width: 100%; border-collapse: collapse; }
 .okrs-table thead { background: #f8f9fa; }
@@ -126,7 +126,7 @@
   font-size: 0.875rem;
 }
 
-/* Ações dos OKRs */
+/* Ações dos Objetivos Estratégicos */
 .okr-actions {
   display: flex;
   gap: 0.5rem;

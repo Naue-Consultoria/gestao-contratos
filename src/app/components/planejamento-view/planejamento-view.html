@@ -79,7 +79,7 @@
       class="tab-button"
       [class.active]="activeTab === 'okrs'"
       (click)="activeTab = 'okrs'; loadOkrs()">
-      <i class="fas fa-bullseye"></i> OKRs
+      <i class="fas fa-bullseye"></i> Objetivos Estratégicos
     </button>
   </div>
 
@@ -214,10 +214,10 @@
     </div>
   </div>
 
-  <!-- OKRs -->
+  <!-- Objetivos Estratégicos -->
   <div class="section" *ngIf="activeTab === 'okrs'">
     <div class="section-header">
-      <h3>Objetivos e Resultados-Chave (OKRs)</h3>
+      <h3>Objetivos Estratégicos</h3>
     </div>
 
     <!-- Formulário inline para adicionar objetivo -->
@@ -380,7 +380,7 @@
   </div>
 </div>
 
-<!-- Modal Delete OKR -->
+<!-- Modal Delete Objetivo Estratégico -->
 <div class="modal-overlay" *ngIf="showDeleteOkrModal" (click)="closeDeleteOkrModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -390,7 +390,7 @@
       </button>
     </div>
     <div class="modal-body">
-      <p>Tem certeza que deseja excluir o objetivo <strong>{{ okrToDelete?.objetivo }}</strong>?</p>
+      <p>Tem certeza que deseja excluir o objetivo estratégico <strong>{{ okrToDelete?.objetivo }}</strong>?</p>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="closeDeleteOkrModal()">Cancelar</button>

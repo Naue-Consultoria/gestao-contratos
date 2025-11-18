@@ -71,7 +71,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   // Menu dropdown grupo
   openGrupoMenuId: number | null = null;
 
-  // OKRs
+  // Objetivos Estratégicos
   okrs: any[] = [];
   novoObjetivo: string = '';
   editingOkrId: number | null = null;
@@ -521,7 +521,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ===== GESTÃO DE OKRs =====
+  // ===== GESTÃO DE OBJETIVOS ESTRATÉGICOS =====
 
   async loadOkrs(): Promise<void> {
     if (!this.planejamentoId) return;
@@ -535,14 +535,14 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
         this.okrs = response.data;
       }
     } catch (err: any) {
-      console.error('Erro ao carregar OKRs:', err);
-      this.toastr.error('Erro ao carregar OKRs', 'Erro');
+      console.error('Erro ao carregar objetivos estratégicos:', err);
+      this.toastr.error('Erro ao carregar objetivos estratégicos', 'Erro');
     }
   }
 
   async adicionarNovoOkr(): Promise<void> {
     if (!this.novoObjetivo.trim()) {
-      this.toastr.warning('Por favor, informe o objetivo', 'Atenção');
+      this.toastr.warning('Por favor, informe o objetivo estratégico', 'Atenção');
       return;
     }
 
@@ -556,13 +556,13 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
       );
 
       if (response.success) {
-        this.toastr.success('Objetivo adicionado com sucesso', 'Sucesso');
+        this.toastr.success('Objetivo estratégico adicionado com sucesso', 'Sucesso');
         this.novoObjetivo = '';
         this.loadOkrs();
       }
     } catch (err: any) {
-      console.error('Erro ao adicionar objetivo:', err);
-      this.toastr.error(err.error?.message || 'Erro ao adicionar objetivo', 'Erro');
+      console.error('Erro ao adicionar objetivo estratégico:', err);
+      this.toastr.error(err.error?.message || 'Erro ao adicionar objetivo estratégico', 'Erro');
     }
   }
 
@@ -578,7 +578,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
 
   async salvarEdicaoOkr(okrId: number): Promise<void> {
     if (!this.editingOkrText.trim()) {
-      this.toastr.warning('Por favor, informe o objetivo', 'Atenção');
+      this.toastr.warning('Por favor, informe o objetivo estratégico', 'Atenção');
       return;
     }
 
@@ -590,14 +590,14 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
       );
 
       if (response.success) {
-        this.toastr.success('Objetivo atualizado com sucesso', 'Sucesso');
+        this.toastr.success('Objetivo estratégico atualizado com sucesso', 'Sucesso');
         this.editingOkrId = null;
         this.editingOkrText = '';
         this.loadOkrs();
       }
     } catch (err: any) {
-      console.error('Erro ao atualizar objetivo:', err);
-      this.toastr.error(err.error?.message || 'Erro ao atualizar objetivo', 'Erro');
+      console.error('Erro ao atualizar objetivo estratégico:', err);
+      this.toastr.error(err.error?.message || 'Erro ao atualizar objetivo estratégico', 'Erro');
     }
   }
 
@@ -620,13 +620,13 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
       );
 
       if (response.success) {
-        this.toastr.success('OKR excluído com sucesso', 'Sucesso');
+        this.toastr.success('Objetivo estratégico excluído com sucesso', 'Sucesso');
         this.closeDeleteOkrModal();
         this.loadOkrs();
       }
     } catch (err: any) {
-      console.error('Erro ao deletar OKR:', err);
-      this.toastr.error('Erro ao deletar OKR', 'Erro');
+      console.error('Erro ao deletar objetivo estratégico:', err);
+      this.toastr.error('Erro ao deletar objetivo estratégico', 'Erro');
     }
   }
 }
