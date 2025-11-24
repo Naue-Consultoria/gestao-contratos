@@ -105,8 +105,8 @@ export class PublicOkrViewComponent implements OnInit {
       }
     } catch (err: any) {
       console.error('Erro ao carregar OKRs:', err);
-      this.error = 'Não foi possível carregar os OKRs deste departamento.';
-      this.toastr.error('OKRs não encontrados', 'Erro');
+      this.error = 'Não foi possível carregar os OKR\'s deste departamento.';
+      this.toastr.error('OKR\'s não encontrados', 'Erro');
     } finally {
       this.isLoading = false;
     }
@@ -353,16 +353,16 @@ export class PublicOkrViewComponent implements OnInit {
       );
 
       if (response.success) {
-        this.toastr.success('OKRs salvos com sucesso!', 'Sucesso');
+        this.toastr.success('Alterações salvas com sucesso!', 'Salvo');
         this.hasChanges = false;
         // Recarregar para obter IDs atualizados
         await this.loadOkr();
       } else {
-        this.toastr.error(response.message || 'Erro ao salvar OKRs', 'Erro');
+        this.toastr.error(response.message || 'Erro ao salvar alterações', 'Erro');
       }
     } catch (err: any) {
       console.error('Erro ao salvar OKRs:', err);
-      this.toastr.error(err.error?.message || 'Erro ao salvar OKRs', 'Erro');
+      this.toastr.error(err.error?.message || 'Erro ao salvar alterações', 'Erro');
     } finally {
       this.isSaving = false;
     }
