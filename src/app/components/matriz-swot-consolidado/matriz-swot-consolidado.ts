@@ -163,13 +163,25 @@ export class MatrizSwotConsolidadoComponent implements OnInit {
     const classificacaoKey = `${quadrante}_classificacao` as keyof typeof grupo.matriz_swot;
     const classificacoes = grupo.matriz_swot[classificacaoKey];
 
-    if (!classificacoes || typeof classificacoes !== 'object') return todosItens;
+    // Debug: verificar estrutura das classificações
+    console.log(`📊 Grupo: ${grupo.nome_grupo}, Quadrante: ${quadrante}`);
+    console.log('Classificações:', classificacoes);
+    console.log('Todos itens:', todosItens);
+
+    if (!classificacoes || typeof classificacoes !== 'object') {
+      console.log('⚠️ Sem classificações, retornando todos os itens');
+      return todosItens;
+    }
 
     // Filtrar apenas itens com classificação "C" (Certeza)
-    return todosItens.filter((item, index) => {
+    const itensFiltrados = todosItens.filter((item, index) => {
       const classificacao = classificacoes[index.toString()];
+      console.log(`Item ${index}: "${item}" -> Classificação: ${classificacao}`);
       return classificacao === 'C';
     });
+
+    console.log('Itens filtrados (apenas C):', itensFiltrados);
+    return itensFiltrados;
   }
 
   isMatrizPreenchida(grupo: Grupo): boolean {

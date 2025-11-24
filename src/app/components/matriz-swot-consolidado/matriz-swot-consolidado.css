@@ -83,11 +83,10 @@
 /* Matriz SWOT Final */
 .matriz-final-section { background: white; border-radius: 12px; padding: 2rem; padding-top: 3rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 3rem; margin-bottom: 2rem; border: 2px solid #003b2b; }
 
-.section-header-final { display: flex; justify-content: center; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; position: relative; }
-.section-header-final h2 { margin: 0; font-size: 1.5rem; color: #003b2b; text-align: center; flex: 1; }
-.section-header-final .btn, .section-header-final .btn-group { position: absolute; right: 0; }
-.section-header-final .header-actions { position: absolute; right: 0; display: flex; gap: 0.5rem; align-items: center; }
-.btn-group { display: flex; gap: 0.5rem; }
+.section-header-final { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+.section-header-final h2 { margin: 0; font-size: 1.5rem; color: #003b2b; }
+.section-header-final .header-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.btn-group { display: flex; gap: 0.75rem; }
 
 .swot-grid-final { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
 
@@ -332,8 +331,9 @@
   .matriz-header { flex-direction: column; align-items: stretch; gap: 1rem; }
   .status-info { align-self: flex-start; }
   .section-header-final { flex-direction: column; align-items: stretch; }
-  .section-header-final .btn, .section-header-final .btn-group { position: static; }
-  .btn-group { flex-direction: column; }
+  .section-header-final h2 { text-align: center; }
+  .section-header-final .header-actions { width: 100%; justify-content: center; }
+  .btn-group { flex-direction: column; width: 100%; }
 
   .matriz-wrapper {
     grid-template-columns: 30px 1fr;
