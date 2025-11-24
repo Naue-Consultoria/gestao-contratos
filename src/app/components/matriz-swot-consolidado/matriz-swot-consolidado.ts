@@ -153,9 +153,23 @@ export class MatrizSwotConsolidadoComponent implements OnInit {
 
   getMatrizItens(grupo: Grupo, quadrante: 'forcas' | 'fraquezas' | 'oportunidades' | 'ameacas'): string[] {
     if (!grupo.matriz_swot) return [];
+
+    // Obter todos os itens do quadrante
     const valor = grupo.matriz_swot[quadrante];
     if (!valor || !valor.trim()) return [];
-    return valor.split('\n').filter(item => item.trim() !== '');
+    const todosItens = valor.split('\n').filter(item => item.trim() !== '');
+
+    // Obter classificações do quadrante correspondente
+    const classificacaoKey = `${quadrante}_classificacao` as keyof typeof grupo.matriz_swot;
+    const classificacoes = grupo.matriz_swot[classificacaoKey];
+
+    if (!classificacoes || typeof classificacoes !== 'object') return todosItens;
+
+    // Filtrar apenas itens com classificação "C" (Certeza)
+    return todosItens.filter((item, index) => {
+      const classificacao = classificacoes[index.toString()];
+      return classificacao === 'C';
+    });
   }
 
   isMatrizPreenchida(grupo: Grupo): boolean {
