@@ -1,0 +1,290 @@
+<div class="public-departamento-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando departamento...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <div class="error-icon">⚠️</div>
+    <h2>Erro ao carregar departamento</h2>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !error && departamento" class="content-container">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-background"></div>
+      <div class="hero-content">
+        <!-- Logos -->
+        <div class="logos-container">
+          <div class="logo-naue">
+            <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
+          </div>
+          <div class="logo-divider" *ngIf="getClientLogoUrl()"></div>
+          <div class="logo-client" *ngIf="getClientLogoUrl()">
+            <img [src]="getClientLogoUrl()" [alt]="getClientName()" />
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="hero-title">
+          <h1>{{ departamento.planejamento?.titulo }}</h1>
+          <h2>Matriz de Evolução Consciente</h2>
+          <h3 class="departamento-nome">{{ departamento.nome_departamento }}</h3>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="hero-info-cards">
+          <div class="info-card" *ngIf="departamento.planejamento?.data_inicio">
+            <div class="info-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Período</span>
+              <span class="info-value">
+                {{ formatDate(departamento.planejamento.data_inicio) }}
+                <span *ngIf="departamento.planejamento.data_fim"> - {{ formatDate(departamento.planejamento.data_fim) }}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="info-card" *ngIf="departamento.planejamento?.prazo_preenchimento">
+            <div class="info-icon" [class.expired]="isPrazoVencido()">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Prazo de Preenchimento</span>
+              <span class="info-value" [class.expired]="isPrazoVencido()">
+                {{ formatDate(departamento.planejamento.prazo_preenchimento) }}
+                <span *ngIf="isPrazoVencido()" class="expired-badge">Vencido</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Responsável</span>
+              <span class="info-value">
+                {{ departamento.responsavel_nome || 'Não definido' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div *ngIf="departamento.planejamento?.descricao" class="hero-description">
+          <p>{{ departamento.planejamento.descricao }}</p>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator">
+          <i class="fas fa-chevron-down"></i>
+          <span>Role para preencher</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Explicação das Colunas -->
+    <div class="colunas-explicacao">
+      <div class="coluna-explicacao vulnerabilidade">
+        <div class="icon-circle">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <h4>Vulnerabilidade</h4>
+        <p>Medos, limitações e desafios que impactaram a gestão, o time</p>
+      </div>
+
+      <div class="divider-line"></div>
+
+      <div class="coluna-explicacao conquistas">
+        <div class="icon-circle">
+          <i class="fas fa-star"></i>
+        </div>
+        <h4>Conquistas</h4>
+        <p>Momento de se vendarem</p>
+      </div>
+
+      <div class="divider-line"></div>
+
+      <div class="coluna-explicacao licoes">
+        <div class="icon-circle">
+          <i class="fas fa-book-open"></i>
+        </div>
+        <h4>Lições Aprendidas</h4>
+        <p>Erros que se tornaram sabedoria e princípios</p>
+      </div>
+
+      <div class="divider-line"></div>
+
+      <div class="coluna-explicacao compromissos">
+        <div class="icon-circle">
+          <i class="fas fa-handshake"></i>
+        </div>
+        <h4>Compromissos</h4>
+        <p>Ações concretas de mudança e crescimento</p>
+      </div>
+    </div>
+
+    <!-- Informações do Departamento -->
+    <div class="departamento-info-section">
+      <div class="info-header">
+        <h3 class="departamento-title">
+          <i class="fas fa-building"></i>
+          {{ departamento.nome_departamento }}
+        </h3>
+        <div class="status-indicator">
+          <span *ngIf="isMatrizPreenchida()" class="status-chip filled">
+            <i class="fas fa-check-circle"></i> Preenchida
+          </span>
+          <span *ngIf="!isMatrizPreenchida()" class="status-chip pending">
+            <i class="fas fa-clock"></i> Pendente
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Matriz do Departamento -->
+    <div class="departamento-card">
+      <!-- Matriz Editável -->
+      <div class="card-body-edit">
+        <div class="matriz-edit-grid">
+          <!-- Vulnerabilidades -->
+          <div class="matriz-column-edit">
+            <div class="column-header-edit vulnerabilidades">
+              <span><i class="fas fa-shield-alt"></i> Vulnerabilidades</span>
+              <button type="button" class="btn-add-item" (click)="addItem('vulnerabilidades')" [disabled]="isPrazoVencido()">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+            <div class="column-items">
+              <div *ngIf="getItens('vulnerabilidades').length === 0" class="empty-column">
+                Clique no + para adicionar itens
+              </div>
+              <div *ngFor="let item of getItens('vulnerabilidades'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <textarea
+                  [value]="item"
+                  (input)="updateItem('vulnerabilidades', i, $event)"
+                  placeholder="Digite o item..."
+                  class="item-textarea"
+                  [disabled]="isPrazoVencido()"
+                  rows="1"></textarea>
+                <button type="button" class="btn-remove-item" (click)="removeItem('vulnerabilidades', i)" [disabled]="isPrazoVencido()">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conquistas -->
+          <div class="matriz-column-edit">
+            <div class="column-header-edit conquistas">
+              <span><i class="fas fa-star"></i> Conquistas</span>
+              <button type="button" class="btn-add-item" (click)="addItem('conquistas')" [disabled]="isPrazoVencido()">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+            <div class="column-items">
+              <div *ngIf="getItens('conquistas').length === 0" class="empty-column">
+                Clique no + para adicionar itens
+              </div>
+              <div *ngFor="let item of getItens('conquistas'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <textarea
+                  [value]="item"
+                  (input)="updateItem('conquistas', i, $event)"
+                  placeholder="Digite o item..."
+                  class="item-textarea"
+                  [disabled]="isPrazoVencido()"
+                  rows="1"></textarea>
+                <button type="button" class="btn-remove-item" (click)="removeItem('conquistas', i)" [disabled]="isPrazoVencido()">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lições Aprendidas -->
+          <div class="matriz-column-edit">
+            <div class="column-header-edit licoes">
+              <span><i class="fas fa-book-open"></i> Lições Aprendidas</span>
+              <button type="button" class="btn-add-item" (click)="addItem('licoes_aprendidas')" [disabled]="isPrazoVencido()">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+            <div class="column-items">
+              <div *ngIf="getItens('licoes_aprendidas').length === 0" class="empty-column">
+                Clique no + para adicionar itens
+              </div>
+              <div *ngFor="let item of getItens('licoes_aprendidas'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <textarea
+                  [value]="item"
+                  (input)="updateItem('licoes_aprendidas', i, $event)"
+                  placeholder="Digite o item..."
+                  class="item-textarea"
+                  [disabled]="isPrazoVencido()"
+                  rows="1"></textarea>
+                <button type="button" class="btn-remove-item" (click)="removeItem('licoes_aprendidas', i)" [disabled]="isPrazoVencido()">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compromissos -->
+          <div class="matriz-column-edit">
+            <div class="column-header-edit compromissos">
+              <span><i class="fas fa-handshake"></i> Compromissos</span>
+              <button type="button" class="btn-add-item" (click)="addItem('compromissos')" [disabled]="isPrazoVencido()">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+            <div class="column-items">
+              <div *ngIf="getItens('compromissos').length === 0" class="empty-column">
+                Clique no + para adicionar itens
+              </div>
+              <div *ngFor="let item of getItens('compromissos'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <textarea
+                  [value]="item"
+                  (input)="updateItem('compromissos', i, $event)"
+                  placeholder="Digite o item..."
+                  class="item-textarea"
+                  [disabled]="isPrazoVencido()"
+                  rows="1"></textarea>
+                <button type="button" class="btn-remove-item" (click)="removeItem('compromissos', i)" [disabled]="isPrazoVencido()">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="card-actions-edit">
+          <button type="button" class="btn-save" (click)="salvarMatriz()" [disabled]="isSaving || isPrazoVencido()">
+            <i class="fas" [class.fa-save]="!isSaving" [class.fa-spinner]="isSaving" [class.fa-spin]="isSaving"></i>
+            {{ isSaving ? 'Salvando...' : 'Salvar Matriz' }}
+          </button>
+
+          <button *ngIf="isMatrizPreenchida()" type="button" class="btn-secondary" (click)="exportarPDF()">
+            <i class="fas fa-file-pdf"></i>
+            Exportar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="public-footer">
+    <div class="footer-content">
+      <p>&copy; {{ getCurrentYear() }} NAUE Consultoria. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+</div>

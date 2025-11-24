@@ -1,0 +1,222 @@
+/* Importar estilos compartilhados */
+@import '../public-planejamento-view/public-planejamento-view.css';
+
+/* Ajustes específicos para visualização de departamento único */
+.public-departamento-container {
+  /* Herda estilos do public-planejamento-view */
+}
+
+.departamento-nome {
+  margin-top: 1rem;
+  font-size: 1.5rem;
+  color: #4a5568;
+  font-weight: 600;
+}
+
+/* Seção de informações do departamento */
+.departamento-info-section {
+  background: linear-gradient(135deg, #003b2b 0%, #002821 100%);
+  padding: 2.5rem 2rem;
+  margin: 0;
+  width: 100%;
+}
+
+.info-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.departamento-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.departamento-title i {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.5rem;
+}
+
+.status-indicator {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.status-chip.filled {
+  background: #48bb78;
+  color: white;
+  box-shadow: 0 2px 8px rgba(72, 187, 120, 0.25);
+}
+
+.status-chip.pending {
+  background: #f6ad55;
+  color: white;
+  box-shadow: 0 2px 8px rgba(246, 173, 85, 0.25);
+}
+
+.status-chip i {
+  font-size: 1rem;
+}
+
+/* Ícones nos cabeçalhos das colunas */
+.column-header-edit span i {
+  margin-right: 0.5rem;
+  opacity: 0.95;
+}
+
+/* Botões de ação */
+.card-actions-edit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 1.5rem;
+  background: #f7fafc;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.btn-save {
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, #003b2b 0%, #002821 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.3);
+}
+
+.btn-save:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 59, 43, 0.4);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  padding: 0.875rem 2rem;
+  background: white;
+  color: #003b2b;
+  border: 2px solid #003b2b;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.btn-secondary:hover {
+  background: #003b2b;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.2);
+}
+
+/* Footer */
+.public-footer {
+  background: linear-gradient(135deg, #003b2b 0%, #002821 100%);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-content p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .departamento-info-section {
+    padding: 2rem 1rem;
+  }
+
+  .info-header {
+    gap: 0.875rem;
+  }
+
+  .departamento-title {
+    font-size: 1.35rem;
+    justify-content: center;
+  }
+
+  .departamento-title i {
+    font-size: 1.25rem;
+  }
+
+  .status-chip {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .public-footer {
+    padding: 2rem 1rem;
+  }
+
+  .footer-content p {
+    font-size: 0.875rem;
+  }
+
+  .card-actions-edit {
+    flex-direction: column;
+    padding: 1.5rem 1rem;
+  }
+
+  .btn-save,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-save {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+  }
+
+  .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+  }
+}

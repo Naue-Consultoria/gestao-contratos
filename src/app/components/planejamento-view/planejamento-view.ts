@@ -271,6 +271,32 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     });
   }
 
+  copiarLinkDepartamento(departamento: Departamento): void {
+    if (!departamento.unique_token) {
+      this.toastr.error('Este departamento não possui um token único', 'Erro');
+      return;
+    }
+
+    const url = this.planejamentoService.gerarUrlPublicaDepartamento(departamento.unique_token);
+
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastr.success(`Link do departamento "${departamento.nome_departamento}" copiado`, 'Sucesso');
+    }).catch(err => {
+      console.error('Erro ao copiar link:', err);
+      this.toastr.error('Erro ao copiar link', 'Erro');
+    });
+  }
+
+  visualizarDepartamento(departamento: Departamento): void {
+    if (!departamento.unique_token) {
+      this.toastr.error('Este departamento não possui um token único', 'Erro');
+      return;
+    }
+
+    const url = this.planejamentoService.gerarUrlPublicaDepartamento(departamento.unique_token);
+    window.open(url, '_blank');
+  }
+
   voltarParaLista(): void {
     this.router.navigate(['/home/planejamento-estrategico']);
   }

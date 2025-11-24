@@ -32,9 +32,11 @@ export interface Departamento {
   responsavel_nome?: string | null;
   responsavel_email?: string | null;
   ordem: number;
+  unique_token: string;
   created_at: string;
   updated_at: string;
   matriz?: MatrizEvolucao | null;
+  planejamento?: any; // Para quando vem do endpoint público
 }
 
 export interface Grupo {
@@ -433,11 +435,19 @@ export class PlanejamentoEstrategicoService {
   }
 
   /**
-   * Gerar URL pública para preenchimento da Matriz Consciente
+   * Gerar URL pública para preenchimento da Matriz Consciente (planejamento completo)
    */
   gerarUrlPublica(token: string): string {
     const baseUrl = window.location.origin;
     return `${baseUrl}/planejamento-estrategico/${token}`;
+  }
+
+  /**
+   * Gerar URL pública para preenchimento da Matriz Consciente (por departamento)
+   */
+  gerarUrlPublicaDepartamento(departamentoToken: string): string {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/matriz-consciente/${departamentoToken}`;
   }
 
   /**
@@ -446,6 +456,33 @@ export class PlanejamentoEstrategicoService {
   gerarUrlPublicaSwot(grupoToken: string): string {
     const baseUrl = window.location.origin;
     return `${baseUrl}/matriz-swot/${grupoToken}`;
+  }
+
+  /**
+   * Obter departamento via token público
+   */
+  obterDepartamentoPublico(token: string): Observable<{ success: boolean; data: Departamento }> {
+    return this.http.get<{ success: boolean; data: Departamento }>(
+      `${this.apiUrl}/publico/departamento/${token}`
+    );
+  }
+
+  /**
+   * Atualizar matriz via token de departamento (link público)
+   */
+  atualizarMatrizDepartamentoPublico(
+    token: string,
+    data: UpdateMatrizRequest
+  ): Observable<{
+    success: boolean;
+    message: string;
+    data: MatrizEvolucao;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: MatrizEvolucao;
+    }>(`${this.apiUrl}/publico/departamento/${token}/matriz`, data);
   }
 
   /**

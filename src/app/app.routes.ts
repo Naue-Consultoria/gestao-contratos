@@ -47,6 +47,7 @@ import { PlanejamentoEstrategicoPageComponent } from './components/planejamento-
 import { PlanejamentoFormComponent } from './components/planejamento-form/planejamento-form';
 import { PlanejamentoViewComponent } from './components/planejamento-view/planejamento-view';
 import { PublicPlanejamentoViewComponent } from './pages/public-planejamento-view/public-planejamento-view';
+import { PublicDepartamentoViewComponent } from './pages/public-departamento-view/public-departamento-view';
 import { PublicMatrizSwotComponent } from './pages/public-matriz-swot/public-matriz-swot';
 import { MatrizSwotConsolidadoComponent } from './components/matriz-swot-consolidado/matriz-swot-consolidado';
 import { MatrizCruzamentoSwotComponent } from './components/matriz-cruzamento-swot/matriz-cruzamento-swot';
@@ -110,6 +111,13 @@ export const routes: Routes = [
   {
     path: 'planejamento-estrategico/:token',
     component: PublicPlanejamentoViewComponent,
+    title: 'Matriz de Evolução Consciente - NAUE Consultoria',
+  },
+
+  // Rota pública para visualização de departamento específico (Matriz Consciente)
+  {
+    path: 'matriz-consciente/:token',
+    component: PublicDepartamentoViewComponent,
     title: 'Matriz de Evolução Consciente - NAUE Consultoria',
   },
 

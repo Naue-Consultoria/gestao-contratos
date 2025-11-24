@@ -95,10 +95,10 @@
       <h3>Departamentos</h3>
       <div class="section-actions">
         <button class="btn btn-primary btn-sm" (click)="visualizarPlanejamento()">
-          <i class="fas fa-eye"></i> Visualizar Público
+          <i class="fas fa-eye"></i> Visualizar Geral
         </button>
         <button class="btn btn-primary btn-sm" (click)="copiarLinkPublico()">
-          <i class="fas fa-link"></i> Copiar Link
+          <i class="fas fa-link"></i> Copiar Geral
         </button>
         <button class="btn btn-primary" (click)="openNovoDepartamentoModal()">
           <i class="fas fa-plus"></i> Novo Departamento
@@ -111,41 +111,67 @@
       <p>Nenhum departamento cadastrado</p>
     </div>
 
-    <div class="departamentos-grid" *ngIf="departamentos.length > 0">
-      <div *ngFor="let dep of departamentos" class="dep-card">
-        <div class="dep-header">
-          <h4>{{ dep.nome_departamento }}</h4>
-          <div class="dep-actions">
-            <button class="btn-menu" (click)="toggleMenu(dep.id)" title="Mais opções">
-              <i class="fas fa-ellipsis-v"></i>
-            </button>
-            <div class="dropdown-menu" *ngIf="openMenuId === dep.id">
-              <button class="dropdown-item" (click)="openEditarDepartamentoModal(dep); closeMenu()">
-                <i class="fas fa-edit"></i> Editar
-              </button>
-              <button class="dropdown-item dropdown-item-danger" (click)="openDeleteModal(dep); closeMenu()">
-                <i class="fas fa-trash"></i> Excluir
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="dep-body">
-          <div *ngIf="dep.responsavel_nome">
-            <i class="fas fa-user"></i> {{ dep.responsavel_nome }}
-          </div>
-          <div *ngIf="dep.responsavel_email">
-            <i class="fas fa-envelope"></i> {{ dep.responsavel_email }}
-          </div>
-          <div class="matriz-status">
-            <span *ngIf="isMatrizPreenchida(dep)" class="badge-success">
-              <i class="fas fa-check-circle"></i> Matriz Preenchida
-            </span>
-            <span *ngIf="!isMatrizPreenchida(dep)" class="badge-warning">
-              <i class="fas fa-clock"></i> Aguardando Preenchimento
-            </span>
-          </div>
-        </div>
-      </div>
+    <div class="table-container" *ngIf="departamentos.length > 0">
+      <table class="departamentos-table">
+        <thead>
+          <tr>
+            <th>Departamento</th>
+            <th>Responsável</th>
+            <th>Email</th>
+            <th>Status da Matriz</th>
+            <th class="actions-column">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let dep of departamentos">
+            <td class="departamento-name">
+              <i class="fas fa-building"></i>
+              <strong>{{ dep.nome_departamento }}</strong>
+            </td>
+            <td>
+              <span *ngIf="dep.responsavel_nome">
+                <i class="fas fa-user"></i> {{ dep.responsavel_nome }}
+              </span>
+              <span *ngIf="!dep.responsavel_nome" class="text-muted">—</span>
+            </td>
+            <td>
+              <span *ngIf="dep.responsavel_email">
+                <i class="fas fa-envelope"></i> {{ dep.responsavel_email }}
+              </span>
+              <span *ngIf="!dep.responsavel_email" class="text-muted">—</span>
+            </td>
+            <td>
+              <span *ngIf="isMatrizPreenchida(dep)" class="badge-success">
+                <i class="fas fa-check-circle"></i> Preenchida
+              </span>
+              <span *ngIf="!isMatrizPreenchida(dep)" class="badge-warning">
+                <i class="fas fa-clock"></i> Pendente
+              </span>
+            </td>
+            <td class="actions-column">
+              <div class="dep-actions">
+                <button class="btn-menu" (click)="toggleMenu(dep.id)" title="Mais opções">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="dropdown-menu" *ngIf="openMenuId === dep.id">
+                  <button class="dropdown-item" (click)="visualizarDepartamento(dep); closeMenu()">
+                    <i class="fas fa-eye"></i> Visualizar
+                  </button>
+                  <button class="dropdown-item" (click)="copiarLinkDepartamento(dep); closeMenu()">
+                    <i class="fas fa-link"></i> Copiar Link do Departamento
+                  </button>
+                  <button class="dropdown-item" (click)="openEditarDepartamentoModal(dep); closeMenu()">
+                    <i class="fas fa-edit"></i> Editar
+                  </button>
+                  <button class="dropdown-item dropdown-item-danger" (click)="openDeleteModal(dep); closeMenu()">
+                    <i class="fas fa-trash"></i> Excluir
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 

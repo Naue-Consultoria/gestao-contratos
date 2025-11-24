@@ -59,6 +59,19 @@
 .dropdown-item-danger:hover { background: #dc3545; color: white; }
 .matriz-status { margin-top: 1rem; }
 
+/* Tabela de Departamentos */
+.table-container { overflow-x: auto; }
+.departamentos-table { width: 100%; border-collapse: collapse; }
+.departamentos-table thead { background: #f8f9fa; }
+.departamentos-table th { padding: 1rem; text-align: left; font-weight: 600; color: #495057; font-size: 0.9rem; border-bottom: 2px solid #dee2e6; }
+.departamentos-table td { padding: 1rem; border-bottom: 1px solid #e9ecef; vertical-align: middle; }
+.departamentos-table tbody tr:hover { background: #f8f9fa; }
+.departamentos-table tbody tr:last-child td { border-bottom: none; }
+.departamento-name { font-weight: 500; color: #2c3e50; }
+.departamento-name i { color: #003b2b; margin-right: 0.5rem; }
+.actions-column { width: 80px; text-align: center; }
+.text-muted { color: #adb5bd; }
+
 .empty-state { text-align: center; padding: 3rem; color: #6c757d; }
 .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
 
@@ -289,6 +302,9 @@
 @media (max-width: 768px) {
   .card-header, .section-header, .actions { flex-direction: column; align-items: stretch; }
   .departamentos-grid { grid-template-columns: 1fr; }
+  .table-container { overflow-x: auto; }
+  .departamentos-table { min-width: 700px; }
+  .departamentos-table th, .departamentos-table td { padding: 0.75rem 0.5rem; font-size: 0.85rem; }
   .okrs-table-container { overflow-x: auto; }
   .arvore-table-container { overflow-x: auto; }
   .pilares-table-container { overflow-x: auto; }
