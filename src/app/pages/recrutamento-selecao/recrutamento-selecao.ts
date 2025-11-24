@@ -116,6 +116,7 @@ export class RecrutamentoSelecao implements OnInit {
     'entrevista_empresa': 'Entrevista Empresa',
     'testes': 'Testes',
     'fechada': 'Fechada',
+    'fechada_rep': 'Fechada/Reposição',
     'cancelada_cliente': 'Cancelada pelo Cliente',
     'standby': 'Standby',
     'nao_cobrada': 'Não Cobrada',
