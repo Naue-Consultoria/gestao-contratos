@@ -68,9 +68,17 @@ export class RecrutamentoSelecao implements OnInit {
   consultoraFilter: string = '';
   showFecharVagaModal: boolean = false;
   selectedVagaToClose: Vaga | null = null;
+  showCancelarVagaModal: boolean = false;
+  selectedVagaToCancel: Vaga | null = null;
 
   // Dados para fechamento de vaga
   fechamentoData = {
+    salario: '',
+    fonteRecrutamento: ''
+  };
+
+  // Dados para cancelamento de vaga
+  cancelamentoData = {
     salario: '',
     fonteRecrutamento: ''
   };
@@ -534,6 +542,110 @@ export class RecrutamentoSelecao implements OnInit {
     }
   }
 
+  cancelarVaga(vaga: Vaga) {
+    this.selectedVagaToCancel = vaga;
+    // Preencher com valores atuais da vaga
+    if (vaga.salario) {
+      // Formatar o valor para exibir com a máscara de moeda
+      const valor = vaga.salario.toFixed(2).replace('.', ',');
+      this.cancelamentoData.salario = `R$ ${valor.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+    } else {
+      this.cancelamentoData.salario = '';
+    }
+    this.cancelamentoData.fonteRecrutamento = vaga.fonteRecrutamento || '';
+    this.showCancelarVagaModal = true;
+  }
+
+  closeCancelarVagaModal() {
+    this.showCancelarVagaModal = false;
+    this.selectedVagaToCancel = null;
+    // Limpar dados do formulário
+    this.cancelamentoData = {
+      salario: '',
+      fonteRecrutamento: ''
+    };
+  }
+
+  onModalCancelamentoBackdropClick(event: MouseEvent) {
+    if (event.target === event.currentTarget) {
+      this.closeCancelarVagaModal();
+    }
+  }
+
+  calcularFaturamentoCancelamento(): string {
+    if (!this.cancelamentoData.salario) {
+      return 'R$ 0,00';
+    }
+
+    // Converter salário de string formatada para número
+    const salarioString = String(this.cancelamentoData.salario);
+    const salarioNumerico = parseFloat(
+      salarioString
+        .replace('R$', '')
+        .replace(/\./g, '')
+        .replace(',', '.')
+        .trim()
+    );
+
+    if (isNaN(salarioNumerico)) {
+      return 'R$ 0,00';
+    }
+
+    // Calcular 30% do salário
+    const faturamento = salarioNumerico * 0.30;
+
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(faturamento);
+  }
+
+  async confirmCancelarVaga() {
+    if (!this.selectedVagaToCancel) return;
+
+    try {
+      // Preparar dados para atualização
+      const updateData: any = {
+        status: 'cancelada_cliente',
+        porcentagem_faturamento: 30  // 30% do salário
+      };
+
+      // Converter salário de string formatada para número
+      if (this.cancelamentoData.salario) {
+        // Garantir que o valor é uma string antes de processar
+        const salarioString = String(this.cancelamentoData.salario);
+
+        // Remover R$, pontos e vírgulas, e converter para número
+        const salarioNumerico = parseFloat(
+          salarioString
+            .replace('R$', '')
+            .replace(/\./g, '')
+            .replace(',', '.')
+            .trim()
+        );
+
+        // Adicionar salário se foi alterado
+        if (!isNaN(salarioNumerico) && salarioNumerico !== this.selectedVagaToCancel.salario) {
+          updateData.salario = salarioNumerico;
+        }
+      }
+
+      // Adicionar fonte de recrutamento se foi preenchida
+      if (this.cancelamentoData.fonteRecrutamento) {
+        updateData.fonte_recrutamento = this.cancelamentoData.fonteRecrutamento;
+      }
+
+      // Chamar serviço para atualizar vaga
+      await firstValueFrom(this.vagaService.updateVaga(this.selectedVagaToCancel.id, updateData));
+
+      this.closeCancelarVagaModal();
+      await this.loadData();
+    } catch (error) {
+      console.error('Erro ao cancelar vaga:', error);
+      alert('Erro ao cancelar vaga. Tente novamente.');
+    }
+  }
+
   // Dropdown management
   toggleDropdown(vagaId: number, event: Event) {
     event.stopPropagation();
@@ -604,10 +716,10 @@ export class RecrutamentoSelecao implements OnInit {
     this.activeTab = tab;
   }
 
-  // Get vagas for fechamento tab (only closed)
+  // Get vagas for fechamento tab (only closed and cancelled)
   getVagasFechamento(): Vaga[] {
     let vagasFechadas = this.vagas.filter(vaga =>
-      (vaga.status === 'fechada' || vaga.status === 'fechada_rep') &&
+      (vaga.status === 'fechada' || vaga.status === 'fechada_rep' || vaga.status === 'cancelada_cliente') &&
       vaga.dataFechamentoCancelamento
     );
 
@@ -641,7 +753,7 @@ export class RecrutamentoSelecao implements OnInit {
     return this.cachedYears;
   }
 
-  // Get available consultoras from vagas
+  // Get available consultoras from vagas (apenas vagas que geram comissão)
   getAvailableConsultoras(): string[] {
     const consultoras = new Set<string>();
 
@@ -656,7 +768,7 @@ export class RecrutamentoSelecao implements OnInit {
     return Array.from(consultoras).sort();
   }
 
-  // Métodos para a aba de Comissões
+  // Métodos para a aba de Comissões (vagas canceladas NÃO geram comissão)
   getVagasComissoes(): Vaga[] {
     let filteredVagas = this.vagas.filter(vaga =>
       vaga.status === 'fechada' || vaga.status === 'fechada_rep'
