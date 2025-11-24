@@ -249,7 +249,6 @@ export class PublicOkrViewComponent implements OnInit {
       departamento_id: this.departamento?.id || 0,
       titulo: 'Novo Objetivo',
       descricao: '',
-      ordem: this.objetivos.length,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       key_results: []
@@ -275,10 +274,9 @@ export class PublicOkrViewComponent implements OnInit {
     const novoKr: OkrKeyResult = {
       id: tempId,
       objetivo_id: objetivo.id,
-      titulo: 'Novo Key Result',
+      titulo: 'Novo KR',
       descricao: '',
       status: 'pendente',
-      ordem: objetivo.key_results?.length || 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       tarefas: []

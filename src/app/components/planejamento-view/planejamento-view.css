@@ -782,6 +782,92 @@
   font-size: 0.8rem;
 }
 
+.btn-menu {
+  color: #9ca3af;
+}
+
+.btn-menu:hover {
+  color: #374151;
+  background: #e5e7eb;
+}
+
+.btn-icon-light.btn-menu {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.btn-icon-light.btn-menu:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== Dropdown Menu ===== */
+.dropdown-menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 140px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  color: #374151;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: #f3f4f6;
+}
+
+.dropdown-item i {
+  width: 16px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.dropdown-item-danger {
+  color: #dc2626;
+}
+
+.dropdown-item-danger:hover {
+  background: #fef2f2;
+}
+
+.dropdown-item-danger i {
+  color: #dc2626;
+}
+
 /* Modal lg */
 .modal-lg {
   max-width: 600px;

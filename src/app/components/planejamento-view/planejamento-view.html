@@ -509,12 +509,19 @@
                 <span class="badge badge-count">{{ objetivo.key_results?.length || 0 }} KRs</span>
               </div>
               <div class="okr-objetivo-actions">
-                <button class="btn-icon btn-icon-light" (click)="openEditarObjetivoModal(objetivo); $event.stopPropagation()" title="Editar">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-icon btn-icon-light btn-icon-danger" (click)="openDeleteObjetivoModal(objetivo); $event.stopPropagation()" title="Excluir">
-                  <i class="fas fa-trash"></i>
-                </button>
+                <div class="dropdown-menu-container">
+                  <button class="btn-icon btn-icon-light btn-menu" (click)="toggleOkrMenu('objetivo', objetivo.id); $event.stopPropagation()" title="Menu">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="dropdown-menu" *ngIf="isOkrMenuOpen('objetivo', objetivo.id)">
+                    <button class="dropdown-item" (click)="openEditarObjetivoModal(objetivo); closeAllOkrMenus(); $event.stopPropagation()">
+                      <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="dropdown-item dropdown-item-danger" (click)="openDeleteObjetivoModal(objetivo); closeAllOkrMenus(); $event.stopPropagation()">
+                      <i class="fas fa-trash"></i> Excluir
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -524,7 +531,7 @@
 
               <!-- Header de KRs com botão à direita -->
               <div class="okr-subsection-header">
-                <span class="okr-subsection-title"><i class="fas fa-key"></i> Key Results</span>
+                <span class="okr-subsection-title"><i class="fas fa-key"></i> KR's</span>
                 <button class="btn btn-outline-primary btn-sm" (click)="openNovoKeyResultModal(objetivo.id); $event.stopPropagation()">
                   <i class="fas fa-plus"></i> Novo KR
                 </button>
@@ -532,7 +539,7 @@
 
               <div *ngIf="!objetivo.key_results || objetivo.key_results.length === 0" class="empty-state-small">
                 <i class="fas fa-key"></i>
-                <p>Nenhum Key Result cadastrado</p>
+                <p>Nenhum KR cadastrado</p>
               </div>
 
               <!-- Lista de Key Results -->
@@ -548,12 +555,19 @@
                     <div class="okr-kr-meta">
                       <span class="kr-status" [ngClass]="getStatusClass(kr.status)">{{ getStatusLabel(kr.status) }}</span>
                       <div class="okr-kr-actions">
-                        <button class="btn-icon btn-icon-sm" (click)="openEditarKeyResultModal(kr); $event.stopPropagation()" title="Editar">
-                          <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-icon btn-icon-sm btn-icon-danger" (click)="openDeleteKeyResultModal(kr); $event.stopPropagation()" title="Excluir">
-                          <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="dropdown-menu-container">
+                          <button class="btn-icon btn-icon-sm btn-menu" (click)="toggleOkrMenu('kr', kr.id); $event.stopPropagation()" title="Menu">
+                            <i class="fas fa-ellipsis-v"></i>
+                          </button>
+                          <div class="dropdown-menu" *ngIf="isOkrMenuOpen('kr', kr.id)">
+                            <button class="dropdown-item" (click)="openEditarKeyResultModal(kr); closeAllOkrMenus(); $event.stopPropagation()">
+                              <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="dropdown-item dropdown-item-danger" (click)="openDeleteKeyResultModal(kr); closeAllOkrMenus(); $event.stopPropagation()">
+                              <i class="fas fa-trash"></i> Excluir
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -593,12 +607,19 @@
                           </div>
                         </div>
                         <div class="tarefa-actions">
-                          <button class="btn-icon btn-icon-sm" (click)="openEditarTarefaModal(tarefa)" title="Editar">
-                            <i class="fas fa-edit"></i>
-                          </button>
-                          <button class="btn-icon btn-icon-sm btn-icon-danger" (click)="openDeleteTarefaModal(tarefa)" title="Excluir">
-                            <i class="fas fa-trash"></i>
-                          </button>
+                          <div class="dropdown-menu-container">
+                            <button class="btn-icon btn-icon-sm btn-menu" (click)="toggleOkrMenu('tarefa', tarefa.id); $event.stopPropagation()" title="Menu">
+                              <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="dropdown-menu" *ngIf="isOkrMenuOpen('tarefa', tarefa.id)">
+                              <button class="dropdown-item" (click)="openEditarTarefaModal(tarefa); closeAllOkrMenus(); $event.stopPropagation()">
+                                <i class="fas fa-edit"></i> Editar
+                              </button>
+                              <button class="dropdown-item dropdown-item-danger" (click)="openDeleteTarefaModal(tarefa); closeAllOkrMenus(); $event.stopPropagation()">
+                                <i class="fas fa-trash"></i> Excluir
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

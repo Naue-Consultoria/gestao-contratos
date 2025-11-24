@@ -203,7 +203,6 @@ export interface OkrKeyResult {
   titulo: string;
   descricao?: string | null;
   status: 'pendente' | 'em_progresso' | 'concluido' | 'cancelado';
-  ordem?: number;
   created_at: string;
   updated_at: string;
   tarefas?: OkrTarefa[];
@@ -214,7 +213,6 @@ export interface OkrObjetivo {
   departamento_id: number;
   titulo: string;
   descricao?: string | null;
-  ordem?: number;
   created_at: string;
   updated_at: string;
   key_results?: OkrKeyResult[];

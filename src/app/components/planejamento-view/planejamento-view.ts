@@ -98,6 +98,13 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   expandedObjetivos: { [objId: number]: boolean } = {};
   expandedKeyResults: { [krId: number]: boolean } = {};
 
+  // Estado de menus abertos OKR
+  openOkrMenus: Map<string, number | null> = new Map([
+    ['objetivo', null],
+    ['kr', null],
+    ['tarefa', null]
+  ]);
+
   // Modal Objetivo
   showObjetivoModal = false;
   isEditingObjetivo = false;
@@ -161,6 +168,9 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     }
     if (!target.closest('.arvore-header-actions')) {
       this.closeArvoreMenu();
+    }
+    if (!target.closest('.dropdown-menu-container')) {
+      this.closeAllOkrMenus();
     }
   }
 
@@ -1125,6 +1135,25 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
 
   isKeyResultExpanded(krId: number): boolean {
     return this.expandedKeyResults[krId] || false;
+  }
+
+  // --- OKR Menu Operations ---
+  toggleOkrMenu(type: string, id: number): void {
+    const currentOpen = this.openOkrMenus.get(type);
+    this.closeAllOkrMenus();
+    if (currentOpen !== id) {
+      this.openOkrMenus.set(type, id);
+    }
+  }
+
+  isOkrMenuOpen(type: string, id: number): boolean {
+    return this.openOkrMenus.get(type) === id;
+  }
+
+  closeAllOkrMenus(): void {
+    this.openOkrMenus.set('objetivo', null);
+    this.openOkrMenus.set('kr', null);
+    this.openOkrMenus.set('tarefa', null);
   }
 
   // --- OBJETIVOS ---
