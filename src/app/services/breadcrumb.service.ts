@@ -281,9 +281,11 @@ export class BreadcrumbService {
 
       // Para URLs como /home/planejamento-estrategico/swot-consolidado/123
       if (urlParts.length === 5 && urlParts[2] === 'planejamento-estrategico' && urlParts[3] === 'swot-consolidado') {
+        const planejamentoId = urlParts[4];
         const breadcrumbs = [
           { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
           { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+          { label: `Visualizar Planejamento #${planejamentoId}`, url: `/home/planejamento-estrategico/visualizar/${planejamentoId}` },
           { label: 'Matriz SWOT' }
         ];
         this.setBreadcrumbs(breadcrumbs);
@@ -292,9 +294,11 @@ export class BreadcrumbService {
 
       // Para URLs como /home/planejamento-estrategico/swot-cruzamento/123
       if (urlParts.length === 5 && urlParts[2] === 'planejamento-estrategico' && urlParts[3] === 'swot-cruzamento') {
+        const planejamentoId = urlParts[4];
         const breadcrumbs = [
           { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
           { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+          { label: `Visualizar Planejamento #${planejamentoId}`, url: `/home/planejamento-estrategico/visualizar/${planejamentoId}` },
           { label: 'Definição de Impacto - Cenários' }
         ];
         this.setBreadcrumbs(breadcrumbs);
@@ -303,9 +307,11 @@ export class BreadcrumbService {
 
       // Para URLs como /home/planejamento-estrategico/analise-cenarios/123
       if (urlParts.length === 5 && urlParts[2] === 'planejamento-estrategico' && urlParts[3] === 'analise-cenarios') {
+        const planejamentoId = urlParts[4];
         const breadcrumbs = [
           { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
           { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
+          { label: `Visualizar Planejamento #${planejamentoId}`, url: `/home/planejamento-estrategico/visualizar/${planejamentoId}` },
           { label: 'Análise de Cenários' }
         ];
         this.setBreadcrumbs(breadcrumbs);
