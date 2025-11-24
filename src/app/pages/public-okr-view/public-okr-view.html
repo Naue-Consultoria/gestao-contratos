@@ -1,0 +1,356 @@
+<div class="public-okr-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando OKRs...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <div class="error-icon">&#9888;</div>
+    <h2>Erro ao carregar OKRs</h2>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !error && departamento" class="content-container">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-background"></div>
+      <div class="hero-content">
+        <!-- Logos -->
+        <div class="logos-container">
+          <div class="logo-naue">
+            <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
+          </div>
+          <div class="logo-divider" *ngIf="getClientLogoUrl()"></div>
+          <div class="logo-client" *ngIf="getClientLogoUrl()">
+            <img [src]="getClientLogoUrl()" [alt]="getClientName()" />
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="hero-title">
+          <h1>{{ planejamento?.titulo }}</h1>
+          <h2>OKRs - Objetivos e Resultados-Chave</h2>
+          <h3 class="departamento-nome">{{ departamento.nome_departamento }}</h3>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="hero-info-cards" *ngIf="planejamento?.data_inicio">
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Período</span>
+              <span class="info-value">
+                {{ formatDate(planejamento.data_inicio) }}
+                <span *ngIf="planejamento.data_fim"> - {{ formatDate(planejamento.data_fim) }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator" *ngIf="objetivos.length > 0">
+          <i class="fas fa-chevron-down"></i>
+          <span>Role para editar</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Explicação OKRs -->
+    <div class="okr-explicacao">
+      <div class="item-explicacao objetivo">
+        <div class="icon-circle">
+          <i class="fas fa-bullseye"></i>
+        </div>
+        <h4>Objetivos</h4>
+        <p>Metas qualitativas e inspiradoras que definem onde queremos chegar</p>
+      </div>
+
+      <div class="divider-line"></div>
+
+      <div class="item-explicacao key-result">
+        <div class="icon-circle">
+          <i class="fas fa-key"></i>
+        </div>
+        <h4>KR's</h4>
+        <p>Resultados mensuráveis que indicam o progresso do objetivo</p>
+      </div>
+
+      <div class="divider-line"></div>
+
+      <div class="item-explicacao tarefa">
+        <div class="icon-circle">
+          <i class="fas fa-tasks"></i>
+        </div>
+        <h4>Tarefas</h4>
+        <p>Ações específicas com responsáveis e prazos definidos</p>
+      </div>
+    </div>
+
+    <!-- OKRs Content -->
+    <section class="okr-section">
+      <!-- Header com botão de adicionar -->
+      <div class="okr-section-header">
+        <h4 class="okr-section-title">
+          <i class="fas fa-bullseye"></i>
+          Objetivos e Resultados-Chave
+        </h4>
+        <button class="btn-add" (click)="addObjetivo()">
+          <i class="fas fa-plus"></i> Novo Objetivo
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="objetivos.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-tasks"></i>
+        </div>
+        <h3>Nenhum OKR cadastrado</h3>
+        <p>Clique em "Novo Objetivo" para começar a definir seus OKRs.</p>
+      </div>
+
+      <!-- Lista de Objetivos -->
+      <div *ngIf="objetivos.length > 0" class="objetivos-container">
+        <div *ngFor="let objetivo of objetivos; let objIndex = index" class="objetivo-card">
+          <!-- Header do Objetivo -->
+          <div class="objetivo-header">
+            <div class="objetivo-title" (click)="toggleObjetivo(objetivo)">
+              <i class="fas" [ngClass]="isObjetivoExpanded(objetivo.id) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+              <span class="objetivo-numero">O{{ objIndex + 1 }}</span>
+
+              <div class="objetivo-titulo-texto" [class.editing]="isEditingObjetivo(objetivo.id)" (click)="$event.stopPropagation()">
+                <ng-container *ngIf="!isEditingObjetivo(objetivo.id)">
+                  <span class="objetivo-texto">{{ objetivo.titulo }}</span>
+                </ng-container>
+                <ng-container *ngIf="isEditingObjetivo(objetivo.id)">
+                  <input type="text" [(ngModel)]="objetivo.titulo" placeholder="Título do objetivo" (keyup.enter)="stopEditingObjetivo(objetivo.id)" />
+                </ng-container>
+              </div>
+            </div>
+
+            <div class="objetivo-actions" (click)="$event.stopPropagation()">
+              <span class="badge-kr">{{ objetivo.key_results?.length || 0 }} KRs</span>
+              <button *ngIf="isEditingObjetivo(objetivo.id)" class="btn-icon btn-success" (click)="stopEditingObjetivo(objetivo.id)" title="Confirmar">
+                <i class="fas fa-check"></i>
+              </button>
+              <div class="dropdown-menu-container" *ngIf="!isEditingObjetivo(objetivo.id)">
+                <button class="btn-icon btn-menu" (click)="toggleMenu('objetivo', objetivo.id)" title="Menu">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="dropdown-menu" *ngIf="isMenuOpen('objetivo', objetivo.id)">
+                  <button class="dropdown-item" (click)="startEditingObjetivo(objetivo.id); closeAllMenus()">
+                    <i class="fas fa-pencil-alt"></i> Editar
+                  </button>
+                  <button class="dropdown-item dropdown-item-danger" (click)="removeObjetivo(objetivo, objIndex); closeAllMenus()">
+                    <i class="fas fa-trash"></i> Excluir
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conteúdo do Objetivo -->
+          <div class="objetivo-body" *ngIf="isObjetivoExpanded(objetivo.id)">
+            <!-- Descrição -->
+            <div class="objetivo-descricao-container" *ngIf="objetivo.descricao || isEditingObjetivo(objetivo.id)">
+              <div class="objetivo-descricao">
+                <ng-container *ngIf="!isEditingObjetivo(objetivo.id)">
+                  {{ objetivo.descricao || 'Sem descrição' }}
+                </ng-container>
+                <ng-container *ngIf="isEditingObjetivo(objetivo.id)">
+                  <textarea [(ngModel)]="objetivo.descricao" placeholder="Descrição do objetivo (opcional)" rows="3"></textarea>
+                </ng-container>
+              </div>
+            </div>
+
+            <!-- KR's Section -->
+            <div class="krs-section">
+              <div class="krs-header">
+                <h5 class="krs-title">
+                  <i class="fas fa-key"></i>
+                  KR's
+                </h5>
+                <button class="btn-add btn-add-small" (click)="addKeyResult(objetivo)">
+                  <i class="fas fa-plus"></i> Novo KR
+                </button>
+              </div>
+
+              <!-- Empty KRs -->
+              <div *ngIf="!objetivo.key_results || objetivo.key_results.length === 0" class="empty-state-small">
+                <p>Nenhum KR cadastrado. Clique em "Novo KR" para adicionar.</p>
+              </div>
+
+              <!-- Lista de Key Results -->
+              <div *ngFor="let kr of objetivo.key_results; let krIndex = index" class="kr-card">
+                <!-- Header do KR -->
+                <div class="kr-header">
+                  <div class="kr-title" (click)="toggleKeyResult(kr.id)">
+                    <i class="fas" [ngClass]="isKeyResultExpanded(kr.id) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                    <span class="kr-numero">KR{{ krIndex + 1 }}</span>
+
+                    <div class="kr-titulo-texto" [class.editing]="isEditingKr(kr.id)" (click)="$event.stopPropagation()">
+                      <ng-container *ngIf="!isEditingKr(kr.id)">
+                        <span class="kr-texto">{{ kr.titulo }}</span>
+                      </ng-container>
+                      <ng-container *ngIf="isEditingKr(kr.id)">
+                        <input type="text" [(ngModel)]="kr.titulo" placeholder="Título do KR" (keyup.enter)="stopEditingKr(kr.id)" />
+                      </ng-container>
+                    </div>
+
+                    <span class="kr-status" [ngClass]="getStatusClass(kr.status)">{{ getStatusLabel(kr.status) }}</span>
+                  </div>
+
+                  <div class="kr-actions" (click)="$event.stopPropagation()">
+                    <button *ngIf="isEditingKr(kr.id)" class="btn-icon btn-success" (click)="stopEditingKr(kr.id)" title="Confirmar">
+                      <i class="fas fa-check"></i>
+                    </button>
+                    <div class="dropdown-menu-container" *ngIf="!isEditingKr(kr.id)">
+                      <button class="btn-icon btn-menu" (click)="toggleMenu('kr', kr.id)" title="Menu">
+                        <i class="fas fa-ellipsis-v"></i>
+                      </button>
+                      <div class="dropdown-menu" *ngIf="isMenuOpen('kr', kr.id)">
+                        <button class="dropdown-item" (click)="startEditingKr(kr.id); closeAllMenus()">
+                          <i class="fas fa-pencil-alt"></i> Editar
+                        </button>
+                        <button class="dropdown-item dropdown-item-danger" (click)="removeKeyResult(objetivo, kr, krIndex); closeAllMenus()">
+                          <i class="fas fa-trash"></i> Excluir
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Conteúdo do KR -->
+                <div class="kr-body" *ngIf="isKeyResultExpanded(kr.id)">
+                  <!-- Descrição -->
+                  <div class="kr-descricao" *ngIf="kr.descricao || isEditingKr(kr.id)">
+                    <ng-container *ngIf="!isEditingKr(kr.id)">
+                      {{ kr.descricao }}
+                    </ng-container>
+                    <ng-container *ngIf="isEditingKr(kr.id)">
+                      <textarea [(ngModel)]="kr.descricao" placeholder="Descrição do KR (opcional)" rows="2"></textarea>
+                    </ng-container>
+                  </div>
+
+                  <!-- Status do KR -->
+                  <div class="kr-meta" *ngIf="isEditingKr(kr.id)">
+                    <div class="kr-meta-item">
+                      <label>Status:</label>
+                      <select [(ngModel)]="kr.status">
+                        <option value="pendente">Pendente</option>
+                        <option value="em_progresso">Em Progresso</option>
+                        <option value="concluido">Concluído</option>
+                        <option value="cancelado">Cancelado</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Tarefas Section -->
+                  <div class="tarefas-section">
+                    <div class="tarefas-header">
+                      <h6 class="tarefas-title">
+                        <i class="fas fa-tasks"></i>
+                        Tarefas
+                      </h6>
+                      <button class="btn-add btn-add-small" (click)="addTarefa(kr)">
+                        <i class="fas fa-plus"></i> Nova Tarefa
+                      </button>
+                    </div>
+
+                    <!-- Empty Tarefas -->
+                    <div *ngIf="!kr.tarefas || kr.tarefas.length === 0" class="empty-state-small">
+                      <p>Nenhuma tarefa cadastrada</p>
+                    </div>
+
+                    <!-- Lista de Tarefas -->
+                    <div class="tarefas-container" *ngIf="kr.tarefas && kr.tarefas.length > 0">
+                      <div *ngFor="let tarefa of kr.tarefas; let tarefaIndex = index"
+                           class="tarefa-item"
+                           [class.tarefa-concluida]="tarefa.concluida">
+                        <div class="tarefa-content">
+                          <div class="tarefa-checkbox" (click)="toggleTarefaConcluida(tarefa)">
+                            <i class="fas" [ngClass]="tarefa.concluida ? 'fa-check-circle' : 'fa-circle'"></i>
+                          </div>
+                          <div class="tarefa-info">
+                            <div class="tarefa-titulo" [class.editing]="isEditingTarefa(tarefa.id)">
+                              <ng-container *ngIf="!isEditingTarefa(tarefa.id)">
+                                {{ tarefa.titulo }}
+                              </ng-container>
+                              <ng-container *ngIf="isEditingTarefa(tarefa.id)">
+                                <input type="text" [(ngModel)]="tarefa.titulo" placeholder="Título da tarefa" />
+                              </ng-container>
+                            </div>
+
+                            <div class="tarefa-meta" [class.editing]="isEditingTarefa(tarefa.id)">
+                              <ng-container *ngIf="!isEditingTarefa(tarefa.id)">
+                                <span *ngIf="tarefa.responsavel" class="tarefa-responsavel">
+                                  <i class="fas fa-user"></i> {{ tarefa.responsavel }}
+                                </span>
+                                <span *ngIf="tarefa.data_limite" class="tarefa-data">
+                                  <i class="fas fa-calendar"></i> {{ formatDate(tarefa.data_limite) }}
+                                </span>
+                              </ng-container>
+                              <ng-container *ngIf="isEditingTarefa(tarefa.id)">
+                                <div class="tarefa-meta-item">
+                                  <i class="fas fa-user"></i>
+                                  <input type="text" [(ngModel)]="tarefa.responsavel" placeholder="Responsável" />
+                                </div>
+                                <div class="tarefa-meta-item">
+                                  <i class="fas fa-calendar"></i>
+                                  <input type="date" [(ngModel)]="tarefa.data_limite" />
+                                </div>
+                              </ng-container>
+                            </div>
+                          </div>
+
+                          <div class="tarefa-actions">
+                            <button *ngIf="isEditingTarefa(tarefa.id)" class="btn-icon btn-success" (click)="stopEditingTarefa(tarefa.id)" title="Confirmar">
+                              <i class="fas fa-check"></i>
+                            </button>
+                            <div class="dropdown-menu-container" *ngIf="!isEditingTarefa(tarefa.id)">
+                              <button class="btn-icon btn-menu" (click)="toggleMenu('tarefa', tarefa.id)" title="Menu">
+                                <i class="fas fa-ellipsis-v"></i>
+                              </button>
+                              <div class="dropdown-menu" *ngIf="isMenuOpen('tarefa', tarefa.id)">
+                                <button class="dropdown-item" (click)="startEditingTarefa(tarefa.id); closeAllMenus()">
+                                  <i class="fas fa-pencil-alt"></i> Editar
+                                </button>
+                                <button class="dropdown-item dropdown-item-danger" (click)="removeTarefa(kr, tarefa, tarefaIndex); closeAllMenus()">
+                                  <i class="fas fa-trash"></i> Excluir
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botões de Ação -->
+      <div class="actions-section" *ngIf="hasChanges">
+        <button class="btn-save" (click)="salvarAlteracoes()" [disabled]="isSaving">
+          <i class="fas" [class.fa-save]="!isSaving" [class.fa-spinner]="isSaving" [class.fa-spin]="isSaving"></i>
+          {{ isSaving ? 'Salvando...' : 'Salvar Alterações' }}
+        </button>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="public-footer">
+      <div class="footer-content">
+        <p>&copy; {{ getCurrentYear() }} NAUE Consultoria. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </div>
+</div>

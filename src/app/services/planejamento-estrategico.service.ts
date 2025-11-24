@@ -183,6 +183,88 @@ export interface UpdateMatrizRequest {
   compromissos?: string;
 }
 
+// ===== INTERFACES OKR =====
+
+export interface OkrTarefa {
+  id: number;
+  key_result_id: number;
+  titulo: string;
+  descricao?: string | null;
+  data_limite?: string | null;
+  responsavel?: string | null;
+  concluida: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OkrKeyResult {
+  id: number;
+  objetivo_id: number;
+  titulo: string;
+  descricao?: string | null;
+  status: 'pendente' | 'em_progresso' | 'concluido' | 'cancelado';
+  ordem?: number;
+  created_at: string;
+  updated_at: string;
+  tarefas?: OkrTarefa[];
+}
+
+export interface OkrObjetivo {
+  id: number;
+  departamento_id: number;
+  titulo: string;
+  descricao?: string | null;
+  ordem?: number;
+  created_at: string;
+  updated_at: string;
+  key_results?: OkrKeyResult[];
+}
+
+export interface DepartamentoComOkr {
+  id: number;
+  nome_departamento: string;
+  unique_token?: string;
+  objetivos: OkrObjetivo[];
+}
+
+export interface CreateOkrObjetivoRequest {
+  titulo: string;
+  descricao?: string;
+}
+
+export interface UpdateOkrObjetivoRequest {
+  titulo?: string;
+  descricao?: string;
+}
+
+export interface CreateKeyResultRequest {
+  titulo: string;
+  descricao?: string;
+  status?: 'pendente' | 'em_progresso' | 'concluido' | 'cancelado';
+}
+
+export interface UpdateKeyResultRequest {
+  titulo?: string;
+  descricao?: string;
+  status?: 'pendente' | 'em_progresso' | 'concluido' | 'cancelado';
+}
+
+export interface CreateTarefaRequest {
+  titulo: string;
+  descricao?: string;
+  data_limite?: string;
+  responsavel?: string;
+  concluida?: boolean;
+}
+
+export interface UpdateTarefaRequest {
+  titulo?: string;
+  descricao?: string;
+  data_limite?: string;
+  responsavel?: string;
+  concluida?: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -459,6 +541,14 @@ export class PlanejamentoEstrategicoService {
   }
 
   /**
+   * Gerar URL pública para visualização dos OKRs de um departamento
+   */
+  gerarUrlPublicaOkr(departamentoToken: string): string {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/okr/${departamentoToken}`;
+  }
+
+  /**
    * Obter departamento via token público
    */
   obterDepartamentoPublico(token: string): Observable<{ success: boolean; data: Departamento }> {
@@ -483,6 +573,54 @@ export class PlanejamentoEstrategicoService {
       message: string;
       data: MatrizEvolucao;
     }>(`${this.apiUrl}/publico/departamento/${token}/matriz`, data);
+  }
+
+  /**
+   * Obter OKRs do departamento via token público
+   */
+  obterOkrDepartamentoPublico(token: string): Observable<{
+    success: boolean;
+    data: {
+      departamento: {
+        id: number;
+        nome_departamento: string;
+        unique_token: string;
+      };
+      planejamento: any;
+      objetivos: OkrObjetivo[];
+    };
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: {
+        departamento: {
+          id: number;
+          nome_departamento: string;
+          unique_token: string;
+        };
+        planejamento: any;
+        objetivos: OkrObjetivo[];
+      };
+    }>(`${this.apiUrl}/publico/departamento/${token}/okr`);
+  }
+
+  /**
+   * Salvar OKRs do departamento via token público
+   */
+  salvarOkrDepartamentoPublico(token: string, objetivos: OkrObjetivo[]): Observable<{
+    success: boolean;
+    message?: string;
+    data?: {
+      objetivos: OkrObjetivo[];
+    };
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message?: string;
+      data?: {
+        objetivos: OkrObjetivo[];
+      };
+    }>(`${this.apiUrl}/publico/departamento/${token}/okr`, { objetivos });
   }
 
   /**
@@ -841,5 +979,211 @@ export class PlanejamentoEstrategicoService {
    */
   gerarUrlPdfMatrizConsolidada(planejamentoId: number): string {
     return `${this.apiUrl}/${planejamentoId}/swot-final/pdf`;
+  }
+
+  // ===== OKR - OBJECTIVES AND KEY RESULTS =====
+
+  // --- OBJETIVOS ---
+
+  /**
+   * Listar objetivos OKR de um departamento
+   */
+  listarOkrObjetivos(departamentoId: number): Observable<{
+    success: boolean;
+    data: OkrObjetivo[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: OkrObjetivo[];
+    }>(`${this.apiUrl}/departamentos/${departamentoId}/okr-objetivos`);
+  }
+
+  /**
+   * Criar novo objetivo OKR
+   */
+  criarOkrObjetivo(departamentoId: number, data: CreateOkrObjetivoRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: OkrObjetivo;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: OkrObjetivo;
+    }>(`${this.apiUrl}/departamentos/${departamentoId}/okr-objetivos`, data);
+  }
+
+  /**
+   * Atualizar objetivo OKR
+   */
+  atualizarOkrObjetivo(objetivoId: number, data: UpdateOkrObjetivoRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: OkrObjetivo;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: OkrObjetivo;
+    }>(`${this.apiUrl}/okr-objetivos/${objetivoId}`, data);
+  }
+
+  /**
+   * Deletar objetivo OKR
+   */
+  deletarOkrObjetivo(objetivoId: number): Observable<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.http.delete<{
+      success: boolean;
+      message: string;
+    }>(`${this.apiUrl}/okr-objetivos/${objetivoId}`);
+  }
+
+  // --- KEY RESULTS ---
+
+  /**
+   * Listar Key Results de um objetivo
+   */
+  listarKeyResults(objetivoId: number): Observable<{
+    success: boolean;
+    data: OkrKeyResult[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: OkrKeyResult[];
+    }>(`${this.apiUrl}/okr-objetivos/${objetivoId}/key-results`);
+  }
+
+  /**
+   * Criar novo Key Result
+   */
+  criarKeyResult(objetivoId: number, data: CreateKeyResultRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: OkrKeyResult;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: OkrKeyResult;
+    }>(`${this.apiUrl}/okr-objetivos/${objetivoId}/key-results`, data);
+  }
+
+  /**
+   * Atualizar Key Result
+   */
+  atualizarKeyResult(keyResultId: number, data: UpdateKeyResultRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: OkrKeyResult;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: OkrKeyResult;
+    }>(`${this.apiUrl}/key-results/${keyResultId}`, data);
+  }
+
+  /**
+   * Deletar Key Result
+   */
+  deletarKeyResult(keyResultId: number): Observable<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.http.delete<{
+      success: boolean;
+      message: string;
+    }>(`${this.apiUrl}/key-results/${keyResultId}`);
+  }
+
+  // --- TAREFAS ---
+
+  /**
+   * Listar tarefas de um Key Result
+   */
+  listarTarefas(keyResultId: number): Observable<{
+    success: boolean;
+    data: OkrTarefa[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: OkrTarefa[];
+    }>(`${this.apiUrl}/key-results/${keyResultId}/tarefas`);
+  }
+
+  /**
+   * Criar nova tarefa
+   */
+  criarTarefa(keyResultId: number, data: CreateTarefaRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: OkrTarefa;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: OkrTarefa;
+    }>(`${this.apiUrl}/key-results/${keyResultId}/tarefas`, data);
+  }
+
+  /**
+   * Atualizar tarefa
+   */
+  atualizarTarefa(tarefaId: number, data: UpdateTarefaRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: OkrTarefa;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: OkrTarefa;
+    }>(`${this.apiUrl}/tarefas/${tarefaId}`, data);
+  }
+
+  /**
+   * Deletar tarefa
+   */
+  deletarTarefa(tarefaId: number): Observable<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.http.delete<{
+      success: boolean;
+      message: string;
+    }>(`${this.apiUrl}/tarefas/${tarefaId}`);
+  }
+
+  /**
+   * Alternar status de conclusão de uma tarefa
+   */
+  toggleTarefa(tarefaId: number): Observable<{
+    success: boolean;
+    message: string;
+    data: OkrTarefa;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: OkrTarefa;
+    }>(`${this.apiUrl}/tarefas/${tarefaId}/toggle`, {});
+  }
+
+  // --- ESTRUTURA COMPLETA ---
+
+  /**
+   * Obter estrutura completa de OKRs de um planejamento
+   */
+  obterOkrCompleto(planejamentoId: number): Observable<{
+    success: boolean;
+    data: DepartamentoComOkr[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: DepartamentoComOkr[];
+    }>(`${this.apiUrl}/${planejamentoId}/okr-completo`);
   }
 }

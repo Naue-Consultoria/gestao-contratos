@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
-import { PlanejamentoEstrategicoService, PlanejamentoEstrategico, Departamento, Grupo, CreateDepartamentoRequest, UpdateDepartamentoRequest, CreateGrupoRequest, UpdateGrupoRequest } from '../../services/planejamento-estrategico.service';
+import { PlanejamentoEstrategicoService, PlanejamentoEstrategico, Departamento, Grupo, CreateDepartamentoRequest, UpdateDepartamentoRequest, CreateGrupoRequest, UpdateGrupoRequest, DepartamentoComOkr, OkrObjetivo, OkrKeyResult, OkrTarefa } from '../../services/planejamento-estrategico.service';
 import { AuthService } from '../../services/auth';
 import { firstValueFrom } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -36,7 +36,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   error = '';
 
   // Tabs
-  activeTab: 'departamentos' | 'grupos' | 'okrs' | 'arvore-problemas' = 'arvore-problemas';
+  activeTab: 'departamentos' | 'grupos' | 'okrs' | 'arvore-problemas' | 'okr-departamental' = 'arvore-problemas';
 
   // Modal de departamento
   showDepartamentoModal = false;
@@ -91,6 +91,51 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   novaArvoreNome: string = '';
   expandedArvores: { [arvoreId: number]: boolean } = {};
   openArvoreMenuId: number | null = null;
+
+  // OKR - Objectives and Key Results
+  okrDepartamentos: DepartamentoComOkr[] = [];
+  expandedOkrDepartamentos: { [depId: number]: boolean } = {};
+  expandedObjetivos: { [objId: number]: boolean } = {};
+  expandedKeyResults: { [krId: number]: boolean } = {};
+
+  // Modal Objetivo
+  showObjetivoModal = false;
+  isEditingObjetivo = false;
+  objetivoForm = {
+    id: 0,
+    departamento_id: 0,
+    titulo: '',
+    descricao: ''
+  };
+  showDeleteObjetivoModal = false;
+  objetivoToDelete: OkrObjetivo | null = null;
+
+  // Modal Key Result
+  showKeyResultModal = false;
+  isEditingKeyResult = false;
+  keyResultForm = {
+    id: 0,
+    objetivo_id: 0,
+    titulo: '',
+    descricao: '',
+    status: 'pendente' as 'pendente' | 'em_progresso' | 'concluido' | 'cancelado'
+  };
+  showDeleteKeyResultModal = false;
+  keyResultToDelete: OkrKeyResult | null = null;
+
+  // Modal Tarefa
+  showTarefaModal = false;
+  isEditingTarefa = false;
+  tarefaForm = {
+    id: 0,
+    key_result_id: 0,
+    titulo: '',
+    descricao: '',
+    data_limite: '',
+    responsavel: ''
+  };
+  showDeleteTarefaModal = false;
+  tarefaToDelete: OkrTarefa | null = null;
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -191,8 +236,22 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
         return 'Concluído';
       case 'cancelado':
         return 'Cancelado';
+      case 'pendente':
+        return 'Pendente';
+      case 'em_progresso':
+        return 'Em Progresso';
       default:
         return status;
+    }
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'pendente': return 'status-pendente';
+      case 'em_progresso': return 'status-em-progresso';
+      case 'concluido': return 'status-concluido';
+      case 'cancelado': return 'status-cancelado';
+      default: return '';
     }
   }
 
@@ -281,6 +340,22 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
 
     navigator.clipboard.writeText(url).then(() => {
       this.toastr.success(`Link do departamento "${departamento.nome_departamento}" copiado`, 'Sucesso');
+    }).catch(err => {
+      console.error('Erro ao copiar link:', err);
+      this.toastr.error('Erro ao copiar link', 'Erro');
+    });
+  }
+
+  copiarLinkOkrDepartamento(departamento: DepartamentoComOkr): void {
+    if (!departamento.unique_token) {
+      this.toastr.error('Este departamento não possui um token único', 'Erro');
+      return;
+    }
+
+    const url = this.planejamentoService.gerarUrlPublicaOkr(departamento.unique_token);
+
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastr.success(`Link OKR do departamento "${departamento.nome_departamento}" copiado`, 'Sucesso');
     }).catch(err => {
       console.error('Erro ao copiar link:', err);
       this.toastr.error('Erro ao copiar link', 'Erro');
@@ -994,6 +1069,398 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     } catch (err: any) {
       console.error('Erro ao deletar item:', err);
       this.toastr.error('Erro ao deletar item', 'Erro');
+    }
+  }
+
+  // ===== OKR - OBJECTIVES AND KEY RESULTS =====
+
+  async loadOkrCompleto(): Promise<void> {
+    if (!this.planejamentoId) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.obterOkrCompleto(this.planejamentoId)
+      );
+
+      if (response.success) {
+        this.okrDepartamentos = response.data;
+        // Expandir primeiro departamento se houver
+        if (this.okrDepartamentos.length > 0) {
+          this.expandedOkrDepartamentos[this.okrDepartamentos[0].id] = true;
+        }
+      }
+    } catch (err: any) {
+      console.error('Erro ao carregar OKRs:', err);
+      this.toastr.error('Erro ao carregar OKRs', 'Erro');
+    }
+  }
+
+  toggleOkrDepartamento(depId: number): void {
+    this.expandedOkrDepartamentos[depId] = !this.expandedOkrDepartamentos[depId];
+  }
+
+  isOkrDepartamentoExpanded(depId: number): boolean {
+    return this.expandedOkrDepartamentos[depId] || false;
+  }
+
+  toggleObjetivo(objetivo: OkrObjetivo): void {
+    const isExpanding = !this.expandedObjetivos[objetivo.id];
+    this.expandedObjetivos[objetivo.id] = isExpanding;
+
+    // Ao expandir, também expande todos os KRs filhos
+    if (isExpanding && objetivo.key_results) {
+      objetivo.key_results.forEach(kr => {
+        this.expandedKeyResults[kr.id] = true;
+      });
+    }
+  }
+
+  isObjetivoExpanded(objId: number): boolean {
+    return this.expandedObjetivos[objId] || false;
+  }
+
+  toggleKeyResult(krId: number): void {
+    this.expandedKeyResults[krId] = !this.expandedKeyResults[krId];
+  }
+
+  isKeyResultExpanded(krId: number): boolean {
+    return this.expandedKeyResults[krId] || false;
+  }
+
+  // --- OBJETIVOS ---
+
+  openNovoObjetivoModal(departamentoId: number): void {
+    this.isEditingObjetivo = false;
+    this.objetivoForm = {
+      id: 0,
+      departamento_id: departamentoId,
+      titulo: '',
+      descricao: ''
+    };
+    this.showObjetivoModal = true;
+  }
+
+  openEditarObjetivoModal(objetivo: OkrObjetivo): void {
+    this.isEditingObjetivo = true;
+    this.objetivoForm = {
+      id: objetivo.id,
+      departamento_id: objetivo.departamento_id,
+      titulo: objetivo.titulo,
+      descricao: objetivo.descricao || ''
+    };
+    this.showObjetivoModal = true;
+  }
+
+  closeObjetivoModal(): void {
+    this.showObjetivoModal = false;
+    this.objetivoForm = {
+      id: 0,
+      departamento_id: 0,
+      titulo: '',
+      descricao: ''
+    };
+  }
+
+  async saveObjetivo(): Promise<void> {
+    if (!this.objetivoForm.titulo.trim()) {
+      this.toastr.warning('Por favor, informe o título do objetivo', 'Atenção');
+      return;
+    }
+
+    try {
+      if (this.isEditingObjetivo && this.objetivoForm.id) {
+        const response = await firstValueFrom(
+          this.planejamentoService.atualizarOkrObjetivo(this.objetivoForm.id, {
+            titulo: this.objetivoForm.titulo,
+            descricao: this.objetivoForm.descricao || undefined
+          })
+        );
+
+        if (response.success) {
+          this.toastr.success('Objetivo atualizado com sucesso', 'Sucesso');
+        }
+      } else {
+        const response = await firstValueFrom(
+          this.planejamentoService.criarOkrObjetivo(this.objetivoForm.departamento_id, {
+            titulo: this.objetivoForm.titulo,
+            descricao: this.objetivoForm.descricao || undefined
+          })
+        );
+
+        if (response.success) {
+          this.toastr.success('Objetivo criado com sucesso', 'Sucesso');
+        }
+      }
+
+      this.closeObjetivoModal();
+      await this.loadOkrCompleto();
+    } catch (err: any) {
+      console.error('Erro ao salvar objetivo:', err);
+      this.toastr.error(err.error?.message || 'Erro ao salvar objetivo', 'Erro');
+    }
+  }
+
+  openDeleteObjetivoModal(objetivo: OkrObjetivo): void {
+    this.objetivoToDelete = objetivo;
+    this.showDeleteObjetivoModal = true;
+  }
+
+  closeDeleteObjetivoModal(): void {
+    this.showDeleteObjetivoModal = false;
+    this.objetivoToDelete = null;
+  }
+
+  async confirmDeleteObjetivo(): Promise<void> {
+    if (!this.objetivoToDelete) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.deletarOkrObjetivo(this.objetivoToDelete.id)
+      );
+
+      if (response.success) {
+        this.toastr.success('Objetivo excluído com sucesso', 'Sucesso');
+        this.closeDeleteObjetivoModal();
+        await this.loadOkrCompleto();
+      }
+    } catch (err: any) {
+      console.error('Erro ao deletar objetivo:', err);
+      this.toastr.error('Erro ao deletar objetivo', 'Erro');
+    }
+  }
+
+  // --- KEY RESULTS ---
+
+  openNovoKeyResultModal(objetivoId: number): void {
+    this.isEditingKeyResult = false;
+    this.keyResultForm = {
+      id: 0,
+      objetivo_id: objetivoId,
+      titulo: '',
+      descricao: '',
+      status: 'pendente'
+    };
+    this.showKeyResultModal = true;
+  }
+
+  openEditarKeyResultModal(kr: OkrKeyResult): void {
+    this.isEditingKeyResult = true;
+    this.keyResultForm = {
+      id: kr.id,
+      objetivo_id: kr.objetivo_id,
+      titulo: kr.titulo,
+      descricao: kr.descricao || '',
+      status: kr.status
+    };
+    this.showKeyResultModal = true;
+  }
+
+  closeKeyResultModal(): void {
+    this.showKeyResultModal = false;
+    this.keyResultForm = {
+      id: 0,
+      objetivo_id: 0,
+      titulo: '',
+      descricao: '',
+      status: 'pendente'
+    };
+  }
+
+  async saveKeyResult(): Promise<void> {
+    if (!this.keyResultForm.titulo.trim()) {
+      this.toastr.warning('Por favor, informe o título do Key Result', 'Atenção');
+      return;
+    }
+
+    try {
+      if (this.isEditingKeyResult && this.keyResultForm.id) {
+        const response = await firstValueFrom(
+          this.planejamentoService.atualizarKeyResult(this.keyResultForm.id, {
+            titulo: this.keyResultForm.titulo,
+            descricao: this.keyResultForm.descricao || undefined,
+            status: this.keyResultForm.status
+          })
+        );
+
+        if (response.success) {
+          this.toastr.success('Key Result atualizado com sucesso', 'Sucesso');
+        }
+      } else {
+        const response = await firstValueFrom(
+          this.planejamentoService.criarKeyResult(this.keyResultForm.objetivo_id, {
+            titulo: this.keyResultForm.titulo,
+            descricao: this.keyResultForm.descricao || undefined,
+            status: this.keyResultForm.status
+          })
+        );
+
+        if (response.success) {
+          this.toastr.success('Key Result criado com sucesso', 'Sucesso');
+        }
+      }
+
+      this.closeKeyResultModal();
+      await this.loadOkrCompleto();
+    } catch (err: any) {
+      console.error('Erro ao salvar Key Result:', err);
+      this.toastr.error(err.error?.message || 'Erro ao salvar Key Result', 'Erro');
+    }
+  }
+
+  openDeleteKeyResultModal(kr: OkrKeyResult): void {
+    this.keyResultToDelete = kr;
+    this.showDeleteKeyResultModal = true;
+  }
+
+  closeDeleteKeyResultModal(): void {
+    this.showDeleteKeyResultModal = false;
+    this.keyResultToDelete = null;
+  }
+
+  async confirmDeleteKeyResult(): Promise<void> {
+    if (!this.keyResultToDelete) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.deletarKeyResult(this.keyResultToDelete.id)
+      );
+
+      if (response.success) {
+        this.toastr.success('Key Result excluído com sucesso', 'Sucesso');
+        this.closeDeleteKeyResultModal();
+        await this.loadOkrCompleto();
+      }
+    } catch (err: any) {
+      console.error('Erro ao deletar Key Result:', err);
+      this.toastr.error('Erro ao deletar Key Result', 'Erro');
+    }
+  }
+
+  // --- TAREFAS ---
+
+  openNovaTarefaModal(keyResultId: number): void {
+    this.isEditingTarefa = false;
+    this.tarefaForm = {
+      id: 0,
+      key_result_id: keyResultId,
+      titulo: '',
+      descricao: '',
+      data_limite: '',
+      responsavel: ''
+    };
+    this.showTarefaModal = true;
+  }
+
+  openEditarTarefaModal(tarefa: OkrTarefa): void {
+    this.isEditingTarefa = true;
+    this.tarefaForm = {
+      id: tarefa.id,
+      key_result_id: tarefa.key_result_id,
+      titulo: tarefa.titulo,
+      descricao: tarefa.descricao || '',
+      data_limite: tarefa.data_limite || '',
+      responsavel: tarefa.responsavel || ''
+    };
+    this.showTarefaModal = true;
+  }
+
+  closeTarefaModal(): void {
+    this.showTarefaModal = false;
+    this.tarefaForm = {
+      id: 0,
+      key_result_id: 0,
+      titulo: '',
+      descricao: '',
+      data_limite: '',
+      responsavel: ''
+    };
+  }
+
+  async saveTarefa(): Promise<void> {
+    if (!this.tarefaForm.titulo.trim()) {
+      this.toastr.warning('Por favor, informe o título da tarefa', 'Atenção');
+      return;
+    }
+
+    try {
+      if (this.isEditingTarefa && this.tarefaForm.id) {
+        const response = await firstValueFrom(
+          this.planejamentoService.atualizarTarefa(this.tarefaForm.id, {
+            titulo: this.tarefaForm.titulo,
+            descricao: this.tarefaForm.descricao || undefined,
+            data_limite: this.tarefaForm.data_limite || undefined,
+            responsavel: this.tarefaForm.responsavel || undefined
+          })
+        );
+
+        if (response.success) {
+          this.toastr.success('Tarefa atualizada com sucesso', 'Sucesso');
+        }
+      } else {
+        const response = await firstValueFrom(
+          this.planejamentoService.criarTarefa(this.tarefaForm.key_result_id, {
+            titulo: this.tarefaForm.titulo,
+            descricao: this.tarefaForm.descricao || undefined,
+            data_limite: this.tarefaForm.data_limite || undefined,
+            responsavel: this.tarefaForm.responsavel || undefined
+          })
+        );
+
+        if (response.success) {
+          this.toastr.success('Tarefa criada com sucesso', 'Sucesso');
+        }
+      }
+
+      this.closeTarefaModal();
+      await this.loadOkrCompleto();
+    } catch (err: any) {
+      console.error('Erro ao salvar tarefa:', err);
+      this.toastr.error(err.error?.message || 'Erro ao salvar tarefa', 'Erro');
+    }
+  }
+
+  openDeleteTarefaModal(tarefa: OkrTarefa): void {
+    this.tarefaToDelete = tarefa;
+    this.showDeleteTarefaModal = true;
+  }
+
+  closeDeleteTarefaModal(): void {
+    this.showDeleteTarefaModal = false;
+    this.tarefaToDelete = null;
+  }
+
+  async confirmDeleteTarefa(): Promise<void> {
+    if (!this.tarefaToDelete) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.deletarTarefa(this.tarefaToDelete.id)
+      );
+
+      if (response.success) {
+        this.toastr.success('Tarefa excluída com sucesso', 'Sucesso');
+        this.closeDeleteTarefaModal();
+        await this.loadOkrCompleto();
+      }
+    } catch (err: any) {
+      console.error('Erro ao deletar tarefa:', err);
+      this.toastr.error('Erro ao deletar tarefa', 'Erro');
+    }
+  }
+
+  async toggleTarefaConcluida(tarefa: OkrTarefa): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.toggleTarefa(tarefa.id)
+      );
+
+      if (response.success) {
+        // Atualizar localmente sem recarregar tudo
+        tarefa.concluida = response.data.concluida;
+      }
+    } catch (err: any) {
+      console.error('Erro ao alternar tarefa:', err);
+      this.toastr.error('Erro ao alternar tarefa', 'Erro');
     }
   }
 }

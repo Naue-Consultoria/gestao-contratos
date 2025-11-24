@@ -51,13 +51,6 @@
           <span *ngIf="isPrazoVencido()" class="badge-danger">Vencido</span>
         </span>
       </div>
-      <div class="info-row">
-        <strong>Progresso de Preenchimento:</strong>
-        <div class="progress-bar">
-          <div class="progress-fill" [style.width.%]="getMatrizPreenchimentoPercentage()"></div>
-        </div>
-        <span>{{ getMatrizPreenchimentoPercentage() }}% ({{ getMatrizesPreenchidas() }}/{{ departamentos.length }})</span>
-      </div>
     </div>
   </div>
 
@@ -86,6 +79,12 @@
       [class.active]="activeTab === 'okrs'"
       (click)="activeTab = 'okrs'; loadOkrs()">
       <i class="fas fa-bullseye"></i> Objetivos Estratégicos
+    </button>
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'okr-departamental'"
+      (click)="activeTab = 'okr-departamental'; loadOkrCompleto()">
+      <i class="fas fa-tasks"></i> OKRs
     </button>
   </div>
 
@@ -454,6 +453,164 @@
       </ul>
     </div>
   </div>
+
+  <!-- OKR Departamental -->
+  <div class="section" *ngIf="activeTab === 'okr-departamental'">
+    <div class="section-header">
+      <h3>OKRs por Departamento</h3>
+    </div>
+
+    <div *ngIf="okrDepartamentos.length === 0" class="empty-state">
+      <i class="fas fa-tasks"></i>
+      <p>Nenhum departamento cadastrado. Adicione departamentos na aba "Matriz Consciente" para começar.</p>
+    </div>
+
+    <!-- Lista de Departamentos com OKRs -->
+    <div *ngIf="okrDepartamentos.length > 0" class="okr-departamentos-container">
+      <div *ngFor="let dep of okrDepartamentos" class="okr-departamento-card">
+        <!-- Header do Departamento -->
+        <div class="okr-dep-header" (click)="toggleOkrDepartamento(dep.id)">
+          <div class="okr-dep-title">
+            <i class="fas" [ngClass]="isOkrDepartamentoExpanded(dep.id) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+            <i class="fas fa-building"></i>
+            <h4>{{ dep.nome_departamento }}</h4>
+            <span class="badge badge-info">{{ dep.objetivos.length }} objetivos</span>
+          </div>
+          <div class="okr-dep-actions">
+            <button class="btn btn-sm btn-primary" (click)="copiarLinkOkrDepartamento(dep); $event.stopPropagation()" title="Copiar Link OKR">
+              <i class="fas fa-link"></i> Copiar Link OKR
+            </button>
+          </div>
+        </div>
+
+        <!-- Conteúdo do Departamento -->
+        <div class="okr-dep-body" *ngIf="isOkrDepartamentoExpanded(dep.id)">
+          <!-- Header com título e botão à direita -->
+          <div class="okr-section-header">
+            <h5 class="okr-section-title"><i class="fas fa-bullseye"></i> Objetivos</h5>
+            <button class="btn btn-success btn-sm" (click)="openNovoObjetivoModal(dep.id); $event.stopPropagation()">
+              <i class="fas fa-plus"></i> Novo Objetivo
+            </button>
+          </div>
+
+          <div *ngIf="!dep.objetivos || dep.objetivos.length === 0" class="empty-state-small">
+            <i class="fas fa-inbox"></i>
+            <p>Nenhum objetivo cadastrado para este departamento</p>
+          </div>
+
+          <!-- Lista de Objetivos -->
+          <div *ngFor="let objetivo of dep.objetivos; let objIndex = index" class="okr-objetivo-card">
+            <!-- Header do Objetivo -->
+            <div class="okr-objetivo-header" (click)="toggleObjetivo(objetivo)">
+              <div class="okr-objetivo-title">
+                <i class="fas toggle-icon" [ngClass]="isObjetivoExpanded(objetivo.id) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                <span class="objetivo-numero">O{{ objIndex + 1 }}</span>
+                <span class="objetivo-titulo">{{ objetivo.titulo }}</span>
+                <span class="badge badge-count">{{ objetivo.key_results?.length || 0 }} KRs</span>
+              </div>
+              <div class="okr-objetivo-actions">
+                <button class="btn-icon btn-icon-light" (click)="openEditarObjetivoModal(objetivo); $event.stopPropagation()" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-icon btn-icon-light btn-icon-danger" (click)="openDeleteObjetivoModal(objetivo); $event.stopPropagation()" title="Excluir">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Conteúdo do Objetivo -->
+            <div class="okr-objetivo-body" *ngIf="isObjetivoExpanded(objetivo.id)">
+              <p *ngIf="objetivo.descricao" class="objetivo-descricao">{{ objetivo.descricao }}</p>
+
+              <!-- Header de KRs com botão à direita -->
+              <div class="okr-subsection-header">
+                <span class="okr-subsection-title"><i class="fas fa-key"></i> Key Results</span>
+                <button class="btn btn-outline-primary btn-sm" (click)="openNovoKeyResultModal(objetivo.id); $event.stopPropagation()">
+                  <i class="fas fa-plus"></i> Novo KR
+                </button>
+              </div>
+
+              <div *ngIf="!objetivo.key_results || objetivo.key_results.length === 0" class="empty-state-small">
+                <i class="fas fa-key"></i>
+                <p>Nenhum Key Result cadastrado</p>
+              </div>
+
+              <!-- Lista de Key Results -->
+              <div class="okr-kr-list">
+                <div *ngFor="let kr of objetivo.key_results; let krIndex = index" class="okr-kr-card">
+                  <!-- Header do KR -->
+                  <div class="okr-kr-header" (click)="toggleKeyResult(kr.id)">
+                    <div class="okr-kr-title">
+                      <i class="fas toggle-icon" [ngClass]="isKeyResultExpanded(kr.id) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                      <span class="kr-numero">KR{{ krIndex + 1 }}</span>
+                      <span class="kr-titulo">{{ kr.titulo }}</span>
+                    </div>
+                    <div class="okr-kr-meta">
+                      <span class="kr-status" [ngClass]="getStatusClass(kr.status)">{{ getStatusLabel(kr.status) }}</span>
+                      <div class="okr-kr-actions">
+                        <button class="btn-icon btn-icon-sm" (click)="openEditarKeyResultModal(kr); $event.stopPropagation()" title="Editar">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon btn-icon-sm btn-icon-danger" (click)="openDeleteKeyResultModal(kr); $event.stopPropagation()" title="Excluir">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Conteúdo do KR -->
+                  <div class="okr-kr-body" *ngIf="isKeyResultExpanded(kr.id)">
+                    <p *ngIf="kr.descricao" class="kr-descricao">{{ kr.descricao }}</p>
+
+                    <!-- Header de Tarefas com botão à direita -->
+                    <div class="okr-subsection-header tarefas-header">
+                      <span class="okr-subsection-title"><i class="fas fa-tasks"></i> Tarefas</span>
+                      <button class="btn btn-outline-secondary btn-sm" (click)="openNovaTarefaModal(kr.id); $event.stopPropagation()">
+                        <i class="fas fa-plus"></i> Nova Tarefa
+                      </button>
+                    </div>
+
+                    <div *ngIf="!kr.tarefas || kr.tarefas.length === 0" class="empty-state-small tarefas-empty">
+                      <i class="fas fa-clipboard-list"></i>
+                      <p>Nenhuma tarefa cadastrada</p>
+                    </div>
+
+                    <!-- Lista de Tarefas -->
+                    <div class="okr-tarefas-list" *ngIf="kr.tarefas && kr.tarefas.length > 0">
+                      <div *ngFor="let tarefa of kr.tarefas" class="okr-tarefa-item" [class.tarefa-concluida]="tarefa.concluida">
+                        <div class="tarefa-content">
+                          <label class="tarefa-checkbox">
+                            <input type="checkbox" [checked]="tarefa.concluida" (change)="toggleTarefaConcluida(tarefa)">
+                            <span class="tarefa-titulo">{{ tarefa.titulo }}</span>
+                          </label>
+                          <div class="tarefa-meta" *ngIf="tarefa.responsavel || tarefa.data_limite">
+                            <span *ngIf="tarefa.responsavel" class="tarefa-responsavel">
+                              <i class="fas fa-user"></i> {{ tarefa.responsavel }}
+                            </span>
+                            <span *ngIf="tarefa.data_limite" class="tarefa-data">
+                              <i class="fas fa-calendar"></i> {{ formatDate(tarefa.data_limite) }}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="tarefa-actions">
+                          <button class="btn-icon btn-icon-sm" (click)="openEditarTarefaModal(tarefa)" title="Editar">
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button class="btn-icon btn-icon-sm btn-icon-danger" (click)="openDeleteTarefaModal(tarefa)" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Modal Departamento -->
@@ -606,6 +763,162 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="closeDeleteItemModal()">Cancelar</button>
       <button class="btn btn-danger" (click)="confirmDeleteItem()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Objetivo OKR -->
+<div class="modal-overlay" *ngIf="showObjetivoModal" (click)="closeObjetivoModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditingObjetivo ? 'Editar' : 'Novo' }} Objetivo</h2>
+      <button class="modal-close" (click)="closeObjetivoModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Título do Objetivo *</label>
+        <input type="text" [(ngModel)]="objetivoForm.titulo" class="form-control" placeholder="Ex: Aumentar a satisfação dos clientes">
+      </div>
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea [(ngModel)]="objetivoForm.descricao" class="form-control" placeholder="Descrição detalhada do objetivo" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeObjetivoModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="saveObjetivo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Delete Objetivo OKR -->
+<div class="modal-overlay" *ngIf="showDeleteObjetivoModal" (click)="closeDeleteObjetivoModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirmar Exclusão</h2>
+      <button class="modal-close" (click)="closeDeleteObjetivoModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Tem certeza que deseja excluir o objetivo <strong>{{ objetivoToDelete?.titulo }}</strong>?</p>
+      <p class="text-warning">Todos os Key Results e tarefas associados também serão excluídos.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteObjetivoModal()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmDeleteObjetivo()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Key Result -->
+<div class="modal-overlay" *ngIf="showKeyResultModal" (click)="closeKeyResultModal()">
+  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditingKeyResult ? 'Editar' : 'Novo' }} Key Result</h2>
+      <button class="modal-close" (click)="closeKeyResultModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Título do Key Result *</label>
+        <input type="text" [(ngModel)]="keyResultForm.titulo" class="form-control" placeholder="Ex: Reduzir tempo de resposta para 24h">
+      </div>
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea [(ngModel)]="keyResultForm.descricao" class="form-control" placeholder="Descrição detalhada" rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select [(ngModel)]="keyResultForm.status" class="form-control">
+          <option value="pendente">Pendente</option>
+          <option value="em_progresso">Em Progresso</option>
+          <option value="concluido">Concluído</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeKeyResultModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="saveKeyResult()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Delete Key Result -->
+<div class="modal-overlay" *ngIf="showDeleteKeyResultModal" (click)="closeDeleteKeyResultModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirmar Exclusão</h2>
+      <button class="modal-close" (click)="closeDeleteKeyResultModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Tem certeza que deseja excluir o Key Result <strong>{{ keyResultToDelete?.titulo }}</strong>?</p>
+      <p class="text-warning">Todas as tarefas associadas também serão excluídas.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteKeyResultModal()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmDeleteKeyResult()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Tarefa -->
+<div class="modal-overlay" *ngIf="showTarefaModal" (click)="closeTarefaModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditingTarefa ? 'Editar' : 'Nova' }} Tarefa</h2>
+      <button class="modal-close" (click)="closeTarefaModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Título da Tarefa *</label>
+        <input type="text" [(ngModel)]="tarefaForm.titulo" class="form-control" placeholder="Ex: Enviar pesquisa de satisfação">
+      </div>
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea [(ngModel)]="tarefaForm.descricao" class="form-control" placeholder="Descrição da tarefa" rows="2"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group half">
+          <label>Data Limite</label>
+          <input type="date" [(ngModel)]="tarefaForm.data_limite" class="form-control">
+        </div>
+        <div class="form-group half">
+          <label>Responsável</label>
+          <input type="text" [(ngModel)]="tarefaForm.responsavel" class="form-control" placeholder="Nome do responsável">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeTarefaModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="saveTarefa()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Delete Tarefa -->
+<div class="modal-overlay" *ngIf="showDeleteTarefaModal" (click)="closeDeleteTarefaModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirmar Exclusão</h2>
+      <button class="modal-close" (click)="closeDeleteTarefaModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Tem certeza que deseja excluir a tarefa <strong>{{ tarefaToDelete?.titulo }}</strong>?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteTarefaModal()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmDeleteTarefa()">Excluir</button>
     </div>
   </div>
 </div>

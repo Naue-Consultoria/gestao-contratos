@@ -49,6 +49,7 @@ import { PlanejamentoViewComponent } from './components/planejamento-view/planej
 import { PublicPlanejamentoViewComponent } from './pages/public-planejamento-view/public-planejamento-view';
 import { PublicDepartamentoViewComponent } from './pages/public-departamento-view/public-departamento-view';
 import { PublicMatrizSwotComponent } from './pages/public-matriz-swot/public-matriz-swot';
+import { PublicOkrViewComponent } from './pages/public-okr-view/public-okr-view';
 import { MatrizSwotConsolidadoComponent } from './components/matriz-swot-consolidado/matriz-swot-consolidado';
 import { MatrizCruzamentoSwotComponent } from './components/matriz-cruzamento-swot/matriz-cruzamento-swot';
 import { AnaliseCenariosComponent } from './components/analise-cenarios/analise-cenarios';
@@ -126,6 +127,13 @@ export const routes: Routes = [
     path: 'matriz-swot/:token',
     component: PublicMatrizSwotComponent,
     title: 'Matriz SWOT - NAUE Consultoria',
+  },
+
+  // Rota pública para visualização de OKRs por departamento
+  {
+    path: 'okr/:token',
+    component: PublicOkrViewComponent,
+    title: 'OKRs - NAUE Consultoria',
   },
 
   // Rota pública para visualização do hub de mentoria
