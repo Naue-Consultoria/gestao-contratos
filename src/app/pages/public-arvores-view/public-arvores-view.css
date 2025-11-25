@@ -1,9 +1,59 @@
-/* Importar estilos compartilhados */
+/* ===== IMPORTAR ESTILOS COMPARTILHADOS ===== */
 @import '../public-planejamento-view/public-planejamento-view.css';
 
-/* Ajustes específicos para visualização de árvores */
+/* ===== CONTAINER PRINCIPAL ===== */
 .public-arvores-container {
-  /* Herda estilos do public-planejamento-view */
+  min-height: 100vh;
+  background: #f7fafc;
+  padding: 0;
+}
+
+/* ===== BANNERS DE MENSAGEM ===== */
+.success-banner,
+.error-banner {
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 1.25rem 2rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  animation: slideDown 0.3s ease-out;
+}
+
+.success-banner {
+  background: #d4edda;
+  border: 2px solid #28a745;
+  color: #155724;
+}
+
+.success-banner i {
+  font-size: 1.5rem;
+  color: #28a745;
+}
+
+.error-banner {
+  background: #f8d7da;
+  border: 2px solid #dc3545;
+  color: #721c24;
+}
+
+.error-banner i {
+  font-size: 1.5rem;
+  color: #dc3545;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ===== SEÇÃO DE EXPLICAÇÃO ===== */
@@ -54,7 +104,7 @@
 /* ===== SEÇÃO DE ÁRVORES ===== */
 .arvores-section {
   background: #f7fafc;
-  padding: 3rem 2rem;
+  padding: 3rem 2rem 4rem 2rem;
 }
 
 .arvores-content {
@@ -65,6 +115,87 @@
   gap: 2rem;
 }
 
+/* Adicionar Nova Árvore */
+.add-arvore-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.btn-add-arvore {
+  background: linear-gradient(135deg, #003b2b 0%, #002821 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.3);
+}
+
+.btn-add-arvore:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 59, 43, 0.4);
+}
+
+.btn-add-arvore i {
+  font-size: 1.25rem;
+}
+
+.nova-arvore-form {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nova-arvore-form .form-control {
+  flex: 1;
+  min-width: 300px;
+}
+
+.btn-confirm,
+.btn-cancel {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-confirm {
+  background: #28a745;
+  color: white;
+}
+
+.btn-confirm:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.btn-cancel {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+/* Card de Árvore */
 .arvore-card {
   background: white;
   border-radius: 16px;
@@ -98,14 +229,29 @@
   color: white;
   font-size: 1.25rem;
   transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
-.arvore-title-row h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: white;
+.arvore-nome-input {
   flex: 1;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.arvore-nome-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.arvore-nome-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .arvore-title-row .badge {
@@ -116,10 +262,37 @@
   font-size: 0.9rem;
   font-weight: 600;
   border: 1px solid rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
 }
 
 .arvore-body {
-  padding: 0;
+  padding: 2rem;
+}
+
+.arvore-body-header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.btn-add-linha {
+  background: #003b2b;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-add-linha:hover {
+  background: #004d38;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 59, 43, 0.3);
 }
 
 .arvore-body .empty-state {
@@ -139,9 +312,11 @@
   font-size: 1.1rem;
 }
 
-/* ===== TABELA DE ÁRVORES ===== */
+/* ===== TABELA DE ÁRVORES (EDITÁVEL) ===== */
 .arvore-table-container {
   overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
 
 .arvore-table {
@@ -154,10 +329,10 @@
 }
 
 .arvore-table th {
-  padding: 1.25rem 1.5rem;
+  padding: 1.25rem 1rem;
   text-align: left;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #2d3748;
   border-bottom: 2px solid #e2e8f0;
   white-space: nowrap;
@@ -186,33 +361,50 @@
 }
 
 .arvore-table td {
-  padding: 1.25rem 1.5rem;
+  padding: 1rem;
   font-size: 0.95rem;
   color: #4a5568;
-  vertical-align: top;
-}
-
-.arvore-table td strong {
-  color: #2d3748;
-  font-weight: 600;
+  vertical-align: middle;
 }
 
 .arvore-table td.text-center {
   text-align: center;
 }
 
-.pergunta-col {
-  color: #718096;
-  font-style: italic;
-  line-height: 1.6;
+/* Inputs da tabela */
+.arvore-table .form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background: white;
 }
 
-.valor-col {
+.arvore-table .form-control:focus {
+  outline: none;
+  border-color: #003b2b;
+  box-shadow: 0 0 0 3px rgba(0, 59, 43, 0.1);
+}
+
+.arvore-table .form-control.text-center {
+  text-align: center;
   font-weight: 600;
-  color: #2d3748;
-  font-size: 1.05rem;
 }
 
+/* Textarea para pergunta norteadora */
+.arvore-table .textarea-pergunta {
+  font-style: normal;
+  color: #000000;
+  resize: vertical;
+  min-height: 60px;
+  max-height: 200px;
+  line-height: 1.6;
+  font-family: inherit;
+}
+
+/* Nota calculada */
 .nota-col {
   vertical-align: middle;
 }
@@ -228,25 +420,77 @@
 }
 
 .nota-col.nota-media .nota-badge {
+  background: #e2e8f0;
+  color: #2d3748;
+  border: 2px solid #e2e8f0;
+}
+
+.nota-col.nota-alta .nota-badge {
   background: #fef5e7;
   color: #d68910;
   border: 2px solid #d68910;
 }
 
-.nota-col.nota-alta .nota-badge {
-  background: #fee;
-  color: #dc2626;
-  border: 2px solid #dc2626;
-  animation: pulse-nota 2s ease-in-out infinite;
+/* Botão remover linha */
+.btn-remove {
+  background: transparent;
+  border: 2px solid #dc3545;
+  color: #dc3545;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@keyframes pulse-nota {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
-  }
+.btn-remove:hover {
+  background: #dc3545;
+  color: white;
+  transform: scale(1.05);
+}
+
+/* ===== BOTÃO SALVAR ===== */
+.card-actions-edit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.btn-save {
+  padding: 1.25rem 3rem;
+  background: linear-gradient(135deg, #003b2b 0%, #002821 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 4px 16px rgba(0, 59, 43, 0.3);
+}
+
+.btn-save:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 59, 43, 0.4);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-save i {
+  font-size: 1.25rem;
 }
 
 /* ===== PILARES DE DOR ===== */
@@ -279,18 +523,19 @@
 
 .pilares-header {
   text-align: center;
-  margin-bottom: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pilares-count-container {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
 .pilares-icon {
   width: 80px;
   height: 80px;
-  background: rgba(220, 38, 38, 0.2);
-  border: 3px solid #dc2626;
+  background: rgba(214, 137, 16, 0.2);
+  border: 3px solid #d68910;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -300,21 +545,21 @@
 
 .pilares-icon i {
   font-size: 2.5rem;
-  color: #dc2626;
+  color: #d68910;
 }
 
 .pilares-header h2 {
   margin: 0;
-  font-size: 2.25rem;
+  font-size: 3rem;
   font-weight: 700;
   color: white;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .pilares-count {
-  background: rgba(220, 38, 38, 0.2);
-  border: 2px solid #dc2626;
-  color: #dc2626;
+  background: rgba(214, 137, 16, 0.2);
+  border: 2px solid #d68910;
+  color: #d68910;
   padding: 0.5rem 1.25rem;
   border-radius: 20px;
   font-size: 1rem;
@@ -342,7 +587,7 @@
   background: white;
   border-radius: 16px;
   padding: 2rem;
-  border-left: 5px solid #dc2626;
+  border-left: 5px solid #d68910;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
   position: relative;
@@ -356,7 +601,7 @@
   right: 0;
   width: 100px;
   height: 100px;
-  background: radial-gradient(circle, rgba(220, 38, 38, 0.05) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(214, 137, 16, 0.05) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -376,38 +621,38 @@
 .pilar-arvore {
   background: #e2e8f0;
   color: #2d3748;
-  padding: 0.375rem 0.875rem;
+  padding: 0.5rem 1rem;
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .pilar-nota-badge {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #d68910 0%, #b87a0d 100%);
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1.25rem;
   border-radius: 8px;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 2px 8px rgba(214, 137, 16, 0.3);
 }
 
 .pilar-topico {
   margin: 0 0 0.75rem 0;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #1a202c;
   line-height: 1.4;
 }
 
 .pilar-pergunta {
-  margin: 0 0 1.25rem 0;
-  font-size: 0.95rem;
+  margin: 0;
+  font-size: 1.1rem;
   line-height: 1.6;
-  color: #718096;
-  font-style: italic;
+  color: #4a5568;
+  font-style: normal;
 }
 
 .pilar-valores {
@@ -440,12 +685,19 @@
 }
 
 /* ===== EMPTY STATE ===== */
+.empty-state-section {
+  background: #f7fafc;
+  padding: 4rem 2rem;
+}
+
 .empty-state-large {
-  max-width: 1200px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 6rem 2rem;
+  padding: 4rem 2rem;
   text-align: center;
   background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .empty-state-large i {
@@ -466,22 +718,44 @@
   margin: 0;
   font-size: 1.1rem;
   color: #718096;
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 /* ===== ÍCONE ESPECIAL PARA PILARES ===== */
 .info-icon.pilares-icon {
-  background: rgba(220, 38, 38, 0.2);
-  border: 2px solid rgba(220, 38, 38, 0.3);
+  background: rgba(214, 137, 16, 0.2);
+  border: 2px solid rgba(214, 137, 16, 0.3);
 }
 
 .info-icon.pilares-icon i {
-  color: #dc2626;
+  color: #d68910;
+}
+
+/* ===== FOOTER ===== */
+.public-footer {
+  background: linear-gradient(135deg, #003b2b 0%, #002821 100%);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-content p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  font-weight: 400;
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
+  .public-arvores-container {
+    padding: 0;
+  }
+
   .explicacao-content h3 {
     font-size: 1.5rem;
   }
@@ -490,18 +764,36 @@
     font-size: 1rem;
   }
 
+  .nova-arvore-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nova-arvore-form .form-control {
+    min-width: unset;
+  }
+
+  .arvore-nome-input {
+    font-size: 1.1rem;
+  }
+
   .arvore-table-container {
     overflow-x: scroll;
   }
 
   .arvore-table {
-    min-width: 800px;
+    min-width: 900px;
   }
 
   .arvore-table th,
   .arvore-table td {
-    padding: 1rem 0.75rem;
-    font-size: 0.875rem;
+    padding: 0.875rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .arvore-table .form-control {
+    padding: 0.5rem;
+    font-size: 0.85rem;
   }
 
   .pilares-grid {
@@ -510,5 +802,18 @@
 
   .pilares-header h2 {
     font-size: 1.75rem;
+  }
+
+  .btn-save {
+    font-size: 1.05rem;
+    padding: 1rem 2rem;
+  }
+
+  .card-actions-edit {
+    padding: 1.5rem 1rem;
+  }
+
+  .public-footer {
+    padding: 2rem 1rem;
   }
 }

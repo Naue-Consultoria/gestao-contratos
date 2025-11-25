@@ -29,7 +29,7 @@
 .progress-bar { width: 200px; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden; }
 .progress-fill { height: 100%; background: #003b2b; transition: width 0.3s; }
 
-.section { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.section { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: visible; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
 .section-header h3 { margin: 0; font-size: 1.25rem; }
 .section-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
@@ -38,7 +38,8 @@
 .dep-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 1.5rem; }
 .dep-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; }
 .dep-header h4 { margin: 0; font-size: 1.1rem; }
-.dep-actions { position: relative; display: flex; gap: 0.25rem; }
+.dep-actions { position: relative; display: flex; gap: 0.25rem; z-index: 10; }
+.dep-actions .dropdown-menu { z-index: 1001; }
 .dep-body { display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem; }
 .integrantes-row { display: flex; align-items: center; gap: 0.5rem; }
 .grupo-actions { margin-top: 0.5rem; display: flex; gap: 0.5rem; }
@@ -47,7 +48,7 @@
 .btn-menu { background: transparent; border: none; padding: 0.5rem; cursor: pointer; color: #6c757d; border-radius: 6px; font-size: 1.2rem; }
 .btn-menu:hover { background: #e9ecef; }
 
-.dropdown-menu { position: absolute; top: 100%; right: 0; background: white; border: 1px solid #e9ecef; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10; min-width: 150px; margin-top: 0.25rem; }
+.dropdown-menu { position: absolute; top: calc(100% + 4px); right: 0; background: white; border: 1px solid #e9ecef; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1001; min-width: 200px; }
 
 .dropdown-item { width: 100%; display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; background: transparent; border: none; cursor: pointer; color: #495057; font-size: 0.9rem; text-align: left; transition: background 0.2s; }
 .dropdown-item:first-child { border-radius: 8px 8px 0 0; }
@@ -60,7 +61,7 @@
 .matriz-status { margin-top: 1rem; }
 
 /* Tabela de Departamentos */
-.table-container { overflow-x: auto; }
+.table-container { overflow-x: auto; overflow-y: visible; }
 .departamentos-table { width: 100%; border-collapse: collapse; }
 .departamentos-table thead { background: #f8f9fa; }
 .departamentos-table th { padding: 1rem; text-align: left; font-weight: 600; color: #495057; font-size: 0.9rem; border-bottom: 2px solid #dee2e6; }
@@ -69,7 +70,7 @@
 .departamentos-table tbody tr:last-child td { border-bottom: none; }
 .departamento-name { font-weight: 500; color: #2c3e50; }
 .departamento-name i { color: #003b2b; margin-right: 0.5rem; }
-.actions-column { width: 80px; text-align: center; }
+.actions-column { width: 80px; text-align: center; position: relative; }
 .text-muted { color: #adb5bd; }
 
 .empty-state { text-align: center; padding: 3rem; color: #6c757d; }

@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlanejamentoEstrategicoService } from '../../services/planejamento-estrategico.service';
 import { firstValueFrom } from 'rxjs';
@@ -7,7 +8,7 @@ import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-public-arvores-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './public-arvores-view.html',
   styleUrls: ['./public-arvores-view.css']
 })
@@ -20,9 +21,15 @@ export class PublicArvoresViewComponent implements OnInit {
   planejamento: any = null;
   arvores: any[] = [];
   isLoading = true;
+  isSaving = false;
   error = '';
+  successMessage = '';
   expandedArvores: { [arvoreId: number]: boolean } = {};
   currentYear = new Date().getFullYear();
+
+  // Nova árvore
+  novaArvoreNome: string = '';
+  showNovaArvoreForm = false;
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -96,8 +103,140 @@ export class PublicArvoresViewComponent implements OnInit {
   }
 
   formatarNumero(valor: any): string {
-    if (valor === null || valor === undefined) return '-';
+    if (valor === null || valor === undefined || valor === '') return '-';
     return String(valor).replace('.', ',');
+  }
+
+  adicionarNovaLinha(arvore: any): void {
+    if (!arvore.itens) {
+      arvore.itens = [];
+    }
+
+    arvore.itens.push({
+      topico: '',
+      pergunta_norteadora: '',
+      gravidade: null,
+      urgencia: null,
+      tendencia: null,
+      nota: null
+    });
+  }
+
+  removerLinha(arvore: any, index: number): void {
+    if (confirm('Tem certeza que deseja remover este item?')) {
+      arvore.itens.splice(index, 1);
+    }
+  }
+
+  calcularNota(item: any): void {
+    const gravidade = item.gravidade ? parseFloat(String(item.gravidade).replace(',', '.')) : null;
+    const urgencia = item.urgencia ? parseFloat(String(item.urgencia).replace(',', '.')) : null;
+    const tendencia = item.tendencia ? parseFloat(String(item.tendencia).replace(',', '.')) : null;
+
+    if (gravidade && urgencia && tendencia) {
+      item.nota = gravidade * urgencia * tendencia;
+    } else {
+      item.nota = null;
+    }
+  }
+
+  toggleNovaArvoreForm(): void {
+    this.showNovaArvoreForm = !this.showNovaArvoreForm;
+    if (!this.showNovaArvoreForm) {
+      this.novaArvoreNome = '';
+    }
+  }
+
+  criarNovaArvore(): void {
+    if (!this.novaArvoreNome.trim()) {
+      alert('Por favor, informe o nome da árvore');
+      return;
+    }
+
+    // Criar árvore sem ID (será criada no servidor)
+    const novaArvore = {
+      nome_arvore: this.novaArvoreNome.trim(),
+      itens: []
+    };
+
+    this.arvores.push(novaArvore);
+
+    // Atribuir um ID temporário para controle local
+    const tempId = -1 * (this.arvores.length);
+    (novaArvore as any).id = tempId;
+
+    this.expandedArvores[tempId] = true;
+    this.novaArvoreNome = '';
+    this.showNovaArvoreForm = false;
+  }
+
+  async salvarArvores(): Promise<void> {
+    if (!this.token) return;
+
+    // Validar dados
+    for (const arvore of this.arvores) {
+      if (!arvore.nome_arvore || !arvore.nome_arvore.trim()) {
+        alert('Todas as árvores devem ter um nome');
+        return;
+      }
+
+      for (const item of arvore.itens || []) {
+        if (!item.topico || !item.topico.trim()) {
+          alert('Todos os itens devem ter um tópico');
+          return;
+        }
+
+        // Validar range de valores
+        const gravidade = item.gravidade ? parseFloat(String(item.gravidade).replace(',', '.')) : null;
+        const urgencia = item.urgencia ? parseFloat(String(item.urgencia).replace(',', '.')) : null;
+        const tendencia = item.tendencia ? parseFloat(String(item.tendencia).replace(',', '.')) : null;
+
+        if (gravidade !== null && (gravidade < 1 || gravidade > 5)) {
+          alert('Gravidade deve estar entre 1 e 5');
+          return;
+        }
+        if (urgencia !== null && (urgencia < 1 || urgencia > 5)) {
+          alert('Urgência deve estar entre 1 e 5');
+          return;
+        }
+        if (tendencia !== null && (tendencia < 1 || tendencia > 5)) {
+          alert('Tendência deve estar entre 1 e 5');
+          return;
+        }
+      }
+    }
+
+    this.isSaving = true;
+    this.error = '';
+    this.successMessage = '';
+
+    try {
+      // Preparar dados para envio (remover IDs temporários)
+      const arvoresToSave = this.arvores.map(arvore => ({
+        id: arvore.id > 0 ? arvore.id : null, // IDs negativos são temporários
+        nome_arvore: arvore.nome_arvore,
+        itens: arvore.itens || []
+      }));
+
+      const response = await firstValueFrom(
+        this.planejamentoService.salvarItensArvorePublico(this.token, arvoresToSave)
+      );
+
+      if (response.success) {
+        this.successMessage = 'Árvores salvas com sucesso!';
+
+        // Recarregar dados do servidor
+        setTimeout(() => {
+          this.loadArvores();
+          this.successMessage = '';
+        }, 2000);
+      }
+    } catch (err: any) {
+      console.error('Erro ao salvar árvores:', err);
+      this.error = err.error?.message || 'Erro ao salvar árvores. Tente novamente.';
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   getPilaresDeDor(): any[] {

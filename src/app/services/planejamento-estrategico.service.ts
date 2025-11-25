@@ -754,6 +754,49 @@ export class PlanejamentoEstrategicoService {
     }>(`${this.apiUrl}/${planejamentoId}/swot-final`, data);
   }
 
+  /**
+   * Obter matriz SWOT consolidada via token público
+   */
+  obterSwotConsolidadoPublico(token: string): Observable<{
+    success: boolean;
+    data: {
+      planejamento: any;
+      grupos: any[];
+      matrizFinal: any;
+    };
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: {
+        planejamento: any;
+        grupos: any[];
+        matrizFinal: any;
+      };
+    }>(`${this.apiUrl}/publico/swot-consolidado/${token}`);
+  }
+
+  /**
+   * Salvar matriz SWOT consolidada via token público
+   */
+  salvarSwotConsolidadoPublico(token: string, data: UpdateMatrizSwotFinalRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`${this.apiUrl}/publico/swot-consolidado/${token}`, data);
+  }
+
+  /**
+   * Gerar URL pública para matriz SWOT consolidada
+   */
+  gerarUrlPublicaSwotConsolidado(token: string): string {
+    return `${window.location.origin}/swot-consolidado/${token}`;
+  }
+
   // ===== MATRIZ DE CRUZAMENTO SWOT =====
 
   /**
@@ -912,6 +955,19 @@ export class PlanejamentoEstrategicoService {
    */
   gerarUrlPublicaArvores(token: string): string {
     return `${window.location.origin}/arvores-problemas/${token}`;
+  }
+
+  /**
+   * Salvar itens das árvores via token público
+   */
+  salvarItensArvorePublico(token: string, arvores: any[]): Observable<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+    }>(`${this.apiUrl}/publico/arvores/${token}/itens`, { arvores });
   }
 
   /**

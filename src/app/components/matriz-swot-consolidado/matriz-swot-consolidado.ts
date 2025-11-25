@@ -80,8 +80,8 @@ export class MatrizSwotConsolidadoComponent implements OnInit {
         this.planejamento = response.data;
         this.grupos = response.data.grupos || [];
 
-        // Expandir todos os grupos por padrão
-        this.grupos.forEach(g => this.expandedGrupos.add(g.id));
+        // Grupos começam retraídos por padrão
+        // (não adiciona nenhum ID ao expandedGrupos)
 
         // Carregar matriz final
         await this.loadMatrizFinal();

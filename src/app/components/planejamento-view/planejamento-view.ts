@@ -422,6 +422,26 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  visualizarSwotConsolidadoPublico(): void {
+    if (!this.planejamento) return;
+
+    const url = this.planejamentoService.gerarUrlPublicaSwotConsolidado(this.planejamento.unique_token);
+    window.open(url, '_blank');
+  }
+
+  copiarLinkSwotConsolidado(): void {
+    if (!this.planejamento) return;
+
+    const url = this.planejamentoService.gerarUrlPublicaSwotConsolidado(this.planejamento.unique_token);
+
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastr.success('Link da Matriz SWOT Consolidada copiado', 'Sucesso');
+    }).catch(err => {
+      console.error('Erro ao copiar link:', err);
+      this.toastr.error('Erro ao copiar link', 'Erro');
+    });
+  }
+
   // Menu dropdown actions
   toggleMenu(depId: number): void {
     this.openMenuId = this.openMenuId === depId ? null : depId;

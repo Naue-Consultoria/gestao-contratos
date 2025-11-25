@@ -77,13 +77,13 @@
         <!-- Scroll Indicator -->
         <div class="scroll-indicator">
           <i class="fas fa-chevron-down"></i>
-          <span>Role para visualizar</span>
+          <span>Role para preencher</span>
         </div>
       </div>
     </section>
 
     <!-- Explicação -->
-    <div class="explicacao-section">
+    <section class="explicacao-section">
       <div class="explicacao-content">
         <div class="explicacao-icon">
           <i class="fas fa-info-circle"></i>
@@ -91,38 +91,87 @@
         <h3>Sobre a Árvore de Problemas</h3>
         <p>
           A Árvore de Problemas é uma ferramenta estratégica que identifica e analisa os principais desafios
-          organizacionais. Cada item é avaliado por <strong>Gravidade</strong>, <strong>Urgência</strong> e
-          <strong>Tendência</strong>, gerando uma <strong>Nota de Impacto</strong> que prioriza as ações necessárias.
+          organizacionais. Cada item é avaliado por <strong>Gravidade (1-5)</strong>, <strong>Urgência (1-5)</strong> e
+          <strong>Tendência (1-5)</strong>, gerando uma <strong>Nota de Impacto</strong> (G × U × T) que prioriza as ações necessárias.
         </p>
       </div>
+    </section>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="success-banner">
+      <i class="fas fa-check-circle"></i>
+      {{ successMessage }}
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="error-banner">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ error }}
     </div>
 
     <!-- Árvores -->
-    <div class="arvores-section" *ngIf="arvores.length > 0">
+    <section class="arvores-section">
       <div class="arvores-content">
+
+        <!-- Botão Criar Nova Árvore -->
+        <div class="add-arvore-section">
+          <button class="btn-add-arvore" (click)="toggleNovaArvoreForm()" *ngIf="!showNovaArvoreForm">
+            <i class="fas fa-plus-circle"></i> Adicionar Nova Árvore
+          </button>
+
+          <div class="nova-arvore-form" *ngIf="showNovaArvoreForm">
+            <input
+              type="text"
+              [(ngModel)]="novaArvoreNome"
+              class="form-control"
+              placeholder="Nome da nova árvore (ex: Tecnologia, Marketing...)"
+              (keyup.enter)="criarNovaArvore()">
+            <button class="btn-confirm" (click)="criarNovaArvore()">
+              <i class="fas fa-check"></i> Criar
+            </button>
+            <button class="btn-cancel" (click)="toggleNovaArvoreForm()">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de Árvores -->
         <div *ngFor="let arvore of arvores" class="arvore-card">
           <!-- Header da Árvore -->
           <div class="arvore-header" (click)="toggleArvore(arvore.id)">
             <div class="arvore-title-row">
               <i class="fas" [ngClass]="isArvoreExpanded(arvore.id) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-              <h2>{{ arvore.nome_arvore }}</h2>
+              <input
+                type="text"
+                [(ngModel)]="arvore.nome_arvore"
+                class="arvore-nome-input"
+                placeholder="Nome da árvore"
+                (click)="$event.stopPropagation()">
               <span class="badge">{{ arvore.itens?.length || 0 }} itens</span>
             </div>
           </div>
 
           <!-- Corpo da Árvore -->
           <div class="arvore-body" *ngIf="isArvoreExpanded(arvore.id)">
+
+            <!-- Botão Adicionar Linha -->
+            <div class="arvore-body-header">
+              <button class="btn-add-linha" (click)="adicionarNovaLinha(arvore)">
+                <i class="fas fa-plus"></i> Adicionar Item
+              </button>
+            </div>
+
             <div *ngIf="!arvore.itens || arvore.itens.length === 0" class="empty-state">
               <i class="fas fa-inbox"></i>
-              <p>Nenhum item cadastrado nesta árvore</p>
+              <p>Nenhum item cadastrado. Clique em "Adicionar Item" para começar.</p>
             </div>
 
             <div *ngIf="arvore.itens && arvore.itens.length > 0" class="arvore-table-container">
               <table class="arvore-table">
                 <thead>
                   <tr>
-                    <th style="width: 25%;">
-                      <i class="fas fa-tag"></i> Tópico
+                    <th style="width: 20%;">
+                      <i class="fas fa-tag"></i> Tópico *
                     </th>
                     <th style="width: 30%;">
                       <i class="fas fa-question-circle"></i> Pergunta Norteadora
@@ -136,20 +185,62 @@
                     <th style="width: 10%;" class="text-center">
                       <i class="fas fa-chart-line"></i> Tendência
                     </th>
-                    <th style="width: 15%;" class="text-center">
+                    <th style="width: 12%;" class="text-center">
                       <i class="fas fa-calculator"></i> Nota
                     </th>
+                    <th style="width: 8%;" class="text-center">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let item of arvore.itens">
-                    <td><strong>{{ item.topico }}</strong></td>
-                    <td class="pergunta-col">{{ item.pergunta_norteadora || '-' }}</td>
-                    <td class="text-center valor-col">{{ formatarNumero(item.gravidade) }}</td>
-                    <td class="text-center valor-col">{{ formatarNumero(item.urgencia) }}</td>
-                    <td class="text-center valor-col">{{ formatarNumero(item.tendencia) }}</td>
+                  <tr *ngFor="let item of arvore.itens; let i = index">
+                    <td>
+                      <input
+                        type="text"
+                        [(ngModel)]="item.topico"
+                        class="form-control"
+                        placeholder="Digite o tópico...">
+                    </td>
+                    <td>
+                      <textarea
+                        [(ngModel)]="item.pergunta_norteadora"
+                        class="form-control textarea-pergunta"
+                        placeholder="Digite a pergunta..."
+                        rows="2"></textarea>
+                    </td>
+                    <td class="text-center">
+                      <input
+                        type="text"
+                        [(ngModel)]="item.gravidade"
+                        (ngModelChange)="calcularNota(item)"
+                        class="form-control text-center"
+                        placeholder="1-5"
+                        maxlength="3">
+                    </td>
+                    <td class="text-center">
+                      <input
+                        type="text"
+                        [(ngModel)]="item.urgencia"
+                        (ngModelChange)="calcularNota(item)"
+                        class="form-control text-center"
+                        placeholder="1-5"
+                        maxlength="3">
+                    </td>
+                    <td class="text-center">
+                      <input
+                        type="text"
+                        [(ngModel)]="item.tendencia"
+                        (ngModelChange)="calcularNota(item)"
+                        class="form-control text-center"
+                        placeholder="1-5"
+                        maxlength="3">
+                    </td>
                     <td class="text-center nota-col" [ngClass]="{'nota-alta': item.nota > 20, 'nota-media': item.nota > 10 && item.nota <= 20}">
                       <span class="nota-badge">{{ formatarNumero(item.nota) }}</span>
+                    </td>
+                    <td class="text-center">
+                      <button class="btn-remove" (click)="removerLinha(arvore, i)" title="Remover item">
+                        <i class="fas fa-trash"></i>
+                      </button>
                     </td>
                   </tr>
                 </tbody>
@@ -157,21 +248,25 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Pilares de Dor -->
-    <div *ngIf="getPilaresDeDor().length > 0" class="pilares-section">
+        <!-- Botão Salvar -->
+        <div class="card-actions-edit">
+          <button class="btn-save" (click)="salvarArvores()" [disabled]="isSaving">
+            <i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+            {{ isSaving ? 'Salvando...' : 'Salvar Todas as Árvores' }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pilares de Dor (apenas visualização) -->
+    <section *ngIf="getPilaresDeDor().length > 0" class="pilares-section">
       <div class="pilares-content">
         <div class="pilares-header">
-          <div class="pilares-icon">
-            <i class="fas fa-bullseye"></i>
-          </div>
           <h2>Pilares de Dor</h2>
-          <span class="pilares-count">{{ getPilaresDeDor().length }} item{{ getPilaresDeDor().length !== 1 ? 's' : '' }}</span>
         </div>
         <p class="pilares-subtitle">
-          Tópicos com nota de impacto superior a 20 pontos, representando os principais desafios organizacionais que requerem atenção prioritária.
+          Esses são os principais desafios organizacionais que requerem atenção prioritária.
         </p>
         <div class="pilares-grid">
           <div *ngFor="let pilar of getPilaresDeDor()" class="pilar-card">
@@ -181,44 +276,24 @@
             </div>
             <h3 class="pilar-topico">{{ pilar.topico }}</h3>
             <p *ngIf="pilar.pergunta_norteadora" class="pilar-pergunta">{{ pilar.pergunta_norteadora }}</p>
-            <div class="pilar-valores">
-              <div class="pilar-valor">
-                <span class="valor-label">G</span>
-                <span class="valor-num">{{ formatarNumero(pilar.gravidade) }}</span>
-              </div>
-              <div class="pilar-valor">
-                <span class="valor-label">U</span>
-                <span class="valor-num">{{ formatarNumero(pilar.urgencia) }}</span>
-              </div>
-              <div class="pilar-valor">
-                <span class="valor-label">T</span>
-                <span class="valor-num">{{ formatarNumero(pilar.tendencia) }}</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Empty State -->
-    <div *ngIf="arvores.length === 0" class="empty-state-large">
-      <i class="fas fa-project-diagram"></i>
-      <h3>Nenhuma árvore cadastrada</h3>
-      <p>Ainda não foram cadastradas árvores de problemas para este planejamento estratégico.</p>
-    </div>
+    <section *ngIf="arvores.length === 0" class="empty-state-section">
+      <div class="empty-state-large">
+        <i class="fas fa-project-diagram"></i>
+        <h3>Nenhuma árvore cadastrada</h3>
+        <p>Clique no botão acima para adicionar a primeira árvore de problemas.</p>
+      </div>
+    </section>
 
     <!-- Footer -->
     <footer class="public-footer">
       <div class="footer-content">
-        <div class="footer-logo">
-          <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
-        </div>
-        <p class="footer-text">
-          NAUE Consultoria - Planejamento Estratégico
-        </p>
-        <p class="footer-copyright">
-          © {{ currentYear }} NAUE. Todos os direitos reservados.
-        </p>
+        <p>&copy; {{ currentYear }} NAUE Consultoria. Todos os direitos reservados.</p>
       </div>
     </footer>
   </div>
