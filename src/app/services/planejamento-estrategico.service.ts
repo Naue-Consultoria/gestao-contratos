@@ -874,6 +874,47 @@ export class PlanejamentoEstrategicoService {
   }
 
   /**
+   * Criar árvores padrão (Cliente, Pessoas, Regulamentação, Financeiro)
+   */
+  criarArvoresPadrao(planejamentoId: number): Observable<{
+    success: boolean;
+    message: string;
+    data: any[];
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: any[];
+    }>(`${this.apiUrl}/${planejamentoId}/arvores/criar-padrao`, {});
+  }
+
+  /**
+   * Obter árvores de problemas via token público (para visualização pública)
+   */
+  obterArvoresPublico(token: string): Observable<{
+    success: boolean;
+    data: {
+      planejamento: any;
+      arvores: any[];
+    };
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: {
+        planejamento: any;
+        arvores: any[];
+      };
+    }>(`${this.apiUrl}/publico/arvores/${token}`);
+  }
+
+  /**
+   * Gerar URL pública para árvores de problemas
+   */
+  gerarUrlPublicaArvores(token: string): string {
+    return `${window.location.origin}/arvores-problemas/${token}`;
+  }
+
+  /**
    * Atualizar nome de uma árvore
    */
   atualizarArvore(arvoreId: number, data: { nome_arvore: string }): Observable<{

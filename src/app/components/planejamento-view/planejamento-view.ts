@@ -91,6 +91,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   novaArvoreNome: string = '';
   expandedArvores: { [arvoreId: number]: boolean } = {};
   openArvoreMenuId: number | null = null;
+  openItemMenuId: string | null = null; // formato: "arvoreId-itemIndex"
 
   // OKR - Objectives and Key Results
   okrDepartamentos: DepartamentoComOkr[] = [];
@@ -168,6 +169,9 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     }
     if (!target.closest('.arvore-header-actions')) {
       this.closeArvoreMenu();
+    }
+    if (!target.closest('.arvore-item-actions')) {
+      this.closeItemMenu();
     }
     if (!target.closest('.dropdown-menu-container')) {
       this.closeAllOkrMenus();
@@ -338,6 +342,26 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
       console.error('Erro ao copiar link:', err);
       this.toastr.error('Erro ao copiar link', 'Erro');
     });
+  }
+
+  copiarLinkArvores(): void {
+    if (!this.planejamento) return;
+
+    const url = this.planejamentoService.gerarUrlPublicaArvores(this.planejamento.unique_token);
+
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastr.success('Link das Árvores de Problemas copiado', 'Sucesso');
+    }).catch(err => {
+      console.error('Erro ao copiar link:', err);
+      this.toastr.error('Erro ao copiar link', 'Erro');
+    });
+  }
+
+  visualizarArvoresPublico(): void {
+    if (!this.planejamento) return;
+
+    const url = this.planejamentoService.gerarUrlPublicaArvores(this.planejamento.unique_token);
+    window.open(url, '_blank');
   }
 
   copiarLinkDepartamento(departamento: Departamento): void {
@@ -826,6 +850,24 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  async criarArvoresPadrao(): Promise<void> {
+    if (!this.planejamentoId) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.criarArvoresPadrao(this.planejamentoId)
+      );
+
+      if (response.success) {
+        this.toastr.success(response.message || 'Árvores padrão criadas com sucesso', 'Sucesso');
+        this.loadArvores();
+      }
+    } catch (err: any) {
+      console.error('Erro ao criar árvores padrão:', err);
+      this.toastr.error(err.error?.message || 'Erro ao criar árvores padrão', 'Erro');
+    }
+  }
+
   openDeleteArvoreModal(arvore: any): void {
     this.arvoreToDelete = arvore;
     this.showDeleteArvoreModal = true;
@@ -869,6 +911,19 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
 
   closeArvoreMenu(): void {
     this.openArvoreMenuId = null;
+  }
+
+  toggleItemMenu(arvoreId: number, itemIndex: number): void {
+    const menuId = `${arvoreId}-${itemIndex}`;
+    this.openItemMenuId = this.openItemMenuId === menuId ? null : menuId;
+  }
+
+  closeItemMenu(): void {
+    this.openItemMenuId = null;
+  }
+
+  isItemMenuOpen(arvoreId: number, itemIndex: number): boolean {
+    return this.openItemMenuId === `${arvoreId}-${itemIndex}`;
   }
 
   adicionarNovaLinha(arvoreId: number): void {

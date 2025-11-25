@@ -321,9 +321,20 @@
   <div class="section" *ngIf="activeTab === 'arvore-problemas'">
     <div class="section-header">
       <h3>Árvore de Problemas</h3>
-      <button class="btn btn-secondary" (click)="exportarArvoresPDF()" *ngIf="arvores.length > 0">
-        <i class="fas fa-file-pdf"></i> Exportar PDF
-      </button>
+      <div class="section-actions">
+        <button class="btn btn-success" (click)="criarArvoresPadrao()" *ngIf="arvores.length === 0">
+          <i class="fas fa-magic"></i> Criar Árvores Padrão
+        </button>
+        <button class="btn btn-primary btn-sm" (click)="visualizarArvoresPublico()" *ngIf="arvores.length > 0">
+          <i class="fas fa-eye"></i> Visualizar
+        </button>
+        <button class="btn btn-primary btn-sm" (click)="copiarLinkArvores()" *ngIf="arvores.length > 0">
+          <i class="fas fa-link"></i> Copiar Link
+        </button>
+        <button class="btn btn-secondary" (click)="exportarArvoresPDF()" *ngIf="arvores.length > 0">
+          <i class="fas fa-file-pdf"></i> Exportar PDF
+        </button>
+      </div>
     </div>
 
     <!-- Formulário inline para criar nova árvore -->
@@ -401,9 +412,19 @@
                     <td class="text-center">{{ formatarNumero(item.tendencia) }}</td>
                     <td class="text-center" [ngClass]="{'nota-alta': item.nota > 20}">{{ formatarNumero(item.nota) }}</td>
                     <td>
-                      <button class="btn btn-sm btn-danger" (click)="openDeleteItemModal(item, arvore.id)" title="Excluir">
-                        <i class="fas fa-trash"></i>
-                      </button>
+                      <div class="arvore-item-actions">
+                        <button class="btn-menu" (click)="toggleItemMenu(arvore.id, i); $event.stopPropagation()" title="Mais opções">
+                          <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="dropdown-menu" *ngIf="isItemMenuOpen(arvore.id, i)">
+                          <button class="dropdown-item" (click)="iniciarEdicaoItem(arvore.id, item, i); closeItemMenu()">
+                            <i class="fas fa-edit"></i> Editar
+                          </button>
+                          <button class="dropdown-item dropdown-item-danger" (click)="openDeleteItemModal(item, arvore.id); closeItemMenu()">
+                            <i class="fas fa-trash"></i> Excluir
+                          </button>
+                        </div>
+                      </div>
                     </td>
                   </ng-container>
                   <ng-container *ngIf="isItemEditing(arvore.id, i)">

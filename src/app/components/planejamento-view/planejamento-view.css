@@ -252,7 +252,8 @@
   background: #f8f9fa;
   border: 1px solid #dee2e6;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
 }
 
 /* Formulário inline para criar árvore */
@@ -274,6 +275,7 @@
   padding: 1rem 1.5rem;
   background: white;
   border-bottom: 1px solid #dee2e6;
+  border-radius: 8px 8px 0 0;
 }
 
 .arvore-title-row {
@@ -309,10 +311,29 @@
   position: relative;
   display: flex;
   gap: 0.5rem;
+  z-index: 10;
+}
+
+.arvore-header-actions .dropdown-menu {
+  z-index: 1001;
+}
+
+.arvore-item-actions {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.arvore-item-actions .dropdown-menu {
+  z-index: 1001;
 }
 
 .arvore-body {
   padding: 1.5rem;
+  border-radius: 0 0 8px 8px;
+  background: #f8f9fa;
 }
 
 .arvore-body-header {

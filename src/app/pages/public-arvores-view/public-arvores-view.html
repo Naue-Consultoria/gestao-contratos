@@ -1,0 +1,225 @@
+<div class="public-arvores-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando árvores de problemas...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <div class="error-icon">⚠️</div>
+    <h2>Erro ao carregar árvores</h2>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !error && planejamento" class="content-container">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-background"></div>
+      <div class="hero-content">
+        <!-- Logos -->
+        <div class="logos-container">
+          <div class="logo-naue">
+            <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="hero-title">
+          <h1>Planejamento Estratégico</h1>
+          <h2 class="client-name">{{ getClientName() }}</h2>
+          <h3>Árvore de Problemas</h3>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="hero-info-cards">
+          <div class="info-card" *ngIf="planejamento.data_inicio">
+            <div class="info-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Período</span>
+              <span class="info-value">
+                {{ formatDate(planejamento.data_inicio) }}
+                <span *ngIf="planejamento.data_fim"> - {{ formatDate(planejamento.data_fim) }}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-project-diagram"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Árvores Cadastradas</span>
+              <span class="info-value">{{ arvores.length }} árvore{{ arvores.length !== 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+
+          <div class="info-card" *ngIf="getPilaresDeDor().length > 0">
+            <div class="info-icon pilares-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Pilares de Dor</span>
+              <span class="info-value">{{ getPilaresDeDor().length }} item{{ getPilaresDeDor().length !== 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div *ngIf="planejamento.descricao" class="hero-description">
+          <p>{{ planejamento.descricao }}</p>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator">
+          <i class="fas fa-chevron-down"></i>
+          <span>Role para visualizar</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Explicação -->
+    <div class="explicacao-section">
+      <div class="explicacao-content">
+        <div class="explicacao-icon">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <h3>Sobre a Árvore de Problemas</h3>
+        <p>
+          A Árvore de Problemas é uma ferramenta estratégica que identifica e analisa os principais desafios
+          organizacionais. Cada item é avaliado por <strong>Gravidade</strong>, <strong>Urgência</strong> e
+          <strong>Tendência</strong>, gerando uma <strong>Nota de Impacto</strong> que prioriza as ações necessárias.
+        </p>
+      </div>
+    </div>
+
+    <!-- Árvores -->
+    <div class="arvores-section" *ngIf="arvores.length > 0">
+      <div class="arvores-content">
+        <div *ngFor="let arvore of arvores" class="arvore-card">
+          <!-- Header da Árvore -->
+          <div class="arvore-header" (click)="toggleArvore(arvore.id)">
+            <div class="arvore-title-row">
+              <i class="fas" [ngClass]="isArvoreExpanded(arvore.id) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+              <h2>{{ arvore.nome_arvore }}</h2>
+              <span class="badge">{{ arvore.itens?.length || 0 }} itens</span>
+            </div>
+          </div>
+
+          <!-- Corpo da Árvore -->
+          <div class="arvore-body" *ngIf="isArvoreExpanded(arvore.id)">
+            <div *ngIf="!arvore.itens || arvore.itens.length === 0" class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <p>Nenhum item cadastrado nesta árvore</p>
+            </div>
+
+            <div *ngIf="arvore.itens && arvore.itens.length > 0" class="arvore-table-container">
+              <table class="arvore-table">
+                <thead>
+                  <tr>
+                    <th style="width: 25%;">
+                      <i class="fas fa-tag"></i> Tópico
+                    </th>
+                    <th style="width: 30%;">
+                      <i class="fas fa-question-circle"></i> Pergunta Norteadora
+                    </th>
+                    <th style="width: 10%;" class="text-center">
+                      <i class="fas fa-exclamation"></i> Gravidade
+                    </th>
+                    <th style="width: 10%;" class="text-center">
+                      <i class="fas fa-clock"></i> Urgência
+                    </th>
+                    <th style="width: 10%;" class="text-center">
+                      <i class="fas fa-chart-line"></i> Tendência
+                    </th>
+                    <th style="width: 15%;" class="text-center">
+                      <i class="fas fa-calculator"></i> Nota
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of arvore.itens">
+                    <td><strong>{{ item.topico }}</strong></td>
+                    <td class="pergunta-col">{{ item.pergunta_norteadora || '-' }}</td>
+                    <td class="text-center valor-col">{{ formatarNumero(item.gravidade) }}</td>
+                    <td class="text-center valor-col">{{ formatarNumero(item.urgencia) }}</td>
+                    <td class="text-center valor-col">{{ formatarNumero(item.tendencia) }}</td>
+                    <td class="text-center nota-col" [ngClass]="{'nota-alta': item.nota > 20, 'nota-media': item.nota > 10 && item.nota <= 20}">
+                      <span class="nota-badge">{{ formatarNumero(item.nota) }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pilares de Dor -->
+    <div *ngIf="getPilaresDeDor().length > 0" class="pilares-section">
+      <div class="pilares-content">
+        <div class="pilares-header">
+          <div class="pilares-icon">
+            <i class="fas fa-bullseye"></i>
+          </div>
+          <h2>Pilares de Dor</h2>
+          <span class="pilares-count">{{ getPilaresDeDor().length }} item{{ getPilaresDeDor().length !== 1 ? 's' : '' }}</span>
+        </div>
+        <p class="pilares-subtitle">
+          Tópicos com nota de impacto superior a 20 pontos, representando os principais desafios organizacionais que requerem atenção prioritária.
+        </p>
+        <div class="pilares-grid">
+          <div *ngFor="let pilar of getPilaresDeDor()" class="pilar-card">
+            <div class="pilar-header">
+              <span class="pilar-arvore">{{ pilar.arvore_nome }}</span>
+              <span class="pilar-nota-badge">{{ formatarNumero(pilar.nota) }}</span>
+            </div>
+            <h3 class="pilar-topico">{{ pilar.topico }}</h3>
+            <p *ngIf="pilar.pergunta_norteadora" class="pilar-pergunta">{{ pilar.pergunta_norteadora }}</p>
+            <div class="pilar-valores">
+              <div class="pilar-valor">
+                <span class="valor-label">G</span>
+                <span class="valor-num">{{ formatarNumero(pilar.gravidade) }}</span>
+              </div>
+              <div class="pilar-valor">
+                <span class="valor-label">U</span>
+                <span class="valor-num">{{ formatarNumero(pilar.urgencia) }}</span>
+              </div>
+              <div class="pilar-valor">
+                <span class="valor-label">T</span>
+                <span class="valor-num">{{ formatarNumero(pilar.tendencia) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="arvores.length === 0" class="empty-state-large">
+      <i class="fas fa-project-diagram"></i>
+      <h3>Nenhuma árvore cadastrada</h3>
+      <p>Ainda não foram cadastradas árvores de problemas para este planejamento estratégico.</p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="public-footer">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
+        </div>
+        <p class="footer-text">
+          NAUE Consultoria - Planejamento Estratégico
+        </p>
+        <p class="footer-copyright">
+          © {{ currentYear }} NAUE. Todos os direitos reservados.
+        </p>
+      </div>
+    </footer>
+  </div>
+</div>
