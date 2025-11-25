@@ -372,16 +372,15 @@
 .footer-item {
   color: white;
   font-size: 0.75rem;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 0.25rem;
+  padding: 0.5rem;
   line-height: 1.4;
   word-wrap: break-word;
   overflow-wrap: break-word;
   text-align: center;
+  hyphens: auto;
 }
 
 /* Legenda */

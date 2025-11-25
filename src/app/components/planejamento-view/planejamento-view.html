@@ -444,10 +444,13 @@
 
     <!-- Pilares de Dor -->
     <div *ngIf="arvores.length > 0 && getPilaresDeDor().length > 0" class="pilares-dor-section">
-      <h3 class="pilares-title">
-        <i class="fas fa-exclamation-triangle"></i> Pilares de Dor
-      </h3>
-
+      <div class="pilares-header">
+        <h3 class="pilares-title">
+          <i class="fas fa-bullseye"></i> Pilares de Dor
+        </h3>
+        <span class="pilares-count">{{ getPilaresDeDor().length }} itens</span>
+      </div>
+      <p class="pilares-subtitle">Tópicos com nota de impacto superior a 20 pontos</p>
       <ul class="pilares-list">
         <li *ngFor="let pilar of getPilaresDeDor()">{{ pilar.topico }}</li>
       </ul>

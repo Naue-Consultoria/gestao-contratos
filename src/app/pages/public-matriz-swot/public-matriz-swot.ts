@@ -166,6 +166,10 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
     return 'N/A';
   }
 
+  getClientLogoUrl(): string | null {
+    return this.planejamento?.client?.logo_url || null;
+  }
+
   formatDate(dateString: string | null | undefined): string {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);

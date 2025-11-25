@@ -137,26 +137,33 @@
 }
 
 .hero-title h1 {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: white;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.5rem 0;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   line-height: 1.2;
 }
 
-.hero-title h2 {
+.hero-title h2.client-name {
   font-size: 1.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 1rem 0;
+}
+
+.hero-title h3 {
+  font-size: 1.25rem;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.85);
   margin: 0 0 0.5rem 0;
 }
 
-.hero-title .client-name {
-  font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
-  font-weight: 300;
+.hero-title h4.departamento-nome {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0.5rem 0 0 0;
 }
 
 /* Info Cards */
@@ -359,13 +366,13 @@
 }
 
 .coluna-explicacao.vulnerabilidade .icon-circle {
-  background: #14e79f;
-  color: #003b2b;
+  background: #4a5568;
+  color: white;
 }
 
 .coluna-explicacao.conquistas .icon-circle {
-  background: #ffffff;
-  color: #2d3748;
+  background: #18723c;
+  color: white;
 }
 
 .coluna-explicacao.licoes .icon-circle {
@@ -552,11 +559,12 @@
 }
 
 .column-header.vulnerabilidades {
-  background: #f56565;
+  background: #4a5568;
 }
 
 .column-header.conquistas {
-  background: #48bb78;
+  background: #18723c;
+  color: white;
 }
 
 .column-header.licoes {
@@ -786,13 +794,13 @@
 }
 
 .column-header-edit.vulnerabilidades {
-  background: #14e79f;
-  color: #003b2b;
+  background: #4a5568;
+  color: white;
 }
 
 .column-header-edit.conquistas {
-  background: #ffffff;
-  color: #2d3748;
+  background: #18723c;
+  color: white;
 }
 
 .column-header-edit.licoes {
@@ -922,15 +930,19 @@
   }
 
   .hero-title h1 {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
-  .hero-title h2 {
+  .hero-title h2.client-name {
     font-size: 1.25rem;
   }
 
-  .hero-title .client-name {
+  .hero-title h3 {
     font-size: 1rem;
+  }
+
+  .hero-title h4.departamento-nome {
+    font-size: 0.9rem;
   }
 
   .logo-naue img,

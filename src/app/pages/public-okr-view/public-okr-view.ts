@@ -133,8 +133,7 @@ export class PublicOkrViewComponent implements OnInit {
   }
 
   getClientLogoUrl(): string | null {
-    if (!this.planejamento?.client?.id) return null;
-    return `${environment.apiUrl}/clients/${this.planejamento.client.id}/logo`;
+    return this.planejamento?.client?.logo_url || null;
   }
 
   formatDate(dateString: string | null | undefined): string {

@@ -174,43 +174,70 @@
 .pilares-dor-section {
   margin-top: 2rem;
   padding: 1.5rem;
-  background: #fffbeb;
-  border: 2px solid #f59e0b;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 2px solid #18723c;
+  border-radius: 12px;
+}
+
+.pilares-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
 .pilares-title {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.25rem;
-  color: #f59e0b;
+  margin: 0;
+  font-size: 1.1rem;
+  color: #18723c;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-weight: 600;
+}
+
+.pilares-title i {
+  font-size: 1rem;
+}
+
+.pilares-count {
+  background: #18723c;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .pilares-subtitle {
   margin: 0 0 1rem 0;
-  font-size: 0.9rem;
-  color: #92400e;
+  font-size: 0.85rem;
+  color: #166534;
 }
 
 .pilares-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 0.75rem;
 }
 
 .pilares-list li {
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1rem;
   background: white;
-  border-left: 4px solid #f59e0b;
-  border-radius: 4px;
-  font-size: 0.95rem;
+  border-left: 4px solid #18723c;
+  border-radius: 6px;
+  font-size: 0.9rem;
   color: #1f2937;
-  flex: 0 0 auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.pilares-list li:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 /* Container de Árvores */

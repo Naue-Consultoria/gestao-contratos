@@ -88,11 +88,13 @@ export class PlanejamentoFormComponent implements OnInit, OnDestroy {
       );
 
       if (response.clients) {
-        this.clients = response.clients.map((client: any) => ({
-          id: client.id,
-          name: (client.name || client.full_name || client.company_name || client.trade_name || 'N/A').toUpperCase(),
-          email: client.email
-        }));
+        this.clients = response.clients
+          .map((client: any) => ({
+            id: client.id,
+            name: (client.name || client.full_name || client.company_name || client.trade_name || 'N/A').toUpperCase(),
+            email: client.email
+          }))
+          .sort((a: any, b: any) => a.name.localeCompare(b.name, 'pt-BR'));
       }
     } catch (err: any) {
       console.error('Erro ao carregar clientes:', err);

@@ -24,16 +24,13 @@
           <div class="logo-naue">
             <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
           </div>
-          <div class="logo-divider" *ngIf="planejamento.client?.logo_path"></div>
-          <div class="logo-client" *ngIf="planejamento.client?.logo_path">
-            <img [src]="planejamento.client.logo_path" [alt]="getClientName()" />
-          </div>
         </div>
 
         <!-- Title -->
         <div class="hero-title">
-          <h1>{{ planejamento.titulo }}</h1>
-          <h2>Matriz de Evolução Consciente</h2>
+          <h1>Planejamento Estratégico</h1>
+          <h2 class="client-name">{{ getClientName() }}</h2>
+          <h3>Matriz de Evolução Consciente</h3>
         </div>
 
         <!-- Info Cards -->
@@ -110,7 +107,7 @@
           <i class="fas fa-star"></i>
         </div>
         <h4>Conquistas</h4>
-        <p>Momento de se vendarem</p>
+        <p>Chegou o momento de se venderem: comunicar conquistas, assumir protagonismo</p>
       </div>
 
       <div class="divider-line"></div>
@@ -130,7 +127,7 @@
           <i class="fas fa-handshake"></i>
         </div>
         <h4>Compromissos</h4>
-        <p>Ações concretas de mudança e crescimento</p>
+        <p>Novos projetos, focos, direcionamentos para o próximo ano</p>
       </div>
     </div>
 

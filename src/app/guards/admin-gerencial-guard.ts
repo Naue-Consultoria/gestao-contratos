@@ -22,8 +22,8 @@ export class AdminGerencialGuard implements CanActivate {
       return false;
     }
 
-    // Permitir acesso para Admin, Admin Gerencial e Consultor R&S
-    if (this.authService.isAdmin() || this.authService.isAdminGerencial() || this.authService.isConsultorRS()) {
+    // Permitir acesso para Admin e Admin Gerencial
+    if (this.authService.isAdmin() || this.authService.isAdminGerencial()) {
       return true;
     }
 

@@ -237,8 +237,7 @@ export class PublicDepartamentoViewComponent implements OnInit, AfterViewChecked
   }
 
   getClientLogoUrl(): string | null {
-    if (!this.departamento?.planejamento?.client?.id) return null;
-    return `${environment.apiUrl}/clients/${this.departamento.planejamento.client.id}/logo`;
+    return this.departamento?.planejamento?.client?.logo_url || null;
   }
 
   exportarPDF(): void {
