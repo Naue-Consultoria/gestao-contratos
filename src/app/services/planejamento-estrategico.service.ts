@@ -1403,6 +1403,14 @@ export class PlanejamentoEstrategicoService {
   }
 
   /**
+   * Exportar classificação de riscos para PDF
+   */
+  exportarClassificacaoRiscosPDF(token: string): void {
+    const url = `${this.apiUrl}/publico/classificacao-riscos/${token}/pdf`;
+    window.open(url, '_blank');
+  }
+
+  /**
    * Gerar URL pública para classificação de riscos
    */
   gerarUrlPublicaClassificacaoRiscos(token: string): string {

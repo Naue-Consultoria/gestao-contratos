@@ -12,6 +12,12 @@
     <p>{{ error }}</p>
   </div>
 
+  <!-- Toast Notification -->
+  <div *ngIf="showToast" class="toast-notification">
+    <i class="fas fa-check-circle"></i>
+    <span>{{ toastMessage }}</span>
+  </div>
+
   <!-- Main Content -->
   <div *ngIf="!isLoading && !error && planejamento" class="content-container">
 
@@ -81,12 +87,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Success Message -->
-    <div *ngIf="successMessage" class="success-banner">
-      <i class="fas fa-check-circle"></i>
-      {{ successMessage }}
-    </div>
 
     <!-- Seção de Classificação de Oportunidades -->
     <section class="classificacao-section oportunidades-section">
@@ -200,8 +200,17 @@
       </div>
     </section>
 
-    <!-- Botão de Salvar -->
+    <!-- Botões de Ação -->
     <div class="action-section">
+      <button
+        class="btn-exportar"
+        (click)="exportarPDF()"
+        [disabled]="isExportingPDF || isSaving">
+        <i *ngIf="!isExportingPDF" class="fas fa-file-pdf"></i>
+        <i *ngIf="isExportingPDF" class="fas fa-spinner fa-spin"></i>
+        {{ isExportingPDF ? 'Exportando...' : 'Exportar PDF' }}
+      </button>
+
       <button
         class="btn-salvar"
         (click)="salvar()"

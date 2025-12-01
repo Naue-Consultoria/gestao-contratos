@@ -28,8 +28,10 @@ export class PublicClassificacaoRiscosComponent implements OnInit {
   matrizFinal: any = null;
   isLoading = true;
   isSaving = false;
+  isExportingPDF = false;
   error = '';
-  successMessage = '';
+  showToast = false;
+  toastMessage = '';
   currentYear = new Date().getFullYear();
 
   // Dados de classificação
@@ -209,7 +211,6 @@ export class PublicClassificacaoRiscosComponent implements OnInit {
 
     this.isSaving = true;
     this.error = '';
-    this.successMessage = '';
 
     try {
       const dados: UpdateClassificacaoRiscosRequest = {
@@ -222,15 +223,13 @@ export class PublicClassificacaoRiscosComponent implements OnInit {
       );
 
       if (response.success) {
-        this.successMessage = 'Classificação de riscos salva com sucesso!';
+        this.showToast = true;
+        this.toastMessage = 'Salvo com sucesso!';
 
-        // Scroll para o topo
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        // Limpar mensagem após 5 segundos
+        // Ocultar toast após 3 segundos
         setTimeout(() => {
-          this.successMessage = '';
-        }, 5000);
+          this.showToast = false;
+        }, 3000);
       }
     } catch (err: any) {
       console.error('Erro ao salvar classificação:', err);
@@ -238,6 +237,29 @@ export class PublicClassificacaoRiscosComponent implements OnInit {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       this.isSaving = false;
+    }
+  }
+
+  exportarPDF(): void {
+    if (!this.token) return;
+
+    this.isExportingPDF = true;
+    try {
+      this.planejamentoService.exportarClassificacaoRiscosPDF(this.token);
+
+      // Mostrar toast de exportação
+      this.showToast = true;
+      this.toastMessage = 'Exportando PDF...';
+
+      setTimeout(() => {
+        this.showToast = false;
+      }, 2000);
+    } catch (err) {
+      console.error('Erro ao exportar PDF:', err);
+    } finally {
+      setTimeout(() => {
+        this.isExportingPDF = false;
+      }, 1000);
     }
   }
 
