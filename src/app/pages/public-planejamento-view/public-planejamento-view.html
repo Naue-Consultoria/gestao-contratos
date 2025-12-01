@@ -175,24 +175,24 @@
             <!-- Vulnerabilidades -->
             <div class="matriz-column-edit">
               <div class="column-header-edit vulnerabilidades">
-                <span>Vulnerabilidades</span>
-                <button type="button" class="btn-add-item" (click)="addItemToDepartamento(departamento, 'vulnerabilidades'); $event.stopPropagation()" [disabled]="isPrazoVencido()">
+                <span><i class="fas fa-shield-alt"></i> Vulnerabilidades</span>
+                <button type="button" class="btn-add-item" *ngIf="isEditingDepartamento(departamento.id)" (click)="addItemToDepartamento(departamento, 'vulnerabilidades'); $event.stopPropagation()" [disabled]="isPrazoVencido()">
                   <i class="fas fa-plus"></i>
                 </button>
               </div>
               <div class="column-items">
                 <div *ngIf="getDepartamentoItens(departamento, 'vulnerabilidades').length === 0" class="empty-column">
-                  Clique no + para adicionar itens
+                  {{ isEditingDepartamento(departamento.id) ? 'Clique no + para adicionar itens' : 'Nenhum item adicionado' }}
                 </div>
-                <div *ngFor="let item of getDepartamentoItens(departamento, 'vulnerabilidades'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <div *ngFor="let item of getDepartamentoItens(departamento, 'vulnerabilidades'); let i = index; trackBy: trackByIndex" class="item-edit" [class.view-mode]="!isEditingDepartamento(departamento.id)">
                   <textarea
                     [value]="item"
                     (input)="updateItemInDepartamento(departamento, 'vulnerabilidades', i, $event)"
                     placeholder="Digite o item..."
                     class="item-textarea"
-                    [disabled]="isPrazoVencido()"
+                    [disabled]="!isEditingDepartamento(departamento.id) || isPrazoVencido()"
                     rows="1"></textarea>
-                  <button type="button" class="btn-remove-item" (click)="removeItemFromDepartamento(departamento, 'vulnerabilidades', i)" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditingDepartamento(departamento.id)" (click)="removeItemFromDepartamento(departamento, 'vulnerabilidades', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -202,24 +202,24 @@
             <!-- Conquistas -->
             <div class="matriz-column-edit">
               <div class="column-header-edit conquistas">
-                <span>Conquistas</span>
-                <button type="button" class="btn-add-item" (click)="addItemToDepartamento(departamento, 'conquistas'); $event.stopPropagation()" [disabled]="isPrazoVencido()">
+                <span><i class="fas fa-star"></i> Conquistas</span>
+                <button type="button" class="btn-add-item" *ngIf="isEditingDepartamento(departamento.id)" (click)="addItemToDepartamento(departamento, 'conquistas'); $event.stopPropagation()" [disabled]="isPrazoVencido()">
                   <i class="fas fa-plus"></i>
                 </button>
               </div>
               <div class="column-items">
                 <div *ngIf="getDepartamentoItens(departamento, 'conquistas').length === 0" class="empty-column">
-                  Clique no + para adicionar itens
+                  {{ isEditingDepartamento(departamento.id) ? 'Clique no + para adicionar itens' : 'Nenhum item adicionado' }}
                 </div>
-                <div *ngFor="let item of getDepartamentoItens(departamento, 'conquistas'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <div *ngFor="let item of getDepartamentoItens(departamento, 'conquistas'); let i = index; trackBy: trackByIndex" class="item-edit" [class.view-mode]="!isEditingDepartamento(departamento.id)">
                   <textarea
                     [value]="item"
                     (input)="updateItemInDepartamento(departamento, 'conquistas', i, $event)"
                     placeholder="Digite o item..."
                     class="item-textarea"
-                    [disabled]="isPrazoVencido()"
+                    [disabled]="!isEditingDepartamento(departamento.id) || isPrazoVencido()"
                     rows="1"></textarea>
-                  <button type="button" class="btn-remove-item" (click)="removeItemFromDepartamento(departamento, 'conquistas', i)" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditingDepartamento(departamento.id)" (click)="removeItemFromDepartamento(departamento, 'conquistas', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -229,24 +229,24 @@
             <!-- Lições Aprendidas -->
             <div class="matriz-column-edit">
               <div class="column-header-edit licoes">
-                <span>Lições Aprendidas</span>
-                <button type="button" class="btn-add-item" (click)="addItemToDepartamento(departamento, 'licoes_aprendidas'); $event.stopPropagation()" [disabled]="isPrazoVencido()">
+                <span><i class="fas fa-book-open"></i> Lições Aprendidas</span>
+                <button type="button" class="btn-add-item" *ngIf="isEditingDepartamento(departamento.id)" (click)="addItemToDepartamento(departamento, 'licoes_aprendidas'); $event.stopPropagation()" [disabled]="isPrazoVencido()">
                   <i class="fas fa-plus"></i>
                 </button>
               </div>
               <div class="column-items">
                 <div *ngIf="getDepartamentoItens(departamento, 'licoes_aprendidas').length === 0" class="empty-column">
-                  Clique no + para adicionar itens
+                  {{ isEditingDepartamento(departamento.id) ? 'Clique no + para adicionar itens' : 'Nenhum item adicionado' }}
                 </div>
-                <div *ngFor="let item of getDepartamentoItens(departamento, 'licoes_aprendidas'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <div *ngFor="let item of getDepartamentoItens(departamento, 'licoes_aprendidas'); let i = index; trackBy: trackByIndex" class="item-edit" [class.view-mode]="!isEditingDepartamento(departamento.id)">
                   <textarea
                     [value]="item"
                     (input)="updateItemInDepartamento(departamento, 'licoes_aprendidas', i, $event)"
                     placeholder="Digite o item..."
                     class="item-textarea"
-                    [disabled]="isPrazoVencido()"
+                    [disabled]="!isEditingDepartamento(departamento.id) || isPrazoVencido()"
                     rows="1"></textarea>
-                  <button type="button" class="btn-remove-item" (click)="removeItemFromDepartamento(departamento, 'licoes_aprendidas', i)" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditingDepartamento(departamento.id)" (click)="removeItemFromDepartamento(departamento, 'licoes_aprendidas', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -256,24 +256,24 @@
             <!-- Compromissos -->
             <div class="matriz-column-edit">
               <div class="column-header-edit compromissos">
-                <span>Compromissos</span>
-                <button type="button" class="btn-add-item" (click)="addItemToDepartamento(departamento, 'compromissos'); $event.stopPropagation()" [disabled]="isPrazoVencido()">
+                <span><i class="fas fa-handshake"></i> Compromissos</span>
+                <button type="button" class="btn-add-item" *ngIf="isEditingDepartamento(departamento.id)" (click)="addItemToDepartamento(departamento, 'compromissos'); $event.stopPropagation()" [disabled]="isPrazoVencido()">
                   <i class="fas fa-plus"></i>
                 </button>
               </div>
               <div class="column-items">
                 <div *ngIf="getDepartamentoItens(departamento, 'compromissos').length === 0" class="empty-column">
-                  Clique no + para adicionar itens
+                  {{ isEditingDepartamento(departamento.id) ? 'Clique no + para adicionar itens' : 'Nenhum item adicionado' }}
                 </div>
-                <div *ngFor="let item of getDepartamentoItens(departamento, 'compromissos'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <div *ngFor="let item of getDepartamentoItens(departamento, 'compromissos'); let i = index; trackBy: trackByIndex" class="item-edit" [class.view-mode]="!isEditingDepartamento(departamento.id)">
                   <textarea
                     [value]="item"
                     (input)="updateItemInDepartamento(departamento, 'compromissos', i, $event)"
                     placeholder="Digite o item..."
                     class="item-textarea"
-                    [disabled]="isPrazoVencido()"
+                    [disabled]="!isEditingDepartamento(departamento.id) || isPrazoVencido()"
                     rows="1"></textarea>
-                  <button type="button" class="btn-remove-item" (click)="removeItemFromDepartamento(departamento, 'compromissos', i)" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditingDepartamento(departamento.id)" (click)="removeItemFromDepartamento(departamento, 'compromissos', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -294,13 +294,21 @@
               <button class="btn-export-pdf" (click)="exportarPDF(departamento); $event.stopPropagation()" [disabled]="!isMatrizPreenchida(departamento)">
                 <i class="fas fa-file-pdf"></i> Exportar PDF
               </button>
-              <button class="btn-save-edit" (click)="saveDepartamentoMatriz(departamento); $event.stopPropagation()" [disabled]="isSaving || isPrazoVencido()">
-                <i class="fas fa-save"></i> {{ isSaving && selectedDepartamento?.id === departamento.id ? 'Salvando...' : 'Salvar Matriz' }}
+              <button class="btn-save-edit" (click)="toggleEditMode(departamento); $event.stopPropagation()" [disabled]="(isSaving && selectedDepartamento?.id === departamento.id) || isPrazoVencido()">
+                <i class="fas" [ngClass]="isEditingDepartamento(departamento.id) ? 'fa-save' : 'fa-edit'"></i>
+                {{ isSaving && selectedDepartamento?.id === departamento.id ? 'Salvando...' : (isEditingDepartamento(departamento.id) ? 'Salvar Matriz' : 'Editar Matriz') }}
               </button>
             </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Botão Exportar Todas as Matrizes -->
+    <div *ngIf="hasAnyMatrizPreenchida()" class="export-all-section">
+      <button class="btn-export-all-matrices" (click)="exportarTodasMatrizes()">
+        <i class="fas fa-file-pdf"></i> Exportar Todas as Matrizes (PDF)
+      </button>
     </div>
 
     <!-- Footer -->

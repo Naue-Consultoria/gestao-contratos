@@ -51,6 +51,9 @@ export class PublicPlanejamentoViewComponent implements OnInit, AfterViewChecked
   // Departamentos expandidos/colapsados
   expandedDepartamentos = new Set<number>();
 
+  // Departamentos em modo de edição
+  editingDepartamentos = new Set<number>();
+
   // Flag para controlar resize
   private lastResizeCheck = 0;
 
@@ -238,6 +241,21 @@ export class PublicPlanejamentoViewComponent implements OnInit, AfterViewChecked
     return this.expandedDepartamentos.has(depId);
   }
 
+  // Modo de edição
+  isEditingDepartamento(depId: number): boolean {
+    return this.editingDepartamentos.has(depId);
+  }
+
+  toggleEditMode(departamento: Departamento): void {
+    if (this.isEditingDepartamento(departamento.id)) {
+      // Sair do modo edição - salvar
+      this.saveDepartamentoMatriz(departamento);
+    } else {
+      // Entrar no modo edição
+      this.editingDepartamentos.add(departamento.id);
+    }
+  }
+
   async saveDepartamentoMatriz(departamento: Departamento): Promise<void> {
     if (this.isPrazoVencido()) {
       this.toastr.warning('O prazo para edição desta matriz expirou', 'Atenção');
@@ -268,6 +286,8 @@ export class PublicPlanejamentoViewComponent implements OnInit, AfterViewChecked
 
       if (response.success) {
         this.toastr.success('Matriz salva com sucesso', 'Sucesso');
+        // Sair do modo edição após salvar
+        this.editingDepartamentos.delete(departamento.id);
         this.loadPlanejamento(); // Recarregar para mostrar dados atualizados
       }
     } catch (err: any) {
@@ -288,6 +308,17 @@ export class PublicPlanejamentoViewComponent implements OnInit, AfterViewChecked
 
   getCurrentYear(): number {
     return new Date().getFullYear();
+  }
+
+  exportarTodasMatrizes(): void {
+    if (!this.planejamento?.id) {
+      this.toastr.error('Planejamento não encontrado', 'Erro');
+      return;
+    }
+
+    const url = this.planejamentoService.gerarUrlPdfTodasMatrizes(this.planejamento.id);
+    window.open(url, '_blank');
+    this.toastr.info('PDF de todas as matrizes sendo gerado...', 'Download');
   }
 
   exportarPDF(departamento: Departamento): void {

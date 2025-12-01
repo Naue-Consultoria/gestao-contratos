@@ -1076,6 +1076,13 @@ export class PlanejamentoEstrategicoService {
     return `${this.apiUrl}/${planejamentoId}/swot-final/pdf`;
   }
 
+  /**
+   * Gerar URL para exportar todas as matrizes de evolução em PDF
+   */
+  gerarUrlPdfTodasMatrizes(planejamentoId: number): string {
+    return `${this.apiUrl}/${planejamentoId}/matrizes/pdf`;
+  }
+
   // ===== OKR - OBJECTIVES AND KEY RESULTS =====
 
   // --- OBJETIVOS ---

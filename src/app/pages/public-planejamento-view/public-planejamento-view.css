@@ -408,6 +408,39 @@
 }
 
 /* =========================
+   EXPORT ALL SECTION
+   ========================= */
+.export-all-section {
+  margin: 2rem;
+  text-align: center;
+}
+
+.btn-export-all-matrices {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border: none;
+  padding: 1.25rem 2.5rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+}
+
+.btn-export-all-matrices:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(220, 53, 69, 0.4);
+}
+
+.btn-export-all-matrices i {
+  font-size: 1.25rem;
+}
+
+/* =========================
    EMPTY STATE
    ========================= */
 .empty-state {
@@ -793,6 +826,16 @@
   letter-spacing: 0.5px;
 }
 
+.column-header-edit span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.column-header-edit i {
+  font-size: 1rem;
+}
+
 .column-header-edit.vulnerabilidades {
   background: #4a5568;
   color: white;
@@ -866,11 +909,31 @@
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   padding: 0.5rem;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .item-edit:focus-within {
   border-color: #003b2b;
+}
+
+/* Modo visualização - estilo mais limpo */
+.item-edit.view-mode {
+  background: #f7fafc;
+  border: none;
+  padding: 0.75rem;
+  border-left: 3px solid #e2e8f0;
+}
+
+.item-edit.view-mode .item-textarea {
+  color: #2d3748;
+  cursor: default;
+  padding: 0;
+}
+
+.item-edit.view-mode .item-textarea:disabled {
+  background: transparent;
+  color: #2d3748;
+  opacity: 1;
 }
 
 .item-textarea {
