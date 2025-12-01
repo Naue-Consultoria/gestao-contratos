@@ -281,5 +281,19 @@ export class MatrizCruzamentoSwotComponent implements OnInit {
       grid[linha][coluna] = Math.round(valor / 10) * 10;
     }
   }
+
+  exportarPDF(): void {
+    if (!this.planejamentoId) return;
+
+    const url = this.planejamentoService.gerarUrlPdfDefinicaoImpacto(this.planejamentoId);
+    window.open(url, '_blank');
+  }
+
+  exportarExcel(): void {
+    if (!this.planejamentoId) return;
+
+    const url = this.planejamentoService.gerarUrlExcelDefinicaoImpacto(this.planejamentoId);
+    window.open(url, '_blank');
+  }
 }
 

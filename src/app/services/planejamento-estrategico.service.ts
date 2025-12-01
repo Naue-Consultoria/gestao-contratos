@@ -1083,6 +1083,20 @@ export class PlanejamentoEstrategicoService {
     return `${this.apiUrl}/${planejamentoId}/matrizes/pdf`;
   }
 
+  /**
+   * Gerar URL para exportar Definição de Impacto (Matriz de Cruzamento SWOT) em PDF
+   */
+  gerarUrlPdfDefinicaoImpacto(planejamentoId: number): string {
+    return `${this.apiUrl}/${planejamentoId}/swot-cruzamento/pdf`;
+  }
+
+  /**
+   * Gerar URL para exportar Definição de Impacto (Matriz de Cruzamento SWOT) em Excel
+   */
+  gerarUrlExcelDefinicaoImpacto(planejamentoId: number): string {
+    return `${this.apiUrl}/${planejamentoId}/swot-cruzamento/excel`;
+  }
+
   // ===== OKR - OBJECTIVES AND KEY RESULTS =====
 
   // --- OBJETIVOS ---
