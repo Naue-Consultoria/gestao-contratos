@@ -386,25 +386,25 @@
 /* ===== MATRIZ CONSOLIDADA EDITÁVEL ===== */
 .matriz-consolidada-section {
   background: linear-gradient(to bottom, #f7fafc 0%, #edf2f7 100%);
-  padding: 4rem 2rem;
+  padding: 2rem 2rem 3rem 2rem;
 }
 
 .matriz-consolidada-content {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
 .matriz-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .matriz-header-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   background: linear-gradient(135deg, #003b2b 0%, #002821 100%);
   border-radius: 50%;
   margin-bottom: 1.5rem;
@@ -417,15 +417,15 @@
 }
 
 .matriz-header h2 {
-  margin: 0 0 0.75rem 0;
-  font-size: 2.5rem;
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
   font-weight: 700;
   color: #1a202c;
 }
 
 .matriz-header p {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   color: #718096;
 }
 
@@ -455,7 +455,7 @@
 }
 
 .swot-quadrante-consolidado.fraquezas {
-  border-color: #ef4444;
+  border-color: #ffc107;
 }
 
 .swot-quadrante-consolidado.oportunidades {
@@ -463,11 +463,11 @@
 }
 
 .swot-quadrante-consolidado.ameacas {
-  border-color: #f59e0b;
+  border-color: #dc3545;
 }
 
 .quadrante-consolidado-header {
-  padding: 1.5rem 2rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -478,7 +478,7 @@
 }
 
 .swot-quadrante-consolidado.fraquezas .quadrante-consolidado-header {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
 }
 
 .swot-quadrante-consolidado.oportunidades .quadrante-consolidado-header {
@@ -486,7 +486,7 @@
 }
 
 .swot-quadrante-consolidado.ameacas .quadrante-consolidado-header {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
 }
 
 .header-content {
@@ -529,39 +529,65 @@
 }
 
 .quadrante-consolidado-body {
-  padding: 2rem;
-  min-height: 200px;
+  padding: 1rem;
+  min-height: 80px;
 }
 
 .empty-quadrante {
   text-align: center;
-  padding: 3rem 1rem;
+  padding: 1rem;
   color: #a0aec0;
 }
 
 .empty-quadrante i {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  display: block;
-  opacity: 0.5;
+  display: none;
 }
 
 .empty-quadrante p {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
 }
 
 .itens-list {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.75rem;
 }
 
 .item-edit-row {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: flex-start;
   animation: fadeInItem 0.3s ease-out;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.5rem;
+  transition: all 0.2s;
+}
+
+.item-edit-row:focus-within {
+  border-color: #003b2b;
+}
+
+/* Modo visualização - estilo mais limpo */
+.item-edit-row.view-mode {
+  background: #f7fafc;
+  border: none;
+  padding: 0.75rem;
+  border-left: 3px solid #e2e8f0;
+}
+
+.item-edit-row.view-mode .item-textarea {
+  color: #2d3748;
+  cursor: default;
+  padding: 0;
+}
+
+.item-edit-row.view-mode .item-textarea:disabled {
+  background: transparent;
+  color: #2d3748;
+  opacity: 1;
 }
 
 @keyframes fadeInItem {
@@ -575,34 +601,23 @@
   }
 }
 
+/* item-number removido - não será mais exibido */
 .item-number {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #003b2b 0%, #002821 100%);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.95rem;
-  flex-shrink: 0;
-  margin-top: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 59, 43, 0.2);
+  display: none;
 }
 
 .item-textarea {
   flex: 1;
-  padding: 1rem 1.25rem;
+  padding: 0.625rem 0.875rem;
   border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 1rem;
-  line-height: 1.6;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
   resize: vertical;
   font-family: inherit;
   transition: all 0.2s ease;
-  min-height: 70px;
-  max-height: 250px;
+  min-height: 45px;
+  max-height: 120px;
   background: white;
 }
 

@@ -25,6 +25,7 @@ export class PublicSwotConsolidadoComponent implements OnInit {
   error = '';
   successMessage = '';
   currentYear = new Date().getFullYear();
+  isEditing = false;
 
   // Grupos expandidos
   expandedGrupos = new Set<number>();
@@ -193,6 +194,17 @@ export class PublicSwotConsolidadoComponent implements OnInit {
     return index;
   }
 
+  // Modo de edição
+  toggleEditMode(): void {
+    if (this.isEditing) {
+      // Sair do modo edição - salvar
+      this.salvarMatriz();
+    } else {
+      // Entrar no modo edição
+      this.isEditing = true;
+    }
+  }
+
   async salvarMatriz(): Promise<void> {
     if (!this.token) return;
 
@@ -216,6 +228,8 @@ export class PublicSwotConsolidadoComponent implements OnInit {
       if (response.success) {
         this.successMessage = 'Matriz SWOT consolidada salva com sucesso!';
         this.matrizFinal = response.data;
+        // Sair do modo edição após salvar
+        this.isEditing = false;
 
         // Limpar mensagem após 3 segundos
         setTimeout(() => {

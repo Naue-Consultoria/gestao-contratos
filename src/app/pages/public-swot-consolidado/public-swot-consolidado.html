@@ -104,28 +104,27 @@
           <div class="swot-quadrante-consolidado forcas">
             <div class="quadrante-consolidado-header">
               <div class="header-content">
-                <i class="fas fa-star"></i>
                 <span>Forças</span>
               </div>
-              <button type="button" class="btn-add-item" (click)="addItem('forcas')" [disabled]="getItens('forcas').length >= 5">
+              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('forcas')" [disabled]="getItens('forcas').length >= 5">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
             <div class="quadrante-consolidado-body">
               <div *ngIf="getItens('forcas').length === 0" class="empty-quadrante">
                 <i class="fas fa-inbox"></i>
-                <p>Clique no <strong>+</strong> para adicionar pontos fortes</p>
+                <p>{{ isEditing ? 'Clique no + para adicionar pontos fortes' : 'Nenhum item adicionado' }}</p>
               </div>
               <div class="itens-list">
-                <div *ngFor="let item of getItens('forcas'); let i = index; trackBy: trackByIndex" class="item-edit-row">
-                  <div class="item-number">{{ i + 1 }}</div>
+                <div *ngFor="let item of getItens('forcas'); let i = index; trackBy: trackByIndex" class="item-edit-row" [class.view-mode]="!isEditing">
                   <textarea
                     [value]="item"
                     (input)="updateItem('forcas', i, $event)"
                     placeholder="Descreva um ponto forte da organização..."
                     class="item-textarea"
+                    [disabled]="!isEditing"
                     rows="2"></textarea>
-                  <button type="button" class="btn-remove-item" (click)="removeItem('forcas', i)">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditing" (click)="removeItem('forcas', i)">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -137,28 +136,27 @@
           <div class="swot-quadrante-consolidado fraquezas">
             <div class="quadrante-consolidado-header">
               <div class="header-content">
-                <i class="fas fa-exclamation-triangle"></i>
                 <span>Fraquezas</span>
               </div>
-              <button type="button" class="btn-add-item" (click)="addItem('fraquezas')" [disabled]="getItens('fraquezas').length >= 5">
+              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('fraquezas')" [disabled]="getItens('fraquezas').length >= 5">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
             <div class="quadrante-consolidado-body">
               <div *ngIf="getItens('fraquezas').length === 0" class="empty-quadrante">
                 <i class="fas fa-inbox"></i>
-                <p>Clique no <strong>+</strong> para adicionar fraquezas</p>
+                <p>{{ isEditing ? 'Clique no + para adicionar fraquezas' : 'Nenhum item adicionado' }}</p>
               </div>
               <div class="itens-list">
-                <div *ngFor="let item of getItens('fraquezas'); let i = index; trackBy: trackByIndex" class="item-edit-row">
-                  <div class="item-number">{{ i + 1 }}</div>
+                <div *ngFor="let item of getItens('fraquezas'); let i = index; trackBy: trackByIndex" class="item-edit-row" [class.view-mode]="!isEditing">
                   <textarea
                     [value]="item"
                     (input)="updateItem('fraquezas', i, $event)"
                     placeholder="Descreva uma fraqueza a ser trabalhada..."
                     class="item-textarea"
+                    [disabled]="!isEditing"
                     rows="2"></textarea>
-                  <button type="button" class="btn-remove-item" (click)="removeItem('fraquezas', i)">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditing" (click)="removeItem('fraquezas', i)">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -170,28 +168,27 @@
           <div class="swot-quadrante-consolidado oportunidades">
             <div class="quadrante-consolidado-header">
               <div class="header-content">
-                <i class="fas fa-lightbulb"></i>
                 <span>Oportunidades</span>
               </div>
-              <button type="button" class="btn-add-item" (click)="addItem('oportunidades')" [disabled]="getItens('oportunidades').length >= 5">
+              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('oportunidades')" [disabled]="getItens('oportunidades').length >= 5">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
             <div class="quadrante-consolidado-body">
               <div *ngIf="getItens('oportunidades').length === 0" class="empty-quadrante">
                 <i class="fas fa-inbox"></i>
-                <p>Clique no <strong>+</strong> para adicionar oportunidades</p>
+                <p>{{ isEditing ? 'Clique no + para adicionar oportunidades' : 'Nenhum item adicionado' }}</p>
               </div>
               <div class="itens-list">
-                <div *ngFor="let item of getItens('oportunidades'); let i = index; trackBy: trackByIndex" class="item-edit-row">
-                  <div class="item-number">{{ i + 1 }}</div>
+                <div *ngFor="let item of getItens('oportunidades'); let i = index; trackBy: trackByIndex" class="item-edit-row" [class.view-mode]="!isEditing">
                   <textarea
                     [value]="item"
                     (input)="updateItem('oportunidades', i, $event)"
                     placeholder="Descreva uma oportunidade de mercado..."
                     class="item-textarea"
+                    [disabled]="!isEditing"
                     rows="2"></textarea>
-                  <button type="button" class="btn-remove-item" (click)="removeItem('oportunidades', i)">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditing" (click)="removeItem('oportunidades', i)">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -203,28 +200,27 @@
           <div class="swot-quadrante-consolidado ameacas">
             <div class="quadrante-consolidado-header">
               <div class="header-content">
-                <i class="fas fa-shield-alt"></i>
                 <span>Ameaças</span>
               </div>
-              <button type="button" class="btn-add-item" (click)="addItem('ameacas')" [disabled]="getItens('ameacas').length >= 5">
+              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('ameacas')" [disabled]="getItens('ameacas').length >= 5">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
             <div class="quadrante-consolidado-body">
               <div *ngIf="getItens('ameacas').length === 0" class="empty-quadrante">
                 <i class="fas fa-inbox"></i>
-                <p>Clique no <strong>+</strong> para adicionar ameaças</p>
+                <p>{{ isEditing ? 'Clique no + para adicionar ameaças' : 'Nenhum item adicionado' }}</p>
               </div>
               <div class="itens-list">
-                <div *ngFor="let item of getItens('ameacas'); let i = index; trackBy: trackByIndex" class="item-edit-row">
-                  <div class="item-number">{{ i + 1 }}</div>
+                <div *ngFor="let item of getItens('ameacas'); let i = index; trackBy: trackByIndex" class="item-edit-row" [class.view-mode]="!isEditing">
                   <textarea
                     [value]="item"
                     (input)="updateItem('ameacas', i, $event)"
                     placeholder="Descreva uma ameaça externa..."
                     class="item-textarea"
+                    [disabled]="!isEditing"
                     rows="2"></textarea>
-                  <button type="button" class="btn-remove-item" (click)="removeItem('ameacas', i)">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditing" (click)="removeItem('ameacas', i)">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -233,24 +229,11 @@
           </div>
         </div>
 
-        <!-- Observações -->
-        <div class="observacoes-card">
-          <div class="observacoes-header">
-            <i class="fas fa-comment-alt"></i>
-            <h3>Observações Adicionais</h3>
-          </div>
-          <textarea
-            [(ngModel)]="observacoes"
-            class="observacoes-textarea"
-            placeholder="Adicione observações, contexto ou insights relevantes sobre a análise SWOT..."
-            rows="4"></textarea>
-        </div>
-
-        <!-- Botão Salvar -->
+        <!-- Botão Editar/Salvar -->
         <div class="save-section">
-          <button class="btn-save-consolidado" (click)="salvarMatriz()" [disabled]="isSaving">
-            <i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i>
-            {{ isSaving ? 'Salvando...' : 'Salvar Matriz SWOT Consolidada' }}
+          <button class="btn-save-consolidado" (click)="toggleEditMode()" [disabled]="isSaving">
+            <i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : (isEditing ? 'fa-save' : 'fa-edit')"></i>
+            {{ isSaving ? 'Salvando...' : (isEditing ? 'Salvar Matriz SWOT Consolidada' : 'Editar Matriz SWOT Consolidada') }}
           </button>
         </div>
       </div>

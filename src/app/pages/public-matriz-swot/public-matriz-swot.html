@@ -119,29 +119,29 @@
               <div class="matriz-quadrante forcas">
                 <div class="quadrante-header-edit">
                   <span class="label-horizontal">FORÇAS</span>
-                  <button type="button" class="btn-add-item" (click)="addItem('forcas')" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('forcas')" [disabled]="isPrazoVencido()">
                     <i class="fas fa-plus"></i>
                   </button>
                 </div>
               <div class="quadrante-items">
                 <div *ngIf="getItens('forcas').length === 0" class="empty-quadrante">
-                  Clique no + para adicionar itens
+                  {{ isEditing ? 'Clique no + para adicionar itens' : 'Nenhum item adicionado' }}
                 </div>
-                <div *ngFor="let item of getItens('forcas'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <div *ngFor="let item of getItens('forcas'); let i = index; trackBy: trackByIndex" class="item-edit" [class.view-mode]="!isEditing">
                   <textarea
                     [value]="item"
                     (input)="updateItem('forcas', i, $event)"
                     placeholder="Digite o item..."
                     class="item-textarea"
-                    [disabled]="isPrazoVencido()"
+                    [disabled]="!isEditing || isPrazoVencido()"
                     rows="1"></textarea>
                   <select
                     [(ngModel)]="classificacoesCache.forcas[i]"
                     class="item-classificacao"
-                    [disabled]="isPrazoVencido() || !item.trim()">
+                    [disabled]="!isEditing || isPrazoVencido() || !item.trim()">
                     <option *ngFor="let opcao of opcoesClassificacao" [value]="opcao.value">{{ opcao.label }}</option>
                   </select>
-                  <button type="button" class="btn-remove-item" (click)="removeItem('forcas', i)" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditing" (click)="removeItem('forcas', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -152,29 +152,29 @@
               <div class="matriz-quadrante fraquezas">
                 <div class="quadrante-header-edit">
                   <span class="label-horizontal">FRAQUEZAS</span>
-                  <button type="button" class="btn-add-item" (click)="addItem('fraquezas')" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('fraquezas')" [disabled]="isPrazoVencido()">
                     <i class="fas fa-plus"></i>
                   </button>
                 </div>
               <div class="quadrante-items">
                 <div *ngIf="getItens('fraquezas').length === 0" class="empty-quadrante">
-                  Clique no + para adicionar itens
+                  {{ isEditing ? 'Clique no + para adicionar itens' : 'Nenhum item adicionado' }}
                 </div>
-                <div *ngFor="let item of getItens('fraquezas'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <div *ngFor="let item of getItens('fraquezas'); let i = index; trackBy: trackByIndex" class="item-edit" [class.view-mode]="!isEditing">
                   <textarea
                     [value]="item"
                     (input)="updateItem('fraquezas', i, $event)"
                     placeholder="Digite o item..."
                     class="item-textarea"
-                    [disabled]="isPrazoVencido()"
+                    [disabled]="!isEditing || isPrazoVencido()"
                     rows="1"></textarea>
                   <select
                     [(ngModel)]="classificacoesCache.fraquezas[i]"
                     class="item-classificacao"
-                    [disabled]="isPrazoVencido() || !item.trim()">
+                    [disabled]="!isEditing || isPrazoVencido() || !item.trim()">
                     <option *ngFor="let opcao of opcoesClassificacao" [value]="opcao.value">{{ opcao.label }}</option>
                   </select>
-                  <button type="button" class="btn-remove-item" (click)="removeItem('fraquezas', i)" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditing" (click)="removeItem('fraquezas', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -191,29 +191,29 @@
               <div class="matriz-quadrante oportunidades">
                 <div class="quadrante-header-edit">
                   <span class="label-horizontal">OPORTUNIDADES</span>
-                  <button type="button" class="btn-add-item" (click)="addItem('oportunidades')" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('oportunidades')" [disabled]="isPrazoVencido()">
                     <i class="fas fa-plus"></i>
                   </button>
                 </div>
               <div class="quadrante-items">
                 <div *ngIf="getItens('oportunidades').length === 0" class="empty-quadrante">
-                  Clique no + para adicionar itens
+                  {{ isEditing ? 'Clique no + para adicionar itens' : 'Nenhum item adicionado' }}
                 </div>
-                <div *ngFor="let item of getItens('oportunidades'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <div *ngFor="let item of getItens('oportunidades'); let i = index; trackBy: trackByIndex" class="item-edit" [class.view-mode]="!isEditing">
                   <textarea
                     [value]="item"
                     (input)="updateItem('oportunidades', i, $event)"
                     placeholder="Digite o item..."
                     class="item-textarea"
-                    [disabled]="isPrazoVencido()"
+                    [disabled]="!isEditing || isPrazoVencido()"
                     rows="1"></textarea>
                   <select
                     [(ngModel)]="classificacoesCache.oportunidades[i]"
                     class="item-classificacao"
-                    [disabled]="isPrazoVencido() || !item.trim()">
+                    [disabled]="!isEditing || isPrazoVencido() || !item.trim()">
                     <option *ngFor="let opcao of opcoesClassificacao" [value]="opcao.value">{{ opcao.label }}</option>
                   </select>
-                  <button type="button" class="btn-remove-item" (click)="removeItem('oportunidades', i)" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditing" (click)="removeItem('oportunidades', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -224,29 +224,29 @@
               <div class="matriz-quadrante ameacas">
                 <div class="quadrante-header-edit">
                   <span class="label-horizontal">AMEAÇAS</span>
-                  <button type="button" class="btn-add-item" (click)="addItem('ameacas')" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('ameacas')" [disabled]="isPrazoVencido()">
                     <i class="fas fa-plus"></i>
                   </button>
                 </div>
               <div class="quadrante-items">
                 <div *ngIf="getItens('ameacas').length === 0" class="empty-quadrante">
-                  Clique no + para adicionar itens
+                  {{ isEditing ? 'Clique no + para adicionar itens' : 'Nenhum item adicionado' }}
                 </div>
-                <div *ngFor="let item of getItens('ameacas'); let i = index; trackBy: trackByIndex" class="item-edit">
+                <div *ngFor="let item of getItens('ameacas'); let i = index; trackBy: trackByIndex" class="item-edit" [class.view-mode]="!isEditing">
                   <textarea
                     [value]="item"
                     (input)="updateItem('ameacas', i, $event)"
                     placeholder="Digite o item..."
                     class="item-textarea"
-                    [disabled]="isPrazoVencido()"
+                    [disabled]="!isEditing || isPrazoVencido()"
                     rows="1"></textarea>
                   <select
                     [(ngModel)]="classificacoesCache.ameacas[i]"
                     class="item-classificacao"
-                    [disabled]="isPrazoVencido() || !item.trim()">
+                    [disabled]="!isEditing || isPrazoVencido() || !item.trim()">
                     <option *ngFor="let opcao of opcoesClassificacao" [value]="opcao.value">{{ opcao.label }}</option>
                   </select>
-                  <button type="button" class="btn-remove-item" (click)="removeItem('ameacas', i)" [disabled]="isPrazoVencido()">
+                  <button type="button" class="btn-remove-item" *ngIf="isEditing" (click)="removeItem('ameacas', i)" [disabled]="isPrazoVencido()">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -268,8 +268,9 @@
               <button class="btn-export-pdf" (click)="exportarPDF()" [disabled]="!isMatrizSwotPreenchida()">
                 <i class="fas fa-file-pdf"></i> Exportar PDF
               </button>
-              <button class="btn-save-edit" (click)="salvarMatrizSwot()" [disabled]="isSaving || isPrazoVencido()">
-                <i class="fas fa-save"></i> {{ isSaving ? 'Salvando...' : 'Salvar Matriz' }}
+              <button class="btn-save-edit" (click)="toggleEditMode()" [disabled]="isSaving || isPrazoVencido()">
+                <i class="fas" [ngClass]="isEditing ? 'fa-save' : 'fa-edit'"></i>
+                {{ isSaving ? 'Salvando...' : (isEditing ? 'Salvar Matriz' : 'Editar Matriz') }}
               </button>
             </div>
           </div>

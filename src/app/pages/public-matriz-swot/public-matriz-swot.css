@@ -633,11 +633,39 @@
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   padding: 0.5rem;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .item-edit:focus-within {
   border-color: #003b2b;
+}
+
+/* Modo visualização - estilo mais limpo */
+.item-edit.view-mode {
+  background: #f7fafc;
+  border: none;
+  padding: 0.75rem;
+  border-left: 3px solid #e2e8f0;
+}
+
+.item-edit.view-mode .item-textarea {
+  color: #2d3748;
+  cursor: default;
+  padding: 0;
+}
+
+.item-edit.view-mode .item-textarea:disabled {
+  background: transparent;
+  color: #2d3748;
+  opacity: 1;
+}
+
+.item-edit.view-mode .item-classificacao {
+  pointer-events: none;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
 }
 
 .item-textarea {

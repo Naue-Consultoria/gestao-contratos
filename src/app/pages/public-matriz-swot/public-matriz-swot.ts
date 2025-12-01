@@ -36,6 +36,7 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
   isLoading = true;
   isSaving = false;
   error = '';
+  isEditing = false;
 
   // Cache local dos itens do grupo (para edição em tempo real)
   itensCache = {
@@ -251,6 +252,17 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
     return index;
   }
 
+  // Modo de edição
+  toggleEditMode(): void {
+    if (this.isEditing) {
+      // Sair do modo edição - salvar
+      this.salvarMatrizSwot();
+    } else {
+      // Entrar no modo edição
+      this.isEditing = true;
+    }
+  }
+
   // Funções para gerenciar classificações
   getClassificacao(quadrante: 'forcas' | 'fraquezas' | 'oportunidades' | 'ameacas', index: number): string {
     return this.classificacoesCache[quadrante][index] || '';
@@ -308,6 +320,8 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
 
       if (response.success) {
         this.toastr.success('Matriz SWOT salva com sucesso', 'Sucesso');
+        // Sair do modo edição após salvar
+        this.isEditing = false;
         this.loadPlanejamento(); // Recarregar para mostrar dados atualizados
       }
     } catch (err: any) {
