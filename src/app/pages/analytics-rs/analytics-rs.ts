@@ -185,13 +185,13 @@ export class AnalyticsRsComponent implements OnInit, AfterViewInit, OnDestroy {
     // Calcular SLA médio para vagas fechadas
     const slaMedia = this.calculateAverageSLA(vagas.filter(v => v.status === 'fechada' || v.status === 'fechada_rep'));
 
-    // Calcular faturamento
+    // Calcular faturamento (incluindo vagas canceladas, igual à tabela de fechamento)
     const faturamentoTotal = vagas
-      .filter(v => v.status === 'fechada' || v.status === 'fechada_rep')
+      .filter(v => v.status === 'fechada' || v.status === 'fechada_rep' || v.status === 'cancelada_cliente')
       .reduce((sum, v) => sum + (v.valor_faturamento || 0), 0);
 
     const faturamentoPrevisto = vagas
-      .filter(v => v.status !== 'cancelada_cliente' && v.status !== 'nao_cobrada')
+      .filter(v => v.status !== 'nao_cobrada')
       .reduce((sum, v) => sum + (v.valor_faturamento || 0), 0);
 
     this.metrics = {
