@@ -232,7 +232,12 @@ export class AniseOportunidadesComponent implements OnInit, AfterViewInit {
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { font: { size: 10 }, padding: 8, usePointStyle: true }
+            labels: {
+              font: { size: 10 },
+              padding: 10,
+              usePointStyle: true,
+              boxWidth: 12
+            }
           },
           tooltip: {
             callbacks: {
@@ -301,7 +306,12 @@ export class AniseOportunidadesComponent implements OnInit, AfterViewInit {
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { font: { size: 10 }, padding: 8, usePointStyle: true }
+            labels: {
+              font: { size: 10 },
+              padding: 10,
+              usePointStyle: true,
+              boxWidth: 12
+            }
           },
           tooltip: {
             callbacks: {
@@ -380,8 +390,9 @@ export class AniseOportunidadesComponent implements OnInit, AfterViewInit {
             position: 'bottom',
             labels: {
               font: { size: 11 },
-              padding: 10,
-              usePointStyle: true
+              padding: 12,
+              usePointStyle: true,
+              boxWidth: 15
             }
           },
           tooltip: {
@@ -460,8 +471,9 @@ export class AniseOportunidadesComponent implements OnInit, AfterViewInit {
             position: 'bottom',
             labels: {
               font: { size: 11 },
-              padding: 10,
-              usePointStyle: true
+              padding: 12,
+              usePointStyle: true,
+              boxWidth: 15
             }
           },
           tooltip: {

@@ -754,12 +754,12 @@ export class RecrutamentoSelecao implements OnInit {
     return this.cachedYears;
   }
 
-  // Get available consultoras from vagas (apenas vagas que geram comissão)
+  // Get available consultoras from vagas (incluindo canceladas)
   getAvailableConsultoras(): string[] {
     const consultoras = new Set<string>();
 
     this.vagas
-      .filter(vaga => vaga.status === 'fechada' || vaga.status === 'fechada_rep')
+      .filter(vaga => vaga.status === 'fechada' || vaga.status === 'fechada_rep' || vaga.status === 'cancelada_cliente')
       .forEach(vaga => {
         if (vaga.usuarioNome) {
           consultoras.add(vaga.usuarioNome);
@@ -769,10 +769,10 @@ export class RecrutamentoSelecao implements OnInit {
     return Array.from(consultoras).sort();
   }
 
-  // Métodos para a aba de Comissões (vagas canceladas NÃO geram comissão)
+  // Métodos para a aba de Comissões (vagas canceladas aparecem com comissão 0%)
   getVagasComissoes(): Vaga[] {
     let filteredVagas = this.vagas.filter(vaga =>
-      vaga.status === 'fechada' || vaga.status === 'fechada_rep'
+      vaga.status === 'fechada' || vaga.status === 'fechada_rep' || vaga.status === 'cancelada_cliente'
     );
 
     // Apply consultora filter if selected
@@ -830,6 +830,10 @@ export class RecrutamentoSelecao implements OnInit {
   }
 
   calcularComissao(vaga: Vaga): number {
+    // Vagas canceladas não geram comissão
+    if (vaga.status === 'cancelada_cliente') {
+      return 0;
+    }
     // Calcula 5% do lucro como comissão da consultora
     const lucro = this.calcularLucro(vaga);
     return lucro * 0.05; // 5% do lucro
@@ -856,6 +860,20 @@ export class RecrutamentoSelecao implements OnInit {
   calcularTotalComissao(): number {
     return this.getVagasComissoes().reduce((total, vaga) => {
       return total + this.calcularComissao(vaga);
+    }, 0);
+  }
+
+  // Métodos para subtotais da aba Fechamento
+  calcularTotalSalarioFechamento(): number {
+    return this.getVagasFechamento().reduce((total, vaga) => {
+      return total + (vaga.salario || 0);
+    }, 0);
+  }
+
+  calcularTotalFaturamentoFechamento(): number {
+    return this.getVagasFechamento().reduce((total, vaga) => {
+      const valorFaturamento = vaga.valorFaturamento || (vaga.salario * ((vaga.porcentagemFaturamento || 100) / 100));
+      return total + valorFaturamento;
     }, 0);
   }
 

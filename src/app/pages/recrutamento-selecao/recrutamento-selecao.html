@@ -458,6 +458,15 @@
             </td>
           </tr>
         </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="4" class="text-right"><strong>Total:</strong></td>
+            <td><strong>R$ {{ calcularTotalSalarioFechamento() | number:'1.2-2':'pt-BR' }}</strong></td>
+            <td></td>
+            <td><strong>R$ {{ calcularTotalFaturamentoFechamento() | number:'1.2-2':'pt-BR' }}</strong></td>
+            <td colspan="5"></td>
+          </tr>
+        </tfoot>
       </table>
     </div>
 
@@ -466,7 +475,7 @@
       <div *ngIf="getVagasComissoes().length === 0" class="empty-state">
         <i class="fas fa-coins empty-icon"></i>
         <h3>Nenhuma comissão encontrada</h3>
-        <p>Vagas fechadas com comissões aparecerão aqui</p>
+        <p>Vagas fechadas e canceladas aparecerão aqui</p>
       </div>
 
       <table class="data-table" *ngIf="getVagasComissoes().length > 0">
@@ -474,6 +483,7 @@
           <tr>
             <th>Cliente</th>
             <th>Cargo</th>
+            <th>Status</th>
             <th>Tipo Cargo</th>
             <th>Salário</th>
             <th>Faturamento</th>
@@ -481,7 +491,7 @@
             <th>Imposto</th>
             <th>Valor Imposto</th>
             <th>Lucro</th>
-            <th>Comissão (5%)</th>
+            <th>Comissão</th>
             <th>Consultora</th>
             <th>Data Fechamento</th>
           </tr>
@@ -504,6 +514,11 @@
               <div class="vaga-title">
                 {{ vaga.cargo }}
               </div>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + vaga.status">
+                {{ statusLabels[vaga.status] }}
+              </span>
             </td>
             <td>
               <span class="type-badge">{{ tipoCargoLabels[vaga.tipoCargo] }}</span>
@@ -542,7 +557,7 @@
         </tbody>
         <tfoot>
           <tr class="total-row">
-            <td colspan="5" class="text-right"><strong>Total:</strong></td>
+            <td colspan="6" class="text-right"><strong>Total:</strong></td>
             <td><strong>R$ {{ calcularTotalFaturamento() | number:'1.2-2':'pt-BR' }}</strong></td>
             <td></td>
             <td><strong>R$ {{ calcularTotalImpostos() | number:'1.2-2':'pt-BR' }}</strong></td>
