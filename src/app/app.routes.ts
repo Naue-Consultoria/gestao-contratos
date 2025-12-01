@@ -52,6 +52,7 @@ import { PublicMatrizSwotComponent } from './pages/public-matriz-swot/public-mat
 import { PublicOkrViewComponent } from './pages/public-okr-view/public-okr-view';
 import { PublicArvoresViewComponent } from './pages/public-arvores-view/public-arvores-view';
 import { PublicSwotConsolidadoComponent } from './pages/public-swot-consolidado/public-swot-consolidado';
+import { PublicClassificacaoRiscosComponent } from './pages/public-classificacao-riscos/public-classificacao-riscos';
 import { MatrizSwotConsolidadoComponent } from './components/matriz-swot-consolidado/matriz-swot-consolidado';
 import { MatrizCruzamentoSwotComponent } from './components/matriz-cruzamento-swot/matriz-cruzamento-swot';
 import { AnaliseCenariosComponent } from './components/analise-cenarios/analise-cenarios';
@@ -150,6 +151,13 @@ export const routes: Routes = [
     path: 'swot-consolidado/:token',
     component: PublicSwotConsolidadoComponent,
     title: 'Matriz SWOT Consolidada - NAUE Consultoria',
+  },
+
+  // Rota pública para Classificação de Riscos
+  {
+    path: 'classificacao-riscos/:token',
+    component: PublicClassificacaoRiscosComponent,
+    title: 'Classificação de Riscos - NAUE Consultoria',
   },
 
   // Rota pública para visualização do hub de mentoria

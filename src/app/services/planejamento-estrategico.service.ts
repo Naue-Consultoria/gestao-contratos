@@ -176,6 +176,39 @@ export interface UpdateMatrizCruzamentoRequest {
   problemas: number[][];
 }
 
+// ===== CLASSIFICAÇÃO DE RISCOS =====
+
+export type ClassificacaoOportunidade = 'explorar' | 'melhorar' | 'compartilhar' | 'aceitar';
+export type ClassificacaoAmeaca = 'evitar' | 'transferir' | 'mitigar' | 'aceitar';
+
+export interface ItemRiscoOportunidade {
+  item: string;
+  classificacao: ClassificacaoOportunidade | null;
+  tratativa: string;
+}
+
+export interface ItemRiscoAmeaca {
+  item: string;
+  classificacao: ClassificacaoAmeaca | null;
+  tratativa: string;
+}
+
+export interface ClassificacaoRiscos {
+  id: number;
+  planejamento_id: number;
+  oportunidades: ItemRiscoOportunidade[];
+  ameacas: ItemRiscoAmeaca[];
+  created_at: string;
+  updated_at: string;
+  created_by?: number | null;
+  updated_by?: number | null;
+}
+
+export interface UpdateClassificacaoRiscosRequest {
+  oportunidades: ItemRiscoOportunidade[];
+  ameacas: ItemRiscoAmeaca[];
+}
+
 export interface UpdateMatrizRequest {
   vulnerabilidades?: string;
   conquistas?: string;
@@ -1301,5 +1334,78 @@ export class PlanejamentoEstrategicoService {
       success: boolean;
       data: DepartamentoComOkr[];
     }>(`${this.apiUrl}/${planejamentoId}/okr-completo`);
+  }
+
+  // ===== CLASSIFICAÇÃO DE RISCOS =====
+
+  /**
+   * Obter classificação de riscos de um planejamento
+   */
+  obterClassificacaoRiscos(planejamentoId: number): Observable<{
+    success: boolean;
+    data: ClassificacaoRiscos | null;
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: ClassificacaoRiscos | null;
+    }>(`${this.apiUrl}/${planejamentoId}/classificacao-riscos`);
+  }
+
+  /**
+   * Salvar classificação de riscos
+   */
+  salvarClassificacaoRiscos(planejamentoId: number, data: UpdateClassificacaoRiscosRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: ClassificacaoRiscos;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: ClassificacaoRiscos;
+    }>(`${this.apiUrl}/${planejamentoId}/classificacao-riscos`, data);
+  }
+
+  /**
+   * Obter classificação de riscos via token público
+   */
+  obterClassificacaoRiscosPublico(token: string): Observable<{
+    success: boolean;
+    data: {
+      planejamento: any;
+      matrizFinal: any;
+      classificacao: ClassificacaoRiscos | null;
+    };
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: {
+        planejamento: any;
+        matrizFinal: any;
+        classificacao: ClassificacaoRiscos | null;
+      };
+    }>(`${this.apiUrl}/publico/classificacao-riscos/${token}`);
+  }
+
+  /**
+   * Salvar classificação de riscos via token público
+   */
+  salvarClassificacaoRiscosPublico(token: string, data: UpdateClassificacaoRiscosRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: ClassificacaoRiscos;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: ClassificacaoRiscos;
+    }>(`${this.apiUrl}/publico/classificacao-riscos/${token}`, data);
+  }
+
+  /**
+   * Gerar URL pública para classificação de riscos
+   */
+  gerarUrlPublicaClassificacaoRiscos(token: string): string {
+    return `${window.location.origin}/classificacao-riscos/${token}`;
   }
 }
