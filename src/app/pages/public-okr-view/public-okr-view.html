@@ -153,6 +153,30 @@
 
           <!-- Conteúdo do Objetivo -->
           <div class="objetivo-body" *ngIf="isObjetivoExpanded(objetivo.id)">
+            <!-- Vinculação com Objetivo Estratégico -->
+            <div class="objetivo-vinculo-container" *ngIf="objetivosEstrategicos.length > 0">
+              <div class="objetivo-vinculo">
+                <ng-container *ngIf="!isEditingObjetivo(objetivo.id)">
+                  <div class="vinculo-display" *ngIf="getObjetivoEstrategicoNome(objetivo)">
+                    <i class="fas fa-link"></i>
+                    <span class="vinculo-label">Vinculado a:</span>
+                    <span class="vinculo-objetivo">{{ getObjetivoEstrategicoNome(objetivo) }}</span>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="isEditingObjetivo(objetivo.id)">
+                  <div class="vinculo-edit">
+                    <label><i class="fas fa-link"></i> Vincular a Objetivo Estratégico</label>
+                    <select [(ngModel)]="objetivo.objetivo_estrategico_id">
+                      <option [ngValue]="null">-- Nenhum --</option>
+                      <option *ngFor="let obj of objetivosEstrategicos" [ngValue]="obj.id">
+                        {{ obj.isSubObjetivo ? '↳ ' : '' }}{{ obj.objetivo }}
+                      </option>
+                    </select>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+
             <!-- Descrição -->
             <div class="objetivo-descricao-container" *ngIf="objetivo.descricao || isEditingObjetivo(objetivo.id)">
               <div class="objetivo-descricao">

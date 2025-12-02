@@ -556,6 +556,9 @@
   <div class="section" *ngIf="activeTab === 'okr-departamental'">
     <div class="section-header">
       <h3>OKRs por Departamento</h3>
+      <button class="btn btn-secondary" (click)="exportarOkrDepartamentosPDF()" *ngIf="okrDepartamentos.length > 0">
+        <i class="fas fa-file-pdf"></i> Exportar PDF
+      </button>
     </div>
 
     <div *ngIf="okrDepartamentos.length === 0" class="empty-state">

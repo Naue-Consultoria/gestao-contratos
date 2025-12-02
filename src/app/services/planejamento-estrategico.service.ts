@@ -676,6 +676,19 @@ export class PlanejamentoEstrategicoService {
   }
 
   /**
+   * Obter objetivos estratégicos via token de departamento público
+   */
+  obterObjetivosEstrategicosPublico(token: string): Observable<{
+    success: boolean;
+    data: { id: number; objetivo: string; isSubObjetivo: boolean }[];
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: { id: number; objetivo: string; isSubObjetivo: boolean }[];
+    }>(`${this.apiUrl}/publico/departamento/${token}/objetivos-estrategicos`);
+  }
+
+  /**
    * Obter grupo via token público
    */
   obterGrupoPublico(token: string): Observable<{ success: boolean; data: Grupo }> {
@@ -1122,6 +1135,13 @@ export class PlanejamentoEstrategicoService {
    */
   gerarUrlPdfOkrs(planejamentoId: number): string {
     return `${this.apiUrl}/${planejamentoId}/okrs/pdf`;
+  }
+
+  /**
+   * Gerar URL para exportar OKRs por Departamento em PDF
+   */
+  gerarUrlPdfOkrDepartamentos(planejamentoId: number): string {
+    return `${this.apiUrl}/${planejamentoId}/okr-departamentos/pdf`;
   }
 
   /**

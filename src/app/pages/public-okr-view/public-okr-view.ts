@@ -59,6 +59,10 @@ export class PublicOkrViewComponent implements OnInit {
   // Contadores para IDs temporários (novos itens)
   private tempIdCounter = -1;
 
+  // Objetivos estratégicos para vincular
+  objetivosEstrategicos: { id: number; objetivo: string; isSubObjetivo: boolean }[] = [];
+  loadingObjetivosEstrategicos = false;
+
   // Fechar menus ao clicar fora
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
@@ -102,6 +106,9 @@ export class PublicOkrViewComponent implements OnInit {
         });
 
         this.hasChanges = false;
+
+        // Carregar objetivos estratégicos para vinculação
+        await this.loadObjetivosEstrategicos();
       }
     } catch (err: any) {
       console.error('Erro ao carregar OKRs:', err);
@@ -110,6 +117,44 @@ export class PublicOkrViewComponent implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  async loadObjetivosEstrategicos(): Promise<void> {
+    if (!this.token) return;
+
+    this.loadingObjetivosEstrategicos = true;
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.obterObjetivosEstrategicosPublico(this.token)
+      );
+
+      if (response.success) {
+        this.objetivosEstrategicos = response.data || [];
+      }
+    } catch (err: any) {
+      console.error('Erro ao carregar objetivos estratégicos:', err);
+    } finally {
+      this.loadingObjetivosEstrategicos = false;
+    }
+  }
+
+  getObjetivoEstrategicoNome(objetivo: OkrObjetivo): string | null {
+    if (!objetivo.objetivo_estrategico_id) return null;
+
+    const objEstrategico = this.objetivosEstrategicos.find(
+      oe => oe.id === objetivo.objetivo_estrategico_id
+    );
+
+    if (objEstrategico) {
+      return objEstrategico.objetivo;
+    }
+
+    // Se não encontrou no array mas tem objetivo_estrategico carregado do backend
+    if ((objetivo as any).objetivo_estrategico?.objetivo) {
+      return (objetivo as any).objetivo_estrategico.objetivo;
+    }
+
+    return null;
   }
 
   getClientName(): string {

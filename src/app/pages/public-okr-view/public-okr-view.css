@@ -163,7 +163,7 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+  overflow: visible;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -181,6 +181,11 @@
   color: white;
   cursor: pointer;
   transition: background 0.2s;
+  border-radius: 12px 12px 0 0;
+}
+
+.objetivo-card:not(:has(.objetivo-body)) .objetivo-header {
+  border-radius: 12px;
 }
 
 .objetivo-header:hover {
@@ -375,6 +380,74 @@
 
 .objetivo-body {
   padding: 1.5rem;
+}
+
+/* ===== Vinculação com Objetivo Estratégico ===== */
+.objetivo-vinculo-container {
+  margin-bottom: 1rem;
+}
+
+.objetivo-vinculo {
+  background: #f0fff4;
+  border-radius: 8px;
+  border-left: 4px solid #48bb78;
+}
+
+.vinculo-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: #2d3748;
+  font-size: 0.9rem;
+}
+
+.vinculo-display i {
+  color: #48bb78;
+}
+
+.vinculo-label {
+  color: #718096;
+}
+
+.vinculo-objetivo {
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.vinculo-edit {
+  padding: 1rem;
+}
+
+.vinculo-edit label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #4a5568;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.vinculo-edit label i {
+  color: #48bb78;
+}
+
+.vinculo-edit select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  color: #2d3748;
+  cursor: pointer;
+}
+
+.vinculo-edit select:focus {
+  outline: none;
+  border-color: #48bb78;
+  box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
 }
 
 .objetivo-descricao-container {

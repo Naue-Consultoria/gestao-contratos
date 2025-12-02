@@ -1206,6 +1206,15 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     this.toastr.info('PDF sendo gerado...', 'Download');
   }
 
+  // Exportar OKRs por Departamento para PDF
+  exportarOkrDepartamentosPDF(): void {
+    if (!this.planejamentoId) return;
+
+    const url = this.planejamentoService.gerarUrlPdfOkrDepartamentos(this.planejamentoId);
+    window.open(url, '_blank');
+    this.toastr.info('PDF sendo gerado...', 'Download');
+  }
+
   // Obter pilares de dor (itens com nota > 20)
   getPilaresDeDor(): any[] {
     const pilares: any[] = [];
