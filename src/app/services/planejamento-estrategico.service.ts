@@ -246,6 +246,12 @@ export interface OkrObjetivo {
   departamento_id: number;
   titulo: string;
   descricao?: string | null;
+  objetivo_estrategico_id?: number | null;
+  objetivo_estrategico?: {
+    id: number;
+    objetivo: string;
+    parent_id?: number | null;
+  } | null;
   created_at: string;
   updated_at: string;
   key_results?: OkrKeyResult[];
@@ -261,11 +267,13 @@ export interface DepartamentoComOkr {
 export interface CreateOkrObjetivoRequest {
   titulo: string;
   descricao?: string;
+  objetivo_estrategico_id?: number | null;
 }
 
 export interface UpdateOkrObjetivoRequest {
   titulo?: string;
   descricao?: string;
+  objetivo_estrategico_id?: number | null;
 }
 
 export interface CreateKeyResultRequest {
@@ -294,6 +302,19 @@ export interface UpdateTarefaRequest {
   data_limite?: string;
   responsavel?: string;
   concluida?: boolean;
+}
+
+// ===== INTERFACES OBJETIVOS ESTRATÉGICOS =====
+
+export interface ObjetivoEstrategico {
+  id: number;
+  planejamento_id: number;
+  objetivo: string;
+  parent_id?: number | null;
+  ordem?: number;
+  created_at: string;
+  updated_at?: string;
+  sub_objetivos?: ObjetivoEstrategico[];
 }
 
 @Injectable({
@@ -863,30 +884,31 @@ export class PlanejamentoEstrategicoService {
   // ===== OBJETIVOS ESTRATÉGICOS =====
 
   /**
-   * Listar objetivos estratégicos de um planejamento
+   * Listar objetivos estratégicos de um planejamento (com hierarquia de sub-objetivos)
    */
   listarOkrs(planejamentoId: number): Observable<{
     success: boolean;
-    data: any[];
+    data: ObjetivoEstrategico[];
   }> {
     return this.http.get<{
       success: boolean;
-      data: any[];
+      data: ObjetivoEstrategico[];
     }>(`${this.apiUrl}/${planejamentoId}/okrs`);
   }
 
   /**
    * Adicionar objetivo estratégico a um planejamento
+   * @param parent_id - Se fornecido, cria como sub-objetivo do objetivo especificado
    */
-  adicionarOkr(planejamentoId: number, data: { objetivo: string }): Observable<{
+  adicionarOkr(planejamentoId: number, data: { objetivo: string; parent_id?: number }): Observable<{
     success: boolean;
     message: string;
-    data: any;
+    data: ObjetivoEstrategico;
   }> {
     return this.http.post<{
       success: boolean;
       message: string;
-      data: any;
+      data: ObjetivoEstrategico;
     }>(`${this.apiUrl}/${planejamentoId}/okrs`, data);
   }
 
@@ -896,17 +918,17 @@ export class PlanejamentoEstrategicoService {
   atualizarOkr(okrId: number, data: { objetivo: string }): Observable<{
     success: boolean;
     message: string;
-    data: any;
+    data: ObjetivoEstrategico;
   }> {
     return this.http.put<{
       success: boolean;
       message: string;
-      data: any;
+      data: ObjetivoEstrategico;
     }>(`${this.apiUrl}/okrs/${okrId}`, data);
   }
 
   /**
-   * Deletar objetivo estratégico
+   * Deletar objetivo estratégico (também deleta sub-objetivos em cascata)
    */
   deletarOkr(okrId: number): Observable<{
     success: boolean;

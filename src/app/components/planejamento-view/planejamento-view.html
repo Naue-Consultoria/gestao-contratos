@@ -281,48 +281,113 @@
       <p>Nenhum objetivo cadastrado</p>
     </div>
 
-    <div *ngIf="okrs.length > 0" class="okrs-table-container">
-      <table class="okrs-table">
-        <thead>
-          <tr>
-            <th style="width: 10%;">#</th>
-            <th style="width: 65%;">Objetivo</th>
-            <th style="width: 25%;">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let okr of okrs; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>
-              <div *ngIf="editingOkrId !== okr.id">{{ okr.objetivo }}</div>
-              <div *ngIf="editingOkrId === okr.id" class="editing-row">
-                <input
-                  type="text"
-                  [(ngModel)]="editingOkrText"
-                  class="form-control form-control-sm"
-                  (keyup.enter)="salvarEdicaoOkr(okr.id)"
-                  (keyup.escape)="cancelarEdicaoOkr()">
-                <button class="btn btn-sm btn-primary" (click)="salvarEdicaoOkr(okr.id)" title="Salvar">
-                  <i class="fas fa-check"></i>
+    <div *ngIf="okrs.length > 0" class="okrs-list-container">
+      <!-- Objetivos Principais -->
+      <div *ngFor="let okr of okrs; let i = index" class="okr-item-card">
+        <!-- Objetivo Principal -->
+        <div class="okr-main-row">
+          <div class="okr-expand-toggle" (click)="toggleOkr(okr.id)" *ngIf="hasSubObjetivos(okr) || addingSubObjetivoToId === okr.id">
+            <i class="fas" [ngClass]="isOkrExpanded(okr.id) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+          </div>
+          <div class="okr-expand-toggle-placeholder" *ngIf="!hasSubObjetivos(okr) && addingSubObjetivoToId !== okr.id"></div>
+          <span class="okr-number">{{ i + 1 }}.</span>
+          <div class="okr-content" *ngIf="editingOkrId !== okr.id">
+            <span class="okr-text">{{ okr.objetivo }}</span>
+            <span class="sub-count-badge" *ngIf="hasSubObjetivos(okr)">({{ okr.sub_objetivos.length }} sub-objetivo{{ okr.sub_objetivos.length > 1 ? 's' : '' }})</span>
+          </div>
+          <div *ngIf="editingOkrId === okr.id" class="editing-row">
+            <input
+              type="text"
+              [(ngModel)]="editingOkrText"
+              class="form-control form-control-sm"
+              (keyup.enter)="salvarEdicaoOkr(okr.id)"
+              (keyup.escape)="cancelarEdicaoOkr()">
+            <button class="btn btn-sm btn-primary" (click)="salvarEdicaoOkr(okr.id)" title="Salvar">
+              <i class="fas fa-check"></i>
+            </button>
+            <button class="btn btn-sm btn-secondary" (click)="cancelarEdicaoOkr()" title="Cancelar">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="okr-actions" *ngIf="editingOkrId !== okr.id">
+            <button class="btn btn-sm btn-outline-primary" (click)="startAddSubObjetivo(okr.id)" title="Adicionar Sub-objetivo">
+              <i class="fas fa-plus"></i>
+            </button>
+            <div class="dropdown-menu-container">
+              <button class="btn-menu" (click)="toggleOkrEstrategicoMenu(okr.id); $event.stopPropagation()" title="Opções">
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+              <div class="dropdown-menu" *ngIf="openOkrEstrategicoMenuId === okr.id">
+                <button class="dropdown-item" (click)="iniciarEdicaoOkr(okr); closeOkrEstrategicoMenu()">
+                  <i class="fas fa-edit"></i> Editar
                 </button>
-                <button class="btn btn-sm btn-secondary" (click)="cancelarEdicaoOkr()" title="Cancelar">
-                  <i class="fas fa-times"></i>
+                <button class="dropdown-item dropdown-item-danger" (click)="openDeleteOkrModal(okr); closeOkrEstrategicoMenu()">
+                  <i class="fas fa-trash"></i> Excluir
                 </button>
               </div>
-            </td>
-            <td>
-              <div class="okr-actions" *ngIf="editingOkrId !== okr.id">
-                <button class="btn btn-sm btn-white" (click)="iniciarEdicaoOkr(okr)" title="Editar">
-                  <i class="fas fa-edit"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-objetivos -->
+        <div class="sub-objetivos-container" *ngIf="isOkrExpanded(okr.id) && (hasSubObjetivos(okr) || addingSubObjetivoToId === okr.id)">
+          <!-- Lista de sub-objetivos existentes -->
+          <div *ngFor="let sub of okr.sub_objetivos; let j = index" class="sub-objetivo-row">
+            <div class="sub-objetivo-indent"></div>
+            <span class="sub-objetivo-number">{{ i + 1 }}.{{ j + 1 }}</span>
+            <div class="okr-content" *ngIf="editingOkrId !== sub.id">
+              <span class="okr-text sub-text">{{ sub.objetivo }}</span>
+            </div>
+            <div *ngIf="editingOkrId === sub.id" class="editing-row">
+              <input
+                type="text"
+                [(ngModel)]="editingOkrText"
+                class="form-control form-control-sm"
+                (keyup.enter)="salvarEdicaoOkr(sub.id)"
+                (keyup.escape)="cancelarEdicaoOkr()">
+              <button class="btn btn-sm btn-primary" (click)="salvarEdicaoOkr(sub.id)" title="Salvar">
+                <i class="fas fa-check"></i>
+              </button>
+              <button class="btn btn-sm btn-secondary" (click)="cancelarEdicaoOkr()" title="Cancelar">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="okr-actions" *ngIf="editingOkrId !== sub.id">
+              <div class="dropdown-menu-container">
+                <button class="btn-menu" (click)="toggleOkrEstrategicoMenu(sub.id); $event.stopPropagation()" title="Opções">
+                  <i class="fas fa-ellipsis-v"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" (click)="openDeleteOkrModal(okr)" title="Excluir">
-                  <i class="fas fa-trash"></i>
-                </button>
+                <div class="dropdown-menu" *ngIf="openOkrEstrategicoMenuId === sub.id">
+                  <button class="dropdown-item" (click)="iniciarEdicaoOkr(sub); closeOkrEstrategicoMenu()">
+                    <i class="fas fa-edit"></i> Editar
+                  </button>
+                  <button class="dropdown-item dropdown-item-danger" (click)="openDeleteOkrModal(sub); closeOkrEstrategicoMenu()">
+                    <i class="fas fa-trash"></i> Excluir
+                  </button>
+                </div>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+          </div>
+
+          <!-- Input para adicionar novo sub-objetivo -->
+          <div class="add-sub-objetivo-row" *ngIf="addingSubObjetivoToId === okr.id">
+            <div class="sub-objetivo-indent"></div>
+            <input
+              type="text"
+              [(ngModel)]="novoSubObjetivo[okr.id]"
+              class="form-control form-control-sm"
+              placeholder="Digite o sub-objetivo..."
+              (keyup.enter)="adicionarSubObjetivo(okr.id)"
+              (keyup.escape)="cancelAddSubObjetivo()">
+            <button class="btn btn-sm btn-primary" (click)="adicionarSubObjetivo(okr.id)" title="Salvar">
+              <i class="fas fa-check"></i>
+            </button>
+            <button class="btn btn-sm btn-secondary" (click)="cancelAddSubObjetivo()" title="Cancelar">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -540,6 +605,11 @@
                 <span class="objetivo-numero">O{{ objIndex + 1 }}</span>
                 <span class="objetivo-titulo">{{ objetivo.titulo }}</span>
                 <span class="badge badge-count">{{ objetivo.key_results?.length || 0 }} KRs</span>
+              </div>
+              <div class="objetivo-vinculo" *ngIf="objetivo.objetivo_estrategico">
+                <i class="fas fa-link"></i>
+                <span class="vinculo-label">{{ objetivo.objetivo_estrategico.parent_id ? 'Sub-obj:' : 'Obj. Estr:' }}</span>
+                <span class="vinculo-nome">{{ objetivo.objetivo_estrategico.objetivo }}</span>
               </div>
               <div class="okr-objetivo-actions">
                 <div class="dropdown-menu-container">
@@ -838,6 +908,16 @@
       <div class="form-group">
         <label>Descrição</label>
         <textarea [(ngModel)]="objetivoForm.descricao" class="form-control" placeholder="Descrição detalhada do objetivo" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Vincular a Objetivo Estratégico</label>
+        <select [(ngModel)]="objetivoForm.objetivo_estrategico_id" class="form-control">
+          <option [ngValue]="null">-- Nenhum --</option>
+          <option *ngFor="let obj of objetivosEstrategicosFlat" [ngValue]="obj.id">
+            {{ obj.isSubObjetivo ? '↳ ' : '' }}{{ obj.objetivo }}
+          </option>
+        </select>
+        <small class="form-hint">Opcional: Vincule este objetivo a um objetivo estratégico ou sub-objetivo</small>
       </div>
     </div>
     <div class="modal-footer">

@@ -123,6 +123,43 @@
 .okrs-table tbody tr:hover { background: #f8f9fa; }
 .okrs-table tbody tr:last-child td { border-bottom: none; }
 
+/* ===== SUB-OBJETIVOS ESTRATÉGICOS ===== */
+.okrs-list-container { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
+
+.okr-item-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; }
+
+.okr-main-row { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; }
+
+.okr-expand-toggle { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6c757d; border-radius: 4px; transition: all 0.2s; }
+.okr-expand-toggle:hover { background: #e9ecef; color: #495057; }
+.okr-expand-toggle-placeholder { width: 24px; }
+
+.okr-number { font-weight: 700; color: #003b2b; min-width: 32px; font-size: 1rem; }
+
+.okr-content { flex: 1; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.okr-text { color: #2c3e50; font-size: 0.95rem; }
+.sub-count-badge { font-size: 0.8rem; color: #6c757d; background: #e9ecef; padding: 0.2rem 0.5rem; border-radius: 12px; }
+
+.okr-actions { display: flex; gap: 0.25rem; }
+.btn-outline-primary { background: transparent; color: #003b2b; border: 1px solid #003b2b; }
+.btn-outline-primary:hover { background: #003b2b; color: white; }
+
+/* Sub-objetivos */
+.sub-objetivos-container { background: white; border-top: 1px solid #e9ecef; padding: 0.5rem 0; }
+
+.sub-objetivo-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; }
+.sub-objetivo-row:hover { background: #f8f9fa; }
+
+.sub-objetivo-indent { width: 24px; border-left: 2px solid #003b2b; height: 100%; margin-left: 12px; }
+
+.sub-objetivo-number { font-weight: 600; color: #6c757d; min-width: 48px; font-size: 0.9rem; }
+
+.sub-text { color: #495057; }
+
+.add-sub-objetivo-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; background: #fffdf5; border-top: 1px dashed #dee2e6; }
+.add-sub-objetivo-row .form-control { flex: 1; }
+/* ===== FIM SUB-OBJETIVOS ===== */
+
 /* Edição inline */
 .editing-row {
   display: flex;
@@ -489,7 +526,8 @@
   margin-bottom: 1rem;
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
 }
 
 .okr-objetivo-header {
@@ -501,6 +539,11 @@
   color: #fff;
   cursor: pointer;
   transition: all 0.2s;
+  border-radius: 12px 12px 0 0;
+}
+
+.okr-objetivo-card:not(:has(.okr-objetivo-body)) .okr-objetivo-header {
+  border-radius: 12px;
 }
 
 .okr-objetivo-header:hover {
@@ -544,10 +587,62 @@
   font-weight: 500;
 }
 
+.objetivo-vinculo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 193, 7, 0.25);
+  padding: 0.3rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.95);
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: 0.5rem;
+}
+
+.objetivo-vinculo i {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.vinculo-label {
+  font-weight: 500;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.vinculo-nome {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
 .okr-objetivo-actions {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  position: relative;
+}
+
+.okr-objetivo-actions .dropdown-menu-container {
+  position: relative;
+}
+
+.okr-objetivo-actions .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  z-index: 1050;
 }
 
 .btn-icon-light {

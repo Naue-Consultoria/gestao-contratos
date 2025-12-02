@@ -79,6 +79,12 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   showDeleteOkrModal = false;
   okrToDelete: any = null;
 
+  // Sub-objetivos
+  expandedOkrs: { [okrId: number]: boolean } = {};
+  novoSubObjetivo: { [okrId: number]: string } = {};
+  addingSubObjetivoToId: number | null = null;
+  openOkrEstrategicoMenuId: number | null = null;
+
   // Árvore de Problemas
   arvores: any[] = [];
   arvoresItens: { [arvoreId: number]: any[] } = {};
@@ -109,14 +115,22 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   // Modal Objetivo
   showObjetivoModal = false;
   isEditingObjetivo = false;
-  objetivoForm = {
+  objetivoForm: {
+    id: number;
+    departamento_id: number;
+    titulo: string;
+    descricao: string;
+    objetivo_estrategico_id: number | null;
+  } = {
     id: 0,
     departamento_id: 0,
     titulo: '',
-    descricao: ''
+    descricao: '',
+    objetivo_estrategico_id: null
   };
   showDeleteObjetivoModal = false;
   objetivoToDelete: OkrObjetivo | null = null;
+  objetivosEstrategicosFlat: { id: number; objetivo: string; isSubObjetivo: boolean }[] = [];
 
   // Modal Key Result
   showKeyResultModal = false;
@@ -175,6 +189,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     }
     if (!target.closest('.dropdown-menu-container')) {
       this.closeAllOkrMenus();
+      this.closeOkrEstrategicoMenu();
     }
   }
 
@@ -826,6 +841,71 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ===== SUB-OBJETIVOS =====
+
+  toggleOkrEstrategicoMenu(okrId: number): void {
+    this.openOkrEstrategicoMenuId = this.openOkrEstrategicoMenuId === okrId ? null : okrId;
+  }
+
+  closeOkrEstrategicoMenu(): void {
+    this.openOkrEstrategicoMenuId = null;
+  }
+
+  toggleOkr(okrId: number): void {
+    this.expandedOkrs[okrId] = !this.expandedOkrs[okrId];
+  }
+
+  isOkrExpanded(okrId: number): boolean {
+    return this.expandedOkrs[okrId] || false;
+  }
+
+  hasSubObjetivos(okr: any): boolean {
+    return okr.sub_objetivos && okr.sub_objetivos.length > 0;
+  }
+
+  startAddSubObjetivo(okrId: number): void {
+    this.addingSubObjetivoToId = okrId;
+    this.novoSubObjetivo[okrId] = '';
+    // Expandir o objetivo para mostrar o input
+    this.expandedOkrs[okrId] = true;
+  }
+
+  cancelAddSubObjetivo(): void {
+    if (this.addingSubObjetivoToId) {
+      this.novoSubObjetivo[this.addingSubObjetivoToId] = '';
+    }
+    this.addingSubObjetivoToId = null;
+  }
+
+  async adicionarSubObjetivo(parentId: number): Promise<void> {
+    const texto = this.novoSubObjetivo[parentId]?.trim();
+    if (!texto) {
+      this.toastr.warning('Por favor, informe o sub-objetivo', 'Atenção');
+      return;
+    }
+
+    if (!this.planejamentoId) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.adicionarOkr(this.planejamentoId, {
+          objetivo: texto,
+          parent_id: parentId
+        })
+      );
+
+      if (response.success) {
+        this.toastr.success('Sub-objetivo adicionado com sucesso', 'Sucesso');
+        this.novoSubObjetivo[parentId] = '';
+        this.addingSubObjetivoToId = null;
+        this.loadOkrs();
+      }
+    } catch (err: any) {
+      console.error('Erro ao adicionar sub-objetivo:', err);
+      this.toastr.error(err.error?.message || 'Erro ao adicionar sub-objetivo', 'Erro');
+    }
+  }
+
   // ===== GESTÃO DE ÁRVORE DE PROBLEMAS =====
 
   async loadArvores(): Promise<void> {
@@ -1253,25 +1333,29 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
 
   // --- OBJETIVOS ---
 
-  openNovoObjetivoModal(departamentoId: number): void {
+  async openNovoObjetivoModal(departamentoId: number): Promise<void> {
     this.isEditingObjetivo = false;
     this.objetivoForm = {
       id: 0,
       departamento_id: departamentoId,
       titulo: '',
-      descricao: ''
+      descricao: '',
+      objetivo_estrategico_id: null
     };
+    await this.loadObjetivosEstrategicosParaSelect();
     this.showObjetivoModal = true;
   }
 
-  openEditarObjetivoModal(objetivo: OkrObjetivo): void {
+  async openEditarObjetivoModal(objetivo: OkrObjetivo): Promise<void> {
     this.isEditingObjetivo = true;
     this.objetivoForm = {
       id: objetivo.id,
       departamento_id: objetivo.departamento_id,
       titulo: objetivo.titulo,
-      descricao: objetivo.descricao || ''
+      descricao: objetivo.descricao || '',
+      objetivo_estrategico_id: objetivo.objetivo_estrategico_id || null
     };
+    await this.loadObjetivosEstrategicosParaSelect();
     this.showObjetivoModal = true;
   }
 
@@ -1281,8 +1365,41 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
       id: 0,
       departamento_id: 0,
       titulo: '',
-      descricao: ''
+      descricao: '',
+      objetivo_estrategico_id: null
     };
+  }
+
+  async loadObjetivosEstrategicosParaSelect(): Promise<void> {
+    if (!this.planejamentoId) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.planejamentoService.listarOkrs(this.planejamentoId)
+      );
+
+      if (response.success) {
+        this.objetivosEstrategicosFlat = [];
+        for (const okr of response.data) {
+          this.objetivosEstrategicosFlat.push({
+            id: okr.id,
+            objetivo: okr.objetivo,
+            isSubObjetivo: false
+          });
+          if (okr.sub_objetivos && okr.sub_objetivos.length > 0) {
+            for (const sub of okr.sub_objetivos) {
+              this.objetivosEstrategicosFlat.push({
+                id: sub.id,
+                objetivo: sub.objetivo,
+                isSubObjetivo: true
+              });
+            }
+          }
+        }
+      }
+    } catch (err: any) {
+      console.error('Erro ao carregar objetivos estratégicos para select:', err);
+    }
   }
 
   async saveObjetivo(): Promise<void> {
@@ -1296,7 +1413,8 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
         const response = await firstValueFrom(
           this.planejamentoService.atualizarOkrObjetivo(this.objetivoForm.id, {
             titulo: this.objetivoForm.titulo,
-            descricao: this.objetivoForm.descricao || undefined
+            descricao: this.objetivoForm.descricao || undefined,
+            objetivo_estrategico_id: this.objetivoForm.objetivo_estrategico_id
           })
         );
 
@@ -1307,7 +1425,8 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
         const response = await firstValueFrom(
           this.planejamentoService.criarOkrObjetivo(this.objetivoForm.departamento_id, {
             titulo: this.objetivoForm.titulo,
-            descricao: this.objetivoForm.descricao || undefined
+            descricao: this.objetivoForm.descricao || undefined,
+            objetivo_estrategico_id: this.objetivoForm.objetivo_estrategico_id
           })
         );
 
