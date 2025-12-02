@@ -442,6 +442,26 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     });
   }
 
+  visualizarClassificacaoRiscos(): void {
+    if (!this.planejamento) return;
+
+    const url = this.planejamentoService.gerarUrlPublicaClassificacaoRiscos(this.planejamento.unique_token);
+    window.open(url, '_blank');
+  }
+
+  copiarLinkClassificacaoRiscos(): void {
+    if (!this.planejamento) return;
+
+    const url = this.planejamentoService.gerarUrlPublicaClassificacaoRiscos(this.planejamento.unique_token);
+
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastr.success('Link de Classificação de Riscos copiado', 'Sucesso');
+    }).catch(err => {
+      console.error('Erro ao copiar link:', err);
+      this.toastr.error('Erro ao copiar link', 'Erro');
+    });
+  }
+
   // Menu dropdown actions
   toggleMenu(depId: number): void {
     this.openMenuId = this.openMenuId === depId ? null : depId;
