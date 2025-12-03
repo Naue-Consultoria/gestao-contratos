@@ -338,13 +338,30 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
     }
 
     const term = this.searchTerm.toLowerCase();
+    const termDigitsOnly = this.searchTerm.replace(/\D/g, ''); // Remove tudo que não é dígito
+
     this.filteredClients = this.clients.filter((client) => {
-      return (
-        client.name.toLowerCase().includes(term) ||
-        client.document.toLowerCase().includes(term) ||
-        client.location.toLowerCase().includes(term) ||
-        client.type.toLowerCase().includes(term)
-      );
+      // Busca por nome, localização ou tipo
+      if (client.name.toLowerCase().includes(term) ||
+          client.location.toLowerCase().includes(term) ||
+          client.type.toLowerCase().includes(term)) {
+        return true;
+      }
+
+      // Busca por documento (CPF/CNPJ) - compara apenas números
+      if (termDigitsOnly && client.document) {
+        const documentDigitsOnly = client.document.replace(/\D/g, '');
+        if (documentDigitsOnly.includes(termDigitsOnly)) {
+          return true;
+        }
+      }
+
+      // Também permite busca pelo documento formatado
+      if (client.document.toLowerCase().includes(term)) {
+        return true;
+      }
+
+      return false;
     }).sort((a, b) => a.name.localeCompare(b.name));
   }
 
