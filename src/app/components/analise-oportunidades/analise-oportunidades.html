@@ -31,6 +31,9 @@
   <div *ngIf="matrizCruzamento && matrizFinal && analiseItems.length > 0" class="analise-container">
     <div class="cliente-header">
       <h2>{{ getClientName() }}</h2>
+      <button class="btn btn-primary" (click)="exportarPDF()">
+        <i class="fas fa-file-pdf"></i> Exportar PDF
+      </button>
     </div>
 
     <div class="analise-content-single">

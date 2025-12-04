@@ -540,4 +540,12 @@ export class AniseOportunidadesComponent implements OnInit, AfterViewInit {
       this.router.navigate(['/home/planejamento-estrategico/analise-cenarios', this.planejamentoId]);
     }
   }
+
+  exportarPDF(): void {
+    if (!this.planejamentoId) return;
+
+    const url = this.planejamentoService.gerarUrlPdfAnaliseOportunidades(this.planejamentoId);
+    window.open(url, '_blank');
+    this.toastr.info('PDF sendo gerado...', 'Download');
+  }
 }

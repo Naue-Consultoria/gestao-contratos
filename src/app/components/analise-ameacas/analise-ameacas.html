@@ -31,6 +31,9 @@
   <div *ngIf="matrizCruzamento && matrizFinal && analiseItems.length > 0" class="analise-container">
     <div class="cliente-header">
       <h2>{{ getClientName() }}</h2>
+      <button class="btn btn-primary" (click)="exportarPDF()">
+        <i class="fas fa-file-pdf"></i> Exportar PDF
+      </button>
     </div>
 
     <div class="analise-content-single">
@@ -40,15 +43,19 @@
         <div class="charts-grid">
           <div class="chart-box">
             <h4 class="chart-subtitle">Distribuição por FRAQUEZA</h4>
-            <div class="chart-container-pie">
-              <canvas id="chartFraquezas"></canvas>
+            <div class="chart-wrapper">
+              <div class="chart-container-pie">
+                <canvas id="chartFraquezas"></canvas>
+              </div>
             </div>
           </div>
 
           <div class="chart-box">
             <h4 class="chart-subtitle">Distribuição por FORÇA</h4>
-            <div class="chart-container-pie">
-              <canvas id="chartForcas"></canvas>
+            <div class="chart-wrapper">
+              <div class="chart-container-pie">
+                <canvas id="chartForcas"></canvas>
+              </div>
             </div>
           </div>
         </div>
@@ -64,15 +71,19 @@
           <div class="item-charts-grid">
             <div class="chart-box-small">
               <h5 class="chart-subtitle-small">Distribuição FRAQUEZAS</h5>
-              <div class="chart-container-small">
-                <canvas [id]="'chartFraqueza' + i"></canvas>
+              <div class="chart-wrapper-small">
+                <div class="chart-container-small">
+                  <canvas [id]="'chartFraqueza' + i"></canvas>
+                </div>
               </div>
             </div>
 
             <div class="chart-box-small">
               <h5 class="chart-subtitle-small">Distribuição FORÇAS</h5>
-              <div class="chart-container-small">
-                <canvas [id]="'chartForca' + i"></canvas>
+              <div class="chart-wrapper-small">
+                <div class="chart-container-small">
+                  <canvas [id]="'chartForca' + i"></canvas>
+                </div>
               </div>
             </div>
           </div>

@@ -166,11 +166,20 @@
   text-align: center;
 }
 
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+
 .chart-container-pie {
-  height: 500px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  height: 400px;
+  width: 100%;
+}
+
+.chart-container-pie canvas {
+  max-height: 100% !important;
 }
 
 .analise-table {
@@ -296,11 +305,20 @@
   text-align: center;
 }
 
+.chart-wrapper-small {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+
 .chart-container-small {
-  height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  height: 220px;
+  width: 100%;
+}
+
+.chart-container-small canvas {
+  max-height: 100% !important;
 }
 
 @media (max-width: 1024px) {
@@ -309,7 +327,8 @@
   }
 
   .chart-container-pie {
-    height: 350px;
+    height: 250px;
+    max-height: 250px;
   }
 
   .item-charts-grid {
@@ -317,7 +336,8 @@
   }
 
   .chart-container-small {
-    height: 280px;
+    height: 200px;
+    max-height: 200px;
   }
 }
 

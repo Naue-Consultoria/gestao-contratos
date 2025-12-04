@@ -227,15 +227,21 @@ export class AnaliseAmeacasComponent implements OnInit, AfterViewInit {
       },
       options: {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            bottom: 5
+          }
+        },
         plugins: {
           legend: {
             position: 'bottom',
+            onClick: () => {},
             labels: {
-              font: { size: 10 },
-              padding: 10,
+              font: { size: 9 },
+              padding: 6,
               usePointStyle: true,
-              boxWidth: 12
+              boxWidth: 6
             }
           },
           tooltip: {
@@ -259,7 +265,7 @@ export class AnaliseAmeacasComponent implements OnInit, AfterViewInit {
             const percentual = total > 0 ? Math.round((valor / total) * 100) : 0;
             if (percentual > 5) {
               ctx.fillStyle = '#ffffff';
-              ctx.font = 'bold 11px Arial';
+              ctx.font = 'bold 10px Arial';
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               const position = element.tooltipPosition();
@@ -301,15 +307,21 @@ export class AnaliseAmeacasComponent implements OnInit, AfterViewInit {
       },
       options: {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            bottom: 5
+          }
+        },
         plugins: {
           legend: {
             position: 'bottom',
+            onClick: () => {},
             labels: {
-              font: { size: 10 },
-              padding: 10,
+              font: { size: 9 },
+              padding: 6,
               usePointStyle: true,
-              boxWidth: 12
+              boxWidth: 6
             }
           },
           tooltip: {
@@ -333,7 +345,7 @@ export class AnaliseAmeacasComponent implements OnInit, AfterViewInit {
             const percentual = total > 0 ? Math.round((valor / total) * 100) : 0;
             if (percentual > 5) {
               ctx.fillStyle = '#ffffff';
-              ctx.font = 'bold 11px Arial';
+              ctx.font = 'bold 10px Arial';
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               const position = element.tooltipPosition();
@@ -383,15 +395,22 @@ export class AnaliseAmeacasComponent implements OnInit, AfterViewInit {
       },
       options: {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            bottom: 10
+          }
+        },
         plugins: {
           legend: {
             position: 'bottom',
+            align: 'start',
+            onClick: () => {},
             labels: {
-              font: { size: 11 },
-              padding: 12,
+              font: { size: 10 },
+              padding: 6,
               usePointStyle: true,
-              boxWidth: 15
+              boxWidth: 8
             }
           },
           tooltip: {
@@ -464,15 +483,22 @@ export class AnaliseAmeacasComponent implements OnInit, AfterViewInit {
       },
       options: {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            bottom: 10
+          }
+        },
         plugins: {
           legend: {
             position: 'bottom',
+            align: 'start',
+            onClick: () => {},
             labels: {
-              font: { size: 11 },
-              padding: 12,
+              font: { size: 10 },
+              padding: 6,
               usePointStyle: true,
-              boxWidth: 15
+              boxWidth: 8
             }
           },
           tooltip: {
@@ -538,5 +564,13 @@ export class AnaliseAmeacasComponent implements OnInit, AfterViewInit {
     if (this.planejamentoId) {
       this.router.navigate(['/home/planejamento-estrategico/analise-cenarios', this.planejamentoId]);
     }
+  }
+
+  exportarPDF(): void {
+    if (!this.planejamentoId) return;
+
+    const url = this.planejamentoService.gerarUrlPdfAnaliseAmeacas(this.planejamentoId);
+    window.open(url, '_blank');
+    this.toastr.info('PDF sendo gerado...', 'Download');
   }
 }

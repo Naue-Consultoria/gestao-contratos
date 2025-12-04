@@ -1186,6 +1186,20 @@ export class PlanejamentoEstrategicoService {
     return `${this.apiUrl}/${planejamentoId}/analise-cenarios/pdf`;
   }
 
+  /**
+   * Gerar URL para exportar Análise de Oportunidades em PDF
+   */
+  gerarUrlPdfAnaliseOportunidades(planejamentoId: number): string {
+    return `${this.apiUrl}/${planejamentoId}/analise-oportunidades/pdf`;
+  }
+
+  /**
+   * Gerar URL para exportar Análise de Ameaças em PDF
+   */
+  gerarUrlPdfAnaliseAmeacas(planejamentoId: number): string {
+    return `${this.apiUrl}/${planejamentoId}/analise-ameacas/pdf`;
+  }
+
   // ===== OKR - OBJECTIVES AND KEY RESULTS =====
 
   // --- OBJETIVOS ---
