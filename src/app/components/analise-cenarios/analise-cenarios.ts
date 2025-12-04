@@ -273,6 +273,14 @@ export class AnaliseCenariosComponent implements OnInit, AfterViewInit {
     }
   }
 
+  exportarPDF(): void {
+    if (!this.planejamentoId) return;
+
+    const url = this.planejamentoService.gerarUrlPdfAnaliseCenarios(this.planejamentoId);
+    window.open(url, '_blank');
+    this.toastr.info('PDF sendo gerado...', 'Download');
+  }
+
   ngAfterViewInit(): void {
     // Criar gráficos após a view estar pronta
     if (this.analiseOportunidades && this.analiseAmeacas) {

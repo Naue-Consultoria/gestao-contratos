@@ -1145,6 +1145,13 @@ export class PlanejamentoEstrategicoService {
   }
 
   /**
+   * Gerar URL para exportar matriz SWOT de um grupo em PDF
+   */
+  gerarUrlPdfMatrizSwotGrupo(grupoId: number): string {
+    return `${environment.apiUrl}/planejamento-estrategico/publico/matriz-swot/${grupoId}/pdf`;
+  }
+
+  /**
    * Gerar URL para exportar matriz SWOT consolidada em PDF
    */
   gerarUrlPdfMatrizConsolidada(planejamentoId: number): string {
@@ -1170,6 +1177,13 @@ export class PlanejamentoEstrategicoService {
    */
   gerarUrlExcelDefinicaoImpacto(planejamentoId: number): string {
     return `${this.apiUrl}/${planejamentoId}/swot-cruzamento/excel`;
+  }
+
+  /**
+   * Gerar URL para exportar Análise de Cenários em PDF
+   */
+  gerarUrlPdfAnaliseCenarios(planejamentoId: number): string {
+    return `${this.apiUrl}/${planejamentoId}/analise-cenarios/pdf`;
   }
 
   // ===== OKR - OBJECTIVES AND KEY RESULTS =====

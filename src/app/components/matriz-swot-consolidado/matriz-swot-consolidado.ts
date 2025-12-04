@@ -201,8 +201,9 @@ export class MatrizSwotConsolidadoComponent implements OnInit {
   }
 
   exportarPDF(grupoId: number): void {
-    const url = `${window.location.origin}/api/planejamento-estrategico/publico/matriz-swot/${grupoId}/pdf`;
+    const url = this.planejamentoService.gerarUrlPdfMatrizSwotGrupo(grupoId);
     window.open(url, '_blank');
+    this.toastr.info('PDF sendo gerado...', 'Download');
   }
 
   // Matriz SWOT Final
