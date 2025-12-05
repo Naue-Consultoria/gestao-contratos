@@ -70,6 +70,12 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
 
   // Menu dropdown grupo
   openGrupoMenuId: number | null = null;
+  openGrupoSwotMenuId: number | null = null;
+  openGrupoRiscosMenuId: number | null = null;
+
+  // Menus da seção consolidada
+  showSwotConsolidadoMenu = false;
+  showRiscosConsolidadoMenu = false;
 
   // Objetivos Estratégicos
   okrs: any[] = [];
@@ -190,6 +196,10 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     if (!target.closest('.dropdown-menu-container')) {
       this.closeAllOkrMenus();
       this.closeOkrEstrategicoMenu();
+      this.closeGrupoSwotMenu();
+      this.closeGrupoRiscosMenu();
+      this.closeSwotConsolidadoMenu();
+      this.closeRiscosConsolidadoMenu();
     }
   }
 
@@ -460,8 +470,20 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
   visualizarClassificacaoRiscos(): void {
     if (!this.planejamento) return;
 
-    const url = this.planejamentoService.gerarUrlPublicaClassificacaoRiscos(this.planejamento.unique_token);
+    // Abrir página consolidada de classificação de riscos (com visualização dos grupos)
+    const url = this.planejamentoService.gerarUrlPublicaClassificacaoRiscosConsolidado(this.planejamento.unique_token);
     window.open(url, '_blank');
+  }
+
+  copiarLinkClassificacaoRiscosConsolidado(): void {
+    if (!this.planejamento) return;
+
+    const url = this.planejamentoService.gerarUrlPublicaClassificacaoRiscosConsolidado(this.planejamento.unique_token);
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastr.success('Link copiado para a área de transferência', 'Sucesso');
+    }).catch(() => {
+      this.toastr.error('Erro ao copiar link', 'Erro');
+    });
   }
 
   copiarLinkClassificacaoRiscos(): void {
@@ -607,6 +629,58 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     this.openGrupoMenuId = null;
   }
 
+  // Menus consolidados da seção
+  toggleSwotConsolidadoMenu(): void {
+    this.showRiscosConsolidadoMenu = false;
+    this.showSwotConsolidadoMenu = !this.showSwotConsolidadoMenu;
+  }
+
+  closeSwotConsolidadoMenu(): void {
+    this.showSwotConsolidadoMenu = false;
+  }
+
+  toggleRiscosConsolidadoMenu(): void {
+    this.showSwotConsolidadoMenu = false;
+    this.showRiscosConsolidadoMenu = !this.showRiscosConsolidadoMenu;
+  }
+
+  closeRiscosConsolidadoMenu(): void {
+    this.showRiscosConsolidadoMenu = false;
+  }
+
+  // Menus de SWOT e Classificação de Riscos por grupo
+  toggleGrupoSwotMenu(grupoId: number): void {
+    this.closeGrupoRiscosMenu();
+    this.openGrupoSwotMenuId = this.openGrupoSwotMenuId === grupoId ? null : grupoId;
+  }
+
+  closeGrupoSwotMenu(): void {
+    this.openGrupoSwotMenuId = null;
+  }
+
+  toggleGrupoRiscosMenu(grupoId: number): void {
+    this.closeGrupoSwotMenu();
+    this.openGrupoRiscosMenuId = this.openGrupoRiscosMenuId === grupoId ? null : grupoId;
+  }
+
+  closeGrupoRiscosMenu(): void {
+    this.openGrupoRiscosMenuId = null;
+  }
+
+  visualizarClassificacaoRiscosGrupo(grupo: Grupo): void {
+    const url = this.planejamentoService.gerarUrlPublicaClassificacaoRiscosGrupo(grupo.unique_token);
+    window.open(url, '_blank');
+  }
+
+  copiarLinkClassificacaoRiscosGrupo(grupo: Grupo): void {
+    const url = this.planejamentoService.gerarUrlPublicaClassificacaoRiscosGrupo(grupo.unique_token);
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastr.success('Link copiado para a área de transferência', 'Sucesso');
+    }).catch(() => {
+      this.toastr.error('Erro ao copiar link', 'Erro');
+    });
+  }
+
   openNovoGrupoModal(): void {
     this.isEditingGrupo = false;
     this.grupoForm = {
@@ -714,6 +788,10 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
 
   isMatrizSwotPreenchida(grupo: Grupo): boolean {
     return !!grupo.matriz_swot?.preenchido_em;
+  }
+
+  isClassificacaoRiscosPreenchida(grupo: Grupo): boolean {
+    return !!grupo.classificacao_riscos?.preenchido_em;
   }
 
   visualizarGrupo(grupo: Grupo): void {

@@ -1,0 +1,228 @@
+<div class="public-classificacao-riscos-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando classificação de riscos...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <div class="error-icon">&#9888;</div>
+    <h2>Erro ao carregar dados</h2>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Toast Notification -->
+  <div *ngIf="showToast" class="toast-notification">
+    <i class="fas fa-check-circle"></i>
+    <span>{{ toastMessage }}</span>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !error && grupo" class="content-container">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-background"></div>
+      <div class="hero-content">
+        <!-- Logos -->
+        <div class="logos-container">
+          <div class="logo-naue">
+            <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="hero-title">
+          <h1>Planejamento Estratégico</h1>
+          <h2 class="client-name">{{ getClientName() }}</h2>
+          <h3>Classificação de Riscos</h3>
+          <div class="grupo-badge">
+            <i class="fas fa-users"></i>
+            <span>Grupo: {{ grupo.nome_grupo }}</span>
+          </div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="hero-info-cards">
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Grupo</span>
+              <span class="info-value">{{ grupo.nome_grupo }}</span>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Progresso Classificação</span>
+              <span class="info-value">{{ getProgressoClassificacao() }}%</span>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-tasks"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Progresso Tratativas</span>
+              <span class="info-value">{{ getProgressoTratativas() }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="hero-description">
+          <p>Classifique as oportunidades e ameaças identificadas na Matriz SWOT e defina as tratativas adequadas para cada risco.</p>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator">
+          <i class="fas fa-chevron-down"></i>
+          <span>Role para preencher</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção de Classificação de Oportunidades -->
+    <section class="classificacao-section oportunidades-section">
+      <div class="section-header">
+        <div class="section-icon oportunidades-icon">
+          <i class="fas fa-lightbulb"></i>
+        </div>
+        <div class="section-title">
+          <h2>Oportunidades (Riscos Positivos)</h2>
+          <p>Classifique cada oportunidade identificada e defina a estratégia de resposta</p>
+        </div>
+      </div>
+
+      <div *ngIf="oportunidades.length === 0" class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <p>Nenhuma oportunidade identificada na Matriz SWOT Consolidada</p>
+      </div>
+
+      <div *ngFor="let oportunidade of oportunidades; let i = index; trackBy: trackByIndex" class="risco-card">
+        <div class="risco-item">
+          <div class="risco-numero">{{ i + 1 }}</div>
+          <div class="risco-conteudo">
+            <h3>{{ oportunidade.item }}</h3>
+          </div>
+        </div>
+
+        <div class="classificacao-group">
+          <label class="label">Estratégia de Resposta</label>
+          <div class="opcoes-grid">
+            <div
+              *ngFor="let opcao of opcoesOportunidades"
+              class="opcao-card"
+              [class.selected]="oportunidade.classificacao === opcao.value"
+              (click)="oportunidade.classificacao = opcao.value">
+              <div class="opcao-radio">
+                <i *ngIf="oportunidade.classificacao === opcao.value" class="fas fa-check-circle"></i>
+                <i *ngIf="oportunidade.classificacao !== opcao.value" class="far fa-circle"></i>
+              </div>
+              <div class="opcao-conteudo">
+                <div class="opcao-label">{{ opcao.label }}</div>
+                <div class="opcao-descricao">{{ opcao.descricao }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tratativa-group">
+          <label class="label">Plano de Ação / Tratativa</label>
+          <textarea
+            [(ngModel)]="oportunidade.tratativa"
+            class="tratativa-input"
+            placeholder="Descreva as ações específicas que serão tomadas para aproveitar esta oportunidade..."
+            rows="4"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção de Classificação de Ameaças -->
+    <section class="classificacao-section ameacas-section">
+      <div class="section-header">
+        <div class="section-icon ameacas-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="section-title">
+          <h2>Ameaças (Riscos Negativos)</h2>
+          <p>Classifique cada ameaça identificada e defina a estratégia de resposta</p>
+        </div>
+      </div>
+
+      <div *ngIf="ameacas.length === 0" class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <p>Nenhuma ameaça identificada na Matriz SWOT Consolidada</p>
+      </div>
+
+      <div *ngFor="let ameaca of ameacas; let i = index; trackBy: trackByIndex" class="risco-card">
+        <div class="risco-item">
+          <div class="risco-numero">{{ i + 1 }}</div>
+          <div class="risco-conteudo">
+            <h3>{{ ameaca.item }}</h3>
+          </div>
+        </div>
+
+        <div class="classificacao-group">
+          <label class="label">Estratégia de Resposta</label>
+          <div class="opcoes-grid">
+            <div
+              *ngFor="let opcao of opcoesAmeacas"
+              class="opcao-card"
+              [class.selected]="ameaca.classificacao === opcao.value"
+              (click)="ameaca.classificacao = opcao.value">
+              <div class="opcao-radio">
+                <i *ngIf="ameaca.classificacao === opcao.value" class="fas fa-check-circle"></i>
+                <i *ngIf="ameaca.classificacao !== opcao.value" class="far fa-circle"></i>
+              </div>
+              <div class="opcao-conteudo">
+                <div class="opcao-label">{{ opcao.label }}</div>
+                <div class="opcao-descricao">{{ opcao.descricao }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tratativa-group">
+          <label class="label">Plano de Ação / Tratativa</label>
+          <textarea
+            [(ngModel)]="ameaca.tratativa"
+            class="tratativa-input"
+            placeholder="Descreva as ações específicas que serão tomadas para lidar com esta ameaça..."
+            rows="4"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- Botões de Ação -->
+    <div class="action-section">
+      <button
+        class="btn-salvar"
+        (click)="salvar()"
+        [disabled]="isSaving">
+        <i *ngIf="!isSaving" class="fas fa-save"></i>
+        <i *ngIf="isSaving" class="fas fa-spinner fa-spin"></i>
+        {{ isSaving ? 'Salvando...' : 'Salvar Classificação' }}
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
+        </div>
+        <div class="footer-text">
+          <p>&copy; {{ currentYear }} NAUE Consultoria. Todos os direitos reservados.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>

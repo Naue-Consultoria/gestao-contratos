@@ -48,7 +48,18 @@ export interface Grupo {
   created_at: string;
   updated_at: string;
   matriz_swot?: MatrizSwot | null;
+  classificacao_riscos?: ClassificacaoRiscosGrupo | null;
   planejamento?: any; // Para quando vem do endpoint público
+}
+
+export interface ClassificacaoRiscosGrupo {
+  id: number;
+  grupo_id: number;
+  oportunidades?: any[];
+  ameacas?: any[];
+  preenchido_em?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface MatrizSwot {
@@ -1485,5 +1496,99 @@ export class PlanejamentoEstrategicoService {
    */
   gerarUrlPublicaClassificacaoRiscos(token: string): string {
     return `${window.location.origin}/classificacao-riscos/${token}`;
+  }
+
+  // ===== CLASSIFICAÇÃO DE RISCOS POR GRUPO =====
+
+  /**
+   * Obter classificação de riscos de um grupo via token público
+   */
+  obterClassificacaoRiscosGrupoPublico(token: string): Observable<{
+    success: boolean;
+    data: {
+      grupo: any;
+      planejamento: any;
+      matrizFinal: any;
+      classificacao: ClassificacaoRiscos | null;
+    };
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: {
+        grupo: any;
+        planejamento: any;
+        matrizFinal: any;
+        classificacao: ClassificacaoRiscos | null;
+      };
+    }>(`${this.apiUrl}/publico/grupo/${token}/classificacao-riscos`);
+  }
+
+  /**
+   * Salvar classificação de riscos de um grupo via token público
+   */
+  salvarClassificacaoRiscosGrupoPublico(token: string, data: UpdateClassificacaoRiscosRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`${this.apiUrl}/publico/grupo/${token}/classificacao-riscos`, data);
+  }
+
+  /**
+   * Gerar URL pública para classificação de riscos por grupo
+   */
+  gerarUrlPublicaClassificacaoRiscosGrupo(grupoToken: string): string {
+    return `${window.location.origin}/classificacao-riscos-grupo/${grupoToken}`;
+  }
+
+  // ===== CLASSIFICAÇÃO DE RISCOS CONSOLIDADA =====
+
+  /**
+   * Obter classificação de riscos consolidada via token do planejamento
+   */
+  obterClassificacaoRiscosConsolidadoPublico(token: string): Observable<{
+    success: boolean;
+    data: {
+      planejamento: any;
+      matrizFinal: any;
+      grupos: any[];
+      classificacaoFinal: ClassificacaoRiscos | null;
+    };
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: {
+        planejamento: any;
+        matrizFinal: any;
+        grupos: any[];
+        classificacaoFinal: ClassificacaoRiscos | null;
+      };
+    }>(`${this.apiUrl}/publico/classificacao-riscos-consolidado/${token}`);
+  }
+
+  /**
+   * Salvar classificação de riscos consolidada via token do planejamento
+   */
+  salvarClassificacaoRiscosConsolidadoPublico(token: string, data: UpdateClassificacaoRiscosRequest): Observable<{
+    success: boolean;
+    message: string;
+    data: ClassificacaoRiscos;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+      data: ClassificacaoRiscos;
+    }>(`${this.apiUrl}/publico/classificacao-riscos-consolidado/${token}`, data);
+  }
+
+  /**
+   * Gerar URL pública para classificação de riscos consolidada
+   */
+  gerarUrlPublicaClassificacaoRiscosConsolidado(token: string): string {
+    return `${window.location.origin}/classificacao-riscos-consolidado/${token}`;
   }
 }

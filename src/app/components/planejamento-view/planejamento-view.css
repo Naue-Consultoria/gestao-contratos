@@ -33,6 +33,8 @@
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
 .section-header h3 { margin: 0; font-size: 1.25rem; }
 .section-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.section-actions-organized { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+.section-actions-organized .dropdown-menu-container { position: relative; }
 
 .departamentos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
 .dep-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 1.5rem; }
@@ -43,6 +45,222 @@
 .dep-body { display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem; }
 .integrantes-row { display: flex; align-items: center; gap: 0.5rem; }
 .grupo-actions { margin-top: 0.5rem; display: flex; gap: 0.5rem; }
+.grupo-actions-grid { margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.grupo-actions-grid .dropdown-menu-container { position: relative; }
+.grupo-actions-grid .dropdown-menu-bottom { top: calc(100% + 4px); left: 0; right: auto; }
+
+/* Badges de status lado a lado */
+.grupo-status-badges {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.badge-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Botões lado a lado */
+.grupo-buttons-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.grupo-buttons-row .dropdown-menu-container {
+  position: relative;
+}
+
+.grupo-buttons-row .dropdown-menu-bottom {
+  top: calc(100% + 4px);
+  left: 0;
+  right: auto;
+}
+
+/* Tabela de Grupos */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.grupos-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.grupos-table thead {
+  background: #f8f9fa;
+}
+
+.grupos-table th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #4a5568;
+  border-bottom: 2px solid #e2e8f0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.grupos-table th.text-center {
+  text-align: center;
+}
+
+.grupos-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.grupos-table td.text-center {
+  text-align: center;
+}
+
+.grupos-table tbody tr:hover {
+  background: #f7fafc;
+}
+
+.grupos-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.grupos-table .grupo-name-cell {
+  white-space: nowrap;
+}
+
+.grupos-table .grupo-name-cell i {
+  color: #003b2b;
+  font-size: 1rem;
+  margin-right: 0.75rem;
+}
+
+.grupos-table .integrantes-text {
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.grupos-table .action-cell {
+  overflow: visible;
+}
+
+.grupos-table .action-cell .dropdown-menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.grupos-table .action-cell .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 9999;
+  min-width: 160px;
+  margin-top: 4px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+}
+
+/* Garantir que a tabela e containers não cortem o dropdown */
+.table-responsive {
+  overflow: visible !important;
+}
+
+.grupos-table {
+  overflow: visible !important;
+}
+
+.grupos-table tbody,
+.grupos-table tr,
+.grupos-table td {
+  overflow: visible;
+}
+
+.section {
+  overflow: visible;
+}
+
+/* Botão de menu de opções */
+.btn-icon-menu {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  color: #718096;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-icon-menu:hover {
+  background: #f7fafc;
+  color: #4a5568;
+  border-color: #cbd5e0;
+}
+
+/* Botões estilizados para SWOT e Riscos */
+.btn-swot {
+  background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-swot:hover {
+  background: linear-gradient(135deg, #155724 0%, #0d3518 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(30, 126, 52, 0.3);
+}
+
+.btn-riscos {
+  background: linear-gradient(135deg, #003b2b 0%, #002821 100%);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-riscos:hover {
+  background: linear-gradient(135deg, #004d38 0%, #003028 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 59, 43, 0.3);
+}
+
 .btn-sm { padding: 0.5rem 0.875rem; font-size: 0.85rem; }
 
 .btn-menu { background: transparent; border: none; padding: 0.5rem; cursor: pointer; color: #6c757d; border-radius: 6px; font-size: 1.2rem; }
@@ -61,7 +279,7 @@
 .matriz-status { margin-top: 1rem; }
 
 /* Tabela de Departamentos */
-.table-container { overflow-x: auto; overflow-y: visible; }
+.table-container { overflow: visible; }
 .departamentos-table { width: 100%; border-collapse: collapse; }
 .departamentos-table thead { background: #f8f9fa; }
 .departamentos-table th { padding: 1rem; text-align: left; font-weight: 600; color: #495057; font-size: 0.9rem; border-bottom: 2px solid #dee2e6; }

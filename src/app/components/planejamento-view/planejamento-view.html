@@ -178,22 +178,48 @@
   <div class="section" *ngIf="activeTab === 'grupos'">
     <div class="section-header">
       <h3>Grupos</h3>
-      <div class="section-actions">
-        <button class="btn btn-primary btn-sm" (click)="visualizarConsolidado()" *ngIf="grupos.length > 0">
-          <i class="fas fa-th"></i> Visualizar Matriz
-        </button>
-        <button class="btn btn-primary btn-sm" (click)="visualizarSwotConsolidadoPublico()" *ngIf="grupos.length > 0">
-          <i class="fas fa-eye"></i> Página SWOT
-        </button>
-        <button class="btn btn-primary btn-sm" (click)="visualizarClassificacaoRiscos()" *ngIf="grupos.length > 0">
-          <i class="fas fa-shield-alt"></i> Classificação de Riscos
-        </button>
-        <button class="btn btn-primary btn-sm" (click)="copiarLinkSwotConsolidado()" *ngIf="grupos.length > 0">
-          <i class="fas fa-link"></i> Copiar Link
-        </button>
-        <button class="btn btn-primary btn-sm" (click)="visualizarCruzamento()" *ngIf="grupos.length > 0">
+      <div class="section-actions section-actions-organized">
+        <!-- Menu Matriz SWOT Consolidada -->
+        <div class="dropdown-menu-container" *ngIf="grupos.length > 0">
+          <button class="btn btn-swot btn-sm" (click)="toggleSwotConsolidadoMenu()">
+            <i class="fas fa-th"></i> SWOT Consolidada
+            <i class="fas fa-caret-down"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-bottom" *ngIf="showSwotConsolidadoMenu">
+            <button class="dropdown-item" (click)="visualizarConsolidado(); closeSwotConsolidadoMenu()">
+              <i class="fas fa-columns"></i> Matriz Consolidada
+            </button>
+            <button class="dropdown-item" (click)="visualizarSwotConsolidadoPublico(); closeSwotConsolidadoMenu()">
+              <i class="fas fa-eye"></i> Página Pública
+            </button>
+            <button class="dropdown-item" (click)="copiarLinkSwotConsolidado(); closeSwotConsolidadoMenu()">
+              <i class="fas fa-link"></i> Copiar Link
+            </button>
+          </div>
+        </div>
+
+        <!-- Menu Classificação de Riscos Consolidada -->
+        <div class="dropdown-menu-container" *ngIf="grupos.length > 0">
+          <button class="btn btn-riscos btn-sm" (click)="toggleRiscosConsolidadoMenu()">
+            <i class="fas fa-shield-alt"></i> Riscos Consolidados
+            <i class="fas fa-caret-down"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-bottom" *ngIf="showRiscosConsolidadoMenu">
+            <button class="dropdown-item" (click)="visualizarClassificacaoRiscos(); closeRiscosConsolidadoMenu()">
+              <i class="fas fa-eye"></i> Visualizar
+            </button>
+            <button class="dropdown-item" (click)="copiarLinkClassificacaoRiscosConsolidado(); closeRiscosConsolidadoMenu()">
+              <i class="fas fa-link"></i> Copiar Link
+            </button>
+          </div>
+        </div>
+
+        <!-- Botão Definição de Impacto -->
+        <button class="btn btn-secondary btn-sm" (click)="visualizarCruzamento()" *ngIf="grupos.length > 0">
           <i class="fas fa-project-diagram"></i> Definição de Impacto
         </button>
+
+        <!-- Botão Novo Grupo -->
         <button class="btn btn-primary" (click)="openNovoGrupoModal()">
           <i class="fas fa-plus"></i> Novo Grupo
         </button>
@@ -205,52 +231,98 @@
       <p>Nenhum grupo cadastrado</p>
     </div>
 
-    <div class="departamentos-grid" *ngIf="grupos.length > 0">
-      <div *ngFor="let grupo of grupos" class="dep-card">
-        <div class="dep-header">
-          <h4>{{ grupo.nome_grupo }}</h4>
-          <div class="dep-actions">
-            <button class="btn-menu" (click)="toggleGrupoMenu(grupo.id)" title="Mais opções">
-              <i class="fas fa-ellipsis-v"></i>
-            </button>
-            <div class="dropdown-menu" *ngIf="openGrupoMenuId === grupo.id">
-              <button class="dropdown-item" (click)="visualizarGrupo(grupo); closeGrupoMenu()">
-                <i class="fas fa-eye"></i> Visualizar
-              </button>
-              <button class="dropdown-item" (click)="copiarLinkGrupo(grupo); closeGrupoMenu()">
-                <i class="fas fa-link"></i> Copiar Link do Grupo
-              </button>
-              <button class="dropdown-item" (click)="openEditarGrupoModal(grupo); closeGrupoMenu()">
-                <i class="fas fa-edit"></i> Editar
-              </button>
-              <button class="dropdown-item dropdown-item-danger" (click)="openDeleteGrupoModal(grupo); closeGrupoMenu()">
-                <i class="fas fa-trash"></i> Excluir
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="dep-body">
-          <div *ngIf="grupo.integrantes" class="integrantes-row">
-            <i class="fas fa-users"></i> {{ grupo.integrantes }}
-          </div>
-          <div class="matriz-status">
-            <span *ngIf="isMatrizSwotPreenchida(grupo)" class="badge-success">
-              <i class="fas fa-check-circle"></i> Matriz Preenchida
-            </span>
-            <span *ngIf="!isMatrizSwotPreenchida(grupo)" class="badge-warning">
-              <i class="fas fa-clock"></i> Aguardando Preenchimento
-            </span>
-          </div>
-          <div class="grupo-actions">
-            <button class="btn btn-sm btn-primary" (click)="visualizarGrupo(grupo)">
-              <i class="fas fa-eye"></i> Visualizar
-            </button>
-            <button class="btn btn-sm btn-primary" (click)="copiarLinkGrupo(grupo)">
-              <i class="fas fa-link"></i> Copiar Link
-            </button>
-          </div>
-        </div>
-      </div>
+    <div class="table-responsive" *ngIf="grupos.length > 0">
+      <table class="grupos-table">
+        <thead>
+          <tr>
+            <th>Grupo</th>
+            <th>Integrantes</th>
+            <th class="text-center">Status SWOT</th>
+            <th class="text-center">Status Riscos</th>
+            <th class="text-center">Matriz SWOT</th>
+            <th class="text-center">Class. Riscos</th>
+            <th class="text-center">Opções</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let grupo of grupos">
+            <td class="grupo-name-cell">
+              <i class="fas fa-users"></i>
+              <strong>{{ grupo.nome_grupo }}</strong>
+            </td>
+            <td>
+              <span *ngIf="grupo.integrantes" class="integrantes-text">{{ grupo.integrantes }}</span>
+              <span *ngIf="!grupo.integrantes" class="text-muted">—</span>
+            </td>
+            <td class="text-center">
+              <span *ngIf="isMatrizSwotPreenchida(grupo)" class="badge-success">
+                <i class="fas fa-check-circle"></i> Preenchida
+              </span>
+              <span *ngIf="!isMatrizSwotPreenchida(grupo)" class="badge-warning">
+                <i class="fas fa-clock"></i> Pendente
+              </span>
+            </td>
+            <td class="text-center">
+              <span *ngIf="isClassificacaoRiscosPreenchida(grupo)" class="badge-success">
+                <i class="fas fa-check-circle"></i> Preenchida
+              </span>
+              <span *ngIf="!isClassificacaoRiscosPreenchida(grupo)" class="badge-warning">
+                <i class="fas fa-clock"></i> Pendente
+              </span>
+            </td>
+            <!-- Coluna Matriz SWOT -->
+            <td class="text-center action-cell">
+              <div class="dropdown-menu-container">
+                <button class="btn btn-sm btn-swot" (click)="toggleGrupoSwotMenu(grupo.id); $event.stopPropagation()" title="Matriz SWOT">
+                  <i class="fas fa-th"></i>
+                  <i class="fas fa-caret-down"></i>
+                </button>
+                <div class="dropdown-menu" *ngIf="openGrupoSwotMenuId === grupo.id">
+                  <button class="dropdown-item" (click)="visualizarGrupo(grupo); closeGrupoSwotMenu()">
+                    <i class="fas fa-eye"></i> Visualizar
+                  </button>
+                  <button class="dropdown-item" (click)="copiarLinkGrupo(grupo); closeGrupoSwotMenu()">
+                    <i class="fas fa-link"></i> Copiar Link
+                  </button>
+                </div>
+              </div>
+            </td>
+            <!-- Coluna Classificação de Riscos -->
+            <td class="text-center action-cell">
+              <div class="dropdown-menu-container">
+                <button class="btn btn-sm btn-riscos" (click)="toggleGrupoRiscosMenu(grupo.id); $event.stopPropagation()" title="Classificação de Riscos">
+                  <i class="fas fa-shield-alt"></i>
+                  <i class="fas fa-caret-down"></i>
+                </button>
+                <div class="dropdown-menu" *ngIf="openGrupoRiscosMenuId === grupo.id">
+                  <button class="dropdown-item" (click)="visualizarClassificacaoRiscosGrupo(grupo); closeGrupoRiscosMenu()">
+                    <i class="fas fa-eye"></i> Visualizar
+                  </button>
+                  <button class="dropdown-item" (click)="copiarLinkClassificacaoRiscosGrupo(grupo); closeGrupoRiscosMenu()">
+                    <i class="fas fa-link"></i> Copiar Link
+                  </button>
+                </div>
+              </div>
+            </td>
+            <!-- Coluna Opções -->
+            <td class="text-center action-cell">
+              <div class="dropdown-menu-container">
+                <button class="btn-icon-menu" (click)="toggleGrupoMenu(grupo.id); $event.stopPropagation()" title="Mais opções">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="dropdown-menu" *ngIf="openGrupoMenuId === grupo.id">
+                  <button class="dropdown-item" (click)="openEditarGrupoModal(grupo); closeGrupoMenu()">
+                    <i class="fas fa-edit"></i> Editar Grupo
+                  </button>
+                  <button class="dropdown-item dropdown-item-danger" (click)="openDeleteGrupoModal(grupo); closeGrupoMenu()">
+                    <i class="fas fa-trash"></i> Excluir Grupo
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 

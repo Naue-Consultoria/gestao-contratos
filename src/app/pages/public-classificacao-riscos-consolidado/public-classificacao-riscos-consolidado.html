@@ -1,0 +1,297 @@
+<div class="public-classificacao-riscos-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando classificação de riscos...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <div class="error-icon">&#9888;</div>
+    <h2>Erro ao carregar dados</h2>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Toast Notification -->
+  <div *ngIf="showToast" class="toast-notification">
+    <i class="fas fa-check-circle"></i>
+    <span>{{ toastMessage }}</span>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !error && planejamento" class="content-container">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-background"></div>
+      <div class="hero-content">
+        <!-- Logos -->
+        <div class="logos-container">
+          <div class="logo-naue">
+            <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="hero-title">
+          <h1>Planejamento Estratégico</h1>
+          <h2 class="client-name">{{ getClientName() }}</h2>
+          <h3>Classificação de Riscos - Consolidada</h3>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="hero-info-cards">
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Grupos Preenchidos</span>
+              <span class="info-value">{{ getProgressoGeral() }}%</span>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Classificação Final</span>
+              <span class="info-value">{{ getProgressoClassificacao() }}%</span>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-tasks"></i>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Tratativas Finais</span>
+              <span class="info-value">{{ getProgressoTratativas() }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="hero-description">
+          <p>Visualize as classificações de riscos de cada grupo e defina a versão final consolidada.</p>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator">
+          <i class="fas fa-chevron-down"></i>
+          <span>Role para visualizar</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção de Classificação Final (Consolidada) -->
+    <section class="classificacao-section consolidada-section">
+      <div class="section-header">
+        <div class="section-icon consolidada-icon">
+          <i class="fas fa-check-double"></i>
+        </div>
+        <div class="section-title">
+          <h2>Classificação Final Consolidada</h2>
+          <p>Defina a versão final da classificação de riscos baseada nas contribuições dos grupos</p>
+        </div>
+        <button class="btn-toggle-edit" (click)="toggleEditMode()">
+          <i *ngIf="!isEditing" class="fas fa-edit"></i>
+          <i *ngIf="isEditing" class="fas fa-save"></i>
+          {{ isEditing ? 'Salvar Alterações' : 'Editar Classificação' }}
+        </button>
+      </div>
+
+      <!-- Oportunidades Consolidadas -->
+      <div class="subsection">
+        <h3 class="subsection-title oportunidades">
+          <i class="fas fa-lightbulb"></i> Oportunidades (Riscos Positivos)
+        </h3>
+
+        <div *ngIf="oportunidades.length === 0" class="empty-state-small">
+          <p>Nenhuma oportunidade identificada na Matriz SWOT Consolidada</p>
+        </div>
+
+        <div *ngFor="let oportunidade of oportunidades; let i = index; trackBy: trackByIndex" class="risco-card-consolidado">
+          <div class="risco-item-consolidado">
+            <div class="risco-numero">{{ i + 1 }}</div>
+            <div class="risco-texto">{{ oportunidade.item }}</div>
+          </div>
+
+          <!-- Respostas dos Grupos -->
+          <div class="grupo-responses-section" *ngIf="getGrupoResponsesForOportunidade(oportunidade.item).length > 0">
+            <div class="grupo-responses-header">
+              <i class="fas fa-users"></i>
+              <span>Respostas dos Grupos</span>
+            </div>
+            <div class="grupo-responses-grid">
+              <div *ngFor="let response of getGrupoResponsesForOportunidade(oportunidade.item)" class="grupo-response-card">
+                <div class="grupo-response-nome">{{ response.grupo }}</div>
+                <div class="grupo-response-classificacao">
+                  <span class="classificacao-badge-sm oportunidade">{{ getClassificacaoLabel(response.classificacao) }}</span>
+                </div>
+                <div class="grupo-response-tratativa" *ngIf="response.tratativa">
+                  {{ response.tratativa }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Classificação Final -->
+          <div class="classificacao-final-section">
+            <div class="classificacao-final-header">
+              <i class="fas fa-check-double"></i>
+              <span>Classificação Final</span>
+            </div>
+
+            <div class="classificacao-tratativa" *ngIf="!isEditing">
+              <div class="info-row">
+                <span class="info-label">Classificação:</span>
+                <span class="classificacao-badge oportunidade">{{ getClassificacaoLabel(oportunidade.classificacao) }}</span>
+              </div>
+              <div class="info-row" *ngIf="oportunidade.tratativa">
+                <span class="info-label">Tratativa:</span>
+                <span class="tratativa-texto">{{ oportunidade.tratativa }}</span>
+              </div>
+            </div>
+
+            <div class="edit-mode" *ngIf="isEditing">
+              <div class="classificacao-group-inline">
+                <label class="label">Estratégia:</label>
+                <div class="opcoes-inline">
+                  <div
+                    *ngFor="let opcao of opcoesOportunidades"
+                    class="opcao-inline"
+                    [class.selected]="oportunidade.classificacao === opcao.value"
+                    (click)="oportunidade.classificacao = opcao.value">
+                    {{ opcao.label }}
+                  </div>
+                </div>
+              </div>
+              <div class="tratativa-group-inline">
+                <label class="label">Tratativa:</label>
+                <textarea
+                  [(ngModel)]="oportunidade.tratativa"
+                  class="tratativa-input-inline"
+                  placeholder="Descreva o plano de ação..."
+                  rows="2"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ameaças Consolidadas -->
+      <div class="subsection">
+        <h3 class="subsection-title ameacas">
+          <i class="fas fa-exclamation-triangle"></i> Ameaças (Riscos Negativos)
+        </h3>
+
+        <div *ngIf="ameacas.length === 0" class="empty-state-small">
+          <p>Nenhuma ameaça identificada na Matriz SWOT Consolidada</p>
+        </div>
+
+        <div *ngFor="let ameaca of ameacas; let i = index; trackBy: trackByIndex" class="risco-card-consolidado">
+          <div class="risco-item-consolidado">
+            <div class="risco-numero ameaca">{{ i + 1 }}</div>
+            <div class="risco-texto">{{ ameaca.item }}</div>
+          </div>
+
+          <!-- Respostas dos Grupos -->
+          <div class="grupo-responses-section" *ngIf="getGrupoResponsesForAmeaca(ameaca.item).length > 0">
+            <div class="grupo-responses-header">
+              <i class="fas fa-users"></i>
+              <span>Respostas dos Grupos</span>
+            </div>
+            <div class="grupo-responses-grid">
+              <div *ngFor="let response of getGrupoResponsesForAmeaca(ameaca.item)" class="grupo-response-card">
+                <div class="grupo-response-nome">{{ response.grupo }}</div>
+                <div class="grupo-response-classificacao">
+                  <span class="classificacao-badge-sm ameaca">{{ getClassificacaoLabel(response.classificacao) }}</span>
+                </div>
+                <div class="grupo-response-tratativa" *ngIf="response.tratativa">
+                  {{ response.tratativa }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Classificação Final -->
+          <div class="classificacao-final-section">
+            <div class="classificacao-final-header">
+              <i class="fas fa-check-double"></i>
+              <span>Classificação Final</span>
+            </div>
+
+            <div class="classificacao-tratativa" *ngIf="!isEditing">
+              <div class="info-row">
+                <span class="info-label">Classificação:</span>
+                <span class="classificacao-badge ameaca">{{ getClassificacaoLabel(ameaca.classificacao) }}</span>
+              </div>
+              <div class="info-row" *ngIf="ameaca.tratativa">
+                <span class="info-label">Tratativa:</span>
+                <span class="tratativa-texto">{{ ameaca.tratativa }}</span>
+              </div>
+            </div>
+
+            <div class="edit-mode" *ngIf="isEditing">
+              <div class="classificacao-group-inline">
+                <label class="label">Estratégia:</label>
+                <div class="opcoes-inline">
+                  <div
+                    *ngFor="let opcao of opcoesAmeacas"
+                    class="opcao-inline"
+                    [class.selected]="ameaca.classificacao === opcao.value"
+                    (click)="ameaca.classificacao = opcao.value">
+                    {{ opcao.label }}
+                  </div>
+                </div>
+              </div>
+              <div class="tratativa-group-inline">
+                <label class="label">Tratativa:</label>
+                <textarea
+                  [(ngModel)]="ameaca.tratativa"
+                  class="tratativa-input-inline"
+                  placeholder="Descreva o plano de ação..."
+                  rows="2"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Botões de Ação -->
+    <div class="action-section">
+      <button
+        class="btn-exportar"
+        (click)="exportarPDF()"
+        [disabled]="isExportingPDF || isSaving">
+        <i *ngIf="!isExportingPDF" class="fas fa-file-pdf"></i>
+        <i *ngIf="isExportingPDF" class="fas fa-spinner fa-spin"></i>
+        {{ isExportingPDF ? 'Exportando...' : 'Exportar PDF' }}
+      </button>
+
+      <button
+        class="btn-salvar"
+        (click)="salvar()"
+        [disabled]="isSaving">
+        <i *ngIf="!isSaving" class="fas fa-save"></i>
+        <i *ngIf="isSaving" class="fas fa-spinner fa-spin"></i>
+        {{ isSaving ? 'Salvando...' : 'Salvar Classificação Final' }}
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="/logoNaueNeg.png" alt="NAUE Consultoria" />
+        </div>
+        <div class="footer-text">
+          <p>&copy; {{ currentYear }} NAUE Consultoria. Todos os direitos reservados.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>

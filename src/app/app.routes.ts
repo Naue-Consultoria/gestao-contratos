@@ -53,6 +53,8 @@ import { PublicOkrViewComponent } from './pages/public-okr-view/public-okr-view'
 import { PublicArvoresViewComponent } from './pages/public-arvores-view/public-arvores-view';
 import { PublicSwotConsolidadoComponent } from './pages/public-swot-consolidado/public-swot-consolidado';
 import { PublicClassificacaoRiscosComponent } from './pages/public-classificacao-riscos/public-classificacao-riscos';
+import { PublicClassificacaoRiscosGrupoComponent } from './pages/public-classificacao-riscos-grupo/public-classificacao-riscos-grupo';
+import { PublicClassificacaoRiscosConsolidadoComponent } from './pages/public-classificacao-riscos-consolidado/public-classificacao-riscos-consolidado';
 import { MatrizSwotConsolidadoComponent } from './components/matriz-swot-consolidado/matriz-swot-consolidado';
 import { MatrizCruzamentoSwotComponent } from './components/matriz-cruzamento-swot/matriz-cruzamento-swot';
 import { AnaliseCenariosComponent } from './components/analise-cenarios/analise-cenarios';
@@ -153,11 +155,25 @@ export const routes: Routes = [
     title: 'Matriz SWOT Consolidada - NAUE Consultoria',
   },
 
-  // Rota pública para Classificação de Riscos
+  // Rota pública para Classificação de Riscos (legado - consolidada)
   {
     path: 'classificacao-riscos/:token',
     component: PublicClassificacaoRiscosComponent,
     title: 'Classificação de Riscos - NAUE Consultoria',
+  },
+
+  // Rota pública para Classificação de Riscos por Grupo
+  {
+    path: 'classificacao-riscos-grupo/:token',
+    component: PublicClassificacaoRiscosGrupoComponent,
+    title: 'Classificação de Riscos - Grupo - NAUE Consultoria',
+  },
+
+  // Rota pública para Classificação de Riscos Consolidada (com visualização dos grupos)
+  {
+    path: 'classificacao-riscos-consolidado/:token',
+    component: PublicClassificacaoRiscosConsolidadoComponent,
+    title: 'Classificação de Riscos Consolidada - NAUE Consultoria',
   },
 
   // Rota pública para visualização do hub de mentoria
