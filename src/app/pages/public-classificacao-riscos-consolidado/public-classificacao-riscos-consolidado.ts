@@ -116,10 +116,6 @@ export class PublicClassificacaoRiscosConsolidadoComponent implements OnInit {
         this.matrizFinal = response.data.matrizFinal;
         this.grupos = response.data.grupos || [];
 
-        // Debug: ver estrutura dos dados dos grupos
-        console.log('Grupos recebidos:', this.grupos);
-        console.log('Exemplo de classificacao_riscos:', this.grupos[0]?.classificacao_riscos);
-
         // Extrair oportunidades e ameaças da matriz SWOT consolidada
         const oportunidadesTexto = this.matrizFinal?.oportunidades || '';
         const ameacasTexto = this.matrizFinal?.ameacas || '';
@@ -152,7 +148,6 @@ export class PublicClassificacaoRiscosConsolidadoComponent implements OnInit {
         }
       }
     } catch (err: any) {
-      console.error('Erro ao carregar dados:', err);
       this.error = 'Não foi possível carregar os dados de classificação de riscos.';
     } finally {
       this.isLoading = false;
@@ -266,15 +261,6 @@ export class PublicClassificacaoRiscosConsolidadoComponent implements OnInit {
     for (const grupo of this.grupos) {
       const classificacao = this.getGrupoClassificacao(grupo);
 
-      // Debug
-      if (!responses.length && this.grupos.indexOf(grupo) === 0) {
-        console.log('Debug getGrupoResponsesForOportunidade:');
-        console.log('- Buscando item:', normalizedItemText);
-        console.log('- Grupo:', grupo.nome_grupo);
-        console.log('- Classificacao do grupo:', classificacao);
-        console.log('- Oportunidades do grupo:', classificacao?.oportunidades);
-      }
-
       if (classificacao?.oportunidades && Array.isArray(classificacao.oportunidades)) {
         const item = classificacao.oportunidades.find((op: any) =>
           op.item?.trim().toLowerCase() === normalizedItemText
@@ -361,7 +347,6 @@ export class PublicClassificacaoRiscosConsolidadoComponent implements OnInit {
         }, 3000);
       }
     } catch (err: any) {
-      console.error('Erro ao salvar classificação:', err);
       this.error = err.error?.message || 'Erro ao salvar classificação. Tente novamente.';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
@@ -374,7 +359,7 @@ export class PublicClassificacaoRiscosConsolidadoComponent implements OnInit {
 
     this.isExportingPDF = true;
     try {
-      const url = `${environment.apiUrl}/planejamento-estrategico/publico/classificacao-riscos/${this.token}/pdf`;
+      const url = `${environment.apiUrl}/planejamento-estrategico/publico/classificacao-riscos-consolidado/${this.token}/pdf`;
       window.open(url, '_blank');
 
       // Mostrar toast de exportação
@@ -385,7 +370,7 @@ export class PublicClassificacaoRiscosConsolidadoComponent implements OnInit {
         this.showToast = false;
       }, 2000);
     } catch (err) {
-      console.error('Erro ao exportar PDF:', err);
+      // Erro silencioso na exportação
     } finally {
       setTimeout(() => {
         this.isExportingPDF = false;
