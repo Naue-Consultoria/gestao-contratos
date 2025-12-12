@@ -1,0 +1,191 @@
+<div class="tabela-periodica-container">
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Carregando...</p>
+  </div>
+
+  <!-- Header (padrão do sistema) -->
+  <div class="dark-header">
+    <h2 class="dark-title">
+      <i class="fa-solid fa-th"></i>
+      Tabela Periódica
+    </h2>
+    <p class="dark-subtitle">24 Forças de Caráter</p>
+  </div>
+
+  <div class="tabela-content" *ngIf="!isLoading">
+
+    <!-- Upload PDF Section -->
+    <div class="pdf-upload-section" *ngIf="!readOnly && !pdfProcessado">
+      <div
+        class="pdf-dropzone"
+        [class.drag-over]="isDragOver"
+        [class.processing]="isProcessingPdf"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()"
+      >
+        <input
+          #fileInput
+          type="file"
+          accept="application/pdf"
+          (change)="onFileSelected($event)"
+          style="display: none"
+        />
+
+        <div class="dropzone-content" *ngIf="!isProcessingPdf">
+          <div class="dropzone-icon">
+            <i class="fas fa-file-pdf"></i>
+          </div>
+          <h4>Importar PDF do VIA Institute</h4>
+          <p>Arraste seu PDF aqui ou clique para selecionar</p>
+          <span class="dropzone-hint">Suporta o relatório "VIA Character Strengths Profile"</span>
+        </div>
+
+        <div class="dropzone-processing" *ngIf="isProcessingPdf">
+          <div class="spinner"></div>
+          <p>Processando PDF...</p>
+        </div>
+      </div>
+
+      <div class="divider-or">
+        <span>ou preencha manualmente</span>
+      </div>
+    </div>
+
+    <!-- PDF Processado Badge -->
+    <div class="pdf-processed-badge" *ngIf="pdfProcessado && !readOnly">
+      <i class="fas fa-check-circle"></i>
+      <span>PDF importado com sucesso!</span>
+      <button class="btn-import-new" (click)="pdfProcessado = false">
+        <i class="fas fa-redo"></i> Importar outro
+      </button>
+    </div>
+
+    <!-- Top 5 Summary -->
+    <div class="top5-summary" *ngIf="getTop5().length > 0">
+      <h4>Suas Top 5 Forcas de Carater</h4>
+      <div class="top5-list">
+        <div class="top5-item" *ngFor="let forca of getTop5()">
+          <span class="top5-number">{{ forca.rank }}</span>
+          <span class="top5-name">{{ forca.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="tabela-wrapper">
+      <table class="forcas-table">
+        <thead>
+          <tr>
+            <th colspan="6" class="virtudes-header">VIRTUDES</th>
+          </tr>
+          <tr>
+            <th *ngFor="let cat of categoriasColunas" class="categoria-header" [style.background]="getCategoriaCor(cat)">
+              {{ getCategoriaNome(cat) | uppercase }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let linha of tabelaLayout">
+            <td
+              *ngFor="let forcaId of linha; let colIndex = index"
+              class="cell"
+              [class.empty]="!forcaId"
+              [class.inactive]="forcaId && !hasRanking(forcaId)"
+              [class.top5]="forcaId && isTop5(forcaId)"
+              [class.sabedoria]="forcaId && hasRanking(forcaId) && getForcaById(forcaId)?.categoria === 'sabedoria'"
+              [class.humanidade]="forcaId && hasRanking(forcaId) && getForcaById(forcaId)?.categoria === 'humanidade'"
+              [class.justica]="forcaId && hasRanking(forcaId) && getForcaById(forcaId)?.categoria === 'justica'"
+              [class.moderacao]="forcaId && hasRanking(forcaId) && getForcaById(forcaId)?.categoria === 'moderacao'"
+              [class.coragem]="forcaId && hasRanking(forcaId) && getForcaById(forcaId)?.categoria === 'coragem'"
+              [class.transcendencia]="forcaId && hasRanking(forcaId) && getForcaById(forcaId)?.categoria === 'transcendencia'"
+              [class.clickable]="forcaId && !readOnly"
+              (click)="onCellClick(forcaId)"
+            >
+              <ng-container *ngIf="forcaId">
+                <span class="rank-badge" *ngIf="getRanking(forcaId)" [class.top5-badge]="isTop5(forcaId)">
+                  {{ getRanking(forcaId) }}
+                </span>
+                <span class="cell-text" [innerHTML]="getForcaById(forcaId)?.nomeExibicao"></span>
+              </ng-container>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Acoes -->
+    <div class="actions" *ngIf="!readOnly">
+      <button class="btn-reset" (click)="resetarTabela()" [disabled]="forcasRanking.length === 0">
+        <i class="fas fa-undo"></i> Limpar Tudo
+      </button>
+      <button class="btn-save" (click)="salvarDados()" [disabled]="isSaving || !hasChanges">
+        <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+        <i class="fas fa-save" *ngIf="!isSaving"></i>
+        {{ isSaving ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header" [style.border-left-color]="forcaSelecionada ? getCategoriaCor(forcaSelecionada.categoria) : '#666'">
+        <button class="modal-close" (click)="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-category" [style.color]="forcaSelecionada ? getCategoriaCor(forcaSelecionada.categoria) : '#666'">
+          {{ forcaSelecionada ? getCategoriaNome(forcaSelecionada.categoria) : '' }}
+        </div>
+        <div class="modal-title">
+          <span class="modal-rank" [class.top5-rank]="rankSelecionado > 0 && rankSelecionado <= 5">
+            {{ rankSelecionado || '?' }}
+          </span>
+          <span>{{ forcaSelecionada?.nome }}</span>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-description">{{ forcaSelecionada?.descricao }}</p>
+
+        <div class="modal-virtue" [style.background]="forcaSelecionada ? virtudes[forcaSelecionada.categoria].corBg : '#f8f9fa'">
+          <div class="virtue-icon" [style.background]="forcaSelecionada ? getCategoriaCor(forcaSelecionada.categoria) + '20' : '#eee'">
+            {{ forcaSelecionada ? virtudes[forcaSelecionada.categoria].icon : '' }}
+          </div>
+          <div class="virtue-info">
+            <div class="virtue-label">Virtude</div>
+            <div class="virtue-name">{{ forcaSelecionada ? getCategoriaNome(forcaSelecionada.categoria) : '' }}</div>
+          </div>
+        </div>
+
+        <div class="rank-input-section" *ngIf="!readOnly">
+          <label>Posicao no Ranking (1-24):</label>
+          <div class="rank-input-wrapper">
+            <input
+              type="number"
+              [(ngModel)]="rankSelecionado"
+              min="0"
+              max="24"
+              placeholder="0"
+            />
+            <span class="rank-hint">Deixe 0 para remover</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" *ngIf="!readOnly">
+        <button class="btn-cancel" (click)="closeModal()">Cancelar</button>
+        <button class="btn-remove" (click)="removerRanking()" *ngIf="getRanking(forcaSelecionada?.id || '')">
+          <i class="fas fa-trash"></i> Remover
+        </button>
+        <button class="btn-confirm" (click)="salvarRanking()">
+          <i class="fas fa-check"></i> Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

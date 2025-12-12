@@ -76,11 +76,6 @@ export class MentoriaList implements OnInit {
         if (response.success && response.data) {
           this.mentorias = response.data;
 
-          console.log('📊 Mentorias carregadas:', this.mentorias);
-          console.log('📊 Primeira mentoria:', this.mentorias[0]);
-          console.log('📊 Client da primeira mentoria:', this.mentorias[0]?.client);
-          console.log('📊 Contract da primeira mentoria:', this.mentorias[0]?.contract);
-
           // Carregar encontros de todas as mentorias para mostrar nome do mentorado
           this.mentorias.forEach(mentoria => {
             if (!mentoria.encontros) {

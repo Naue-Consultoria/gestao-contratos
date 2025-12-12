@@ -1809,6 +1809,17 @@
       </div>
     </section>
 
+    <!-- Tabela Periodica - 24 Forcas de Carater Section -->
+    <section *ngIf="secaoId === 'tabelaPeriodica'" class="dark-section tabela-periodica-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.tabelaPeriodica?.ativo">
+      <div class="dark-container">
+        <app-tabela-periodica
+          [token]="token"
+          [readOnly]="false">
+        </app-tabela-periodica>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section *ngIf="secaoId === 'mapaMental'" class="dark-section mapa-mental-main-section"
              [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaMental?.ativo">

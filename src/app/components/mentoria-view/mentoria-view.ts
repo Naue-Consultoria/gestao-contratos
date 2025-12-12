@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MentoriaService, Mentoria, MentoriaEncontro } from '../../services/mentoria.service';
@@ -10,7 +11,7 @@ import { DeleteConfirmationModalComponent } from '../delete-confirmation-modal/d
 @Component({
   selector: 'app-mentoria-view',
   standalone: true,
-  imports: [CommonModule, BreadcrumbComponent, DeleteConfirmationModalComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, DeleteConfirmationModalComponent],
   templateUrl: './mentoria-view.html',
   styleUrl: './mentoria-view.css'
 })
@@ -27,6 +28,12 @@ export class MentoriaView implements OnInit {
   showExpirarEncontroModal = false;
   encontroParaExpirar: MentoriaEncontro | null = null;
   isExpirandoEncontro = false;
+
+  // Modal de observações do encontro
+  showObservacoesModal = false;
+  encontroParaObservacoes: MentoriaEncontro | null = null;
+  observacoesTexto = '';
+  isSalvandoObservacoes = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -387,5 +394,55 @@ export class MentoriaView implements OnInit {
     }).catch(() => {
       this.toastr.error('Erro ao copiar link');
     });
+  }
+
+  // ===== MODAL DE OBSERVAÇÕES =====
+
+  abrirObservacoes(encontro: MentoriaEncontro): void {
+    this.encontroParaObservacoes = encontro;
+    this.observacoesTexto = encontro.observacoes || '';
+    this.showObservacoesModal = true;
+  }
+
+  fecharObservacoesModal(): void {
+    this.showObservacoesModal = false;
+    this.encontroParaObservacoes = null;
+    this.observacoesTexto = '';
+    this.isSalvandoObservacoes = false;
+  }
+
+  salvarObservacoes(): void {
+    if (!this.encontroParaObservacoes || !this.encontroParaObservacoes.id) return;
+
+    this.isSalvandoObservacoes = true;
+
+    this.mentoriaService.atualizarEncontro(this.encontroParaObservacoes.id, {
+      observacoes: this.observacoesTexto
+    }).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success('Observações salvas com sucesso!');
+          // Atualizar o encontro localmente
+          if (this.mentoria?.encontros) {
+            const encontroIndex = this.mentoria.encontros.findIndex(
+              e => e.id === this.encontroParaObservacoes?.id
+            );
+            if (encontroIndex !== -1) {
+              this.mentoria.encontros[encontroIndex].observacoes = this.observacoesTexto;
+            }
+          }
+          this.fecharObservacoesModal();
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao salvar observações:', error);
+        this.toastr.error('Erro ao salvar observações');
+        this.isSalvandoObservacoes = false;
+      }
+    });
+  }
+
+  temObservacoes(encontro: MentoriaEncontro): boolean {
+    return !!encontro.observacoes && encontro.observacoes.trim().length > 0;
   }
 }

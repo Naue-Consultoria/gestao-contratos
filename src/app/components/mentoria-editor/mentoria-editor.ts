@@ -186,10 +186,6 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
           const contrato = this.contratos.find(c => c.id === this.encontro!.contract_id);
           const clientId = contrato?.client_id;
 
-          console.log('📋 Encontro carregado:', this.encontro);
-          console.log('📋 Contrato encontrado:', contrato);
-          console.log('📋 Client ID:', clientId);
-
           // Filtrar contratos pelo cliente e habilitar o select
           if (clientId) {
             this.onClienteChange(clientId);
@@ -386,18 +382,10 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
   // ===== SALVAR ENCONTRO =====
 
   async salvarEncontro(): Promise<void> {
-    console.log('🔍 salvarEncontro chamado');
-    console.log('📝 Formulário válido?', this.encontroForm.valid);
-    console.log('📝 Valores do formulário:', this.encontroForm.value);
-    console.log('📝 Erros do formulário:', this.encontroForm.errors);
-
     if (this.encontroForm.invalid) {
       this.toastr.error('Preencha todos os campos obrigatórios');
       Object.keys(this.encontroForm.controls).forEach(key => {
         const control = this.encontroForm.get(key);
-        if (control?.invalid) {
-          console.log(`❌ Campo inválido: ${key}`, control.errors);
-        }
         control?.markAsTouched();
       });
       return;
@@ -407,7 +395,6 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
 
     try {
       if (this.isEditMode && this.encontroId) {
-        console.log('✏️ Modo edição - Atualizando encontro');
         // Atualizar encontro existente
         const response = await this.mentoriaService.atualizarEncontro(
           this.encontroId,
@@ -420,7 +407,6 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
           this.router.navigate(['/home/mentorias', this.encontroId, 'conteudo']);
         }
       } else {
-        console.log('➕ Modo criação - Criando nova mentoria');
         // CRIAR NOVA MENTORIA (não mais encontro individual)
         const formValue = this.encontroForm.value;
 
@@ -439,11 +425,7 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
           mentorado_email: formValue.mentorado_email || undefined
         };
 
-        console.log('📤 Enviando dados:', dados);
-
         const response = await this.mentoriaService.criarMentoria(dados).toPromise();
-
-        console.log('📥 Resposta recebida:', response);
 
         if (response?.success && response.data) {
           // Se houver foto selecionada, fazer upload para todos os encontros

@@ -85,7 +85,7 @@ interface MapaMentalData {
 
 // Tipos de blocos disponíveis
 type TipoBloco = 'visaoGeral' | 'mentoria' | 'testes' | 'proximosPassos' | 'referencias' |
-                  'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'analiseProblemas' | 'erros' | 'encerramento';
+                  'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'analiseProblemas' | 'erros' | 'tabelaPeriodica' | 'encerramento';
 
 interface BlocoEditor {
   id: string;
@@ -97,7 +97,7 @@ interface BlocoEditor {
 }
 
 interface SecaoReordenavel {
-  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'analiseProblemas' | 'erros';
+  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'analiseProblemas' | 'erros' | 'tabelaPeriodica';
   titulo: string;
   icone: string;
   ordem: number;
@@ -120,6 +120,7 @@ interface ConteudoMentoria {
   matrizRaci: { ativo: boolean };
   analiseProblemas: { ativo: boolean };
   erros: { ativo: boolean };
+  tabelaPeriodica: { ativo: boolean };
   encerramento: { ativo: boolean; conteudo: string };
   ordemSecoes?: string[]; // Nova propriedade para controlar a ordem
   blocosAtivos?: BlocoEditor[]; // Nova propriedade para controlar blocos ativos
@@ -175,6 +176,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { tipo: 'matrizRaci', titulo: 'Matriz RACI', icone: 'fa-table', descricao: 'Matriz de Responsabilidades RACI' },
     { tipo: 'analiseProblemas', titulo: 'Análise de Problemas', icone: 'fa-sitemap', descricao: 'Análise Sistêmica de Problemas' },
     { tipo: 'erros', titulo: 'Erros', icone: 'fa-exclamation-triangle', descricao: 'Análise e Gestão de Erros' },
+    { tipo: 'tabelaPeriodica', titulo: 'Tabela Periódica', icone: 'fa-th', descricao: '24 Forças de Caráter' },
     { tipo: 'encerramento', titulo: 'Encerramento', icone: 'fa-flag-checkered', descricao: 'Conclusão do encontro' }
   ];
 
@@ -223,8 +225,9 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     matrizRaci: { ativo: false },
     analiseProblemas: { ativo: false },
     erros: { ativo: false },
+    tabelaPeriodica: { ativo: false },
     encerramento: { ativo: true, conteudo: '' },
-    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros'] // Ordem padrão
+    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros', 'tabelaPeriodica'] // Ordem padrão
   };
 
   // Lista de seções reordenáveis
@@ -242,7 +245,8 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { id: 'controleHabitos', titulo: 'Controle de Hábitos', icone: 'fa-calendar-check', ordem: 10 },
     { id: 'matrizRaci', titulo: 'Matriz RACI', icone: 'fa-table', ordem: 11 },
     { id: 'analiseProblemas', titulo: 'Análise de Problemas', icone: 'fa-sitemap', ordem: 12 },
-    { id: 'erros', titulo: 'Erros', icone: 'fa-exclamation-triangle', ordem: 13 }
+    { id: 'erros', titulo: 'Erros', icone: 'fa-exclamation-triangle', ordem: 13 },
+    { id: 'tabelaPeriodica', titulo: 'Tabela Periódica', icone: 'fa-th', ordem: 14 }
   ];
 
   constructor(
@@ -382,10 +386,25 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
                 this.conteudo.matrizRaci = { ativo: false };
               }
 
+              // Adicionar analiseProblemas se não existir (retrocompatibilidade)
+              if (!this.conteudo.analiseProblemas) {
+                this.conteudo.analiseProblemas = { ativo: false };
+              }
+
+              // Adicionar erros se não existir (retrocompatibilidade)
+              if (!this.conteudo.erros) {
+                this.conteudo.erros = { ativo: false };
+              }
+
+              // Adicionar tabelaPeriodica se não existir (retrocompatibilidade)
+              if (!this.conteudo.tabelaPeriodica) {
+                this.conteudo.tabelaPeriodica = { ativo: false };
+              }
+
               // Adicionar ordem de seções se não existir (retrocompatibilidade)
               if (!this.conteudo.ordemSecoes) {
-                this.conteudo.ordemSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci'];
-              } else if (this.conteudo.ordemSecoes.length < 12) {
+                this.conteudo.ordemSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros', 'tabelaPeriodica'];
+              } else {
                 // Migrar para incluir novas ferramentas se ainda não estiverem
                 if (!this.conteudo.ordemSecoes.includes('ganhosPerdas')) {
                   this.conteudo.ordemSecoes.push('ganhosPerdas');
@@ -395,6 +414,15 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
                 }
                 if (!this.conteudo.ordemSecoes.includes('matrizRaci')) {
                   this.conteudo.ordemSecoes.push('matrizRaci');
+                }
+                if (!this.conteudo.ordemSecoes.includes('analiseProblemas')) {
+                  this.conteudo.ordemSecoes.push('analiseProblemas');
+                }
+                if (!this.conteudo.ordemSecoes.includes('erros')) {
+                  this.conteudo.ordemSecoes.push('erros');
+                }
+                if (!this.conteudo.ordemSecoes.includes('tabelaPeriodica')) {
+                  this.conteudo.ordemSecoes.push('tabelaPeriodica');
                 }
               }
             } catch (e) {
@@ -472,7 +500,8 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       'controleHabitos': { ativo: this.conteudo.controleHabitos.ativo, titulo: 'Controle de Hábitos', icone: 'fa-calendar-check' },
       'matrizRaci': { ativo: this.conteudo.matrizRaci.ativo, titulo: 'Matriz RACI', icone: 'fa-table' },
       'analiseProblemas': { ativo: this.conteudo.analiseProblemas.ativo, titulo: 'Análise de Problemas', icone: 'fa-sitemap' },
-      'erros': { ativo: this.conteudo.erros.ativo, titulo: 'Erros', icone: 'fa-exclamation-triangle' }
+      'erros': { ativo: this.conteudo.erros.ativo, titulo: 'Erros', icone: 'fa-exclamation-triangle' },
+      'tabelaPeriodica': { ativo: this.conteudo.tabelaPeriodica.ativo, titulo: 'Tabela Periódica', icone: 'fa-th' }
     };
 
     const secoesJaAdicionadas = new Set<string>();
@@ -631,6 +660,9 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       case 'erros':
         this.conteudo.erros.ativo = ativar;
         break;
+      case 'tabelaPeriodica':
+        this.conteudo.tabelaPeriodica.ativo = ativar;
+        break;
       case 'encerramento':
         this.conteudo.encerramento.ativo = ativar;
         break;
@@ -736,7 +768,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       this.conteudo.blocosAtivos = this.blocosAtivos;
 
       // Extrair ordem das seções
-      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros'];
+      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros', 'tabelaPeriodica'];
       this.conteudo.ordemSecoes = this.blocosAtivos
         .filter(bloco => secoesReordenaveis.includes(bloco.tipo))
         .sort((a, b) => a.ordem - b.ordem)
@@ -933,7 +965,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
 
       // 2.1 Extrair ordem das seções reordenáveis para a página pública
       // Filtra apenas as seções reordenáveis (não incluindo visaoGeral, mentoria e encerramento que têm posições fixas)
-      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros'];
+      const secoesReordenaveis = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros', 'tabelaPeriodica'];
       this.conteudo.ordemSecoes = this.blocosAtivos
         .filter(bloco => secoesReordenaveis.includes(bloco.tipo))
         .sort((a, b) => a.ordem - b.ordem)

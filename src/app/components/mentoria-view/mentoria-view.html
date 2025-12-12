@@ -177,6 +177,15 @@
           </button>
 
           <button
+            class="btn-action-card observacoes"
+            [class.has-content]="temObservacoes(encontro)"
+            (click)="abrirObservacoes(encontro)"
+            title="Observações do Encontro">
+            <i class="fas fa-sticky-note"></i>
+            <span>Observações</span>
+          </button>
+
+          <button
             class="btn-action-card warning"
             (click)="expirarEncontro(encontro)"
             title="Expirar Encontro">
@@ -230,4 +239,45 @@
     (onConfirm)="confirmarExpiracaoEncontro()"
     (onCancel)="fecharModalExpiracaoEncontro()">
   </app-delete-confirmation-modal>
+
+  <!-- Modal de Observações do Encontro -->
+  <div class="modal-overlay" *ngIf="showObservacoesModal" (click)="fecharObservacoesModal()">
+    <div class="modal-content observacoes-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header-minimal">
+        <div class="header-info">
+          <span class="header-badge">Encontro {{ encontroParaObservacoes?.numero_encontro }}</span>
+          <span class="header-nome">{{ encontroParaObservacoes?.mentorado_nome }}</span>
+        </div>
+        <button class="btn-close-minimal" (click)="fecharObservacoesModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body-focused">
+        <textarea
+          #observacoesInput
+          id="observacoes"
+          [(ngModel)]="observacoesTexto"
+          placeholder="Escreva suas observações sobre este encontro..."
+          class="observacoes-textarea-focused"
+        ></textarea>
+      </div>
+
+      <div class="modal-footer-minimal">
+        <span class="footer-hint">
+          <i class="fas fa-lock"></i>
+          Visível apenas para a equipe
+        </span>
+        <div class="footer-actions">
+          <button class="btn-cancel-minimal" (click)="fecharObservacoesModal()" [disabled]="isSalvandoObservacoes">
+            Cancelar
+          </button>
+          <button class="btn-save-minimal" (click)="salvarObservacoes()" [disabled]="isSalvandoObservacoes">
+            <i class="fas fa-spinner fa-spin" *ngIf="isSalvandoObservacoes"></i>
+            {{ isSalvandoObservacoes ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

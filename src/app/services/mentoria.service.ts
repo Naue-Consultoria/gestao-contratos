@@ -35,6 +35,7 @@ export interface MentoriaEncontro {
   data_encontro: string;
   visao_geral?: string;
   conteudo_html?: string;
+  observacoes?: string;
   unique_token: string;
   token_expira_em?: string;
   status: 'draft' | 'published' | 'archived';
@@ -836,4 +837,48 @@ export class MentoriaService {
       dados
     );
   }
+
+  // ===== TABELA PERIÓDICA - 24 FORÇAS DE CARÁTER =====
+
+  /**
+   * Obter Tabela Periódica (via token público)
+   */
+  obterTabelaPeriodica(token: string): Observable<ApiResponse<TabelaPeriodicaForcas>> {
+    return this.http.get<ApiResponse<TabelaPeriodicaForcas>>(
+      `${this.apiUrl}/publico/${token}/tabela-periodica`
+    );
+  }
+
+  /**
+   * Salvar Tabela Periódica (via token público)
+   */
+  salvarTabelaPeriodica(token: string, dados: {
+    nome_usuario?: string;
+    forcas_ranking: ForcaRanking[];
+  }): Observable<ApiResponse<TabelaPeriodicaForcas>> {
+    return this.http.post<ApiResponse<TabelaPeriodicaForcas>>(
+      `${this.apiUrl}/publico/${token}/tabela-periodica`,
+      dados
+    );
+  }
+}
+
+// ===== INTERFACES PARA TABELA PERIÓDICA =====
+
+export interface ForcaRanking {
+  id: string;
+  rank: number;
+  name: string;
+  category: 'sabedoria' | 'humanidade' | 'justica' | 'moderacao' | 'coragem' | 'transcendencia';
+  description?: string;
+}
+
+export interface TabelaPeriodicaForcas {
+  id: number;
+  encontro_token: string;
+  encontro_id: number;
+  nome_usuario?: string;
+  forcas_ranking: ForcaRanking[];
+  created_at: string;
+  updated_at: string;
 }
