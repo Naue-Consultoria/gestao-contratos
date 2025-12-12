@@ -83,7 +83,7 @@
             <th colspan="6" class="virtudes-header">VIRTUDES</th>
           </tr>
           <tr>
-            <th *ngFor="let cat of categoriasColunas" class="categoria-header" [style.background]="getCategoriaCor(cat)">
+            <th *ngFor="let cat of categoriasColunas" class="categoria-header" [style.background]="getCategoriaCorHeader(cat)">
               {{ getCategoriaNome(cat) | uppercase }}
             </th>
           </tr>
@@ -102,7 +102,7 @@
               [class.moderacao]="forcaId && hasRanking(forcaId) && getForcaById(forcaId)?.categoria === 'moderacao'"
               [class.coragem]="forcaId && hasRanking(forcaId) && getForcaById(forcaId)?.categoria === 'coragem'"
               [class.transcendencia]="forcaId && hasRanking(forcaId) && getForcaById(forcaId)?.categoria === 'transcendencia'"
-              [class.clickable]="forcaId && !readOnly"
+              [class.clickable]="forcaId && hasRanking(forcaId)"
               (click)="onCellClick(forcaId)"
             >
               <ng-container *ngIf="forcaId">
@@ -118,73 +118,44 @@
     </div>
 
     <!-- Acoes -->
-    <div class="actions" *ngIf="!readOnly">
-      <button class="btn-reset" (click)="resetarTabela()" [disabled]="forcasRanking.length === 0">
-        <i class="fas fa-undo"></i> Limpar Tudo
+    <div class="actions">
+      <button class="btn-export" (click)="exportarPdf()" [disabled]="forcasRanking.length === 0">
+        <i class="fas fa-file-pdf"></i> Exportar PDF
       </button>
-      <button class="btn-save" (click)="salvarDados()" [disabled]="isSaving || !hasChanges">
-        <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
-        <i class="fas fa-save" *ngIf="!isSaving"></i>
-        {{ isSaving ? 'Salvando...' : 'Salvar' }}
-      </button>
+      <ng-container *ngIf="!readOnly">
+        <button class="btn-reset" (click)="resetarTabela()" [disabled]="forcasRanking.length === 0">
+          <i class="fas fa-undo"></i> Limpar Tudo
+        </button>
+        <button class="btn-save" (click)="salvarDados()" [disabled]="isSaving || !hasChanges">
+          <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+          <i class="fas fa-save" *ngIf="!isSaving"></i>
+          {{ isSaving ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </ng-container>
     </div>
 
   </div>
 
-  <!-- Modal -->
+  <!-- Modal Simples - Apenas visualização da descrição -->
   <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-content modal-simple" (click)="$event.stopPropagation()">
       <div class="modal-header" [style.border-left-color]="forcaSelecionada ? getCategoriaCor(forcaSelecionada.categoria) : '#666'">
         <button class="modal-close" (click)="closeModal()">
           <i class="fas fa-times"></i>
         </button>
-        <div class="modal-category" [style.color]="forcaSelecionada ? getCategoriaCor(forcaSelecionada.categoria) : '#666'">
-          {{ forcaSelecionada ? getCategoriaNome(forcaSelecionada.categoria) : '' }}
-        </div>
         <div class="modal-title">
           <span class="modal-rank" [class.top5-rank]="rankSelecionado > 0 && rankSelecionado <= 5">
-            {{ rankSelecionado || '?' }}
+            {{ rankSelecionado }}
           </span>
           <span>{{ forcaSelecionada?.nome }}</span>
+        </div>
+        <div class="modal-category" [style.color]="forcaSelecionada ? getCategoriaCor(forcaSelecionada.categoria) : '#666'">
+          {{ forcaSelecionada ? getCategoriaNome(forcaSelecionada.categoria) : '' }}
         </div>
       </div>
 
       <div class="modal-body">
-        <p class="modal-description">{{ forcaSelecionada?.descricao }}</p>
-
-        <div class="modal-virtue" [style.background]="forcaSelecionada ? virtudes[forcaSelecionada.categoria].corBg : '#f8f9fa'">
-          <div class="virtue-icon" [style.background]="forcaSelecionada ? getCategoriaCor(forcaSelecionada.categoria) + '20' : '#eee'">
-            {{ forcaSelecionada ? virtudes[forcaSelecionada.categoria].icon : '' }}
-          </div>
-          <div class="virtue-info">
-            <div class="virtue-label">Virtude</div>
-            <div class="virtue-name">{{ forcaSelecionada ? getCategoriaNome(forcaSelecionada.categoria) : '' }}</div>
-          </div>
-        </div>
-
-        <div class="rank-input-section" *ngIf="!readOnly">
-          <label>Posicao no Ranking (1-24):</label>
-          <div class="rank-input-wrapper">
-            <input
-              type="number"
-              [(ngModel)]="rankSelecionado"
-              min="0"
-              max="24"
-              placeholder="0"
-            />
-            <span class="rank-hint">Deixe 0 para remover</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer" *ngIf="!readOnly">
-        <button class="btn-cancel" (click)="closeModal()">Cancelar</button>
-        <button class="btn-remove" (click)="removerRanking()" *ngIf="getRanking(forcaSelecionada?.id || '')">
-          <i class="fas fa-trash"></i> Remover
-        </button>
-        <button class="btn-confirm" (click)="salvarRanking()">
-          <i class="fas fa-check"></i> Confirmar
-        </button>
+        <p class="modal-description">{{ forcaSelecionada ? getDescricaoPersonalizada(forcaSelecionada.id) : '' }}</p>
       </div>
     </div>
   </div>

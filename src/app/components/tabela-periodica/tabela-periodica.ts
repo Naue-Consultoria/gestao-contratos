@@ -1,9 +1,11 @@
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { MentoriaService, ForcaRanking } from '../../services/mentoria.service';
 import * as pdfjsLib from 'pdfjs-dist';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 // Definição das 24 forças de caráter
 interface ForcaCarater {
@@ -53,12 +55,12 @@ export class TabelaPeriodicaComponent implements OnInit {
 
   // Virtudes (categorias)
   virtudes: { [key: string]: VirtudeDados } = {
-    sabedoria: { nome: 'Sabedoria', cor: '#F5B942', corBg: 'rgba(245, 185, 66, 0.1)', icon: '💡' },
-    humanidade: { nome: 'Humanidade', cor: '#F5D742', corBg: 'rgba(245, 215, 66, 0.1)', icon: '❤️' },
-    justica: { nome: 'Justiça', cor: '#5DADE2', corBg: 'rgba(93, 173, 226, 0.1)', icon: '⚖️' },
-    moderacao: { nome: 'Moderação', cor: '#58D68D', corBg: 'rgba(88, 214, 141, 0.1)', icon: '🧘' },
-    coragem: { nome: 'Coragem', cor: '#CD6155', corBg: 'rgba(205, 97, 85, 0.1)', icon: '🦁' },
-    transcendencia: { nome: 'Transcendência', cor: '#9B59B6', corBg: 'rgba(155, 89, 182, 0.1)', icon: '✨' }
+    sabedoria: { nome: 'Sabedoria', cor: '#D4A017', corBg: 'rgba(245, 185, 66, 0.1)', icon: '💡' },
+    humanidade: { nome: 'Humanidade', cor: '#C9A227', corBg: 'rgba(245, 215, 66, 0.1)', icon: '❤️' },
+    justica: { nome: 'Justiça', cor: '#2980B9', corBg: 'rgba(93, 173, 226, 0.1)', icon: '⚖️' },
+    moderacao: { nome: 'Moderação', cor: '#27AE60', corBg: 'rgba(88, 214, 141, 0.1)', icon: '🧘' },
+    coragem: { nome: 'Coragem', cor: '#C0392B', corBg: 'rgba(205, 97, 85, 0.1)', icon: '🦁' },
+    transcendencia: { nome: 'Transcendência', cor: '#8E44AD', corBg: 'rgba(155, 89, 182, 0.1)', icon: '✨' }
   };
 
   // As 24 forças de caráter organizadas
@@ -176,6 +178,17 @@ export class TabelaPeriodicaComponent implements OnInit {
     return ranking ? ranking.rank : null;
   }
 
+  // Obter descrição personalizada do PDF (ou descrição padrão)
+  getDescricaoPersonalizada(forcaId: string): string {
+    const ranking = this.forcasRanking.find(r => r.id === forcaId);
+    if (ranking && ranking.description) {
+      return ranking.description;
+    }
+    // Fallback para descrição padrão
+    const forca = this.getForcaById(forcaId);
+    return forca?.descricao || '';
+  }
+
   // Verificar se força está no top 5
   isTop5(forcaId: string): boolean {
     const rank = this.getRanking(forcaId);
@@ -187,9 +200,12 @@ export class TabelaPeriodicaComponent implements OnInit {
     return this.getRanking(forcaId) !== null;
   }
 
-  // Clique na célula
+  // Clique na célula - abre modal para visualizar descrição
   onCellClick(forcaId: string | null): void {
-    if (!forcaId || this.readOnly) return;
+    if (!forcaId) return;
+
+    // Só abre o modal se a força tiver ranking (foi importada do PDF)
+    if (!this.hasRanking(forcaId)) return;
 
     const forca = this.getForcaById(forcaId);
     if (forca) {
@@ -265,9 +281,22 @@ export class TabelaPeriodicaComponent implements OnInit {
     }
   }
 
-  // Obter cor da categoria
+  // Obter cor da categoria (para células)
   getCategoriaCor(categoria: string): string {
     return this.virtudes[categoria]?.cor || '#666';
+  }
+
+  // Obter cor escura da categoria (para headers)
+  getCategoriaCorHeader(categoria: string): string {
+    const coresHeader: { [key: string]: string } = {
+      sabedoria: '#8B6914',
+      humanidade: '#7D6608',
+      justica: '#1A5276',
+      moderacao: '#1D6F42',
+      coragem: '#7B241C',
+      transcendencia: '#5B2C6F'
+    };
+    return coresHeader[categoria] || '#444';
   }
 
   // Obter nome da categoria
@@ -427,7 +456,7 @@ export class TabelaPeriodicaComponent implements OnInit {
         // Limpar rankings anteriores
         this.forcasRanking = [];
 
-        // Adicionar as forças extraídas
+        // Adicionar as forças extraídas com a descrição personalizada do PDF
         forcasExtraidas.forEach(forca => {
           const forcaInterna = this.getForcaById(forca.id);
           if (forcaInterna) {
@@ -436,7 +465,8 @@ export class TabelaPeriodicaComponent implements OnInit {
               rank: forca.rank,
               name: forcaInterna.nome,
               category: forcaInterna.categoria,
-              description: forcaInterna.descricao
+              // Usar descrição do PDF se disponível, senão usar a padrão
+              description: forca.descricao || forcaInterna.descricao
             });
           }
         });
@@ -459,51 +489,139 @@ export class TabelaPeriodicaComponent implements OnInit {
     }
   }
 
-  private extrairForcasDoPdf(texto: string): { id: string; rank: number }[] {
-    const forcasExtraidas: { id: string; rank: number }[] = [];
+  private extrairForcasDoPdf(texto: string): { id: string; rank: number; descricao: string }[] {
+    const forcasExtraidas: { id: string; rank: number; descricao: string }[] = [];
 
-    // Regex para capturar o padrão: "1. Justiça" ou "1. Justiça JUSTICE"
-    // O padrão do VIA é: número + ponto + nome da força + categoria em inglês (opcional)
-    const regex = /(\d{1,2})\.\s*([A-Za-zÀ-ÿ\s]+?)(?:\s+(WISDOM|COURAGE|HUMANITY|JUSTICE|TEMPERANCE|TRANSCENDENCE)|\s*[:\n])/gi;
+    // Normalizar texto - remover quebras de linha extras
+    const textoNormalizado = texto.replace(/\r\n/g, ' ').replace(/\n/g, ' ').replace(/\s+/g, ' ');
 
-    let match;
-    while ((match = regex.exec(texto)) !== null) {
-      const rank = parseInt(match[1], 10);
-      const nomeForca = match[2].trim().toLowerCase();
+    console.log('Texto normalizado (primeiros 2000 chars):', textoNormalizado.substring(0, 2000));
 
-      // Buscar o ID interno da força
-      const forcaId = this.mapeamentoForcas[nomeForca];
+    // Lista de nomes de forças em português para buscar diretamente
+    const forcasParaBuscar = [
+      { nome: 'Justiça', id: 'justica' },
+      { nome: 'Integridade', id: 'integridade' },
+      { nome: 'Espiritualidade', id: 'espiritualidade' },
+      { nome: 'Gratidão', id: 'gratidao' },
+      { nome: 'Trabalho em Equipe', id: 'trabalhoequipe' },
+      { nome: 'Vitalidade', id: 'vitalidade' },
+      { nome: 'Generosidade', id: 'generosidade' },
+      { nome: 'Amor ao Aprendizado', id: 'aprendizado' },
+      { nome: 'Humildade', id: 'humildade' },
+      { nome: 'Perspectiva', id: 'perspectiva' },
+      { nome: 'Inteligência Social', id: 'inteligenciasocial' },
+      { nome: 'Bravura', id: 'bravura' },
+      { nome: 'Liderança', id: 'lideranca' },
+      { nome: 'Critério', id: 'menteaberta' },
+      { nome: 'Apreciação da Beleza', id: 'apreciacao' },
+      { nome: 'Prudência', id: 'prudencia' },
+      { nome: 'Humor', id: 'humor' },
+      { nome: 'Criatividade', id: 'criatividade' },
+      { nome: 'Perdão', id: 'perdao' },
+      { nome: 'Perseverança', id: 'perseveranca' },
+      { nome: 'Esperança', id: 'esperanca' },
+      { nome: 'Curiosidade', id: 'curiosidade' },
+      { nome: 'Amor', id: 'amor' },
+      { nome: 'Autocontrole', id: 'autocontrole' }
+    ];
 
-      if (forcaId && rank >= 1 && rank <= 24) {
-        // Verificar se já não foi adicionada (evitar duplicatas)
-        if (!forcasExtraidas.find(f => f.id === forcaId)) {
-          forcasExtraidas.push({ id: forcaId, rank });
-        }
-      }
-    }
+    // Para cada força, buscar no texto com regex específico
+    for (const forca of forcasParaBuscar) {
+      // Escapar caracteres especiais do nome para usar no regex
+      const nomeEscapado = forca.nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-    // Se não encontrou com o regex principal, tentar um padrão alternativo
-    if (forcasExtraidas.length === 0) {
-      // Padrão alternativo mais simples
-      const regexAlternativo = /(\d{1,2})\.\s*([A-Za-zÀ-ÿ\s]+)/g;
-      while ((match = regexAlternativo.exec(texto)) !== null) {
+      // Regex: "N. NomeDaForça CATEGORIA NomeDaForça: descrição..."
+      // Captura: (1) número, (2) descrição até próximo "N. " ou "©"
+      const regex = new RegExp(
+        `(\\d{1,2})\\.\\s*${nomeEscapado}\\s+(?:WISDOM|COURAGE|HUMANITY|JUSTICE|TEMPERANCE|TRANSCENDENCE)\\s+(?:[^:]+):\\s*(.+?)(?=\\s+\\d{1,2}\\.\\s+[A-Z]|©2|$)`,
+        'i'
+      );
+
+      const match = textoNormalizado.match(regex);
+      if (match) {
         const rank = parseInt(match[1], 10);
-        let nomeForca = match[2].trim().toLowerCase();
+        let descricao = match[2].trim().replace(/\s+/g, ' ');
 
-        // Limpar possíveis textos extras
-        nomeForca = nomeForca.split('\n')[0].trim();
-        nomeForca = nomeForca.replace(/\s+/g, ' ');
-
-        const forcaId = this.mapeamentoForcas[nomeForca];
-
-        if (forcaId && rank >= 1 && rank <= 24) {
-          if (!forcasExtraidas.find(f => f.id === forcaId)) {
-            forcasExtraidas.push({ id: forcaId, rank });
-          }
+        if (rank >= 1 && rank <= 24 && !forcasExtraidas.find(f => f.id === forca.id)) {
+          forcasExtraidas.push({ id: forca.id, rank, descricao });
+          console.log(`Encontrada: ${forca.nome} - Rank: ${rank}`);
         }
+      } else {
+        console.log(`Não encontrada: ${forca.nome}`);
       }
     }
+
+    console.log(`Total de forças extraídas: ${forcasExtraidas.length}`);
 
     return forcasExtraidas.sort((a, b) => a.rank - b.rank);
+  }
+
+  // ===== EXPORTAR PARA PDF =====
+
+  async exportarPdf(): Promise<void> {
+    try {
+      const element = document.querySelector('.tabela-wrapper') as HTMLElement;
+      if (!element) {
+        this.toastr.error('Erro ao gerar PDF');
+        return;
+      }
+
+      this.toastr.info('Gerando PDF da Tabela Periódica...', '', { timeOut: 2000 });
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+
+      const imgWidth = 297; // A4 landscape width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Adicionar título
+      pdf.setFontSize(20);
+      pdf.setTextColor(2, 44, 34);
+      pdf.text('Tabela Periódica - 24 Forças de Caráter', 148.5, 15, { align: 'center' });
+
+      // Adicionar legenda das virtudes
+      pdf.setFontSize(9);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text('Sabedoria | Humanidade | Justiça | Moderação | Coragem | Transcendência', 148.5, 23, { align: 'center' });
+
+      // Adicionar Top 5 se existir
+      const top5 = this.getTop5();
+      if (top5.length > 0) {
+        pdf.setFontSize(10);
+        pdf.setTextColor(14, 155, 113); // Verde do sistema
+        const top5Text = `Top 5: ${top5.map(f => `${f.rank}. ${f.name}`).join(' | ')}`;
+        pdf.text(top5Text, 148.5, 30, { align: 'center' });
+      }
+
+      // Adicionar imagem da tabela
+      const yPosition = top5.length > 0 ? 38 : 30;
+      const availableHeight = 210 - yPosition - 15;
+      const finalHeight = Math.min(imgHeight, availableHeight);
+      const finalWidth = (canvas.width * finalHeight) / canvas.height;
+
+      const imgData = canvas.toDataURL('image/png');
+      const xPosition = (297 - finalWidth) / 2;
+      pdf.addImage(imgData, 'PNG', xPosition, yPosition, finalWidth, finalHeight);
+
+      // Adicionar rodapé
+      pdf.setFontSize(8);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text(`Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 148.5, 200, { align: 'center' });
+
+      pdf.save('tabela_periodica_forcas.pdf');
+      this.toastr.success('PDF da Tabela Periódica gerado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      this.toastr.error('Erro ao gerar PDF da tabela');
+    }
   }
 }

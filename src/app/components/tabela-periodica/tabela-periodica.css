@@ -76,7 +76,7 @@
 
 /* Top 5 Summary */
 .top5-summary {
-  background: linear-gradient(135deg, #1e6076, #12b0a0);
+  background: var(--primary-green, #0e9b71);
   color: white;
   padding: 1.5rem;
   border-radius: 12px;
@@ -228,16 +228,21 @@
   position: absolute;
   top: 4px;
   left: 4px;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   background: #333;
   color: white;
   border-radius: 50%;
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
+  text-align: center;
+  line-height: 22px;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 .rank-badge.top5-badge {
@@ -290,7 +295,8 @@
 }
 
 .btn-reset,
-.btn-save {
+.btn-save,
+.btn-export {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -324,8 +330,20 @@
   border-color: #059669;
 }
 
+.btn-export {
+  background: #dc3545;
+  border: 2px solid #dc3545;
+  color: white;
+}
+
+.btn-export:hover:not(:disabled) {
+  background: #c82333;
+  border-color: #c82333;
+}
+
 .btn-reset:disabled,
-.btn-save:disabled {
+.btn-save:disabled,
+.btn-export:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -399,6 +417,7 @@
 
 .modal-header {
   padding: 1.5rem;
+  padding-right: 3.5rem;
   border-bottom: 1px solid #eee;
   position: relative;
   border-left: 4px solid #666;
@@ -406,10 +425,10 @@
 
 .modal-close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 32px;
-  height: 32px;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 28px;
+  height: 28px;
   border: none;
   background: #f0f0f0;
   border-radius: 50%;
@@ -419,6 +438,7 @@
   justify-content: center;
   color: #666;
   transition: all 0.2s;
+  font-size: 0.85rem;
 }
 
 .modal-close:hover {
@@ -470,7 +490,36 @@
   font-size: 0.95rem;
   line-height: 1.7;
   color: #444;
-  margin: 0 0 1.25rem;
+  margin: 0;
+}
+
+/* Modal Simples - apenas visualização */
+.modal-simple {
+  max-width: 420px;
+}
+
+.modal-simple .modal-header {
+  border-bottom: none;
+  padding-bottom: 0.75rem;
+}
+
+.modal-simple .modal-title {
+  margin-bottom: 0.25rem;
+}
+
+.modal-simple .modal-category {
+  margin-bottom: 0;
+  margin-top: 0.25rem;
+}
+
+.modal-simple .modal-body {
+  padding-top: 0.5rem;
+}
+
+.modal-simple .modal-description {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #333;
 }
 
 .modal-virtue {
@@ -622,9 +671,10 @@
   }
 
   .rank-badge {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     font-size: 0.5rem;
+    line-height: 18px;
   }
 
   .legend {
