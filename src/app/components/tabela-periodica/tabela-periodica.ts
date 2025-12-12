@@ -495,63 +495,66 @@ export class TabelaPeriodicaComponent implements OnInit {
     // Normalizar texto - remover quebras de linha extras
     const textoNormalizado = texto.replace(/\r\n/g, ' ').replace(/\n/g, ' ').replace(/\s+/g, ' ');
 
-    console.log('Texto normalizado (primeiros 2000 chars):', textoNormalizado.substring(0, 2000));
-
-    // Lista de nomes de forças em português para buscar diretamente
+    // Lista de nomes de forças em português (incluindo variações PT-BR e PT-PT)
     const forcasParaBuscar = [
-      { nome: 'Justiça', id: 'justica' },
-      { nome: 'Integridade', id: 'integridade' },
-      { nome: 'Espiritualidade', id: 'espiritualidade' },
-      { nome: 'Gratidão', id: 'gratidao' },
-      { nome: 'Trabalho em Equipe', id: 'trabalhoequipe' },
-      { nome: 'Vitalidade', id: 'vitalidade' },
-      { nome: 'Generosidade', id: 'generosidade' },
-      { nome: 'Amor ao Aprendizado', id: 'aprendizado' },
-      { nome: 'Humildade', id: 'humildade' },
-      { nome: 'Perspectiva', id: 'perspectiva' },
-      { nome: 'Inteligência Social', id: 'inteligenciasocial' },
-      { nome: 'Bravura', id: 'bravura' },
-      { nome: 'Liderança', id: 'lideranca' },
-      { nome: 'Critério', id: 'menteaberta' },
-      { nome: 'Apreciação da Beleza', id: 'apreciacao' },
-      { nome: 'Prudência', id: 'prudencia' },
-      { nome: 'Humor', id: 'humor' },
-      { nome: 'Criatividade', id: 'criatividade' },
-      { nome: 'Perdão', id: 'perdao' },
-      { nome: 'Perseverança', id: 'perseveranca' },
-      { nome: 'Esperança', id: 'esperanca' },
-      { nome: 'Curiosidade', id: 'curiosidade' },
-      { nome: 'Amor', id: 'amor' },
-      { nome: 'Autocontrole', id: 'autocontrole' }
+      { nomes: ['Justiça'], id: 'justica' },
+      { nomes: ['Integridade'], id: 'integridade' },
+      { nomes: ['Espiritualidade'], id: 'espiritualidade' },
+      { nomes: ['Gratidão'], id: 'gratidao' },
+      { nomes: ['Trabalho em Equipe', 'Trabalho em equipa'], id: 'trabalhoequipe' },
+      { nomes: ['Vitalidade'], id: 'vitalidade' },
+      { nomes: ['Generosidade'], id: 'generosidade' },
+      { nomes: ['Amor ao Aprendizado'], id: 'aprendizado' },
+      { nomes: ['Humildade'], id: 'humildade' },
+      { nomes: ['Perspectiva'], id: 'perspectiva' },
+      { nomes: ['Inteligência Social'], id: 'inteligenciasocial' },
+      { nomes: ['Bravura'], id: 'bravura' },
+      { nomes: ['Liderança'], id: 'lideranca' },
+      { nomes: ['Critério', 'Mente Aberta'], id: 'menteaberta' },
+      { nomes: ['Apreciação da Beleza', 'Apreciação da beleza e excelência'], id: 'apreciacao' },
+      { nomes: ['Prudência'], id: 'prudencia' },
+      { nomes: ['Humor'], id: 'humor' },
+      { nomes: ['Criatividade'], id: 'criatividade' },
+      { nomes: ['Perdão'], id: 'perdao' },
+      { nomes: ['Perseverança'], id: 'perseveranca' },
+      { nomes: ['Esperança'], id: 'esperanca' },
+      { nomes: ['Curiosidade'], id: 'curiosidade' },
+      { nomes: ['Amor'], id: 'amor' },
+      { nomes: ['Autocontrole', 'Auto-controle'], id: 'autocontrole' }
     ];
 
     // Para cada força, buscar no texto com regex específico
     for (const forca of forcasParaBuscar) {
-      // Escapar caracteres especiais do nome para usar no regex
-      const nomeEscapado = forca.nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (forcasExtraidas.find(f => f.id === forca.id)) continue; // Já encontrada
 
-      // Regex: "N. NomeDaForça CATEGORIA NomeDaForça: descrição..."
-      // Captura: (1) número, (2) descrição até próximo "N. " ou "©"
-      const regex = new RegExp(
-        `(\\d{1,2})\\.\\s*${nomeEscapado}\\s+(?:WISDOM|COURAGE|HUMANITY|JUSTICE|TEMPERANCE|TRANSCENDENCE)\\s+(?:[^:]+):\\s*(.+?)(?=\\s+\\d{1,2}\\.\\s+[A-Z]|©2|$)`,
-        'i'
-      );
+      for (const nome of forca.nomes) {
+        if (forcasExtraidas.find(f => f.id === forca.id)) break; // Já encontrada com outro nome
 
-      const match = textoNormalizado.match(regex);
-      if (match) {
-        const rank = parseInt(match[1], 10);
-        let descricao = match[2].trim().replace(/\s+/g, ' ');
+        // Escapar caracteres especiais do nome para usar no regex
+        const nomeEscapado = nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-        if (rank >= 1 && rank <= 24 && !forcasExtraidas.find(f => f.id === forca.id)) {
-          forcasExtraidas.push({ id: forca.id, rank, descricao });
-          console.log(`Encontrada: ${forca.nome} - Rank: ${rank}`);
+        // Regex mais flexível - captura descrição após a categoria (sem exigir "Nome:")
+        // Padrão: "N. NomeDaForça CATEGORIA descrição..."
+        const regex = new RegExp(
+          `(\\d{1,2})\\.\\s*${nomeEscapado}\\s+(WISDOM|COURAGE|HUMANITY|JUSTICE|TEMPERANCE|TRANSCENDENCE)\\s+(.+?)(?=\\s+\\d{1,2}\\.\\s+[A-Z]|©2|$)`,
+          'i'
+        );
+
+        const match = textoNormalizado.match(regex);
+        if (match) {
+          const rank = parseInt(match[1], 10);
+          let descricao = match[3].trim().replace(/\s+/g, ' ');
+
+          // Remover possível prefixo "NomeDaForça:" ou "Inclui X." do início da descrição
+          descricao = descricao.replace(/^[A-Za-zÀ-ÿ\s]+:\s*/i, '');
+          descricao = descricao.replace(/^Inclui[^.]+\.\s*/i, '');
+
+          if (rank >= 1 && rank <= 24) {
+            forcasExtraidas.push({ id: forca.id, rank, descricao });
+          }
         }
-      } else {
-        console.log(`Não encontrada: ${forca.nome}`);
       }
     }
-
-    console.log(`Total de forças extraídas: ${forcasExtraidas.length}`);
 
     return forcasExtraidas.sort((a, b) => a.rank - b.rank);
   }
