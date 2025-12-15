@@ -194,21 +194,31 @@
                 </td>
                 <td>
                   <div class="action-buttons-cell">
-                    <button class="action-btn"
-                            (click)="openCandidatoModal(vagaCandidato.candidato)"
-                            title="Editar Candidato">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="action-btn"
-                            (click)="openObservacoesModal(vagaCandidato.candidato)"
-                            title="Observações">
-                      <i class="fas fa-sticky-note"></i>
-                    </button>
-                    <button class="action-btn"
-                            (click)="openEntrevistaModal(vagaCandidato)"
-                            title="Agendar Entrevista">
-                      <i class="fas fa-calendar-plus"></i>
-                    </button>
+                    <div class="dropdown-menu-container">
+                      <button class="action-btn menu-btn"
+                              (click)="toggleCandidatoMenu(vagaCandidato.id, $event)"
+                              title="Menu de Ações">
+                        <i class="fas fa-ellipsis-v"></i>
+                      </button>
+                      <div class="dropdown-menu"
+                           *ngIf="openMenuId === vagaCandidato.id"
+                           [style.top.px]="menuPosition.top"
+                           [style.left.px]="menuPosition.left">
+                        <button class="dropdown-item" (click)="openCandidatoModal(vagaCandidato.candidato); closeMenu()">
+                          <i class="fas fa-edit"></i> Editar Candidato
+                        </button>
+                        <button class="dropdown-item" (click)="openObservacoesModal(vagaCandidato.candidato); closeMenu()">
+                          <i class="fas fa-sticky-note"></i> Observações
+                        </button>
+                        <button class="dropdown-item" (click)="openEntrevistaModal(vagaCandidato); closeMenu()">
+                          <i class="fas fa-calendar-plus"></i> Agendar Entrevista
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item delete" (click)="deleteCandidato(vagaCandidato); closeMenu()">
+                          <i class="fas fa-trash"></i> Excluir Candidato
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </td>
               </tr>

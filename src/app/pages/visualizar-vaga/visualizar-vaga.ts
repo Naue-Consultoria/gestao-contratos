@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -93,6 +93,10 @@ export class VisualizarVagaComponent implements OnInit {
   // Modal de observações
   isObservacoesModalVisible = false;
   selectedCandidatoForObservacoes: Candidato | null = null;
+
+  // Menu dropdown de ações do candidato
+  openMenuId: number | null = null;
+  menuPosition = { top: 0, left: 0 };
 
   // Formulários
   candidateForm = {
@@ -540,6 +544,64 @@ export class VisualizarVagaComponent implements OnInit {
       this.toastr.error('Erro ao atualizar status da entrevista');
       // Revert the select value
       event.target.value = latestInterview.status;
+    }
+  }
+
+  // Métodos para o menu dropdown de candidatos
+  toggleCandidatoMenu(vagaCandidatoId: number, event: MouseEvent) {
+    event.stopPropagation();
+
+    if (this.openMenuId === vagaCandidatoId) {
+      this.openMenuId = null;
+    } else {
+      const button = event.target as HTMLElement;
+      const rect = button.getBoundingClientRect();
+
+      // Posicionar o menu abaixo do botão, alinhado à direita
+      this.menuPosition = {
+        top: rect.bottom + 5,
+        left: rect.right - 180 // 180 é a largura mínima do menu
+      };
+
+      this.openMenuId = vagaCandidatoId;
+    }
+  }
+
+  closeMenu() {
+    this.openMenuId = null;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    // Fecha o menu se clicar fora dele
+    if (this.openMenuId !== null) {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.dropdown-menu-container')) {
+        this.openMenuId = null;
+      }
+    }
+  }
+
+  async deleteCandidato(vagaCandidato: VagaCandidato) {
+    const candidatoNome = vagaCandidato.candidato.nome;
+    const candidatoId = vagaCandidato.candidato.id;
+
+    if (!candidatoId) {
+      this.toastr.error('ID do candidato não encontrado');
+      return;
+    }
+
+    if (!confirm(`Tem certeza que deseja excluir o candidato "${candidatoNome}" desta vaga?`)) {
+      return;
+    }
+
+    try {
+      await firstValueFrom(this.vagaService.desvincularCandidato(this.vagaId, candidatoId));
+      this.toastr.success(`Candidato "${candidatoNome}" removido com sucesso`);
+      await this.loadCandidatos();
+    } catch (error) {
+      console.error('Erro ao excluir candidato:', error);
+      this.toastr.error('Erro ao excluir candidato. Tente novamente.');
     }
   }
 }

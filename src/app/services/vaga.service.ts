@@ -73,6 +73,10 @@ export class VagaService {
     return this.http.post(`${this.apiUrl}/${vagaId}/candidatos`, { candidato_id: candidatoId });
   }
 
+  desvincularCandidato(vagaId: number, candidatoId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${vagaId}/candidatos/${candidatoId}`);
+  }
+
   // ============================================================================
   // MÉTODOS PÚBLICOS (acesso via token)
   // ============================================================================
