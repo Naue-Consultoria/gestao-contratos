@@ -11,6 +11,7 @@ import { Entrevista, EntrevistaService } from '../../services/entrevista.service
 import { Candidato } from '../../services/candidato.service';
 import { VagaService } from '../../services/vaga.service';
 import { UserService } from '../../services/user.service';
+import { VagaExportService } from '../../services/vaga-export.service';
 import { DateNoTimezonePipe } from '../../pipes/date-no-timezone-pipe';
 import { firstValueFrom } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -170,7 +171,10 @@ export class VisualizarVagaComponent implements OnInit {
   private vagaService = inject(VagaService);
   private userService = inject(UserService);
   private entrevistaService = inject(EntrevistaService);
+  private vagaExportService = inject(VagaExportService);
   private toastr = inject(ToastrService);
+
+  isExporting = false;
 
   constructor(
     private router: Router,
@@ -346,8 +350,22 @@ export class VisualizarVagaComponent implements OnInit {
     this.router.navigate(['/home/recrutamento-selecao']);
   }
 
-  printVaga() {
-    window.print();
+  async exportToPdf() {
+    if (!this.vaga || this.isExporting) return;
+
+    try {
+      this.isExporting = true;
+      this.toastr.info('Gerando PDF...', 'Exportação');
+
+      await this.vagaExportService.exportToPdf(this.vaga, this.candidatos);
+
+      this.toastr.success('PDF exportado com sucesso!', 'Exportação');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      this.toastr.error('Erro ao exportar PDF. Tente novamente.', 'Erro');
+    } finally {
+      this.isExporting = false;
+    }
   }
 
   // Candidate Management Methods

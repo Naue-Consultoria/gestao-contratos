@@ -34,9 +34,10 @@
           <i class="fas fa-edit"></i>
           Editar
         </button>
-        <button class="btn-action-header" (click)="printVaga()" title="Imprimir Vaga">
-          <i class="fas fa-print"></i>
-          Imprimir
+        <button class="btn-action-header" (click)="exportToPdf()" title="Exportar PDF" [disabled]="isExporting">
+          <i class="fas fa-file-pdf" *ngIf="!isExporting"></i>
+          <i class="fas fa-spinner fa-spin" *ngIf="isExporting"></i>
+          {{ isExporting ? 'Exportando...' : 'Exportar PDF' }}
         </button>
         <button class="btn-action-header delete" (click)="deleteVaga()" title="Excluir Vaga">
           <i class="fas fa-trash"></i>
