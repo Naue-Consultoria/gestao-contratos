@@ -211,6 +211,14 @@
         <i *ngIf="isSaving" class="fas fa-spinner fa-spin"></i>
         {{ isSaving ? 'Salvando...' : 'Salvar Classificação' }}
       </button>
+      <button
+        class="btn-exportar-pdf"
+        (click)="exportarPdf()"
+        [disabled]="isExporting">
+        <i *ngIf="!isExporting" class="fas fa-file-pdf"></i>
+        <i *ngIf="isExporting" class="fas fa-spinner fa-spin"></i>
+        {{ isExporting ? 'Exportando...' : 'Exportar PDF' }}
+      </button>
     </div>
 
     <!-- Footer -->

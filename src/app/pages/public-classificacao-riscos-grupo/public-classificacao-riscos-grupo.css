@@ -4,6 +4,73 @@
 /* ===== CONTAINER PRINCIPAL ===== */
 .public-classificacao-riscos-container {
   /* Herda estilos do public-planejamento-view */
+  background: #f7fafc;
+  min-height: 100vh;
+}
+
+/* ===== LOADING STATE ===== */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background: #f7fafc;
+}
+
+.loading-container .spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #003b2b;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-container p {
+  color: #003b2b;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* ===== ERROR STATE ===== */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background: #f7fafc;
+  text-align: center;
+}
+
+.error-container .error-icon {
+  font-size: 4rem;
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.error-container h2 {
+  color: #003b2b;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.error-container p {
+  color: #003b2b;
+  font-size: 1rem;
+  margin: 0;
+  max-width: 400px;
 }
 
 /* ===== BADGE DO GRUPO ===== */
@@ -350,6 +417,41 @@
   font-size: 1.25rem;
 }
 
+.btn-exportar-pdf {
+  padding: 1.25rem 3rem;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+}
+
+.btn-exportar-pdf:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e04555 0%, #d32535 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+.btn-exportar-pdf:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-exportar-pdf:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-exportar-pdf i {
+  font-size: 1.25rem;
+}
+
 /* ===== FOOTER ===== */
 .footer {
   background: linear-gradient(135deg, #003b2b 0%, #002821 100%);
@@ -401,7 +503,12 @@
     text-align: center;
   }
 
-  .btn-salvar {
+  .action-section {
+    flex-direction: column;
+  }
+
+  .btn-salvar,
+  .btn-exportar-pdf {
     width: 100%;
     justify-content: center;
   }
