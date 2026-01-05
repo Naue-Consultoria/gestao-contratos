@@ -31,6 +31,21 @@ export interface UserAssignment {
   role: 'owner' | 'editor' | 'viewer';
 }
 
+export interface RoutineListItem {
+  id: number;
+  contractNumber: string;
+  clientName: string;
+  clientId: number;
+  type: string;
+  status: string;
+  servicesCount: number;
+  progress: {
+    completed: number;
+    total: number;
+    percentage: number;
+  };
+}
+
 export interface ApiContractInstallment {
   id: number;
   installment_number: number;
@@ -238,6 +253,16 @@ export class ContractService {
 
   getContractsByClient(clientId: number): Observable<{ contracts: any[] }> {
     return this.http.get<{ contracts: any[] }>(`${this.API_URL}/client/${clientId}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  /**
+   * Endpoint otimizado para página de rotinas
+   * Retorna apenas dados necessários para listagem
+   */
+  getRoutines(): Observable<{ routines: RoutineListItem[]; total: number }> {
+    return this.http.get<{ routines: RoutineListItem[]; total: number }>(`${this.API_URL}/routines`, {
       headers: this.getAuthHeaders()
     });
   }

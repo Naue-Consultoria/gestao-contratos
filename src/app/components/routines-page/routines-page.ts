@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
-import { ContractService, ApiContract } from '../../services/contract';
-import { ClientService } from '../../services/client';
+import { ContractService, RoutineListItem } from '../../services/contract';
 import { AuthService } from '../../services/auth';
 
 interface ContractRoutine {
@@ -20,7 +19,6 @@ interface ContractRoutine {
     total: number;
     percentage: number;
   };
-  raw: ApiContract;
 }
 
 @Component({
@@ -32,7 +30,6 @@ interface ContractRoutine {
 })
 export class RoutinesPageComponent implements OnInit {
   private contractService = inject(ContractService);
-  private clientService = inject(ClientService);
   private authService = inject(AuthService);
   private router = inject(Router);
 
@@ -81,42 +78,22 @@ export class RoutinesPageComponent implements OnInit {
   private async loadData() {
     try {
       this.isLoading = true;
-      // O backend já filtra automaticamente:
-      // - Admin: vê todos os contratos
-      // - Usuário comum: vê apenas contratos aos quais está atribuído
-      const response = await this.contractService.getContracts().toPromise();
-      
-      if (response && response.contracts) {
-        // Carregar clientes para mapear nomes
-        const clientsResponse = await this.clientService.getClients().toPromise();
-        const clientsMap = new Map();
-        
-        if (clientsResponse && clientsResponse.clients) {
-          clientsResponse.clients.forEach((client: any) => {
-            // Priorizar nome fantasia para PJ, depois nome completo para PF
-            const name = client.trade_name || client.company_name || client.full_name || 'Cliente sem nome';
-            clientsMap.set(client.id, name);
-          });
-        }
 
-        this.contracts = response.contracts
-          .filter((contract: ApiContract) =>
-            contract.status === 'active' &&
-            contract.type !== 'Recrutamento & Seleção'
-          )
-          .map((contract: ApiContract) => ({
-            id: contract.id,
-            contractNumber: contract.contract_number,
-            clientName: clientsMap.get(contract.client?.id) || 'Cliente não encontrado',
-            type: this.getTypeLabel(contract.type),
-            status: contract.status,
-            statusColor: this.getStatusColor(contract.status),
-            servicesCount: contract.contract_services?.length || 0,
-            progress: this.calculateProgress(contract),
-            raw: contract
-          }));
+      // Usar endpoint otimizado que retorna apenas dados necessários
+      const response = await this.contractService.getRoutines().toPromise();
 
-        
+      if (response && response.routines) {
+        this.contracts = response.routines.map((routine: RoutineListItem) => ({
+          id: routine.id,
+          contractNumber: routine.contractNumber,
+          clientName: routine.clientName,
+          type: this.getTypeLabel(routine.type),
+          status: routine.status,
+          statusColor: this.getStatusColor(routine.status),
+          servicesCount: routine.servicesCount,
+          progress: routine.progress
+        }));
+
         this.filteredContracts = [...this.contracts];
         this.prepareClientsList();
       }
@@ -155,62 +132,6 @@ export class RoutinesPageComponent implements OnInit {
       'suspended': '#f59e0b'
     };
     return colors[status] || '#6b7280';
-  }
-
-
-  private calculateProgress(contract: ApiContract): { completed: number; total: number; percentage: number } {
-    if (!contract.contract_services || contract.contract_services.length === 0) {
-      return { completed: 0, total: 0, percentage: 0 };
-    }
-
-    // Usar TODOS os serviços (incluindo internos)
-    const allServices = contract.contract_services;
-
-    if (allServices.length === 0) {
-      return { completed: 0, total: 0, percentage: 0 };
-    }
-
-    let totalSteps = 0;
-    let completedSteps = 0;
-
-    // Usar o progresso calculado pelo backend (já vem nas contract_service_stages específicas)
-    allServices.forEach(service => {
-      // Se o backend retornou progresso calculado, usar esse
-      if ((service as any).progress) {
-        const progress = (service as any).progress;
-        totalSteps += progress.totalStages;
-        completedSteps += progress.completedStages;
-
-        // Log temporário para debug do contrato 145 (0039)
-        if (contract.id === 145) {
-          console.log(`🔍 [Frontend] Contrato 145 - Serviço:`, service.service?.name, progress);
-        }
-      }
-      // Fallback: se não tem progresso do backend, usar lógica antiga
-      else if (service.service?.service_stages && service.service.service_stages.length > 0) {
-        totalSteps += service.service.service_stages.length;
-        completedSteps += service.service.service_stages.filter((stage: any) => stage.status === 'completed').length;
-      } else {
-        // Se não tem etapas específicas, usar o status do serviço como uma etapa única
-        totalSteps += 1;
-        if (service.status === 'completed') {
-          completedSteps += 1;
-        }
-      }
-    });
-
-    const percentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-
-    // Log do resultado final para contrato 145
-    if (contract.id === 145) {
-      console.log(`🔍 [Frontend] Contrato 145 TOTAL:`, { totalSteps, completedSteps, percentage });
-    }
-
-    return {
-      completed: completedSteps,
-      total: totalSteps,
-      percentage
-    };
   }
 
   onSortChange() {
