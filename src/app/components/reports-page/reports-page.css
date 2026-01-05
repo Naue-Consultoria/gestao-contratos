@@ -138,6 +138,10 @@
   background: linear-gradient(135deg, var(--primary-green, #00b894) 0%, #088a5b 100%);
 }
 
+.card-icon.active-clients {
+  background: linear-gradient(135deg, var(--primary-green, #00b894) 0%, #088a5b 100%);
+}
+
 
 /* Body do Card */
 .card-body {

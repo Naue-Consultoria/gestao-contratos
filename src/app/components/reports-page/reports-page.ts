@@ -39,6 +39,7 @@ export class ReportsPage implements OnInit {
   clientReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
   servicesReport: ReportConfig = { clientId: '', serviceId: '', format: 'pdf', isLoading: false };
   serviceRoutinesReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
+  activeClientsReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
 
   constructor(
     private reportService: ReportService,
@@ -108,7 +109,7 @@ export class ReportsPage implements OnInit {
     });
   }
 
-  generateReport(reportType: 'monthly' | 'client' | 'services' | 'financial' | 'serviceRoutines' | 'commercial', config: ReportConfig | GeneralReportConfig) {
+  generateReport(reportType: 'monthly' | 'client' | 'services' | 'financial' | 'serviceRoutines' | 'commercial' | 'activeClients', config: ReportConfig | GeneralReportConfig) {
     if ((reportType === 'client' || reportType === 'serviceRoutines') && !config.clientId) {
       this.toastr.warning('Por favor, selecione um cliente.');
       return;
@@ -165,6 +166,10 @@ export class ReportsPage implements OnInit {
       case 'commercial':
         fileName = `relatorio_comercial_${year}_${month}`;
         reportObservable = this.reportService.generateCommercialReport(requestData);
+        break;
+      case 'activeClients':
+        fileName = `relatorio_clientes_ativos_${year}_${month}`;
+        reportObservable = this.reportService.generateActiveClientsReport(requestData);
         break;
     }
 

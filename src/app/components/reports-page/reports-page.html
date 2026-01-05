@@ -9,6 +9,56 @@
 <!-- Reports Grid -->
 <div class="reports-grid">
   
+  <!-- Relatório de Clientes Ativos -->
+  <div class="report-card" [class.is-loading]="activeClientsReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon active-clients">
+        <i class="fas fa-users"></i>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h3 class="card-title">Clientes Ativos</h3>
+      <p class="card-description">
+        Lista completa de clientes com contratos ativos e seus valores
+      </p>
+
+      <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button
+              class="format-btn"
+              [class.active]="activeClientsReport.format === 'pdf'"
+              (click)="activeClientsReport.format = 'pdf'"
+              [disabled]="activeClientsReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button
+              class="format-btn"
+              [class.active]="activeClientsReport.format === 'excel'"
+              (click)="activeClientsReport.format = 'excel'"
+              [disabled]="activeClientsReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button
+        class="btn-generate"
+        (click)="generateReport('activeClients', activeClientsReport)"
+        [disabled]="activeClientsReport.isLoading">
+        <i class="fas" [class.fa-download]="!activeClientsReport.isLoading" [class.fa-spinner]="activeClientsReport.isLoading" [class.fa-spin]="activeClientsReport.isLoading"></i>
+        <span>{{ activeClientsReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Relatório Mensal -->
   <div class="report-card" [class.is-loading]="monthlyReport.isLoading">
     <div class="card-header">
@@ -16,27 +66,27 @@
         <i class="fas fa-calendar-alt"></i>
       </div>
     </div>
-    
+
     <div class="card-body">
       <h3 class="card-title">Relatório Mensal</h3>
       <p class="card-description">
         Resumo completo das atividades e contratos do mês atual
       </p>
-      
+
       <div class="card-controls">
         <div class="control-group">
           <label class="control-label">Formato de Exportação</label>
           <div class="format-selector">
-            <button 
-              class="format-btn" 
+            <button
+              class="format-btn"
               [class.active]="monthlyReport.format === 'pdf'"
               (click)="monthlyReport.format = 'pdf'"
               [disabled]="monthlyReport.isLoading">
               <i class="fas fa-file-pdf"></i>
               PDF
             </button>
-            <button 
-              class="format-btn" 
+            <button
+              class="format-btn"
               [class.active]="monthlyReport.format === 'excel'"
               (click)="monthlyReport.format = 'excel'"
               [disabled]="monthlyReport.isLoading">
@@ -47,9 +97,9 @@
         </div>
       </div>
     </div>
-    
+
     <div class="card-footer">
-      <button 
+      <button
         class="btn-generate"
         (click)="generateReport('monthly', monthlyReport)"
         [disabled]="monthlyReport.isLoading">

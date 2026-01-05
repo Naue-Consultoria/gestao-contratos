@@ -99,6 +99,13 @@ export class ReportService {
     });
   }
 
+  generateActiveClientsReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/active-clients`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
   // Método para buscar vagas por cliente
   getVagasByClient(clientId: string): Observable<any> {
     return this.http.get(`${environment.apiUrl}/vagas/by-client/${clientId}`, {
