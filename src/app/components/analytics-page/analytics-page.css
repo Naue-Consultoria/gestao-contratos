@@ -600,6 +600,13 @@
   margin: 0;
 }
 
+.chart-filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .chart-filter {
 }
 

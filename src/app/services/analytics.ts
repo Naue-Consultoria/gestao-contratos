@@ -143,6 +143,7 @@ export interface ContractCompletionData {
   contractNumber: string;
   clientId: number;
   clientName: string;
+  type: string;
   totalServices: number;
   completedServices: number;
   completionPercentage: number;

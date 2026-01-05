@@ -44,6 +44,14 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   selectedClientId: number | null = null;
   availableClients: {id: number, name: string}[] = [];
 
+  // Filtro de tipo de contrato
+  selectedContractType: string | null = null;
+  availableContractTypes: {value: string, label: string}[] = [
+    { value: 'Full', label: 'Full' },
+    { value: 'Pontual', label: 'Pontual' },
+    { value: 'Individual', label: 'Individual' }
+  ];
+
   // Dados de analytics
   analyticsData: AnalyticsData | null = null;
   revenueProgress: number = 0;
@@ -148,8 +156,8 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     
     this.initConversionGauge();
     this.initContractsDonut();
-    this.initContractCompletionChart(); // Novo gráfico de conclusão por contratos
-    this.initServicesByUserChart();
+    this.initContractCompletionChart();
+    this.initContractsByTypeChart();
     this.initTopServicesChart();
   }
 
@@ -320,40 +328,68 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * Gráfico de distribuição de serviços por usuário
+   * Gráfico de contratos por tipo
    */
-  private initServicesByUserChart() {
-    const canvas = document.getElementById('servicesByUserChart') as HTMLCanvasElement;
-    if (!canvas || !this.analyticsData?.servicesByUser || this.analyticsData.servicesByUser.length === 0) return;
+  private initContractsByTypeChart() {
+    const canvas = document.getElementById('contractsByTypeChart') as HTMLCanvasElement;
+    if (!canvas || !this.analyticsData?.contracts?.byType) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const data = this.analyticsData.servicesByUser.slice(0, 8); // Top 8 usuários
+    const byType = this.analyticsData.contracts.byType;
+
+    // Filtrar tipos com valores > 0 e excluir Recrutamento & Seleção
+    const typeConfig: {[key: string]: {label: string, color: string}} = {
+      'Full': { label: 'Full', color: '#065f46' },
+      'Pontual': { label: 'Pontual', color: '#0A8060' },
+      'Individual': { label: 'Individual', color: '#10b981' }
+    };
+
+    const labels: string[] = [];
+    const data: number[] = [];
+    const colors: string[] = [];
+
+    Object.entries(typeConfig).forEach(([type, config]) => {
+      const value = byType[type] || 0;
+      if (value > 0) {
+        labels.push(config.label);
+        data.push(value);
+        colors.push(config.color);
+      }
+    });
+
     if (data.length === 0) return;
-    const labels = data.map((user: any) => user.userName);
-    const values = data.map((user: any) => user.totalServices);
 
     const Chart = (window as any).Chart;
-    this.charts['servicesByUserChart'] = new Chart(ctx, {
-      type: 'bar',
+    this.charts['contractsByTypeChart'] = new Chart(ctx, {
+      type: 'doughnut',
       data: {
         labels,
         datasets: [{
-          label: 'Serviços',
-          data: values,
-          backgroundColor: data.map(() => '#065f46'), // Todas as barras em verde mais escuro
+          data,
+          backgroundColor: colors,
           borderColor: '#ffffff',
-          borderWidth: 2,
-          borderRadius: 8,
-          borderSkipped: false,
+          borderWidth: 3,
+          hoverOffset: 8
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: '60%',
         plugins: {
-          legend: { display: false },
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              usePointStyle: true,
+              pointStyle: 'circle',
+              font: {
+                size: 12
+              }
+            }
+          },
           tooltip: {
             backgroundColor: '#fff',
             titleColor: '#374151',
@@ -362,27 +398,11 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
             borderWidth: 1,
             callbacks: {
               label: (context: any) => {
-                const user = data[context.dataIndex];
-                return `${user.totalServices} serviços`;
+                const total = data.reduce((sum, val) => sum + val, 0);
+                const percentage = Math.round((context.parsed / total) * 100);
+                return `${context.label}: ${context.parsed} (${percentage}%)`;
               }
             }
-          }
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { 
-              color: '#6b7280',
-              maxRotation: 45
-            }
-          },
-          y: {
-            grid: { color: 'rgba(0, 0, 0, 0.05)' },
-            ticks: { 
-              color: '#6b7280',
-              stepSize: 1
-            },
-            beginAtZero: true
           }
         }
       }
@@ -522,12 +542,19 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * Filtrar contratos por cliente e aplicar lógica de 0% de conclusão
+   * Filtrar contratos por cliente, tipo e aplicar lógica de 0% de conclusão
    */
   private getFilteredContractData(): ContractCompletionData[] {
     if (!this.analyticsData?.contractCompletionData) return [];
 
     let filteredData = this.analyticsData.contractCompletionData;
+
+    // Filtrar por tipo de contrato se selecionado
+    if (this.selectedContractType !== null) {
+      filteredData = filteredData.filter(
+        contract => contract.type === this.selectedContractType
+      );
+    }
 
     // Filtrar por cliente se selecionado
     if (this.selectedClientId !== null) {
@@ -559,6 +586,31 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   onClientFilterChange(clientId: number | null) {
     this.selectedClientId = clientId;
+    this.refreshContractCompletionChart();
+  }
+
+  /**
+   * Alterar filtro de tipo de contrato via evento
+   */
+  onContractTypeFilterChangeEvent(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    const value = selectElement.value;
+    const contractType = value ? value : null;
+    this.onContractTypeFilterChange(contractType);
+  }
+
+  /**
+   * Alterar filtro de tipo de contrato
+   */
+  onContractTypeFilterChange(contractType: string | null) {
+    this.selectedContractType = contractType;
+    this.refreshContractCompletionChart();
+  }
+
+  /**
+   * Reinicializar o gráfico de contratos após mudança de filtro
+   */
+  private refreshContractCompletionChart() {
     // Reinicializar apenas o gráfico de contratos
     if (this.charts['contractCompletionChart']) {
       this.charts['contractCompletionChart'].destroy();
