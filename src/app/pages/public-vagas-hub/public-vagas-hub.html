@@ -188,60 +188,58 @@
         <div class="vaga-card premium aberta" *ngFor="let vaga of getVagasAbertas()">
           <!-- Card Header -->
           <div class="vaga-card-header">
-            <h3 class="vaga-title">{{ vaga.cargo }}</h3>
+            <div class="header-top">
+              <h3 class="vaga-title">{{ vaga.cargo }}</h3>
+              <span class="vaga-data-abertura">
+                <i class="fas fa-calendar-alt"></i>
+                {{ formatDate(vaga.data_abertura) }}
+              </span>
+            </div>
             <span class="vaga-tipo-badge">
               <i class="fas fa-tag"></i>
               {{ getTipoCargoLabel(vaga.tipo_cargo) }}
             </span>
           </div>
 
-          <!-- Highlights - Status e Candidatos em DESTAQUE -->
-          <div class="vaga-highlights-premium">
-            <div class="highlight-box status-box" [ngClass]="getStatusClass(vaga.status)">
-              <div class="highlight-icon-wrapper">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
+          <!-- Info Grid Completo -->
+          <div class="vaga-info-section">
+            <div class="info-row-main">
+              <div class="info-stat status-stat" [ngClass]="getStatusClass(vaga.status)">
+                <div class="stat-icon">
+                  <i class="fas fa-circle-notch"></i>
+                </div>
+                <div class="stat-details">
+                  <span class="stat-label">Status</span>
+                  <span class="stat-value">{{ getStatusLabel(vaga.status) }}</span>
+                </div>
               </div>
-              <div class="highlight-info">
-                <span class="highlight-label">Status Atual</span>
-                <span class="highlight-value-big">{{ getStatusLabel(vaga.status) }}</span>
+
+              <div class="info-stat candidatos-stat">
+                <div class="stat-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-details">
+                  <span class="stat-label">Candidatos</span>
+                  <span class="stat-value">{{ vaga.total_candidatos || 0 }}</span>
+                </div>
               </div>
             </div>
 
-            <div class="highlight-box candidatos-box">
-              <div class="highlight-icon-wrapper candidatos">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </div>
-              <div class="highlight-info">
-                <span class="highlight-label">Candidatos</span>
-                <span class="highlight-value-big candidatos-count">{{ vaga.total_candidatos || 0 }}</span>
+            <div class="info-row-secondary" *ngIf="!vaga.observacoes || !vaga.observacoes.trim()">
+              <div class="info-detail">
+                <i class="fas fa-sync-alt"></i>
+                <span class="detail-text">{{ getTipoAberturaLabel(vaga.tipo_abertura) }}</span>
               </div>
             </div>
           </div>
 
-          <!-- Info List -->
-          <div class="vaga-info-grid">
-            <div class="info-item">
-              <i class="fas fa-calendar-plus"></i>
-              <div class="info-content">
-                <span class="info-label">Abertura</span>
-                <span class="info-value">{{ formatDate(vaga.data_abertura) }}</span>
-              </div>
+          <!-- Observações -->
+          <div class="vaga-observacoes" *ngIf="vaga.observacoes && vaga.observacoes.trim()">
+            <div class="observacoes-header">
+              <i class="fas fa-info-circle"></i>
+              <span>Observações</span>
             </div>
-            <div class="info-item">
-              <i class="fas fa-sync-alt"></i>
-              <div class="info-content">
-                <span class="info-label">Tipo</span>
-                <span class="info-value">{{ getTipoAberturaLabel(vaga.tipo_abertura) }}</span>
-              </div>
-            </div>
+            <p class="observacoes-text">{{ vaga.observacoes }}</p>
           </div>
 
           <!-- Timeline de Histórico -->
@@ -297,53 +295,52 @@
         <div class="vaga-card premium andamento" *ngFor="let vaga of getVagasEmAndamento()">
           <!-- Card Header -->
           <div class="vaga-card-header">
-            <h3 class="vaga-title">{{ vaga.cargo }}</h3>
+            <div class="header-top">
+              <h3 class="vaga-title">{{ vaga.cargo }}</h3>
+              <span class="vaga-data-abertura">
+                <i class="fas fa-calendar-alt"></i>
+                {{ formatDate(vaga.data_abertura) }}
+              </span>
+            </div>
             <span class="vaga-tipo-badge">
               <i class="fas fa-tag"></i>
               {{ getTipoCargoLabel(vaga.tipo_cargo) }}
             </span>
           </div>
 
-          <!-- Highlights - Status e Candidatos -->
-          <div class="vaga-highlights-premium">
-            <div class="highlight-box status-box" [ngClass]="getStatusClass(vaga.status)">
-              <div class="highlight-icon-wrapper">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
+          <!-- Info Grid Completo -->
+          <div class="vaga-info-section">
+            <div class="info-row-main">
+              <div class="info-stat status-stat" [ngClass]="getStatusClass(vaga.status)">
+                <div class="stat-icon">
+                  <i class="fas fa-circle-notch"></i>
+                </div>
+                <div class="stat-details">
+                  <span class="stat-label">Status</span>
+                  <span class="stat-value">{{ getStatusLabel(vaga.status) }}</span>
+                </div>
               </div>
-              <div class="highlight-info">
-                <span class="highlight-label">Status Atual</span>
-                <span class="highlight-value-big">{{ getStatusLabel(vaga.status) }}</span>
+
+              <div class="info-stat candidatos-stat">
+                <div class="stat-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-details">
+                  <span class="stat-label">Candidatos</span>
+                  <span class="stat-value">{{ vaga.total_candidatos || 0 }}</span>
+                </div>
               </div>
             </div>
 
-            <div class="highlight-box candidatos-box">
-              <div class="highlight-icon-wrapper candidatos">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </div>
-              <div class="highlight-info">
-                <span class="highlight-label">Candidatos</span>
-                <span class="highlight-value-big candidatos-count">{{ vaga.total_candidatos || 0 }}</span>
-              </div>
-            </div>
           </div>
 
-          <!-- Info Grid -->
-          <div class="vaga-info-grid">
-            <div class="info-item">
-              <i class="fas fa-calendar-plus"></i>
-              <div class="info-content">
-                <span class="info-label">Abertura</span>
-                <span class="info-value">{{ formatDate(vaga.data_abertura) }}</span>
-              </div>
+          <!-- Observações -->
+          <div class="vaga-observacoes" *ngIf="vaga.observacoes && vaga.observacoes.trim()">
+            <div class="observacoes-header">
+              <i class="fas fa-info-circle"></i>
+              <span>Observações</span>
             </div>
+            <p class="observacoes-text">{{ vaga.observacoes }}</p>
           </div>
 
           <!-- Timeline -->
@@ -434,7 +431,7 @@
       <div class="footer-content">
         <img src="/logoNaue.png" alt="NAUE Consultoria" class="footer-logo-img">
         <div class="footer-text">
-          <p class="footer-sub">Todos os direitos reservados © 2025 NAUE Consultoria</p>
+          <p class="footer-sub">Todos os direitos reservados © {{ currentYear }} NAUE Consultoria</p>
         </div>
       </div>
     </div>

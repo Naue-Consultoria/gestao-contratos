@@ -802,7 +802,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
             bodyFont: { size: 12 },
             callbacks: {
               title: (context) => {
-                return `${context[0].label} 2025`;
+                return `${context[0].label} ${new Date().getFullYear()}`;
               },
               label: (context) => {
                 return `${context.dataset.label}: ${context.parsed.y} contratos`;

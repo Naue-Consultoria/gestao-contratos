@@ -262,6 +262,10 @@ export class PublicVagasHubComponent implements OnInit {
     if (!this.hubData?.vagas) return 0;
     return this.hubData.vagas.filter(v => v.status === status).length;
   }
+
+  get currentYear(): number {
+    return new Date().getFullYear();
+  }
 }
 
 

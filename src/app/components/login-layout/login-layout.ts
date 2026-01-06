@@ -16,6 +16,10 @@ export class LoginLayout {
 
   @Output("navigate") onNavigate = new EventEmitter();
 
+  get currentYear(): number {
+    return new Date().getFullYear();
+  }
+
   submit() {
     this.onSubmit.emit();
   }

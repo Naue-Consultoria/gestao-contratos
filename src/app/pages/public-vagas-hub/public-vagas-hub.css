@@ -397,12 +397,42 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
 .vaga-title {
   font-size: 18px;
   font-weight: 700;
   color: #1f2937;
-  margin: 0 0 10px 0;
+  margin: 0;
   line-height: 1.4;
+  flex: 1;
+}
+
+.vaga-data-abertura {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 5px 9px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.vaga-data-abertura i {
+  font-size: 10px;
+  color: #003b2b;
+  opacity: 0.7;
 }
 
 .vaga-tipo-badge {
@@ -419,164 +449,180 @@
   letter-spacing: 0.3px;
 }
 
-/* Highlights - simplificado para mobile */
-.vaga-highlights-premium {
-  padding: 16px 20px;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-
-.highlight-box {
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid #e5e7eb;
-  border-left: 3px solid;
-}
-
-.highlight-box.status-box.status-aberta {
-  border-left-color: #003b2b;
-}
-
-.highlight-box.status-box.status-divulgacao {
-  border-left-color: #3b82f6;
-}
-
-.highlight-box.status-box.status-entrevista {
-  border-left-color: #f59e0b;
-}
-
-.highlight-box.status-box.status-testes {
-  border-left-color: #f59e0b;
-}
-
-.highlight-box.candidatos-box {
-  border-left-color: #003b2b;
-}
-
-.highlight-icon-wrapper {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  flex-shrink: 0;
-}
-
-.highlight-icon-wrapper svg {
-  width: 20px;
-  height: 20px;
-}
-
-.highlight-box.status-box.status-aberta .highlight-icon-wrapper svg {
-  stroke: #003b2b;
-}
-
-.highlight-box.status-box.status-divulgacao .highlight-icon-wrapper svg {
-  stroke: #3b82f6;
-}
-
-.highlight-box.status-box.status-entrevista .highlight-icon-wrapper svg {
-  stroke: #f59e0b;
-}
-
-.highlight-box.status-box.status-testes .highlight-icon-wrapper svg {
-  stroke: #f59e0b;
-}
-
-.highlight-icon-wrapper.candidatos svg {
-  stroke: #003b2b;
-}
-
-.highlight-info {
-  flex: 1;
-}
-
-.highlight-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-  color: #6b7280;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.highlight-value-big {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.status-box.status-aberta .highlight-value-big {
-  color: #003b2b;
-}
-
-.status-box.status-divulgacao .highlight-value-big {
-  color: #1e40af;
-}
-
-.status-box.status-entrevista .highlight-value-big,
-.status-box.status-testes .highlight-value-big {
-  color: #d97706;
-}
-
-.candidatos-count {
-  color: #003b2b;
-}
-
-/* Info Grid */
-.vaga-info-grid {
-  padding: 14px 20px;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+/* Nova Seção de Informações */
+.vaga-info-section {
   background: white;
   border-top: 1px solid #e5e7eb;
 }
 
-.info-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  background: #fafafa;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+.info-row-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
 }
 
-.info-item i {
-  font-size: 15px;
-  color: #003b2b;
-  width: 16px;
-  text-align: center;
+.info-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: white;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.info-stat:active {
+  transform: scale(0.98);
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: #003b2b;
+  border-radius: 50%;
   flex-shrink: 0;
 }
 
-.info-content {
+.stat-icon i {
+  color: white;
+  font-size: 16px;
+}
+
+.stat-details {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
-.info-label {
+.stat-label {
   font-size: 10px;
   text-transform: uppercase;
   color: #6b7280;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
 }
 
-.info-value {
-  font-size: 13px;
-  font-weight: 600;
+.stat-value {
+  font-size: 17px;
+  font-weight: 700;
   color: #1f2937;
+  line-height: 1.1;
+}
+
+/* Status com cores específicas */
+.info-stat.status-stat.status-aberta .stat-icon {
+  background: #003b2b;
+}
+
+.info-stat.status-stat.status-divulgacao .stat-icon {
+  background: #3b82f6;
+}
+
+.info-stat.status-stat.status-entrevista .stat-icon,
+.info-stat.status-stat.status-testes .stat-icon {
+  background: #f59e0b;
+}
+
+.info-stat.status-stat.status-fechada .stat-icon {
+  background: #10b981;
+}
+
+.info-stat.status-stat.status-standby .stat-icon {
+  background: #6b7280;
+}
+
+.info-stat.status-stat.status-encerramento .stat-icon {
+  background: #ef4444;
+}
+
+.info-stat.status-stat.status-cancelada .stat-icon {
+  background: #dc2626;
+}
+
+/* Candidatos */
+.info-stat.candidatos-stat .stat-icon {
+  background: linear-gradient(135deg, #003b2b 0%, #0a8560 100%);
+}
+
+.info-stat.candidatos-stat .stat-value {
+  color: #003b2b;
+  font-size: 20px;
+}
+
+/* Linha secundária */
+.info-row-secondary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 20px 18px 20px;
+  background: white;
+}
+
+.info-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border-left: 3px solid #003b2b;
+}
+
+.info-detail i {
+  font-size: 13px;
+  color: #003b2b;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.detail-text {
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+}
+
+/* Observações */
+.vaga-observacoes {
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+  border-left: 3px solid #003b2b;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.observacoes-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #003b2b;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.observacoes-header i {
+  color: #003b2b;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.observacoes-text {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.7;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-weight: 400;
 }
 
 /* Timeline */
@@ -1019,12 +1065,6 @@
     gap: 16px;
   }
 
-  .vaga-highlights-premium {
-    grid-template-columns: 1fr 1fr;
-    padding: 18px 24px;
-    gap: 12px;
-  }
-
   .vaga-card-header {
     padding: 24px;
   }
@@ -1033,9 +1073,54 @@
     font-size: 19px;
   }
 
-  .vaga-info-grid {
-    grid-template-columns: repeat(2, 1fr);
-    padding: 16px 24px;
+  .vaga-data-abertura {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .vaga-data-abertura i {
+    font-size: 11px;
+  }
+
+  .info-row-main {
+    padding: 20px 24px;
+    gap: 16px;
+  }
+
+  .info-stat {
+    padding: 16px;
+  }
+
+  .stat-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .stat-icon i {
+    font-size: 18px;
+  }
+
+  .stat-value {
+    font-size: 19px;
+  }
+
+  .info-stat.candidatos-stat .stat-value {
+    font-size: 22px;
+  }
+
+  .info-row-secondary {
+    padding: 0 24px 20px 24px;
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .info-detail {
+    flex: 1;
+    padding: 12px 14px;
+  }
+
+  .vaga-observacoes {
+    padding: 18px 24px;
   }
 
   .vaga-timeline-section {
@@ -1175,37 +1260,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
-  .vaga-highlights-premium {
-    padding: 20px 24px;
-  }
-
-  .highlight-box {
-    padding: 16px;
-  }
-
-  .highlight-box:hover {
-    border-color: #d1d5db;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  }
-
-  .highlight-icon-wrapper {
-    width: 44px;
-    height: 44px;
-  }
-
-  .highlight-icon-wrapper svg {
-    width: 22px;
-    height: 22px;
-  }
-
-  .highlight-label {
-    font-size: 11px;
-  }
-
-  .highlight-value-big {
-    font-size: 20px;
-  }
-
   .vaga-title {
     font-size: 20px;
   }
@@ -1215,10 +1269,65 @@
     font-size: 12px;
   }
 
-  .vaga-info-grid {
-    grid-template-columns: repeat(2, 1fr);
-    padding: 16px 24px;
-    gap: 12px;
+  .info-row-main {
+    padding: 24px 28px;
+    gap: 20px;
+  }
+
+  .info-stat {
+    padding: 18px;
+  }
+
+  .info-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .stat-icon i {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .stat-value {
+    font-size: 21px;
+  }
+
+  .info-stat.candidatos-stat .stat-value {
+    font-size: 25px;
+  }
+
+  .info-row-secondary {
+    padding: 0 28px 24px 28px;
+  }
+
+  .info-detail {
+    padding: 14px 16px;
+  }
+
+  .detail-text {
+    font-size: 14px;
+  }
+
+  .vaga-observacoes {
+    padding: 20px 28px;
+  }
+
+  .vaga-data-abertura {
+    font-size: 13px;
+    padding: 7px 12px;
+  }
+
+  .observacoes-text {
+    font-size: 14px;
+    line-height: 1.8;
   }
 
   .timeline-toggle {
