@@ -41,14 +41,12 @@ export class RoutinesPageComponent implements OnInit {
   currentUser = this.authService.getUser();
   private searchTimeout: any;
 
-  // Client filter properties
   selectedClient = '';
   isClientFilterOpen = false;
   clientSearchTerm = '';
   availableClients: { name: string; count: number }[] = [];
   filteredClients: { name: string; count: number }[] = [];
 
-  // Sorting properties
   sortBy: 'client-az' | 'contract-number' = 'client-az';
   sortOptions = [
     { value: 'client-az', label: 'Cliente A-Z' },
