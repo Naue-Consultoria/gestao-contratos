@@ -29,6 +29,9 @@ export class ResetPasswordComponent implements OnInit {
   showPassword = false;
   showConfirmPassword = false;
 
+  // Regex para senha forte (mesma do backend)
+  private passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -38,7 +41,7 @@ export class ResetPasswordComponent implements OnInit {
   ) {
     this.resetPasswordForm = this.fb.group({
       code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(this.passwordRegex)]],
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
   }
@@ -80,16 +83,21 @@ export class ResetPasswordComponent implements OnInit {
 
   getErrorMessage(fieldName: string): string {
     const field = this.resetPasswordForm.get(fieldName);
-    
+
     if (field?.errors) {
       if (field.errors['required']) {
         return 'Este campo é obrigatório';
       }
       if (field.errors['pattern']) {
-        return 'O código deve ter 6 dígitos';
+        if (fieldName === 'code') {
+          return 'O código deve ter 6 dígitos';
+        }
+        if (fieldName === 'password') {
+          return 'A senha deve conter letra maiúscula, minúscula, número e caractere especial (@$!%*?&)';
+        }
       }
       if (field.errors['minlength']) {
-        return 'A senha deve ter pelo menos 6 caracteres';
+        return 'A senha deve ter pelo menos 8 caracteres';
       }
     }
 
