@@ -189,11 +189,12 @@
       <div class="card-controls">
         <div class="control-group">
           <label class="control-label">Selecione o Serviço</label>
-          <select 
-            class="form-select" 
+          <select
+            class="form-select"
             [(ngModel)]="servicesReport.serviceId"
             [disabled]="servicesReport.isLoading">
             <option value="">Escolha um serviço...</option>
+            <option value="all">Todos os Serviços</option>
             <option *ngFor="let service of services" [value]="service.id">
               {{ service.name }}
             </option>

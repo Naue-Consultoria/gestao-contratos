@@ -42,6 +42,13 @@ export class ReportService {
     });
   }
 
+  generateAllServicesReport(data: ReportRequest): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/all-services`, data, {
+      responseType: 'blob',
+      headers: this.getHeaders()
+    });
+  }
+
   generateFinancialReport(data: ReportRequest): Observable<Blob> {
     return this.http.post(`${this.apiUrl}/financial`, data, {
       responseType: 'blob',

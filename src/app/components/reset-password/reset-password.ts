@@ -158,4 +158,31 @@ export class ResetPasswordComponent implements OnInit {
       control?.markAsTouched({ onlySelf: true });
     });
   }
+
+  // Helper methods for password validation display
+  hasLowercase(): boolean {
+    const value = this.resetPasswordForm.get('password')?.value;
+    return value && /[a-z]/.test(value);
+  }
+
+  hasUppercase(): boolean {
+    const value = this.resetPasswordForm.get('password')?.value;
+    return value && /[A-Z]/.test(value);
+  }
+
+  hasNumber(): boolean {
+    const value = this.resetPasswordForm.get('password')?.value;
+    return value && /\d/.test(value);
+  }
+
+  hasSpecialChar(): boolean {
+    const value = this.resetPasswordForm.get('password')?.value;
+    return value && /[@$!%*?&]/.test(value);
+  }
+
+  passwordsMatch(): boolean {
+    const password = this.resetPasswordForm.get('password')?.value;
+    const confirmPassword = this.resetPasswordForm.get('confirmPassword')?.value;
+    return password === confirmPassword && confirmPassword;
+  }
 }

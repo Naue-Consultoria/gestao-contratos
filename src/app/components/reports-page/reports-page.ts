@@ -119,6 +119,9 @@ export class ReportsPage implements OnInit {
       return;
     }
 
+    // Check if "all services" report
+    const isAllServices = reportType === 'services' && config.serviceId === 'all';
+
     config.isLoading = true;
     const requestData: ReportRequest = {
       clientId: config.clientId && config.clientId !== '' ? config.clientId : undefined,
@@ -148,10 +151,15 @@ export class ReportsPage implements OnInit {
         reportObservable = this.reportService.generateClientReport(requestData);
         break;
       case 'services':
-        const service = this.services.find(s => s.id === parseInt(config.serviceId as string, 10));
-        const serviceName = service ? service.name.replace(/\s+/g, '_').toLowerCase() : 'servico';
-        fileName = `relatorio_servico_${serviceName}_${year}_${month}`;
-        reportObservable = this.reportService.generateServicesReport(requestData);
+        if (isAllServices) {
+          fileName = `relatorio_todos_servicos_${year}_${month}`;
+          reportObservable = this.reportService.generateAllServicesReport(requestData);
+        } else {
+          const service = this.services.find(s => s.id === parseInt(config.serviceId as string, 10));
+          const serviceName = service ? service.name.replace(/\s+/g, '_').toLowerCase() : 'servico';
+          fileName = `relatorio_servico_${serviceName}_${year}_${month}`;
+          reportObservable = this.reportService.generateServicesReport(requestData);
+        }
         break;
       case 'financial':
         fileName = `relatorio_financeiro_${year}_${month}`;
