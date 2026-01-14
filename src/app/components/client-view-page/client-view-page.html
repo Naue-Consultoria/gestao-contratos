@@ -45,7 +45,12 @@
               <span class="type-badge" [ngClass]="client.type === 'PF' ? 'badge-info' : 'badge-primary'">
                 {{ client.type === 'PF' ? 'Pessoa Física' : 'Pessoa Jurídica' }}
               </span>
-              <span class="document-badge">{{ getClientDocument() }}</span>
+              <span class="type-badge badge-secondary" *ngIf="isInternational()">
+                <i class="fas fa-globe"></i> Internacional
+              </span>
+              <span class="document-badge" *ngIf="getClientDocument()">
+                {{ getDocumentLabel() }}: {{ getClientDocument() }}
+              </span>
             </div>
           </div>
         </div>
@@ -83,6 +88,10 @@
         <div class="info-group" *ngIf="client.type === 'PJ' && client.employee_count">
           <span class="info-label">Nº de Funcionários</span>
           <span class="info-value">{{ client.employee_count }}</span>
+        </div>
+        <div class="info-group" *ngIf="isInternational() && client.country">
+          <span class="info-label">País</span>
+          <span class="info-value">{{ client.country }}</span>
         </div>
         <div class="info-group">
           <span class="info-label">Endereço</span>

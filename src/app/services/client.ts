@@ -5,17 +5,19 @@ import { environment } from '../../environments/environment';
 
 export interface CreateClientRequest {
   type: 'PF' | 'PJ';
+  origin?: 'national' | 'international';
   email?: string; // Para compatibilidade com PF
   emails?: string[]; // Para múltiplos emails em PJ
   phone?: string;
   phones?: string[]; // Para múltiplos telefones
   street: string;
-  number: string;
+  number?: string; // Opcional para internacionais
   complement?: string;
-  neighborhood: string;
+  neighborhood?: string; // Opcional para internacionais
   city: string;
-  state: string;
-  zipcode: string;
+  state?: string; // Opcional para internacionais
+  zipcode?: string; // Opcional para internacionais
+  country?: string; // Obrigatório para internacionais
   employee_count?: number;
   business_segment?: string;
   cpf?: string;
@@ -24,9 +26,11 @@ export interface CreateClientRequest {
   company_name?: string;
   trade_name?: string;
   legal_representative?: string;
+  tax_id?: string; // Para clientes internacionais
 }
 
 export interface UpdateClientRequest {
+  origin?: 'national' | 'international';
   email?: string; // Para compatibilidade com PF
   emails?: string[]; // Para múltiplos emails em PJ
   phone?: string;
@@ -38,6 +42,7 @@ export interface UpdateClientRequest {
   city?: string;
   state?: string;
   zipcode?: string;
+  country?: string;
   employee_count?: number;
   business_segment?: string;
   cpf?: string;
@@ -46,6 +51,7 @@ export interface UpdateClientRequest {
   company_name?: string;
   trade_name?: string;
   legal_representative?: string;
+  tax_id?: string;
 }
 
 export interface ClientEmail {
@@ -63,6 +69,7 @@ export interface ClientPhone {
 export interface ApiClient {
   id: number;
   type: 'PF' | 'PJ';
+  origin?: 'national' | 'international';
   name: string;
   email: string; // Email primário para compatibilidade
   emails?: ClientEmail[]; // Lista de emails para PJ
@@ -77,6 +84,7 @@ export interface ApiClient {
   city: string;
   state: string;
   zipcode: string;
+  country?: string | null; // Para clientes internacionais
   created_at: string;
   updated_at: string;
   created_by?: number;
@@ -91,6 +99,7 @@ export interface ApiClient {
   legal_representative?: string;
   employee_count?: number | null;
   business_segment?: string | null;
+  tax_id?: string | null; // Para clientes internacionais
   logo_path?: string | null;
   logo_original_name?: string | null;
   logo_mime_type?: string | null;
@@ -120,12 +129,15 @@ export interface ClientStats {
   total: number;
   totalPF: number;
   totalPJ: number;
+  totalNational: number;
+  totalInternational: number;
   byCity: { [key: string]: number };
   byState: { [key: string]: number };
 }
 
 export interface ClientFilters {
   type?: 'PF' | 'PJ';
+  origin?: 'national' | 'international';
   city?: string;
   state?: string;
   search?: string;
@@ -153,10 +165,13 @@ export class ClientService {
    */
   getClients(filters?: ClientFilters): Observable<ClientsResponse> {
     let params: any = {};
-    
+
     if (filters) {
       if (filters.type) {
         params.type = filters.type;
+      }
+      if (filters.origin) {
+        params.origin = filters.origin;
       }
       if (filters.city) {
         params.city = filters.city;
@@ -172,9 +187,9 @@ export class ClientService {
       }
     }
 
-    return this.http.get<ClientsResponse>(this.API_URL, { 
+    return this.http.get<ClientsResponse>(this.API_URL, {
       params,
-      headers: this.getAuthHeaders() 
+      headers: this.getAuthHeaders()
     });
   }
 
@@ -273,6 +288,34 @@ export class ClientService {
    * Obter endereço completo formatado
    */
   getFullAddress(client: ApiClient): string {
+    const isInternational = client.origin === 'international';
+
+    if (isInternational) {
+      // Formato para cliente internacional
+      let address = client.street;
+      if (client.number) {
+        address += `, ${client.number}`;
+      }
+      if (client.complement) {
+        address += ` - ${client.complement}`;
+      }
+      if (client.neighborhood) {
+        address += ` - ${client.neighborhood}`;
+      }
+      address += `, ${client.city}`;
+      if (client.state) {
+        address += `, ${client.state}`;
+      }
+      if (client.zipcode) {
+        address += ` - ${client.zipcode}`;
+      }
+      if (client.country) {
+        address += ` - ${client.country}`;
+      }
+      return address;
+    }
+
+    // Formato para cliente nacional (brasileiro)
     let address = `${client.street}, ${client.number}`;
     if (client.complement) {
       address += ` - ${client.complement}`;
@@ -283,13 +326,20 @@ export class ClientService {
   }
 
   /**
-   * Obter documento formatado (CPF ou CNPJ)
+   * Obter documento formatado (CPF, CNPJ ou Tax ID)
    */
   getFormattedDocument(client: ApiClient): string {
     if (client.type === 'PF' && client.cpf) {
       return this.formatCPF(client.cpf);
-    } else if (client.type === 'PJ' && client.cnpj) {
-      return this.formatCNPJ(client.cnpj);
+    } else if (client.type === 'PJ') {
+      // Cliente internacional: usar Tax ID
+      if (client.origin === 'international' && client.tax_id) {
+        return client.tax_id;
+      }
+      // Cliente nacional: usar CNPJ
+      if (client.cnpj) {
+        return this.formatCNPJ(client.cnpj);
+      }
     }
     return '';
   }

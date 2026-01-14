@@ -17,6 +17,7 @@ interface ClientDisplay {
   name: string;
   initials: string;
   type: 'PF' | 'PJ';
+  origin?: 'national' | 'international';
   location: string;
   document: string;
   contracts: number;
@@ -29,6 +30,7 @@ interface ClientDisplay {
   logoUrl?: SafeUrl;
   company_name?: string;
   trade_name?: string;
+  country?: string | null;
 }
 
 @Component({
@@ -215,13 +217,23 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
     aggregates?: { totalCount: number; activeCount: number; totalValue: number }
   ): ClientDisplay {
     const initials = this.getInitials(apiClient.name);
+    const isInternational = apiClient.origin === 'international';
+
+    // Location: para internacionais mostra cidade/país, para nacionais cidade/estado
+    let location: string;
+    if (isInternational) {
+      location = apiClient.country ? `${apiClient.city}, ${apiClient.country}` : apiClient.city;
+    } else {
+      location = `${apiClient.city}/${apiClient.state}`;
+    }
 
     return {
       id: apiClient.id,
       name: apiClient.name,
       initials: initials,
       type: apiClient.type,
-      location: `${apiClient.city}/${apiClient.state}`,
+      origin: apiClient.origin || 'national',
+      location: location,
       document: this.clientService.getFormattedDocument(apiClient),
       contracts: aggregates?.totalCount || 0,
       activeContracts: aggregates?.activeCount || 0,
@@ -232,7 +244,15 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
       logo_path: apiClient.logo_path,
       company_name: apiClient.company_name,
       trade_name: apiClient.trade_name,
+      country: apiClient.country,
     };
+  }
+
+  /**
+   * Verifica se um cliente é internacional
+   */
+  isClientInternational(client: ClientDisplay): boolean {
+    return client.origin === 'international';
   }
 
   private getInitials(name: string): string {

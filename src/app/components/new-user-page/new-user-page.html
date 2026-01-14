@@ -166,44 +166,16 @@
             <i class="fas fa-camera"></i>
             <h2>Foto de Perfil</h2>
           </div>
-          
+
           <div class="card-body">
-            <div class="profile-upload-container">
-              <div class="profile-picture-preview" *ngIf="!profilePictureUrl">
-                <div class="avatar-placeholder">
-                  <i class="fas fa-user"></i>
-                </div>
-              </div>
-              
-              <div class="profile-picture-preview" *ngIf="profilePictureUrl">
-                <img [src]="profilePictureUrl" alt="Foto de perfil">
-                <button 
-                  type="button" 
-                  class="remove-picture-btn" 
-                  (click)="removeProfilePicture()" 
-                  [disabled]="isLoading"
-                  title="Remover foto">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-              
-              <div class="upload-controls">
-                <input 
-                  type="file" 
-                  id="profilePicture" 
-                  accept="image/*" 
-                  (change)="onProfilePictureSelected($event)"
-                  [disabled]="isLoading"
-                  #fileInput>
-                <label for="profilePicture" class="upload-button">
-                  <i class="fas fa-upload"></i>
-                  {{ profilePictureUrl ? 'Alterar Foto' : 'Enviar Foto' }}
-                </label>
-                <p class="upload-hint">
-                  JPG, PNG ou GIF • Máx. 2MB
-                </p>
-              </div>
-            </div>
+            <app-image-upload
+              [label]="''"
+              [currentImageUrl]="profilePictureUrl"
+              [placeholder]="'Arraste ou clique para selecionar a foto'"
+              [disabled]="isLoading"
+              (imageUploaded)="onProfilePictureUploaded($event)"
+              (imageRemoved)="onProfilePictureRemoved()">
+            </app-image-upload>
           </div>
         </div>
 

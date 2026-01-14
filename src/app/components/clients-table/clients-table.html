@@ -62,7 +62,7 @@
           <tr>
             <th>Cliente</th>
             <th>Tipo</th>
-            <th>Cidade/UF</th>
+            <th>Localização</th>
             <th>Documento</th>
             <th>Contratos</th>
             <th>Ações</th>
@@ -87,9 +87,14 @@
               </div>
             </td>
             <td>
-              <span class="badge" [ngClass]="client.type === 'PF' ? 'badge-info' : 'badge-primary'">
-                {{ client.type }}
-              </span>
+              <div class="type-badges">
+                <span class="badge" [ngClass]="client.type === 'PF' ? 'badge-info' : 'badge-primary'">
+                  {{ client.type }}
+                </span>
+                <span class="badge badge-secondary" *ngIf="isClientInternational(client)" title="Cliente Internacional">
+                  <i class="fas fa-globe"></i>
+                </span>
+              </div>
             </td>
             <td class="client-location">{{ client.location }}</td>
             <td>{{ client.document }}</td>

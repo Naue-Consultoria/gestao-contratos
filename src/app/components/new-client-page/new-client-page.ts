@@ -30,6 +30,7 @@ export class NewClientPageComponent implements OnInit {
   // Form data
   formData: CreateClientRequest & { logo_url?: string | SafeUrl } = {
     type: 'PF',
+    origin: 'national',
     email: '',
     phone: '',
     street: '',
@@ -39,6 +40,7 @@ export class NewClientPageComponent implements OnInit {
     city: '',
     state: '',
     zipcode: '',
+    country: '',
     // Optional fields
     employee_count: undefined,
     business_segment: '',
@@ -49,7 +51,8 @@ export class NewClientPageComponent implements OnInit {
     cnpj: '',
     company_name: '',
     trade_name: '',
-    legal_representative: ''
+    legal_representative: '',
+    tax_id: ''
   };
 
   // Email fields para PJ (múltiplos emails)
@@ -82,6 +85,7 @@ export class NewClientPageComponent implements OnInit {
       // Map client data to form
       this.formData = {
         type: client.type,
+        origin: client.origin || 'national',
         email: client.email,
         phone: client.phone || '',
         street: client.street,
@@ -91,6 +95,7 @@ export class NewClientPageComponent implements OnInit {
         city: client.city,
         state: client.state,
         zipcode: client.zipcode,
+        country: client.country || '',
         // Optional fields
         employee_count: client.employee_count || undefined,
         business_segment: client.business_segment || '',
@@ -101,7 +106,8 @@ export class NewClientPageComponent implements OnInit {
         cnpj: client.cnpj || '',
         company_name: client.company_name || '',
         trade_name: client.trade_name || '',
-        legal_representative: client.legal_representative || ''
+        legal_representative: client.legal_representative || '',
+        tax_id: client.tax_id || ''
       };
 
       // Carregar emails se for PJ
@@ -200,6 +206,34 @@ export class NewClientPageComponent implements OnInit {
 
   getPageTitle(): string {
     return this.isEditing ? 'Editar Cliente' : 'Novo Cliente';
+  }
+
+  /**
+   * Chamado quando a origem do cliente muda
+   */
+  onOriginChange() {
+    if (this.formData.origin === 'international') {
+      // Cliente internacional sempre é PJ
+      this.formData.type = 'PJ';
+      // Limpar campos brasileiros
+      this.formData.cpf = '';
+      this.formData.cnpj = '';
+      // Inicializar emailFields se estiver vazio
+      if (this.emailFields.length === 0 || (this.emailFields.length === 1 && this.emailFields[0] === '')) {
+        this.emailFields = [''];
+      }
+    } else {
+      // Cliente nacional
+      this.formData.country = '';
+      this.formData.tax_id = '';
+    }
+  }
+
+  /**
+   * Verifica se é cliente internacional
+   */
+  isInternational(): boolean {
+    return this.formData.origin === 'international';
   }
 
   async onLogoUploaded(file: File) {
@@ -320,9 +354,19 @@ export class NewClientPageComponent implements OnInit {
   validatePhone(index: number) {
     const phone = this.phoneFields[index];
     if (phone && phone.trim() !== '') {
-      const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
-      if (!phoneRegex.test(phone)) {
-        this.modalService.showError(`Telefone ${index + 1} inválido. Use o formato (XX) XXXXX-XXXX`);
+      // Para clientes internacionais, não validar formato brasileiro
+      if (this.isInternational()) {
+        // Apenas verificar se tem pelo menos alguns dígitos
+        const digitsOnly = phone.replace(/\D/g, '');
+        if (digitsOnly.length < 5) {
+          this.modalService.showError(`Phone ${index + 1} is too short`);
+        }
+      } else {
+        // Para clientes nacionais, validar formato brasileiro
+        const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
+        if (!phoneRegex.test(phone)) {
+          this.modalService.showError(`Telefone ${index + 1} inválido. Use o formato (XX) XXXXX-XXXX`);
+        }
       }
     }
   }
@@ -385,6 +429,8 @@ export class NewClientPageComponent implements OnInit {
    * Verifica se o formulário é válido
    */
   isFormValid(): boolean {
+    const isInternational = this.formData.origin === 'international';
+
     if (this.formData.type === 'PJ') {
       // Para PJ, verificar se há pelo menos um email válido
       const validEmails = this.emailFields.filter(email => {
@@ -393,25 +439,35 @@ export class NewClientPageComponent implements OnInit {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(trimmedEmail);
       });
-      
+
       if (validEmails.length === 0) return false;
-      
-      // Verificar campos obrigatórios para PJ
-      return !!(
-        this.formData.company_name &&
-        this.formData.cnpj &&
-        this.formData.street &&
-        this.formData.number &&
-        this.formData.neighborhood &&
-        this.formData.city &&
-        this.formData.state &&
-        this.formData.zipcode
-      );
+
+      if (isInternational) {
+        // Verificar campos obrigatórios para PJ Internacional
+        return !!(
+          this.formData.company_name &&
+          this.formData.street &&
+          this.formData.city &&
+          this.formData.country
+        );
+      } else {
+        // Verificar campos obrigatórios para PJ Nacional
+        return !!(
+          this.formData.company_name &&
+          this.formData.cnpj &&
+          this.formData.street &&
+          this.formData.number &&
+          this.formData.neighborhood &&
+          this.formData.city &&
+          this.formData.state &&
+          this.formData.zipcode
+        );
+      }
     } else {
-      // Para PF, usar validação padrão
+      // Para PF, usar validação padrão (sempre nacional)
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       const isEmailValid = !!(this.formData.email && emailRegex.test(this.formData.email));
-      
+
       return !!(
         isEmailValid &&
         this.formData.full_name &&

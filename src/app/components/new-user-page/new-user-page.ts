@@ -7,6 +7,8 @@ import { ProfilePictureService } from '../../services/profile-picture.service';
 import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
+import { ImageUploadComponent } from '../image-upload/image-upload.component';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 interface UserData {
   name: string;
@@ -19,7 +21,7 @@ interface UserData {
 @Component({
   selector: 'app-new-user-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, ImageUploadComponent],
   templateUrl: './new-user-page.html',
   styleUrls: ['./new-user-page.css']
 })
@@ -29,6 +31,7 @@ export class NewUserPageComponent implements OnInit {
   private userService = inject(UserService);
   private profilePictureService = inject(ProfilePictureService);
   private toastr = inject(ToastrService);
+  private sanitizer = inject(DomSanitizer);
 
   // Form data
   userData: UserData = {
@@ -45,7 +48,7 @@ export class NewUserPageComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   errors: { [key: string]: string } = {};
-  profilePictureUrl = '';
+  profilePictureUrl: string | SafeUrl = '';
   selectedProfilePicture: File | null = null;
 
   ngOnInit() {
@@ -90,9 +93,10 @@ export class NewUserPageComponent implements OnInit {
         
         // Load profile picture if exists
         if (user.profile_picture_path) {
-          this.profilePictureService.getProfilePictureUrl(user.id).subscribe({
-            next: (url) => {
-              this.profilePictureUrl = url;
+          this.userService.getProfilePictureBlob(user.id).subscribe({
+            next: (blob) => {
+              const objectURL = URL.createObjectURL(blob);
+              this.profilePictureUrl = this.sanitizer.bypassSecurityTrustUrl(objectURL);
             },
             error: () => {
               this.profilePictureUrl = '';
@@ -197,23 +201,19 @@ export class NewUserPageComponent implements OnInit {
     return this.isEditMode ? 'Editar Usuário' : 'Novo Usuário';
   }
 
-  onProfilePictureSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      this.selectedProfilePicture = input.files[0];
-      
-      // Preview the selected image
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.profilePictureUrl = e.target?.result as string;
-      };
-      reader.readAsDataURL(this.selectedProfilePicture);
-    }
+  onProfilePictureUploaded(file: File): void {
+    this.selectedProfilePicture = file;
+
+    // Preview the selected image
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const url = e.target?.result as string;
+      this.profilePictureUrl = this.sanitizer.bypassSecurityTrustUrl(url);
+    };
+    reader.readAsDataURL(file);
   }
 
-  async removeProfilePicture(): Promise<void> {
-    if (this.isEditMode && !this.editingUserId) return;
-    
+  async onProfilePictureRemoved(): Promise<void> {
     // Se está editando, remove do servidor
     if (this.isEditMode && this.editingUserId) {
       try {
@@ -229,7 +229,7 @@ export class NewUserPageComponent implements OnInit {
         this.isLoading = false;
       }
     }
-    
+
     // Em ambos os casos, limpa o preview local
     this.profilePictureUrl = '';
     this.selectedProfilePicture = null;

@@ -146,16 +146,24 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
 
   getAddress(): string {
     if (!this.client) return '';
-    const parts = [
-      this.client.street,
-      this.client.number,
-      this.client.complement,
-      this.client.neighborhood,
-      `${this.client.city}/${this.client.state}`,
-      this.client.zipcode
-    ].filter(part => part && part.trim() !== '');
-    
-    return parts.join(', ');
+    return this.clientService.getFullAddress(this.client);
+  }
+
+  /**
+   * Verifica se o cliente é internacional
+   */
+  isInternational(): boolean {
+    return this.client?.origin === 'international';
+  }
+
+  /**
+   * Retorna o label do documento conforme o tipo de cliente
+   */
+  getDocumentLabel(): string {
+    if (!this.client) return '';
+    if (this.client.type === 'PF') return 'CPF';
+    if (this.isInternational()) return 'Tax ID';
+    return 'CNPJ';
   }
 
   formatValue(value: number): string {
