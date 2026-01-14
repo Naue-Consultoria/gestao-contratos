@@ -67,7 +67,7 @@ export interface Proposal {
   signer_phone?: string;
   signer_document?: string;
   signer_observations?: string;
-  status: 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta'; // contraproposta = Assinada Parcialmente
+  status: 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta' | 'standby'; // contraproposta = Assinada Parcialmente
   converted_to_contract_id?: number;
   converted_at?: string;
   notes?: string;
@@ -412,7 +412,8 @@ export class ProposalService {
       'rejected': '#ef4444', // Vermelho
       'expired': '#f59e0b', // Amarelo
       'converted': '#10b981', // Verde claro (Assinada)
-      'contraproposta': '#ef4444' // Vermelho para Assinada Parcialmente
+      'contraproposta': '#ef4444', // Vermelho para Assinada Parcialmente
+      'standby': '#eab308' // Amarelo/Dourado para Standby
     };
     return colors[status] || '#6b7280';
   }
@@ -428,7 +429,8 @@ export class ProposalService {
       'rejected': 'Rejeitada',
       'expired': 'Expirada',
       'converted': 'Assinada',
-      'contraproposta': 'Ass. Parcial'
+      'contraproposta': 'Ass. Parcial',
+      'standby': 'Standby'
     };
     return texts[status] || status;
   }

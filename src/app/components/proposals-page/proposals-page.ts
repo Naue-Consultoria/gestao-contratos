@@ -639,7 +639,8 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         'rejected': 'Rejeitada',
         'expired': 'Expirada',
         'converted': 'Assinada',
-        'contraproposta': 'Assinada Parcialmente'
+        'contraproposta': 'Assinada Parcialmente',
+        'standby': 'Standby'
       };
       doc.text(`Status: ${statusMap[fullProposal.status] || fullProposal.status}`, margin, currentY);
 
@@ -975,7 +976,8 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       'rejected': '#dc3545',
       'expired': '#fd7e14',
       'converted': '#10b981',  // Verde claro (Assinada)
-      'contraproposta': '#0a8560'  // Verde mais claro que o 'signed'
+      'contraproposta': '#0a8560',  // Verde mais claro que o 'signed'
+      'standby': '#eab308'  // Amarelo/Dourado para Standby
     };
     return statusColors[status] || '#6c757d';
   }
@@ -1309,7 +1311,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   async updateProposalStatus(proposal: ProposalDisplay, event: Event) {
     event.stopPropagation();
 
-    const newStatus = proposal.status as 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta';
+    const newStatus = proposal.status as 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta' | 'standby';
     const previousStatus = proposal.raw.status;
 
     // Se o status não mudou, não faz nada
