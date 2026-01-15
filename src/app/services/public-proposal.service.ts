@@ -67,11 +67,14 @@ export interface PublicProposal {
     city: string;
     state: string;
     zipcode: string;
+    origin?: 'national' | 'international';
+    country?: string;
     type?: 'PJ' | 'PF';
     company?: {
       company_name: string;
       trade_name?: string;
       cnpj: string;
+      tax_id?: string;
     };
     person?: {
       full_name: string;
@@ -186,12 +189,19 @@ export class PublicProposalService {
   /**
    * Formatar valor monetário
    */
-  formatCurrency(value: number): string {
+  formatCurrency(value: number, currency: 'BRL' | 'USD' = 'BRL'): string {
+    if (currency === 'USD') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2
+      }).format(value);
+    }
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
       minimumFractionDigits: 2
-    }).format(value); // Valor já está em reais
+    }).format(value);
   }
 
   /**

@@ -210,8 +210,9 @@
                 formControlName="valor_global"
                 class="form-control"
                 appCurrencyMask
+                [currency]="clientCurrency"
                 [class.error]="isFieldInvalid('valor_global')"
-                placeholder="R$ 0,00">
+                [placeholder]="clientCurrency === 'USD' ? '$ 0.00' : 'R$ 0,00'">
               <div *ngIf="isFieldInvalid('valor_global')" class="error-message">
                 Valor global é obrigatório quando a opção está marcada
               </div>
@@ -263,7 +264,7 @@
                 <div class="form-group">
                   <label for="vista_discount_value" class="form-label">
                     <i class="fas fa-dollar-sign"></i>
-                    Valor (R$)
+                    Valor ({{ clientCurrency === 'USD' ? '$' : 'R$' }})
                     <span class="required">*</span>
                   </label>
                   <input
@@ -314,7 +315,7 @@
                 <div class="form-group">
                   <label for="prazo_discount_value" class="form-label">
                     <i class="fas fa-dollar-sign"></i>
-                    Valor (R$)
+                    Valor ({{ clientCurrency === 'USD' ? '$' : 'R$' }})
                     <span class="required">*</span>
                   </label>
                   <input
@@ -467,6 +468,7 @@
                           [name]="'price_' + service._uniqueId"
                           placeholder="0,00"
                           appCurrencyMask
+                          [currency]="clientCurrency"
                         />
                       </div>
                     </div>

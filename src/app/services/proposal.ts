@@ -92,6 +92,8 @@ export interface Proposal {
     market_sector?: string;
     description?: string;
     type?: 'PF' | 'PJ';
+    origin?: 'national' | 'international';
+    country?: string;
     company?: {
       trade_name?: string;
       company_name?: string;
@@ -309,13 +311,22 @@ export class ProposalService {
   /**
    * Formatar valor monetário
    */
-  formatCurrency(value: number | null | undefined): string {
-    if (typeof value !== 'number' || value === null || value === undefined) return 'R$ 0,00';
+  formatCurrency(value: number | null | undefined, currency: 'BRL' | 'USD' = 'BRL'): string {
+    if (typeof value !== 'number' || value === null || value === undefined) {
+      return currency === 'USD' ? '$ 0.00' : 'R$ 0,00';
+    }
+    if (currency === 'USD') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2
+      }).format(value);
+    }
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
       minimumFractionDigits: 2
-    }).format(value); // Valor já está em reais
+    }).format(value);
   }
 
   /**

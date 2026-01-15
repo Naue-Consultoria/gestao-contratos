@@ -146,7 +146,13 @@ export class NewClientPageComponent implements OnInit {
       
       // Preparar dados para envio
       const dataToSend = { ...this.formData };
-      
+
+      // Usar o primeiro telefone válido como telefone principal
+      const validPhones = this.phoneFields.filter(phone => phone.trim() !== '');
+      if (validPhones.length > 0) {
+        dataToSend.phone = validPhones[0];
+      }
+
       // Se for PJ, usar o primeiro email como principal e salvar os outros depois
       if (this.formData.type === 'PJ') {
         const validEmails = this.emailFields.filter(email => email.trim() !== '');
@@ -181,7 +187,6 @@ export class NewClientPageComponent implements OnInit {
       }
 
       // Salvar telefones adicionais (se houver mais de um telefone)
-      const validPhones = this.phoneFields.filter(phone => phone.trim() !== '');
       if (validPhones.length > 1) {
         await this.saveAdditionalPhones(clientId, validPhones);
       }

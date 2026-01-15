@@ -396,6 +396,9 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Determinar moeda baseada na origem do cliente
+    const clientCurrency = this.getProposalCurrency(apiProposal);
+
     return {
       id: apiProposal.id,
       proposalNumber: apiProposal.proposal_number,
@@ -405,7 +408,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       clientType: clientType,
       status: apiProposal.status,
       statusText: this.proposalService.getStatusText(apiProposal.status),
-      totalValue: this.proposalService.formatCurrency(totalValue),
+      totalValue: this.proposalService.formatCurrency(totalValue, clientCurrency),
       validUntil: apiProposal.end_date ? this.formatDate(apiProposal.end_date) : 'Sem prazo',
       createdAt: this.formatDate(apiProposal.created_at),
       isExpired: this.proposalService.isProposalExpired(apiProposal),
@@ -530,6 +533,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       }
 
       const fullProposal = proposalResponse.data;
+      const proposalCurrency = this.getProposalCurrency(fullProposal);
 
       // Gerar PDF usando jsPDF
       const doc = new jsPDF();
@@ -748,7 +752,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
 
           // Valor (sem quantidade, direto o valor total)
           const value = service.total_value || service.value || service.unit_value || 0;
-          doc.text(this.formatCurrency(value), colValue, currentY, { align: 'right' });
+          doc.text(this.formatCurrency(value, proposalCurrency), colValue, currentY, { align: 'right' });
 
           currentY += rowHeight;
         });
@@ -775,7 +779,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         doc.text('VALOR TOTAL:', totalBoxX + 3, currentY + 5);
 
         // Valor alinhado à direita do box
-        const totalValue = this.formatCurrency(fullProposal.total_value || 0);
+        const totalValue = this.formatCurrency(fullProposal.total_value || 0, proposalCurrency);
         doc.text(totalValue, pageWidth - margin - 3, currentY + 5, { align: 'right' });
 
         currentY += 25;
@@ -815,13 +819,13 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
 
           if (fullProposal.final_value) {
             const valorParcela = fullProposal.final_value / fullProposal.installments;
-            doc.text(`Valor por Parcela: ${this.formatCurrency(valorParcela)}`, margin, currentY);
+            doc.text(`Valor por Parcela: ${this.formatCurrency(valorParcela, proposalCurrency)}`, margin, currentY);
             currentY += 6;
           }
         }
 
         if (fullProposal.discount_applied && fullProposal.discount_applied > 0) {
-          doc.text(`Desconto Aplicado: ${this.formatCurrency(fullProposal.discount_applied)}`, margin, currentY);
+          doc.text(`Desconto Aplicado: ${this.formatCurrency(fullProposal.discount_applied, proposalCurrency)}`, margin, currentY);
           currentY += 6;
         }
 
@@ -1052,13 +1056,26 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   }
 
-  private formatCurrency(value: number | null | undefined): string {
-    if (typeof value !== 'number' || value === null || value === undefined) return 'R$ 0,00';
+  private formatCurrency(value: number | null | undefined, currency: 'BRL' | 'USD' = 'BRL'): string {
+    if (typeof value !== 'number' || value === null || value === undefined) {
+      return currency === 'USD' ? '$ 0.00' : 'R$ 0,00';
+    }
+    if (currency === 'USD') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2
+      }).format(value);
+    }
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
       minimumFractionDigits: 2
     }).format(value);
+  }
+
+  private getProposalCurrency(proposal: any): 'BRL' | 'USD' {
+    return proposal?.client?.origin === 'international' ? 'USD' : 'BRL';
   }
 
   private getClientName(proposal: any): string {

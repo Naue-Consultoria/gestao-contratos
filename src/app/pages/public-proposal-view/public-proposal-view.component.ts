@@ -899,15 +899,26 @@ export class PublicProposalViewComponent implements OnInit {
   }
   
 
+  get clientCurrency(): 'BRL' | 'USD' {
+    return this.proposal?.client?.origin === 'international' ? 'USD' : 'BRL';
+  }
+
   formatCurrency(value: number): string {
     if (typeof value !== 'number' || value === null || value === undefined || isNaN(value)) {
-      return 'R$ 0,00';
+      return this.clientCurrency === 'USD' ? '$ 0.00' : 'R$ 0,00';
     }
-    
+
     try {
-      return this.publicProposalService.formatCurrency(value);
+      return this.publicProposalService.formatCurrency(value, this.clientCurrency);
     } catch (error) {
       // Fallback para formatação manual
+      if (this.clientCurrency === 'USD') {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+          minimumFractionDigits: 2
+        }).format(value);
+      }
       return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',

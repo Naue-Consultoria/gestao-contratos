@@ -76,6 +76,9 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   isCreatingClient: boolean = false;
   private isLoadingData: boolean = false; // Flag para evitar recálculos durante carregamento
 
+  // Moeda do cliente (BRL para nacional, USD para internacional)
+  clientCurrency: 'BRL' | 'USD' = 'BRL';
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -105,6 +108,13 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     // Observar mudanças no tipo de cliente para ajustar validações
     this.newClientForm.get('client_type')?.valueChanges.subscribe(value => {
       this.updateDocumentValidation(value);
+    });
+
+    // Observar mudanças no cliente para atualizar a moeda
+    this.proposalForm.get('client_id')?.valueChanges.subscribe(clientId => {
+      if (clientId) {
+        this.onClientChange(clientId);
+      }
     });
 
     // Adicionar listeners para conversão entre valor e porcentagem
@@ -285,6 +295,17 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       usar_valor_global: proposal.usar_valor_global || false, // Carregar checkbox
       valor_global: proposal.valor_global || null // Carregar valor global
     });
+
+    // Definir moeda baseada na origem do cliente
+    if (proposal.client?.origin === 'international') {
+      this.clientCurrency = 'USD';
+    } else if (proposal.client_id) {
+      // Fallback: buscar cliente na lista carregada
+      const client = this.clients.find(c => c.id === proposal.client_id);
+      this.clientCurrency = client?.origin === 'international' ? 'USD' : 'BRL';
+    } else {
+      this.clientCurrency = 'BRL';
+    }
 
     // Carregar serviços da proposta
     this.selectedServices = proposal.services.map((service, index) => {
@@ -580,7 +601,25 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   formatCurrency(value: number): string {
-    return this.proposalService.formatCurrency(value);
+    return this.proposalService.formatCurrency(value, this.clientCurrency);
+  }
+
+  onClientChange(clientId: number | string): void {
+    console.log('🔍 onClientChange chamado com:', clientId, typeof clientId);
+    // Garantir que clientId seja número
+    const id = typeof clientId === 'string' ? parseInt(clientId, 10) : clientId;
+    const selectedClient = this.clients.find(c => c.id === id);
+    console.log('🔍 Cliente encontrado:', selectedClient);
+    if (selectedClient) {
+      // Verificar se é internacional pelo campo origin ou pela presença de country/tax_id
+      const isInternational = selectedClient.origin === 'international' ||
+        (selectedClient.country && selectedClient.country !== 'Brasil' && selectedClient.country !== 'Brazil');
+      this.clientCurrency = isInternational ? 'USD' : 'BRL';
+      console.log('🌍 Cliente selecionado:', selectedClient.name, '| Origin:', selectedClient.origin, '| Country:', selectedClient.country, '| Moeda:', this.clientCurrency);
+    } else {
+      this.clientCurrency = 'BRL';
+      console.log('⚠️ Cliente não encontrado na lista. Total de clientes:', this.clients.length);
+    }
   }
 
   formatCurrencyForInput(value: number): string {

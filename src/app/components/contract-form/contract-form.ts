@@ -156,6 +156,9 @@ export class ContractFormComponent implements OnInit {
   secondaryInstallments: ContractInstallment[] = [];
   secondaryFirstInstallmentDate = '';
 
+  // Moeda do cliente (BRL para nacional, USD para internacional)
+  clientCurrency: 'BRL' | 'USD' = 'BRL';
+
   ngOnInit() {
     this.currentUserId = this.authService.getUser()?.id ?? null;
     const id = this.route.snapshot.paramMap.get('id');
@@ -317,7 +320,10 @@ export class ContractFormComponent implements OnInit {
           barter_percentage: contract.barter_percentage || null,
           secondary_payment_method: contract.secondary_payment_method || '',
         };
-        
+
+        // Definir moeda baseada na origem do cliente
+        this.clientCurrency = contract.client?.origin === 'international' ? 'USD' : 'BRL';
+
         // Primeiro, carregar os serviços para que getTotalValue() funcione corretamente
         this.selectedServices = contract.contract_services.map((cs: any) => {
             const selectedService: SelectedService = {
@@ -629,7 +635,7 @@ export class ContractFormComponent implements OnInit {
   }
 
   getFormattedTotalValue(): string {
-    return this.contractService.formatValue(this.getTotalValue());
+    return this.contractService.formatValue(this.getTotalValue(), this.clientCurrency);
   }
 
   openUserModal(): void {
@@ -824,7 +830,25 @@ export class ContractFormComponent implements OnInit {
   }
 
   formatCurrency(value: number): string {
-    return this.contractService.formatValue(value);
+    return this.contractService.formatValue(value, this.clientCurrency);
+  }
+
+  onClientChange(clientId: number | string): void {
+    console.log('🔍 onClientChange chamado com:', clientId, typeof clientId);
+    // Garantir que clientId seja número
+    const id = typeof clientId === 'string' ? parseInt(clientId, 10) : clientId;
+    const selectedClient = this.clients.find(c => c.id === id);
+    console.log('🔍 Cliente encontrado:', selectedClient);
+    if (selectedClient) {
+      // Verificar se é internacional pelo campo origin ou pela presença de country/tax_id
+      const isInternational = selectedClient.origin === 'international' ||
+        (selectedClient.country && selectedClient.country !== 'Brasil' && selectedClient.country !== 'Brazil');
+      this.clientCurrency = isInternational ? 'USD' : 'BRL';
+      console.log('🌍 Cliente selecionado:', selectedClient.name, '| Origin:', selectedClient.origin, '| Country:', selectedClient.country, '| Moeda:', this.clientCurrency);
+    } else {
+      this.clientCurrency = 'BRL';
+      console.log('⚠️ Cliente não encontrado na lista. Total de clientes:', this.clients.length);
+    }
   }
 
   calculateInstallmentValue(method: any): number {
@@ -845,17 +869,20 @@ export class ContractFormComponent implements OnInit {
 
   getInstallmentPreview(method: any, installmentCount: number): string {
     const totalValue = this.getTotalValue();
-    if (totalValue <= 0) return 'R$ 0,00';
-    
+    const zeroValue = this.clientCurrency === 'USD' ? '$ 0.00' : 'R$ 0,00';
+    const placeholderValue = this.clientCurrency === 'USD' ? '$ --.--' : 'R$ --,--';
+
+    if (totalValue <= 0) return zeroValue;
+
     let methodValue = 0;
     if (method.value_type === 'percentage' && method.percentage) {
       methodValue = (totalValue * method.percentage) / 100;
     } else if (method.value_type === 'fixed_value' && method.fixed_value) {
       methodValue = method.fixed_value;
     } else {
-      return 'R$ --,--';
+      return placeholderValue;
     }
-    
+
     const installmentValue = methodValue / installmentCount;
     return this.formatCurrency(installmentValue);
   }

@@ -504,8 +504,20 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     doc.text(value, margin + 35, y);
   }
 
+  get clientCurrency(): 'BRL' | 'USD' {
+    return this.contract?.client?.origin === 'international' ? 'USD' : 'BRL';
+  }
+
   formatCurrency(value: number | null | undefined): string {
-    if (value === null || value === undefined) return 'R$ 0,00';
+    if (value === null || value === undefined) {
+      return this.clientCurrency === 'USD' ? '$ 0.00' : 'R$ 0,00';
+    }
+    if (this.clientCurrency === 'USD') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(value);
+    }
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'

@@ -1,4 +1,4 @@
-import { Directive, HostListener, ElementRef, forwardRef, Input } from '@angular/core';
+import { Directive, HostListener, ElementRef, forwardRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 
 @Directive({
@@ -12,9 +12,10 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
     },
   ],
 })
-export class CurrencyMaskDirective implements ControlValueAccessor {
+export class CurrencyMaskDirective implements ControlValueAccessor, OnChanges {
   @Input() allowNegative = false;
   @Input() maxValue?: number;
+  @Input() currency: 'BRL' | 'USD' = 'BRL';
 
   private el: HTMLInputElement;
   private onChange: (value: any) => void = () => {};
@@ -23,6 +24,13 @@ export class CurrencyMaskDirective implements ControlValueAccessor {
 
   constructor(private elementRef: ElementRef) {
     this.el = this.elementRef.nativeElement;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['currency'] && !changes['currency'].firstChange) {
+      // Re-format display when currency changes
+      this.updateDisplay();
+    }
   }
 
   writeValue(value: any): void {
@@ -105,23 +113,28 @@ export class CurrencyMaskDirective implements ControlValueAccessor {
 
     // Garantir que temos pelo menos 3 dígitos (para centavos)
     const paddedValue = this.rawValue.padStart(3, '0');
-    
-    // Separar reais e centavos
-    const centavos = paddedValue.slice(-2);
-    let reais = paddedValue.slice(0, -2) || '0';
-    
-    // Remover zeros à esquerda dos reais
-    reais = parseInt(reais).toString();
-    
-    // Formatar reais com separadores de milhar
-    const formattedReais = this.addThousandsSeparator(reais);
-    
-    // Montar o valor final
-    this.el.value = `R$ ${formattedReais},${centavos}`;
+
+    // Separar inteiros e centavos
+    const cents = paddedValue.slice(-2);
+    let integerPart = paddedValue.slice(0, -2) || '0';
+
+    // Remover zeros à esquerda
+    integerPart = parseInt(integerPart).toString();
+
+    // Formatar com separadores de milhar e montar valor final
+    if (this.currency === 'USD') {
+      // USD: $ 1,234.56
+      const formattedInteger = this.addThousandsSeparator(integerPart, ',');
+      this.el.value = `$ ${formattedInteger}.${cents}`;
+    } else {
+      // BRL: R$ 1.234,56
+      const formattedInteger = this.addThousandsSeparator(integerPart, '.');
+      this.el.value = `R$ ${formattedInteger},${cents}`;
+    }
   }
 
-  private addThousandsSeparator(value: string): string {
-    return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  private addThousandsSeparator(value: string, separator: string): string {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
   }
 
   private getNumericValueFromRaw(): number {

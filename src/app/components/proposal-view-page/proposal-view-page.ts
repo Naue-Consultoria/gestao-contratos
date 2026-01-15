@@ -605,8 +605,13 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  get clientCurrency(): 'BRL' | 'USD' {
+    const client = (this.proposal as any)?.client;
+    return client?.origin === 'international' ? 'USD' : 'BRL';
+  }
+
   formatCurrency(value: number | null | undefined): string {
-    return this.proposalService.formatCurrency(value || 0);
+    return this.proposalService.formatCurrency(value || 0, this.clientCurrency);
   }
 
   formatDate(dateString: string | null | undefined): string {

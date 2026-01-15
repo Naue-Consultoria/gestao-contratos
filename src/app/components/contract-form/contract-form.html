@@ -67,6 +67,7 @@
                 name="client_id"
                 [disabled]="isLoading"
                 [class.error]="errors.client_id"
+                (ngModelChange)="onClientChange($event)"
               >
                 <option [value]="null" disabled>Selecione um cliente</option>
                 <option *ngFor="let client of clients" [value]="client.id">
@@ -178,7 +179,7 @@
                       <label class="field-label">Valor</label>
                       <div class="value-controls-vertical">
                         <div class="value-type-buttons">
-                          <button 
+                          <button
                             type="button"
                             class="value-type-btn"
                             [class.active]="method.value_type === 'percentage'"
@@ -186,13 +187,13 @@
                             [disabled]="isLoading">
                             %
                           </button>
-                          <button 
+                          <button
                             type="button"
                             class="value-type-btn"
                             [class.active]="method.value_type === 'fixed_value'"
                             (click)="setPaymentValueType(i, 'fixed_value')"
                             [disabled]="isLoading">
-                            R$
+                            {{ clientCurrency === 'USD' ? '$' : 'R$' }}
                           </button>
                         </div>
                         
@@ -207,16 +208,17 @@
                           min="0" max="100" step="0.01"
                           placeholder="100">
                         
-                        <input 
+                        <input
                           *ngIf="method.value_type === 'fixed_value'"
-                          type="text" 
+                          type="text"
                           class="form-control value-input"
                           [(ngModel)]="method.fixed_value"
                           [name]="'fixed_value_' + i"
                           [disabled]="isLoading || dynamicPaymentMethods.length === 1"
                           [class.locked]="dynamicPaymentMethods.length === 1"
                           placeholder="Valor total"
-                          appCurrencyMask>
+                          appCurrencyMask
+                          [currency]="clientCurrency">
                       </div>
                     </div>
                   </div>
@@ -320,14 +322,14 @@
                     <span>Porcentagem</span>
                   </label>
                   <label class="radio-label">
-                    <input 
-                      type="radio" 
-                      name="barterType" 
+                    <input
+                      type="radio"
+                      name="barterType"
                       value="value"
                       [(ngModel)]="formData.barter_type"
                       (ngModelChange)="onBarterTypeChange()"
                       [disabled]="isLoading">
-                    <span>Valor em R$</span>
+                    <span>Valor em {{ clientCurrency === 'USD' ? '$' : 'R$' }}</span>
                   </label>
                 </div>
               </div>
@@ -352,15 +354,16 @@
               </div>
               
               <div class="form-group" *ngIf="formData.barter_type === 'value'">
-                <label class="form-label">Valor da Permuta (R$)</label>
-                <input 
-                  type="text" 
-                  class="form-control" 
+                <label class="form-label">Valor da Permuta ({{ clientCurrency === 'USD' ? '$' : 'R$' }})</label>
+                <input
+                  type="text"
+                  class="form-control"
                   [(ngModel)]="formData.barter_value"
                   (ngModelChange)="onBarterValueChange()"
                   name="barterValue"
                   placeholder="0,00"
                   appCurrencyMask
+                  [currency]="clientCurrency"
                   [disabled]="isLoading">
                 <span class="help-text">
                   <i class="fas fa-info-circle"></i>
@@ -536,6 +539,7 @@
                           [name]="'price_' + i"
                           placeholder="0,00"
                           appCurrencyMask
+                          [currency]="clientCurrency"
                         />
                       </div>
                     </div>

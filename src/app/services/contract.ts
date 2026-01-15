@@ -175,6 +175,8 @@ export interface ApiContract {
   client: {
     id: number;
     name: string;
+    origin?: 'national' | 'international';
+    country?: string;
   };
   contract_services: ApiContractService[];
   created_by_user?: { name: string };
@@ -321,8 +323,11 @@ export class ContractService {
     return this.http.delete(`${this.API_URL}/${id}/permanent`, { headers });
   }
 
-  formatValue(valueInReais: number): string {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valueInReais || 0);
+  formatValue(value: number, currency: 'BRL' | 'USD' = 'BRL'): string {
+    if (currency === 'USD') {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value || 0);
+    }
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
   }
 
   /**

@@ -260,7 +260,7 @@
               <div class="contract-value">
                 <span class="value-amount">{{ contract.totalValue }}</span>
                 <span *ngIf="hasCancelledServices(contract.raw)" class="cancelled-indicator"
-                      [title]="'Original: ' + contractService.formatValue(contract.raw.total_value) + ' | Cancelados: ' + contractService.formatValue(getCancelledServicesValue(contract.raw)) + ' | Atual: ' + contract.totalValue">
+                      [title]="'Original: ' + formatContractValue(contract.raw.total_value, contract.raw) + ' | Cancelados: ' + formatContractValue(getCancelledServicesValue(contract.raw), contract.raw) + ' | Atual: ' + contract.totalValue">
                   *
                 </span>
               </div>
@@ -376,7 +376,7 @@
               <span class="table-card-value">
                 <span class="value-amount">{{ contract.totalValue }}</span>
                 <span *ngIf="hasCancelledServices(contract.raw)" class="cancelled-indicator"
-                      [title]="'Original: ' + contractService.formatValue(contract.raw.total_value) + ' | Cancelados: ' + contractService.formatValue(getCancelledServicesValue(contract.raw)) + ' | Atual: ' + contract.totalValue">
+                      [title]="'Original: ' + formatContractValue(contract.raw.total_value, contract.raw) + ' | Cancelados: ' + formatContractValue(getCancelledServicesValue(contract.raw), contract.raw) + ' | Atual: ' + contract.totalValue">
                   *
                 </span>
               </span>

@@ -327,6 +327,9 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       clientName = contract.client.name;
     }
 
+    // Determinar moeda baseada na origem do cliente
+    const clientCurrency: 'BRL' | 'USD' = contract.client?.origin === 'international' ? 'USD' : 'BRL';
+
     return {
       id: contract.id,
       contractNumber: contract.contract_number,
@@ -341,7 +344,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
         contract.start_date,
         contract.end_date
       )} dias`,
-      totalValue: this.contractService.formatValue(this.getAdjustedContractValue(contract)),
+      totalValue: this.contractService.formatValue(this.getAdjustedContractValue(contract), clientCurrency),
       status: this.contractService.getStatusText(contract.status),
       statusColor: this.contractService.getStatusColor(contract.status),
       servicesCount: contract.contract_services?.length || 0,
@@ -475,6 +478,14 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
   formatAverageValue(): string {
     return this.contractService.formatValue(this.stats.averageValue);
+  }
+
+  getContractCurrency(contract: ApiContract): 'BRL' | 'USD' {
+    return contract.client?.origin === 'international' ? 'USD' : 'BRL';
+  }
+
+  formatContractValue(value: number, contract: ApiContract): string {
+    return this.contractService.formatValue(value, this.getContractCurrency(contract));
   }
 
   getTypeIcon(type: string): string {
