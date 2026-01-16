@@ -384,8 +384,11 @@
 
 
           <div class="summary-total">
-            <div class="total-label">Investimento Total</div>
-            <div class="total-amount">{{ formatCurrency(getFinalValueWithDiscount()) }}</div>
+            <div class="total-label">Seu Investimento</div>
+            <div class="total-amount-installments">
+              <span class="installment-count">{{ (proposal?.max_installments || 12) }}x</span>
+              <span class="installment-value">{{ formatCurrency(getFinalValueWithDiscount() / (proposal?.max_installments || 12)) }}</span>
+            </div>
             <div class="discount-note" *ngIf="canGetDiscount()">
               <div class="original-price-summary">
                 De: <s>{{ formatCurrency(getBaseTotal()) }}</s>
@@ -573,15 +576,15 @@
                       </div>
                     </div>
                     
-                    <div class="payment-type-card" 
+                    <div class="payment-type-card"
                          [class.selected]="paymentType === 'prazo'"
                          (click)="onPaymentTypeChange('prazo')">
                       <div class="card-header">
-                        <input type="radio" 
-                               name="payment_type" 
+                        <input type="radio"
+                               name="payment_type"
                                [checked]="paymentType === 'prazo'"
                                (change)="onPaymentTypeChange('prazo')">
-                        <span class="card-title">A Prazo</span>
+                        <span class="card-title">À Prazo</span>
                         <span class="discount-badge" *ngIf="areAllServicesSelected() && hasPrazoDiscount()">
                           <ng-container *ngIf="proposal && proposal.prazo_discount_percentage && proposal.prazo_discount_percentage > 0">
                             {{ proposal.prazo_discount_percentage }}% OFF
@@ -593,27 +596,21 @@
                       </div>
                       <div class="card-content">
                         <div class="price-display">
-                          <span class="original-price" *ngIf="hasPrazoDiscount() && areAllServicesSelected()">
-                            De: {{ formatCurrency(getBaseTotal()) }}
+                          <span class="total-info">
+                            Total: {{ formatCurrency(getPrazoValueWithDiscount()) }}
                           </span>
                           <span class="final-price">
-                            {{ formatCurrency(getPrazoValueWithDiscount()) }}
+                            {{ (proposal && proposal.max_installments) || 12 }}x de {{ formatCurrency(getPrazoValueWithDiscount() / ((proposal && proposal.max_installments) || 12)) }}
                           </span>
                         </div>
-                        <div class="installments-info">
-                          Em até {{ (proposal && proposal.max_installments) || 12 }}x de {{ formatCurrency(getPrazoValueWithDiscount() / ((proposal && proposal.max_installments) || 12)) }}
-                        </div>
-                        <div class="savings" *ngIf="areAllServicesSelected() && hasPrazoDiscount()">
-                          Economia de {{ formatCurrency(getBaseTotal() - getPrazoValueWithDiscount()) }}
-                        </div>
-                        <div class="no-discount-info" *ngIf="!areAllServicesSelected() && hasPrazoDiscount()">
-                          <small>Desconto disponível apenas com todos os serviços</small>
+                        <div class="installment-benefit">
+                          Parcele sem juros
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                
+
                 <!-- Payment Method Selection -->
                 <div class="payment-method-selection">
                   <label class="field-label">Método de Pagamento *</label>

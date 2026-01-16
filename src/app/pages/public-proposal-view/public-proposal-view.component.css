@@ -2808,6 +2808,89 @@ html {
   letter-spacing: -0.02em;
 }
 
+.total-amount-installments {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  line-height: 1;
+}
+
+.installment-count {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #065f46;
+}
+
+.installment-value {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #022c22;
+  letter-spacing: -0.02em;
+}
+
+.price-display-installments {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.price-display-installments .installment-count {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.installment-value-card {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #065f46;
+}
+
+.installments-subtitle {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 0.25rem;
+}
+
+.total-info {
+  display: block;
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin-bottom: 0.25rem;
+}
+
+.installment-benefit {
+  background: #14532d;
+  color: #ffffff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.total-full-value {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-top: 0.5rem;
+  font-weight: 400;
+}
+
+.installments-summary {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #065f46;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(6, 95, 70, 0.1);
+  border-radius: 20px;
+  display: inline-block;
+}
+
 /* === SIGNATURE SECTION === */
 .signature-section {
   padding: 6rem 0 4rem;
@@ -3419,6 +3502,19 @@ html {
   font-size: 0.9rem;
   margin-top: 0.5rem;
   font-weight: 500;
+}
+
+.installments-highlight {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.final-price-small {
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
 }
 
 .no-discount-info {
