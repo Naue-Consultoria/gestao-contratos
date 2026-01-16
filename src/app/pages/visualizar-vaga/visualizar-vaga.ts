@@ -277,19 +277,15 @@ export class VisualizarVagaComponent implements OnInit {
       console.log('Candidatos mapeados:', this.candidatos);
 
       // Atualizar candidato aprovado na vaga
-      if (this.vaga) {
-        console.log('Procurando candidato aprovado...');
-        this.candidatos.forEach(vc => {
-          console.log(`Candidato: ${vc.candidato.nome}, Status: ${vc.candidato.status}`);
-        });
-
+      if (this.vaga && !this.vaga.candidatoAprovado) {
+        // Verificar status na tabela vaga_candidatos OU na tabela candidatos
         const candidatoAprovado = this.candidatos.find(
-          vc => vc.candidato.status === 'aprovado'
+          vc => vc.status === 'aprovado' || vc.candidato.status === 'aprovado'
         );
 
-        console.log('Candidato aprovado encontrado:', candidatoAprovado);
-        this.vaga.candidatoAprovado = candidatoAprovado?.candidato.nome;
-        console.log('vaga.candidatoAprovado:', this.vaga.candidatoAprovado);
+        if (candidatoAprovado) {
+          this.vaga.candidatoAprovado = candidatoAprovado.candidato.nome;
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar candidatos:', error);

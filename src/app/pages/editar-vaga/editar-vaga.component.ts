@@ -89,9 +89,6 @@ export class EditarVagaComponent implements OnInit {
       dataAbertura: ['', Validators.required],
       dataFechamentoCancelamento: [''],
       observacoes: [''],
-      candidatoAprovado: [''],
-      emailCandidato: [''],
-      telefoneCandidato: [''],
       porcentagemFaturamento: [100, [Validators.min(0), Validators.max(200)]],
       valorFaturamento: [{ value: 0, disabled: true }],
       sigilosa: [false],
@@ -193,10 +190,7 @@ export class EditarVagaComponent implements OnInit {
 
       if (!isFechado) {
         this.vagaForm.patchValue({
-          dataFechamentoCancelamento: '',
-          candidatoAprovado: '',
-          emailCandidato: '',
-          telefoneCandidato: ''
+          dataFechamentoCancelamento: ''
         });
       }
     });

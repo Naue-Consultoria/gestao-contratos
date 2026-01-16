@@ -198,7 +198,6 @@
             <th>Consultora</th>
             <th>Status</th>
             <th>Candidato Aprovado</th>
-            <th>Fonte</th>
             <th>Data Abertura</th>
             <th>Data Fechamento</th>
             <th>SLA (dias)</th>
@@ -267,9 +266,6 @@
                 </small>
               </div>
               <span class="empty-text" *ngIf="!vaga.candidatoAprovado">-</span>
-            </td>
-            <td>
-              <span class="fonte-badge">{{ fonteRecrutamentoLabels[vaga.fonteRecrutamento] }}</span>
             </td>
             <td>
               <span class="date-text">{{ vaga.dataAbertura | dateNoTimezone }}</span>
@@ -351,6 +347,7 @@
             <th>Consultora</th>
             <th>Data Abertura</th>
             <th>Data Fechamento</th>
+            <th>Fonte</th>
             <th>SLA (dias)</th>
             <th>Ações</th>
           </tr>
@@ -413,6 +410,9 @@
               <span class="date-text empty" *ngIf="!vaga.dataFechamentoCancelamento">-</span>
             </td>
             <td>
+              <span class="fonte-badge">{{ fonteRecrutamentoLabels[vaga.fonteRecrutamento] || '-' }}</span>
+            </td>
+            <td>
               <span class="sla-badge"
                     [ngClass]="getSlaClass(calculateSla(vaga))"
                     *ngIf="vaga.dataFechamentoCancelamento">
@@ -464,7 +464,7 @@
             <td><strong>R$ {{ calcularTotalSalarioFechamento() | number:'1.2-2':'pt-BR' }}</strong></td>
             <td></td>
             <td><strong>R$ {{ calcularTotalFaturamentoFechamento() | number:'1.2-2':'pt-BR' }}</strong></td>
-            <td colspan="5"></td>
+            <td colspan="6"></td>
           </tr>
         </tfoot>
       </table>

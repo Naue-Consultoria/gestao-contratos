@@ -250,43 +250,6 @@
 
           </div>
 
-          <!-- Section: Candidato Aprovado -->
-          <div class="form-section" *ngIf="['fechada', 'fechada_rep'].includes(vagaForm.get('status')?.value)">
-            <h3 class="section-title">
-              <i class="fas fa-user-check"></i>
-              Candidato Aprovado
-            </h3>
-
-            <div class="form-group">
-              <label class="form-label">Nome do Candidato</label>
-              <input
-                type="text"
-                formControlName="candidatoAprovado"
-                class="form-control"
-                placeholder="Nome completo do candidato aprovado">
-            </div>
-
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">E-mail</label>
-                <input
-                  type="email"
-                  formControlName="emailCandidato"
-                  class="form-control"
-                  placeholder="email@exemplo.com">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Telefone</label>
-                <input
-                  type="tel"
-                  formControlName="telefoneCandidato"
-                  class="form-control"
-                  placeholder="(00) 00000-0000">
-              </div>
-            </div>
-          </div>
-
           <!-- Section: Observações -->
           <div class="form-section">
             <h3 class="section-title">

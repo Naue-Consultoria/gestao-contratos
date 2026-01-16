@@ -197,6 +197,9 @@ export class RecrutamentoSelecao implements OnInit {
       // Carregar vagas do backend
       const response = await firstValueFrom(this.vagaService.getAll());
 
+      console.log('=== DEBUG: Dados recebidos do backend ===');
+      console.log('Total de vagas:', response.data.length);
+
       // Mapear dados do backend para o formato esperado pelo componente
       this.vagas = response.data.map((vaga: any) => {
         // Extrair nome do cliente de acordo com a estrutura do banco
@@ -223,12 +226,27 @@ export class RecrutamentoSelecao implements OnInit {
 
         // Buscar candidato aprovado dos candidatos vinculados
         let candidatoAprovadoNome = vaga.candidato_aprovado?.nome;
-        if (vaga.vaga_candidatos && Array.isArray(vaga.vaga_candidatos)) {
+
+        // Debug: ver os dados de candidatos
+        if (vaga.vaga_candidatos && vaga.vaga_candidatos.length > 0) {
+          console.log(`Vaga ${vaga.id} - ${vaga.cargo}:`);
+          console.log('  candidato_aprovado:', vaga.candidato_aprovado);
+          console.log('  vaga_candidatos:', vaga.vaga_candidatos.map((vc: any) => ({
+            vc_status: vc.status,
+            candidato_nome: vc.candidato?.nome,
+            candidato_status: vc.candidato?.status
+          })));
+        }
+
+        if (!candidatoAprovadoNome && vaga.vaga_candidatos && Array.isArray(vaga.vaga_candidatos)) {
+          // Verificar status na tabela vaga_candidatos (status do candidato para esta vaga específica)
+          // OU verificar status na tabela candidatos
           const candidatoAprovado = vaga.vaga_candidatos.find((vc: any) =>
-            vc.candidato && vc.candidato.status === 'aprovado'
+            vc.candidato && (vc.status === 'aprovado' || vc.candidato.status === 'aprovado')
           );
           if (candidatoAprovado) {
             candidatoAprovadoNome = candidatoAprovado.candidato.nome;
+            console.log(`  -> Candidato aprovado encontrado: ${candidatoAprovadoNome}`);
           }
         }
 
