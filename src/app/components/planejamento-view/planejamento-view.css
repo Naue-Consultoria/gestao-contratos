@@ -342,9 +342,9 @@
 .okrs-table tbody tr:last-child td { border-bottom: none; }
 
 /* ===== SUB-OBJETIVOS ESTRATÉGICOS ===== */
-.okrs-list-container { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
+.okrs-list-container { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; overflow: visible; }
 
-.okr-item-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; }
+.okr-item-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; overflow: visible; }
 
 .okr-main-row { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; }
 
@@ -401,6 +401,20 @@
   display: flex;
   gap: 0.5rem;
   justify-content: flex-start;
+  position: relative;
+}
+
+.okr-actions .dropdown-menu-container {
+  position: relative;
+}
+
+.okr-actions .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 9999;
+  min-width: 160px;
+  margin-top: 4px;
 }
 
 /* Árvore de Problemas - Tabela */
