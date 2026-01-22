@@ -36,6 +36,10 @@ export class MentoriaEdit implements OnInit {
   fotoSelecionadaPreview: string | null = null;
   fotoAtualUrl: string | null = null;
 
+  // Atualização global do nome do mentorado
+  isAtualizandoNome = false;
+  showModalAtualizarNome = false;
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -66,9 +70,10 @@ export class MentoriaEdit implements OnInit {
       client_id: ['', Validators.required],
       contract_id: ['', Validators.required],
       status: ['ativa', Validators.required],
+      mentorado_nome: ['', [Validators.required, Validators.minLength(2)]], // Nome do mentorado
       mentorado_data_nascimento: [''], // Data de nascimento do mentorado (opcional)
       mentorado_profissao: [''], // Profissão do mentorado (opcional)
-      mentorado_email: [''] // Email do mentorado (opcional)
+      mentorado_email: ['', [Validators.email]] // Email do mentorado (opcional, com validação)
     });
   }
 
@@ -167,11 +172,17 @@ export class MentoriaEdit implements OnInit {
     console.log('📋 Contratos filtrados:', this.contratosFiltrados.length);
     console.log('📋 Contract_id da mentoria:', this.mentoria.contract_id);
 
+    // Pegar o mentorado_nome do primeiro encontro (pois está armazenado nos encontros)
+    const primeiroEncontro = this.mentoria.encontros && this.mentoria.encontros.length > 0
+      ? this.mentoria.encontros[0]
+      : null;
+
     // Depois preencher o formulário com os valores
     this.mentoriaForm.patchValue({
       client_id: this.mentoria.client_id,
       contract_id: this.mentoria.contract_id,
       status: this.mentoria.status,
+      mentorado_nome: primeiroEncontro?.mentorado_nome || this.mentoria.mentorado_nome || '',
       mentorado_data_nascimento: this.mentoria.mentorado_data_nascimento || '',
       mentorado_profissao: this.mentoria.mentorado_profissao || '',
       mentorado_email: this.mentoria.mentorado_email || ''
@@ -334,6 +345,69 @@ export class MentoriaEdit implements OnInit {
     } finally {
       this.isUploadingFoto = false;
     }
+  }
+
+  /**
+   * Abrir modal para atualizar o nome do mentorado em todos os encontros
+   */
+  atualizarNomeEmTodosEncontros(): void {
+    if (!this.mentoria || !this.mentoria.encontros || this.mentoria.encontros.length === 0) {
+      this.toastr.warning('Não há encontros para atualizar');
+      return;
+    }
+
+    const novoNome = this.mentoriaForm.get('mentorado_nome')?.value;
+    if (!novoNome || novoNome.trim() === '') {
+      this.toastr.error('O nome do mentorado é obrigatório');
+      return;
+    }
+
+    // Abrir modal de confirmação
+    this.showModalAtualizarNome = true;
+  }
+
+  /**
+   * Fechar modal de atualização de nome
+   */
+  fecharModalAtualizarNome(): void {
+    if (!this.isAtualizandoNome) {
+      this.showModalAtualizarNome = false;
+    }
+  }
+
+  /**
+   * Confirmar atualização do nome em todos os encontros
+   */
+  confirmarAtualizarNome(): void {
+    if (!this.mentoria || !this.mentoria.encontros || this.mentoria.encontros.length === 0) {
+      return;
+    }
+
+    const novoNome = this.mentoriaForm.get('mentorado_nome')?.value;
+    const primeiroEncontroId = this.mentoria.encontros[0].id;
+    this.isAtualizandoNome = true;
+
+    this.mentoriaService.atualizarNomeMentoradoGlobal(primeiroEncontroId, novoNome).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.toastr.success(
+            `Nome atualizado em ${response.data.encontros_atualizados} encontro(s)!`,
+            'Sucesso'
+          );
+          // Atualizar o nome nos encontros localmente
+          if (this.mentoria?.encontros) {
+            this.mentoria.encontros.forEach(e => e.mentorado_nome = novoNome);
+          }
+        }
+        this.isAtualizandoNome = false;
+        this.showModalAtualizarNome = false;
+      },
+      error: (error) => {
+        console.error('Erro ao atualizar nome globalmente:', error);
+        this.toastr.error('Erro ao atualizar nome do mentorado');
+        this.isAtualizandoNome = false;
+      }
+    });
   }
 
   private configurarBreadcrumb(): void {

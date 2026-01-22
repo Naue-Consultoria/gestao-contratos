@@ -61,6 +61,10 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
   fotoSelecionada: File | null = null;
   fotoSelecionadaPreview: string | null = null;
 
+  // Atualização global do nome do mentorado
+  atualizarNomeGlobalmente = false;
+  isAtualizandoNome = false;
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -494,6 +498,46 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
       error: (error) => {
         console.error('Erro ao publicar:', error);
         this.toastr.error('Erro ao publicar encontro');
+      }
+    });
+  }
+
+  /**
+   * Atualizar o nome do mentorado em todos os encontros da mentoria
+   */
+  atualizarNomeEmTodosEncontros(): void {
+    if (!this.encontroId) {
+      this.toastr.error('Encontro não encontrado');
+      return;
+    }
+
+    const novoNome = this.encontroForm.get('mentorado_nome')?.value;
+    if (!novoNome || novoNome.trim() === '') {
+      this.toastr.error('O nome do mentorado é obrigatório');
+      return;
+    }
+
+    if (!confirm(`Deseja atualizar o nome do mentorado para "${novoNome}" em TODOS os encontros desta mentoria?`)) {
+      return;
+    }
+
+    this.isAtualizandoNome = true;
+
+    this.mentoriaService.atualizarNomeMentoradoGlobal(this.encontroId, novoNome).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.toastr.success(
+            `Nome atualizado em ${response.data.encontros_atualizados} encontro(s)!`,
+            'Sucesso'
+          );
+          this.atualizarNomeGlobalmente = false;
+        }
+        this.isAtualizandoNome = false;
+      },
+      error: (error) => {
+        console.error('Erro ao atualizar nome globalmente:', error);
+        this.toastr.error('Erro ao atualizar nome do mentorado');
+        this.isAtualizandoNome = false;
       }
     });
   }

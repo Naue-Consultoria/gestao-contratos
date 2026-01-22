@@ -73,7 +73,51 @@
             </div>
           </div>
 
-          <!-- Linha 2: Data de Nascimento e Profissão -->
+          <!-- Linha 2: Nome do Mentorado e Email -->
+          <div class="form-row">
+            <!-- Nome do Mentorado -->
+            <div class="form-field">
+              <label for="mentorado_nome">
+                <i class="fas fa-user-graduate"></i>
+                Nome do Mentorado *
+              </label>
+              <input
+                type="text"
+                id="mentorado_nome"
+                formControlName="mentorado_nome"
+                placeholder="Ex: João Silva">
+              <div class="field-action-row">
+                <button
+                  type="button"
+                  class="btn-link-action"
+                  (click)="atualizarNomeEmTodosEncontros()"
+                  [disabled]="isAtualizandoNome || !mentoriaForm.get('mentorado_nome')?.value"
+                  title="Atualizar nome em todos os encontros desta mentoria">
+                  <i class="fas" [ngClass]="isAtualizandoNome ? 'fa-spinner fa-spin' : 'fa-sync-alt'"></i>
+                  {{ isAtualizandoNome ? 'Atualizando...' : 'Aplicar em todos os encontros' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Email do Mentorado -->
+            <div class="form-field">
+              <label for="mentorado_email">
+                <i class="fas fa-envelope"></i>
+                Email do Mentorado
+              </label>
+              <input
+                type="email"
+                id="mentorado_email"
+                formControlName="mentorado_email"
+                placeholder="Ex: joao@email.com">
+              <small class="field-error" *ngIf="mentoriaForm.get('mentorado_email')?.invalid && mentoriaForm.get('mentorado_email')?.touched">
+                <i class="fas fa-exclamation-circle"></i>
+                Email inválido
+              </small>
+            </div>
+          </div>
+
+          <!-- Linha 3: Data de Nascimento e Profissão -->
           <div class="form-row">
             <!-- Data de Nascimento do Mentorado -->
             <div class="form-field">
@@ -101,25 +145,8 @@
             </div>
           </div>
 
-          <!-- Linha 3: Email e Status -->
+          <!-- Linha 4: Status da Mentoria -->
           <div class="form-row">
-            <!-- Email do Mentorado -->
-            <div class="form-field">
-              <label for="mentorado_email">
-                <i class="fas fa-envelope"></i>
-                Email do Mentorado
-              </label>
-              <input
-                type="email"
-                id="mentorado_email"
-                formControlName="mentorado_email"
-                placeholder="Ex: joao@email.com">
-              <small class="field-error" *ngIf="mentoriaForm.get('mentorado_email')?.invalid && mentoriaForm.get('mentorado_email')?.touched">
-                <i class="fas fa-exclamation-circle"></i>
-                Email inválido
-              </small>
-            </div>
-
             <!-- Status da Mentoria -->
             <div class="form-field">
               <label for="status">
@@ -181,28 +208,42 @@
         </div>
 
         <div class="foto-upload-container">
-          <!-- Indicador de Foto Atual -->
-          <div class="foto-selected-indicator" *ngIf="fotoAtualUrl && !fotoSelecionadaPreview">
-            <i class="fas fa-check-circle"></i>
-            <span>Foto atual da mentoria</span>
-            <button type="button"
-                    class="btn-remove-foto"
-                    (click)="removerFotoAtual()"
-                    [disabled]="isUploadingFoto"
-                    title="Remover foto atual">
-              <i class="fas fa-trash"></i>
-              Remover
-            </button>
+          <!-- Prévia da Foto Atual -->
+          <div class="foto-preview-container" *ngIf="fotoAtualUrl && !fotoSelecionadaPreview">
+            <div class="foto-preview">
+              <img [src]="fotoAtualUrl" alt="Foto da mentoria" class="foto-preview-image">
+            </div>
+            <div class="foto-preview-actions">
+              <span class="foto-preview-label">
+                <i class="fas fa-check-circle"></i>
+                Foto atual da mentoria
+              </span>
+              <button type="button"
+                      class="btn-remove-foto"
+                      (click)="removerFotoAtual()"
+                      [disabled]="isUploadingFoto"
+                      title="Remover foto atual">
+                <i class="fas fa-trash"></i>
+                Remover
+              </button>
+            </div>
           </div>
 
-          <!-- Indicador de Nova Foto Selecionada -->
-          <div class="foto-selected-indicator" *ngIf="fotoSelecionadaPreview">
-            <i class="fas fa-image"></i>
-            <span>Nova foto selecionada</span>
-            <button type="button" class="btn-remove-foto" (click)="removerFotoSelecionada()">
-              <i class="fas fa-times"></i>
-              Remover
-            </button>
+          <!-- Prévia da Nova Foto Selecionada -->
+          <div class="foto-preview-container" *ngIf="fotoSelecionadaPreview">
+            <div class="foto-preview">
+              <img [src]="fotoSelecionadaPreview" alt="Nova foto" class="foto-preview-image">
+            </div>
+            <div class="foto-preview-actions">
+              <span class="foto-preview-label">
+                <i class="fas fa-image"></i>
+                Nova foto selecionada
+              </span>
+              <button type="button" class="btn-remove-foto" (click)="removerFotoSelecionada()">
+                <i class="fas fa-times"></i>
+                Remover
+              </button>
+            </div>
           </div>
 
           <!-- Input de Upload -->
@@ -232,4 +273,46 @@
 <div *ngIf="isLoading" class="loading-overlay">
   <div class="spinner"></div>
   <p>Carregando...</p>
+</div>
+
+<!-- Modal de Confirmação - Atualizar Nome -->
+<div class="modal-overlay" *ngIf="showModalAtualizarNome" (click)="fecharModalAtualizarNome()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-icon warning">
+        <i class="fas fa-sync-alt"></i>
+      </div>
+      <h3 class="modal-title">Atualizar Nome do Mentorado</h3>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-message">
+        Deseja atualizar o nome do mentorado para
+        <strong>"{{ mentoriaForm.get('mentorado_nome')?.value }}"</strong>
+        em <strong>TODOS os {{ mentoria?.encontros?.length || 0 }} encontros</strong> desta mentoria?
+      </p>
+      <div class="modal-info">
+        <i class="fas fa-info-circle"></i>
+        <span>Esta ação irá substituir o nome em todos os encontros existentes.</span>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn-modal-cancel"
+        (click)="fecharModalAtualizarNome()"
+        [disabled]="isAtualizandoNome">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="btn-modal-confirm"
+        (click)="confirmarAtualizarNome()"
+        [disabled]="isAtualizandoNome">
+        <i class="fas" [ngClass]="isAtualizandoNome ? 'fa-spinner fa-spin' : 'fa-check'"></i>
+        {{ isAtualizandoNome ? 'Atualizando...' : 'Confirmar' }}
+      </button>
+    </div>
+  </div>
 </div>

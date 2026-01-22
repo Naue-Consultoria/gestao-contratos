@@ -386,8 +386,8 @@
           <div class="summary-total">
             <div class="total-label">Seu Investimento</div>
             <div class="total-amount-installments">
-              <span class="installment-count">{{ (proposal?.max_installments || 12) }}x</span>
-              <span class="installment-value">{{ formatCurrency(getFinalValueWithDiscount() / (proposal?.max_installments || 12)) }}</span>
+              <span class="installment-count">{{ (proposal.max_installments || 12) }}x</span>
+              <span class="installment-value">{{ formatCurrency(getFinalValueWithDiscount() / (proposal.max_installments || 12)) }}</span>
             </div>
             <div class="discount-note" *ngIf="canGetDiscount()">
               <div class="original-price-summary">

@@ -222,6 +222,16 @@ export class MentoriaService {
   }
 
   /**
+   * Atualizar nome do mentorado em todos os encontros da mentoria
+   */
+  atualizarNomeMentoradoGlobal(encontroId: number, mentoradoNome: string): Observable<ApiResponse<{ encontros_atualizados: number; mentorado_nome: string }>> {
+    return this.http.put<ApiResponse<{ encontros_atualizados: number; mentorado_nome: string }>>(
+      `${this.apiUrl}/encontros/${encontroId}/atualizar-nome-global`,
+      { mentorado_nome: mentoradoNome }
+    );
+  }
+
+  /**
    * Deletar encontro
    */
   deletarEncontro(id: number): Observable<ApiResponse<void>> {

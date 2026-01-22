@@ -191,11 +191,26 @@
                 <i class="fas fa-user-graduate"></i>
                 Nome do Mentorado *
               </label>
-              <input
-                type="text"
-                id="mentorado_nome"
-                formControlName="mentorado_nome"
-                placeholder="Ex: João Silva">
+              <div class="input-with-action">
+                <input
+                  type="text"
+                  id="mentorado_nome"
+                  formControlName="mentorado_nome"
+                  placeholder="Ex: João Silva">
+                <button
+                  type="button"
+                  class="btn-secondary btn-small"
+                  (click)="atualizarNomeEmTodosEncontros()"
+                  [disabled]="isAtualizandoNome || !encontroForm.get('mentorado_nome')?.value"
+                  title="Atualizar nome em todos os encontros desta mentoria">
+                  <i class="fas" [ngClass]="isAtualizandoNome ? 'fa-spinner fa-spin' : 'fa-sync-alt'"></i>
+                  {{ isAtualizandoNome ? 'Atualizando...' : 'Aplicar em todos' }}
+                </button>
+              </div>
+              <small class="field-hint">
+                <i class="fas fa-info-circle"></i>
+                Use "Aplicar em todos" para atualizar o nome em todos os encontros desta mentoria
+              </small>
             </div>
 
             <!-- Número do Encontro -->
@@ -263,14 +278,21 @@
 
         <!-- MODO CRIAÇÃO - Foto da Mentoria -->
         <div *ngIf="!isEditMode" class="foto-upload-container">
-          <!-- Indicador de arquivo selecionado -->
-          <div class="foto-selected-indicator" *ngIf="fotoSelecionadaPreview">
-            <i class="fas fa-check-circle"></i>
-            <span>Foto selecionada</span>
-            <button type="button" class="btn-remove-foto" (click)="removerFotoSelecionada()" title="Remover foto">
-              <i class="fas fa-times"></i>
-              Remover
-            </button>
+          <!-- Prévia da foto selecionada -->
+          <div class="foto-preview-container" *ngIf="fotoSelecionadaPreview">
+            <div class="foto-preview">
+              <img [src]="fotoSelecionadaPreview" alt="Prévia da foto" class="foto-preview-image">
+            </div>
+            <div class="foto-preview-actions">
+              <span class="foto-preview-label">
+                <i class="fas fa-check-circle"></i>
+                Foto selecionada
+              </span>
+              <button type="button" class="btn-remove-foto" (click)="removerFotoSelecionada()" title="Remover foto">
+                <i class="fas fa-times"></i>
+                Remover
+              </button>
+            </div>
           </div>
 
           <div class="foto-upload-input" *ngIf="!fotoSelecionadaPreview">
@@ -290,14 +312,21 @@
 
         <!-- MODO EDIÇÃO - Foto do Encontro -->
         <div *ngIf="isEditMode" class="foto-upload-container">
-          <!-- Indicador de foto existente -->
-          <div class="foto-selected-indicator" *ngIf="fotoEncontroUrl">
-            <i class="fas fa-image"></i>
-            <span>Foto atual do encontro</span>
-            <button type="button" class="btn-remove-foto" (click)="removerFoto()" title="Remover foto" [disabled]="isUploadingFoto">
-              <i class="fas fa-trash"></i>
-              Remover foto
-            </button>
+          <!-- Prévia da foto existente -->
+          <div class="foto-preview-container" *ngIf="fotoEncontroUrl">
+            <div class="foto-preview">
+              <img [src]="fotoEncontroUrl" alt="Foto do encontro" class="foto-preview-image">
+            </div>
+            <div class="foto-preview-actions">
+              <span class="foto-preview-label">
+                <i class="fas fa-check-circle"></i>
+                Foto atual do encontro
+              </span>
+              <button type="button" class="btn-remove-foto" (click)="removerFoto()" title="Remover foto" [disabled]="isUploadingFoto">
+                <i class="fas fa-trash"></i>
+                Remover
+              </button>
+            </div>
           </div>
 
           <div class="foto-upload-input" *ngIf="!fotoEncontroUrl">
