@@ -63,6 +63,7 @@
         <option value="pendente">Pendente</option>
         <option value="aprovado">Aprovado</option>
         <option value="reprovado">Reprovado</option>
+        <option value="desistiu">Desistiu do processo seletivo</option>
       </select>
       <div class="invalid-feedback" *ngIf="formControls['status'].invalid && formControls['status'].touched">
         <span *ngIf="formControls['status'].errors?.['required']">Status é obrigatório</span>

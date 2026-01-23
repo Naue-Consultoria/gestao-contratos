@@ -104,7 +104,7 @@ export class VisualizarVagaComponent implements OnInit {
     nome: '',
     email: '',
     telefone: '',
-    status: 'pendente', // pendente, aprovado, reprovado
+    status: 'pendente', // pendente, aprovado, reprovado, desistiu
     observacoes: ''
   };
 
@@ -379,7 +379,7 @@ export class VisualizarVagaComponent implements OnInit {
       nome: this.candidateForm.nome,
       email: this.candidateForm.email,
       telefone: this.candidateForm.telefone,
-      status: this.candidateForm.status as 'pendente' | 'aprovado' | 'reprovado'
+      status: this.candidateForm.status as 'pendente' | 'aprovado' | 'reprovado' | 'desistiu'
     };
 
     const novaInscricao: VagaCandidato = {

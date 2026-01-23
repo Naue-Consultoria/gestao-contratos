@@ -8,7 +8,7 @@ export interface Candidato {
   nome: string;
   email?: string;
   telefone?: string;
-  status?: 'pendente' | 'aprovado' | 'reprovado';
+  status?: 'pendente' | 'aprovado' | 'reprovado' | 'desistiu';
   observacoes?: string;
   created_at?: Date;
   updated_at?: Date;

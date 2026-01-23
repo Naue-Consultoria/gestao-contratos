@@ -54,7 +54,7 @@ export interface Candidato {
   nome: string;
   email?: string;
   telefone?: string;
-  status: 'pendente' | 'aprovado' | 'reprovado';
+  status: 'pendente' | 'aprovado' | 'reprovado' | 'desistiu';
   observacoes?: string;
   created_at: Date | string;
   updated_at: Date | string;

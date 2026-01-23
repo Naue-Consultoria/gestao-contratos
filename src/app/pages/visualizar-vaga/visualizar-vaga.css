@@ -908,6 +908,11 @@
   color: #ef4444;
 }
 
+.status-desistiu {
+  background-color: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}
+
 /* Status Vaga */
 .status-inscrito {
   background-color: rgba(59, 130, 246, 0.1);
