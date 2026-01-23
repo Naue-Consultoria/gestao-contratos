@@ -53,6 +53,7 @@
               <option value="converted">Assinada</option>
               <option value="contraproposta">Assinada Parcialmente</option>
               <option value="standby">Standby</option>
+              <option value="sem_retorno">Sem Retorno</option>
             </select>
           </div>
 
@@ -219,21 +220,32 @@
             </td>
 
             <td (click)="$event.stopPropagation()">
-              <select
-                class="status-select"
-                [(ngModel)]="proposal.status"
-                (change)="updateProposalStatus(proposal, $event)"
-                [style.background-color]="getStatusColor(proposal.status)"
-              >
-                <option value="draft">Rascunho</option>
-                <option value="sent">Enviada</option>
-                <option value="signed">Fechada</option>
-                <option value="rejected">Rejeitada</option>
-                <option value="expired">Expirada</option>
-                <option value="converted">Assinada</option>
-                <option value="contraproposta">Assinada Parcialmente</option>
-                <option value="standby">Standby</option>
-              </select>
+              <div class="status-cell">
+                <select
+                  class="status-select"
+                  [(ngModel)]="proposal.status"
+                  (change)="updateProposalStatus(proposal, $event)"
+                  [style.background-color]="getStatusColor(proposal.status)"
+                >
+                  <option value="draft">Rascunho</option>
+                  <option value="sent">Enviada</option>
+                  <option value="signed">Fechada</option>
+                  <option value="rejected">Rejeitada</option>
+                  <option value="expired">Expirada</option>
+                  <option value="converted">Assinada</option>
+                  <option value="contraproposta">Assinada Parcialmente</option>
+                  <option value="standby">Standby</option>
+                  <option value="sem_retorno">Sem Retorno</option>
+                </select>
+                <button
+                  class="status-note-btn"
+                  (click)="openStatusNatureModal(proposal, $event)"
+                  [title]="proposal.raw.status_natureza ? 'Editar natureza: ' + proposal.raw.status_natureza : 'Adicionar natureza do status'"
+                  [class.has-note]="proposal.raw.status_natureza"
+                >
+                  <i class="fas fa-comment-alt"></i>
+                </button>
+              </div>
             </td>
             <td>
               <span class="value-amount">{{ proposal.totalValue }}</span>
@@ -375,3 +387,50 @@
   (close)="onDuplicateModalClose()"
   (proposalDuplicated)="onProposalDuplicated($event)">
 </app-duplicate-proposal-modal>
+
+<!-- Status Nature Modal -->
+<div class="modal-overlay" *ngIf="showStatusNatureModal" (click)="closeStatusNatureModal()">
+  <div class="status-nature-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-info">
+        <h3>Natureza do Status</h3>
+        <div class="modal-proposal-meta" *ngIf="selectedProposalForStatusNature">
+          <span class="proposal-ref">{{ selectedProposalForStatusNature.proposalNumber }}</span>
+          <span class="proposal-separator">·</span>
+          <span class="proposal-client">{{ selectedProposalForStatusNature.clientName }}</span>
+          <span class="status-badge-sm" [style.background-color]="getStatusColor(selectedProposalForStatusNature.status)">
+            {{ proposalService.getStatusText(selectedProposalForStatusNature.status) }}
+          </span>
+        </div>
+      </div>
+      <button type="button" class="modal-close-btn" (click)="closeStatusNatureModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="selectedProposalForStatusNature">
+      <label class="textarea-label">Descreva o motivo ou detalhes:</label>
+      <textarea
+        id="statusNature"
+        [(ngModel)]="statusNatureText"
+        class="form-control textarea-main"
+        rows="5"
+        maxlength="500"
+        placeholder="Ex: Cliente solicitou prazo para análise interna, retorno previsto para próxima semana..."
+      ></textarea>
+      <div class="textarea-footer">
+        <span class="char-count" [class.warning]="statusNatureText.length > 400">
+          {{ statusNatureText.length }}/500
+        </span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeStatusNatureModal()">
+        Cancelar
+      </button>
+      <button type="button" class="btn btn-primary" (click)="saveStatusNature()" [disabled]="isSavingStatusNature">
+        <i *ngIf="isSavingStatusNature" class="fas fa-spinner fa-spin"></i>
+        {{ isSavingStatusNature ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </div>
+</div>

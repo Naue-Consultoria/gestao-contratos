@@ -192,13 +192,14 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       client_id: ['', Validators.required],
       type: ['Full', Validators.required],
       end_date: [''],
-      observations: [''],
+      observacoes: [''], // Observações internas sobre a proposta
       max_installments: [12, [Validators.required, Validators.min(1), Validators.max(24)]],
       vista_discount_percentage: [6, [Validators.required, Validators.min(0), Validators.max(100)]],
       prazo_discount_percentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
       vista_discount_value: [0, [Validators.required, Validators.min(0)]],
       prazo_discount_value: [0, [Validators.required, Validators.min(0)]],
       status: ['draft'], // Campo de status adicionado
+      status_natureza: [''], // Natureza/descrição detalhada do status
       solicitante_name: [''],
       solicitante_email: ['', Validators.email],
       solicitante_phone: [''],
@@ -281,13 +282,14 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       client_id: proposal.client_id,
       type: proposal.type || 'Full',
       end_date: proposal.end_date ? proposal.end_date.split('T')[0] : '',
-      observations: proposal.notes || '',
+      observacoes: proposal.observacoes || '',
       max_installments: proposal.max_installments ?? 12,
       vista_discount_percentage: proposal.vista_discount_percentage !== null && proposal.vista_discount_percentage !== undefined ? proposal.vista_discount_percentage : 6,
       prazo_discount_percentage: proposal.prazo_discount_percentage !== null && proposal.prazo_discount_percentage !== undefined ? proposal.prazo_discount_percentage : 0,
       vista_discount_value: proposal.vista_discount_value !== null && proposal.vista_discount_value !== undefined ? proposal.vista_discount_value : 0,
       prazo_discount_value: proposal.prazo_discount_value !== null && proposal.prazo_discount_value !== undefined ? proposal.prazo_discount_value : 0,
       status: proposal.status || 'draft', // Carregar status da proposta
+      status_natureza: proposal.status_natureza || '', // Carregar natureza do status
       solicitante_name: proposal.solicitante_name || '',
       solicitante_email: proposal.solicitante_email || '',
       solicitante_phone: proposal.solicitante_phone || '',
@@ -1035,9 +1037,15 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       }))
     };
 
-    // Adicionar status apenas quando estiver em modo de edição
-    if (this.isEditMode && this.proposalForm.value.status) {
-      (formData as any).status = this.proposalForm.value.status;
+    // Adicionar campos extras
+    (formData as any).observacoes = this.proposalForm.value.observacoes || '';
+
+    // Adicionar status e status_natureza apenas quando estiver em modo de edição
+    if (this.isEditMode) {
+      if (this.proposalForm.value.status) {
+        (formData as any).status = this.proposalForm.value.status;
+      }
+      (formData as any).status_natureza = this.proposalForm.value.status_natureza || '';
     }
 
 

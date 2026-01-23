@@ -134,8 +134,9 @@
               <i class="fas fa-info-circle"></i>
               Informações da Proposta
             </h3>
-            
-            <div class="form-grid">
+
+            <!-- Linha 1: Tipo + Validade + Fonte -->
+            <div class="form-grid form-grid-3">
               <div class="form-group">
                 <label for="type" class="form-label">Tipo de Proposta <span class="required">*</span></label>
                 <select id="type" formControlName="type" class="form-control" [class.error]="isFieldInvalid('type')">
@@ -150,85 +151,101 @@
                 <label for="end_date" class="form-label">Válida Até</label>
                 <input id="end_date" type="date" formControlName="end_date" class="form-control">
               </div>
+              <div class="form-group">
+                <label for="source" class="form-label">Fonte</label>
+                <select id="source" formControlName="source" class="form-control">
+                  <option value="">Selecione a fonte</option>
+                  <option value="Indicação">Indicação</option>
+                  <option value="Site">Site</option>
+                  <option value="Já era cliente">Já era cliente</option>
+                  <option value="Redes Sociais">Redes Sociais</option>
+                  <option value="Instagram">Instagram</option>
+                  <option value="LinkedIn">LinkedIn</option>
+                  <option value="Facebook">Facebook</option>
+                  <option value="Google">Google</option>
+                  <option value="WhatsApp">WhatsApp</option>
+                  <option value="E-mail Marketing">E-mail Marketing</option>
+                  <option value="Evento">Evento</option>
+                  <option value="Parceiro">Parceiro</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção Acompanhamento Comercial - only visible in edit mode -->
+          <div class="form-section" *ngIf="isEditMode">
+            <h3 class="section-title">
+              <i class="fas fa-chart-line"></i>
+              Acompanhamento Comercial
+            </h3>
+
+            <!-- Linha: Status + Natureza lado a lado -->
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="status" class="form-label">Status da Proposta</label>
+                <select id="status" formControlName="status" class="form-control">
+                  <option value="draft">Rascunho</option>
+                  <option value="sent">Enviada</option>
+                  <option value="signed">Fechada</option>
+                  <option value="rejected">Rejeitada</option>
+                  <option value="expired">Expirada</option>
+                  <option value="converted">Assinada</option>
+                  <option value="contraproposta">Assinada Parcialmente</option>
+                  <option value="standby">Standby</option>
+                  <option value="sem_retorno">Sem Retorno</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="status_natureza" class="form-label">Natureza do Status</label>
+                <input id="status_natureza" type="text" formControlName="status_natureza" class="form-control"
+                       placeholder="Ex: Aguardando aprovação do diretor...">
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção Condições de Pagamento -->
+          <div class="form-section" *ngIf="proposalForm.get('type')?.value !== 'Recrutamento & Seleção'">
+            <h3 class="section-title">
+              <i class="fas fa-credit-card"></i>
+              Condições de Pagamento
+            </h3>
+
+            <!-- Linha: Parcelas + Valor Global -->
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="max_installments" class="form-label">Máximo de Parcelas <span class="required">*</span></label>
+                <select id="max_installments" formControlName="max_installments" class="form-control" [class.error]="isFieldInvalid('max_installments')">
+                  <option value="1">1x (somente à vista)</option>
+                  <option *ngFor="let count of [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]" [value]="count">
+                    Até {{ count }}x
+                  </option>
+                </select>
+                <div *ngIf="isFieldInvalid('max_installments')" class="error-message">Quantidade máxima de parcelas é obrigatória.</div>
+              </div>
+              <div class="form-group" *ngIf="proposalForm.get('usar_valor_global')?.value">
+                <label for="valor_global" class="form-label">Valor Global <span class="required">*</span></label>
+                <input
+                  id="valor_global"
+                  type="text"
+                  formControlName="valor_global"
+                  class="form-control"
+                  appCurrencyMask
+                  [currency]="clientCurrency"
+                  [class.error]="isFieldInvalid('valor_global')"
+                  [placeholder]="clientCurrency === 'USD' ? '$ 0.00' : 'R$ 0,00'">
+                <div *ngIf="isFieldInvalid('valor_global')" class="error-message">
+                  Valor global é obrigatório quando a opção está marcada
+                </div>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label for="source" class="form-label">
-                <i class="fas fa-bullseye"></i>
-                Fonte
-              </label>
-              <select id="source" formControlName="source" class="form-control">
-                <option value="">Selecione a fonte</option>
-                <option value="Indicação">Indicação</option>
-                <option value="Site">Site</option>
-                <option value="Já era cliente">Já era cliente</option>
-                <option value="Redes Sociais">Redes Sociais</option>
-                <option value="Instagram">Instagram</option>
-                <option value="LinkedIn">LinkedIn</option>
-                <option value="Facebook">Facebook</option>
-                <option value="Google">Google</option>
-                <option value="WhatsApp">WhatsApp</option>
-                <option value="E-mail Marketing">E-mail Marketing</option>
-                <option value="Evento">Evento</option>
-                <option value="Parceiro">Parceiro</option>
-                <option value="Outro">Outro</option>
-              </select>
-              <div class="help-text">Como o cliente conheceu a empresa</div>
-            </div>
-
-            <!-- Status field - only visible in edit mode -->
-            <div class="form-group" *ngIf="isEditMode">
-              <label for="status" class="form-label">Status da Proposta</label>
-              <select id="status" formControlName="status" class="form-control">
-                <option value="draft">Rascunho</option>
-                <option value="sent">Enviada</option>
-                <option value="signed">Fechada</option>
-                <option value="rejected">Rejeitada</option>
-                <option value="expired">Expirada</option>
-                <option value="converted">Assinada</option>
-                <option value="contraproposta">Assinada Parcialmente</option>
-              </select>
-              <div class="help-text">Alterar o status da proposta pode afetar as ações disponíveis</div>
-            </div>
-            
-            <!-- Valor Global da Proposta -->
-            <div class="form-group">
+            <!-- Checkbox Valor Global -->
+            <div class="form-group checkbox-inline">
               <label class="checkbox-label">
                 <input type="checkbox" formControlName="usar_valor_global" />
-                <span style="margin-left: 8px;">Usar valor global fixo para a proposta</span>
+                <span>Usar valor global fixo (ignora soma dos serviços)</span>
               </label>
-              <div class="help-text">
-                Quando marcado, o valor total da proposta será o valor global definido, ignorando a soma dos serviços
-              </div>
-            </div>
-
-            <div class="form-group" *ngIf="proposalForm.get('usar_valor_global')?.value">
-              <label for="valor_global" class="form-label">Valor Global <span class="required">*</span></label>
-              <input
-                id="valor_global"
-                type="text"
-                formControlName="valor_global"
-                class="form-control"
-                appCurrencyMask
-                [currency]="clientCurrency"
-                [class.error]="isFieldInvalid('valor_global')"
-                [placeholder]="clientCurrency === 'USD' ? '$ 0.00' : 'R$ 0,00'">
-              <div *ngIf="isFieldInvalid('valor_global')" class="error-message">
-                Valor global é obrigatório quando a opção está marcada
-              </div>
-              <div class="help-text">Este valor substituirá a soma dos serviços como valor total da proposta</div>
-            </div>
-
-            <div class="form-group" *ngIf="proposalForm.get('type')?.value !== 'Recrutamento & Seleção'">
-              <label for="max_installments" class="form-label">Máximo de Parcelas <span class="required">*</span></label>
-              <select id="max_installments" formControlName="max_installments" class="form-control" [class.error]="isFieldInvalid('max_installments')">
-                <option value="1">1x (somente à vista)</option>
-                <option *ngFor="let count of [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]" [value]="count">
-                  Até {{ count }}x
-                </option>
-              </select>
-              <div *ngIf="isFieldInvalid('max_installments')" class="error-message">Quantidade máxima de parcelas é obrigatória.</div>
-              <div class="help-text">Define o número máximo de parcelas que o cliente poderá escolher no pagamento a prazo</div>
             </div>
 
             <!-- Descontos para pagamento à vista -->
@@ -333,48 +350,6 @@
               <div class="help-text">Digite a porcentagem ou o valor. O outro campo será calculado automaticamente.</div>
             </div>
 
-          </div>
-
-          <!-- Seção Solicitante -->
-          <div class="form-section">
-            <h3 class="section-title">
-              <i class="fas fa-user-tie"></i>
-              Solicitante
-            </h3>
-
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="solicitante_name" class="form-label">Nome do Solicitante</label>
-                <input id="solicitante_name" type="text" formControlName="solicitante_name" class="form-control"
-                       placeholder="Nome completo do solicitante">
-                <div class="help-text">Pessoa que solicitou a proposta</div>
-              </div>
-              <div class="form-group">
-                <label for="solicitante_email" class="form-label">Email do Solicitante</label>
-                <input id="solicitante_email" type="email" formControlName="solicitante_email" class="form-control"
-                       placeholder="email@exemplo.com"
-                       [class.error]="proposalForm.get('solicitante_email')?.invalid && proposalForm.get('solicitante_email')?.touched">
-                <div *ngIf="proposalForm.get('solicitante_email')?.invalid && proposalForm.get('solicitante_email')?.touched"
-                     class="error-message">Email inválido</div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="solicitante_phone" class="form-label">Telefone do Solicitante</label>
-              <input id="solicitante_phone" type="text" formControlName="solicitante_phone" class="form-control"
-                     placeholder="(00) 00000-0000">
-              <div class="help-text">Todos os campos do solicitante são opcionais</div>
-            </div>
-          </div>
-
-          <!-- Seção Observações -->
-          <div class="form-section">
-
-            <div class="form-group">
-              <label for="observations" class="form-label">Observações</label>
-              <textarea id="observations" formControlName="observations" class="form-control" rows="3"
-                        placeholder="Adicione observações sobre esta proposta..."></textarea>
-            </div>
           </div>
         </div>
 
@@ -546,6 +521,53 @@
                 <span class="summary-label">Total da Proposta</span>
                 <span class="summary-value">{{ getTotalValueFormatted() }}</span>
               </div>
+            </div>
+          </div>
+
+          <!-- Seção Solicitante -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-user-tie"></i>
+              Solicitante
+            </h3>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="solicitante_name" class="form-label">Nome do Solicitante</label>
+                <input id="solicitante_name" type="text" formControlName="solicitante_name" class="form-control"
+                       placeholder="Nome completo do solicitante">
+                <div class="help-text">Pessoa que solicitou a proposta</div>
+              </div>
+              <div class="form-group">
+                <label for="solicitante_email" class="form-label">Email do Solicitante</label>
+                <input id="solicitante_email" type="email" formControlName="solicitante_email" class="form-control"
+                       placeholder="email@exemplo.com"
+                       [class.error]="proposalForm.get('solicitante_email')?.invalid && proposalForm.get('solicitante_email')?.touched">
+                <div *ngIf="proposalForm.get('solicitante_email')?.invalid && proposalForm.get('solicitante_email')?.touched"
+                     class="error-message">Email inválido</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="solicitante_phone" class="form-label">Telefone do Solicitante</label>
+              <input id="solicitante_phone" type="text" formControlName="solicitante_phone" class="form-control"
+                     placeholder="(00) 00000-0000">
+              <div class="help-text">Todos os campos do solicitante são opcionais</div>
+            </div>
+          </div>
+
+          <!-- Seção Observações Internas -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-sticky-note"></i>
+              Observações Internas
+            </h3>
+
+            <div class="form-group">
+              <label for="observacoes" class="form-label">Observações</label>
+              <textarea id="observacoes" formControlName="observacoes" class="form-control" rows="4"
+                        placeholder="Adicione observações internas sobre esta proposta (visível apenas para a equipe)..."></textarea>
+              <div class="help-text">Estas observações são de uso interno e não serão visíveis para o cliente</div>
             </div>
           </div>
         </div>

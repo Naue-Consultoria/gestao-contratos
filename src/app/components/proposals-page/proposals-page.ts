@@ -42,7 +42,7 @@ interface ProposalDisplay {
 })
 export class ProposalsPageComponent implements OnInit, OnDestroy {
   private modalService = inject(ModalService);
-  private proposalService = inject(ProposalService);
+  public proposalService = inject(ProposalService); // public para acessar getStatusText no template
   private clientService = inject(ClientService);
   private searchService = inject(SearchService);
   private router = inject(Router);
@@ -82,6 +82,12 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   // Duplicate Proposal Modal
   showDuplicateModal = false;
   selectedProposalForDuplication: Proposal | null = null;
+
+  // Status Nature Modal
+  showStatusNatureModal = false;
+  selectedProposalForStatusNature: ProposalDisplay | null = null;
+  statusNatureText = '';
+  isSavingStatusNature = false;
 
   // Dropdown control
   activeDropdownId: number | null = null;
@@ -981,7 +987,8 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       'expired': '#fd7e14',
       'converted': '#10b981',  // Verde claro (Assinada)
       'contraproposta': '#0a8560',  // Verde mais claro que o 'signed'
-      'standby': '#eab308'  // Amarelo/Dourado para Standby
+      'standby': '#eab308',  // Amarelo/Dourado para Standby
+      'sem_retorno': '#9ca3af'  // Cinza claro para Sem Retorno
     };
     return statusColors[status] || '#6c757d';
   }
@@ -1328,7 +1335,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   async updateProposalStatus(proposal: ProposalDisplay, event: Event) {
     event.stopPropagation();
 
-    const newStatus = proposal.status as 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta' | 'standby';
+    const newStatus = proposal.status as 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta' | 'standby' | 'sem_retorno';
     const previousStatus = proposal.raw.status;
 
     // Se o status não mudou, não faz nada
@@ -1365,6 +1372,58 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       } else {
         this.modalService.showError('Não foi possível atualizar o status da proposta.');
       }
+    }
+  }
+
+  /**
+   * Abrir modal para editar natureza do status
+   */
+  openStatusNatureModal(proposal: ProposalDisplay, event: MouseEvent) {
+    event.stopPropagation();
+    this.selectedProposalForStatusNature = proposal;
+    this.statusNatureText = proposal.raw.status_natureza || '';
+    this.showStatusNatureModal = true;
+  }
+
+  /**
+   * Fechar modal de natureza do status
+   */
+  closeStatusNatureModal() {
+    this.showStatusNatureModal = false;
+    this.selectedProposalForStatusNature = null;
+    this.statusNatureText = '';
+    this.isSavingStatusNature = false;
+  }
+
+  /**
+   * Salvar natureza do status
+   */
+  async saveStatusNature() {
+    if (!this.selectedProposalForStatusNature) return;
+
+    this.isSavingStatusNature = true;
+
+    try {
+      const response = await firstValueFrom(
+        this.proposalService.updateProposal(this.selectedProposalForStatusNature.id, {
+          status_natureza: this.statusNatureText
+        } as any)
+      );
+
+      if (response && response.success) {
+        // Atualizar o objeto local
+        this.selectedProposalForStatusNature.raw.status_natureza = this.statusNatureText;
+
+        this.modalService.showSuccess('Natureza do status salva com sucesso!');
+        this.closeStatusNatureModal();
+      } else {
+        this.modalService.showError(response?.message || 'Erro ao salvar a natureza do status.');
+      }
+    } catch (error: any) {
+      console.error('❌ Error saving status nature:', error);
+      this.modalService.showError('Não foi possível salvar a natureza do status.');
+    } finally {
+      this.isSavingStatusNature = false;
     }
   }
 
