@@ -83,7 +83,7 @@ export class EditarVagaComponent implements OnInit {
       tipoCargo: ['', Validators.required],
       tipoAbertura: ['', Validators.required],
       status: ['aberta', Validators.required],
-      fonteRecrutamento: ['', Validators.required],
+      fonteRecrutamento: [''],
       salario: [''],
       pretensaoSalarial: [''],
       dataAbertura: ['', Validators.required],
