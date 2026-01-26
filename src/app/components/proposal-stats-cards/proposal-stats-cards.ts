@@ -152,15 +152,8 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
     // Calcular valor total de todas as propostas filtradas
     const totalValue = proposals.reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
 
-    // Construir cards base
+    // Construir cards base (sem Total de Propostas)
     const baseCards: StatCard[] = [
-      {
-        title: 'Total de Propostas',
-        value: totalProposals,
-        icon: 'fas fa-file-alt',
-        color: '#003b2b',
-        subtitle: this.useFilteredData ? 'Propostas filtradas' : undefined
-      },
       {
         title: 'Propostas Enviadas',
         value: sentProposals,
@@ -201,14 +194,8 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
     // Calculate pending value only for sent proposals
     const pendingValue = stats.sentValue || 0;
 
-    // Construir cards base
+    // Construir cards base (sem Total de Propostas)
     const baseCards: StatCard[] = [
-      {
-        title: 'Total de Propostas',
-        value: totalProposals,
-        icon: 'fas fa-file-alt',
-        color: '#003b2b',
-      },
       {
         title: 'Propostas Enviadas',
         value: sentProposals,
@@ -238,14 +225,8 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
   }
 
   private buildDefaultCards() {
-    // Construir cards base
+    // Construir cards base (sem Total de Propostas)
     const baseCards: StatCard[] = [
-      {
-        title: 'Total de Propostas',
-        value: 0,
-        icon: 'fas fa-file-alt',
-        color: '#003b2b',
-      },
       {
         title: 'Propostas Enviadas',
         value: 0,

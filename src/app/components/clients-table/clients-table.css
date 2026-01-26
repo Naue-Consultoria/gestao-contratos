@@ -692,3 +692,128 @@ tr:last-child td {
   background-color: #fee2e2;
   color: #dc2626;
 }
+
+/* ==========================================
+   RESPONSIVIDADE NOTEBOOKS (até 1700px)
+   ========================================== */
+
+@media (max-width: 1700px) {
+  /* Stats Cards - 3 lado a lado compactos */
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .stat-card {
+    padding: 0.875rem 1rem !important;
+    border-radius: 12px !important;
+  }
+
+  .stat-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+  }
+
+  .stat-value {
+    font-size: 1.5rem !important;
+    margin: 0.25rem 0 !important;
+  }
+
+  .stat-label {
+    font-size: 0.7rem !important;
+  }
+
+  .stat-change {
+    font-size: 0.7rem !important;
+    padding: 0.125rem 0.5rem !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .mb-4 {
+    margin-bottom: 1rem !important;
+  }
+
+  /* Table Container */
+  .table-container {
+    padding: 1rem !important;
+  }
+
+  .table-header {
+    margin-bottom: 1rem !important;
+  }
+
+  .table-title {
+    font-size: 1rem !important;
+  }
+
+  .search-input-wrapper {
+    flex: 0 1 300px !important;
+  }
+
+  .search-input {
+    padding: 0.5rem 2rem 0.5rem 2.25rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Table */
+  th, td {
+    padding: 0.625rem 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  th {
+    font-size: 0.7rem !important;
+  }
+
+  .client-avatar,
+  .client-logo {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+  }
+
+  .client-name {
+    font-size: 0.8rem !important;
+  }
+
+  .client-trade-name {
+    font-size: 0.7rem !important;
+  }
+
+  .client-since {
+    font-size: 0.65rem !important;
+  }
+
+  .market-badge,
+  .badge {
+    padding: 0.125rem 0.5rem !important;
+    font-size: 0.65rem !important;
+  }
+
+  .action-btn,
+  .dropdown-toggle {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .dropdown-item {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* MOBILE - até 575px */
+@media (max-width: 575px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

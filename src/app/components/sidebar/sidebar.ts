@@ -74,12 +74,6 @@ export class SidebarComponent {
         { id: 'usuarios', icon: 'fas fa-users', text: 'Usuários', route: '/home/usuarios', adminOnly: true, adminOnlyNotGerencial: true, excludeConsultorRS: true },
         { id: 'configuracoes', icon: 'fas fa-cog', text: 'Configurações', route: '/home/configuracoes' }
       ]
-    },
-    {
-      title: 'AJUDA',
-      items: [
-        { id: 'ajuda', icon: 'fas fa-question-circle', text: 'Suporte', route: '/home/ajuda' }
-      ]
     }
   ];
   

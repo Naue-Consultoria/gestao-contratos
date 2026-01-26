@@ -23,7 +23,6 @@ import { AnalyticsPageComponent } from './components/analytics-page/analytics-pa
 import { UsersPageComponent } from './components/users-page/users-page';
 import { NewUserPageComponent } from './components/new-user-page/new-user-page';
 import { SettingsPageComponent } from './components/settings-page/settings-page';
-import { HelpPageComponent } from './components/help-page/help-page';
 import { RoutinesPageComponent } from './components/routines-page/routines-page';
 import { RoutineViewPageComponent } from './components/routine-view-page/routine-view-page';
 import { ServiceTrackingPageComponent } from './components/service-tracking-page/service-tracking-page';
@@ -574,13 +573,6 @@ export const routes: Routes = [
         title: 'Configurações - NAUE Consultoria',
       },
 
-      // Ajuda e suporte
-      {
-        path: 'ajuda',
-        component: HelpPageComponent,
-        title: 'Ajuda - NAUE Consultoria',
-      },
-
       // Redirecionamentos para compatibilidade com rotas antigas
       { path: 'contracts', redirectTo: 'contratos', pathMatch: 'full' },
       { path: 'contracts/new', redirectTo: 'contratos/novo', pathMatch: 'full' },
@@ -611,7 +603,6 @@ export const routes: Routes = [
       { path: 'users/edit/:id', redirectTo: 'usuarios/editar/:id', pathMatch: 'full' },
       
       { path: 'settings', redirectTo: 'configuracoes', pathMatch: 'full' },
-      { path: 'help', redirectTo: 'ajuda', pathMatch: 'full' },
     ],
   },
 

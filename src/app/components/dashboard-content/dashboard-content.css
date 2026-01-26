@@ -1865,70 +1865,22 @@
 }
 
 /* ==========================================
-   CORREÇÃO FINAL - RESPONSIVIDADE NOTEBOOKS
-   Estes estilos têm prioridade máxima
+   NOTEBOOKS - até 1700px
    ========================================== */
-
-/* NOTEBOOKS E TELAS ATÉ 1500px - Forçar 2 colunas para cards */
-@media (max-width: 1500px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 1rem !important;
-    margin-bottom: 1rem !important;
-  }
-
+@media (max-width: 1700px) {
   .quick-actions-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-columns: repeat(6, 1fr) !important;
     gap: 0.75rem !important;
-    margin-bottom: 1rem !important;
   }
 
   .quick-action-btn {
-    padding: 0.75rem 1rem !important;
+    padding: 0.75rem 0.5rem !important;
     font-size: 0.8rem !important;
-    min-height: 44px !important;
+    min-height: 48px !important;
   }
 
-  .main-content-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
-  }
-
-  .chart-container,
-  .activities-container {
-    padding: 1.25rem !important;
-  }
-
-  .activities-container {
-    max-height: 400px !important;
-  }
-
-  .stat-card {
-    padding: 1.25rem !important;
-    min-height: auto !important;
-  }
-
-  .stat-value {
-    font-size: 2rem !important;
-  }
-
-  .page-title {
-    font-size: 1.75rem !important;
-  }
-}
-
-/* DESKTOP GRANDE - Apenas acima de 1500px usa 4 colunas */
-@media (min-width: 1501px) {
-  .stats-grid {
-    grid-template-columns: repeat(4, 1fr) !important;
-  }
-
-  .quick-actions-grid {
-    grid-template-columns: repeat(6, 1fr) !important;
-  }
-
-  .main-content-grid {
-    grid-template-columns: 1.8fr 1fr !important;
+  .quick-action-btn i {
+    font-size: 1rem !important;
   }
 }
 

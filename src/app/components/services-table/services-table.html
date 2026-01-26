@@ -134,27 +134,29 @@
               </div>
             </td>
             <td>
-              <button
-                class="action-btn"
-                (click)="duplicateService(service, $event)"
-                title="Duplicar serviço"
-              >
-                <i class="fas fa-copy"></i>
-              </button>
-              <button
-                class="action-btn"
-                (click)="editService(service.id); $event.stopPropagation()"
-                title="Editar serviço"
-              >
-                <i class="fas fa-edit"></i>
-              </button>
-              <button
-                class="action-btn action-btn-danger"
-                (click)="deleteService(service, $event)"
-                title="Excluir serviço"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
+              <div class="actions-cell">
+                <button
+                  class="action-btn"
+                  (click)="duplicateService(service, $event)"
+                  title="Duplicar serviço"
+                >
+                  <i class="fas fa-copy"></i>
+                </button>
+                <button
+                  class="action-btn"
+                  (click)="editService(service.id); $event.stopPropagation()"
+                  title="Editar serviço"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  class="action-btn action-btn-danger"
+                  (click)="deleteService(service, $event)"
+                  title="Excluir serviço"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

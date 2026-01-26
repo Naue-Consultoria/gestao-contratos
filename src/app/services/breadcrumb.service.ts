@@ -174,10 +174,6 @@ export class BreadcrumbService {
       { label: 'Análise de Cenários', url: '/home/planejamento-estrategico/analise-cenarios' },
       { label: 'Análise de Ameaças' }
     ],
-    '/home/ajuda': [
-      { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
-      { label: 'Ajuda' }
-    ],
     '/home/rotinas': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Rotinas' }
@@ -416,7 +412,6 @@ export class BreadcrumbService {
       'notifications': 'Notificações',
       'configuracoes': 'Configurações',
       'profile': 'Meu Perfil',
-      'ajuda': 'Ajuda',
       'recrutamento-selecao': 'R&S',
       'analytics-rs': 'Analytics R&S',
       'relatorios-rs': 'Relatórios R&S',
@@ -429,8 +424,7 @@ export class BreadcrumbService {
       'users': 'Usuários',
       'routines': 'Rotinas',
       'reports': 'Relatórios',
-      'settings': 'Configurações',
-      'help': 'Ajuda'
+      'settings': 'Configurações'
     };
     return sectionMap[section] || '';
   }

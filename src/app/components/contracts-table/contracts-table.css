@@ -1400,6 +1400,149 @@
     background: var(--dark-border);
 }
 
+/* ==========================================
+   RESPONSIVIDADE NOTEBOOKS (até 1700px)
+   ========================================== */
+
+@media (max-width: 1700px) {
+    .page-title {
+        font-size: 1.5rem !important;
+    }
+
+    .page-header {
+        margin-bottom: 1rem !important;
+    }
+
+    .table-container {
+        padding: 1rem !important;
+    }
+
+    .table-header {
+        margin-bottom: 1rem !important;
+        gap: 0.75rem !important;
+    }
+
+    .tabs {
+        margin-bottom: 0.75rem !important;
+        gap: 0.25rem !important;
+    }
+
+    .tab {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .tab-count {
+        padding: 0.125rem 0.375rem !important;
+        font-size: 0.625rem !important;
+    }
+
+    .mb-4 {
+        margin-bottom: 0.75rem !important;
+    }
+
+    .filter-row {
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+
+    .filter-item {
+        flex: 1 1 calc(20% - 0.5rem) !important;
+        min-width: 100px !important;
+        max-width: none !important;
+    }
+
+    .filter-label {
+        font-size: 0.65rem !important;
+    }
+
+    .filter-select {
+        height: 34px !important;
+        font-size: 0.75rem !important;
+        padding: 0.375rem 1.75rem 0.375rem 0.5rem !important;
+    }
+
+    .search-box {
+        flex: 1 1 100% !important;
+        max-width: none !important;
+        min-width: unset !important;
+        order: -1 !important;
+    }
+
+    .search-input {
+        height: 34px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .btn {
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* Tabela mais compacta */
+    .contracts-table th,
+    .contracts-table td {
+        padding: 0.5rem 0.375rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .contracts-table th {
+        font-size: 0.65rem !important;
+    }
+
+    .contract-number {
+        font-size: 0.75rem !important;
+    }
+
+    .client-name {
+        font-size: 0.75rem !important;
+    }
+
+    .type-badge {
+        padding: 0.125rem 0.375rem !important;
+        font-size: 0.6rem !important;
+    }
+
+    .services-badge {
+        padding: 0.125rem 0.375rem !important;
+        font-size: 0.6rem !important;
+    }
+
+    .value-amount {
+        font-size: 0.75rem !important;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.6rem !important;
+    }
+
+    .end-date {
+        font-size: 0.7rem !important;
+    }
+
+    .payment-badge {
+        padding: 2px 6px !important;
+        font-size: 0.55rem !important;
+    }
+
+    .payment-method-text,
+    .payment-date-text {
+        font-size: 0.6rem !important;
+    }
+
+    .action-btn {
+        width: 26px !important;
+        height: 26px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .dropdown-toggle {
+        width: 28px !important;
+        height: 28px !important;
+    }
+}
+
 /* Responsive - 1280x800 específico */
 @media (min-width: 1280px) and (max-width: 1366px) and (max-height: 900px) {
     .page {

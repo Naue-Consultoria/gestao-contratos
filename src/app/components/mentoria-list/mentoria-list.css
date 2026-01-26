@@ -1143,3 +1143,201 @@
 .btn-primary:active {
   transform: translateY(0);
 }
+
+/* ==========================================
+   RESPONSIVIDADE NOTEBOOKS (até 1700px)
+   ========================================== */
+
+@media (max-width: 1700px) {
+  .page-title {
+    font-size: 1.5rem !important;
+  }
+
+  .page-header {
+    margin-bottom: 1rem !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Stats Cards - 3 lado a lado compactos */
+  .stats-cards {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .stat-card {
+    padding: 0.875rem 1rem !important;
+    border-radius: 12px !important;
+  }
+
+  .stat-card-header {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .stat-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+  }
+
+  .stat-icon i {
+    font-size: 0.875rem !important;
+  }
+
+  .stat-value {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .stat-label {
+    font-size: 0.65rem !important;
+  }
+
+  /* Filters Section */
+  .filters-section {
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
+    gap: 0.75rem !important;
+  }
+
+  .search-box {
+    min-width: 150px !important;
+  }
+
+  .search-input {
+    padding: 0.5rem 0.75rem 0.5rem 2.25rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .filter-group {
+    min-width: 140px !important;
+  }
+
+  .filter-group label {
+    font-size: 0.65rem !important;
+  }
+
+  .filter-select {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .btn-primary {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Table */
+  .mentorias-table th {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .mentorias-table td {
+    padding: 0.875rem 1rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .cliente-info i {
+    font-size: 0.875rem !important;
+  }
+
+  .cliente-info span {
+    font-size: 0.8rem !important;
+  }
+
+  .mentorado-info span {
+    font-size: 0.8rem !important;
+  }
+
+  .contrato-number {
+    font-size: 0.8rem !important;
+  }
+
+  .encontros-count {
+    min-width: 28px !important;
+    height: 28px !important;
+    padding: 0 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .status-badge {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.65rem !important;
+  }
+
+  .btn-action,
+  .btn-expand {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Mentoria Card */
+  .mentoria-header {
+    padding: 1rem !important;
+  }
+
+  .cliente-principal i {
+    font-size: 1rem !important;
+  }
+
+  .cliente-principal h3 {
+    font-size: 0.95rem !important;
+  }
+
+  .meta-item {
+    font-size: 0.7rem !important;
+  }
+
+  .meta-item i {
+    font-size: 0.75rem !important;
+  }
+
+  /* Encontros */
+  .encontros-container {
+    padding: 1rem !important;
+  }
+
+  .encontros-header h4 {
+    font-size: 0.875rem !important;
+  }
+
+  .encontro-item {
+    padding: 0.75rem !important;
+    gap: 0.75rem !important;
+  }
+
+  .encontro-numero-badge {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .encontro-nome {
+    font-size: 0.8rem !important;
+  }
+
+  .encontro-data {
+    font-size: 0.7rem !important;
+  }
+
+  .encontro-status-select {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.7rem !important;
+    min-width: 110px !important;
+  }
+
+  .btn-action-sm {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* MOBILE - até 575px */
+@media (max-width: 575px) {
+  .stats-cards {
+    grid-template-columns: 1fr !important;
+  }
+}
