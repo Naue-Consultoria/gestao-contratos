@@ -82,16 +82,21 @@
             <button
               type="button"
               class="filter-select multi-select-trigger"
-              (click)="toggleStatusDropdown()"
+              (click)="toggleStatusDropdown($event)"
               [class.active]="statusFilter.length > 0">
               <span>{{ getStatusFilterLabel() }}</span>
               <i class="fas fa-chevron-down"></i>
             </button>
 
-            <div class="multi-select-dropdown" *ngIf="statusDropdownOpen">
+            <!-- Backdrop para fechar o dropdown -->
+            <div class="multi-select-backdrop" *ngIf="statusDropdownOpen" (click)="statusDropdownOpen = false"></div>
+
+            <div class="multi-select-dropdown" *ngIf="statusDropdownOpen"
+                 [style.top.px]="dropdownPosition.top"
+                 [style.left.px]="dropdownPosition.left">
               <div class="multi-select-options">
                 <label
-                  *ngFor="let status of Object.keys(statusLabels)"
+                  *ngFor="let status of statusOptions"
                   class="multi-select-option">
                   <input
                     type="checkbox"

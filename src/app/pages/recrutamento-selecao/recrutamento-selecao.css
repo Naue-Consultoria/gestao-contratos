@@ -590,16 +590,13 @@
 }
 
 .multi-select-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  width: 100%;
+  position: fixed;
   min-width: 250px;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  z-index: 10001;
   max-height: 400px;
   overflow: hidden;
   display: flex;
@@ -703,6 +700,17 @@
 .btn-clear-selection:hover {
   background: #fee2e2;
   border-color: #dc2626;
+}
+
+/* Backdrop para o dropdown */
+.multi-select-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  background: transparent;
 }
 
 /* Action Buttons */
@@ -1441,6 +1449,29 @@
 
   .filter-select {
     width: 100%;
+  }
+
+  /* Multi-select dropdown responsivo */
+  .multi-select-wrapper {
+    width: 100%;
+    display: block;
+  }
+
+  .multi-select-trigger {
+    width: 100%;
+  }
+
+  .multi-select-backdrop {
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .multi-select-dropdown {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 350px;
+    max-height: 70vh;
   }
 
   .action-buttons {

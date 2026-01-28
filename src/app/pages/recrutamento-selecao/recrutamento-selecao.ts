@@ -58,6 +58,7 @@ export class RecrutamentoSelecao implements OnInit {
   searchTerm: string = '';
   statusFilter: string[] = [];  // Array para múltiplos status
   statusDropdownOpen: boolean = false;  // Controla dropdown de status
+  dropdownPosition = { top: 0, left: 0 };  // Posição do dropdown
   departmentFilter: string = '';
   tipoCargoFilter: string = '';
   fonteRecrutamentoFilter: string = '';
@@ -122,6 +123,21 @@ export class RecrutamentoSelecao implements OnInit {
     'nao_cobrada': 'Não Cobrada',
     'encerramento_cont': 'Encerramento de Contrato'
   };
+
+  // Array de opções de status para o dropdown
+  statusOptions: string[] = [
+    'aberta',
+    'divulgacao_prospec',
+    'entrevista_nc',
+    'entrevista_empresa',
+    'testes',
+    'fechada',
+    'fechada_rep',
+    'cancelada_cliente',
+    'standby',
+    'nao_cobrada',
+    'encerramento_cont'
+  ];
 
   fonteRecrutamentoLabels: Record<string, string> = {
     'catho': 'Catho',
@@ -403,8 +419,19 @@ export class RecrutamentoSelecao implements OnInit {
   }
 
   // Métodos para controle do multi-select de status
-  toggleStatusDropdown() {
+  toggleStatusDropdown(event: MouseEvent) {
     this.statusDropdownOpen = !this.statusDropdownOpen;
+
+    if (this.statusDropdownOpen) {
+      // Calcular posição do dropdown baseado no botão clicado
+      const button = event.currentTarget as HTMLElement;
+      const rect = button.getBoundingClientRect();
+
+      this.dropdownPosition = {
+        top: rect.bottom + 4,
+        left: rect.left
+      };
+    }
   }
 
   toggleStatusFilter(status: string) {
