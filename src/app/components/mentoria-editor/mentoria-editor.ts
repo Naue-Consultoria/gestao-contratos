@@ -201,7 +201,7 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
             contract_id: this.encontro.contract_id,
             mentorado_nome: this.encontro.mentorado_nome,
             numero_encontro: this.encontro.numero_encontro,
-            data_encontro: this.encontro.data_encontro,
+            data_encontro: this.formatDateForInput(this.encontro.data_encontro),
             encontro_status: this.encontro.encontro_status || 'em_andamento',
             token_expira_em: this.encontro.token_expira_em
           });
@@ -837,6 +837,27 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
     }
 
     return nome.toUpperCase();
+  }
+
+  /**
+   * Formatar data para o input type="date"
+   * Extrai apenas a parte da data (YYYY-MM-DD) sem considerar timezone
+   */
+  private formatDateForInput(dateString: string | null | undefined): string {
+    if (!dateString) return '';
+
+    // Se já está no formato YYYY-MM-DD, retornar como está
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString;
+    }
+
+    // Caso contrário, extrair apenas a parte da data
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
 
   // ===== BREADCRUMB =====
