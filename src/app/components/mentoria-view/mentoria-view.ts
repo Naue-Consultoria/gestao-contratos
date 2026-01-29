@@ -123,7 +123,13 @@ export class MentoriaView implements OnInit {
 
   formatarData(data: string): string {
     if (!data) return 'Data não definida';
-    const date = new Date(data);
+
+    // Extrair ano, mês e dia da string YYYY-MM-DD sem conversão de timezone
+    const [year, month, day] = data.split('T')[0].split('-');
+
+    // Criar data usando componentes locais (sem timezone UTC)
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+
     return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: 'long',
