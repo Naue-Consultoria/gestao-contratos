@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { WebsocketService } from './websocket.service';
 import { RateLimitService } from './rate-limit.service';
 
 export interface Notification {
@@ -62,6 +61,8 @@ export interface NotificationOptions {
 })
 export class NotificationService {
   private readonly API_URL = `${environment.apiUrl}/notifications`;
+  private readonly POLLING_INTERVAL = 60000; // 60 segundos
+  private readonly MAX_STORED_NOTIFICATIONS = 50;
 
   private toastQueue = new BehaviorSubject<Notification[]>([]);
   public toastQueue$ = this.toastQueue.asObservable();
@@ -76,42 +77,17 @@ export class NotificationService {
   private readonly pageSize = 20;
   private totalPages = 1;
   private isLoading = false;
-  private isInitialized = false; // Flag para evitar inicialização múltipla
+  private isInitialized = false;
+  private pollingInterval: any = null;
 
   private defaultDuration = 5000;
   private maxToasts = 3;
 
   constructor(
     private http: HttpClient,
-    private websocketService: WebsocketService,
     private rateLimitService: RateLimitService
   ) {
     this.loadNotificationsFromStorage();
-    this.removeTestNotifications(); // Remove notificações de teste ao inicializar
-    this.listenForRealTimeNotifications();
-  }
-
-  private listenForRealTimeNotifications(): void {
-    this.websocketService.listenForNewNotifications().subscribe(notificationFromServer => {
-      // Verificar se a notificação é relevante para o usuário atual
-      if (!this.isNotificationRelevantForUser(notificationFromServer)) {
-        return;
-      }
-
-      const newNotification: Notification = {
-        ...notificationFromServer,
-        id: `server-${(notificationFromServer as any).id}`,
-        timestamp: new Date((notificationFromServer as any).created_at || Date.now()),
-        isRead: (notificationFromServer as any).is_read || false,
-        persistent: true,
-        type: this.mapNotificationType((notificationFromServer as any).type),
-        icon: this.getNotificationIcon((notificationFromServer as any).type),
-        priority: (notificationFromServer as any).priority || 'normal'
-      };
-      this.addToHistory(newNotification);
-      this.show({ ...newNotification, persistent: false, duration: this.getNotificationDuration(newNotification) });
-      this.fetchUnreadCount(); // Atualizar contador
-    });
   }
 
   success(message: string, title: string = 'Sucesso!', options?: NotificationOptions): void { this.show({ type: 'success', title, message, icon: 'fas fa-check-circle', ...options }); }
@@ -148,34 +124,19 @@ export class NotificationService {
     this.toastQueue.next(this.toastQueue.value.filter(n => n.id !== id));
   }
 
-  private addToHistory(notification: Notification): void {
-    const history = [notification, ...this.notificationHistory.value];
-    this.notificationHistory.next(history.slice(0, 100));
-    this.updateUnreadCount();
-    this.saveNotificationsToStorage();
-  }
-
   fetchUserNotifications(page: number = 1) {
-    if (this.isLoading) {
-      console.log('⏳ Notificações já carregando, ignorando chamada duplicada');
-      return;
-    }
+    if (this.isLoading) return;
 
-    // Verificar se há token antes de fazer a requisição
     const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn('Token não encontrado - pulando busca de notificações');
-      return;
-    }
+    if (!token) return;
 
     this.isLoading = true;
 
-    // Usar rate limiting mais agressivo para esta requisição
     const requestKey = `notifications-page-${page}`;
     this.rateLimitService.executeRequest(
       requestKey,
       () => this.http.get<NotificationListResponse>(`${this.API_URL}?page=${page}&limit=${this.pageSize}`),
-      1500 // Aumentado para 1.5s debounce
+      1500
     ).subscribe({
       next: (response) => {
         if (response.success && response.notifications) {
@@ -195,100 +156,77 @@ export class NotificationService {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error("Falha ao buscar notificações", err);
+        console.error("Falha ao buscar notificacoes", err);
         this.isLoading = false;
       }
     });
   }
 
   fetchUnreadCount() {
-    // Verificar se há token antes de fazer a requisição
     const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn('Token não encontrado - pulando busca de contador de não lidas');
-      return;
-    }
+    if (!token) return;
 
-    // Usar rate limiting mais conservador para esta requisição
     this.rateLimitService.executeRequest(
       'notifications-unread-count',
       () => this.http.get<{ success: boolean, unreadCount: number }>(`${this.API_URL}/unread-count`),
-      2000 // Aumentado para 2s debounce para contador
+      2000
     ).subscribe({
       next: (response) => {
         if (response.success) {
           this.unreadCount.next(response.unreadCount);
         }
       },
-      error: (err) => console.error("Falha ao buscar contador de não lidas", err)
+      error: (err) => console.error("Falha ao buscar contador de nao lidas", err)
     });
   }
 
   markAsRead(id: string): void {
-    // Atualizar localmente primeiro
     const history = this.notificationHistory.value.map(n => n.id === id ? { ...n, isRead: true } : n);
     this.notificationHistory.next(history);
     this.updateUnreadCount();
     this.saveNotificationsToStorage();
 
-    // Extrair ID numérico do servidor
     const numericId = this.extractServerId(id);
     if (numericId) {
       this.http.patch(`${this.API_URL}/${numericId}/read`, {}).subscribe({
-        next: () => this.fetchUnreadCount(), // Sincronizar contador
-        error: (err) => console.error('Erro ao marcar notificação como lida:', err)
+        next: () => this.fetchUnreadCount(),
+        error: (err) => console.error('Erro ao marcar notificacao como lida:', err)
       });
     }
   }
 
   markAllAsRead(): void {
-    // Atualizar localmente primeiro
     const history = this.notificationHistory.value.map(n => ({ ...n, isRead: true }));
     this.notificationHistory.next(history);
     this.updateUnreadCount();
     this.saveNotificationsToStorage();
 
-    // Chamar API
     this.http.patch(`${this.API_URL}/read-all`, {}).subscribe({
-      next: () => this.fetchUnreadCount(), // Sincronizar contador
+      next: () => this.fetchUnreadCount(),
       error: (err) => console.error('Erro ao marcar todas como lidas:', err)
     });
   }
 
   clearHistory(): void {
-    // Limpar estado local
     this.notificationHistory.next([]);
     this.updateUnreadCount();
     this.saveNotificationsToStorage();
 
-    // Deletar do backend
     this.http.delete(`${this.API_URL}/delete-all`).subscribe({
-      next: () => {
-        console.log('✅ Notificações deletadas do servidor');
-        this.fetchUnreadCount(); // Sincronizar contador
-      },
-      error: (err) => console.error('❌ Erro ao deletar notificações do servidor:', err)
+      next: () => this.fetchUnreadCount(),
+      error: (err) => console.error('Erro ao deletar notificacoes do servidor:', err)
     });
   }
 
-  /**
-   * Deletar notificações antigas (mais de X dias)
-   */
   deleteOldNotifications(daysOld: number = 30): void {
     this.http.delete(`${this.API_URL}/delete-old?days=${daysOld}`).subscribe({
-      next: () => {
-        console.log(`✅ Notificações antigas (>${daysOld} dias) deletadas`);
-        this.refreshNotifications(); // Recarregar notificações
-      },
-      error: (err) => console.error('❌ Erro ao deletar notificações antigas:', err)
+      next: () => this.refreshNotifications(),
+      error: (err) => console.error('Erro ao deletar notificacoes antigas:', err)
     });
   }
 
-  /**
-   * Resetar estado das notificações (usado no logout)
-   */
   resetNotificationState(): void {
-    console.log('🧹 Resetando estado das notificações');
+    this.stopPolling();
     this.isInitialized = false;
     this.isLoading = false;
     this.currentPage = 1;
@@ -298,29 +236,17 @@ export class NotificationService {
     this.toastQueue.next([]);
   }
 
-  removeTestNotifications(): void {
-    const history = this.notificationHistory.value.filter(n => !n.id.startsWith('test-'));
-    this.notificationHistory.next(history);
-    this.updateUnreadCount();
-    this.saveNotificationsToStorage();
-  }
-
-  clearOldNotifications(): void {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const history = this.notificationHistory.value.filter(n => new Date(n.timestamp) > sevenDaysAgo);
-    this.notificationHistory.next(history);
-    this.updateUnreadCount();
-    this.saveNotificationsToStorage();
-  }
-
   private updateUnreadCount(): void {
     this.unreadCount.next(this.notificationHistory.value.filter(n => !n.isRead).length);
   }
 
   private saveNotificationsToStorage(): void {
-    try { localStorage.setItem('notification_history', JSON.stringify(this.notificationHistory.value)); }
-    catch (e) { console.error('Erro ao salvar notificações', e); }
+    try {
+      const toSave = this.notificationHistory.value.slice(0, this.MAX_STORED_NOTIFICATIONS);
+      localStorage.setItem('notification_history', JSON.stringify(toSave));
+    } catch (e) {
+      console.error('Erro ao salvar notificacoes', e);
+    }
   }
 
   private loadNotificationsFromStorage(): void {
@@ -328,10 +254,13 @@ export class NotificationService {
       const stored = localStorage.getItem('notification_history');
       if (stored) {
         const history = JSON.parse(stored).map((n: any) => ({ ...n, timestamp: new Date(n.timestamp) }));
-        this.notificationHistory.next(history);
+        this.notificationHistory.next(history.slice(0, this.MAX_STORED_NOTIFICATIONS));
         this.updateUnreadCount();
       }
-    } catch (e) { console.error('Erro ao carregar notificações', e); }
+    } catch (e) {
+      console.error('Erro ao carregar notificacoes', e);
+      localStorage.removeItem('notification_history');
+    }
   }
 
   private generateId(): string {
@@ -392,18 +321,11 @@ export class NotificationService {
     return iconMap[type] || 'fas fa-bell';
   }
 
-  private getNotificationDuration(notification: Notification): number {
-    if (notification.priority === 'high') return 8000;
-    if (notification.type === 'error') return 7000;
-    return this.defaultDuration;
-  }
-
   private extractServerId(clientId: string): number | null {
     const match = clientId.match(/^server-(\d+)$/);
     return match ? parseInt(match[1], 10) : null;
   }
 
-  // Métodos públicos para paginação
   hasMoreNotifications(): boolean {
     return this.currentPage < this.totalPages;
   }
@@ -420,64 +342,33 @@ export class NotificationService {
     this.fetchUnreadCount();
   }
 
-  /**
-   * Inicializa as notificações após o usuário estar autenticado
-   */
   initializeNotifications(): void {
-    if (this.isInitialized) {
-      console.log('🔄 Notificações já inicializadas, ignorando');
-      return;
-    }
+    if (this.isInitialized) return;
 
-    console.log('🚀 Inicializando notificações...');
     this.isInitialized = true;
-    
-    // Usar setTimeout para evitar chamadas imediatas que podem causar rate limiting
+
     setTimeout(() => {
       this.fetchUserNotifications();
     }, 1000);
-    
+
     setTimeout(() => {
       this.fetchUnreadCount();
     }, 2000);
+
+    this.startPolling();
   }
 
-  /**
-   * Verifica se uma notificação é relevante para o usuário atual
-   * baseado nos vínculos com contratos e role do usuário
-   */
-  private isNotificationRelevantForUser(notification: any): boolean {
-    try {
-      // Notificações sem metadata de contrato são sempre relevantes (notificações gerais)
-      if (!notification.metadata?.contract_id) {
-        return true;
-      }
+  private startPolling(): void {
+    this.stopPolling();
+    this.pollingInterval = setInterval(() => {
+      this.fetchUnreadCount();
+    }, this.POLLING_INTERVAL);
+  }
 
-      // Para notificações relacionadas a contratos específicos,
-      // a validação já foi feita no backend, então aceitar
-      // (o backend só envia notificações para usuários vinculados)
-      return true;
-    } catch (error) {
-      console.error('Erro ao verificar relevância da notificação:', error);
-      // Em caso de erro, negar por segurança
-      return false;
+  private stopPolling(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
     }
-  }
-
-  /**
-   * Filtro adicional para notificações já carregadas
-   * (usado como camada extra de segurança)
-   */
-  private filterNotificationsByAccess(notifications: Notification[]): Notification[] {
-    return notifications.filter(notification => {
-      // Se não tem metadata de contrato, manter
-      if (!notification.metadata?.contract_id) {
-        return true;
-      }
-
-      // Para notificações com contract_id, confiar na validação do backend
-      // pois a API já filtra baseado nos vínculos do usuário
-      return true;
-    });
   }
 }

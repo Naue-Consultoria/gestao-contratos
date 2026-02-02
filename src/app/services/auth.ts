@@ -4,7 +4,6 @@ import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { NotificationService } from './notification.service';
 import { environment } from '../../environments/environment';
-import { WebsocketService } from './websocket.service';
 
 export interface User {
   id: number;
@@ -68,7 +67,6 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private injector = inject(Injector);
-  private websocketService = inject(WebsocketService);
   
   private get notificationService(): NotificationService {
     return this.injector.get(NotificationService);
@@ -90,7 +88,6 @@ export class AuthService {
       tap(response => {
         if (response.token && response.user) {
           this.setSession(response.token, response.user);
-          this.websocketService.connect(response.user.id);
           // Inicializar notificações após delay maior para evitar rate limiting
           setTimeout(() => {
             this.notificationService.initializeNotifications();
@@ -110,14 +107,12 @@ export class AuthService {
     const headers = this.getAuthHeaders();
     return this.http.post(`${this.API_URL}/logout`, {}, { headers }).pipe(
       tap(() => {
-        this.websocketService.disconnect();
         this.notificationService.resetNotificationState(); // Reset do estado das notificações
         this.clearSession();
         this.notificationService.info('Você foi desconectado.', 'Sessão Encerrada');
         this.router.navigate(['/login']);
       }),
       catchError(error => {
-        this.websocketService.disconnect();
         this.notificationService.resetNotificationState(); // Reset mesmo em erro
         this.clearSession();
         this.router.navigate(['/login']);
