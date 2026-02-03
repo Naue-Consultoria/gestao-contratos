@@ -160,9 +160,14 @@
                   <span class="phone-text">{{ vagaCandidato.candidato.telefone || '-' }}</span>
                 </td>
                 <td>
-                  <span class="status-badge" [ngClass]="'status-' + (vagaCandidato.candidato.status || 'pendente')">
-                    {{ (vagaCandidato.candidato.status || 'pendente') | titlecase }}
-                  </span>
+                  <select class="status-select"
+                          [value]="vagaCandidato.status"
+                          (change)="onVagaCandidatoStatusChange(vagaCandidato, $event)"
+                          [ngClass]="'status-' + vagaCandidato.status">
+                    <option *ngFor="let statusOption of vagaCandidatoStatusOptions" [value]="statusOption">
+                      {{ statusOption | titlecase }}
+                    </option>
+                  </select>
                 </td>
                 <td>
                   <span class="date-text">{{ vagaCandidato.data_inscricao | dateNoTimezone }}</span>

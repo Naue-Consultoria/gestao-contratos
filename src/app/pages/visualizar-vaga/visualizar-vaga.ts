@@ -8,7 +8,7 @@ import { CandidatoModalComponent } from '../../components/candidato-modal/candid
 import { EntrevistaModal } from '../../components/entrevista-modal/entrevista-modal';
 import { ObservacoesModalComponent } from '../../components/observacoes-modal/observacoes-modal.component';
 import { Entrevista, EntrevistaService } from '../../services/entrevista.service';
-import { Candidato } from '../../services/candidato.service';
+import { Candidato, CandidatoService } from '../../services/candidato.service';
 import { VagaService } from '../../services/vaga.service';
 import { UserService } from '../../services/user.service';
 import { VagaExportService } from '../../services/vaga-export.service';
@@ -168,10 +168,22 @@ export class VisualizarVagaComponent implements OnInit {
     'remarcou': 'Remarcou'
   };
 
+  // Opções de status para o vaga_candidato
+  vagaCandidatoStatusOptions: string[] = [
+    'inscrito',
+    'triagem',
+    'entrevista_agendada',
+    'entrevista_realizada',
+    'aprovado',
+    'reprovado',
+    'desistiu'
+  ];
+
   private vagaService = inject(VagaService);
   private userService = inject(UserService);
   private entrevistaService = inject(EntrevistaService);
   private vagaExportService = inject(VagaExportService);
+  private candidatoService = inject(CandidatoService); // Adicionado
   private toastr = inject(ToastrService);
 
   isExporting = false;
@@ -364,48 +376,29 @@ export class VisualizarVagaComponent implements OnInit {
     }
   }
 
-  // Candidate Management Methods
-  addCandidate() {
-    if (!this.candidateForm.nome || !this.candidateForm.email) {
-      alert('Nome e email são obrigatórios!');
-      return;
+  async onCandidatoSaved(candidato: Candidato) {
+    console.log('Candidato salvo:', candidato);
+
+    // Se é um novo candidato (não tem ID ou não veio de uma edição), vincular à vaga
+    if (!this.selectedCandidato && candidato.id) {
+      try {
+        console.log('Vinculando candidato', candidato.id, 'à vaga', this.vagaId);
+        await firstValueFrom(this.vagaService.vincularCandidato(this.vagaId, candidato.id));
+        this.toastr.success('Candidato vinculado à vaga com sucesso!');
+        await this.loadCandidatos();
+      } catch (error) {
+        console.error('Erro ao vincular candidato:', error);
+        this.toastr.error('Erro ao vincular candidato à vaga. Tente novamente.');
+      }
+    } else {
+      // Candidato editado via modal de candidato, apenas recarrega para refletir mudanças
+      console.log('Candidato editado, recarregando lista...');
+      await this.loadCandidatos();
     }
 
-    // Simulação - substituir por chamada real ao backend
-    const novoId = this.candidatos.length + 1;
-
-    const novoCandidato: Candidato = {
-      id: novoId,
-      nome: this.candidateForm.nome,
-      email: this.candidateForm.email,
-      telefone: this.candidateForm.telefone,
-      status: this.candidateForm.status as 'pendente' | 'aprovado' | 'reprovado' | 'desistiu'
-    };
-
-    const novaInscricao: VagaCandidato = {
-      id: novoId,
-      vaga_id: this.vagaId,
-      candidato: novoCandidato,
-      status: 'inscrito',
-      data_inscricao: new Date().toISOString(),
-      observacoes: this.candidateForm.observacoes,
-      entrevistas: []
-    };
-
-    this.candidatos.push(novaInscricao);
-
-    // Limpar formulário
-    this.candidateForm = {
-      nome: '',
-      email: '',
-      telefone: '',
-      status: 'pendente',
-      observacoes: ''
-    };
-
-    this.showAddCandidateModal = false;
-    console.log('Candidato adicionado:', novoCandidato);
+    this.showAddCandidateModal = false; // Fechar o modal antigo se estiver aberto
   }
+
 
   // Métodos para o modal de entrevista
   openEntrevistaModal(vagaCandidato: VagaCandidato, entrevista?: Entrevista) {
@@ -422,28 +415,8 @@ export class VisualizarVagaComponent implements OnInit {
 
   onEntrevistaSaved(entrevista: Entrevista) {
     console.log('Entrevista salva:', entrevista);
-    // Aqui você pode atualizar a lista de entrevistas do candidato
-    // Por enquanto, vou simular adicionando à lista local
-    if (this.selectedVagaCandidato) {
-      const candidatoIndex = this.candidatos.findIndex(c => c.id === this.selectedVagaCandidato?.id);
-      if (candidatoIndex !== -1) {
-        // Se for uma nova entrevista, adiciona à lista
-        if (!this.selectedEntrevista) {
-          this.candidatos[candidatoIndex].entrevistas.push({
-            id: entrevista.id || Date.now(),
-            data_entrevista: entrevista.data_entrevista,
-            hora_entrevista: entrevista.hora_entrevista,
-            status: entrevista.status || 'agendada',
-            link_chamada: entrevista.link_chamada,
-            observacoes: entrevista.observacoes,
-            avaliacao: '',
-            entrevistador_nome: entrevista.entrevistador_nome
-          });
-          // Atualizar status do candidato
-          this.candidatos[candidatoIndex].status = 'entrevista_agendada';
-        }
-      }
-    }
+    // Recarregar candidatos para atualizar a lista de entrevistas
+    this.loadCandidatos();
   }
 
   async loadEntrevistadores() {
@@ -471,32 +444,6 @@ export class VisualizarVagaComponent implements OnInit {
     this.selectedCandidato = null;
   }
 
-  async onCandidatoSaved(candidato: Candidato) {
-    console.log('Candidato salvo:', candidato);
-
-    if (!this.selectedCandidato && candidato.id) {
-      // Novo candidato - vincular à vaga
-      try {
-        console.log('Vinculando candidato', candidato.id, 'à vaga', this.vagaId);
-        await firstValueFrom(this.vagaService.vincularCandidato(this.vagaId, candidato.id));
-        console.log('Candidato vinculado com sucesso!');
-
-        // Recarregar lista de candidatos
-        await this.loadCandidatos();
-      } catch (error) {
-        console.error('Erro ao vincular candidato:', error);
-        alert('Erro ao vincular candidato à vaga. Tente novamente.');
-      }
-    } else if (this.selectedCandidato) {
-      // Candidato editado - apenas recarregar lista
-      console.log('Candidato editado, recarregando lista...');
-      await this.loadCandidatos();
-    }
-
-    // Fechar o modal antigo se estiver aberto
-    this.showAddCandidateModal = false;
-  }
-
   // Métodos para o modal de observações
   openObservacoesModal(candidato: Candidato) {
     this.selectedCandidatoForObservacoes = candidato;
@@ -508,16 +455,27 @@ export class VisualizarVagaComponent implements OnInit {
     this.selectedCandidatoForObservacoes = null;
   }
 
-  onObservacoesSaved(candidatoAtualizado: Candidato) {
+  async onObservacoesSaved(candidatoAtualizado: Candidato) {
     console.log('Observações salvas:', candidatoAtualizado);
 
-    // Atualizar o candidato na lista local
-    const vagaCandidatoIndex = this.candidatos.findIndex(
-      vc => vc.candidato.id === candidatoAtualizado.id
-    );
+    const vagaCandidato = this.candidatos.find(vc => vc.candidato.id === candidatoAtualizado.id);
 
-    if (vagaCandidatoIndex !== -1) {
-      this.candidatos[vagaCandidatoIndex].candidato = candidatoAtualizado;
+    if (vagaCandidato && vagaCandidato.id) {
+      try {
+        await firstValueFrom(
+          this.candidatoService.updateCandidatoVagaStatus(vagaCandidato.id, {
+            status: vagaCandidato.status, // Manter o status atual do vagaCandidato
+            observacoes: candidatoAtualizado.observacoes
+          })
+        );
+        this.toastr.success('Observações atualizadas com sucesso!');
+        await this.loadCandidatos(); // Recarregar para refletir a mudança
+      } catch (error) {
+        console.error('Erro ao atualizar observações:', error);
+        this.toastr.error('Erro ao atualizar observações. Tente novamente.');
+      }
+    } else {
+      this.toastr.error('Não foi possível encontrar o registro do candidato na vaga para atualizar as observações.');
     }
   }
 
@@ -527,6 +485,7 @@ export class VisualizarVagaComponent implements OnInit {
       return null;
     }
     // Retorna a última entrevista (mais recente)
+    // Supondo que as entrevistas já vêm ordenadas por data/hora
     return vagaCandidato.entrevistas[vagaCandidato.entrevistas.length - 1];
   }
 
@@ -540,6 +499,8 @@ export class VisualizarVagaComponent implements OnInit {
 
     if (!latestInterview || !latestInterview.id) {
       this.toastr.error('Entrevista não encontrada');
+      // Revert the select value if there's no interview
+      event.target.value = newStatus; // Or the previous status if stored
       return;
     }
 
@@ -558,6 +519,29 @@ export class VisualizarVagaComponent implements OnInit {
       this.toastr.error('Erro ao atualizar status da entrevista');
       // Revert the select value
       event.target.value = latestInterview.status;
+    }
+  }
+
+  // Novo método para alterar o status do candidato na vaga
+  async onVagaCandidatoStatusChange(vagaCandidato: VagaCandidato, event: any) {
+    const newStatus = event.target.value;
+
+    if (!vagaCandidato || !vagaCandidato.id) {
+      this.toastr.error('Candidato na vaga não encontrado');
+      event.target.value = newStatus;
+      return;
+    }
+
+    try {
+      await firstValueFrom(
+        this.candidatoService.updateCandidatoVagaStatus(vagaCandidato.id, { status: newStatus })
+      );
+      vagaCandidato.status = newStatus;
+      this.toastr.success('Status do candidato na vaga atualizado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao atualizar status do candidato na vaga:', error);
+      this.toastr.error('Erro ao atualizar status do candidato na vaga. Tente novamente.');
+      event.target.value = vagaCandidato.status; // Revert if error
     }
   }
 

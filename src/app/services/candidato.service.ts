@@ -9,7 +9,7 @@ export interface Candidato {
   email?: string;
   telefone?: string;
   status?: 'pendente' | 'aprovado' | 'reprovado' | 'desistiu';
-  observacoes?: string;
+  observacoes?: string; // Adicionado
   created_at?: Date;
   updated_at?: Date;
 }
@@ -36,6 +36,10 @@ export class CandidatoService {
 
   updateCandidato(id: number, candidato: Candidato): Observable<Candidato> {
     return this.http.put<Candidato>(`${this.apiUrl}/${id}`, candidato);
+  }
+
+  updateCandidatoVagaStatus(vagaCandidatoId: number, data: { status: string, observacoes?: string }): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/vaga-candidato/${vagaCandidatoId}/status`, data);
   }
 
   deleteCandidato(id: number): Observable<void> {
