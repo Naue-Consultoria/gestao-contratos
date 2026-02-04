@@ -260,8 +260,8 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
           bValue = b.clientName.toLowerCase();
           break;
         case 'status':
-          aValue = a.statusText.toLowerCase();
-          bValue = b.statusText.toLowerCase();
+          aValue = (a.statusText || '').toLowerCase();
+          bValue = (b.statusText || '').toLowerCase();
           break;
         case 'totalValue':
           // Converter string de valor para número
