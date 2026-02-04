@@ -67,7 +67,7 @@ export interface Proposal {
   signer_phone?: string;
   signer_document?: string;
   signer_observations?: string;
-  status: 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta' | 'standby' | 'sem_retorno'; // contraproposta = Assinada Parcialmente, sem_retorno = Sem Retorno
+  status: 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta' | 'standby' | 'sem_retorno' | 'em_negociacao'; // contraproposta = Assinada Parcialmente, sem_retorno = Sem Retorno, em_negociacao = Em Negociação
   observacoes?: string; // Observações internas sobre a proposta
   status_natureza?: string; // Natureza/descrição detalhada do status
   converted_to_contract_id?: number;
@@ -427,7 +427,8 @@ export class ProposalService {
       'converted': '#10b981', // Verde claro (Assinada)
       'contraproposta': '#ef4444', // Vermelho para Assinada Parcialmente
       'standby': '#eab308', // Amarelo/Dourado para Standby
-      'sem_retorno': '#9ca3af' // Cinza claro para Sem Retorno
+      'sem_retorno': '#9ca3af', // Cinza claro para Sem Retorno
+      'em_negociacao': '#8b5cf6' // Roxo para Em Negociação
     };
     return colors[status] || '#6b7280';
   }
@@ -445,7 +446,8 @@ export class ProposalService {
       'converted': 'Assinada',
       'contraproposta': 'Ass. Parcial',
       'standby': 'Standby',
-      'sem_retorno': 'Sem Retorno'
+      'sem_retorno': 'Sem Retorno',
+      'em_negociacao': 'Em Negociação'
     };
     return texts[status] || status;
   }
