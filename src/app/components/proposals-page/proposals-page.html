@@ -174,7 +174,10 @@
               <i [class]="getSortIcon('clientName')"></i>
             </th>
             <th>Tipo</th>
-            <th>Status</th>
+            <th class="sortable" (click)="sortBy('status')">
+              Status
+              <i [class]="getSortIcon('status')"></i>
+            </th>
             <th class="sortable" (click)="sortBy('totalValue')">
               Valor Total
               <i [class]="getSortIcon('totalValue')"></i>
