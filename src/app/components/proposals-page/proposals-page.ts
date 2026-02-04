@@ -259,6 +259,10 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
           aValue = a.clientName.toLowerCase();
           bValue = b.clientName.toLowerCase();
           break;
+        case 'status':
+          aValue = a.statusText.toLowerCase();
+          bValue = b.statusText.toLowerCase();
+          break;
         case 'totalValue':
           // Converter string de valor para número
           aValue = this.parseMoneyValue(a.totalValue);
