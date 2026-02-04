@@ -103,27 +103,27 @@ export class ServiceTrackingPageComponent implements OnInit {
       // Buscar a rotina pelo ID da rotina (routineId da URL)
       try {
         const routine = await this.routineService.getRoutineById(this.routineId).toPromise();
-        
+
         if (routine) {
           this.routine = routine;
-          
+
           // Usar o contract_service_id da rotina para buscar o service
           const contractServiceId = routine.contract_service_id;
-          
+
           // Validar se o serviceId da URL bate com o contract_service_id da rotina
           if (contractServiceId !== this.serviceId) {
           }
-          
+
           const contractService = await this.contractService.getContractServiceById(contractServiceId).toPromise();
           if (contractService) {
             this.service = contractService;
-            
+
             // Carregar dados do contrato
             if (contractService.contract_id) {
               const contractResponse = await this.contractService.getContract(contractService.contract_id).toPromise();
               if (contractResponse) {
                 this.contract = contractResponse.contract;
-                
+
                 // Configurar breadcrumb com o caminho completo
                 this.setupBreadcrumb();
               }
@@ -138,8 +138,30 @@ export class ServiceTrackingPageComponent implements OnInit {
           this.isLoading = false;
           return;
         }
-      } catch (serviceError) {
+      } catch (serviceError: any) {
         console.error('Erro ao carregar dados:', serviceError);
+
+        // Tratamento específico para erro 403 (Acesso negado)
+        if (serviceError.status === 403) {
+          this.isLoading = false;
+          this.toastr.warning(
+            'Você não tem permissão para acessar esta rotina. Verifique se está atribuído ao contrato.',
+            'Acesso Negado',
+            {
+              timeOut: 5000,
+              progressBar: true,
+              closeButton: true,
+              positionClass: 'toast-top-center'
+            }
+          );
+
+          // Aguardar 3 segundos antes de redirecionar para o usuário ler a mensagem
+          setTimeout(() => {
+            this.router.navigate(['/home/dashboard']);
+          }, 3000);
+          return;
+        }
+
         this.error = 'Erro ao carregar dados';
         this.isLoading = false;
         return;
@@ -586,7 +608,19 @@ export class ServiceTrackingPageComponent implements OnInit {
       console.error('Erro ao carregar comentários:', error);
       this.comments = [];
 
-      if (error.status !== 0) {
+      // Tratamento específico para erro 403 (Acesso negado)
+      if (error.status === 403) {
+        this.toastr.warning(
+          'Você não tem permissão para acessar os comentários desta rotina.',
+          'Acesso Negado',
+          {
+            timeOut: 5000,
+            progressBar: true,
+            closeButton: true,
+            positionClass: 'toast-top-center'
+          }
+        );
+      } else if (error.status !== 0) {
         this.toastr.error('Erro ao carregar comentários');
       }
     } finally {

@@ -771,27 +771,34 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
 
   /**
    * Calcula o valor total considerando apenas serviços selecionados em contrapropostas
+   * IMPORTANTE: Uma vez que o cliente selecionou serviços, o valor aceito deve ser usado
+   * independente de mudanças posteriores no status da proposta
    */
   getCalculatedTotal(): number {
     if (!this.proposal) return 0;
 
-    // Se houver serviços com seleção parcial (alguns NÃO selecionados, mas não todos),
-    // somar apenas os serviços selecionados
+    // Verificar se há serviços com seleção do cliente definida
+    // Uma vez que o cliente selecionou/rejeitou serviços, sempre usar o valor aceito
     if (this.proposal.services) {
-      // Contar quantos serviços NÃO foram selecionados
-      const unselectedCount = this.proposal.services.filter(s => s.selected_by_client === false).length;
-      const totalServices = this.proposal.services.length;
+      // Verificar se há algum serviço com selected_by_client definido (true ou false)
+      const hasClientSelection = this.proposal.services.some(s => s.selected_by_client !== null && s.selected_by_client !== undefined);
 
-      // Só é seleção parcial se:
-      // 1. Houver pelo menos um serviço NÃO selecionado
-      // 2. Mas NÃO todos os serviços são não selecionados (se todos forem false, é dados inconsistentes)
-      const hasPartialSelection = unselectedCount > 0 && unselectedCount < totalServices;
+      if (hasClientSelection) {
+        // Contar quantos serviços NÃO foram selecionados
+        const unselectedCount = this.proposal.services.filter(s => s.selected_by_client === false).length;
+        const totalServices = this.proposal.services.length;
 
-      if (hasPartialSelection) {
-        const selectedServices = this.proposal.services.filter(service => service.selected_by_client !== false);
-        const selectedServicesTotal = selectedServices.reduce((sum, service) => sum + (service.total_value || 0), 0);
+        // Só é seleção parcial se:
+        // 1. Houver pelo menos um serviço NÃO selecionado
+        // 2. Mas NÃO todos os serviços são não selecionados (se todos forem false, é dados inconsistentes)
+        const hasPartialSelection = unselectedCount > 0 && unselectedCount < totalServices;
 
-        return selectedServicesTotal;
+        if (hasPartialSelection) {
+          const selectedServices = this.proposal.services.filter(service => service.selected_by_client !== false);
+          const selectedServicesTotal = selectedServices.reduce((sum, service) => sum + (service.total_value || 0), 0);
+
+          return selectedServicesTotal;
+        }
       }
     }
 

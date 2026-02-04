@@ -926,14 +926,16 @@
 
 .signer-details {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
+  align-items: start;
 }
 
 .signer-detail {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0;
 }
 
 .signer-detail .detail-label {
@@ -956,12 +958,28 @@
   background: var(--white);
   border-radius: 6px;
   border: 1px solid var(--border-gray);
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
+  line-height: 1.5;
+  hyphens: none;
 }
 
 :host-context(body.dark-mode) .signer-detail .detail-value {
   color: var(--dark-text);
   background: var(--dark-card);
   border-color: var(--dark-border);
+}
+
+/* Campo de observações (último campo) deve ocupar toda a largura */
+.signer-details .signer-detail:last-child {
+  grid-column: 1 / -1;
+}
+
+/* Ajuste para observações com textos longos */
+.signer-details .signer-detail:last-child .detail-value {
+  min-height: 3rem;
+  max-width: 100%;
 }
 
 /* ===============================
