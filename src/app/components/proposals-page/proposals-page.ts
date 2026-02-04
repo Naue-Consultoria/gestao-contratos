@@ -654,7 +654,9 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         'expired': 'Expirada',
         'converted': 'Assinada',
         'contraproposta': 'Assinada Parcialmente',
-        'standby': 'Standby'
+        'standby': 'Standby',
+        'sem_retorno': 'Sem Retorno',
+        'em_negociacao': 'Em Negociação'
       };
       doc.text(`Status: ${statusMap[fullProposal.status] || fullProposal.status}`, margin, currentY);
 
@@ -992,7 +994,8 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       'converted': '#10b981',  // Verde claro (Assinada)
       'contraproposta': '#0a8560',  // Verde mais claro que o 'signed'
       'standby': '#eab308',  // Amarelo/Dourado para Standby
-      'sem_retorno': '#9ca3af'  // Cinza claro para Sem Retorno
+      'sem_retorno': '#9ca3af',  // Cinza claro para Sem Retorno
+      'em_negociacao': '#8b5cf6'  // Roxo para Em Negociação
     };
     return statusColors[status] || '#6c757d';
   }
@@ -1339,7 +1342,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   async updateProposalStatus(proposal: ProposalDisplay, event: Event) {
     event.stopPropagation();
 
-    const newStatus = proposal.status as 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta' | 'standby' | 'sem_retorno';
+    const newStatus = proposal.status as 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta' | 'standby' | 'sem_retorno' | 'em_negociacao';
     const previousStatus = proposal.raw.status;
 
     // Se o status não mudou, não faz nada
