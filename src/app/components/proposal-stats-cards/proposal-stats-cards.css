@@ -339,48 +339,48 @@
 /* Cards grandes (350px - 399px) */
 @container (min-width: 350px) and (max-width: 399px) {
   .stat-value {
-    font-size: 3.25rem !important;
+    font-size: 2.5rem !important;
     line-height: 1.1;
     margin-bottom: 0.5rem;
     font-weight: 800;
   }
-  
+
   .stat-label {
-    font-size: 0.9rem !important;
+    font-size: 0.85rem !important;
     margin-bottom: 0.75rem;
   }
-  
+
+  .stat-icon-wrapper {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .stat-icon-wrapper i {
+    font-size: 1.375rem !important;
+  }
+}
+
+/* Cards muito grandes (400px+) - Limitado para evitar crescimento excessivo */
+@container (min-width: 400px) {
+  .stat-value {
+    font-size: 2.5rem !important;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+  }
+
+  .stat-label {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.75rem;
+  }
+
   .stat-icon-wrapper {
     width: 48px !important;
     height: 48px !important;
   }
-  
+
   .stat-icon-wrapper i {
     font-size: 1.5rem !important;
-  }
-}
-
-/* Cards muito grandes (400px+) */
-@container (min-width: 400px) {
-  .stat-value {
-    font-size: 3.75rem !important;
-    line-height: 1.1;
-    margin-bottom: 0.5rem;
-    font-weight: 800;
-  }
-  
-  .stat-label {
-    font-size: 0.95rem !important;
-    margin-bottom: 0.75rem;
-  }
-  
-  .stat-icon-wrapper {
-    width: 56px !important;
-    height: 56px !important;
-  }
-  
-  .stat-icon-wrapper i {
-    font-size: 1.75rem !important;
   }
 }
 
@@ -457,28 +457,28 @@
     gap: 2rem;
     margin-bottom: 2rem;
   }
-  
+
   .stat-card {
-    padding: 2.5rem;
+    padding: 2rem;
     border-radius: 20px;
-    min-height: 180px;
+    min-height: 160px;
   }
-  
+
   .stat-value {
-    font-size: 3rem;
+    font-size: 2.5rem;
   }
-  
+
   .stat-icon-wrapper {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
   }
-  
+
   .stat-icon-wrapper i {
-    font-size: 1.625rem;
+    font-size: 1.5rem;
   }
-  
+
   .stat-label {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 }
 
@@ -489,28 +489,28 @@
     gap: 1.5rem;
     margin-bottom: 1.5rem;
   }
-  
+
   .stat-card {
     padding: 2rem;
     border-radius: 18px;
     min-height: 160px;
   }
-  
+
   .stat-value {
     font-size: 2.5rem;
   }
-  
+
   .stat-icon-wrapper {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
   }
-  
+
   .stat-icon-wrapper i {
     font-size: 1.5rem;
   }
-  
+
   .stat-label {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
   }
 }
 
@@ -603,10 +603,7 @@
   }
 }
 
-/* Ajuste específico para o card "Valor em Aberto" */
-.stat-card:nth-child(4) .stat-value {
-  font-size: 2.2rem !important;
-}
+/* Ajuste removido - tamanho fixo já aplicado nas container queries */
 
 /* ==========================================
    CORREÇÃO FINAL - RESPONSIVIDADE NOTEBOOKS
@@ -633,10 +630,6 @@
   .stat-value {
     font-size: 1.5rem !important;
     margin-bottom: 0.25rem !important;
-  }
-
-  .stat-card:nth-child(4) .stat-value {
-    font-size: 1.25rem !important;
   }
 
   .stat-label {
