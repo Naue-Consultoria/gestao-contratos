@@ -383,26 +383,31 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     }
 
     // Calcular valor total considerando seleção parcial de serviços
+    // IMPORTANTE: Uma vez que o cliente selecionou serviços, o valor aceito deve ser usado
+    // independente de mudanças posteriores no status da proposta
     let totalValue = apiProposal.total_value || 0;
 
-    // Verificar se há serviços com seleção parcial apenas para propostas assinadas, contrapropostas ou convertidas
-    // Para propostas enviadas, todos os serviços estão disponíveis
-    if ((apiProposal.status === 'signed' || apiProposal.status === 'contraproposta' || apiProposal.status === 'converted') &&
-        apiProposal.services && apiProposal.services.length > 0) {
-      // Contar quantos serviços NÃO foram selecionados
-      const unselectedCount = apiProposal.services.filter((s: any) => s.selected_by_client === false).length;
-      const totalServices = apiProposal.services.length;
+    // Verificar se há serviços com seleção do cliente definida
+    if (apiProposal.services && apiProposal.services.length > 0) {
+      // Verificar se há algum serviço com selected_by_client definido (true ou false)
+      const hasClientSelection = apiProposal.services.some((s: any) => s.selected_by_client !== null && s.selected_by_client !== undefined);
 
-      // Só é seleção parcial se:
-      // 1. Houver pelo menos um serviço NÃO selecionado
-      // 2. Mas NÃO todos os serviços são não selecionados (se todos forem false, é dados inconsistentes)
-      const hasPartialSelection = unselectedCount > 0 && unselectedCount < totalServices;
+      if (hasClientSelection) {
+        // Contar quantos serviços NÃO foram selecionados
+        const unselectedCount = apiProposal.services.filter((s: any) => s.selected_by_client === false).length;
+        const totalServices = apiProposal.services.length;
 
-      if (hasPartialSelection) {
-        // Calcular apenas o valor dos serviços selecionados
-        // Filtra por !== false para incluir serviços selecionados (true ou undefined/null)
-        const selectedServices = apiProposal.services.filter((service: any) => service.selected_by_client !== false);
-        totalValue = selectedServices.reduce((sum: number, service: any) => sum + (service.total_value || 0), 0);
+        // Só é seleção parcial se:
+        // 1. Houver pelo menos um serviço NÃO selecionado
+        // 2. Mas NÃO todos os serviços são não selecionados (se todos forem false, é dados inconsistentes)
+        const hasPartialSelection = unselectedCount > 0 && unselectedCount < totalServices;
+
+        if (hasPartialSelection) {
+          // Calcular apenas o valor dos serviços selecionados
+          // Filtra por !== false para incluir serviços selecionados (true ou undefined/null)
+          const selectedServices = apiProposal.services.filter((service: any) => service.selected_by_client !== false);
+          totalValue = selectedServices.reduce((sum: number, service: any) => sum + (service.total_value || 0), 0);
+        }
       }
     }
 

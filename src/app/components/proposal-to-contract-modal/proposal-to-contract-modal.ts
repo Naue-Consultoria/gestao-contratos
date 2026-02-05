@@ -151,26 +151,43 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
 
   getProposalFinalValue(): number {
     if (!this.proposal) return 0;
-    
-    // Se for contraproposta, calcular valor apenas dos serviços selecionados
-    if (this.proposal.status === 'contraproposta') {
-      const selectedServices = this.getProposalServices();
-      const totalValue = selectedServices.reduce((sum: number, service: any) => {
-        return sum + (service.total_value || 0);
-      }, 0);
-      
-      // Aplicar desconto se houver pagamento à vista
-      if (this.proposal.payment_type === 'vista' && this.proposal.discount_applied && this.proposal.discount_applied > 0) {
-        return totalValue - this.proposal.discount_applied;
+
+    // Verificar se há seleção parcial de serviços (independente do status)
+    // IMPORTANTE: Uma vez que o cliente selecionou serviços, o valor aceito deve ser usado
+    // independente de mudanças posteriores no status da proposta
+    if (this.proposal.services && this.proposal.services.length > 0) {
+      // Verificar se há algum serviço com selected_by_client definido (true ou false)
+      const hasClientSelection = this.proposal.services.some((s: any) => s.selected_by_client !== null && s.selected_by_client !== undefined);
+
+      if (hasClientSelection) {
+        // Contar quantos serviços NÃO foram selecionados
+        const unselectedCount = this.proposal.services.filter((s: any) => s.selected_by_client === false).length;
+        const totalServices = this.proposal.services.length;
+
+        // Só é seleção parcial se houver pelo menos um serviço NÃO selecionado
+        // mas NÃO todos os serviços são não selecionados
+        const hasPartialSelection = unselectedCount > 0 && unselectedCount < totalServices;
+
+        if (hasPartialSelection) {
+          const selectedServices = this.getProposalServices();
+          const totalValue = selectedServices.reduce((sum: number, service: any) => {
+            return sum + (service.total_value || 0);
+          }, 0);
+
+          // Aplicar desconto se houver pagamento à vista
+          if (this.proposal.payment_type === 'vista' && this.proposal.discount_applied && this.proposal.discount_applied > 0) {
+            return totalValue - this.proposal.discount_applied;
+          }
+          return totalValue;
+        }
       }
-      return totalValue;
     }
-    
+
     // Se há pagamento à vista com final_value definido, usar esse valor
     if (this.proposal.payment_type === 'vista' && this.proposal.final_value && this.proposal.final_value > 0) {
       return this.proposal.final_value;
     }
-    
+
     // Caso contrário, usar o total_value
     return this.proposal.total_value || 0;
   }
