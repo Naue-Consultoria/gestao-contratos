@@ -72,6 +72,7 @@ export class SidebarComponent {
       title: 'CONFIGURAÇÕES',
       items: [
         { id: 'usuarios', icon: 'fas fa-users', text: 'Usuários', route: '/home/usuarios', adminOnly: true, adminOnlyNotGerencial: true, excludeConsultorRS: true },
+        { id: 'estados-atuacao', icon: 'fas fa-map-marked-alt', text: 'Estados de Atuação', route: '/home/estados-atuacao', adminOnly: true, excludeConsultorRS: true },
         { id: 'configuracoes', icon: 'fas fa-cog', text: 'Configurações', route: '/home/configuracoes' }
       ]
     }

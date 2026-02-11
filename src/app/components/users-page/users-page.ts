@@ -100,9 +100,11 @@ export class UsersPageComponent implements OnInit, OnDestroy {
 
     try {
       const response = await firstValueFrom(this.userService.getUsers(params));
-      
+
       if (response && response.users) {
-        this.users = response.users.map(user => this.mapApiUserToTableUser(user));
+        // Filtrar o usuário admin@example.com
+        const filteredUsers = response.users.filter(user => user.email !== 'admin@example.com');
+        this.users = filteredUsers.map(user => this.mapApiUserToTableUser(user));
         this.loadProfilePictures();
       }
     } catch (error: any) {

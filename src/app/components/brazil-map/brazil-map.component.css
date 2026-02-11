@@ -1,0 +1,13 @@
+.brazil-map-wrapper {
+  width: 100%;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brazil-map-svg {
+  width: 400px;
+  height: 420px;
+  display: block;
+}

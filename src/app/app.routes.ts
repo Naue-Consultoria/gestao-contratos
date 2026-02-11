@@ -59,6 +59,7 @@ import { MatrizCruzamentoSwotComponent } from './components/matriz-cruzamento-sw
 import { AnaliseCenariosComponent } from './components/analise-cenarios/analise-cenarios';
 import { AniseOportunidadesComponent } from './components/analise-oportunidades/analise-oportunidades';
 import { AnaliseAmeacasComponent } from './components/analise-ameacas/analise-ameacas';
+import { GerenciarEstadosComponent } from './pages/gerenciar-estados/gerenciar-estados.component';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -571,6 +572,14 @@ export const routes: Routes = [
         path: 'configuracoes',
         component: SettingsPageComponent,
         title: 'Configurações - NAUE Consultoria',
+      },
+
+      // Gerenciar Estados de Atuação - Admin e Admin Gerencial
+      {
+        path: 'estados-atuacao',
+        component: GerenciarEstadosComponent,
+        canActivate: [AdminGerencialGuard],
+        title: 'Estados de Atuação - NAUE Consultoria',
       },
 
       // Redirecionamentos para compatibilidade com rotas antigas

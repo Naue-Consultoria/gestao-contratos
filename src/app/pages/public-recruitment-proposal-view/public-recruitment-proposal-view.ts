@@ -18,12 +18,19 @@ import {
   PublicTeamMember
 } from '../../services/public-team.service';
 
+import {
+  EstadoAtuacaoService,
+  EstadoAtuacaoSimples
+} from '../../services/estado-atuacao.service';
+
 type ProposalServiceItem = PublicProposalService;
+
+import { BrazilMapComponent } from '../../components/brazil-map/brazil-map.component';
 
 @Component({
   selector: 'app-public-recruitment-proposal-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, BrazilMapComponent],
   templateUrl: './public-recruitment-proposal-view.html',
   styleUrls: ['./public-recruitment-proposal-view.css']
 })
@@ -70,6 +77,14 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
   teamMembers: PublicTeamMember[] = [];
   duplicatedTeamMembers: PublicTeamMember[] = [];
   teamLoading = false;
+
+  // Estados de atuação
+  estadosAtuacao: EstadoAtuacaoSimples[] = [];
+  estadosLoading = false;
+
+  get estadosSiglas(): string[] {
+    return this.estadosAtuacao.map(e => e.sigla);
+  }
 
   // Team carousel properties
   isTeamManualControl = false;
@@ -124,6 +139,7 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
     private router: Router,
     private publicProposalService: PublicProposalServiceAPI,
     private publicTeamService: PublicTeamService,
+    private estadoAtuacaoService: EstadoAtuacaoService,
     private toastr: ToastrService,
     private sanitizer: DomSanitizer
   ) {}
@@ -141,6 +157,7 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
     this.initializeClientLogos();
     this.initializeCarousel();
     this.loadTeamMembers();
+    this.loadEstadosAtuacao(); // Carregar estados de atuação
     this.loadProposal();
   }
 
@@ -221,6 +238,23 @@ export class PublicRecruitmentProposalView implements OnInit, AfterViewInit {
           console.error('Erro ao carregar membros da equipe:', error);
           this.teamMembers = [];
           this.teamLoading = false;
+        }
+      });
+  }
+
+  private loadEstadosAtuacao(): void {
+    this.estadosLoading = true;
+    this.estadoAtuacaoService.getEstadosAtivos()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.estadosAtuacao = response.estados || [];
+          this.estadosLoading = false;
+        },
+        error: (error) => {
+          console.error('Erro ao carregar estados de atuação:', error);
+          this.estadosAtuacao = [];
+          this.estadosLoading = false;
         }
       });
   }
