@@ -59,50 +59,53 @@
     </div>
   </section>
 
+  <!-- Statistics Section -->
+  <section class="stats-section">
+    <div class="section-container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">+15</div>
+          <div class="stat-text">Anos no Mercado</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">360°</div>
+          <div class="stat-text">Soluções completas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">+100</div>
+          <div class="stat-text">Empresas Atendidas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">380%</div>
+          <div class="stat-text">ROI em 18 Meses</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- About Section -->
   <section class="about-section">
     <div class="section-container">
       <div class="about-content">
-        <!-- Left Side: Statistics Cards -->
-        <div class="about-left">
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-number">+15</div>
-              <div class="stat-text">Anos no Mercado</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">360°</div>
-              <div class="stat-text">Soluções completas</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">+100</div>
-              <div class="stat-text">Empresas Atendidas</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">380%</div>
-              <div class="stat-text">ROI em 18 Meses</div>
-            </div>
-          </div>
-        </div>
-        
         <!-- Center: Brazil Map -->
         <div class="about-center">
-          <img src="/estados.png" alt="Mapa do Brasil - Estados" class="map-image" (error)="onImageError($event)">
+          <app-brazil-map [estadosAtivos]="estadosSiglas" class="map-component"></app-brazil-map>
         </div>
-        
+
         <!-- Right Side: Presence Info -->
         <div class="about-right">
           <div class="presence-section">
             <h3 class="presence-title">Presença Nacional</h3>
-            <div class="locations-list">
-              <div class="location-item">1. Goiás-GO</div>
-              <div class="location-item">2. Mato Grosso-MT</div>
-              <div class="location-item">3. Paraíba-PB</div>
-              <div class="location-item">4. Pernambuco-PE</div>
-              <div class="location-item">5. Paraná-PR</div>
-              <div class="location-item">6. Rio de Janeiro-RJ</div>
-              <div class="location-item">7. Tocantins-TO</div>
-              <div class="location-item">8. Alagoas-AL</div>
+            <div class="locations-list" *ngIf="!estadosLoading && estadosAtuacao.length > 0">
+              <div class="location-item" *ngFor="let estado of estadosAtuacao">
+                {{estado.numero}}. {{estado.estado}}-{{estado.sigla}}
+              </div>
+            </div>
+            <div class="locations-list" *ngIf="estadosLoading">
+              <div class="location-item">Carregando estados...</div>
+            </div>
+            <div class="locations-list" *ngIf="!estadosLoading && estadosAtuacao.length === 0">
+              <div class="location-item">Nenhum estado cadastrado</div>
             </div>
           </div>
         </div>

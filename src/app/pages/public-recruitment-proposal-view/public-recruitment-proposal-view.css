@@ -359,23 +359,40 @@ html {
 }
 
 
+/* === STATISTICS SECTION === */
+.stats-section {
+  background: #012018;
+  padding: 4rem 0 3rem;
+  position: relative;
+  z-index: 2;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 /* === ABOUT SECTION === */
 .about-section {
   background: #012018;
-  padding: 8rem 0 6rem;
+  padding: 3rem 0 6rem;
   position: relative;
   overflow: hidden;
   z-index: 2;
-  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .about-content {
   display: grid;
-  grid-template-columns: 1fr 1.2fr 1fr;
-  gap: 2rem 1rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
   align-items: center;
   position: relative;
   z-index: 5;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 /* Left Side - Statistics Cards */
@@ -383,13 +400,6 @@ html {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  max-width: 500px;
 }
 
 .stat-card {
@@ -562,8 +572,7 @@ html {
   .about-center {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100%;
+    align-items: flex-start;
   }
   
   .stats-grid {

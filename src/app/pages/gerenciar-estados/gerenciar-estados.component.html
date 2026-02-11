@@ -1,0 +1,136 @@
+<div class="page-header">
+  <h1 class="page-title">Estados de Atuação</h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<div class="table-section">
+  <div class="table-header">
+    <h2 class="table-title">Lista de Estados</h2>
+    <button class="btn btn-primary" (click)="addNewRow()" [disabled]="isSaving">
+      <i class="fas fa-plus"></i>
+      Adicionar Estado
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <span>Carregando estados...</span>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && estadosRows.length === 0" class="empty-state">
+    <i class="fas fa-map"></i>
+    <p>Nenhum estado cadastrado</p>
+    <button class="btn btn-primary" (click)="addNewRow()">
+      <i class="fas fa-plus"></i>
+      Adicionar Primeiro Estado
+    </button>
+  </div>
+
+  <!-- Estados List -->
+  <div *ngIf="!isLoading && estadosRows.length > 0" class="content-area">
+    <!-- Table Header -->
+    <div class="table-row table-row-header">
+      <div class="table-cell-drag"></div>
+      <div class="table-cell-numero">Nº</div>
+      <div class="table-cell-estado">Estado *</div>
+      <div class="table-cell-sigla">Sigla *</div>
+      <div class="table-cell-actions"></div>
+    </div>
+
+    <!-- Estados List -->
+    <div
+      cdkDropList
+      (cdkDropListDropped)="onDrop($event)"
+      class="estados-list">
+
+      <div
+        *ngFor="let row of estadosRows; let i = index"
+        cdkDrag
+        class="table-row estado-row">
+
+        <!-- Drag Handle -->
+        <div class="table-cell-drag drag-handle" cdkDragHandle title="Arraste para reordenar">
+          <i class="fas fa-grip-vertical"></i>
+        </div>
+
+        <!-- Número -->
+        <div class="table-cell-numero">
+          <div class="numero-display">{{ row.numero }}</div>
+        </div>
+
+        <!-- Estado -->
+        <div class="table-cell-estado">
+          <input
+            type="text"
+            class="form-input"
+            [(ngModel)]="row.estado"
+            (ngModelChange)="onFieldChange(i)"
+            placeholder="Ex: São Paulo"
+            maxlength="100"
+            [disabled]="isSaving"
+          />
+        </div>
+
+        <!-- Sigla -->
+        <div class="table-cell-sigla">
+          <input
+            type="text"
+            class="form-input sigla-input"
+            [(ngModel)]="row.sigla"
+            (ngModelChange)="onFieldChange(i)"
+            placeholder="SP"
+            maxlength="2"
+            [disabled]="isSaving"
+            (input)="row.sigla = row.sigla.toUpperCase()"
+          />
+        </div>
+
+        <!-- Remove Button -->
+        <div class="table-cell-actions">
+          <button
+            class="btn-remove"
+            (click)="removeRow(i)"
+            [disabled]="isSaving"
+            title="Remover estado">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button
+        class="btn btn-secondary"
+        (click)="cancelChanges()"
+        [disabled]="isSaving || !hasUnsavedChanges()">
+        <i class="fas fa-times"></i>
+        Cancelar
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="saveChanges()"
+        [disabled]="isSaving || !hasUnsavedChanges()">
+        <span *ngIf="!isSaving">
+          <i class="fas fa-save"></i>
+          Salvar Alterações
+        </span>
+        <span *ngIf="isSaving">
+          <i class="fas fa-spinner fa-spin"></i>
+          Salvando...
+        </span>
+      </button>
+    </div>
+
+    <!-- Help Text -->
+    <div class="help-text">
+      <i class="fas fa-info-circle"></i>
+      <p>
+        <strong>Dica:</strong> Arraste as linhas pelas alças <i class="fas fa-grip-vertical"></i> para reordenar.
+        Os estados cadastrados aparecerão nas páginas públicas de propostas.
+      </p>
+    </div>
+  </div>
+</div>

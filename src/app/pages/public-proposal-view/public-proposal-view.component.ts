@@ -15,17 +15,24 @@ import {
   ConfirmationData
 } from '../../services/public-proposal.service';
 
-import { 
-  PublicTeamService, 
-  PublicTeamMember 
+import {
+  PublicTeamService,
+  PublicTeamMember
 } from '../../services/public-team.service';
+
+import {
+  EstadoAtuacaoService,
+  EstadoAtuacaoSimples
+} from '../../services/estado-atuacao.service';
+
+import { BrazilMapComponent } from '../../components/brazil-map/brazil-map.component';
 
 type ProposalServiceItem = PublicProposalService;
 
 @Component({
   selector: 'app-public-proposal-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, BrazilMapComponent],
   templateUrl: './public-proposal-view.component.html',
   styleUrls: ['./public-proposal-view.component.css']
 })
@@ -75,6 +82,14 @@ export class PublicProposalViewComponent implements OnInit {
   teamMembers: PublicTeamMember[] = [];
   duplicatedTeamMembers: PublicTeamMember[] = [];
   teamLoading = false;
+
+  // Estados de atuação
+  estadosAtuacao: EstadoAtuacaoSimples[] = [];
+  estadosLoading = false;
+
+  get estadosSiglas(): string[] {
+    return this.estadosAtuacao.map(e => e.sigla);
+  }
   
   // Team carousel properties
   teamCarouselProgress = 0;
@@ -149,6 +164,7 @@ export class PublicProposalViewComponent implements OnInit {
     private router: Router,
     private publicProposalService: PublicProposalServiceAPI,
     private publicTeamService: PublicTeamService,
+    private estadoAtuacaoService: EstadoAtuacaoService,
     private toastr: ToastrService,
     private sanitizer: DomSanitizer
   ) {
@@ -156,7 +172,7 @@ export class PublicProposalViewComponent implements OnInit {
 
   ngOnInit(): void {
     this.token = this.route.snapshot.paramMap.get('token') || '';
-    
+
     if (!this.token) {
       this.toastr.error('Token inválido');
       this.router.navigate(['/']);
@@ -166,6 +182,7 @@ export class PublicProposalViewComponent implements OnInit {
     this.initializeClientLogos();
     this.initializeCarousel();
     this.loadTeamMembers();
+    this.loadEstadosAtuacao();
     this.loadProposal();
   }
 
@@ -254,6 +271,23 @@ export class PublicProposalViewComponent implements OnInit {
           console.error('Erro ao carregar membros da equipe:', error);
           this.teamMembers = [];
           this.teamLoading = false;
+        }
+      });
+  }
+
+  private loadEstadosAtuacao(): void {
+    this.estadosLoading = true;
+    this.estadoAtuacaoService.getEstadosAtivos()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.estadosAtuacao = response.estados || [];
+          this.estadosLoading = false;
+        },
+        error: (error) => {
+          console.error('Erro ao carregar estados de atuação:', error);
+          this.estadosAtuacao = [];
+          this.estadosLoading = false;
         }
       });
   }

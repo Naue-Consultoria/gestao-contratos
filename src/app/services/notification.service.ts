@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { RateLimitService } from './rate-limit.service';
+import { io, Socket } from 'socket.io-client';
 
 export interface Notification {
   id: string;
@@ -61,8 +62,10 @@ export interface NotificationOptions {
 })
 export class NotificationService {
   private readonly API_URL = `${environment.apiUrl}/notifications`;
-  private readonly POLLING_INTERVAL = 60000; // 60 segundos
   private readonly MAX_STORED_NOTIFICATIONS = 50;
+
+  private socket: Socket | null = null;
+  private isSocketConnected = false;
 
   private toastQueue = new BehaviorSubject<Notification[]>([]);
   public toastQueue$ = this.toastQueue.asObservable();
@@ -78,7 +81,6 @@ export class NotificationService {
   private totalPages = 1;
   private isLoading = false;
   private isInitialized = false;
-  private pollingInterval: any = null;
 
   private defaultDuration = 5000;
   private maxToasts = 3;
@@ -226,7 +228,7 @@ export class NotificationService {
   }
 
   resetNotificationState(): void {
-    this.stopPolling();
+    this.disconnectWebSocket();
     this.isInitialized = false;
     this.isLoading = false;
     this.currentPage = 1;
@@ -347,28 +349,136 @@ export class NotificationService {
 
     this.isInitialized = true;
 
+    // Carregar notificações iniciais
     setTimeout(() => {
       this.fetchUserNotifications();
-    }, 1000);
+    }, 500);
 
     setTimeout(() => {
       this.fetchUnreadCount();
-    }, 2000);
+    }, 1000);
 
-    this.startPolling();
+    // Conectar ao WebSocket para notificações em tempo real
+    this.connectWebSocket();
   }
 
-  private startPolling(): void {
-    this.stopPolling();
-    this.pollingInterval = setInterval(() => {
-      this.fetchUnreadCount();
-    }, this.POLLING_INTERVAL);
-  }
-
-  private stopPolling(): void {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
+  private connectWebSocket(): void {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('⚠️ Token não encontrado, não é possível conectar ao WebSocket');
+      return;
     }
+
+    try {
+      // Extrair URL base do backend
+      const backendUrl = environment.apiUrl.replace('/api', '');
+
+      this.socket = io(backendUrl, {
+        auth: { token },
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5
+      });
+
+      this.socket.on('connect', () => {
+        console.log('✅ WebSocket conectado');
+        this.isSocketConnected = true;
+      });
+
+      this.socket.on('connected', (data: any) => {
+        console.log('✅ Confirmação do servidor:', data);
+      });
+
+      this.socket.on('disconnect', (reason: string) => {
+        console.log('🔌 WebSocket desconectado:', reason);
+        this.isSocketConnected = false;
+      });
+
+      this.socket.on('connect_error', (error: any) => {
+        console.error('❌ Erro de conexão WebSocket:', error);
+        this.isSocketConnected = false;
+      });
+
+      // Receber notificações em tempo real
+      this.socket.on('notification', (serverNotification: any) => {
+        console.log('📬 Nova notificação via WebSocket:', serverNotification);
+
+        const notification: Notification = {
+          id: `server-${serverNotification.id}`,
+          type: this.mapNotificationType(serverNotification.type),
+          title: serverNotification.title,
+          message: serverNotification.message,
+          timestamp: new Date(serverNotification.created_at),
+          isRead: serverNotification.is_read || false,
+          persistent: true,
+          link: serverNotification.link,
+          icon: this.getNotificationIcon(serverNotification.type),
+          priority: serverNotification.priority as 'normal' | 'high' || 'normal',
+          metadata: serverNotification.metadata
+        };
+
+        // Adicionar ao histórico
+        const currentHistory = this.notificationHistory.value;
+        this.notificationHistory.next([notification, ...currentHistory].slice(0, this.MAX_STORED_NOTIFICATIONS));
+        this.saveNotificationsToStorage();
+
+        // Atualizar contador de não lidas
+        this.updateUnreadCount();
+
+        // Mostrar toast
+        this.showToastForNotification(notification);
+      });
+
+      // Atualizar contador de não lidas
+      this.socket.on('unread_count_update', (data: { unreadCount: number }) => {
+        console.log('📊 Atualização de contador via WebSocket:', data.unreadCount);
+        this.unreadCount.next(data.unreadCount);
+      });
+
+      // Responder a ping com pong (keep-alive)
+      this.socket.on('pong', (data: any) => {
+        // console.log('🏓 Pong recebido:', data);
+      });
+
+    } catch (error) {
+      console.error('❌ Erro ao conectar WebSocket:', error);
+    }
+  }
+
+  private disconnectWebSocket(): void {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+      this.isSocketConnected = false;
+      console.log('🔌 WebSocket desconectado');
+    }
+  }
+
+  private showToastForNotification(notification: Notification): void {
+    // Mostrar toast apenas para notificações de alta prioridade ou importantes
+    const showToastTypes: Notification['type'][] = [
+      'contract_assignment',
+      'payment_overdue',
+      'contract_expiring',
+      'security_alert',
+      'approval_required'
+    ];
+
+    if (showToastTypes.includes(notification.type)) {
+      this.show({
+        ...notification,
+        persistent: false,
+        duration: notification.priority === 'high' ? 7000 : 5000
+      });
+    }
+  }
+
+  public getWebSocketStatus(): { connected: boolean; userId?: string } {
+    return {
+      connected: this.isSocketConnected,
+      userId: this.socket?.id
+    };
   }
 }
