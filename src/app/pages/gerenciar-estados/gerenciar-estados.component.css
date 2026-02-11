@@ -158,7 +158,7 @@
 }
 
 .estado-row:hover {
-  border-color: #48bb78;
+  border-color: #003b2b;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -193,7 +193,7 @@
 }
 
 .drag-handle:hover {
-  color: #48bb78;
+  color: #003b2b;
 }
 
 /* Numero Display */
@@ -203,7 +203,7 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: #48bb78;
+  background: #003b2b;
   color: white;
   border-radius: 6px;
   font-weight: 700;
@@ -222,7 +222,7 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #48bb78;
+  border-color: #003b2b;
   box-shadow: 0 0 0 2px rgba(72, 187, 120, 0.1);
 }
 
@@ -299,12 +299,12 @@
 }
 
 .btn-primary {
-  background: #48bb78;
+  background: #003b2b;
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #38a169;
+  background: #003b2b;
 }
 
 .btn-secondary {
