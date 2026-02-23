@@ -96,7 +96,10 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   sortField: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
+  private readonly FILTERS_STORAGE_KEY = 'proposals_filters';
+
   ngOnInit() {
+    this.restoreFilters();
     this.subscribeToSearch();
     this.loadData();
     this.loadClients();
@@ -179,6 +182,39 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  private saveFilters() {
+    const state = {
+      filters: this.filters,
+      sortField: this.sortField,
+      sortDirection: this.sortDirection
+    };
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify(state));
+  }
+
+  private restoreFilters() {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.filters) {
+          this.filters = { ...this.filters, ...state.filters };
+        }
+        if (state.sortField) {
+          this.sortField = state.sortField;
+        }
+        if (state.sortDirection) {
+          this.sortDirection = state.sortDirection;
+        }
+        // Sincronizar o search service com o termo restaurado
+        if (this.filters.search) {
+          this.searchService.setSearchTerm(this.filters.search);
+        }
+      }
+    } catch (e) {
+      // Se houver erro ao restaurar, usar filtros padrão
+    }
+  }
+
   applyFilters() {
     let filtered = [...this.proposals];
 
@@ -231,6 +267,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
 
     this.filteredProposals = filtered;
     this.isSearching = false;
+    this.saveFilters();
   }
 
   sortBy(field: string) {
@@ -319,7 +356,10 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
 
   clearFilters() {
     this.filters = { search: '', status: '', client_id: null, type: '', month: '', year: '' };
+    this.sortField = '';
+    this.sortDirection = 'asc';
     this.searchService.setSearchTerm('');
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
     this.applyFilters();
   }
 

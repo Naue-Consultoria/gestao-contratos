@@ -58,7 +58,7 @@ export class GerenciarEstadosComponent implements OnInit, OnDestroy {
 
   loadEstados(): void {
     this.isLoading = true;
-    this.estadoAtuacaoService.getEstados()
+    this.estadoAtuacaoService.getEstados({ ativo: true })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {

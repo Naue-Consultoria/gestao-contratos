@@ -283,48 +283,54 @@
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Active Filters Indicator */
-.active-filters {
-    display: flex;
+/* Active Filters Chip */
+.active-filters-chip {
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    margin-left: auto;
-    align-self: flex-end;
-    height: 38px;
-}
-
-.active-filters-badge {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
-    color: white;
-    padding: 0.25rem 0.625rem;
-    border-radius: 16px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    animation: pulse 2s ease-in-out infinite;
+    height: 36px;
+    padding: 0 0.75rem;
+    background-color: #f0faf6;
+    border: 1px solid #003b2b;
+    border-radius: 8px;
+    color: #003b2b;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
     white-space: nowrap;
 }
 
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
+.active-filters-chip:hover {
+    background-color: #003b2b;
+    color: white;
 }
 
-.btn-clear-inline {
-    background: transparent;
-    border: none;
-    color: #ff6b6b;
-    font-size: 1.25rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 0;
+.active-filters-chip .fa-filter {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+.active-filters-chip .fa-times {
+    font-size: 0.65rem;
+    opacity: 0.5;
+    margin-left: 0.125rem;
+}
+
+.active-filters-chip:hover .fa-times {
+    opacity: 1;
+}
+
+/* Action Buttons Row */
+.action-buttons-row {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 1rem;
+    width: 100%;
 }
 
-.btn-clear-inline:hover {
-    color: #ff5252;
-    transform: rotate(90deg);
+.action-buttons-row .btn-primary {
+    margin-left: auto;
 }
 
 /* Action Buttons Section */
@@ -889,9 +895,6 @@
         min-width: 140px;
     }
 
-    .active-filters {
-        flex: 0 0 auto;
-    }
 }
 
 @media (width: 1280px) and (height: 800px) {
@@ -1047,15 +1050,9 @@
         min-width: unset !important;
     }
 
-    .active-filters {
+    .active-filters-chip {
         width: 100%;
         justify-content: center;
-        margin-left: 0;
-        padding: 0.5rem;
-        background: rgba(255, 107, 107, 0.05);
-        border-radius: 8px;
-        height: auto;
-        margin-top: 0.5rem;
     }
 
     .search-box {
