@@ -62,15 +62,16 @@
 
         <!-- Estado -->
         <div class="table-cell-estado">
-          <input
-            type="text"
+          <select
             class="form-input"
-            [(ngModel)]="row.estado"
-            (ngModelChange)="onFieldChange(i)"
-            placeholder="Ex: São Paulo"
-            maxlength="100"
-            [disabled]="isSaving"
-          />
+            [ngModel]="row.sigla"
+            (ngModelChange)="onEstadoSelect(i, $event)"
+            [disabled]="isSaving || (!row.isNew && !!row.id)">
+            <option value="" disabled>Selecione um estado</option>
+            <option *ngFor="let est of getEstadosDisponiveis(row.sigla)" [value]="est.sigla">
+              {{ est.estado }} ({{ est.sigla }})
+            </option>
+          </select>
         </div>
 
         <!-- Sigla -->
@@ -78,12 +79,9 @@
           <input
             type="text"
             class="form-input sigla-input"
-            [(ngModel)]="row.sigla"
-            (ngModelChange)="onFieldChange(i)"
-            placeholder="SP"
-            maxlength="2"
-            [disabled]="isSaving"
-            (input)="row.sigla = row.sigla.toUpperCase()"
+            [value]="row.sigla"
+            readonly
+            placeholder="--"
           />
         </div>
 
@@ -134,3 +132,13 @@
     </div>
   </div>
 </div>
+
+<app-delete-confirmation-modal
+  [isVisible]="showDeleteModal"
+  [isDeleting]="isDeleting"
+  [itemName]="deleteItemName"
+  title="Excluir Estado"
+  message="Tem certeza que deseja excluir o estado '{{ deleteItemName }}'?"
+  (onConfirm)="confirmDelete()"
+  (onCancel)="cancelDelete()">
+</app-delete-confirmation-modal>

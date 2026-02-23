@@ -5,6 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
+import { DeleteConfirmationModalComponent } from '../../components/delete-confirmation-modal/delete-confirmation-modal.component';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
 import {
   EstadoAtuacaoService,
@@ -25,7 +26,7 @@ interface EstadoRow {
 @Component({
   selector: 'app-gerenciar-estados',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, DragDropModule, BreadcrumbComponent, DeleteConfirmationModalComponent],
   templateUrl: './gerenciar-estados.component.html',
   styleUrls: ['./gerenciar-estados.component.css']
 })
@@ -34,8 +35,42 @@ export class GerenciarEstadosComponent implements OnInit, OnDestroy {
   isLoading = false;
   isSaving = false;
 
+  showDeleteModal = false;
+  isDeleting = false;
+  private deleteIndex: number | null = null;
+
   private destroy$ = new Subject<void>();
   private originalEstados: EstadoAtuacao[] = [];
+
+  readonly todosEstadosBrasil: { estado: string; sigla: string }[] = [
+    { estado: 'Acre', sigla: 'AC' },
+    { estado: 'Alagoas', sigla: 'AL' },
+    { estado: 'Amapá', sigla: 'AP' },
+    { estado: 'Amazonas', sigla: 'AM' },
+    { estado: 'Bahia', sigla: 'BA' },
+    { estado: 'Ceará', sigla: 'CE' },
+    { estado: 'Distrito Federal', sigla: 'DF' },
+    { estado: 'Espírito Santo', sigla: 'ES' },
+    { estado: 'Goiás', sigla: 'GO' },
+    { estado: 'Maranhão', sigla: 'MA' },
+    { estado: 'Mato Grosso', sigla: 'MT' },
+    { estado: 'Mato Grosso do Sul', sigla: 'MS' },
+    { estado: 'Minas Gerais', sigla: 'MG' },
+    { estado: 'Pará', sigla: 'PA' },
+    { estado: 'Paraíba', sigla: 'PB' },
+    { estado: 'Paraná', sigla: 'PR' },
+    { estado: 'Pernambuco', sigla: 'PE' },
+    { estado: 'Piauí', sigla: 'PI' },
+    { estado: 'Rio de Janeiro', sigla: 'RJ' },
+    { estado: 'Rio Grande do Norte', sigla: 'RN' },
+    { estado: 'Rio Grande do Sul', sigla: 'RS' },
+    { estado: 'Rondônia', sigla: 'RO' },
+    { estado: 'Roraima', sigla: 'RR' },
+    { estado: 'Santa Catarina', sigla: 'SC' },
+    { estado: 'São Paulo', sigla: 'SP' },
+    { estado: 'Sergipe', sigla: 'SE' },
+    { estado: 'Tocantins', sigla: 'TO' }
+  ];
 
   constructor(
     private estadoAtuacaoService: EstadoAtuacaoService,
@@ -100,17 +135,47 @@ export class GerenciarEstadosComponent implements OnInit, OnDestroy {
     const row = this.estadosRows[index];
 
     if (row.isNew) {
-      // Se é novo, apenas remove da lista
       this.estadosRows.splice(index, 1);
       this.updateOrdens();
     } else {
-      // Se é existente, confirma exclusão
-      if (confirm(`Tem certeza que deseja excluir o estado ${row.estado}?`)) {
-        this.estadosRows.splice(index, 1);
-        this.updateOrdens();
-        this.markAsEdited();
-      }
+      this.deleteIndex = index;
+      this.showDeleteModal = true;
     }
+  }
+
+  async confirmDelete(): Promise<void> {
+    if (this.deleteIndex === null) return;
+
+    const row = this.estadosRows[this.deleteIndex];
+    this.isDeleting = true;
+
+    try {
+      await this.estadoAtuacaoService.deleteEstado(row.id!).toPromise();
+      this.estadosRows.splice(this.deleteIndex, 1);
+      this.originalEstados = this.originalEstados.filter(e => e.id !== row.id);
+      this.updateOrdens();
+      this.toastr.success('Estado excluído com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao excluir estado:', error);
+      this.toastr.error('Erro ao excluir o estado.');
+    } finally {
+      this.isDeleting = false;
+      this.showDeleteModal = false;
+      this.deleteIndex = null;
+    }
+  }
+
+  cancelDelete(): void {
+    this.showDeleteModal = false;
+    this.deleteIndex = null;
+  }
+
+  get deleteItemName(): string {
+    if (this.deleteIndex !== null && this.estadosRows[this.deleteIndex]) {
+      const row = this.estadosRows[this.deleteIndex];
+      return `${row.estado} (${row.sigla})`;
+    }
+    return '';
   }
 
   onDrop(event: CdkDragDrop<EstadoRow[]>): void {
@@ -220,6 +285,22 @@ export class GerenciarEstadosComponent implements OnInit, OnDestroy {
   private getNextNumero(): number {
     if (this.estadosRows.length === 0) return 1;
     return Math.max(...this.estadosRows.map(r => r.numero)) + 1;
+  }
+
+  getEstadosDisponiveis(currentSigla?: string): { estado: string; sigla: string }[] {
+    const siglasUsadas = this.estadosRows.map(r => r.sigla.toUpperCase());
+    return this.todosEstadosBrasil.filter(e =>
+      e.sigla === currentSigla || !siglasUsadas.includes(e.sigla)
+    );
+  }
+
+  onEstadoSelect(index: number, sigla: string): void {
+    const found = this.todosEstadosBrasil.find(e => e.sigla === sigla);
+    if (found) {
+      this.estadosRows[index].estado = found.estado;
+      this.estadosRows[index].sigla = found.sigla;
+      this.onFieldChange(index);
+    }
   }
 
   isValidSigla(sigla: string): boolean {
