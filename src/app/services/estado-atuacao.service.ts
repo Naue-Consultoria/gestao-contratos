@@ -158,10 +158,10 @@ export class EstadoAtuacaoService {
   }
 
   /**
-   * Excluir estado (soft delete)
+   * Excluir estado permanentemente
    */
   deleteEstado(id: number): Observable<any> {
-    return this.http.delete(`${this.API_URL}/${id}`, {
+    return this.http.delete(`${this.API_URL}/${id}/permanent`, {
       headers: this.getAuthHeaders()
     });
   }
