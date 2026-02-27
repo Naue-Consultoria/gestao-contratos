@@ -1611,7 +1611,7 @@ export class MapaAmbicaoComponent implements OnInit, OnDestroy, AfterViewInit {
     html += card(`<table style="width:100%;border-collapse:collapse;">
       <thead><tr style="background:#f9fafb;"><th style="text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Ativo</th><th style="text-align:right;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Valor</th><th style="text-align:right;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">%</th></tr></thead>
       <tbody>${assetRows}</tbody>
-      <tfoot><tr style="background:#022c22;color:white;"><td style="padding:12px 14px;font-weight:700;border-radius:0 0 0 12px;">Total</td><td style="padding:12px 14px;text-align:right;font-weight:700;">${this.fmtBRL(this.patrimonioAtual)}</td><td style="padding:12px 14px;text-align:right;font-weight:700;border-radius:0 0 12px 0;">100%</td></tr></tfoot>
+      <tfoot><tr style="background:#022c22;"><td style="padding:12px 14px;font-weight:700;border-radius:0 0 0 12px;color:#ffffff;">Total</td><td style="padding:12px 14px;text-align:right;font-weight:700;color:#ffffff;">${this.fmtBRL(this.patrimonioAtual)}</td><td style="padding:12px 14px;text-align:right;font-weight:700;border-radius:0 0 12px 0;color:#ffffff;">100%</td></tr></tfoot>
     </table>`);
     if (patChartImg) html += card(`<div style="text-align:center;"><img src="${patChartImg}" style="width:100%;max-height:300px;object-fit:contain;"></div>`);
     html += `</div>`;
