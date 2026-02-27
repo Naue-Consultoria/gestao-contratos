@@ -274,7 +274,7 @@ import Chart from 'chart.js/auto';
     </div>
   </div>
 
-  <div class="ma-grid-2 ma-mb-20">
+  <div class="ma-grid-2 ma-mb-20 ma-mt-20">
     <div class="ma-card" style="margin:0">
       <div class="ma-card-label">Pergunta 3</div>
       <h3>Ações Concretas para Hoje</h3>
@@ -622,7 +622,7 @@ import Chart from 'chart.js/auto';
 }
 .ma-card-key {
   border-left: 4px solid #00B74F;
-  background: linear-gradient(135deg, rgba(0,183,79,0.04) 0%, white 40%);
+  background: white;
 }
 
 /* ══════════════════════════════════
