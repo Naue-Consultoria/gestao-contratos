@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ContractService, ApiContractInstallment } from '../../services/contract';
 import { ToastrService } from 'ngx-toastr';
+import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 
 @Component({
   selector: 'app-installments-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CurrencyMaskDirective],
   templateUrl: './installments-modal.component.html',
   styleUrls: ['./installments-modal.component.css']
 })

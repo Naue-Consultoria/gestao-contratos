@@ -85,7 +85,7 @@ interface MapaMentalData {
 
 // Tipos de blocos disponíveis
 type TipoBloco = 'visaoGeral' | 'mentoria' | 'testes' | 'proximosPassos' | 'referencias' |
-                  'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'analiseProblemas' | 'erros' | 'tabelaPeriodica' | 'encerramento';
+                  'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'analiseProblemas' | 'erros' | 'tabelaPeriodica' | 'mapaAmbicao' | 'encerramento';
 
 interface BlocoEditor {
   id: string;
@@ -97,7 +97,7 @@ interface BlocoEditor {
 }
 
 interface SecaoReordenavel {
-  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'analiseProblemas' | 'erros' | 'tabelaPeriodica';
+  id: 'testes' | 'proximosPassos' | 'referencias' | 'mapaMental' | 'modeloABC' | 'zonasAprendizado' | 'goldenCircle' | 'rodaDaVida' | 'termometroGestao' | 'ganhosPerdas' | 'controleHabitos' | 'matrizRaci' | 'analiseProblemas' | 'erros' | 'tabelaPeriodica' | 'mapaAmbicao';
   titulo: string;
   icone: string;
   ordem: number;
@@ -121,6 +121,7 @@ interface ConteudoMentoria {
   analiseProblemas: { ativo: boolean };
   erros: { ativo: boolean };
   tabelaPeriodica: { ativo: boolean };
+  mapaAmbicao: { ativo: boolean };
   encerramento: { ativo: boolean; conteudo: string };
   ordemSecoes?: string[]; // Nova propriedade para controlar a ordem
   blocosAtivos?: BlocoEditor[]; // Nova propriedade para controlar blocos ativos
@@ -177,6 +178,7 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { tipo: 'analiseProblemas', titulo: 'Análise de Problemas', icone: 'fa-sitemap', descricao: 'Análise Sistêmica de Problemas' },
     { tipo: 'erros', titulo: 'Erros', icone: 'fa-exclamation-triangle', descricao: 'Análise e Gestão de Erros' },
     { tipo: 'tabelaPeriodica', titulo: 'Tabela Periódica', icone: 'fa-th', descricao: '24 Forças de Caráter' },
+    { tipo: 'mapaAmbicao', titulo: 'Mapa de Ambição', icone: 'fa-mountain-sun', descricao: 'Planejamento Estratégico de Vida e Patrimônio' },
     { tipo: 'encerramento', titulo: 'Encerramento', icone: 'fa-flag-checkered', descricao: 'Conclusão do encontro' }
   ];
 
@@ -226,8 +228,9 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     analiseProblemas: { ativo: false },
     erros: { ativo: false },
     tabelaPeriodica: { ativo: false },
+    mapaAmbicao: { ativo: false },
     encerramento: { ativo: true, conteudo: '' },
-    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros', 'tabelaPeriodica'] // Ordem padrão
+    ordemSecoes: ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros', 'tabelaPeriodica', 'mapaAmbicao'] // Ordem padrão
   };
 
   // Lista de seções reordenáveis
@@ -246,7 +249,8 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
     { id: 'matrizRaci', titulo: 'Matriz RACI', icone: 'fa-table', ordem: 11 },
     { id: 'analiseProblemas', titulo: 'Análise de Problemas', icone: 'fa-sitemap', ordem: 12 },
     { id: 'erros', titulo: 'Erros', icone: 'fa-exclamation-triangle', ordem: 13 },
-    { id: 'tabelaPeriodica', titulo: 'Tabela Periódica', icone: 'fa-th', ordem: 14 }
+    { id: 'tabelaPeriodica', titulo: 'Tabela Periódica', icone: 'fa-th', ordem: 14 },
+    { id: 'mapaAmbicao', titulo: 'Mapa de Ambição', icone: 'fa-mountain-sun', ordem: 15 }
   ];
 
   constructor(
@@ -401,6 +405,11 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
                 this.conteudo.tabelaPeriodica = { ativo: false };
               }
 
+              // Adicionar mapaAmbicao se não existir (retrocompatibilidade)
+              if (!this.conteudo.mapaAmbicao) {
+                this.conteudo.mapaAmbicao = { ativo: false };
+              }
+
               // Adicionar ordem de seções se não existir (retrocompatibilidade)
               if (!this.conteudo.ordemSecoes) {
                 this.conteudo.ordemSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros', 'tabelaPeriodica'];
@@ -423,6 +432,9 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
                 }
                 if (!this.conteudo.ordemSecoes.includes('tabelaPeriodica')) {
                   this.conteudo.ordemSecoes.push('tabelaPeriodica');
+                }
+                if (!this.conteudo.ordemSecoes.includes('mapaAmbicao')) {
+                  this.conteudo.ordemSecoes.push('mapaAmbicao');
                 }
               }
             } catch (e) {
@@ -501,7 +513,8 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
       'matrizRaci': { ativo: this.conteudo.matrizRaci.ativo, titulo: 'Matriz RACI', icone: 'fa-table' },
       'analiseProblemas': { ativo: this.conteudo.analiseProblemas.ativo, titulo: 'Análise de Problemas', icone: 'fa-sitemap' },
       'erros': { ativo: this.conteudo.erros.ativo, titulo: 'Erros', icone: 'fa-exclamation-triangle' },
-      'tabelaPeriodica': { ativo: this.conteudo.tabelaPeriodica.ativo, titulo: 'Tabela Periódica', icone: 'fa-th' }
+      'tabelaPeriodica': { ativo: this.conteudo.tabelaPeriodica.ativo, titulo: 'Tabela Periódica', icone: 'fa-th' },
+      'mapaAmbicao': { ativo: this.conteudo.mapaAmbicao.ativo, titulo: 'Mapa de Ambição', icone: 'fa-mountain-sun' }
     };
 
     const secoesJaAdicionadas = new Set<string>();
@@ -662,6 +675,9 @@ export class MentoriaConteudoEditor implements OnInit, OnDestroy, AfterViewCheck
         break;
       case 'tabelaPeriodica':
         this.conteudo.tabelaPeriodica.ativo = ativar;
+        break;
+      case 'mapaAmbicao':
+        this.conteudo.mapaAmbicao.ativo = ativar;
         break;
       case 'encerramento':
         this.conteudo.encerramento.ativo = ativar;

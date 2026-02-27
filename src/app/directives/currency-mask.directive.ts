@@ -34,20 +34,20 @@ export class CurrencyMaskDirective implements ControlValueAccessor, OnChanges {
   }
 
   writeValue(value: any): void {
-    if (value === null || value === undefined || value === '' || value === 0) {
-      this.rawValue = '';
-      this.el.value = '';
+    if (value === null || value === undefined || value === '') {
+      this.rawValue = '0';
+      this.updateDisplay();
       return;
     }
 
     const numericValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numericValue)) {
-      this.rawValue = '';
-      this.el.value = '';
+      this.rawValue = '0';
+      this.updateDisplay();
       return;
     }
 
-    this.rawValue = Math.abs(numericValue * 100).toString();
+    this.rawValue = Math.round(Math.abs(numericValue * 100)).toString();
     this.updateDisplay();
   }
 
@@ -71,9 +71,9 @@ export class CurrencyMaskDirective implements ControlValueAccessor, OnChanges {
     // Extrair apenas números da entrada
     const numbersOnly = inputValue.replace(/\D/g, '');
     
-    // Se não há números, resetar para vazio
+    // Se não há números, resetar para R$ 0,00
     if (!numbersOnly) {
-      this.rawValue = '';
+      this.rawValue = '0';
       this.updateDisplay();
       this.onChange(0);
       return;
@@ -106,13 +106,10 @@ export class CurrencyMaskDirective implements ControlValueAccessor, OnChanges {
   }
 
   private updateDisplay(): void {
-    if (!this.rawValue) {
-      this.el.value = '';
-      return;
-    }
+    const value = this.rawValue || '0';
 
     // Garantir que temos pelo menos 3 dígitos (para centavos)
-    const paddedValue = this.rawValue.padStart(3, '0');
+    const paddedValue = value.padStart(3, '0');
 
     // Separar inteiros e centavos
     const cents = paddedValue.slice(-2);

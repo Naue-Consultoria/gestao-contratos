@@ -57,9 +57,8 @@ export class MentoriaEdit implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.mentoriaId = parseInt(id, 10);
-      // Carregar dados primeiro, depois a mentoria
-      await this.carregarDados();
-      this.carregarMentoria();
+      // Carregar tudo em paralelo (clientes, contratos e mentoria ao mesmo tempo)
+      await this.carregarTudo();
     } else {
       this.router.navigate(['/home/mentorias']);
     }
@@ -77,18 +76,30 @@ export class MentoriaEdit implements OnInit {
     });
   }
 
-  private async carregarDados(): Promise<void> {
+  private async carregarTudo(): Promise<void> {
+    this.isLoading = true;
+    this.loadingClientes = true;
+    this.loadingContratos = true;
+    this.mentoriaForm.get('client_id')?.disable();
+    this.mentoriaForm.get('contract_id')?.disable();
+
+    // Carregar clientes, contratos e mentoria em paralelo
     await Promise.all([
       this.carregarClientesPromise(),
-      this.carregarContratosPromise()
+      this.carregarContratosPromise(),
+      this.carregarMentoriaPromise()
     ]);
+
+    // Só preencher formulário quando TUDO estiver pronto
+    if (this.mentoria) {
+      this.preencherFormulario();
+      this.configurarBreadcrumb();
+    }
+    this.isLoading = false;
   }
 
   private carregarClientesPromise(): Promise<void> {
     return new Promise((resolve) => {
-      this.loadingClientes = true;
-      this.mentoriaForm.get('client_id')?.disable();
-
       this.clientService.getClients().subscribe({
         next: (response) => {
           this.clientes = response.clients || [];
@@ -117,9 +128,6 @@ export class MentoriaEdit implements OnInit {
 
   private carregarContratosPromise(): Promise<void> {
     return new Promise((resolve) => {
-      this.loadingContratos = true;
-      this.mentoriaForm.get('contract_id')?.disable();
-
       this.contractService.getContracts().subscribe({
         next: (response) => {
           this.contratos = response.contracts || [];
@@ -138,25 +146,24 @@ export class MentoriaEdit implements OnInit {
     });
   }
 
-  private carregarMentoria(): void {
-    if (!this.mentoriaId) return;
+  private carregarMentoriaPromise(): Promise<void> {
+    return new Promise((resolve) => {
+      if (!this.mentoriaId) { resolve(); return; }
 
-    this.isLoading = true;
-    this.mentoriaService.obterMentoria(this.mentoriaId).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.mentoria = response.data;
-          this.preencherFormulario();
-          this.configurarBreadcrumb();
+      this.mentoriaService.obterMentoria(this.mentoriaId).subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.mentoria = response.data;
+          }
+          resolve();
+        },
+        error: (error) => {
+          console.error('Erro ao carregar mentoria:', error);
+          this.toastr.error('Erro ao carregar mentoria');
+          this.router.navigate(['/home/mentorias']);
+          resolve();
         }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Erro ao carregar mentoria:', error);
-        this.toastr.error('Erro ao carregar mentoria');
-        this.isLoading = false;
-        this.router.navigate(['/home/mentorias']);
-      }
+      });
     });
   }
 

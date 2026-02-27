@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Mentoria {
@@ -31,6 +31,7 @@ export interface MentoriaEncontro {
   mentoria_id?: number;
   contract_id: number;
   mentorado_nome: string;
+  mentorado_profissao?: string;
   numero_encontro?: number;
   data_encontro: string;
   visao_geral?: string;
@@ -105,7 +106,38 @@ export interface ApiResponse<T> {
 export class MentoriaService {
   private apiUrl = `${environment.apiUrl}/mentoria`;
 
+  // Cache de mentorias
+  private _mentoriasCache: Mentoria[] | null = null;
+  private _mentoriasCacheTime: number = 0;
+  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+
   constructor(private http: HttpClient) {}
+
+  /**
+   * Invalida o cache de mentorias (chamar após mutações)
+   */
+  invalidarCache(): void {
+    this._mentoriasCache = null;
+    this._mentoriasCacheTime = 0;
+  }
+
+  /**
+   * Retorna mentorias do cache se disponível e válido
+   */
+  private getCacheValido(): Mentoria[] | null {
+    if (this._mentoriasCache && (Date.now() - this._mentoriasCacheTime) < this.CACHE_TTL) {
+      return this._mentoriasCache;
+    }
+    return null;
+  }
+
+  /**
+   * Atualiza o cache com dados enriquecidos (ex: após carregar encontros)
+   */
+  atualizarCache(mentorias: Mentoria[]): void {
+    this._mentoriasCache = mentorias;
+    this._mentoriasCacheTime = Date.now();
+  }
 
   // ===== ENDPOINTS DE MENTORIAS =====
 
@@ -113,6 +145,14 @@ export class MentoriaService {
    * Listar todas as mentorias
    */
   listarMentorias(clientId?: number, status?: string, contractId?: number): Observable<ApiResponse<Mentoria[]>> {
+    // Cache só funciona para listagem sem filtros (caso padrão da tela de lista)
+    if (!clientId && !status && !contractId) {
+      const cached = this.getCacheValido();
+      if (cached) {
+        return of({ success: true, data: cached });
+      }
+    }
+
     let url = `${this.apiUrl}/mentorias`;
     const params: string[] = [];
 
@@ -124,7 +164,15 @@ export class MentoriaService {
       url += `?${params.join('&')}`;
     }
 
-    return this.http.get<ApiResponse<Mentoria[]>>(url);
+    return this.http.get<ApiResponse<Mentoria[]>>(url).pipe(
+      tap(response => {
+        // Só cachear listagem sem filtros
+        if (!clientId && !status && !contractId && response.success && response.data) {
+          this._mentoriasCache = response.data;
+          this._mentoriasCacheTime = Date.now();
+        }
+      })
+    );
   }
 
   /**
@@ -142,33 +190,41 @@ export class MentoriaService {
     contract_id: number;
     numero_encontros: number;
     mentorado_nome: string;
-    mentorado_data_nascimento?: string; // Data de nascimento do mentorado
-    mentorado_profissao?: string; // Profissão do mentorado
-    mentorado_email?: string; // Email do mentorado
-    testes?: any; // Optional test links array
+    mentorado_data_nascimento?: string;
+    mentorado_profissao?: string;
+    mentorado_email?: string;
+    testes?: any;
   }): Observable<ApiResponse<Mentoria>> {
-    return this.http.post<ApiResponse<Mentoria>>(`${this.apiUrl}/mentorias`, dados);
+    return this.http.post<ApiResponse<Mentoria>>(`${this.apiUrl}/mentorias`, dados).pipe(
+      tap(() => this.invalidarCache())
+    );
   }
 
   /**
    * Atualizar mentoria
    */
   atualizarMentoria(id: number, dados: Partial<Mentoria>): Observable<ApiResponse<Mentoria>> {
-    return this.http.put<ApiResponse<Mentoria>>(`${this.apiUrl}/mentorias/${id}`, dados);
+    return this.http.put<ApiResponse<Mentoria>>(`${this.apiUrl}/mentorias/${id}`, dados).pipe(
+      tap(() => this.invalidarCache())
+    );
   }
 
   /**
    * Deletar mentoria (e todos os encontros)
    */
   deletarMentoria(id: number): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/mentorias/${id}`);
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/mentorias/${id}`).pipe(
+      tap(() => this.invalidarCache())
+    );
   }
 
   /**
    * Expirar mentoria (hub) e todos os encontros associados
    */
   expirarMentoria(id: number): Observable<ApiResponse<void>> {
-    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/mentorias/${id}/expirar`, {});
+    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/mentorias/${id}/expirar`, {}).pipe(
+      tap(() => this.invalidarCache())
+    );
   }
 
   /**
@@ -178,6 +234,8 @@ export class MentoriaService {
     return this.http.post<ApiResponse<MentoriaEncontro[]>>(
       `${this.apiUrl}/mentorias/${mentoriaId}/encontros`,
       { quantidade }
+    ).pipe(
+      tap(() => this.invalidarCache())
     );
   }
 
@@ -218,7 +276,9 @@ export class MentoriaService {
    * Atualizar encontro
    */
   atualizarEncontro(id: number, encontro: Partial<MentoriaEncontro>): Observable<ApiResponse<MentoriaEncontro>> {
-    return this.http.put<ApiResponse<MentoriaEncontro>>(`${this.apiUrl}/encontros/${id}`, encontro);
+    return this.http.put<ApiResponse<MentoriaEncontro>>(`${this.apiUrl}/encontros/${id}`, encontro).pipe(
+      tap(() => this.invalidarCache())
+    );
   }
 
   /**
@@ -235,35 +295,45 @@ export class MentoriaService {
    * Deletar encontro
    */
   deletarEncontro(id: number): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/encontros/${id}`);
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/encontros/${id}`).pipe(
+      tap(() => this.invalidarCache())
+    );
   }
 
   /**
    * Expirar encontro individual
    */
   expirarEncontro(id: number): Observable<ApiResponse<void>> {
-    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/encontros/${id}/expirar`, {});
+    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/encontros/${id}/expirar`, {}).pipe(
+      tap(() => this.invalidarCache())
+    );
   }
 
   /**
    * Publicar encontro
    */
   publicarEncontro(id: number): Observable<ApiResponse<MentoriaEncontro>> {
-    return this.http.post<ApiResponse<MentoriaEncontro>>(`${this.apiUrl}/encontros/${id}/publicar`, {});
+    return this.http.post<ApiResponse<MentoriaEncontro>>(`${this.apiUrl}/encontros/${id}/publicar`, {}).pipe(
+      tap(() => this.invalidarCache())
+    );
   }
 
   /**
    * Excluir mentoria (exclui todos os encontros associados)
    */
   excluirMentoria(id: number): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/mentorias/${id}`);
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/mentorias/${id}`).pipe(
+      tap(() => this.invalidarCache())
+    );
   }
 
   /**
    * Excluir encontro individual
    */
   excluirEncontro(id: number): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/encontros/${id}`);
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/encontros/${id}`).pipe(
+      tap(() => this.invalidarCache())
+    );
   }
 
   /**
@@ -869,6 +939,19 @@ export class MentoriaService {
     return this.http.post<ApiResponse<TabelaPeriodicaForcas>>(
       `${this.apiUrl}/publico/${token}/tabela-periodica`,
       dados
+    );
+  }
+
+  // ===== MAPA DE AMBIÇÃO =====
+
+  obterMapaAmbicaoPublico(token: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/publico/${token}/mapa-ambicao`);
+  }
+
+  salvarMapaAmbicao(token: string, dados: any): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/publico/${token}/mapa-ambicao`,
+      { dados }
     );
   }
 }

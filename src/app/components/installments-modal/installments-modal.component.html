@@ -157,11 +157,10 @@
                 <div class="form-group">
                   <label class="form-label">Valor Pago</label>
                   <input
-                    type="number"
+                    type="text"
+                    appCurrencyMask
                     class="form-control"
-                    [(ngModel)]="editForm.paid_amount"
-                    step="0.01"
-                    min="0">
+                    [(ngModel)]="editForm.paid_amount">
                 </div>
               </div>
 

@@ -1820,6 +1820,26 @@
       </div>
     </section>
 
+    <!-- Mapa de Ambição Section -->
+    <section *ngIf="secaoId === 'mapaAmbicao'" class="dark-section mapa-ambicao-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaAmbicao?.ativo">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-mountain-sun"></i>
+            Mapa de Ambição
+          </h2>
+          <p class="dark-subtitle">Planejamento Estratégico de Vida e Patrimônio</p>
+        </div>
+        <app-mapa-ambicao
+          [token]="token"
+          [readOnly]="expired"
+          [nomeMentorado]="encontro.mentorado_nome || ''"
+          [cargoMentorado]="encontro.mentorado_profissao || ''">
+        </app-mapa-ambicao>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section *ngIf="secaoId === 'mapaMental'" class="dark-section mapa-mental-main-section"
              [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaMental?.ativo">

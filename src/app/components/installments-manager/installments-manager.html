@@ -104,13 +104,12 @@
         </div>
         <div class="col-amount">
           <input
-            type="number"
+            type="text"
+            appCurrencyMask
             class="installment-input amount-input"
-            [value]="installment.amount"
-            (input)="onAmountChange(i, $event)"
-            [name]="'amount_' + i"
-            step="0.01"
-            min="0">
+            [(ngModel)]="installment.amount"
+            (ngModelChange)="onAmountModelChange(i, $event)"
+            [name]="'amount_' + i">
         </div>
         <div class="col-status">
           <select

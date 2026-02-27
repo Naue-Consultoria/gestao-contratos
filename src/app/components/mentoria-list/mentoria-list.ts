@@ -75,23 +75,6 @@ export class MentoriaList implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           this.mentorias = response.data;
-
-          // Carregar encontros de todas as mentorias para mostrar nome do mentorado
-          this.mentorias.forEach(mentoria => {
-            if (!mentoria.encontros) {
-              this.mentoriaService.obterMentoria(mentoria.id).subscribe({
-                next: (detailResponse) => {
-                  if (detailResponse.success && detailResponse.data && detailResponse.data.encontros) {
-                    mentoria.encontros = detailResponse.data.encontros;
-                  }
-                },
-                error: (error) => {
-                  console.error(`Erro ao carregar encontros da mentoria ${mentoria.id}:`, error);
-                }
-              });
-            }
-          });
-
           this.calcularEstatisticas();
           this.extrairClientesUnicos();
           this.aplicarFiltros();
