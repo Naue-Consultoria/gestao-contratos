@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, takeUntil } from 'rxjs';
 import { MentoriaService } from '../../services/mentoria.service';
 import { ToastrService } from 'ngx-toastr';
+import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import Chart from 'chart.js/auto';
 
 @Component({
   selector: 'app-mapa-ambicao',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CurrencyMaskDirective],
   template: `
 <!-- ═══ NAV ═══ -->
 <nav class="ma-nav-bar" #navBar>
@@ -107,11 +108,11 @@ import Chart from 'chart.js/auto';
       <div class="ma-card-label">Dados Financeiros</div>
       <div class="ma-field-group ma-mb-16">
         <label class="ma-field-label">Patrimônio Atual (R$) — calculado da aba Estratificação</label>
-        <input type="number" [value]="patrimonioAtual" readonly class="ma-input-readonly">
+        <input type="text" appCurrencyMask [ngModel]="patrimonioAtual" readonly class="ma-input-readonly">
       </div>
       <div class="ma-field-group">
         <label class="ma-field-label">Renda Anual para Acumulação (R$)</label>
-        <input type="number" [(ngModel)]="dados.rendaAnual" (input)="onFieldChange(); recalcDashboard()" placeholder="0" step="1000" [disabled]="readOnly">
+        <input type="text" appCurrencyMask [(ngModel)]="dados.rendaAnual" (ngModelChange)="onFieldChange(); recalcDashboard()" placeholder="R$ 0,00" [disabled]="readOnly">
       </div>
     </div>
     <div class="ma-chart-card">
@@ -209,7 +210,7 @@ import Chart from 'chart.js/auto';
       <div *ngFor="let item of section.items">
         <div *ngIf="item.type === 'monthly'" class="ma-expense-row">
           <span class="ma-expense-name">{{ item.label }}</span>
-          <input type="number" [ngModel]="dados.expenses[item.id]" (ngModelChange)="dados.expenses[item.id]=$event; calcExpenses()" placeholder="0" [disabled]="readOnly">
+          <input type="text" appCurrencyMask [ngModel]="dados.expenses[item.id]" (ngModelChange)="dados.expenses[item.id]=$event; calcExpenses()" placeholder="R$ 0,00" [disabled]="readOnly">
           <div class="ma-annual-value">{{ fmtBRL((dados.expenses[item.id] || 0) * 12) }}</div>
           <input type="text" [(ngModel)]="dados.expenseObs[item.id]" (input)="onFieldChange()" placeholder="Obs..." [disabled]="readOnly">
         </div>
@@ -217,13 +218,13 @@ import Chart from 'chart.js/auto';
           <span class="ma-expense-name">{{ item.label }}</span>
           <input type="number" [ngModel]="dados.expenses[item.id + '-qtd']" (ngModelChange)="dados.expenses[item.id + '-qtd']=$event; calcExpenses()" placeholder="Qtd/ano" [disabled]="readOnly">
           <span class="ma-travel-x">&times;</span>
-          <input type="number" [ngModel]="dados.expenses[item.id + '-custo']" (ngModelChange)="dados.expenses[item.id + '-custo']=$event; calcExpenses()" placeholder="R$/viagem" [disabled]="readOnly">
+          <input type="text" appCurrencyMask [ngModel]="dados.expenses[item.id + '-custo']" (ngModelChange)="dados.expenses[item.id + '-custo']=$event; calcExpenses()" placeholder="R$ 0,00" [disabled]="readOnly">
           <div class="ma-annual-value">{{ fmtBRL(getTravelAnnual(item.id)) }}</div>
           <input type="text" [(ngModel)]="dados.expenseObs[item.id]" (input)="onFieldChange()" placeholder="Obs..." [disabled]="readOnly">
         </div>
         <div *ngIf="item.type === 'annual'" class="ma-expense-row">
           <span class="ma-expense-name">{{ item.label }}</span>
-          <input type="number" [ngModel]="dados.expenses[item.id]" (ngModelChange)="dados.expenses[item.id]=$event; calcExpenses()" placeholder="Valor anual" [disabled]="readOnly">
+          <input type="text" appCurrencyMask [ngModel]="dados.expenses[item.id]" (ngModelChange)="dados.expenses[item.id]=$event; calcExpenses()" placeholder="R$ 0,00" [disabled]="readOnly">
           <div class="ma-annual-value">{{ fmtBRL(dados.expenses[item.id] || 0) }}</div>
           <input type="text" [(ngModel)]="dados.expenseObs[item.id]" (input)="onFieldChange()" placeholder="Obs..." [disabled]="readOnly">
         </div>
@@ -318,7 +319,7 @@ import Chart from 'chart.js/auto';
         <div class="ma-ps-name">
           <span class="ma-ps-dot" [style.background]="asset.color"></span>{{ asset.label }}
         </div>
-        <input type="number" [ngModel]="dados.assets[asset.id]" (ngModelChange)="dados.assets[asset.id]=$event; calcPatrimonio()" placeholder="0" [disabled]="readOnly">
+        <input type="text" appCurrencyMask [ngModel]="dados.assets[asset.id]" (ngModelChange)="dados.assets[asset.id]=$event; calcPatrimonio()" placeholder="R$ 0,00" [disabled]="readOnly">
         <div class="ma-ps-pct">{{ getAssetPct(asset.id) }}%</div>
       </div>
 
@@ -387,7 +388,7 @@ import Chart from 'chart.js/auto';
         <p class="ma-phase-subtitle">Ações imediatas e resultados rápidos para construir momentum.</p>
         <div class="ma-meta-parcial-banner banner-short">
           <div><div class="ma-mpb-label">Meta de Patrimônio — Ano 1</div></div>
-          <div><input type="number" [(ngModel)]="dados.pfMeta1" (input)="onFieldChange(); updateRoadmapChart()" placeholder="R$ meta ano 1" class="ma-meta-input" [disabled]="readOnly"></div>
+          <div><input type="text" appCurrencyMask [(ngModel)]="dados.pfMeta1" (ngModelChange)="onFieldChange(); updateRoadmapChart()" placeholder="R$ 0,00" class="ma-meta-input" [disabled]="readOnly"></div>
         </div>
         <div class="ma-action-header"><span>Ação / Iniciativa</span><span>Prazo</span><span>Status</span><span></span></div>
         <div *ngFor="let action of dados.actionsShort; let i = index" class="ma-action-row">
@@ -411,7 +412,7 @@ import Chart from 'chart.js/auto';
         <p class="ma-phase-subtitle">Estratégias de crescimento sustentável e consolidação.</p>
         <div class="ma-meta-parcial-banner banner-medium">
           <div><div class="ma-mpb-label">Meta de Patrimônio — Ano 3</div></div>
-          <div><input type="number" [(ngModel)]="dados.pfMeta3" (input)="onFieldChange(); updateRoadmapChart()" placeholder="R$ meta ano 3" class="ma-meta-input" [disabled]="readOnly"></div>
+          <div><input type="text" appCurrencyMask [(ngModel)]="dados.pfMeta3" (ngModelChange)="onFieldChange(); updateRoadmapChart()" placeholder="R$ 0,00" class="ma-meta-input" [disabled]="readOnly"></div>
         </div>
         <div class="ma-action-header"><span>Ação / Iniciativa</span><span>Prazo</span><span>Status</span><span></span></div>
         <div *ngFor="let action of dados.actionsMedium; let i = index" class="ma-action-row">
@@ -490,7 +491,7 @@ import Chart from 'chart.js/auto';
       <tbody>
         <tr *ngFor="let row of dados.tracking">
           <td><input type="date" [(ngModel)]="row.data" (input)="onFieldChange()" [disabled]="readOnly"></td>
-          <td><input type="number" [(ngModel)]="row.patrimonio" (input)="onFieldChange()" placeholder="0" [disabled]="readOnly"></td>
+          <td><input type="text" appCurrencyMask [(ngModel)]="row.patrimonio" (ngModelChange)="onFieldChange()" placeholder="R$ 0,00" [disabled]="readOnly"></td>
           <td style="text-align:center">
             <span class="ma-pct-badge" [ngClass]="getTrackingPctClass(row.patrimonio)">{{ getTrackingPct(row.patrimonio) }}</span>
           </td>
@@ -761,8 +762,9 @@ select:focus { border-color: #00B74F; box-shadow: 0 0 0 4px rgba(0,183,79,0.1); 
   align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;
 }
 .ma-expense-name { font-size: 0.875rem; color: #374151; }
-.ma-expense-row input[type="number"] { text-align: right; padding: 0.625rem 0.75rem; font-size: 0.875rem; }
-.ma-expense-row input[type="text"] { padding: 0.625rem 0.75rem; font-size: 0.8rem; }
+.ma-expense-row input { padding: 0.625rem 0.75rem; font-size: 0.875rem; }
+.ma-expense-row input:nth-child(2) { text-align: right; }
+.ma-expense-row input:last-child { text-align: left; font-size: 0.8rem; }
 .ma-annual-value {
   text-align: right; font-size: 0.875rem; color: #666;
   font-variant-numeric: tabular-nums; padding: 0.625rem 0.75rem;
