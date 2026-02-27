@@ -144,6 +144,7 @@ export class PublicMentoriaViewComponent implements OnInit {
   @ViewChild(MatrizRaciEditorComponent) matrizRaciComponent?: MatrizRaciEditorComponent;
   @ViewChild(AnaliseProblemasComponent) analiseProblemasComponent?: AnaliseProblemasComponent;
   @ViewChild(GestaoErrosComponent) gestaoErrosComponent?: GestaoErrosComponent;
+  @ViewChild(MapaAmbicaoComponent) mapaAmbicaoComponent?: MapaAmbicaoComponent;
 
   encontro: MentoriaEncontro | null = null;
   blocos: EncontroBloco[] = [];
@@ -153,6 +154,7 @@ export class PublicMentoriaViewComponent implements OnInit {
   isLoading = true;
   notFound = false;
   expired = false;
+  exportandoMapaAmbicao = false;
 
   // Interações do mentorado
   interacoes: { [blocoId: number]: any } = {};
@@ -6263,6 +6265,17 @@ export class PublicMentoriaViewComponent implements OnInit {
         }
       }
 
+      // Mapa de Ambição
+      if (isAtiva('mapaAmbicao') && this.mapaAmbicaoComponent) {
+        ferramentasDisponiveis.push({
+          nome: 'Mapa de Ambição',
+          verificar: () => true,
+          criarContainer: () => this.mapaAmbicaoComponent!.criarContainerPDFVisualizacao(),
+          timeout: 1500,
+          backgroundColor: '#ffffff'
+        });
+      }
+
       console.log('📋 Total de ferramentas disponíveis:', ferramentasDisponiveis.length);
       console.log('📝 Lista de ferramentas:', ferramentasDisponiveis.map(f => f.nome));
 
@@ -6333,6 +6346,23 @@ export class PublicMentoriaViewComponent implements OnInit {
     } catch (error) {
       console.error('Erro ao exportar PDF completo:', error);
       this.toastr.error('Erro ao exportar PDF completo');
+    }
+  }
+
+  // ===== EXPORTAR MAPA DE AMBIÇÃO =====
+
+  async exportarMapaAmbicaoPDF(): Promise<void> {
+    if (!this.mapaAmbicaoComponent) return;
+    this.exportandoMapaAmbicao = true;
+    this.toastr.info('Gerando PDF do Mapa de Ambição...', '', { timeOut: 8000 });
+    try {
+      await this.mapaAmbicaoComponent.exportarPDF();
+      this.toastr.success('PDF do Mapa de Ambição exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar Mapa de Ambição:', error);
+      this.toastr.error('Erro ao exportar PDF do Mapa de Ambição');
+    } finally {
+      this.exportandoMapaAmbicao = false;
     }
   }
 

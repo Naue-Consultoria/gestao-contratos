@@ -6,6 +6,8 @@ import { MentoriaService } from '../../services/mentoria.service';
 import { ToastrService } from 'ngx-toastr';
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import Chart from 'chart.js/auto';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-mapa-ambicao',
@@ -1009,6 +1011,7 @@ export class MapaAmbicaoComponent implements OnInit, OnDestroy, AfterViewInit {
   dados: any = this.getDefaultDados();
   mapaAmbicaoId: number | null = null;
   salvando: boolean = false;
+  exportando: boolean = false;
 
   totalAnual: number = 0;
   patrimonioNecessario: number = 0;
@@ -1434,5 +1437,246 @@ export class MapaAmbicaoComponent implements OnInit, OnDestroy, AfterViewInit {
         scales: { x: { grid: { display: false } }, y: { ticks: { callback: (v: any) => this.fmtCompact(v as number) } } }
       })
     });
+  }
+
+  // ═══ PDF EXPORT ═══
+
+  async exportarPDF(): Promise<void> {
+    this.exportando = true;
+    try {
+      const container = this.criarContainerPDFVisualizacao();
+      document.body.appendChild(container);
+
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
+        imageTimeout: 0
+      });
+
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const pdfWidth = imgWidth * 0.264583;
+      const pdfHeight = imgHeight * 0.264583;
+
+      const pdf = new jsPDF({
+        orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+        unit: 'mm',
+        format: [pdfWidth, pdfHeight]
+      });
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`mapa-ambicao-${this.dados.ceoNome || 'mentoria'}-${Date.now()}.pdf`);
+    } finally {
+      this.exportando = false;
+    }
+  }
+
+  criarContainerPDFVisualizacao(): HTMLElement {
+    const c = document.createElement('div');
+    c.style.cssText = 'position:absolute;left:-9999px;top:0;width:1100px;font-family:Inter,Arial,sans-serif;color:#1a202c;line-height:1.6;background:#fff;padding:48px;';
+
+    const chartImg = (chart: Chart | null): string => chart ? chart.toBase64Image('image/png', 1) : '';
+
+    const h = (text: string, icon = '') => `<div style="background:linear-gradient(135deg,#022c22,#014d3a);color:white;padding:20px 28px;border-radius:16px;margin:40px 0 20px 0;">
+      <h2 style="margin:0;font-size:22px;font-weight:200;letter-spacing:-0.5px;">${icon} ${text}</h2></div>`;
+
+    const card = (content: string) => `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">${content}</div>`;
+
+    const field = (label: string, value: string) => {
+      const v = value || '<span style="color:#999;">—</span>';
+      return `<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#00B74F;margin-bottom:6px;">${label}</div><div style="font-size:14px;color:#374151;white-space:pre-wrap;">${v}</div></div>`;
+    };
+
+    const kpi = (label: string, value: string, sub = '') => `<div style="text-align:center;padding:18px;background:#f9fafb;border:2px solid rgba(2,44,34,0.1);border-radius:14px;">
+      <div style="font-size:22px;font-weight:700;color:#022c22;">${value}</div>
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#666;margin-top:4px;">${label}</div>
+      ${sub ? '<div style="font-size:11px;color:#999;margin-top:2px;">' + sub + '</div>' : ''}
+    </div>`;
+
+    // ═══ HEADER ═══
+    let html = `<div style="text-align:center;margin-bottom:40px;padding-bottom:30px;border-bottom:3px solid #022c22;">
+      <h1 style="font-size:32px;font-weight:200;color:#022c22;margin:0 0 8px 0;letter-spacing:-1px;">Mapa de Ambição</h1>
+      <p style="font-size:16px;color:#666;margin:0;">Planejamento Estratégico de Vida e Patrimônio</p>
+      <div style="display:flex;justify-content:center;gap:32px;margin-top:20px;font-size:14px;color:#374151;">
+        <span><strong>Nome:</strong> ${this.dados.ceoNome || '—'}</span>
+        <span><strong>Cargo:</strong> ${this.dados.ceoCargo || '—'}</span>
+        <span><strong>Data:</strong> ${this.dados.ceoData ? new Date(this.dados.ceoData + 'T12:00:00').toLocaleDateString('pt-BR') : '—'}</span>
+      </div>
+    </div>`;
+
+    // ═══ 1. DASHBOARD ═══
+    html += h('Dashboard', '<i class="fa-solid fa-chart-line"></i>');
+    html += `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;">
+      ${kpi('Custo Anual Vida Ideal', this.fmtCompact(this.totalAnual))}
+      ${kpi('Patrimônio Necessário', this.fmtCompact(this.patrimonioNecessario), 'Para viver dos rendimentos')}
+      ${kpi('Patrimônio Atual', this.fmtCompact(this.patrimonioAtual))}
+      ${kpi('Progresso', this.progressoPct.toFixed(1) + '%', this.tempoEstimado + ' estimados')}
+    </div>`;
+
+    // Dashboard charts
+    const expImg = chartImg(this.chartExpenses);
+    const patBarImg = chartImg(this.chartPatrimonio);
+    const projImg = chartImg(this.chartProjecao);
+    if (expImg || patBarImg || projImg) {
+      html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">`;
+      if (expImg) html += card(`<div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">Distribuição de Despesas</div><img src="${expImg}" style="width:100%;max-height:250px;object-fit:contain;">`);
+      if (patBarImg) html += card(`<div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">Patrimônio Atual vs Necessário</div><img src="${patBarImg}" style="width:100%;max-height:250px;object-fit:contain;">`);
+      html += `</div>`;
+      if (projImg) html += card(`<div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">Projeção de Crescimento Patrimonial</div><img src="${projImg}" style="width:100%;max-height:280px;object-fit:contain;">`);
+    }
+
+    if (this.dados.dashBloqueio || this.dados.dashAcao) {
+      html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">`;
+      html += card(field('Maior Bloqueio Atual', this.dados.dashBloqueio));
+      html += card(field('Próxima Ação Imediata', this.dados.dashAcao));
+      html += `</div>`;
+    }
+
+    // ═══ 2. PROPÓSITO E VISÃO ═══
+    html += h('Propósito e Visão de Mundo Ideal', '<i class="fa-solid fa-compass"></i>');
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">`;
+    html += card(field('Visão de Mundo Ideal', this.dados.p1Visao));
+    html += card(field('Atividades e Ocupação', this.dados.p1Atividades));
+    html += card(field('Legado e Impacto', this.dados.p1Legado));
+    html += card(field('Causas e Contribuições', this.dados.p1Causas));
+    html += `</div>`;
+    html += card(field('Um Dia Perfeito', this.dados.p1Dia));
+
+    // ═══ 3. ESTILO DE VIDA ═══
+    html += h('Custo do Estilo de Vida dos Sonhos', '<i class="fa-solid fa-gem"></i>');
+    for (const section of this.expenseSections) {
+      let rows = '';
+      for (const item of section.items) {
+        let mensal = 0, anual = 0;
+        if (item.type === 'monthly') { mensal = this.dados.expenses[item.id] || 0; anual = mensal * 12; }
+        else if (item.type === 'travel') { anual = this.getTravelAnnual(item.id); }
+        else if (item.type === 'annual') { anual = this.dados.expenses[item.id] || 0; }
+        if (anual > 0) {
+          const obs = this.dados.expenseObs[item.id] || '';
+          rows += `<tr><td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:13px;">${item.label}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:13px;">${item.type === 'monthly' ? this.fmtBRL(mensal) + '/mês' : '—'}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:13px;font-weight:600;">${this.fmtBRL(anual)}/ano</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#666;">${obs}</td></tr>`;
+        }
+      }
+      if (rows) {
+        html += card(`<div style="font-size:13px;font-weight:700;color:#022c22;margin-bottom:12px;">${section.title}</div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:#f9fafb;"><th style="text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Item</th><th style="text-align:right;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Mensal</th><th style="text-align:right;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Anual</th><th style="padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Obs</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`);
+      }
+    }
+    html += `<div style="background:#022c22;color:white;padding:18px 24px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;margin:12px 0;">
+      <span style="font-size:15px;font-weight:600;">Custo Anual Total da Vida Ideal</span>
+      <span style="font-size:22px;font-weight:700;">${this.fmtBRL(this.totalAnual)}</span>
+    </div>`;
+    html += `<div style="background:#014d3a;color:white;padding:14px 24px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;">
+      <div><span style="font-size:13px;">Patrimônio Necessário</span><br><span style="font-size:11px;opacity:0.7;">Para viver dos rendimentos a 6% a.a.</span></div>
+      <span style="font-size:20px;font-weight:700;">${this.fmtBRL(this.patrimonioNecessario)}</span>
+    </div>`;
+
+    // ═══ 4. PLANO DE AÇÃO ═══
+    html += h('Plano de Ação e Limites', '<i class="fa-solid fa-chess"></i>');
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">`;
+    html += card(field('Negócio / Fonte Principal de Renda', this.dados.p3Negocio));
+    html += card(field('Principais Ações nos Próximos 12 Meses', this.dados.p3Acoes));
+    html += card(field('Depois de Atingir a Liberdade Financeira', this.dados.p3Depois));
+    html += card(field('Limites e Prioridades', this.dados.p3Limites));
+    html += `</div>`;
+
+    // ═══ 5. ESTRATIFICAÇÃO DO PATRIMÔNIO ═══
+    html += h('Estratificação do Patrimônio', '<i class="fa-solid fa-building-columns"></i>');
+    let assetRows = '';
+    for (const asset of this.assetCategories) {
+      const v = this.dados.assets[asset.id] || 0;
+      if (v > 0) {
+        assetRows += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${asset.color};margin-right:8px;vertical-align:middle;"></span>${asset.label}</td>
+          <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:14px;font-weight:600;">${this.fmtBRL(v)}</td>
+          <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:13px;color:#666;">${this.getAssetPct(asset.id)}%</td></tr>`;
+      }
+    }
+    const patChartImg = chartImg(this.chartPatStrat);
+    html += `<div style="display:grid;grid-template-columns:${patChartImg ? '1fr 1fr' : '1fr'};gap:16px;">`;
+    html += card(`<table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:#f9fafb;"><th style="text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Ativo</th><th style="text-align:right;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Valor</th><th style="text-align:right;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">%</th></tr></thead>
+      <tbody>${assetRows}</tbody>
+      <tfoot><tr style="background:#022c22;color:white;"><td style="padding:12px 14px;font-weight:700;border-radius:0 0 0 12px;">Total</td><td style="padding:12px 14px;text-align:right;font-weight:700;">${this.fmtBRL(this.patrimonioAtual)}</td><td style="padding:12px 14px;text-align:right;font-weight:700;border-radius:0 0 12px 0;">100%</td></tr></tfoot>
+    </table>`);
+    if (patChartImg) html += card(`<div style="text-align:center;"><img src="${patChartImg}" style="width:100%;max-height:300px;object-fit:contain;"></div>`);
+    html += `</div>`;
+    if (this.dados.patObservacoes) html += card(field('Observações sobre o Patrimônio', this.dados.patObservacoes));
+
+    // ═══ 6. PLANO FINANCEIRO ═══
+    html += h('Plano de Ação Financeiro', '<i class="fa-solid fa-bullseye"></i>');
+    const renderActions = (title: string, badge: string, meta: number | null, actions: any[]) => {
+      let content = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <span style="padding:4px 12px;background:#022c22;color:white;border-radius:20px;font-size:12px;font-weight:600;">${badge}</span>
+        <span style="font-size:16px;font-weight:600;color:#022c22;">${title}</span>
+      </div>`;
+      if (meta) content += `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:13px;"><strong>Meta de Patrimônio:</strong> ${this.fmtBRL(meta)}</div>`;
+      const filled = actions.filter((a: any) => a.descricao);
+      if (filled.length > 0) {
+        content += `<table style="width:100%;border-collapse:collapse;">
+          <thead><tr style="background:#f9fafb;"><th style="text-align:left;padding:8px;font-size:11px;text-transform:uppercase;color:#999;">Ação</th><th style="padding:8px;font-size:11px;text-transform:uppercase;color:#999;">Prazo</th><th style="padding:8px;font-size:11px;text-transform:uppercase;color:#999;">Status</th></tr></thead><tbody>`;
+        for (const a of filled) {
+          const statusLabel = a.status === 'concluido' ? 'Concluído' : a.status === 'andamento' ? 'Em andamento' : a.status === 'pendente' ? 'Pendente' : '—';
+          const statusColor = a.status === 'concluido' ? '#00B74F' : a.status === 'andamento' ? '#f59e0b' : '#999';
+          content += `<tr><td style="padding:8px;border-bottom:1px solid #f0f0f0;font-size:13px;">${a.descricao}</td>
+            <td style="padding:8px;border-bottom:1px solid #f0f0f0;font-size:13px;text-align:center;">${a.prazo || '—'}</td>
+            <td style="padding:8px;border-bottom:1px solid #f0f0f0;text-align:center;"><span style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${statusColor}22;color:${statusColor};">${statusLabel}</span></td></tr>`;
+        }
+        content += `</tbody></table>`;
+      }
+      return card(content);
+    };
+    html += renderActions('Curto Prazo — 1 Ano', 'Curto Prazo', this.dados.pfMeta1, this.dados.actionsShort);
+    html += renderActions('Médio Prazo — 3 Anos', 'Médio Prazo', this.dados.pfMeta3, this.dados.actionsMedium);
+    html += renderActions('Longo Prazo — 5+ Anos', 'Longo Prazo', this.patrimonioNecessario, this.dados.actionsLong);
+
+    const roadmapImg = chartImg(this.chartRoadmap);
+    if (roadmapImg) html += card(`<div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">Roadmap Financeiro</div><img src="${roadmapImg}" style="width:100%;max-height:300px;object-fit:contain;">`);
+    if (this.dados.pfObservacoes) html += card(field('Observações do Plano', this.dados.pfObservacoes));
+
+    // ═══ 7. RASTREAMENTO ═══
+    html += h('Rastreamento', '<i class="fa-solid fa-chart-line"></i>');
+    const filledTracking = this.dados.tracking.filter((r: any) => r.data || r.patrimonio || r.notas);
+    if (filledTracking.length > 0) {
+      let trackRows = '';
+      for (const r of filledTracking) {
+        trackRows += `<tr><td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:13px;">${r.data ? new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR') : '—'}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:13px;font-weight:600;">${r.patrimonio ? this.fmtBRL(r.patrimonio) : '—'}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:center;font-size:13px;">${this.getTrackingPct(r.patrimonio)}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#666;">${r.notas || '—'}</td></tr>`;
+      }
+      html += card(`<table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="background:#f9fafb;"><th style="text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Data</th><th style="text-align:right;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Patrimônio</th><th style="text-align:center;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">% Meta</th><th style="padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Notas</th></tr></thead>
+        <tbody>${trackRows}</tbody></table>`);
+    }
+
+    if (this.dados.refAprendizado || this.dados.refProximos) {
+      html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">`;
+      html += card(field('Maior Aprendizado', this.dados.refAprendizado));
+      html += card(field('Próximos Passos', this.dados.refProximos));
+      html += `</div>`;
+    }
+
+    // ═══ FOOTER ═══
+    html += `<div style="text-align:center;margin-top:40px;padding-top:20px;border-top:2px solid #e5e7eb;color:#999;font-size:11px;">
+      Mapa de Ambição — Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+    </div>`;
+
+    c.innerHTML = html;
+    return c;
   }
 }
