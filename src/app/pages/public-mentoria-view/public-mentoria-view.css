@@ -639,8 +639,7 @@ html {
   position: relative;
   z-index: 2;
   padding: 5rem 0;
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: radial-gradient(ellipse at 50% 50%, #014d3a 0%, #022c22 70%);
 }
 
 .intro-container {
@@ -737,24 +736,8 @@ html {
   position: relative;
   z-index: 2;
   padding: 5rem 0;
-}
-
-.testes-main-section {
-  background: linear-gradient(180deg, #014d3a 0%, #022c22 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.referencias-main-section {
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.mapa-ambicao-main-section {
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: radial-gradient(ellipse at 50% 50%, #014d3a 0%, #022c22 70%);
+  border: none;
 }
 
 .btn-export-mapa-ambicao {
@@ -1007,12 +990,9 @@ html {
 
 /* === PRÓXIMOS PASSOS SECTION === */
 .proximos-passos-main-section {
-  background: linear-gradient(180deg, #014d3a 0%, #022c22 100%);
   position: relative;
   overflow: hidden;
   padding: 5rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .proximos-passos-main-section::before {
@@ -1672,11 +1652,10 @@ html {
 
 /* === ENCERRAMENTO FINAL === */
 .encerramento-final-section {
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
+  background: radial-gradient(ellipse at 50% 50%, #014d3a 0%, #022c22 70%);
   padding: 6rem 0;
   position: relative;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .encerramento-final-section::before {
@@ -1765,7 +1744,6 @@ html {
 
 /* === FOOTER === */
 .mentoria-footer {
-  background: linear-gradient(135deg, #022c22, #014d3a);
   padding: 3rem 5rem;
   text-align: center;
   color: white;
@@ -2103,9 +2081,6 @@ html {
 
 /* ===== MAPA MENTAL ===== */
 .mapa-mental-main-section {
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .mapa-mental-controls {
@@ -2959,9 +2934,6 @@ html {
 /* ===== MODELO ABC ===== */
 
 .modelo-abc-main-section {
-  background: linear-gradient(180deg, #014d3a 0%, #022c22 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .dark-subtitle {
@@ -3337,9 +3309,6 @@ html {
 /* ===== THE GOLDEN CIRCLE ===== */
 
 .golden-circle-main-section {
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .golden-circle-content {
@@ -3529,9 +3498,6 @@ html {
 /* ===== RODA DA VIDA MAAS ===== */
 
 .roda-da-vida-main-section {
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .roda-da-vida-content {
@@ -4180,9 +4146,6 @@ html {
 /* ===== ZONAS DE APRENDIZADO ===== */
 
 .zonas-aprendizado-main-section {
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .zonas-aprendizado-content {
@@ -4759,9 +4722,6 @@ html {
 /* ===== TERMÔMETRO DE GESTÃO ===== */
 
 .termometro-gestao-main-section {
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .termometro-gestao-content {
@@ -5506,9 +5466,6 @@ html {
 /* ===== GANHOS E PERDAS ===== */
 
 .ganhos-perdas-main-section {
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .ganhos-perdas-content {
@@ -5841,9 +5798,6 @@ html {
 /* ===== CONTROLE DE HÁBITOS ===== */
 
 .controle-habitos-main-section {
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .controle-habitos-content {
@@ -5859,9 +5813,6 @@ html {
 /* ===== MATRIZ RACI ===== */
 
 .matriz-raci-main-section {
-  background: linear-gradient(180deg, #022c22 0%, #014d3a 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Header Section */
