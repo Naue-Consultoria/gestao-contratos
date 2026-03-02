@@ -367,8 +367,14 @@ export class PublicMentoriaViewComponent implements OnInit {
 
   // Getter para obter seções ordenadas conforme configuração do editor
   get secoesOrdenadas(): string[] {
+    const todasSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros', 'tabelaPeriodica', 'mapaAmbicao'];
     if (!this.conteudoEstruturado?.ordemSecoes || this.conteudoEstruturado.ordemSecoes.length === 0) {
-      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros', 'tabelaPeriodica', 'mapaAmbicao'];
+      return todasSecoes;
+    }
+    // Garantir que seções novas que não existiam no ordemSecoes salvo sejam adicionadas ao final
+    const secoesFaltantes = todasSecoes.filter(s => !this.conteudoEstruturado.ordemSecoes.includes(s));
+    if (secoesFaltantes.length > 0) {
+      return [...this.conteudoEstruturado.ordemSecoes, ...secoesFaltantes];
     }
     return this.conteudoEstruturado.ordemSecoes;
   }
