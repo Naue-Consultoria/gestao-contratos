@@ -199,48 +199,71 @@
             <i class="fas fa-file-contract"></i>
             Taxa de Conclusão por Contrato
           </h4>
+        </div>
 
-          <!-- Filtros -->
+        <!-- Toolbar: Tabs + Filtros -->
+        <div class="completion-toolbar">
+          <div class="completion-tabs">
+            <button
+              class="completion-tab-btn"
+              [class.active]="completionTab === 'inProgress'"
+              (click)="setCompletionTab('inProgress')">
+              <i class="fas fa-spinner"></i>
+              Em Progresso ({{ inProgressContractsCount }})
+            </button>
+            <button
+              class="completion-tab-btn"
+              [class.active]="completionTab === 'completed'"
+              (click)="setCompletionTab('completed')">
+              <i class="fas fa-check-circle"></i>
+              Concluídos ({{ completedContractsCount }})
+            </button>
+          </div>
+
           <div class="chart-filters">
-            <!-- Filtro de Tipo de Contrato -->
-            <div class="chart-filter">
-              <select
-                id="contractTypeFilter"
-                class="filter-select"
-                [value]="selectedContractType || ''"
-                (change)="onContractTypeFilterChangeEvent($event)">
-                <option value="">Todos os tipos</option>
-                <option
-                  *ngFor="let type of availableContractTypes"
-                  [value]="type.value">
-                  {{ type.label }}
-                </option>
-              </select>
-            </div>
+            <select
+              id="contractTypeFilter"
+              class="filter-select"
+              [value]="selectedContractType || ''"
+              (change)="onContractTypeFilterChangeEvent($event)">
+              <option value="">Todos os tipos</option>
+              <option
+                *ngFor="let type of availableContractTypes"
+                [value]="type.value">
+                {{ type.label }}
+              </option>
+            </select>
 
-            <!-- Filtro de Cliente -->
-            <div class="chart-filter" *ngIf="availableClients.length > 0">
-              <select
-                id="clientFilter"
-                class="filter-select"
-                [value]="selectedClientId || ''"
-                (change)="onClientFilterChangeEvent($event)">
-                <option value="">Todos os clientes</option>
-                <option
-                  *ngFor="let client of availableClients"
-                  [value]="client.id">
-                  {{ client.name }}
-                </option>
-              </select>
-            </div>
+            <select
+              *ngIf="availableClients.length > 0"
+              id="clientFilter"
+              class="filter-select"
+              [value]="selectedClientId || ''"
+              (change)="onClientFilterChangeEvent($event)">
+              <option value="">Todos os clientes</option>
+              <option
+                *ngFor="let client of availableClients"
+                [value]="client.id">
+                {{ client.name }}
+              </option>
+            </select>
           </div>
         </div>
+
         <div class="chart-wrapper contract-completion-wrapper">
           <canvas id="contractCompletionChart" *ngIf="analyticsData.contractCompletionData && analyticsData.contractCompletionData.length > 0"></canvas>
           <div *ngIf="!analyticsData.contractCompletionData || analyticsData.contractCompletionData.length === 0" class="no-data-message">
             <i class="fas fa-info-circle"></i>
             <p>Nenhum dado de conclusão por contrato disponível ainda</p>
             <small>Os dados aparecerão quando houver contratos ativos com serviços em andamento</small>
+          </div>
+          <div *ngIf="analyticsData.contractCompletionData && analyticsData.contractCompletionData.length > 0 && completionTab === 'completed' && completedContractsCount === 0" class="no-data-message">
+            <i class="fas fa-check-circle"></i>
+            <p>Nenhum contrato concluído ainda</p>
+          </div>
+          <div *ngIf="analyticsData.contractCompletionData && analyticsData.contractCompletionData.length > 0 && completionTab === 'inProgress' && inProgressContractsCount === 0" class="no-data-message">
+            <i class="fas fa-trophy"></i>
+            <p>Todos os contratos foram concluídos!</p>
           </div>
         </div>
       </div>

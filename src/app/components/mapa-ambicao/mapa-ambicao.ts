@@ -252,60 +252,11 @@ import jsPDF from 'jspdf';
   <!-- Nav buttons -->
   <div class="ma-tab-nav-buttons">
     <button class="ma-btn-prev" (click)="showTab('proposito')"><i class="fa-solid fa-arrow-left"></i> Propósito e Visão</button>
-    <button class="ma-btn-next" (click)="showTab('plano')">Plano de Ação <i class="fa-solid fa-arrow-right"></i></button>
-  </div>
-</div>
-
-<!-- ═══ TAB 4 — PLANO DE AÇÃO ═══ -->
-<div *ngIf="activeTab === 'plano'" class="ma-tab-panel">
-
-  <div class="ma-card">
-    <div class="ma-card-label">Pergunta 1</div>
-    <h3>Sua Cadeira Atual</h3>
-    <p class="ma-desc">Seu cargo atual é o veículo para alcançar sua vida ideal, ou se tornou um fim em si mesmo?</p>
-    <textarea [(ngModel)]="dados.p3Negocio" (input)="onFieldChange()" rows="5" placeholder="Clarifique a relação entre sua cadeira atual e sua vida pessoal..." [disabled]="readOnly"></textarea>
-  </div>
-
-  <div class="ma-card">
-    <div class="ma-card-label">Pergunta 2</div>
-    <h3>Patrimônio Necessário</h3>
-    <p class="ma-desc">Quanto você precisa acumular para que os rendimentos cubram seu "Número da Liberdade Anual"?</p>
-    <div class="ma-plano-pat-badge">
-      <span>Patrimônio Necessário (calculado)</span>
-      <span>{{ fmtBRL(patrimonioNecessario) }}</span>
-    </div>
-  </div>
-
-  <div class="ma-grid-2 ma-mb-20 ma-mt-20">
-    <div class="ma-card" style="margin:0">
-      <div class="ma-card-label">Pergunta 3</div>
-      <h3>Ações Concretas para Hoje</h3>
-      <p class="ma-desc">O que você pode fazer HOJE para alinhar sua vida com a visão?</p>
-      <textarea [(ngModel)]="dados.p3Acoes" (input)="onFieldChange()" rows="6" placeholder="Transforme visão em movimento imediato..." [disabled]="readOnly"></textarea>
-    </div>
-    <div class="ma-card ma-card-key" style="margin:0">
-      <div class="ma-card-label">Pergunta-Chave</div>
-      <h3>Depois da Meta</h3>
-      <p class="ma-desc">Quando atingir o patrimônio, o que fará? Continuará na cadeira atual? Se dedicará à filantropia?</p>
-      <textarea [(ngModel)]="dados.p3Depois" (input)="onFieldChange()" rows="6" placeholder="Evite que o objetivo se torne uma meta infinita..." [disabled]="readOnly"></textarea>
-    </div>
-  </div>
-
-  <div class="ma-card">
-    <div class="ma-card-label">Pergunta 5</div>
-    <h3>Limites e Prioridades</h3>
-    <p class="ma-desc">Quais são seus limites não-negociáveis? O que NÃO fará, mesmo que lucrativo?</p>
-    <textarea [(ngModel)]="dados.p3Limites" (input)="onFieldChange()" rows="5" placeholder="Defina valores e limites éticos/pessoais..." [disabled]="readOnly"></textarea>
-  </div>
-
-  <!-- Nav buttons -->
-  <div class="ma-tab-nav-buttons">
-    <button class="ma-btn-prev" (click)="showTab('estilo')"><i class="fa-solid fa-arrow-left"></i> Estilo de Vida</button>
     <button class="ma-btn-next" (click)="showTab('patrimonio')">Estratificação do Patrimônio <i class="fa-solid fa-arrow-right"></i></button>
   </div>
 </div>
 
-<!-- ═══ TAB 5 — ESTRATIFICAÇÃO DO PATRIMÔNIO ═══ -->
+<!-- ═══ TAB 4 — ESTRATIFICAÇÃO DO PATRIMÔNIO ═══ -->
 <div *ngIf="activeTab === 'patrimonio'" class="ma-tab-panel">
 
   <div class="ma-grid-2-1 ma-mb-24">
@@ -350,15 +301,103 @@ import jsPDF from 'jspdf';
 
   <!-- Nav buttons -->
   <div class="ma-tab-nav-buttons">
-    <button class="ma-btn-prev" (click)="showTab('plano')"><i class="fa-solid fa-arrow-left"></i> Plano de Ação</button>
-    <button class="ma-btn-next" (click)="showTab('planofinanceiro')">Plano Financeiro <i class="fa-solid fa-arrow-right"></i></button>
+    <button class="ma-btn-prev" (click)="showTab('estilo')"><i class="fa-solid fa-arrow-left"></i> Estilo de Vida</button>
+    <button class="ma-btn-next" (click)="showTab('rastreamento')">Rastreamento <i class="fa-solid fa-arrow-right"></i></button>
   </div>
 </div>
 
-<!-- ═══ TAB 6 — PLANO DE AÇÃO FINANCEIRO ═══ -->
-<div *ngIf="activeTab === 'planofinanceiro'" class="ma-tab-panel">
+<!-- ═══ TAB 5 — RASTREAMENTO ═══ -->
+<div *ngIf="activeTab === 'rastreamento'" class="ma-tab-panel">
 
-  <div class="ma-grid-3 ma-mb-24">
+  <div class="ma-card ma-mb-20">
+    <div class="ma-card-label">Rastreamento Mensal</div>
+    <table class="ma-tracking-table">
+      <thead>
+        <tr>
+          <th style="width:150px">Data</th>
+          <th style="width:190px">Patrimônio Atual (R$)</th>
+          <th style="width:90px">% da Meta</th>
+          <th>Notas / Progresso</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of dados.tracking">
+          <td><input type="date" [(ngModel)]="row.data" (input)="onFieldChange()" [disabled]="readOnly"></td>
+          <td><input type="text" appCurrencyMask [(ngModel)]="row.patrimonio" (ngModelChange)="onFieldChange()" placeholder="R$ 0,00" [disabled]="readOnly"></td>
+          <td style="text-align:center">
+            <span class="ma-pct-badge" [ngClass]="getTrackingPctClass(row.patrimonio)">{{ getTrackingPct(row.patrimonio) }}</span>
+          </td>
+          <td><input type="text" [(ngModel)]="row.notas" (input)="onFieldChange()" placeholder="Observações..." [disabled]="readOnly"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ma-grid-2">
+    <div class="ma-card" style="margin:0">
+      <div class="ma-card-label">Reflexão</div>
+      <h3>Maior aprendizado preenchendo o Mapa de Ambição</h3>
+      <textarea [(ngModel)]="dados.refAprendizado" (input)="onFieldChange()" rows="5" placeholder="O que de mais importante você aprendeu..." [disabled]="readOnly"></textarea>
+    </div>
+    <div class="ma-card" style="margin:0">
+      <div class="ma-card-label">Próximos Passos</div>
+      <h3>Próximos passos</h3>
+      <textarea [(ngModel)]="dados.refProximos" (input)="onFieldChange()" rows="5" placeholder="Passos concretos para os próximos meses..." [disabled]="readOnly"></textarea>
+    </div>
+  </div>
+
+  <!-- Nav buttons -->
+  <div class="ma-tab-nav-buttons">
+    <button class="ma-btn-prev" (click)="showTab('patrimonio')"><i class="fa-solid fa-arrow-left"></i> Estratificação do Patrimônio</button>
+    <button class="ma-btn-next" (click)="showTab('plano')">Plano de Ação <i class="fa-solid fa-arrow-right"></i></button>
+  </div>
+</div>
+
+<!-- ═══ TAB 6 — PLANO DE AÇÃO (Unificado) ═══ -->
+<div *ngIf="activeTab === 'plano'" class="ma-tab-panel">
+
+  <!-- === Seção 1: Plano de Ação (reflexões) === -->
+  <div class="ma-card">
+    <div class="ma-card-label">Pergunta 1</div>
+    <h3>Sua Cadeira Atual</h3>
+    <p class="ma-desc">Seu cargo atual é o veículo para alcançar sua vida ideal, ou se tornou um fim em si mesmo?</p>
+    <textarea [(ngModel)]="dados.p3Negocio" (input)="onFieldChange()" rows="5" placeholder="Clarifique a relação entre sua cadeira atual e sua vida pessoal..." [disabled]="readOnly"></textarea>
+  </div>
+
+  <div class="ma-card">
+    <div class="ma-card-label">Pergunta 2</div>
+    <h3>Patrimônio Necessário</h3>
+    <p class="ma-desc">Quanto você precisa acumular para que os rendimentos cubram seu "Número da Liberdade Anual"?</p>
+    <div class="ma-plano-pat-badge">
+      <span>Patrimônio Necessário (calculado)</span>
+      <span>{{ fmtBRL(patrimonioNecessario) }}</span>
+    </div>
+  </div>
+
+  <div class="ma-grid-2 ma-mb-20 ma-mt-20">
+    <div class="ma-card" style="margin:0">
+      <div class="ma-card-label">Pergunta 3</div>
+      <h3>Ações Concretas para Hoje</h3>
+      <p class="ma-desc">O que você pode fazer HOJE para alinhar sua vida com a visão?</p>
+      <textarea [(ngModel)]="dados.p3Acoes" (input)="onFieldChange()" rows="6" placeholder="Transforme visão em movimento imediato..." [disabled]="readOnly"></textarea>
+    </div>
+    <div class="ma-card ma-card-key" style="margin:0">
+      <div class="ma-card-label">Pergunta-Chave</div>
+      <h3>Depois da Meta</h3>
+      <p class="ma-desc">Quando atingir o patrimônio, o que fará? Continuará na cadeira atual? Se dedicará à filantropia?</p>
+      <textarea [(ngModel)]="dados.p3Depois" (input)="onFieldChange()" rows="6" placeholder="Evite que o objetivo se torne uma meta infinita..." [disabled]="readOnly"></textarea>
+    </div>
+  </div>
+
+  <div class="ma-card">
+    <div class="ma-card-label">Pergunta 5</div>
+    <h3>Limites e Prioridades</h3>
+    <p class="ma-desc">Quais são seus limites não-negociáveis? O que NÃO fará, mesmo que lucrativo?</p>
+    <textarea [(ngModel)]="dados.p3Limites" (input)="onFieldChange()" rows="5" placeholder="Defina valores e limites éticos/pessoais..." [disabled]="readOnly"></textarea>
+  </div>
+
+  <!-- === Seção 2: Plano de Ação Financeiro === -->
+  <div class="ma-grid-3 ma-mb-24 ma-mt-20">
     <div class="ma-kpi-card">
       <div class="ma-kpi-label">Patrimônio Atual</div>
       <div class="ma-kpi-value">{{ fmtBRL(patrimonioAtual) }}</div>
@@ -471,54 +510,7 @@ import jsPDF from 'jspdf';
 
   <!-- Nav buttons -->
   <div class="ma-tab-nav-buttons">
-    <button class="ma-btn-prev" (click)="showTab('patrimonio')"><i class="fa-solid fa-arrow-left"></i> Estratificação do Patrimônio</button>
-    <button class="ma-btn-next" (click)="showTab('rastreamento')">Rastreamento <i class="fa-solid fa-arrow-right"></i></button>
-  </div>
-</div>
-
-<!-- ═══ TAB 7 — RASTREAMENTO ═══ -->
-<div *ngIf="activeTab === 'rastreamento'" class="ma-tab-panel">
-
-  <div class="ma-card ma-mb-20">
-    <div class="ma-card-label">Rastreamento Mensal</div>
-    <table class="ma-tracking-table">
-      <thead>
-        <tr>
-          <th style="width:150px">Data</th>
-          <th style="width:190px">Patrimônio Atual (R$)</th>
-          <th style="width:90px">% da Meta</th>
-          <th>Notas / Progresso</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let row of dados.tracking">
-          <td><input type="date" [(ngModel)]="row.data" (input)="onFieldChange()" [disabled]="readOnly"></td>
-          <td><input type="text" appCurrencyMask [(ngModel)]="row.patrimonio" (ngModelChange)="onFieldChange()" placeholder="R$ 0,00" [disabled]="readOnly"></td>
-          <td style="text-align:center">
-            <span class="ma-pct-badge" [ngClass]="getTrackingPctClass(row.patrimonio)">{{ getTrackingPct(row.patrimonio) }}</span>
-          </td>
-          <td><input type="text" [(ngModel)]="row.notas" (input)="onFieldChange()" placeholder="Observações..." [disabled]="readOnly"></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="ma-grid-2">
-    <div class="ma-card" style="margin:0">
-      <div class="ma-card-label">Reflexão</div>
-      <h3>Maior aprendizado preenchendo o Mapa de Ambição</h3>
-      <textarea [(ngModel)]="dados.refAprendizado" (input)="onFieldChange()" rows="5" placeholder="O que de mais importante você aprendeu..." [disabled]="readOnly"></textarea>
-    </div>
-    <div class="ma-card" style="margin:0">
-      <div class="ma-card-label">Próximos Passos</div>
-      <h3>Próximos passos</h3>
-      <textarea [(ngModel)]="dados.refProximos" (input)="onFieldChange()" rows="5" placeholder="Passos concretos para os próximos meses..." [disabled]="readOnly"></textarea>
-    </div>
-  </div>
-
-  <!-- Nav buttons -->
-  <div class="ma-tab-nav-buttons">
-    <button class="ma-btn-prev" (click)="showTab('planofinanceiro')"><i class="fa-solid fa-arrow-left"></i> Plano Financeiro</button>
+    <button class="ma-btn-prev" (click)="showTab('rastreamento')"><i class="fa-solid fa-arrow-left"></i> Rastreamento</button>
     <button class="ma-btn-next" (click)="showTab('dashboard')"><i class="fa-solid fa-rotate-left"></i> Voltar ao Dashboard</button>
   </div>
 </div>
@@ -1002,10 +994,9 @@ export class MapaAmbicaoComponent implements OnInit, OnDestroy, AfterViewInit {
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'proposito', label: 'Propósito e Visão' },
     { id: 'estilo', label: 'Estilo de Vida' },
-    { id: 'plano', label: 'Plano de Ação' },
     { id: 'patrimonio', label: 'Estratificação do Patrimônio' },
-    { id: 'planofinanceiro', label: 'Plano de Ação Financeiro' },
-    { id: 'rastreamento', label: 'Rastreamento' }
+    { id: 'rastreamento', label: 'Rastreamento' },
+    { id: 'plano', label: 'Plano de Ação' }
   ];
 
   dados: any = this.getDefaultDados();
@@ -1201,7 +1192,7 @@ export class MapaAmbicaoComponent implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       if (id === 'dashboard') this.updateDashboardCharts();
       if (id === 'patrimonio') this.updatePatChart();
-      if (id === 'planofinanceiro') this.updateRoadmapChart();
+      if (id === 'plano') this.updateRoadmapChart();
     }, 150);
   }
 
@@ -1585,16 +1576,7 @@ export class MapaAmbicaoComponent implements OnInit, OnDestroy, AfterViewInit {
       <span style="font-size:20px;font-weight:700;">${this.fmtBRL(this.patrimonioNecessario)}</span>
     </div>`;
 
-    // ═══ 4. PLANO DE AÇÃO ═══
-    html += h('Plano de Ação e Limites', '<i class="fa-solid fa-chess"></i>');
-    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">`;
-    html += card(field('Negócio / Fonte Principal de Renda', this.dados.p3Negocio));
-    html += card(field('Principais Ações nos Próximos 12 Meses', this.dados.p3Acoes));
-    html += card(field('Depois de Atingir a Liberdade Financeira', this.dados.p3Depois));
-    html += card(field('Limites e Prioridades', this.dados.p3Limites));
-    html += `</div>`;
-
-    // ═══ 5. ESTRATIFICAÇÃO DO PATRIMÔNIO ═══
+    // ═══ 4. ESTRATIFICAÇÃO DO PATRIMÔNIO ═══
     html += h('Estratificação do Patrimônio', '<i class="fa-solid fa-building-columns"></i>');
     let assetRows = '';
     for (const asset of this.assetCategories) {
@@ -1617,8 +1599,37 @@ export class MapaAmbicaoComponent implements OnInit, OnDestroy, AfterViewInit {
     html += `</div>`;
     if (this.dados.patObservacoes) html += card(field('Observações sobre o Patrimônio', this.dados.patObservacoes));
 
-    // ═══ 6. PLANO FINANCEIRO ═══
-    html += h('Plano de Ação Financeiro', '<i class="fa-solid fa-bullseye"></i>');
+    // ═══ 5. RASTREAMENTO ═══
+    html += h('Rastreamento', '<i class="fa-solid fa-chart-line"></i>');
+    const filledTracking = this.dados.tracking.filter((r: any) => r.data || r.patrimonio || r.notas);
+    if (filledTracking.length > 0) {
+      let trackRows = '';
+      for (const r of filledTracking) {
+        trackRows += `<tr><td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:13px;">${r.data ? new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR') : '—'}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:13px;font-weight:600;">${r.patrimonio ? this.fmtBRL(r.patrimonio) : '—'}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:center;font-size:13px;">${this.getTrackingPct(r.patrimonio)}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#666;">${r.notas || '—'}</td></tr>`;
+      }
+      html += card(`<table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="background:#f9fafb;"><th style="text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Data</th><th style="text-align:right;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Patrimônio</th><th style="text-align:center;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">% Meta</th><th style="padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Notas</th></tr></thead>
+        <tbody>${trackRows}</tbody></table>`);
+    }
+
+    if (this.dados.refAprendizado || this.dados.refProximos) {
+      html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">`;
+      html += card(field('Maior Aprendizado', this.dados.refAprendizado));
+      html += card(field('Próximos Passos', this.dados.refProximos));
+      html += `</div>`;
+    }
+
+    // ═══ 6. PLANO DE AÇÃO (Unificado) ═══
+    html += h('Plano de Ação', '<i class="fa-solid fa-chess"></i>');
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">`;
+    html += card(field('Negócio / Fonte Principal de Renda', this.dados.p3Negocio));
+    html += card(field('Principais Ações nos Próximos 12 Meses', this.dados.p3Acoes));
+    html += card(field('Depois de Atingir a Liberdade Financeira', this.dados.p3Depois));
+    html += card(field('Limites e Prioridades', this.dados.p3Limites));
+    html += `</div>`;
     const renderActions = (title: string, badge: string, meta: number | null, actions: any[]) => {
       let content = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <span style="padding:4px 12px;background:#022c22;color:white;border-radius:20px;font-size:12px;font-weight:600;">${badge}</span>
@@ -1647,29 +1658,6 @@ export class MapaAmbicaoComponent implements OnInit, OnDestroy, AfterViewInit {
     const roadmapImg = chartImg(this.chartRoadmap);
     if (roadmapImg) html += card(`<div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">Roadmap Financeiro</div><img src="${roadmapImg}" style="width:100%;max-height:300px;object-fit:contain;">`);
     if (this.dados.pfObservacoes) html += card(field('Observações do Plano', this.dados.pfObservacoes));
-
-    // ═══ 7. RASTREAMENTO ═══
-    html += h('Rastreamento', '<i class="fa-solid fa-chart-line"></i>');
-    const filledTracking = this.dados.tracking.filter((r: any) => r.data || r.patrimonio || r.notas);
-    if (filledTracking.length > 0) {
-      let trackRows = '';
-      for (const r of filledTracking) {
-        trackRows += `<tr><td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:13px;">${r.data ? new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR') : '—'}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:13px;font-weight:600;">${r.patrimonio ? this.fmtBRL(r.patrimonio) : '—'}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:center;font-size:13px;">${this.getTrackingPct(r.patrimonio)}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#666;">${r.notas || '—'}</td></tr>`;
-      }
-      html += card(`<table style="width:100%;border-collapse:collapse;">
-        <thead><tr style="background:#f9fafb;"><th style="text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Data</th><th style="text-align:right;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Patrimônio</th><th style="text-align:center;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">% Meta</th><th style="padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#999;">Notas</th></tr></thead>
-        <tbody>${trackRows}</tbody></table>`);
-    }
-
-    if (this.dados.refAprendizado || this.dados.refProximos) {
-      html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">`;
-      html += card(field('Maior Aprendizado', this.dados.refAprendizado));
-      html += card(field('Próximos Passos', this.dados.refProximos));
-      html += `</div>`;
-    }
 
     // ═══ FOOTER ═══
     html += `<div style="text-align:center;margin-top:40px;padding-top:20px;border-top:2px solid #e5e7eb;color:#999;font-size:11px;">

@@ -44,6 +44,9 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   selectedClientId: number | null = null;
   availableClients: {id: number, name: string}[] = [];
 
+  // Tab de conclusão (em progresso vs concluídos)
+  completionTab: 'inProgress' | 'completed' = 'inProgress';
+
   // Filtro de tipo de contrato
   selectedContractType: string | null = null;
   availableContractTypes: {value: string, label: string}[] = [
@@ -566,9 +569,54 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     // Se nenhum cliente específico, excluir contratos com 0% de conclusão
-    return filteredData.filter(
+    filteredData = filteredData.filter(
       contract => (contract.completionPercentage || 0) > 0
     );
+
+    // Filtrar por tab de conclusão
+    if (this.completionTab === 'completed') {
+      return filteredData.filter(contract => (contract.completionPercentage || 0) >= 100);
+    } else {
+      return filteredData.filter(contract => (contract.completionPercentage || 0) < 100);
+    }
+  }
+
+  /**
+   * Contagem de contratos em progresso (pré-filtrado por tipo/cliente)
+   */
+  get inProgressContractsCount(): number {
+    if (!this.analyticsData?.contractCompletionData) return 0;
+    let data = this.analyticsData.contractCompletionData;
+    if (this.selectedContractType !== null) {
+      data = data.filter(c => c.type === this.selectedContractType);
+    }
+    if (this.selectedClientId !== null) {
+      data = data.filter(c => c.clientId === this.selectedClientId);
+    }
+    return data.filter(c => (c.completionPercentage || 0) > 0 && (c.completionPercentage || 0) < 100).length;
+  }
+
+  /**
+   * Contagem de contratos concluídos (pré-filtrado por tipo/cliente)
+   */
+  get completedContractsCount(): number {
+    if (!this.analyticsData?.contractCompletionData) return 0;
+    let data = this.analyticsData.contractCompletionData;
+    if (this.selectedContractType !== null) {
+      data = data.filter(c => c.type === this.selectedContractType);
+    }
+    if (this.selectedClientId !== null) {
+      data = data.filter(c => c.clientId === this.selectedClientId);
+    }
+    return data.filter(c => (c.completionPercentage || 0) >= 100).length;
+  }
+
+  /**
+   * Alterar tab de conclusão
+   */
+  setCompletionTab(tab: 'inProgress' | 'completed') {
+    this.completionTab = tab;
+    this.refreshContractCompletionChart();
   }
 
   /**
