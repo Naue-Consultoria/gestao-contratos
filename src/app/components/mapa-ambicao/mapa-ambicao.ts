@@ -544,7 +544,9 @@ import jsPDF from 'jspdf';
   margin-bottom: 2.5rem;
 }
 .ma-nav-tab {
-  padding: 12px 18px;
+  flex: 1;
+  justify-content: center;
+  padding: 12px 10px;
   font-size: 13px;
   font-weight: 500;
   color: rgba(255,255,255,0.5);
