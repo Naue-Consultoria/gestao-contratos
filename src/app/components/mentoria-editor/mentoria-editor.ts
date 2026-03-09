@@ -432,10 +432,16 @@ export class MentoriaEditor implements OnInit, AfterViewInit {
         const response = await this.mentoriaService.criarMentoria(dados).toPromise();
 
         if (response?.success && response.data) {
-          // Se houver foto selecionada, fazer upload para todos os encontros
-          if (this.fotoSelecionada && response.data.encontros && response.data.encontros.length > 0) {
-            const encontrosIds = response.data.encontros.map((e: any) => e.id);
-            await this.uploadFotoParaTodosEncontros(encontrosIds);
+          // Se houver foto selecionada, fazer upload para a mentoria e para todos os encontros
+          if (this.fotoSelecionada) {
+            const formData = new FormData();
+            formData.append('foto', this.fotoSelecionada);
+            await this.mentoriaService.uploadFotoMentoria(response.data.id, formData).toPromise();
+
+            if (response.data.encontros && response.data.encontros.length > 0) {
+              const encontrosIds = response.data.encontros.map((e: any) => e.id);
+              await this.uploadFotoParaTodosEncontros(encontrosIds);
+            }
           }
 
           this.toastr.success(
