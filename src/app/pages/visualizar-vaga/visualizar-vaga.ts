@@ -244,7 +244,7 @@ export class VisualizarVagaComponent implements OnInit {
           : undefined,
         observacoes: vagaData.observacoes,
         candidatoAprovado: vagaData.candidato_aprovado?.nome,
-        porcentagemFaturamento: Number(vagaData.porcentagem_faturamento || 100),
+        porcentagemFaturamento: Number(vagaData.porcentagem_faturamento ?? 100),
         valorFaturamento: Number(vagaData.valor_faturamento || 0),
         sigilosa: vagaData.sigilosa || false,
         impostoEstado: Number(vagaData.imposto_estado || 0)

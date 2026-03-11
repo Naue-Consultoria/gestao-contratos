@@ -73,15 +73,17 @@ export class RecrutamentoSelecao implements OnInit {
   selectedVagaToCancel: Vaga | null = null;
 
   // Dados para fechamento de vaga
-  fechamentoData = {
+  fechamentoData: { salario: string; fonteRecrutamento: string; porcentagemFaturamento: number | null } = {
     salario: '',
-    fonteRecrutamento: ''
+    fonteRecrutamento: '',
+    porcentagemFaturamento: null
   };
 
   // Dados para cancelamento de vaga
-  cancelamentoData = {
+  cancelamentoData: { salario: string; fonteRecrutamento: string; porcentagemFaturamento: number | null } = {
     salario: '',
-    fonteRecrutamento: ''
+    fonteRecrutamento: '',
+    porcentagemFaturamento: null
   };
 
   // Cache for months and years
@@ -290,7 +292,7 @@ export class RecrutamentoSelecao implements OnInit {
           observacoes: vaga.observacoes,
           candidatoAprovado: candidatoAprovadoNome,
           totalCandidatos: Array.isArray(vaga.vaga_candidatos) ? vaga.vaga_candidatos.length : 0,
-          porcentagemFaturamento: parseFloat(vaga.porcentagem_faturamento || 100),
+          porcentagemFaturamento: parseFloat(vaga.porcentagem_faturamento ?? 100),
           valorFaturamento: parseFloat(vaga.valor_faturamento || 0),
           sigilosa: vaga.sigilosa || false,
           impostoEstado: parseFloat(vaga.imposto_estado || 0)
@@ -524,6 +526,7 @@ export class RecrutamentoSelecao implements OnInit {
       this.fechamentoData.salario = '';
     }
     this.fechamentoData.fonteRecrutamento = vaga.fonteRecrutamento || '';
+    this.fechamentoData.porcentagemFaturamento = vaga.porcentagemFaturamento ?? 100;
     this.showFecharVagaModal = true;
   }
 
@@ -533,7 +536,8 @@ export class RecrutamentoSelecao implements OnInit {
     // Limpar dados do formulário
     this.fechamentoData = {
       salario: '',
-      fonteRecrutamento: ''
+      fonteRecrutamento: '',
+      porcentagemFaturamento: null
     };
   }
 
@@ -577,6 +581,11 @@ export class RecrutamentoSelecao implements OnInit {
         updateData.fonte_recrutamento = this.fechamentoData.fonteRecrutamento;
       }
 
+      // Adicionar porcentagem de faturamento
+      if (this.fechamentoData.porcentagemFaturamento != null) {
+        updateData.porcentagem_faturamento = this.fechamentoData.porcentagemFaturamento;
+      }
+
       // Chamar serviço para atualizar vaga
       await firstValueFrom(this.vagaService.updateVaga(this.selectedVagaToClose.id, updateData));
 
@@ -599,6 +608,7 @@ export class RecrutamentoSelecao implements OnInit {
       this.cancelamentoData.salario = '';
     }
     this.cancelamentoData.fonteRecrutamento = vaga.fonteRecrutamento || '';
+    this.cancelamentoData.porcentagemFaturamento = 30; // Default 30% para cancelamento
     this.showCancelarVagaModal = true;
   }
 
@@ -608,7 +618,8 @@ export class RecrutamentoSelecao implements OnInit {
     // Limpar dados do formulário
     this.cancelamentoData = {
       salario: '',
-      fonteRecrutamento: ''
+      fonteRecrutamento: '',
+      porcentagemFaturamento: null
     };
   }
 
@@ -637,8 +648,9 @@ export class RecrutamentoSelecao implements OnInit {
       return 'R$ 0,00';
     }
 
-    // Calcular 30% do salário
-    const faturamento = salarioNumerico * 0.30;
+    // Calcular porcentagem do salário
+    const porcentagem = (this.cancelamentoData.porcentagemFaturamento ?? 30) / 100;
+    const faturamento = salarioNumerico * porcentagem;
 
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -653,7 +665,7 @@ export class RecrutamentoSelecao implements OnInit {
       // Preparar dados para atualização
       const updateData: any = {
         status: 'cancelada_cliente',
-        porcentagem_faturamento: 30  // 30% do salário
+        porcentagem_faturamento: this.cancelamentoData.porcentagemFaturamento ?? 30
       };
 
       // Converter salário de string formatada para número
@@ -858,7 +870,7 @@ export class RecrutamentoSelecao implements OnInit {
   }
 
   calcularValorFaturamento(vaga: Vaga): number {
-    const porcentagem = vaga.porcentagemFaturamento || 100;
+    const porcentagem = vaga.porcentagemFaturamento ?? 100;
     return vaga.salario * (porcentagem / 100);
   }
 
@@ -917,7 +929,7 @@ export class RecrutamentoSelecao implements OnInit {
 
   calcularTotalFaturamentoFechamento(): number {
     return this.getVagasFechamento().reduce((total, vaga) => {
-      const valorFaturamento = vaga.valorFaturamento || (vaga.salario * ((vaga.porcentagemFaturamento || 100) / 100));
+      const valorFaturamento = vaga.valorFaturamento || (vaga.salario * ((vaga.porcentagemFaturamento ?? 100) / 100));
       return total + valorFaturamento;
     }, 0);
   }

@@ -209,7 +209,7 @@ export class NovaVagaComponent implements OnInit {
 
   calculateFaturamento() {
     const salario = this.vagaForm.get('salario')?.value || 0;
-    const porcentagem = this.vagaForm.get('porcentagemFaturamento')?.value || 100;
+    const porcentagem = this.vagaForm.get('porcentagemFaturamento')?.value ?? 100;
     const valorFaturamento = salario * (porcentagem / 100);
 
     this.vagaForm.get('valorFaturamento')?.setValue(valorFaturamento, { emitEvent: false });
@@ -237,7 +237,7 @@ export class NovaVagaComponent implements OnInit {
         data_abertura: this.vagaForm.value.dataAbertura,
         data_fechamento_cancelamento: this.vagaForm.value.dataFechamentoCancelamento || null,
         observacoes: this.vagaForm.value.observacoes || null,
-        porcentagem_faturamento: this.vagaForm.value.porcentagemFaturamento ? parseFloat(this.vagaForm.value.porcentagemFaturamento) : 100,
+        porcentagem_faturamento: this.vagaForm.value.porcentagemFaturamento != null ? parseFloat(this.vagaForm.value.porcentagemFaturamento) : 100,
         sigilosa: this.vagaForm.value.sigilosa || false,
         imposto_estado: this.vagaForm.value.impostoEstado ? parseFloat(this.vagaForm.value.impostoEstado) : 0
       };
@@ -294,7 +294,7 @@ export class NovaVagaComponent implements OnInit {
 
   calcularValorFaturamento(): number {
     const salario = this.vagaForm.get('salario')?.value || 0;
-    const porcentagem = this.vagaForm.get('porcentagemFaturamento')?.value || 100;
+    const porcentagem = this.vagaForm.get('porcentagemFaturamento')?.value ?? 100;
     return salario * (porcentagem / 100);
   }
 }
