@@ -232,11 +232,7 @@ export class NovaVagaComponent implements OnInit {
     if (this.vagaForm.valid) {
       this.isSubmitting = true;
 
-      // Preparar dados para envio
-      const salario = this.vagaForm.value.salario ? parseFloat(this.vagaForm.value.salario) : 0;
-      const porcentagemFaturamento = this.vagaForm.value.porcentagemFaturamento != null ? parseFloat(this.vagaForm.value.porcentagemFaturamento) : 100;
-      const valorFaturamento = salario * (porcentagemFaturamento / 100);
-
+      // Preparar dados para envio (valor_faturamento é coluna gerada no banco)
       const vagaData: any = {
         client_id: this.vagaForm.value.clienteId,
         contract_id: this.vagaForm.value.contratoId || null,
@@ -245,13 +241,12 @@ export class NovaVagaComponent implements OnInit {
         tipo_cargo: this.vagaForm.value.tipoCargo,
         tipo_abertura: this.vagaForm.value.tipoAbertura,
         status: this.vagaForm.value.status,
-        salario: salario || null,
+        salario: this.vagaForm.value.salario ? parseFloat(this.vagaForm.value.salario) : null,
         pretensao_salarial: this.vagaForm.value.pretensaoSalarial ? parseFloat(this.vagaForm.value.pretensaoSalarial) : null,
         data_abertura: this.vagaForm.value.dataAbertura,
         data_fechamento_cancelamento: this.vagaForm.value.dataFechamentoCancelamento || null,
         observacoes: this.vagaForm.value.observacoes || null,
-        porcentagem_faturamento: porcentagemFaturamento,
-        valor_faturamento: valorFaturamento,
+        porcentagem_faturamento: this.vagaForm.value.porcentagemFaturamento != null ? parseFloat(this.vagaForm.value.porcentagemFaturamento) : 100,
         sigilosa: this.vagaForm.value.sigilosa || false,
         imposto_estado: this.vagaForm.value.impostoEstado ? parseFloat(this.vagaForm.value.impostoEstado) : 0
       };

@@ -91,6 +91,7 @@ export class RecrutamentoSelecao implements OnInit {
   cachedYears: { value: string; label: string }[] = [];
 
   private vagaService = inject(VagaService);
+  private readonly FILTERS_STORAGE_KEY = 'recrutamento_filters';
 
   constructor(
     private router: Router,
@@ -172,6 +173,7 @@ export class RecrutamentoSelecao implements OnInit {
   ngOnInit() {
     this.setBreadcrumb();
     this.initializeFilters();
+    this.restoreFilters();
     this.loadData();
   }
 
@@ -394,6 +396,7 @@ export class RecrutamentoSelecao implements OnInit {
       return matchesSearch && matchesStatus && matchesTipoCargo && matchesFonte && matchesMonthYear;
     });
 
+    this.saveFilters();
   }
 
   onMonthYearChange() {
@@ -413,11 +416,54 @@ export class RecrutamentoSelecao implements OnInit {
     this.selectedMonth = '';
     this.selectedYear = '';
     this.consultoraFilter = '';
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
     this.applyFilters();
   }
 
   hasFilters(): boolean {
     return !!(this.searchTerm || this.statusFilter.length > 0 || this.departmentFilter || this.tipoCargoFilter || this.fonteRecrutamentoFilter || this.selectedMonth || this.selectedYear || this.consultoraFilter);
+  }
+
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.searchTerm) count++;
+    if (this.statusFilter.length > 0) count++;
+    if (this.tipoCargoFilter) count++;
+    if (this.fonteRecrutamentoFilter) count++;
+    if (this.selectedMonth) count++;
+    if (this.selectedYear) count++;
+    if (this.consultoraFilter) count++;
+    return count;
+  }
+
+  private saveFilters() {
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify({
+      searchTerm: this.searchTerm,
+      statusFilter: this.statusFilter,
+      tipoCargoFilter: this.tipoCargoFilter,
+      fonteRecrutamentoFilter: this.fonteRecrutamentoFilter,
+      selectedMonth: this.selectedMonth,
+      selectedYear: this.selectedYear,
+      consultoraFilter: this.consultoraFilter,
+      activeTab: this.activeTab
+    }));
+  }
+
+  private restoreFilters() {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.searchTerm) this.searchTerm = state.searchTerm;
+        if (state.statusFilter) this.statusFilter = state.statusFilter;
+        if (state.tipoCargoFilter) this.tipoCargoFilter = state.tipoCargoFilter;
+        if (state.fonteRecrutamentoFilter) this.fonteRecrutamentoFilter = state.fonteRecrutamentoFilter;
+        if (state.selectedMonth) this.selectedMonth = state.selectedMonth;
+        if (state.selectedYear) this.selectedYear = state.selectedYear;
+        if (state.consultoraFilter) this.consultoraFilter = state.consultoraFilter;
+        if (state.activeTab) this.activeTab = state.activeTab;
+      }
+    } catch (e) {}
   }
 
   // Métodos para controle do multi-select de status

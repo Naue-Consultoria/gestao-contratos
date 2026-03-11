@@ -39,12 +39,14 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
   searchTerm = '';
   selectedCategory = '';
   availableCategories: string[] = [];
+  private readonly FILTERS_STORAGE_KEY = 'services_filters';
 
   // Duplicate modal properties
   showDuplicateModal = false;
   selectedServiceForDuplication: ApiService | null = null;
 
   ngOnInit() {
+    this.restoreFilters();
     this.loadData();
     window.addEventListener('refreshServices', this.loadData.bind(this));
   }
@@ -162,6 +164,7 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     }
 
     this.filteredServices = filtered;
+    this.saveFilters();
   }
 
   clearSearch() {
@@ -172,7 +175,33 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
   clearFilters() {
     this.searchTerm = '';
     this.selectedCategory = '';
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
     this.applyFilters();
+  }
+
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.searchTerm) count++;
+    if (this.selectedCategory) count++;
+    return count;
+  }
+
+  private saveFilters() {
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify({
+      searchTerm: this.searchTerm,
+      selectedCategory: this.selectedCategory
+    }));
+  }
+
+  private restoreFilters() {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.searchTerm) this.searchTerm = state.searchTerm;
+        if (state.selectedCategory) this.selectedCategory = state.selectedCategory;
+      }
+    } catch (e) {}
   }
 
   duplicateService(service: ServiceDisplay, event: MouseEvent) {

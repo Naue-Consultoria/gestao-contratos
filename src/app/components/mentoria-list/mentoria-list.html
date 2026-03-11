@@ -74,6 +74,13 @@
         <option value="cancelada">Cancelada</option>
       </select>
     </div>
+
+    <!-- Active Filters Chip -->
+    <button class="active-filters-chip" *ngIf="getActiveFiltersCount() > 0" (click)="clearFilters()" title="Limpar todos os filtros">
+      <i class="fas fa-filter"></i>
+      <span>{{ getActiveFiltersCount() }} filtro{{ getActiveFiltersCount() > 1 ? 's' : '' }}</span>
+      <i class="fas fa-times"></i>
+    </button>
   </div>
 
   <!-- Loading State -->

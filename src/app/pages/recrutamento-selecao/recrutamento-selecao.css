@@ -764,6 +764,44 @@
   display: inline-block;
 }
 
+/* Active Filters Chip */
+.active-filters-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 36px;
+    padding: 0 0.75rem;
+    background-color: #f0faf6;
+    border: 1px solid #003b2b;
+    border-radius: 8px;
+    color: #003b2b;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.active-filters-chip:hover {
+    background-color: #003b2b;
+    color: white;
+}
+
+.active-filters-chip .fa-filter {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+.active-filters-chip .fa-times {
+    font-size: 0.65rem;
+    opacity: 0.5;
+    margin-left: 0.125rem;
+}
+
+.active-filters-chip:hover .fa-times {
+    opacity: 1;
+}
+
 /* Loading & Empty States */
 .loading-container,
 .empty-state {

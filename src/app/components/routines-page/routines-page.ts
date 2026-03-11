@@ -52,9 +52,11 @@ export class RoutinesPageComponent implements OnInit {
     { value: 'client-az', label: 'Cliente A-Z' },
     { value: 'contract-number', label: 'Número do Contrato' }
   ];
+  private readonly FILTERS_STORAGE_KEY = 'routines_filters';
 
 
   ngOnInit() {
+    this.restoreFilters();
     this.loadContractRoutines();
     // Close dropdown when clicking outside
     document.addEventListener('click', this.closeDropdownHandler);
@@ -158,6 +160,7 @@ export class RoutinesPageComponent implements OnInit {
   clearSearch() {
     this.searchTerm = '';
     this.selectedClient = '';
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
     this.applyFilters();
   }
 
@@ -255,6 +258,34 @@ export class RoutinesPageComponent implements OnInit {
     }
 
     this.filteredContracts = filtered;
+    this.saveFilters();
+  }
+
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.searchTerm) count++;
+    if (this.selectedClient) count++;
+    return count;
+  }
+
+  private saveFilters() {
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify({
+      searchTerm: this.searchTerm,
+      selectedClient: this.selectedClient,
+      sortBy: this.sortBy
+    }));
+  }
+
+  private restoreFilters() {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.searchTerm) this.searchTerm = state.searchTerm;
+        if (state.selectedClient) this.selectedClient = state.selectedClient;
+        if (state.sortBy) this.sortBy = state.sortBy;
+      }
+    } catch (e) {}
   }
 
 }

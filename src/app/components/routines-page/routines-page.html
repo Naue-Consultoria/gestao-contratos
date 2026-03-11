@@ -101,9 +101,9 @@
           <!-- Sorting Dropdown -->
           <div class="sort-dropdown-wrapper">
             <div class="sort-dropdown">
-              <select 
-                class="sort-select" 
-                [(ngModel)]="sortBy" 
+              <select
+                class="sort-select"
+                [(ngModel)]="sortBy"
                 (change)="onSortChange()"
                 title="Ordenar por">
                 <option *ngFor="let option of sortOptions" [value]="option.value">
@@ -112,6 +112,13 @@
               </select>
             </div>
           </div>
+
+          <!-- Active Filters Chip -->
+          <button class="active-filters-chip" *ngIf="getActiveFiltersCount() > 0" (click)="clearSearch()" title="Limpar todos os filtros">
+            <i class="fas fa-filter"></i>
+            <span>{{ getActiveFiltersCount() }} filtro{{ getActiveFiltersCount() > 1 ? 's' : '' }}</span>
+            <i class="fas fa-times"></i>
+          </button>
         </div>
       </div>
       

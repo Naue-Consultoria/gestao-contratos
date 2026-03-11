@@ -98,6 +98,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   showDeleteModal = false;
   selectedContractForDeletion: ContractDisplay | null = null;
   isDeleting = false;
+  private readonly FILTERS_STORAGE_KEY = 'contracts_filters';
 
   // Controle de visualização financeira - Admin e Admin Gerencial podem ver valores individuais
   canViewFinancialInfo = false;
@@ -117,6 +118,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       }
     }
 
+    this.restoreFilters();
     this.subscribeToSearch();
     this.subscribeToRefreshEvents();
     this.loadInitialData();
@@ -267,6 +269,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     } finally {
       this.isLoading = false;
       this.isSearching = false;
+      this.saveFilters();
     }
   }
 
@@ -440,8 +443,11 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
   clearFilters() {
     this.filters = { search: '', status: '', client_id: null, type: '', dateType: '', month: '', year: '' };
-    this.searchService.setSearchTerm(''); // Also clear the global search
+    this.searchService.setSearchTerm('');
     this.currentTab = 'all';
+    this.sortField = '';
+    this.sortDirection = 'asc';
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
     this.applyFilters();
   }
 
@@ -764,6 +770,34 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     if (this.filters.client_id) count++;
     if (this.filters.dateType && (this.filters.month || this.filters.year)) count++;
     return count;
+  }
+
+  private saveFilters() {
+    const state = {
+      filters: this.filters,
+      sortField: this.sortField,
+      sortDirection: this.sortDirection,
+      currentTab: this.currentTab
+    };
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify(state));
+  }
+
+  private restoreFilters() {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.filters) {
+          this.filters = { ...this.filters, ...state.filters };
+        }
+        if (state.sortField) this.sortField = state.sortField;
+        if (state.sortDirection) this.sortDirection = state.sortDirection;
+        if (state.currentTab) this.currentTab = state.currentTab;
+        if (this.filters.search) {
+          this.searchService.setSearchTerm(this.filters.search);
+        }
+      }
+    } catch (e) {}
   }
 
   // Manipular clique no card de estatísticas

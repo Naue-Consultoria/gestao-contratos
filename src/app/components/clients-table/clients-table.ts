@@ -59,7 +59,13 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
 
   clients: ClientDisplay[] = [];
   filteredClients: ClientDisplay[] = [];
-  searchTerm = '';
+  // Filters
+  filters = {
+    search: '',
+    type: '' as '' | 'PF' | 'PJ',
+    origin: '' as '' | 'national' | 'international'
+  };
+  private readonly FILTERS_STORAGE_KEY = 'clients_filters';
   isLoading = true;
   error = '';
   dropdownOpen: number | null = null;
@@ -71,6 +77,7 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
   deleteMode: 'soft' | 'hard' | null = null;
 
   ngOnInit() {
+    this.restoreFilters();
     this.loadData();
     window.addEventListener('refreshClients', this.loadData.bind(this));
     document.addEventListener('click', this.handleClickOutside.bind(this));
@@ -114,7 +121,7 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
         return this.mapApiClientToTableClient(apiClient, aggregates);
       });
 
-      this.filteredClients = [...this.clients].sort((a, b) => a.name.localeCompare(b.name));
+      this.applyFilters();
       this.loadLogos(); // Carrega as logos após os dados dos clientes
     } catch (err) {
       console.error('❌ Error loading client data:', err);
@@ -351,43 +358,80 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
     this.modalService.showNotification('Cliente salvo com sucesso!', true);
   }
 
-  filterClients() {
-    if (!this.searchTerm.trim()) {
-      this.filteredClients = [...this.clients].sort((a, b) => a.name.localeCompare(b.name));
-      return;
-    }
+  applyFilters() {
+    let filtered = [...this.clients];
 
-    const term = this.searchTerm.toLowerCase();
-    const termDigitsOnly = this.searchTerm.replace(/\D/g, ''); // Remove tudo que não é dígito
+    // Search filter
+    if (this.filters.search.trim()) {
+      const term = this.filters.search.toLowerCase();
+      const termDigitsOnly = this.filters.search.replace(/\D/g, '');
 
-    this.filteredClients = this.clients.filter((client) => {
-      // Busca por nome, localização ou tipo
-      if (client.name.toLowerCase().includes(term) ||
-          client.location.toLowerCase().includes(term) ||
-          client.type.toLowerCase().includes(term)) {
-        return true;
-      }
-
-      // Busca por documento (CPF/CNPJ) - compara apenas números
-      if (termDigitsOnly && client.document) {
-        const documentDigitsOnly = client.document.replace(/\D/g, '');
-        if (documentDigitsOnly.includes(termDigitsOnly)) {
+      filtered = filtered.filter((client) => {
+        if (client.name.toLowerCase().includes(term) ||
+            client.location.toLowerCase().includes(term) ||
+            client.type.toLowerCase().includes(term)) {
           return true;
         }
-      }
+        if (termDigitsOnly && client.document) {
+          const documentDigitsOnly = client.document.replace(/\D/g, '');
+          if (documentDigitsOnly.includes(termDigitsOnly)) {
+            return true;
+          }
+        }
+        if (client.document.toLowerCase().includes(term)) {
+          return true;
+        }
+        return false;
+      });
+    }
 
-      // Também permite busca pelo documento formatado
-      if (client.document.toLowerCase().includes(term)) {
-        return true;
-      }
+    // Type filter (PF/PJ)
+    if (this.filters.type) {
+      filtered = filtered.filter(client => client.type === this.filters.type);
+    }
 
-      return false;
-    }).sort((a, b) => a.name.localeCompare(b.name));
+    // Origin filter (national/international)
+    if (this.filters.origin) {
+      filtered = filtered.filter(client => client.origin === this.filters.origin);
+    }
+
+    this.filteredClients = filtered.sort((a, b) => a.name.localeCompare(b.name));
+    this.saveFilters();
   }
 
   clearSearch() {
-    this.searchTerm = '';
-    this.filterClients();
+    this.filters.search = '';
+    this.applyFilters();
+  }
+
+  clearFilters() {
+    this.filters = { search: '', type: '', origin: '' };
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
+    this.applyFilters();
+  }
+
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.filters.search) count++;
+    if (this.filters.type) count++;
+    if (this.filters.origin) count++;
+    return count;
+  }
+
+  private saveFilters() {
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify({ filters: this.filters }));
+  }
+
+  private restoreFilters() {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.filters) {
+          this.filters = { ...this.filters, ...state.filters };
+        }
+      }
+    } catch (e) {}
   }
 
   getClientLogoUrl(clientId: number): string {
