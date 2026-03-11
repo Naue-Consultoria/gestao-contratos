@@ -202,8 +202,8 @@
             <th>Pretensão Salarial</th>
             <th>Consultora</th>
             <th>Status</th>
-            <th>Candidato Aprovado</th>
             <th>Data Abertura</th>
+            <th>Candidato Aprovado</th>
             <th>Data Fechamento</th>
             <th>SLA (dias)</th>
             <th>Ações</th>
@@ -261,6 +261,9 @@
               </small>
             </td>
             <td>
+              <span class="date-text">{{ vaga.dataAbertura | dateNoTimezone }}</span>
+            </td>
+            <td>
               <div class="approved-candidate" *ngIf="vaga.candidatoAprovado">
                 <span class="candidate-name">
                   <i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.25rem;"></i>
@@ -271,9 +274,6 @@
                 </small>
               </div>
               <span class="empty-text" *ngIf="!vaga.candidatoAprovado">-</span>
-            </td>
-            <td>
-              <span class="date-text">{{ vaga.dataAbertura | dateNoTimezone }}</span>
             </td>
             <td>
               <span class="date-text" *ngIf="vaga.dataFechamentoCancelamento">

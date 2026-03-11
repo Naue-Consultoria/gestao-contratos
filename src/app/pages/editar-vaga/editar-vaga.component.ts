@@ -154,12 +154,12 @@ export class EditarVagaComponent implements OnInit {
         const clientsList = response.clients || response || [];
         this.clientes = clientsList.map((client: any) => ({
           id: client.id,
-          nome: client.name ||
+          nome: (client.name ||
                 client.company_name ||
                 client.trade_name ||
                 client.full_name ||
-                'Cliente sem nome'
-        }));
+                'Cliente sem nome').toUpperCase()
+        })).sort((a: any, b: any) => a.nome.localeCompare(b.nome, 'pt-BR'));
       },
       error: (error: any) => {
         console.error('Erro ao carregar clientes:', error);
@@ -186,12 +186,21 @@ export class EditarVagaComponent implements OnInit {
 
   setupFormListeners() {
     this.vagaForm.get('status')?.valueChanges.subscribe(status => {
-      const isFechado = ['fechada', 'fechada_rep', 'cancelada_cliente'].includes(status);
+      const isFechado = ['fechada', 'fechada_rep', 'cancelada_cliente', 'encerramento_cont'].includes(status);
 
       if (!isFechado) {
         this.vagaForm.patchValue({
           dataFechamentoCancelamento: ''
         });
+      }
+    });
+
+    // Listener para tipo de abertura - reposição padrão 0% faturamento
+    this.vagaForm.get('tipoAbertura')?.valueChanges.subscribe(tipo => {
+      if (tipo === 'reposicao') {
+        this.vagaForm.patchValue({ porcentagemFaturamento: 0 });
+      } else if (tipo === 'nova') {
+        this.vagaForm.patchValue({ porcentagemFaturamento: 100 });
       }
     });
   }
@@ -213,6 +222,10 @@ export class EditarVagaComponent implements OnInit {
     if (this.vagaForm.valid) {
       this.isSubmitting = true;
 
+      const salario = this.vagaForm.value.salario ? parseFloat(this.vagaForm.value.salario) : 0;
+      const porcentagemFaturamento = this.vagaForm.value.porcentagemFaturamento != null ? parseFloat(this.vagaForm.value.porcentagemFaturamento) : 100;
+      const valorFaturamento = salario * (porcentagemFaturamento / 100);
+
       const vagaData: any = {
         client_id: this.vagaForm.value.clienteId,
         user_id: this.vagaForm.value.usuarioId,
@@ -221,12 +234,13 @@ export class EditarVagaComponent implements OnInit {
         tipo_abertura: this.vagaForm.value.tipoAbertura,
         status: this.vagaForm.value.status,
         fonte_recrutamento: this.vagaForm.value.fonteRecrutamento,
-        salario: this.vagaForm.value.salario ? parseFloat(this.vagaForm.value.salario) : null,
+        salario: salario || null,
         pretensao_salarial: this.vagaForm.value.pretensaoSalarial ? parseFloat(this.vagaForm.value.pretensaoSalarial) : null,
         data_abertura: this.vagaForm.value.dataAbertura,
         data_fechamento_cancelamento: this.vagaForm.value.dataFechamentoCancelamento || null,
         observacoes: this.vagaForm.value.observacoes || null,
-        porcentagem_faturamento: this.vagaForm.value.porcentagemFaturamento != null ? parseFloat(this.vagaForm.value.porcentagemFaturamento) : 100,
+        porcentagem_faturamento: porcentagemFaturamento,
+        valor_faturamento: valorFaturamento,
         sigilosa: this.vagaForm.value.sigilosa || false,
         imposto_estado: this.vagaForm.value.impostoEstado ? parseFloat(this.vagaForm.value.impostoEstado) : 0
       };
