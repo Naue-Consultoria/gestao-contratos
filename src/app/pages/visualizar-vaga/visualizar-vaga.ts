@@ -476,17 +476,7 @@ export class VisualizarVagaComponent implements OnInit {
 
     if (!this.selectedCandidato && candidato.id) {
       // Novo candidato - vincular à vaga
-      try {
-        console.log('Vinculando candidato', candidato.id, 'à vaga', this.vagaId);
-        await firstValueFrom(this.vagaService.vincularCandidato(this.vagaId, candidato.id));
-        console.log('Candidato vinculado com sucesso!');
-
-        // Recarregar lista de candidatos
-        await this.loadCandidatos();
-      } catch (error) {
-        console.error('Erro ao vincular candidato:', error);
-        alert('Erro ao vincular candidato à vaga. Tente novamente.');
-      }
+      await this.vincularCandidatoAVaga(candidato);
     } else if (this.selectedCandidato) {
       // Candidato editado - apenas recarregar lista
       console.log('Candidato editado, recarregando lista...');
@@ -495,6 +485,30 @@ export class VisualizarVagaComponent implements OnInit {
 
     // Fechar o modal antigo se estiver aberto
     this.showAddCandidateModal = false;
+  }
+
+  async onCandidatoSelecionado(candidato: Candidato) {
+    console.log('Candidato existente selecionado:', candidato);
+    await this.vincularCandidatoAVaga(candidato);
+  }
+
+  private async vincularCandidatoAVaga(candidato: Candidato) {
+    if (!candidato.id) return;
+    try {
+      console.log('Vinculando candidato', candidato.id, 'à vaga', this.vagaId);
+      await firstValueFrom(this.vagaService.vincularCandidato(this.vagaId, candidato.id));
+      this.toastr.success(`Candidato "${candidato.nome}" vinculado com sucesso!`);
+      await this.loadCandidatos();
+    } catch (error) {
+      console.error('Erro ao vincular candidato:', error);
+      this.toastr.error('Erro ao vincular candidato à vaga. Tente novamente.');
+    }
+  }
+
+  getCandidatosVinculadosIds(): number[] {
+    return this.candidatos
+      .filter(vc => vc.candidato?.id)
+      .map(vc => vc.candidato.id!);
   }
 
   // Métodos para o modal de observações

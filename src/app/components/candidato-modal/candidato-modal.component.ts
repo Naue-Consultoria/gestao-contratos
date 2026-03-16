@@ -1,25 +1,40 @@
 import { Component, EventEmitter, Input, OnInit, OnChanges, SimpleChanges, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { CandidatoService, Candidato } from '../../services/candidato.service';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-candidato-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './candidato-modal.component.html',
   styleUrl: './candidato-modal.component.css'
 })
 export class CandidatoModalComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
   @Input() candidato: Candidato | null = null;
+  @Input() vagaId: number | null = null;
+  @Input() candidatosVinculados: number[] = [];
   @Output() modalClosed = new EventEmitter<void>();
   @Output() candidatoSaved = new EventEmitter<Candidato>();
+  @Output() candidatoSelecionado = new EventEmitter<Candidato>();
 
   candidatoForm!: FormGroup;
   isLoading = false;
   isEditMode = false;
+
+  // Abas: 'novo' ou 'existente'
+  activeTab: 'novo' | 'existente' = 'novo';
+
+  // Busca de candidatos existentes
+  searchTerm = '';
+  searchResults: Candidato[] = [];
+  isSearching = false;
+  private searchSubject = new Subject<string>();
 
   constructor(
     private fb: FormBuilder,
@@ -30,11 +45,20 @@ export class CandidatoModalComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.initForm();
     this.setupModalForEditing();
+    this.setupSearch();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['candidato'] && this.candidatoForm) {
       this.setupModalForEditing();
+    }
+    if (changes['isOpen'] && this.isOpen) {
+      // Reset ao abrir o modal
+      if (!this.candidato) {
+        this.activeTab = 'novo';
+        this.searchTerm = '';
+        this.searchResults = [];
+      }
     }
   }
 
@@ -47,9 +71,52 @@ export class CandidatoModalComponent implements OnInit, OnChanges {
     });
   }
 
+  setupSearch() {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(term => {
+        if (term.length < 2) {
+          this.searchResults = [];
+          this.isSearching = false;
+          return [];
+        }
+        this.isSearching = true;
+        return this.candidatoService.searchCandidatos(term);
+      })
+    ).subscribe({
+      next: (response: any) => {
+        this.searchResults = response?.data || response || [];
+        this.isSearching = false;
+      },
+      error: () => {
+        this.searchResults = [];
+        this.isSearching = false;
+      }
+    });
+  }
+
+  onSearchChange() {
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  isCandidatoJaVinculado(candidato: Candidato): boolean {
+    return this.candidatosVinculados.includes(candidato.id!);
+  }
+
+  selecionarCandidato(candidato: Candidato) {
+    if (this.isCandidatoJaVinculado(candidato)) {
+      this.toastr.warning('Este candidato já está vinculado a esta vaga.', 'Aviso');
+      return;
+    }
+    this.candidatoSelecionado.emit(candidato);
+    this.closeModal();
+  }
+
   setupModalForEditing() {
     if (this.candidato) {
       this.isEditMode = true;
+      this.activeTab = 'novo';
       this.candidatoForm.patchValue({
         nome: this.candidato.nome,
         email: this.candidato.email || '',
@@ -69,6 +136,10 @@ export class CandidatoModalComponent implements OnInit, OnChanges {
 
   get formControls() {
     return this.candidatoForm.controls;
+  }
+
+  setActiveTab(tab: 'novo' | 'existente') {
+    this.activeTab = tab;
   }
 
   onSubmit() {
@@ -112,6 +183,8 @@ export class CandidatoModalComponent implements OnInit, OnChanges {
     this.isOpen = false;
     this.modalClosed.emit();
     this.candidatoForm.reset();
+    this.searchTerm = '';
+    this.searchResults = [];
   }
 
   onBackdropClick(event: MouseEvent) {

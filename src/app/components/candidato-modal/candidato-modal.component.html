@@ -1,5 +1,5 @@
 <div class="modal" [class.active]="isOpen" (click)="onBackdropClick($event)">
-  <div class="modal-content" [formGroup]="candidatoForm">
+  <div class="modal-content">
     <div class="modal-header">
       <h2 class="modal-title">{{ isEditMode ? 'Editar Candidato' : 'Adicionar Candidato' }}</h2>
       <button class="close-btn" (click)="closeModal()" type="button" aria-label="Fechar">
@@ -7,83 +7,161 @@
       </button>
     </div>
 
-    <!-- Nome -->
-    <div class="form-group">
-      <label for="nome" class="form-label">Nome Completo *</label>
-      <input
-        type="text"
-        id="nome"
-        class="form-control"
-        [class.is-invalid]="formControls['nome'].invalid && formControls['nome'].touched"
-        formControlName="nome"
-        placeholder="Digite o nome completo do candidato">
-      <div class="invalid-feedback" *ngIf="formControls['nome'].invalid && formControls['nome'].touched">
-        <span *ngIf="formControls['nome'].errors?.['required']">Nome é obrigatório</span>
-        <span *ngIf="formControls['nome'].errors?.['minlength']">Nome deve ter pelo menos 2 caracteres</span>
-      </div>
-    </div>
-
-    <!-- Email -->
-    <div class="form-group">
-      <label for="email" class="form-label">E-mail</label>
-      <input
-        type="email"
-        id="email"
-        class="form-control"
-        [class.is-invalid]="formControls['email'].invalid && formControls['email'].touched"
-        formControlName="email"
-        placeholder="candidato@exemplo.com">
-      <div class="invalid-feedback" *ngIf="formControls['email'].invalid && formControls['email'].touched">
-        <span *ngIf="formControls['email'].errors?.['email']">E-mail inválido</span>
-      </div>
-    </div>
-
-    <!-- Telefone -->
-    <div class="form-group">
-      <label for="telefone" class="form-label">Telefone</label>
-      <input
-        type="tel"
-        id="telefone"
-        class="form-control"
-        formControlName="telefone"
-        placeholder="(11) 99999-9999"
-        (input)="formatPhone($event)"
-        maxlength="15">
-    </div>
-
-    <!-- Status -->
-    <div class="form-group">
-      <label for="status" class="form-label">Status *</label>
-      <select
-        id="status"
-        class="form-control"
-        [class.is-invalid]="formControls['status'].invalid && formControls['status'].touched"
-        formControlName="status">
-        <option value="" disabled>Selecione o status</option>
-        <option value="pendente">Pendente</option>
-        <option value="aprovado">Aprovado</option>
-        <option value="reprovado">Reprovado</option>
-        <option value="desistiu">Desistiu do processo seletivo</option>
-      </select>
-      <div class="invalid-feedback" *ngIf="formControls['status'].invalid && formControls['status'].touched">
-        <span *ngIf="formControls['status'].errors?.['required']">Status é obrigatório</span>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-primary" (click)="onSubmit()" [disabled]="isLoading">
-        <span *ngIf="!isLoading">
-          <i class="fas" [class.fa-save]="!isEditMode" [class.fa-edit]="isEditMode"></i>
-          {{ isEditMode ? 'Atualizar' : 'Cadastrar' }}
-        </span>
-        <span *ngIf="isLoading">
-          <i class="fas fa-spinner fa-spin"></i>
-          {{ isEditMode ? 'Atualizando...' : 'Cadastrando...' }}
-        </span>
+    <!-- Abas (só aparece no modo adicionar, não no editar) -->
+    <div class="tabs" *ngIf="!isEditMode">
+      <button class="tab-btn" [class.active]="activeTab === 'novo'" (click)="setActiveTab('novo')">
+        <i class="fas fa-user-plus"></i> Novo Candidato
       </button>
-      <button class="btn btn-secondary" (click)="closeModal()" [disabled]="isLoading">
-        Cancelar
+      <button class="tab-btn" [class.active]="activeTab === 'existente'" (click)="setActiveTab('existente')">
+        <i class="fas fa-search"></i> Candidato Existente
       </button>
+    </div>
+
+    <!-- Tab: Novo Candidato (ou Editar) -->
+    <div *ngIf="activeTab === 'novo' || isEditMode" [formGroup]="candidatoForm">
+      <!-- Nome -->
+      <div class="form-group">
+        <label for="nome" class="form-label">Nome Completo *</label>
+        <input
+          type="text"
+          id="nome"
+          class="form-control"
+          [class.is-invalid]="formControls['nome'].invalid && formControls['nome'].touched"
+          formControlName="nome"
+          placeholder="Digite o nome completo do candidato">
+        <div class="invalid-feedback" *ngIf="formControls['nome'].invalid && formControls['nome'].touched">
+          <span *ngIf="formControls['nome'].errors?.['required']">Nome é obrigatório</span>
+          <span *ngIf="formControls['nome'].errors?.['minlength']">Nome deve ter pelo menos 2 caracteres</span>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email" class="form-label">E-mail</label>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          [class.is-invalid]="formControls['email'].invalid && formControls['email'].touched"
+          formControlName="email"
+          placeholder="candidato@exemplo.com">
+        <div class="invalid-feedback" *ngIf="formControls['email'].invalid && formControls['email'].touched">
+          <span *ngIf="formControls['email'].errors?.['email']">E-mail inválido</span>
+        </div>
+      </div>
+
+      <!-- Telefone -->
+      <div class="form-group">
+        <label for="telefone" class="form-label">Telefone</label>
+        <input
+          type="tel"
+          id="telefone"
+          class="form-control"
+          formControlName="telefone"
+          placeholder="(11) 99999-9999"
+          (input)="formatPhone($event)"
+          maxlength="15">
+      </div>
+
+      <!-- Status -->
+      <div class="form-group">
+        <label for="status" class="form-label">Status *</label>
+        <select
+          id="status"
+          class="form-control"
+          [class.is-invalid]="formControls['status'].invalid && formControls['status'].touched"
+          formControlName="status">
+          <option value="" disabled>Selecione o status</option>
+          <option value="pendente">Pendente</option>
+          <option value="aprovado">Aprovado</option>
+          <option value="reprovado">Reprovado</option>
+          <option value="desistiu">Desistiu do processo seletivo</option>
+        </select>
+        <div class="invalid-feedback" *ngIf="formControls['status'].invalid && formControls['status'].touched">
+          <span *ngIf="formControls['status'].errors?.['required']">Status é obrigatório</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="onSubmit()" [disabled]="isLoading">
+          <span *ngIf="!isLoading">
+            <i class="fas" [class.fa-save]="!isEditMode" [class.fa-edit]="isEditMode"></i>
+            {{ isEditMode ? 'Atualizar' : 'Cadastrar' }}
+          </span>
+          <span *ngIf="isLoading">
+            <i class="fas fa-spinner fa-spin"></i>
+            {{ isEditMode ? 'Atualizando...' : 'Cadastrando...' }}
+          </span>
+        </button>
+        <button class="btn btn-secondary" (click)="closeModal()" [disabled]="isLoading">
+          Cancelar
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab: Candidato Existente -->
+    <div *ngIf="activeTab === 'existente' && !isEditMode">
+      <div class="form-group">
+        <label for="search" class="form-label">Buscar por nome, e-mail ou telefone</label>
+        <div class="search-input-wrapper">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            id="search"
+            class="form-control search-input"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange()"
+            placeholder="Digite pelo menos 2 caracteres para buscar..."
+            autocomplete="off">
+          <i class="fas fa-spinner fa-spin search-loading" *ngIf="isSearching"></i>
+        </div>
+      </div>
+
+      <!-- Resultados da busca -->
+      <div class="search-results" *ngIf="searchResults.length > 0">
+        <div class="search-result-item"
+             *ngFor="let result of searchResults"
+             [class.ja-vinculado]="isCandidatoJaVinculado(result)"
+             (click)="selecionarCandidato(result)">
+          <div class="result-info">
+            <span class="result-name">{{ result.nome }}</span>
+            <span class="result-details">
+              <span *ngIf="result.email">{{ result.email }}</span>
+              <span *ngIf="result.email && result.telefone"> | </span>
+              <span *ngIf="result.telefone">{{ result.telefone }}</span>
+            </span>
+          </div>
+          <div class="result-action">
+            <span class="badge-vinculado" *ngIf="isCandidatoJaVinculado(result)">
+              <i class="fas fa-link"></i> Já vinculado
+            </span>
+            <button class="btn btn-sm btn-vincular" *ngIf="!isCandidatoJaVinculado(result)">
+              <i class="fas fa-plus-circle"></i> Vincular
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado vazio da busca -->
+      <div class="search-empty" *ngIf="searchTerm.length >= 2 && !isSearching && searchResults.length === 0">
+        <i class="fas fa-user-slash"></i>
+        <p>Nenhum candidato encontrado para "{{ searchTerm }}"</p>
+        <button class="btn btn-primary btn-sm" (click)="setActiveTab('novo')">
+          <i class="fas fa-user-plus"></i> Cadastrar novo candidato
+        </button>
+      </div>
+
+      <!-- Dica inicial -->
+      <div class="search-hint" *ngIf="searchTerm.length < 2 && !isSearching">
+        <i class="fas fa-info-circle"></i>
+        <p>Digite pelo menos 2 caracteres para buscar candidatos cadastrados no sistema.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">
+          Cancelar
+        </button>
+      </div>
     </div>
   </div>
 </div>

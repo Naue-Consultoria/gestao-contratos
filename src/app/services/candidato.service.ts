@@ -41,4 +41,10 @@ export class CandidatoService {
   deleteCandidato(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  searchCandidatos(search: string): Observable<{ data: Candidato[]; count: number }> {
+    return this.http.get<{ data: Candidato[]; count: number }>(this.apiUrl, {
+      params: { search }
+    });
+  }
 }
