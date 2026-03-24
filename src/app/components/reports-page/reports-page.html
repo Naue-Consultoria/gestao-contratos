@@ -9,37 +9,48 @@
 <!-- Reports Grid -->
 <div class="reports-grid">
   
-  <!-- Relatório de Clientes Ativos -->
-  <div class="report-card" [class.is-loading]="activeClientsReport.isLoading">
+  <!-- Relatório de Clientes Ativos / Cadastro de Clientes -->
+  <div class="report-card" [class.is-loading]="activeClientsReport.isLoading || clientInfoReport.isLoading">
     <div class="card-header">
       <div class="card-icon active-clients">
-        <i class="fas fa-users"></i>
+        <i class="fas" [class.fa-users]="activeClientsSubtype === 'activeClients'" [class.fa-address-card]="activeClientsSubtype === 'clientInfo'"></i>
       </div>
     </div>
 
     <div class="card-body">
-      <h3 class="card-title">Clientes Ativos</h3>
+      <h3 class="card-title">{{ activeClientsSubtype === 'activeClients' ? 'Clientes Ativos' : 'Cadastro de Clientes' }}</h3>
       <p class="card-description">
-        Lista completa de clientes com contratos ativos e seus valores
+        {{ activeClientsSubtype === 'activeClients' ? 'Lista completa de clientes com contratos ativos e seus valores' : 'Informações cadastrais dos clientes: nome, e-mail, CNPJ/CPF, telefone e endereço' }}
       </p>
 
       <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Tipo de Relatório</label>
+          <select
+            class="form-select"
+            [(ngModel)]="activeClientsSubtype"
+            [disabled]="activeClientsReport.isLoading || clientInfoReport.isLoading">
+            <option value="activeClients">Clientes com Contratos Ativos</option>
+            <option value="clientInfo">Cadastro de Clientes</option>
+          </select>
+        </div>
+
         <div class="control-group">
           <label class="control-label">Formato de Exportação</label>
           <div class="format-selector">
             <button
               class="format-btn"
-              [class.active]="activeClientsReport.format === 'pdf'"
-              (click)="activeClientsReport.format = 'pdf'"
-              [disabled]="activeClientsReport.isLoading">
+              [class.active]="(activeClientsSubtype === 'activeClients' ? activeClientsReport.format : clientInfoReport.format) === 'pdf'"
+              (click)="activeClientsSubtype === 'activeClients' ? activeClientsReport.format = 'pdf' : clientInfoReport.format = 'pdf'"
+              [disabled]="activeClientsReport.isLoading || clientInfoReport.isLoading">
               <i class="fas fa-file-pdf"></i>
               PDF
             </button>
             <button
               class="format-btn"
-              [class.active]="activeClientsReport.format === 'excel'"
-              (click)="activeClientsReport.format = 'excel'"
-              [disabled]="activeClientsReport.isLoading">
+              [class.active]="(activeClientsSubtype === 'activeClients' ? activeClientsReport.format : clientInfoReport.format) === 'excel'"
+              (click)="activeClientsSubtype === 'activeClients' ? activeClientsReport.format = 'excel' : clientInfoReport.format = 'excel'"
+              [disabled]="activeClientsReport.isLoading || clientInfoReport.isLoading">
               <i class="fas fa-file-excel"></i>
               Excel
             </button>
@@ -51,10 +62,13 @@
     <div class="card-footer">
       <button
         class="btn-generate"
-        (click)="generateReport('activeClients', activeClientsReport)"
-        [disabled]="activeClientsReport.isLoading">
-        <i class="fas" [class.fa-download]="!activeClientsReport.isLoading" [class.fa-spinner]="activeClientsReport.isLoading" [class.fa-spin]="activeClientsReport.isLoading"></i>
-        <span>{{ activeClientsReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+        (click)="generateActiveClientsSubReport()"
+        [disabled]="activeClientsReport.isLoading || clientInfoReport.isLoading">
+        <i class="fas"
+          [class.fa-download]="!activeClientsReport.isLoading && !clientInfoReport.isLoading"
+          [class.fa-spinner]="activeClientsReport.isLoading || clientInfoReport.isLoading"
+          [class.fa-spin]="activeClientsReport.isLoading || clientInfoReport.isLoading"></i>
+        <span>{{ (activeClientsReport.isLoading || clientInfoReport.isLoading) ? 'Gerando...' : 'Gerar Relatório' }}</span>
       </button>
     </div>
   </div>
