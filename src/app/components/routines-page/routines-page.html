@@ -84,7 +84,7 @@
                 </div>
                 
                 <div class="filter-option" 
-                     *ngFor="let client of filteredClients"
+                     *ngFor="let client of filteredClients; trackBy: trackByClientId"
                      [class.selected]="selectedClient === client.name"
                      (click)="selectClient(client.name, $event)">
                   <span>{{ client.name }}</span>

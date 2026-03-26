@@ -227,4 +227,8 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
       this.router.navigate(['/home/servicos/editar', newService.id]);
     }
   }
+
+  trackByServiceId(index: number, service: any): number {
+    return service.id;
+  }
 }

@@ -27,6 +27,7 @@ export class RoutineViewPageComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   contract: ApiContract | null = null;
+  orderedServices: any[] = [];
   contractId: number = 0;
   isLoading = true;
   error = '';
@@ -78,11 +79,13 @@ export class RoutineViewPageComponent implements OnInit, OnDestroy {
       if (response && response.contract) {
         this.contract = response.contract;
         console.log('🔍 Routine data received:', this.contract);
-        
+
         // Garantir que contract_services seja um array
         if (!this.contract.contract_services) {
           this.contract.contract_services = [];
         }
+
+        this.orderedServices = this.getOrderedServices();
         
         // Garantir que assigned_users seja um array
         if (!this.contract.assigned_users) {
@@ -442,6 +445,7 @@ export class RoutineViewPageComponent implements OnInit, OnDestroy {
     if (this.contract?.contract_services) {
       // Simular mudança no array para forçar ngOnChanges no component filho
       this.contract = { ...this.contract };
+      this.orderedServices = this.getOrderedServices();
     }
   }
 

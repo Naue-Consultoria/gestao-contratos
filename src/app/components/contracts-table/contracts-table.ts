@@ -281,30 +281,30 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   private calculateStatsFromContracts(apiContracts: ApiContract[]) {
+    let active = 0, completed = 0, cancelled = 0, suspended = 0;
+    let totalValueActive = 0, totalValueAll = 0;
+    const typeStats: any = { Full: 0, Pontual: 0, Individual: 0, 'Recrutamento & Seleção': 0 };
+
+    for (const c of apiContracts) {
+      const val = this.getAdjustedContractValue(c);
+      totalValueAll += val;
+      if (c.status === 'active') { active++; totalValueActive += val; }
+      else if (c.status === 'completed') completed++;
+      else if (c.status === 'cancelled') cancelled++;
+      else if (c.status === 'suspended') suspended++;
+      if (typeStats[c.type] !== undefined) typeStats[c.type]++;
+    }
+
     this.stats = {
       total: apiContracts.length,
-      active: apiContracts.filter((c) => c.status === 'active').length,
-      completed: apiContracts.filter((c) => c.status === 'completed').length,
-      cancelled: apiContracts.filter((c) => c.status === 'cancelled').length,
-      suspended: apiContracts.filter((c) => c.status === 'suspended').length,
-      totalValueActive: apiContracts
-        .filter((c) => c.status === 'active')
-        .reduce((sum, c) => sum + this.getAdjustedContractValue(c), 0),
-      totalValueAll: apiContracts.reduce(
-        (sum, c) => sum + this.getAdjustedContractValue(c),
-        0
-      ),
-      averageValue:
-        apiContracts.length > 0
-          ? apiContracts.reduce((sum, c) => sum + this.getAdjustedContractValue(c), 0) /
-            apiContracts.length
-          : 0,
-      typeStats: {
-        Full: apiContracts.filter((c) => c.type === 'Full').length,
-        Pontual: apiContracts.filter((c) => c.type === 'Pontual').length,
-        Individual: apiContracts.filter((c) => c.type === 'Individual').length,
-        'Recrutamento & Seleção': apiContracts.filter((c) => c.type === 'Recrutamento & Seleção').length,
-      },
+      active,
+      completed,
+      cancelled,
+      suspended,
+      totalValueActive,
+      totalValueAll,
+      averageValue: apiContracts.length > 0 ? totalValueAll / apiContracts.length : 0,
+      typeStats,
       averageDuration: 0,
     };
   }
@@ -829,5 +829,17 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
       // Removido toast de informação conforme solicitado
     }
+  }
+
+  trackByContractId(index: number, contract: ContractDisplay): number {
+    return contract.raw.id;
+  }
+
+  trackByClientId(index: number, client: any): number {
+    return client.id;
+  }
+
+  trackByYear(index: number, year: number): number {
+    return year;
   }
 }

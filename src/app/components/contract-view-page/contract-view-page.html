@@ -81,7 +81,7 @@
         </div>
         <div class="info-group">
           <span class="info-label">Total de Serviços</span>
-          <span class="info-value">{{ getNonInternalServices().length || 0 }} item(s)</span>
+          <span class="info-value">{{ nonInternalServices.length || 0 }} item(s)</span>
         </div>
       </div>
     </div>
@@ -98,8 +98,8 @@
         </h3>
         
         <!-- Services Grid -->
-        <div class="services-grid" *ngIf="getNonInternalServices().length > 0">
-          <div *ngFor="let service of getNonInternalServices(); let i = index" class="service-card">
+        <div class="services-grid" *ngIf="nonInternalServices.length > 0">
+          <div *ngFor="let service of nonInternalServices; let i = index" class="service-card">
             <div class="service-card-header">
               <div class="service-header-left">
                 <div class="service-number">{{ i + 1 }}</div>
@@ -175,7 +175,7 @@
         </div>
         
         <!-- Empty State -->
-        <div *ngIf="getNonInternalServices().length === 0" class="empty-state">
+        <div *ngIf="nonInternalServices.length === 0" class="empty-state">
           <div class="empty-icon">
             <i class="fas fa-cogs"></i>
           </div>
@@ -184,7 +184,7 @@
         </div>
         
         <!-- Services Summary - APENAS para Admin -->
-        <div class="services-summary" *ngIf="getNonInternalServices().length > 0 && canViewFinancialInfo">
+        <div class="services-summary" *ngIf="nonInternalServices.length > 0 && canViewFinancialInfo">
           <div class="summary-card">
             <div class="summary-icon">
               <i class="fas fa-calculator"></i>

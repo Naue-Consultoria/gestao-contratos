@@ -98,7 +98,7 @@
         </thead>
         <tbody>
           <tr
-            *ngFor="let service of filteredServices"
+            *ngFor="let service of filteredServices; trackBy: trackByServiceId"
             class="clickable"
             (click)="editService(service.id)"
           >

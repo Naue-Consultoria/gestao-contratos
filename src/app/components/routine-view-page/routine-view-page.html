@@ -81,14 +81,14 @@
         </h3>
         
         <app-contract-services-manager
-          [services]="getOrderedServices()"
+          [services]="orderedServices"
           [contractId]="contract.id"
           [canEdit]="canEdit"
           (serviceUpdated)="onServiceUpdated()">
         </app-contract-services-manager>
         
         <!-- Empty State -->
-        <div *ngIf="getOrderedServices().length === 0" class="empty-state">
+        <div *ngIf="orderedServices.length === 0" class="empty-state">
           <div class="empty-icon">
             <i class="fas fa-tasks"></i>
           </div>

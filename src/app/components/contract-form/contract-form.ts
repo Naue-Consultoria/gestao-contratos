@@ -1063,9 +1063,9 @@ export class ContractFormComponent implements OnInit {
     return this.selectedServices.filter(s => s.category !== 'Interno').length > 0;
   }
 
-  // Retorna apenas serviços visíveis (não internos)
+  // Retorna serviços visíveis (exceto Encerramento e Entrada de Cliente)
   getVisibleServices(): SelectedService[] {
-    return this.selectedServices.filter(s => s.category !== 'Interno');
+    return this.selectedServices.filter(s => s.name !== 'Encerramento' && s.name !== 'Entrada de Cliente');
   }
 
   // Retorna a quantidade de serviços visíveis

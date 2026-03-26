@@ -65,9 +65,14 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
     this.error = '';
     
     try {
-      // Load client details
-      const clientResponse = await firstValueFrom(this.clientService.getClient(id));
+      // Carregar cliente e contratos em paralelo
+      const [clientResponse, contractsResponse] = await Promise.all([
+        firstValueFrom(this.clientService.getClient(id)),
+        firstValueFrom(this.contractService.getContracts({ client_id: id }))
+      ]);
+
       this.client = clientResponse.client;
+      this.contracts = contractsResponse.contracts;
 
       if (this.client.logo_path) {
         this.loadLogo();
@@ -76,17 +81,11 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
       // Update breadcrumb with client name
       this.updateBreadcrumb();
 
-      // Load client contracts
-      const contractsResponse = await firstValueFrom(this.contractService.getContracts());
-      this.contracts = contractsResponse.contracts.filter(contract => contract.client.id === id);
-      
-      // Load emails if PJ
-      if (this.client.type === 'PJ') {
-        await this.loadClientEmails(id);
-      }
-      
-      // Load attachments count
-      await this.loadAttachmentsCount(id);
+      // Carregar emails (se PJ) e contagem de anexos em paralelo
+      await Promise.all([
+        this.client.type === 'PJ' ? this.loadClientEmails(id) : Promise.resolve(),
+        this.loadAttachmentsCount(id)
+      ]);
       
       // Calculate statistics
       this.calculateStatistics();

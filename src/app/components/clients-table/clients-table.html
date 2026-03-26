@@ -104,7 +104,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let client of filteredClients" class="clickable" (click)="viewClient(client.id)">
+          <tr *ngFor="let client of filteredClients; trackBy: trackByClientId" class="clickable" (click)="viewClient(client.id)">
             <td>
               <div class="client-info">
                 <div class="client-avatar" [style.background]="client.gradient" *ngIf="!client.logo_path">

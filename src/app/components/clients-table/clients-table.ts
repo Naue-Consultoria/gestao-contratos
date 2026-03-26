@@ -98,27 +98,31 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = '';
     try {
-      const clientsResponse = await firstValueFrom(
-        this.clientService.getClients({ is_active: true })
-      );
-      const contractsResponse = await firstValueFrom(
-        this.contractService.getContracts()
-      );
+      const [clientsResponse, contractsResponse] = await Promise.all([
+        firstValueFrom(this.clientService.getClients({ is_active: true })),
+        firstValueFrom(this.contractService.getContracts())
+      ]);
+
+      // Indexar contratos por client_id para evitar O(n²)
+      const contractsByClientId = new Map<number, any[]>();
+      for (const c of contractsResponse.contracts) {
+        const id = c.client.id;
+        if (!contractsByClientId.has(id)) contractsByClientId.set(id, []);
+        contractsByClientId.get(id)!.push(c);
+      }
 
       this.clients = clientsResponse.clients.map((apiClient) => {
-        const clientContracts = contractsResponse.contracts.filter(
-          (c) => c.client.id === apiClient.id
-        );
-        const aggregates = {
+        const clientContracts = contractsByClientId.get(apiClient.id) || [];
+        let activeCount = 0, totalValue = 0;
+        for (const c of clientContracts) {
+          if (c.status === 'active') activeCount++;
+          totalValue += c.total_value ?? 0;
+        }
+        return this.mapApiClientToTableClient(apiClient, {
           totalCount: clientContracts.length,
-          activeCount: clientContracts.filter((c) => c.status === 'active')
-            .length,
-          totalValue: clientContracts.reduce(
-            (sum, c) => sum + (c.total_value ?? 0),
-            0
-          ),
-        };
-        return this.mapApiClientToTableClient(apiClient, aggregates);
+          activeCount,
+          totalValue
+        });
       });
 
       this.applyFilters();
@@ -438,5 +442,9 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
     if (!clientId) return '';
     // URL da API para buscar a logo do cliente
     return `${environment.apiUrl}/clients/${clientId}/logo`;
+  }
+
+  trackByClientId(index: number, client: any): number {
+    return client.id;
   }
 }

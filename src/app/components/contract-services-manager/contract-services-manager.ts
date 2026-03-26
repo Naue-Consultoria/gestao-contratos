@@ -227,10 +227,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
       return;
     }
 
-    // Limitar a 2 requisições simultâneas para reduzir carga
     let activeRequests = 0;
-    const maxConcurrentRequests = 2;
-    const delayBetweenRequests = 750; // 750ms entre requisições
+    const maxConcurrentRequests = 6;
+    const delayBetweenRequests = 150; // ms entre requisições
 
     this.services.forEach((service, index) => {
       if (!this.isComponentActive) return;

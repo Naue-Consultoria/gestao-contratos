@@ -500,7 +500,7 @@
                 <div
                   class="service-card"
                   *ngFor="let service of selectedServices; let i = index"
-                  [hidden]="service.category === 'Interno'"
+                  [hidden]="service.name === 'Encerramento' || service.name === 'Entrada de Cliente'"
                 >
                   <div class="service-header">
                     <div class="service-info">

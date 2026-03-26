@@ -288,4 +288,7 @@ export class RoutinesPageComponent implements OnInit {
     } catch (e) {}
   }
 
+  trackByClientId(index: number, client: any): any {
+    return client.id ?? client.name;
+  }
 }
