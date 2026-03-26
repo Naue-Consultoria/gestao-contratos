@@ -476,6 +476,7 @@ export class ContractFormComponent implements OnInit {
       );
       if (response && response.services) {
         this.availableServices = response.services
+          .filter((service) => service.name !== 'Entrada de Cliente' && service.name !== 'Encerramento')
           .sort((a, b) =>
             a.name.toLowerCase().localeCompare(b.name.toLowerCase())
           );
