@@ -178,9 +178,6 @@ export class ServiceTrackingPageComponent implements OnInit {
       // Carregar dados adicionais de forma sequencial para evitar sobrecarga de recursos
       if (this.routine?.id) {
         await this.loadComments();
-
-        // Adicionar um pequeno delay antes de carregar as etapas
-        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       // Carregar etapas do serviço se disponível
@@ -392,8 +389,8 @@ export class ServiceTrackingPageComponent implements OnInit {
         };
 
         // Atualizar a rotina no backend
-        if (this.routine?.id) {
-          const updatedRoutine = await this.routineService.updateRoutine(this.routine.id, updates).toPromise();
+        if (this.service?.id) {
+          const updatedRoutine = await this.routineService.updateRoutine(this.service.id, updates).toPromise();
           if (updatedRoutine) {
             this.routine = updatedRoutine;
             this.toastr.success(statusMessage);

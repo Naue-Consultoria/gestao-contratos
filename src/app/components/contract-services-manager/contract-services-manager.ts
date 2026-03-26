@@ -159,13 +159,13 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
       return 0;
     }
 
-    // Usar TODOS os serviços (incluindo internos)
-    const allServices = this.services;
+    // Excluir serviços da categoria 'Interno' do cálculo de progresso
+    const billableServices = this.services.filter(s => s.service?.category !== 'Interno');
 
     let totalSteps = 0;
     let completedSteps = 0;
 
-    allServices.forEach(service => {
+    billableServices.forEach(service => {
       const progress = this.serviceProgresses[service.id];
       if (progress) {
         totalSteps += progress.totalStages;
@@ -183,13 +183,13 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
       return { completed: 0, total: 0 };
     }
 
-    // Usar TODOS os serviços (incluindo internos)
-    const allServices = this.services;
+    // Excluir serviços da categoria 'Interno' do cálculo de progresso
+    const billableServices = this.services.filter(s => s.service?.category !== 'Interno');
 
     let totalStages = 0;
     let completedStages = 0;
 
-    allServices.forEach(service => {
+    billableServices.forEach(service => {
       const progress = this.serviceProgresses[service.id];
       if (progress) {
         totalStages += progress.totalStages;
