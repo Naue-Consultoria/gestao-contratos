@@ -450,9 +450,9 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Filtrar serviços excluindo "Entrada de Cliente" e "Encerramento"
-    const filteredServices = this.analyticsData.topServices.filter((service: any) => 
-      service.name !== 'Entrada de Cliente' && service.name !== 'Encerramento'
+    // Filtrar serviços excluindo categoria 'Interno'
+    const filteredServices = this.analyticsData.topServices.filter((service: any) =>
+      service.category !== 'Interno'
     );
     
     const data = filteredServices.slice(0, 10); // Top 10 após filtrar
