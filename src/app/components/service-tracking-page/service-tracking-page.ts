@@ -99,45 +99,48 @@ export class ServiceTrackingPageComponent implements OnInit {
       this.isLoading = true;
       this.error = null;
 
-
-      // Buscar a rotina pelo ID da rotina (routineId da URL)
+      // Buscar rotina e serviço do contrato em paralelo (serviceId da URL = contract_service_id)
       try {
-        const routine = await this.routineService.getRoutineById(this.routineId).toPromise();
+        const [routine, contractService] = await Promise.all([
+          this.routineService.getRoutineById(this.routineId).toPromise(),
+          this.contractService.getContractServiceById(this.serviceId).toPromise()
+        ]);
 
-        if (routine) {
-          this.routine = routine;
-
-          // Usar o contract_service_id da rotina para buscar o service
-          const contractServiceId = routine.contract_service_id;
-
-          // Validar se o serviceId da URL bate com o contract_service_id da rotina
-          if (contractServiceId !== this.serviceId) {
-          }
-
-          const contractService = await this.contractService.getContractServiceById(contractServiceId).toPromise();
-          if (contractService) {
-            this.service = contractService;
-
-            // Carregar dados do contrato
-            if (contractService.contract_id) {
-              const contractResponse = await this.contractService.getContract(contractService.contract_id).toPromise();
-              if (contractResponse) {
-                this.contract = contractResponse.contract;
-
-                // Configurar breadcrumb com o caminho completo
-                this.setupBreadcrumb();
-              }
-            }
-          } else {
-            this.error = 'Serviço do contrato não encontrado';
-            this.isLoading = false;
-            return;
-          }
-        } else {
+        if (!routine) {
           this.error = 'Rotina não encontrada';
           this.isLoading = false;
           return;
         }
+        if (!contractService) {
+          this.error = 'Serviço do contrato não encontrado';
+          this.isLoading = false;
+          return;
+        }
+
+        this.routine = routine;
+        this.service = contractService;
+
+        // Wave 2: contrato, comentários e etapas em paralelo (nenhum depende do outro)
+        const wave2: Promise<any>[] = [];
+
+        if (contractService.contract_id) {
+          wave2.push(
+            this.contractService.getContract(contractService.contract_id).toPromise().then(contractResponse => {
+              if (contractResponse) {
+                this.contract = contractResponse.contract;
+                this.setupBreadcrumb();
+              }
+            })
+          );
+        }
+        if (routine.id) {
+          wave2.push(this.loadComments());
+        }
+        if (contractService.service?.id) {
+          wave2.push(this.loadServiceStages());
+        }
+
+        await Promise.all(wave2);
       } catch (serviceError: any) {
         console.error('Erro ao carregar dados:', serviceError);
 
@@ -166,24 +169,14 @@ export class ServiceTrackingPageComponent implements OnInit {
         this.isLoading = false;
         return;
       }
-      
+
       // Para simplicidade, vamos assumir que o usuário pode editar
       this.canEdit = true;
-      
+
       // Configurar valores iniciais do formulário
       this.selectedStatus = this.routine?.status || 'not_started';
       this.selectedDate = this.routine?.scheduled_date || '';
       this.routineNotes = this.routine?.notes || '';
-      
-      // Carregar dados adicionais de forma sequencial para evitar sobrecarga de recursos
-      if (this.routine?.id) {
-        await this.loadComments();
-      }
-
-      // Carregar etapas do serviço se disponível
-      if (this.service?.service?.id) {
-        await this.loadServiceStages();
-      }
 
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
