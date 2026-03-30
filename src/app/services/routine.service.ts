@@ -14,6 +14,15 @@ export interface ServiceRoutine {
   updated_at?: string;
 }
 
+export interface RoutinePageData {
+  routine: ServiceRoutine;
+  contractService: any;
+  contract: { id: number; contract_number: string; client: { id: number; name: string } };
+  stages: any[];
+  comments: RoutineComment[];
+  progress: { totalStages: number; completedStages: number; progressPercentage: number; stages: any[] };
+}
+
 export interface RoutineComment {
   id: number;
   routine_id: number;
@@ -79,6 +88,13 @@ export class RoutineService {
   getRoutineById(routineId: number): Observable<ServiceRoutine | null> {
     return this.http.get<ServiceRoutine | null>(
       `${this.apiUrl}/${routineId}`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  getPageData(routineId: number): Observable<RoutinePageData> {
+    return this.http.get<RoutinePageData>(
+      `${this.apiUrl}/${routineId}/page-data`,
       { headers: this.getAuthHeaders() }
     );
   }

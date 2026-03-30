@@ -2,8 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ContractService, ApiContractService } from '../../services/contract';
-import { RoutineService, ServiceRoutine, RoutineComment } from '../../services/routine.service';
+import { ApiContractService } from '../../services/contract';
+import { RoutineService, ServiceRoutine, RoutineComment, RoutinePageData } from '../../services/routine.service';
 import { ServiceStageService, ServiceStage, ServiceProgress } from '../../services/service-stage.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { BreadcrumbService, BreadcrumbItem } from '../../services/breadcrumb.service';
@@ -20,7 +20,6 @@ import { RoutineAttachmentService } from '../../services/routine-attachment.serv
 export class ServiceTrackingPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private contractService = inject(ContractService);
   private breadcrumbService = inject(BreadcrumbService);
   private toastr = inject(ToastrService);
   private serviceStageService = inject(ServiceStageService);
@@ -99,85 +98,38 @@ export class ServiceTrackingPageComponent implements OnInit {
       this.isLoading = true;
       this.error = null;
 
-      // Buscar rotina e serviço do contrato em paralelo (serviceId da URL = contract_service_id)
+      let pageData: RoutinePageData;
       try {
-        const [routine, contractService] = await Promise.all([
-          this.routineService.getRoutineById(this.routineId).toPromise(),
-          this.contractService.getContractServiceById(this.serviceId).toPromise()
-        ]);
-
-        if (!routine) {
-          this.error = 'Rotina não encontrada';
-          this.isLoading = false;
-          return;
-        }
-        if (!contractService) {
-          this.error = 'Serviço do contrato não encontrado';
-          this.isLoading = false;
-          return;
-        }
-
-        this.routine = routine;
-        this.service = contractService;
-
-        // Wave 2: contrato, comentários e etapas em paralelo (nenhum depende do outro)
-        const wave2: Promise<any>[] = [];
-
-        if (contractService.contract_id) {
-          wave2.push(
-            this.contractService.getContract(contractService.contract_id).toPromise().then(contractResponse => {
-              if (contractResponse) {
-                this.contract = contractResponse.contract;
-                this.setupBreadcrumb();
-              }
-            })
-          );
-        }
-        if (routine.id) {
-          wave2.push(this.loadComments());
-        }
-        if (contractService.service?.id) {
-          wave2.push(this.loadServiceStages());
-        }
-
-        await Promise.all(wave2);
-      } catch (serviceError: any) {
-        console.error('Erro ao carregar dados:', serviceError);
-
-        // Tratamento específico para erro 403 (Acesso negado)
-        if (serviceError.status === 403) {
+        pageData = await this.routineService.getPageData(this.routineId).toPromise() as RoutinePageData;
+      } catch (err: any) {
+        if (err.status === 403) {
           this.isLoading = false;
           this.toastr.warning(
             'Você não tem permissão para acessar esta rotina. Verifique se está atribuído ao contrato.',
             'Acesso Negado',
-            {
-              timeOut: 5000,
-              progressBar: true,
-              closeButton: true,
-              positionClass: 'toast-top-center'
-            }
+            { timeOut: 5000, progressBar: true, closeButton: true, positionClass: 'toast-top-center' }
           );
-
-          // Aguardar 3 segundos antes de redirecionar para o usuário ler a mensagem
-          setTimeout(() => {
-            this.router.navigate(['/home/dashboard']);
-          }, 3000);
+          setTimeout(() => this.router.navigate(['/home/dashboard']), 3000);
           return;
         }
-
         this.error = 'Erro ao carregar dados';
         this.isLoading = false;
         return;
       }
 
-      // Para simplicidade, vamos assumir que o usuário pode editar
-      this.canEdit = true;
+      this.routine = pageData.routine;
+      this.service = pageData.contractService;
+      this.contract = pageData.contract;
+      this.comments = pageData.comments;
+      this.serviceStages = pageData.stages;
+      this.stageProgress = pageData.progress.progressPercentage;
 
-      // Configurar valores iniciais do formulário
+      this.canEdit = true;
       this.selectedStatus = this.routine?.status || 'not_started';
       this.selectedDate = this.routine?.scheduled_date || '';
       this.routineNotes = this.routine?.notes || '';
 
+      this.setupBreadcrumb();
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       this.error = 'Erro ao carregar dados';
