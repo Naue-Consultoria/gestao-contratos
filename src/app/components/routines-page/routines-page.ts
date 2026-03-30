@@ -229,7 +229,7 @@ export class RoutinesPageComponent implements OnInit {
   }
 
   private applyFilters() {
-    let filtered = [...this.contracts];
+    let filtered = this.contracts.filter(contract => contract.status !== 'cancelled');
 
     // Apply client filter
     if (this.selectedClient) {
