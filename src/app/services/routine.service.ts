@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface ServiceRoutine {
@@ -111,12 +112,12 @@ export class RoutineService {
     if (serviceStageId) {
       payload.service_stage_id = serviceStageId;
     }
-    
+
     return this.http.post<RoutineComment>(
-      `${this.apiUrl}/${routineId}/comments`, 
+      `${this.apiUrl}/${routineId}/comments`,
       payload,
       { headers: this.getAuthHeaders() }
-    );
+    ).pipe(timeout(15000));
   }
 
   /**

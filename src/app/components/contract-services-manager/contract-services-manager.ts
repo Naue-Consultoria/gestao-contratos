@@ -27,6 +27,7 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
   selectedService: ApiContractService | null = null;
   showComments: { [serviceId: number]: boolean } = {};
   comments: { [serviceId: number]: ServiceComment[] } = {};
+  private commentsLoaded: { [serviceId: number]: boolean } = {};
   newComments: { [serviceId: number]: string } = {};
   editingComment: { [commentId: number]: string } = {};
   loadingComments: { [serviceId: number]: boolean } = {};
@@ -399,7 +400,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
     const oldStatus = service.status;
     service.status = newStatus as any;
 
-    this.contractService.updateContractService(service.id, { status: newStatus }).subscribe({
+    this.contractService.updateContractService(service.id, { status: newStatus }).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: () => {
         this.toastr.success('Status do serviço atualizado com sucesso');
         this.serviceUpdated.emit();
@@ -423,7 +426,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
 
     service.scheduled_start_date = newDate;
 
-    this.contractService.updateContractService(service.id, { scheduled_start_date: newDate }).subscribe({
+    this.contractService.updateContractService(service.id, { scheduled_start_date: newDate }).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: () => {
         this.toastr.success('Data de início agendada com sucesso');
         this.serviceUpdated.emit();
@@ -451,19 +456,20 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
     this.showComments[serviceId] = true;
     
     // Carregar comentários se ainda não foram carregados
-    if (!this.comments[serviceId]) {
+    if (!this.commentsLoaded[serviceId]) {
       this.loadComments(serviceId);
     }
   }
 
   loadComments(serviceId: number) {
     this.loadingComments[serviceId] = true;
-    
+
     this.contractService.getServiceComments(serviceId).subscribe({
       next: (response) => {
         this.comments[serviceId] = response.comments;
+        this.commentsLoaded[serviceId] = true;
         this.loadingComments[serviceId] = false;
-        
+
         // Carregar anexos para cada comentário automaticamente
         response.comments.forEach(comment => {
           this.loadAttachments(comment.id);
@@ -480,7 +486,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
     const comment = this.newComments[serviceId]?.trim();
     if (!comment) return;
 
-    this.contractService.addServiceComment(serviceId, comment).subscribe({
+    this.contractService.addServiceComment(serviceId, comment).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (response) => {
         this.toastr.success('Comentário adicionado com sucesso');
         this.newComments[serviceId] = '';
@@ -507,7 +515,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
       return;
     }
 
-    this.contractService.updateServiceComment(comment.id, newText).subscribe({
+    this.contractService.updateServiceComment(comment.id, newText).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: () => {
         this.toastr.success('Comentário atualizado com sucesso');
         comment.comment = newText;
@@ -522,7 +532,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
   deleteComment(serviceId: number, comment: ServiceComment) {
     if (!confirm('Tem certeza que deseja excluir este comentário?')) return;
 
-    this.contractService.deleteServiceComment(comment.id).subscribe({
+    this.contractService.deleteServiceComment(comment.id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: () => {
         this.toastr.success('Comentário excluído com sucesso');
         this.loadComments(serviceId);
@@ -562,7 +574,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
 
   loadAttachments(commentId: number) {
     // Sempre carregar anexos para garantir que apareçam no comentário
-    this.attachmentService.getCommentAttachments(commentId).subscribe({
+    this.attachmentService.getCommentAttachments(commentId).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (response) => {
         this.attachments[commentId] = response.attachments;
       },
@@ -574,7 +588,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
 
 
   downloadAttachment(attachment: ServiceCommentAttachment) {
-    this.attachmentService.downloadAttachment(attachment.id).subscribe({
+    this.attachmentService.downloadAttachment(attachment.id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -596,7 +612,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
       return;
     }
 
-    this.attachmentService.deleteAttachment(attachment.id).subscribe({
+    this.attachmentService.deleteAttachment(attachment.id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (response) => {
         // Remover da lista local
         const commentAttachments = this.attachments[attachment.comment_id];
@@ -771,8 +789,11 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
         }
       },
       error: (error) => {
-        this.toastr.error(error.error?.error || 'Erro ao adicionar comentário');
         this.isAddingComment[serviceId] = false;
+        const msg = error.name === 'TimeoutError'
+          ? 'Servidor não respondeu. Tente novamente.'
+          : (error.error?.error || 'Erro ao adicionar comentário');
+        this.toastr.error(msg);
       }
     });
   }
@@ -782,7 +803,9 @@ export class ContractServicesManagerComponent implements OnInit, OnChanges, OnDe
     let failedCount = 0;
 
     files.forEach(file => {
-      this.attachmentService.uploadFile(commentId, file).subscribe({
+      this.attachmentService.uploadFile(commentId, file).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
         next: (progress) => {
           if (progress.status === 'completed') {
             uploadedCount++;

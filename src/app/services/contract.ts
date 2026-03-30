@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { PaymentMethod } from './payment-method.service';
 
@@ -422,7 +423,7 @@ export class ContractService {
       `${this.API_URL}/services/${serviceId}/comments`,
       { comment },
       { headers: this.getAuthHeaders() }
-    );
+    ).pipe(timeout(30000));
   }
 
   updateServiceComment(commentId: number, comment: string): Observable<any> {
