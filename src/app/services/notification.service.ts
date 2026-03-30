@@ -148,7 +148,10 @@ export class NotificationService {
             this.notificationHistory.next(serverNotifications);
           } else {
             const current = this.notificationHistory.value;
-            this.notificationHistory.next([...current, ...serverNotifications]);
+            // Dedup por id para evitar duplicatas ao recarregar
+            const existingIds = new Set(current.map(n => n.id));
+            const newOnly = serverNotifications.filter(n => !existingIds.has(n.id));
+            this.notificationHistory.next([...current, ...newOnly]);
           }
 
           this.currentPage = response.page;
@@ -185,7 +188,6 @@ export class NotificationService {
   markAsRead(id: string): void {
     const history = this.notificationHistory.value.map(n => n.id === id ? { ...n, isRead: true } : n);
     this.notificationHistory.next(history);
-    this.updateUnreadCount();
     this.saveNotificationsToStorage();
 
     const numericId = this.extractServerId(id);
@@ -200,7 +202,6 @@ export class NotificationService {
   markAllAsRead(): void {
     const history = this.notificationHistory.value.map(n => ({ ...n, isRead: true }));
     this.notificationHistory.next(history);
-    this.updateUnreadCount();
     this.saveNotificationsToStorage();
 
     this.http.patch(`${this.API_URL}/read-all`, {}).subscribe({
@@ -211,11 +212,10 @@ export class NotificationService {
 
   clearHistory(): void {
     this.notificationHistory.next([]);
-    this.updateUnreadCount();
+    this.unreadCount.next(0);
     this.saveNotificationsToStorage();
 
     this.http.delete(`${this.API_URL}/delete-all`).subscribe({
-      next: () => this.fetchUnreadCount(),
       error: (err) => console.error('Erro ao deletar notificacoes do servidor:', err)
     });
   }
@@ -236,10 +236,7 @@ export class NotificationService {
     this.notificationHistory.next([]);
     this.unreadCount.next(0);
     this.toastQueue.next([]);
-  }
-
-  private updateUnreadCount(): void {
-    this.unreadCount.next(this.notificationHistory.value.filter(n => !n.isRead).length);
+    localStorage.removeItem('notification_history');
   }
 
   private saveNotificationsToStorage(): void {
@@ -257,7 +254,8 @@ export class NotificationService {
       if (stored) {
         const history = JSON.parse(stored).map((n: any) => ({ ...n, timestamp: new Date(n.timestamp) }));
         this.notificationHistory.next(history.slice(0, this.MAX_STORED_NOTIFICATIONS));
-        this.updateUnreadCount();
+        // Usar contagem local apenas como valor inicial até o servidor responder
+        this.unreadCount.next(history.filter((n: any) => !n.isRead).length);
       }
     } catch (e) {
       console.error('Erro ao carregar notificacoes', e);
@@ -362,11 +360,26 @@ export class NotificationService {
     this.connectWebSocket();
   }
 
+  /**
+   * Reconectar WebSocket com novo token (após token refresh).
+   * Diferente de initializeNotifications, este método apenas reconecta o socket
+   * sem recarregar notificações (que já estão carregadas).
+   */
+  reconnectWebSocket(): void {
+    this.disconnectWebSocket();
+    this.connectWebSocket();
+  }
+
   private connectWebSocket(): void {
     const token = localStorage.getItem('token');
     if (!token) {
       console.warn('⚠️ Token não encontrado, não é possível conectar ao WebSocket');
       return;
+    }
+
+    // Se já existe uma conexão ativa, desconectar primeiro
+    if (this.socket) {
+      this.disconnectWebSocket();
     }
 
     try {
@@ -379,7 +392,7 @@ export class NotificationService {
         reconnection: true,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
-        reconnectionAttempts: 5
+        reconnectionAttempts: 10
       });
 
       this.socket.on('connect', () => {
@@ -397,8 +410,14 @@ export class NotificationService {
       });
 
       this.socket.on('connect_error', (error: any) => {
-        console.error('❌ Erro de conexão WebSocket:', error);
+        console.error('❌ Erro de conexão WebSocket:', error.message || error);
         this.isSocketConnected = false;
+
+        // Se erro de autenticação, não tentar reconectar com token inválido
+        if (error.message?.includes('Authentication error')) {
+          console.warn('⚠️ Token inválido para WebSocket, parando reconexão');
+          this.socket?.disconnect();
+        }
       });
 
       // Receber notificações em tempo real
@@ -419,27 +438,28 @@ export class NotificationService {
           metadata: serverNotification.metadata
         };
 
-        // Adicionar ao histórico
+        // Adicionar ao histórico (com dedup por id)
         const currentHistory = this.notificationHistory.value;
-        this.notificationHistory.next([notification, ...currentHistory].slice(0, this.MAX_STORED_NOTIFICATIONS));
-        this.saveNotificationsToStorage();
+        const alreadyExists = currentHistory.some(n => n.id === notification.id);
+        if (!alreadyExists) {
+          this.notificationHistory.next([notification, ...currentHistory].slice(0, this.MAX_STORED_NOTIFICATIONS));
+          this.saveNotificationsToStorage();
 
-        // Atualizar contador de não lidas
-        this.updateUnreadCount();
+          // Mostrar toast
+          this.showToastForNotification(notification);
+        }
 
-        // Mostrar toast
-        this.showToastForNotification(notification);
+        // NÃO atualizar contagem localmente - esperar o evento unread_count_update do servidor
       });
 
-      // Atualizar contador de não lidas
+      // Atualizar contador de não lidas (enviado pelo servidor após criar notificações)
       this.socket.on('unread_count_update', (data: { unreadCount: number }) => {
-        console.log('📊 Atualização de contador via WebSocket:', data.unreadCount);
         this.unreadCount.next(data.unreadCount);
       });
 
       // Responder a ping com pong (keep-alive)
-      this.socket.on('pong', (data: any) => {
-        // console.log('🏓 Pong recebido:', data);
+      this.socket.on('pong', (_data: any) => {
+        // keep-alive ack
       });
 
     } catch (error) {
@@ -449,15 +469,14 @@ export class NotificationService {
 
   private disconnectWebSocket(): void {
     if (this.socket) {
+      this.socket.removeAllListeners();
       this.socket.disconnect();
       this.socket = null;
       this.isSocketConnected = false;
-      console.log('🔌 WebSocket desconectado');
     }
   }
 
   private showToastForNotification(notification: Notification): void {
-    // Mostrar toast apenas para notificações de alta prioridade ou importantes
     const showToastTypes: Notification['type'][] = [
       'contract_assignment',
       'payment_overdue',

@@ -330,10 +330,10 @@ export class AuthService {
       tap(response => {
         if (response.token && response.user) {
           this.setSession(response.token, response.user);
-          // Reinicializar notificações após refresh do token (com delay)
+          // Reconectar WebSocket com novo token após refresh
           setTimeout(() => {
-            this.notificationService.initializeNotifications();
-          }, 1500);
+            this.notificationService.reconnectWebSocket();
+          }, 500);
         }
       })
     );
