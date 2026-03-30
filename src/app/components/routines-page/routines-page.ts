@@ -10,6 +10,9 @@ interface ContractRoutine {
   id: number;
   contractNumber: string;
   clientName: string;
+  clientTradeName: string;
+  clientCompanyName: string;
+  clientType: string;
   type: string;
   status: string;
   statusColor: string;
@@ -86,7 +89,10 @@ export class RoutinesPageComponent implements OnInit {
         this.contracts = response.routines.map((routine: RoutineListItem) => ({
           id: routine.id,
           contractNumber: routine.contractNumber,
-          clientName: routine.clientName,
+          clientName: (routine.clientName || '').toUpperCase(),
+          clientTradeName: (routine.clientTradeName || '').toUpperCase(),
+          clientCompanyName: (routine.clientCompanyName || '').toUpperCase(),
+          clientType: routine.clientType || '',
           type: this.getTypeLabel(routine.type),
           status: routine.status,
           statusColor: this.getStatusColor(routine.status),

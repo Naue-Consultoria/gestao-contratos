@@ -366,6 +366,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-transform: uppercase;
 }
 
 .filter-arrow {
@@ -444,6 +445,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
+  text-transform: uppercase;
 }
 
 .filter-option:hover {
@@ -749,16 +751,34 @@
 }
 
 /* Client Name */
+.client-name-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .client-name {
   font-weight: 600;
   color: #1e293b;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.client-company-name {
+  font-size: 0.8rem;
+  color: #0a6254;
+  font-weight: 500;
+  text-transform: uppercase;
 }
 
 :host-context(body.dark-mode) .client-name {
   color: var(--dark-text);
+}
+
+:host-context(body.dark-mode) .client-company-name {
+  color: #34d399;
 }
 
 /* Type Badge */

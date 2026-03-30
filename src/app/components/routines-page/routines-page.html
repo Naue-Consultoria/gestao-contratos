@@ -173,7 +173,12 @@
                 </div>
               </td>
               <td class="col-client">
-                <span class="client-name">{{ contract.clientName }}</span>
+                <div class="client-name-container">
+                  <span class="client-name">{{ contract.clientName }}</span>
+                  <span class="client-company-name" *ngIf="contract.clientType === 'PJ' && contract.clientCompanyName && contract.clientTradeName && contract.clientTradeName !== contract.clientCompanyName">
+                    {{ contract.clientCompanyName }}
+                  </span>
+                </div>
               </td>
               <td class="col-type">
                 <span class="type-badge" [ngClass]="getTypeClass(contract.type)">{{ contract.type }}</span>

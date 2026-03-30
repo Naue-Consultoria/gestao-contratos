@@ -36,6 +36,9 @@ export interface RoutineListItem {
   id: number;
   contractNumber: string;
   clientName: string;
+  clientTradeName?: string;
+  clientCompanyName?: string;
+  clientType?: string;
   clientId: number;
   type: string;
   status: string;
