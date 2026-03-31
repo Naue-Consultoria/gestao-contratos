@@ -1,23 +1,39 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { RateLimitService } from './rate-limit.service';
-import { io, Socket } from 'socket.io-client';
+import { supabase } from '../lib/supabase';
+import { RealtimeChannel } from '@supabase/supabase-js';
+
+// ─── Tipos ───────────────────────────────────────────────────────────────
+
+export type NotificationType =
+  | 'success' | 'error' | 'warning' | 'info'
+  | 'contract_assignment' | 'permission_change' | 'contract_expiring'
+  | 'payment_overdue' | 'service_comment' | 'service_status_change'
+  | 'new_contract' | 'new_user' | 'security_alert'
+  | 'approval_required' | 'system_event';
+
+export type NotificationPriority = 'low' | 'medium' | 'high';
+export type DisplayCategory = 'success' | 'info' | 'warning' | 'alert';
 
 export interface Notification {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info' | 'contract_assignment' | 'permission_change' | 'contract_expiring' | 'payment_overdue' | 'service_comment' | 'service_status_change' | 'new_contract' | 'new_user' | 'security_alert' | 'approval_required' | 'system_event';
+  type: NotificationType;
+  displayCategory: DisplayCategory;
   title: string;
   message: string;
   timestamp: Date;
-  isRead?: boolean;
-  persistent?: boolean;
+  isRead: boolean;
+  persistent: boolean;
   link?: string;
   icon?: string;
   duration?: number;
-  priority?: 'normal' | 'high';
+  priority?: NotificationPriority;
   metadata?: any;
+  actorName?: string;
+  archived?: boolean;
   action?: {
     label: string;
     callback: () => void;
@@ -25,17 +41,23 @@ export interface Notification {
 }
 
 export interface ApiNotificationResponse {
-  id: number;
-  user_id: number;
+  id: string;
+  user_id: string;
+  actor_id?: string;
   type: string;
   title: string;
   message: string;
   link?: string;
   priority?: string;
+  entity_type?: string;
+  entity_id?: string;
+  group_key?: string;
   metadata?: any;
   is_read: boolean;
+  archived: boolean;
   read_at?: string;
   created_at: string;
+  actor?: { id: string; name: string } | null;
 }
 
 export interface NotificationListResponse {
@@ -57,16 +79,35 @@ export interface NotificationOptions {
   };
 }
 
+// Mapa de tipo -> categoria de exibição
+const NOTIFICATION_DISPLAY_MAP: Record<string, DisplayCategory> = {
+  contract_assignment: 'info',
+  permission_change: 'info',
+  contract_expiring: 'warning',
+  payment_overdue: 'alert',
+  service_comment: 'info',
+  service_status_change: 'info',
+  new_contract: 'info',
+  new_user: 'info',
+  security_alert: 'alert',
+  approval_required: 'warning',
+  system_event: 'warning',
+};
+
+// ─── Service ─────────────────────────────────────────────────────────────
+
 @Injectable({
   providedIn: 'root'
 })
-export class NotificationService {
+export class NotificationService implements OnDestroy {
   private readonly API_URL = `${environment.apiUrl}/notifications`;
   private readonly MAX_STORED_NOTIFICATIONS = 50;
 
-  private socket: Socket | null = null;
-  private isSocketConnected = false;
+  // Supabase Realtime
+  private realtimeChannel: RealtimeChannel | null = null;
+  private currentUserId: string | null = null;
 
+  // Observables
   private toastQueue = new BehaviorSubject<Notification[]>([]);
   public toastQueue$ = this.toastQueue.asObservable();
 
@@ -76,12 +117,14 @@ export class NotificationService {
   private unreadCount = new BehaviorSubject<number>(0);
   public unreadCount$ = this.unreadCount.asObservable();
 
+  // Paginação
   private currentPage = 1;
   private readonly pageSize = 20;
   private totalPages = 1;
   private isLoading = false;
   private isInitialized = false;
 
+  // Toast config
   private defaultDuration = 5000;
   private maxToasts = 3;
 
@@ -92,19 +135,38 @@ export class NotificationService {
     this.loadNotificationsFromStorage();
   }
 
-  success(message: string, title: string = 'Sucesso!', options?: NotificationOptions): void { this.show({ type: 'success', title, message, icon: 'fas fa-check-circle', ...options }); }
-  error(message: string, title: string = 'Erro!', options?: NotificationOptions): void { this.show({ type: 'error', title, message, icon: 'fas fa-exclamation-circle', duration: 7000, ...options }); }
-  warning(message: string, title: string = 'Atenção!', options?: NotificationOptions): void { this.show({ type: 'warning', title, message, icon: 'fas fa-exclamation-triangle', ...options }); }
-  info(message: string, title: string = 'Informação', options?: NotificationOptions): void { this.show({ type: 'info', title, message, icon: 'fas fa-info-circle', ...options }); }
+  ngOnDestroy(): void {
+    this.disconnectRealtime();
+  }
+
+  // ─── Toast Methods (notificações locais/efêmeras) ──────────────────────
+
+  success(message: string, title: string = 'Sucesso!', options?: NotificationOptions): void {
+    this.show({ type: 'success', displayCategory: 'success', title, message, icon: 'fas fa-check-circle', ...options });
+  }
+
+  error(message: string, title: string = 'Erro!', options?: NotificationOptions): void {
+    this.show({ type: 'error', displayCategory: 'alert', title, message, icon: 'fas fa-exclamation-circle', duration: 7000, ...options });
+  }
+
+  warning(message: string, title: string = 'Atenção!', options?: NotificationOptions): void {
+    this.show({ type: 'warning', displayCategory: 'warning', title, message, icon: 'fas fa-exclamation-triangle', ...options });
+  }
+
+  info(message: string, title: string = 'Informação', options?: NotificationOptions): void {
+    this.show({ type: 'info', displayCategory: 'info', title, message, icon: 'fas fa-info-circle', ...options });
+  }
 
   private show(config: Partial<Notification>): void {
     const notification: Notification = {
       id: this.generateId(),
       type: 'info',
+      displayCategory: 'info',
       title: '',
       message: '',
       timestamp: new Date(),
       isRead: false,
+      persistent: false,
       duration: this.defaultDuration,
       ...config
     };
@@ -126,6 +188,8 @@ export class NotificationService {
     this.toastQueue.next(this.toastQueue.value.filter(n => n.id !== id));
   }
 
+  // ─── API Methods ───────────────────────────────────────────────────────
+
   fetchUserNotifications(page: number = 1) {
     if (this.isLoading) return;
 
@@ -142,13 +206,12 @@ export class NotificationService {
     ).subscribe({
       next: (response) => {
         if (response.success && response.notifications) {
-          const serverNotifications = response.notifications.map(this.mapApiNotificationToClient);
+          const serverNotifications = response.notifications.map(n => this.mapApiNotification(n));
 
           if (page === 1) {
             this.notificationHistory.next(serverNotifications);
           } else {
             const current = this.notificationHistory.value;
-            // Dedup por id para evitar duplicatas ao recarregar
             const existingIds = new Set(current.map(n => n.id));
             const newOnly = serverNotifications.filter(n => !existingIds.has(n.id));
             this.notificationHistory.next([...current, ...newOnly]);
@@ -161,7 +224,7 @@ export class NotificationService {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error("Falha ao buscar notificacoes", err);
+        console.error('Falha ao buscar notificacoes', err);
         this.isLoading = false;
       }
     });
@@ -173,7 +236,7 @@ export class NotificationService {
 
     this.rateLimitService.executeRequest(
       'notifications-unread-count',
-      () => this.http.get<{ success: boolean, unreadCount: number }>(`${this.API_URL}/unread-count`),
+      () => this.http.get<{ success: boolean; unreadCount: number }>(`${this.API_URL}/unread-count`),
       2000
     ).subscribe({
       next: (response) => {
@@ -181,18 +244,20 @@ export class NotificationService {
           this.unreadCount.next(response.unreadCount);
         }
       },
-      error: (err) => console.error("Falha ao buscar contador de nao lidas", err)
+      error: (err) => console.error('Falha ao buscar contador de nao lidas', err)
     });
   }
 
   markAsRead(id: string): void {
-    const history = this.notificationHistory.value.map(n => n.id === id ? { ...n, isRead: true } : n);
+    const history = this.notificationHistory.value.map(n =>
+      n.id === id ? { ...n, isRead: true } : n
+    );
     this.notificationHistory.next(history);
     this.saveNotificationsToStorage();
 
-    const numericId = this.extractServerId(id);
-    if (numericId) {
-      this.http.patch(`${this.API_URL}/${numericId}/read`, {}).subscribe({
+    const serverId = this.extractServerId(id);
+    if (serverId) {
+      this.http.patch(`${this.API_URL}/read`, { ids: [serverId] }).subscribe({
         next: () => this.fetchUnreadCount(),
         error: (err) => console.error('Erro ao marcar notificacao como lida:', err)
       });
@@ -205,8 +270,40 @@ export class NotificationService {
     this.saveNotificationsToStorage();
 
     this.http.patch(`${this.API_URL}/read-all`, {}).subscribe({
-      next: () => this.fetchUnreadCount(),
+      next: () => {
+        this.unreadCount.next(0);
+      },
       error: (err) => console.error('Erro ao marcar todas como lidas:', err)
+    });
+  }
+
+  archiveNotifications(ids: string[]): void {
+    const serverIds = ids.map(id => this.extractServerId(id)).filter(Boolean);
+    if (serverIds.length === 0) return;
+
+    // Remover do histórico local
+    const history = this.notificationHistory.value.filter(n => !ids.includes(n.id));
+    this.notificationHistory.next(history);
+    this.saveNotificationsToStorage();
+
+    this.http.patch(`${this.API_URL}/archive`, { ids: serverIds }).subscribe({
+      next: () => this.fetchUnreadCount(),
+      error: (err) => console.error('Erro ao arquivar notificacoes:', err)
+    });
+  }
+
+  deleteNotifications(ids: string[]): void {
+    const serverIds = ids.map(id => this.extractServerId(id)).filter(Boolean);
+    if (serverIds.length === 0) return;
+
+    // Remover do histórico local
+    const history = this.notificationHistory.value.filter(n => !ids.includes(n.id));
+    this.notificationHistory.next(history);
+    this.saveNotificationsToStorage();
+
+    this.http.post(`${this.API_URL}/delete`, { ids: serverIds }).subscribe({
+      next: () => this.fetchUnreadCount(),
+      error: (err) => console.error('Erro ao deletar notificacoes:', err)
     });
   }
 
@@ -227,104 +324,124 @@ export class NotificationService {
     });
   }
 
+  // ─── Inicialização e Realtime ──────────────────────────────────────────
+
+  initializeNotifications(userId: string): void {
+    if (this.isInitialized && this.currentUserId === userId) return;
+
+    this.currentUserId = userId;
+    this.isInitialized = true;
+
+    // Carregar notificações iniciais
+    setTimeout(() => this.fetchUserNotifications(), 500);
+    setTimeout(() => this.fetchUnreadCount(), 1000);
+
+    // Conectar ao Supabase Realtime
+    this.connectRealtime(userId);
+  }
+
+  private connectRealtime(userId: string): void {
+    // Desconectar canal anterior se existir
+    this.disconnectRealtime();
+
+    try {
+      this.realtimeChannel = supabase
+        .channel(`notifications:${userId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${userId}`,
+          },
+          (payload) => {
+            const raw = payload.new as any;
+            const notification = this.mapRealtimePayload(raw);
+
+            // Adicionar ao histórico (com dedup)
+            const currentHistory = this.notificationHistory.value;
+            const alreadyExists = currentHistory.some(n => n.id === notification.id);
+            if (!alreadyExists) {
+              this.notificationHistory.next(
+                [notification, ...currentHistory].slice(0, this.MAX_STORED_NOTIFICATIONS)
+              );
+              this.saveNotificationsToStorage();
+
+              // Incrementar contador de não lidas
+              this.unreadCount.next(this.unreadCount.value + 1);
+
+              // Mostrar toast para tipos importantes
+              this.showToastForNotification(notification);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${userId}`,
+          },
+          (payload) => {
+            const raw = payload.new as any;
+            const updatedNotification = this.mapRealtimePayload(raw);
+
+            // Atualizar no histórico (para aggregates que foram atualizados)
+            const currentHistory = this.notificationHistory.value;
+            const index = currentHistory.findIndex(n => n.id === updatedNotification.id);
+
+            if (index >= 0) {
+              const updated = [...currentHistory];
+              updated[index] = updatedNotification;
+              // Reordenar para o topo se foi atualizado
+              updated.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+              this.notificationHistory.next(updated);
+              this.saveNotificationsToStorage();
+            } else {
+              // É um aggregate que já existia mas não estava no histórico local
+              this.notificationHistory.next(
+                [updatedNotification, ...currentHistory].slice(0, this.MAX_STORED_NOTIFICATIONS)
+              );
+              this.saveNotificationsToStorage();
+            }
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('[Realtime] Conectado ao canal de notificações');
+          }
+          if (status === 'CHANNEL_ERROR') {
+            console.error('[Realtime] Erro no canal de notificações');
+          }
+        });
+    } catch (error) {
+      console.error('[Realtime] Erro ao conectar:', error);
+    }
+  }
+
+  private disconnectRealtime(): void {
+    if (this.realtimeChannel) {
+      supabase.removeChannel(this.realtimeChannel);
+      this.realtimeChannel = null;
+    }
+  }
+
   resetNotificationState(): void {
-    this.disconnectWebSocket();
+    this.disconnectRealtime();
     this.isInitialized = false;
     this.isLoading = false;
     this.currentPage = 1;
     this.totalPages = 1;
+    this.currentUserId = null;
     this.notificationHistory.next([]);
     this.unreadCount.next(0);
     this.toastQueue.next([]);
     localStorage.removeItem('notification_history');
   }
 
-  private saveNotificationsToStorage(): void {
-    try {
-      const toSave = this.notificationHistory.value.slice(0, this.MAX_STORED_NOTIFICATIONS);
-      localStorage.setItem('notification_history', JSON.stringify(toSave));
-    } catch (e) {
-      console.error('Erro ao salvar notificacoes', e);
-    }
-  }
-
-  private loadNotificationsFromStorage(): void {
-    try {
-      const stored = localStorage.getItem('notification_history');
-      if (stored) {
-        const history = JSON.parse(stored).map((n: any) => ({ ...n, timestamp: new Date(n.timestamp) }));
-        this.notificationHistory.next(history.slice(0, this.MAX_STORED_NOTIFICATIONS));
-        // Usar contagem local apenas como valor inicial até o servidor responder
-        this.unreadCount.next(history.filter((n: any) => !n.isRead).length);
-      }
-    } catch (e) {
-      console.error('Erro ao carregar notificacoes', e);
-      localStorage.removeItem('notification_history');
-    }
-  }
-
-  private generateId(): string {
-    return `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  private mapApiNotificationToClient = (apiNotification: ApiNotificationResponse): Notification => {
-    return {
-      id: `server-${apiNotification.id}`,
-      type: this.mapNotificationType(apiNotification.type),
-      title: apiNotification.title,
-      message: apiNotification.message,
-      timestamp: new Date(apiNotification.created_at),
-      isRead: apiNotification.is_read,
-      persistent: true,
-      link: apiNotification.link,
-      icon: this.getNotificationIcon(apiNotification.type),
-      priority: apiNotification.priority as 'normal' | 'high' || 'normal',
-      metadata: apiNotification.metadata
-    };
-  }
-
-  private mapNotificationType(serverType: string): Notification['type'] {
-    const typeMap: Record<string, Notification['type']> = {
-      'contract_assignment': 'contract_assignment',
-      'permission_change': 'permission_change',
-      'contract_expiring': 'contract_expiring',
-      'payment_overdue': 'payment_overdue',
-      'service_comment': 'service_comment',
-      'service_status_change': 'service_status_change',
-      'new_contract': 'new_contract',
-      'new_user': 'new_user',
-      'security_alert': 'security_alert',
-      'approval_required': 'approval_required',
-      'system_event': 'system_event'
-    };
-    return typeMap[serverType] || 'info';
-  }
-
-  private getNotificationIcon(type: string): string {
-    const iconMap: Record<string, string> = {
-      'contract_assignment': 'fas fa-file-contract',
-      'permission_change': 'fas fa-user-shield',
-      'contract_expiring': 'fas fa-calendar-times',
-      'payment_overdue': 'fas fa-exclamation-triangle',
-      'service_comment': 'fas fa-comment',
-      'service_status_change': 'fas fa-tasks',
-      'new_contract': 'fas fa-file-plus',
-      'new_user': 'fas fa-user-plus',
-      'security_alert': 'fas fa-shield-alt',
-      'approval_required': 'fas fa-check-double',
-      'system_event': 'fas fa-cog',
-      'success': 'fas fa-check-circle',
-      'error': 'fas fa-exclamation-circle',
-      'warning': 'fas fa-exclamation-triangle',
-      'info': 'fas fa-info-circle'
-    };
-    return iconMap[type] || 'fas fa-bell';
-  }
-
-  private extractServerId(clientId: string): number | null {
-    const match = clientId.match(/^server-(\d+)$/);
-    return match ? parseInt(match[1], 10) : null;
-  }
+  // ─── Paginação ─────────────────────────────────────────────────────────
 
   hasMoreNotifications(): boolean {
     return this.currentPage < this.totalPages;
@@ -342,162 +459,132 @@ export class NotificationService {
     this.fetchUnreadCount();
   }
 
-  initializeNotifications(): void {
-    if (this.isInitialized) return;
+  // ─── Mapeamento ────────────────────────────────────────────────────────
 
-    this.isInitialized = true;
-
-    // Carregar notificações iniciais
-    setTimeout(() => {
-      this.fetchUserNotifications();
-    }, 500);
-
-    setTimeout(() => {
-      this.fetchUnreadCount();
-    }, 1000);
-
-    // Conectar ao WebSocket para notificações em tempo real
-    this.connectWebSocket();
+  private mapApiNotification(raw: ApiNotificationResponse): Notification {
+    return {
+      id: `server-${raw.id}`,
+      type: this.mapNotificationType(raw.type),
+      displayCategory: NOTIFICATION_DISPLAY_MAP[raw.type] || 'info',
+      title: raw.title,
+      message: raw.message,
+      timestamp: new Date(raw.created_at),
+      isRead: raw.is_read,
+      persistent: true,
+      link: raw.link,
+      icon: this.getNotificationIcon(raw.type),
+      priority: (raw.priority as NotificationPriority) || 'medium',
+      metadata: raw.metadata,
+      actorName: raw.actor?.name || undefined,
+      archived: raw.archived,
+    };
   }
 
-  /**
-   * Reconectar WebSocket com novo token (após token refresh).
-   * Diferente de initializeNotifications, este método apenas reconecta o socket
-   * sem recarregar notificações (que já estão carregadas).
-   */
-  reconnectWebSocket(): void {
-    this.disconnectWebSocket();
-    this.connectWebSocket();
+  private mapRealtimePayload(raw: any): Notification {
+    return {
+      id: `server-${raw.id}`,
+      type: this.mapNotificationType(raw.type),
+      displayCategory: NOTIFICATION_DISPLAY_MAP[raw.type] || 'info',
+      title: raw.title,
+      message: raw.message,
+      timestamp: new Date(raw.created_at),
+      isRead: raw.is_read || false,
+      persistent: true,
+      link: raw.link,
+      icon: this.getNotificationIcon(raw.type),
+      priority: (raw.priority as NotificationPriority) || 'medium',
+      metadata: raw.metadata,
+      archived: raw.archived || false,
+    };
   }
 
-  private connectWebSocket(): void {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn('⚠️ Token não encontrado, não é possível conectar ao WebSocket');
-      return;
-    }
-
-    // Se já existe uma conexão ativa, desconectar primeiro
-    if (this.socket) {
-      this.disconnectWebSocket();
-    }
-
-    try {
-      // Extrair URL base do backend
-      const backendUrl = environment.apiUrl.replace('/api', '');
-
-      this.socket = io(backendUrl, {
-        auth: { token },
-        transports: ['websocket', 'polling'],
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        reconnectionAttempts: 10
-      });
-
-      this.socket.on('connect', () => {
-        console.log('✅ WebSocket conectado');
-        this.isSocketConnected = true;
-      });
-
-      this.socket.on('connected', (data: any) => {
-        console.log('✅ Confirmação do servidor:', data);
-      });
-
-      this.socket.on('disconnect', (reason: string) => {
-        console.log('🔌 WebSocket desconectado:', reason);
-        this.isSocketConnected = false;
-      });
-
-      this.socket.on('connect_error', (error: any) => {
-        console.error('❌ Erro de conexão WebSocket:', error.message || error);
-        this.isSocketConnected = false;
-
-        // Se erro de autenticação, não tentar reconectar com token inválido
-        if (error.message?.includes('Authentication error')) {
-          console.warn('⚠️ Token inválido para WebSocket, parando reconexão');
-          this.socket?.disconnect();
-        }
-      });
-
-      // Receber notificações em tempo real
-      this.socket.on('notification', (serverNotification: any) => {
-        console.log('📬 Nova notificação via WebSocket:', serverNotification);
-
-        const notification: Notification = {
-          id: `server-${serverNotification.id}`,
-          type: this.mapNotificationType(serverNotification.type),
-          title: serverNotification.title,
-          message: serverNotification.message,
-          timestamp: new Date(serverNotification.created_at),
-          isRead: serverNotification.is_read || false,
-          persistent: true,
-          link: serverNotification.link,
-          icon: this.getNotificationIcon(serverNotification.type),
-          priority: serverNotification.priority as 'normal' | 'high' || 'normal',
-          metadata: serverNotification.metadata
-        };
-
-        // Adicionar ao histórico (com dedup por id)
-        const currentHistory = this.notificationHistory.value;
-        const alreadyExists = currentHistory.some(n => n.id === notification.id);
-        if (!alreadyExists) {
-          this.notificationHistory.next([notification, ...currentHistory].slice(0, this.MAX_STORED_NOTIFICATIONS));
-          this.saveNotificationsToStorage();
-
-          // Mostrar toast
-          this.showToastForNotification(notification);
-        }
-
-        // NÃO atualizar contagem localmente - esperar o evento unread_count_update do servidor
-      });
-
-      // Atualizar contador de não lidas (enviado pelo servidor após criar notificações)
-      this.socket.on('unread_count_update', (data: { unreadCount: number }) => {
-        this.unreadCount.next(data.unreadCount);
-      });
-
-      // Responder a ping com pong (keep-alive)
-      this.socket.on('pong', (_data: any) => {
-        // keep-alive ack
-      });
-
-    } catch (error) {
-      console.error('❌ Erro ao conectar WebSocket:', error);
-    }
+  private mapNotificationType(serverType: string): NotificationType {
+    const validTypes: NotificationType[] = [
+      'contract_assignment', 'permission_change', 'contract_expiring',
+      'payment_overdue', 'service_comment', 'service_status_change',
+      'new_contract', 'new_user', 'security_alert',
+      'approval_required', 'system_event'
+    ];
+    return validTypes.includes(serverType as NotificationType)
+      ? serverType as NotificationType
+      : 'info';
   }
 
-  private disconnectWebSocket(): void {
-    if (this.socket) {
-      this.socket.removeAllListeners();
-      this.socket.disconnect();
-      this.socket = null;
-      this.isSocketConnected = false;
-    }
+  private getNotificationIcon(type: string): string {
+    const iconMap: Record<string, string> = {
+      contract_assignment: 'fas fa-file-contract',
+      permission_change: 'fas fa-user-shield',
+      contract_expiring: 'fas fa-calendar-times',
+      payment_overdue: 'fas fa-exclamation-triangle',
+      service_comment: 'fas fa-comment',
+      service_status_change: 'fas fa-tasks',
+      new_contract: 'fas fa-file-plus',
+      new_user: 'fas fa-user-plus',
+      security_alert: 'fas fa-shield-alt',
+      approval_required: 'fas fa-check-double',
+      system_event: 'fas fa-cog',
+      success: 'fas fa-check-circle',
+      error: 'fas fa-exclamation-circle',
+      warning: 'fas fa-exclamation-triangle',
+      info: 'fas fa-info-circle',
+    };
+    return iconMap[type] || 'fas fa-bell';
   }
 
   private showToastForNotification(notification: Notification): void {
-    const showToastTypes: Notification['type'][] = [
+    const showToastTypes: NotificationType[] = [
       'contract_assignment',
       'payment_overdue',
       'contract_expiring',
       'security_alert',
-      'approval_required'
+      'approval_required',
     ];
 
     if (showToastTypes.includes(notification.type)) {
       this.show({
         ...notification,
         persistent: false,
-        duration: notification.priority === 'high' ? 7000 : 5000
+        duration: notification.priority === 'high' ? 7000 : 5000,
       });
     }
   }
 
-  public getWebSocketStatus(): { connected: boolean; userId?: string } {
-    return {
-      connected: this.isSocketConnected,
-      userId: this.socket?.id
-    };
+  // ─── Storage ───────────────────────────────────────────────────────────
+
+  private saveNotificationsToStorage(): void {
+    try {
+      const toSave = this.notificationHistory.value.slice(0, this.MAX_STORED_NOTIFICATIONS);
+      localStorage.setItem('notification_history', JSON.stringify(toSave));
+    } catch (e) {
+      console.error('Erro ao salvar notificacoes', e);
+    }
+  }
+
+  private loadNotificationsFromStorage(): void {
+    try {
+      const stored = localStorage.getItem('notification_history');
+      if (stored) {
+        const history = JSON.parse(stored).map((n: any) => ({
+          ...n,
+          timestamp: new Date(n.timestamp),
+        }));
+        this.notificationHistory.next(history.slice(0, this.MAX_STORED_NOTIFICATIONS));
+        this.unreadCount.next(history.filter((n: any) => !n.isRead).length);
+      }
+    } catch (e) {
+      console.error('Erro ao carregar notificacoes', e);
+      localStorage.removeItem('notification_history');
+    }
+  }
+
+  // ─── Helpers ───────────────────────────────────────────────────────────
+
+  private generateId(): string {
+    return `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private extractServerId(clientId: string): string | null {
+    const match = clientId.match(/^server-(.+)$/);
+    return match ? match[1] : null;
   }
 }

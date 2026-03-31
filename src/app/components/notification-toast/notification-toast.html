@@ -4,10 +4,10 @@
       *ngFor="let notification of notifications; trackBy: trackById"
       [@slideIn]
       class="notification-toast"
-      [class.success]="notification.type === 'success'"
-      [class.error]="notification.type === 'error'"
-      [class.warning]="notification.type === 'warning'"
-      [class.info]="notification.type === 'info'"
+      [class.success]="notification.type === 'success' || notification.displayCategory === 'success'"
+      [class.error]="notification.type === 'error' || notification.displayCategory === 'alert'"
+      [class.warning]="notification.type === 'warning' || notification.displayCategory === 'warning'"
+      [class.info]="notification.type === 'info' || notification.displayCategory === 'info'"
       (click)="handleClick(notification)">
       
       <div class="notification-icon">
