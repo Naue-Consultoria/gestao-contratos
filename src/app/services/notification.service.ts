@@ -13,7 +13,7 @@ export type NotificationType =
   | 'contract_assignment' | 'permission_change' | 'contract_expiring'
   | 'payment_overdue' | 'service_comment' | 'service_status_change'
   | 'new_contract' | 'new_user' | 'security_alert'
-  | 'approval_required' | 'system_event';
+  | 'proposal_signed' | 'approval_required' | 'system_event';
 
 export type NotificationPriority = 'low' | 'medium' | 'high';
 export type DisplayCategory = 'success' | 'info' | 'warning' | 'alert';
@@ -90,6 +90,7 @@ const NOTIFICATION_DISPLAY_MAP: Record<string, DisplayCategory> = {
   new_contract: 'info',
   new_user: 'info',
   security_alert: 'alert',
+  proposal_signed: 'success',
   approval_required: 'warning',
   system_event: 'warning',
 };
@@ -503,7 +504,7 @@ export class NotificationService implements OnDestroy {
       'contract_assignment', 'permission_change', 'contract_expiring',
       'payment_overdue', 'service_comment', 'service_status_change',
       'new_contract', 'new_user', 'security_alert',
-      'approval_required', 'system_event'
+      'proposal_signed', 'approval_required', 'system_event'
     ];
     return validTypes.includes(serverType as NotificationType)
       ? serverType as NotificationType
@@ -521,6 +522,7 @@ export class NotificationService implements OnDestroy {
       new_contract: 'fas fa-file-plus',
       new_user: 'fas fa-user-plus',
       security_alert: 'fas fa-shield-alt',
+      proposal_signed: 'fas fa-file-signature',
       approval_required: 'fas fa-check-double',
       system_event: 'fas fa-cog',
       success: 'fas fa-check-circle',
@@ -537,6 +539,7 @@ export class NotificationService implements OnDestroy {
       'payment_overdue',
       'contract_expiring',
       'security_alert',
+      'proposal_signed',
       'approval_required',
     ];
 
