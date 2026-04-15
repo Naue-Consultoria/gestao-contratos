@@ -35,6 +35,9 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
   isLoading = true;
   error = '';
 
+  // Tab properties
+  activeTab: 'ativos' | 'inativos' = 'ativos';
+
   // Filter properties
   searchTerm = '';
   selectedCategory = '';
@@ -56,11 +59,21 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     window.removeEventListener('refreshServices', this.loadData.bind(this));
   }
 
+  switchTab(tab: 'ativos' | 'inativos') {
+    if (this.activeTab !== tab) {
+      this.activeTab = tab;
+      this.searchTerm = '';
+      this.selectedCategory = '';
+      this.loadData();
+    }
+  }
+
   async loadData() {
     this.isLoading = true;
     this.error = '';
     try {
-      const servicesResponse = await firstValueFrom(this.serviceService.getServices({ is_active: true }));
+      const isActive = this.activeTab === 'ativos';
+      const servicesResponse = await firstValueFrom(this.serviceService.getServices({ is_active: isActive }));
       this.services = servicesResponse.services.map(apiService => this.mapApiServiceToTableService(apiService));
       this.extractCategories();
       this.applyFilters();

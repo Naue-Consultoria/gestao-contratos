@@ -56,6 +56,26 @@
       </div>
     </div>
 
+    <!-- Tabs -->
+    <div class="tabs-container">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'ativos'"
+        (click)="switchTab('ativos')"
+      >
+        <i class="fas fa-check-circle"></i>
+        Ativos
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'inativos'"
+        (click)="switchTab('inativos')"
+      >
+        <i class="fas fa-ban"></i>
+        Inativos
+      </button>
+    </div>
+
     <!-- Mensagem de erro -->
     <div *ngIf="error" class="error-message">
       <i class="fas fa-exclamation-circle"></i>
@@ -72,9 +92,9 @@
     <div class="table-wrapper" *ngIf="!isLoading">
       <!-- Mensagem quando não há serviços -->
       <div *ngIf="filteredServices.length === 0 && services.length === 0 && !error" class="empty-state">
-        <i class="fas fa-briefcase empty-icon"></i>
-        <h3>Nenhum serviço cadastrado</h3>
-        <p>Clique no botão "Novo Serviço" para adicionar o primeiro serviço.</p>
+        <i [class]="activeTab === 'ativos' ? 'fas fa-briefcase empty-icon' : 'fas fa-ban empty-icon'"></i>
+        <h3>{{ activeTab === 'ativos' ? 'Nenhum serviço cadastrado' : 'Nenhum serviço inativo' }}</h3>
+        <p>{{ activeTab === 'ativos' ? 'Clique no botão "Novo Serviço" para adicionar o primeiro serviço.' : 'Todos os serviços estão ativos no momento.' }}</p>
       </div>
 
       <!-- Mensagem quando não há resultados na busca -->

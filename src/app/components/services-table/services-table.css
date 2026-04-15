@@ -127,6 +127,57 @@
     background-color: rgba(16, 185, 129, 0.1);
 }
 
+/* Tabs */
+.tabs-container {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .tabs-container {
+    border-bottom-color: var(--dark-border);
+}
+
+.tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-gray);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+    color: var(--primary-green);
+}
+
+.tab-btn.active {
+    color: var(--primary-green);
+    border-bottom-color: var(--primary-green);
+}
+
+.tab-btn i {
+    font-size: 0.8rem;
+}
+
+:host-context(body.dark-mode) .tab-btn {
+    color: #999;
+}
+
+:host-context(body.dark-mode) .tab-btn:hover,
+:host-context(body.dark-mode) .tab-btn.active {
+    color: var(--primary-green);
+}
+
 /* Table Container */
 .table-container {
     background-color: var(--white);
