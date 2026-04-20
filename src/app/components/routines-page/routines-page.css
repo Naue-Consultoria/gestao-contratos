@@ -366,6 +366,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-transform: uppercase;
 }
 
 .filter-arrow {
@@ -444,6 +445,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
+  text-transform: uppercase;
 }
 
 .filter-option:hover {
@@ -547,6 +549,44 @@
   outline: none;
   border-color: #0e9b71;
   box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
+}
+
+/* Active Filters Chip */
+.active-filters-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 36px;
+  padding: 0 0.75rem;
+  background-color: #f0faf6;
+  border: 1px solid #003b2b;
+  border-radius: 8px;
+  color: #003b2b;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.active-filters-chip:hover {
+  background-color: #003b2b;
+  color: white;
+}
+
+.active-filters-chip .fa-filter {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.active-filters-chip .fa-times {
+  font-size: 0.65rem;
+  opacity: 0.5;
+  margin-left: 0.125rem;
+}
+
+.active-filters-chip:hover .fa-times {
+  opacity: 1;
 }
 
 :host-context(body.dark-mode) .sort-select {
@@ -711,16 +751,34 @@
 }
 
 /* Client Name */
+.client-name-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .client-name {
   font-weight: 600;
   color: #1e293b;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.client-company-name {
+  font-size: 0.8rem;
+  color: #0a6254;
+  font-weight: 500;
+  text-transform: uppercase;
 }
 
 :host-context(body.dark-mode) .client-name {
   color: var(--dark-text);
+}
+
+:host-context(body.dark-mode) .client-company-name {
+  color: #34d399;
 }
 
 /* Type Badge */

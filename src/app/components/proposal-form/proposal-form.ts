@@ -225,7 +225,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     
     forkJoin({
       clients: this.clientService.getClients({}),
-      services: this.serviceService.getServicesForContracts({ is_active: true })
+      services: this.serviceService.getServices({ is_active: true })
     }).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
@@ -233,9 +233,9 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
         this.clients = (data.clients.clients || []).sort((a, b) => 
           a.name.toLowerCase().localeCompare(b.name.toLowerCase())
         );
-        // Filtrar apenas serviços ativos e ordenar alfabeticamente
+        // Filtrar apenas serviços ativos, excluindo os que são adicionados automaticamente
         this.services = (data.services.services || [])
-          .filter(service => service.is_active)
+          .filter(service => service.is_active && service.name !== 'Entrada de Cliente' && service.name !== 'Encerramento')
           .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
         this.availableServices = [...this.services];
         this.isLoading = false;

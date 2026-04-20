@@ -286,13 +286,13 @@
                   </label>
                   <input
                     id="vista_discount_value"
-                    type="number"
+                    type="text"
+                    appCurrencyMask
+                    [currency]="clientCurrency"
                     formControlName="vista_discount_value"
                     class="form-control"
-                    min="0"
-                    step="0.01"
                     [class.error]="isFieldInvalid('vista_discount_value')"
-                    placeholder="Ex: 500.00">
+                    placeholder="R$ 0,00">
                   <div *ngIf="isFieldInvalid('vista_discount_value')" class="error-message">Valor deve ser maior ou igual a zero.</div>
                 </div>
               </div>
@@ -337,13 +337,13 @@
                   </label>
                   <input
                     id="prazo_discount_value"
-                    type="number"
+                    type="text"
+                    appCurrencyMask
+                    [currency]="clientCurrency"
                     formControlName="prazo_discount_value"
                     class="form-control"
-                    min="0"
-                    step="0.01"
                     [class.error]="isFieldInvalid('prazo_discount_value')"
-                    placeholder="Ex: 0.00">
+                    placeholder="R$ 0,00">
                   <div *ngIf="isFieldInvalid('prazo_discount_value')" class="error-message">Valor deve ser maior ou igual a zero.</div>
                 </div>
               </div>

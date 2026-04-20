@@ -73,15 +73,17 @@ export class RecrutamentoSelecao implements OnInit {
   selectedVagaToCancel: Vaga | null = null;
 
   // Dados para fechamento de vaga
-  fechamentoData = {
+  fechamentoData: { salario: string; fonteRecrutamento: string; porcentagemFaturamento: number | null } = {
     salario: '',
-    fonteRecrutamento: ''
+    fonteRecrutamento: '',
+    porcentagemFaturamento: null
   };
 
   // Dados para cancelamento de vaga
-  cancelamentoData = {
+  cancelamentoData: { salario: string; fonteRecrutamento: string; porcentagemFaturamento: number | null } = {
     salario: '',
-    fonteRecrutamento: ''
+    fonteRecrutamento: '',
+    porcentagemFaturamento: null
   };
 
   // Cache for months and years
@@ -89,6 +91,7 @@ export class RecrutamentoSelecao implements OnInit {
   cachedYears: { value: string; label: string }[] = [];
 
   private vagaService = inject(VagaService);
+  private readonly FILTERS_STORAGE_KEY = 'recrutamento_filters';
 
   constructor(
     private router: Router,
@@ -170,6 +173,7 @@ export class RecrutamentoSelecao implements OnInit {
   ngOnInit() {
     this.setBreadcrumb();
     this.initializeFilters();
+    this.restoreFilters();
     this.loadData();
   }
 
@@ -290,7 +294,7 @@ export class RecrutamentoSelecao implements OnInit {
           observacoes: vaga.observacoes,
           candidatoAprovado: candidatoAprovadoNome,
           totalCandidatos: Array.isArray(vaga.vaga_candidatos) ? vaga.vaga_candidatos.length : 0,
-          porcentagemFaturamento: parseFloat(vaga.porcentagem_faturamento || 100),
+          porcentagemFaturamento: parseFloat(vaga.porcentagem_faturamento ?? 100),
           valorFaturamento: parseFloat(vaga.valor_faturamento || 0),
           sigilosa: vaga.sigilosa || false,
           impostoEstado: parseFloat(vaga.imposto_estado || 0)
@@ -392,6 +396,7 @@ export class RecrutamentoSelecao implements OnInit {
       return matchesSearch && matchesStatus && matchesTipoCargo && matchesFonte && matchesMonthYear;
     });
 
+    this.saveFilters();
   }
 
   onMonthYearChange() {
@@ -411,11 +416,54 @@ export class RecrutamentoSelecao implements OnInit {
     this.selectedMonth = '';
     this.selectedYear = '';
     this.consultoraFilter = '';
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
     this.applyFilters();
   }
 
   hasFilters(): boolean {
     return !!(this.searchTerm || this.statusFilter.length > 0 || this.departmentFilter || this.tipoCargoFilter || this.fonteRecrutamentoFilter || this.selectedMonth || this.selectedYear || this.consultoraFilter);
+  }
+
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.searchTerm) count++;
+    if (this.statusFilter.length > 0) count++;
+    if (this.tipoCargoFilter) count++;
+    if (this.fonteRecrutamentoFilter) count++;
+    if (this.selectedMonth) count++;
+    if (this.selectedYear) count++;
+    if (this.consultoraFilter) count++;
+    return count;
+  }
+
+  private saveFilters() {
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify({
+      searchTerm: this.searchTerm,
+      statusFilter: this.statusFilter,
+      tipoCargoFilter: this.tipoCargoFilter,
+      fonteRecrutamentoFilter: this.fonteRecrutamentoFilter,
+      selectedMonth: this.selectedMonth,
+      selectedYear: this.selectedYear,
+      consultoraFilter: this.consultoraFilter,
+      activeTab: this.activeTab
+    }));
+  }
+
+  private restoreFilters() {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.searchTerm) this.searchTerm = state.searchTerm;
+        if (state.statusFilter) this.statusFilter = state.statusFilter;
+        if (state.tipoCargoFilter) this.tipoCargoFilter = state.tipoCargoFilter;
+        if (state.fonteRecrutamentoFilter) this.fonteRecrutamentoFilter = state.fonteRecrutamentoFilter;
+        if (state.selectedMonth) this.selectedMonth = state.selectedMonth;
+        if (state.selectedYear) this.selectedYear = state.selectedYear;
+        if (state.consultoraFilter) this.consultoraFilter = state.consultoraFilter;
+        if (state.activeTab) this.activeTab = state.activeTab;
+      }
+    } catch (e) {}
   }
 
   // Métodos para controle do multi-select de status
@@ -524,6 +572,7 @@ export class RecrutamentoSelecao implements OnInit {
       this.fechamentoData.salario = '';
     }
     this.fechamentoData.fonteRecrutamento = vaga.fonteRecrutamento || '';
+    this.fechamentoData.porcentagemFaturamento = vaga.porcentagemFaturamento ?? 100;
     this.showFecharVagaModal = true;
   }
 
@@ -533,7 +582,8 @@ export class RecrutamentoSelecao implements OnInit {
     // Limpar dados do formulário
     this.fechamentoData = {
       salario: '',
-      fonteRecrutamento: ''
+      fonteRecrutamento: '',
+      porcentagemFaturamento: null
     };
   }
 
@@ -577,6 +627,11 @@ export class RecrutamentoSelecao implements OnInit {
         updateData.fonte_recrutamento = this.fechamentoData.fonteRecrutamento;
       }
 
+      // Adicionar porcentagem de faturamento
+      if (this.fechamentoData.porcentagemFaturamento != null) {
+        updateData.porcentagem_faturamento = this.fechamentoData.porcentagemFaturamento;
+      }
+
       // Chamar serviço para atualizar vaga
       await firstValueFrom(this.vagaService.updateVaga(this.selectedVagaToClose.id, updateData));
 
@@ -599,6 +654,7 @@ export class RecrutamentoSelecao implements OnInit {
       this.cancelamentoData.salario = '';
     }
     this.cancelamentoData.fonteRecrutamento = vaga.fonteRecrutamento || '';
+    this.cancelamentoData.porcentagemFaturamento = 30; // Default 30% para cancelamento
     this.showCancelarVagaModal = true;
   }
 
@@ -608,7 +664,8 @@ export class RecrutamentoSelecao implements OnInit {
     // Limpar dados do formulário
     this.cancelamentoData = {
       salario: '',
-      fonteRecrutamento: ''
+      fonteRecrutamento: '',
+      porcentagemFaturamento: null
     };
   }
 
@@ -637,8 +694,9 @@ export class RecrutamentoSelecao implements OnInit {
       return 'R$ 0,00';
     }
 
-    // Calcular 30% do salário
-    const faturamento = salarioNumerico * 0.30;
+    // Calcular porcentagem do salário
+    const porcentagem = (this.cancelamentoData.porcentagemFaturamento ?? 30) / 100;
+    const faturamento = salarioNumerico * porcentagem;
 
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -653,7 +711,7 @@ export class RecrutamentoSelecao implements OnInit {
       // Preparar dados para atualização
       const updateData: any = {
         status: 'cancelada_cliente',
-        porcentagem_faturamento: 30  // 30% do salário
+        porcentagem_faturamento: this.cancelamentoData.porcentagemFaturamento ?? 30
       };
 
       // Converter salário de string formatada para número
@@ -858,7 +916,7 @@ export class RecrutamentoSelecao implements OnInit {
   }
 
   calcularValorFaturamento(vaga: Vaga): number {
-    const porcentagem = vaga.porcentagemFaturamento || 100;
+    const porcentagem = vaga.porcentagemFaturamento ?? 100;
     return vaga.salario * (porcentagem / 100);
   }
 
@@ -917,7 +975,7 @@ export class RecrutamentoSelecao implements OnInit {
 
   calcularTotalFaturamentoFechamento(): number {
     return this.getVagasFechamento().reduce((total, vaga) => {
-      const valorFaturamento = vaga.valorFaturamento || (vaga.salario * ((vaga.porcentagemFaturamento || 100) / 100));
+      const valorFaturamento = vaga.valorFaturamento || (vaga.salario * ((vaga.porcentagemFaturamento ?? 100) / 100));
       return total + valorFaturamento;
     }, 0);
   }

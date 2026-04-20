@@ -96,7 +96,10 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   sortField: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
+  private readonly FILTERS_STORAGE_KEY = 'proposals_filters';
+
   ngOnInit() {
+    this.restoreFilters();
     this.subscribeToSearch();
     this.loadData();
     this.loadClients();
@@ -179,6 +182,39 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  private saveFilters() {
+    const state = {
+      filters: this.filters,
+      sortField: this.sortField,
+      sortDirection: this.sortDirection
+    };
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify(state));
+  }
+
+  private restoreFilters() {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.filters) {
+          this.filters = { ...this.filters, ...state.filters };
+        }
+        if (state.sortField) {
+          this.sortField = state.sortField;
+        }
+        if (state.sortDirection) {
+          this.sortDirection = state.sortDirection;
+        }
+        // Sincronizar o search service com o termo restaurado
+        if (this.filters.search) {
+          this.searchService.setSearchTerm(this.filters.search);
+        }
+      }
+    } catch (e) {
+      // Se houver erro ao restaurar, usar filtros padrão
+    }
+  }
+
   applyFilters() {
     let filtered = [...this.proposals];
 
@@ -231,6 +267,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
 
     this.filteredProposals = filtered;
     this.isSearching = false;
+    this.saveFilters();
   }
 
   sortBy(field: string) {
@@ -258,6 +295,10 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         case 'clientName':
           aValue = a.clientName.toLowerCase();
           bValue = b.clientName.toLowerCase();
+          break;
+        case 'status':
+          aValue = (a.statusText || '').toLowerCase();
+          bValue = (b.statusText || '').toLowerCase();
           break;
         case 'totalValue':
           // Converter string de valor para número
@@ -315,7 +356,10 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
 
   clearFilters() {
     this.filters = { search: '', status: '', client_id: null, type: '', month: '', year: '' };
+    this.sortField = '';
+    this.sortDirection = 'asc';
     this.searchService.setSearchTerm('');
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
     this.applyFilters();
   }
 
@@ -379,26 +423,31 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     }
 
     // Calcular valor total considerando seleção parcial de serviços
+    // IMPORTANTE: Uma vez que o cliente selecionou serviços, o valor aceito deve ser usado
+    // independente de mudanças posteriores no status da proposta
     let totalValue = apiProposal.total_value || 0;
 
-    // Verificar se há serviços com seleção parcial apenas para propostas assinadas, contrapropostas ou convertidas
-    // Para propostas enviadas, todos os serviços estão disponíveis
-    if ((apiProposal.status === 'signed' || apiProposal.status === 'contraproposta' || apiProposal.status === 'converted') &&
-        apiProposal.services && apiProposal.services.length > 0) {
-      // Contar quantos serviços NÃO foram selecionados
-      const unselectedCount = apiProposal.services.filter((s: any) => s.selected_by_client === false).length;
-      const totalServices = apiProposal.services.length;
+    // Verificar se há serviços com seleção do cliente definida
+    if (apiProposal.services && apiProposal.services.length > 0) {
+      // Verificar se há algum serviço com selected_by_client definido (true ou false)
+      const hasClientSelection = apiProposal.services.some((s: any) => s.selected_by_client !== null && s.selected_by_client !== undefined);
 
-      // Só é seleção parcial se:
-      // 1. Houver pelo menos um serviço NÃO selecionado
-      // 2. Mas NÃO todos os serviços são não selecionados (se todos forem false, é dados inconsistentes)
-      const hasPartialSelection = unselectedCount > 0 && unselectedCount < totalServices;
+      if (hasClientSelection) {
+        // Contar quantos serviços NÃO foram selecionados
+        const unselectedCount = apiProposal.services.filter((s: any) => s.selected_by_client === false).length;
+        const totalServices = apiProposal.services.length;
 
-      if (hasPartialSelection) {
-        // Calcular apenas o valor dos serviços selecionados
-        // Filtra por !== false para incluir serviços selecionados (true ou undefined/null)
-        const selectedServices = apiProposal.services.filter((service: any) => service.selected_by_client !== false);
-        totalValue = selectedServices.reduce((sum: number, service: any) => sum + (service.total_value || 0), 0);
+        // Só é seleção parcial se:
+        // 1. Houver pelo menos um serviço NÃO selecionado
+        // 2. Mas NÃO todos os serviços são não selecionados (se todos forem false, é dados inconsistentes)
+        const hasPartialSelection = unselectedCount > 0 && unselectedCount < totalServices;
+
+        if (hasPartialSelection) {
+          // Calcular apenas o valor dos serviços selecionados
+          // Filtra por !== false para incluir serviços selecionados (true ou undefined/null)
+          const selectedServices = apiProposal.services.filter((service: any) => service.selected_by_client !== false);
+          totalValue = selectedServices.reduce((sum: number, service: any) => sum + (service.total_value || 0), 0);
+        }
       }
     }
 
@@ -650,7 +699,9 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         'expired': 'Expirada',
         'converted': 'Assinada',
         'contraproposta': 'Assinada Parcialmente',
-        'standby': 'Standby'
+        'standby': 'Standby',
+        'sem_retorno': 'Sem Retorno',
+        'em_negociacao': 'Em Negociação'
       };
       doc.text(`Status: ${statusMap[fullProposal.status] || fullProposal.status}`, margin, currentY);
 
@@ -988,7 +1039,8 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
       'converted': '#10b981',  // Verde claro (Assinada)
       'contraproposta': '#0a8560',  // Verde mais claro que o 'signed'
       'standby': '#eab308',  // Amarelo/Dourado para Standby
-      'sem_retorno': '#9ca3af'  // Cinza claro para Sem Retorno
+      'sem_retorno': '#9ca3af',  // Cinza claro para Sem Retorno
+      'em_negociacao': '#8b5cf6'  // Roxo para Em Negociação
     };
     return statusColors[status] || '#6c757d';
   }
@@ -1335,7 +1387,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   async updateProposalStatus(proposal: ProposalDisplay, event: Event) {
     event.stopPropagation();
 
-    const newStatus = proposal.status as 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta' | 'standby' | 'sem_retorno';
+    const newStatus = proposal.status as 'draft' | 'sent' | 'signed' | 'rejected' | 'expired' | 'converted' | 'contraproposta' | 'standby' | 'sem_retorno' | 'em_negociacao';
     const previousStatus = proposal.raw.status;
 
     // Se o status não mudou, não faz nada

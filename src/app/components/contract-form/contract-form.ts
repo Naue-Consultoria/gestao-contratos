@@ -472,12 +472,11 @@ export class ContractFormComponent implements OnInit {
   async loadServices() {
     try {
       const response = await firstValueFrom(
-        this.serviceService.getServicesForContracts({ is_active: true })
+        this.serviceService.getServices({ is_active: true })
       );
       if (response && response.services) {
-        // Filtrar serviços da categoria 'Interno' para não aparecerem na edição de contratos
         this.availableServices = response.services
-          .filter((service) => service.category !== 'Interno')
+          .filter((service) => service.name !== 'Entrada de Cliente' && service.name !== 'Encerramento')
           .sort((a, b) =>
             a.name.toLowerCase().localeCompare(b.name.toLowerCase())
           );
@@ -564,7 +563,6 @@ export class ContractFormComponent implements OnInit {
     const categories = this.availableServices
       .map(s => s.category || 'Geral')
       .filter((category, index, self) => self.indexOf(category) === index)
-      .filter(category => category !== 'Interno') // Excluir categoria 'Interno' da lista
       .sort();
     return categories;
   }
@@ -1065,9 +1063,9 @@ export class ContractFormComponent implements OnInit {
     return this.selectedServices.filter(s => s.category !== 'Interno').length > 0;
   }
 
-  // Retorna apenas serviços visíveis (não internos)
+  // Retorna serviços visíveis (exceto Encerramento e Entrada de Cliente)
   getVisibleServices(): SelectedService[] {
-    return this.selectedServices.filter(s => s.category !== 'Interno');
+    return this.selectedServices.filter(s => s.name !== 'Encerramento' && s.name !== 'Entrada de Cliente');
   }
 
   // Retorna a quantidade de serviços visíveis

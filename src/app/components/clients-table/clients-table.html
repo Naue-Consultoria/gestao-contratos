@@ -6,31 +6,66 @@
 
   <div class="table-container">
     <div class="table-header">
-      <h2 class="table-title">Lista de Clientes</h2>
-      
-      <!-- Barra de pesquisa -->
-      <div class="search-input-wrapper">
-        <i class="fas fa-search search-icon"></i>
-        <input 
-          type="text" 
-          class="search-input" 
-          placeholder="Buscar por nome, documento, cidade..." 
-          [(ngModel)]="searchTerm"
-          (input)="filterClients()"
-        />
-        <button 
-          *ngIf="searchTerm" 
-          class="clear-search-btn" 
-          (click)="clearSearch()"
-        >
+      <div class="filters-section">
+        <div class="filter-row">
+          <!-- Search Box -->
+          <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Buscar por nome, documento, cidade..."
+              [(ngModel)]="filters.search"
+              (input)="applyFilters()"
+            />
+            <button
+              *ngIf="filters.search"
+              class="clear-search-btn"
+              (click)="clearSearch()"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <!-- Type Filter -->
+          <div class="filter-item">
+            <label class="filter-label">
+              <i class="fas fa-id-badge"></i>
+              Tipo
+            </label>
+            <select class="filter-select" [(ngModel)]="filters.type" (change)="applyFilters()">
+              <option value="">Todos</option>
+              <option value="PF">Pessoa Física</option>
+              <option value="PJ">Pessoa Jurídica</option>
+            </select>
+          </div>
+
+          <!-- Origin Filter -->
+          <div class="filter-item">
+            <label class="filter-label">
+              <i class="fas fa-globe"></i>
+              Origem
+            </label>
+            <select class="filter-select" [(ngModel)]="filters.origin" (change)="applyFilters()">
+              <option value="">Todos</option>
+              <option value="national">Nacional</option>
+              <option value="international">Internacional</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-buttons-row">
+        <button class="active-filters-chip" *ngIf="getActiveFiltersCount() > 0" (click)="clearFilters()" title="Limpar todos os filtros">
+          <i class="fas fa-filter"></i>
+          <span>{{ getActiveFiltersCount() }} filtro{{ getActiveFiltersCount() > 1 ? 's' : '' }}</span>
           <i class="fas fa-times"></i>
         </button>
+        <button class="btn btn-primary" (click)="openNewClientPage()">
+          <i class="fas fa-plus"></i>
+          Novo Cliente
+        </button>
       </div>
-      
-      <button class="btn btn-primary" (click)="openNewClientPage()">
-        <i class="fas fa-plus"></i>
-        Novo Cliente
-      </button>
     </div>
     
     <!-- Mensagem de erro -->
@@ -50,10 +85,10 @@
       <!-- Mensagem quando não há empresas -->
       <div *ngIf="filteredClients.length === 0 && !error" class="empty-state">
         <i class="fas fa-building empty-icon"></i>
-        <h3 *ngIf="!searchTerm">Nenhum cliente cadastrado</h3>
-        <h3 *ngIf="searchTerm">Nenhum cliente encontrado</h3>
-        <p *ngIf="!searchTerm">Clique no botão "Novo Cliente" para adicionar o primeiro cliente.</p>
-        <p *ngIf="searchTerm">Tente buscar com outros termos ou limpe a pesquisa.</p>
+        <h3 *ngIf="!filters.search && !filters.type && !filters.origin">Nenhum cliente cadastrado</h3>
+        <h3 *ngIf="filters.search || filters.type || filters.origin">Nenhum cliente encontrado</h3>
+        <p *ngIf="!filters.search && !filters.type && !filters.origin">Clique no botão "Novo Cliente" para adicionar o primeiro cliente.</p>
+        <p *ngIf="filters.search || filters.type || filters.origin">Tente ajustar os filtros ou <button class="link-button" (click)="clearFilters()">limpe todos os filtros</button>.</p>
       </div>
       
       <!-- Tabela de clientes -->
@@ -69,7 +104,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let client of filteredClients" class="clickable" (click)="viewClient(client.id)">
+          <tr *ngFor="let client of filteredClients; trackBy: trackByClientId" class="clickable" (click)="viewClient(client.id)">
             <td>
               <div class="client-info">
                 <div class="client-avatar" [style.background]="client.gradient" *ngIf="!client.logo_path">

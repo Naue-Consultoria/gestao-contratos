@@ -14,6 +14,8 @@ import { MatrizRaciEditorComponent } from '../../components/matriz-raci-editor/m
 import { AnaliseProblemasComponent } from '../../components/analise-problemas/analise-problemas';
 import { GestaoErrosComponent } from '../../components/gestao-erros/gestao-erros';
 import { TabelaPeriodicaComponent } from '../../components/tabela-periodica/tabela-periodica';
+import { MapaAmbicaoComponent } from '../../components/mapa-ambicao/mapa-ambicao';
+import { LinhaDoTempoEditorComponent } from '../../components/linha-do-tempo-editor/linha-do-tempo-editor.component';
 
 interface TocItem {
   id: string;
@@ -135,7 +137,7 @@ interface MapaMentalData {
 @Component({
   selector: 'app-public-mentoria-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule, MatrizRaciEditorComponent, AnaliseProblemasComponent, GestaoErrosComponent, TabelaPeriodicaComponent],
+  imports: [CommonModule, FormsModule, DragDropModule, MatrizRaciEditorComponent, AnaliseProblemasComponent, GestaoErrosComponent, TabelaPeriodicaComponent, MapaAmbicaoComponent, LinhaDoTempoEditorComponent],
   templateUrl: './public-mentoria-view.html',
   styleUrl: './public-mentoria-view.css'
 })
@@ -143,6 +145,8 @@ export class PublicMentoriaViewComponent implements OnInit {
   @ViewChild(MatrizRaciEditorComponent) matrizRaciComponent?: MatrizRaciEditorComponent;
   @ViewChild(AnaliseProblemasComponent) analiseProblemasComponent?: AnaliseProblemasComponent;
   @ViewChild(GestaoErrosComponent) gestaoErrosComponent?: GestaoErrosComponent;
+  @ViewChild(MapaAmbicaoComponent) mapaAmbicaoComponent?: MapaAmbicaoComponent;
+  @ViewChild(LinhaDoTempoEditorComponent) linhaDoTempoComponent?: LinhaDoTempoEditorComponent;
 
   encontro: MentoriaEncontro | null = null;
   blocos: EncontroBloco[] = [];
@@ -152,6 +156,7 @@ export class PublicMentoriaViewComponent implements OnInit {
   isLoading = true;
   notFound = false;
   expired = false;
+  exportandoMapaAmbicao = false;
 
   // Interações do mentorado
   interacoes: { [blocoId: number]: any } = {};
@@ -364,8 +369,14 @@ export class PublicMentoriaViewComponent implements OnInit {
 
   // Getter para obter seções ordenadas conforme configuração do editor
   get secoesOrdenadas(): string[] {
+    const todasSecoes = ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros', 'tabelaPeriodica', 'mapaAmbicao', 'linhaDoTempo'];
     if (!this.conteudoEstruturado?.ordemSecoes || this.conteudoEstruturado.ordemSecoes.length === 0) {
-      return ['testes', 'proximosPassos', 'referencias', 'mapaMental', 'modeloABC', 'zonasAprendizado', 'goldenCircle', 'rodaDaVida', 'termometroGestao', 'ganhosPerdas', 'controleHabitos', 'matrizRaci', 'analiseProblemas', 'erros', 'tabelaPeriodica'];
+      return todasSecoes;
+    }
+    // Garantir que seções novas que não existiam no ordemSecoes salvo sejam adicionadas ao final
+    const secoesFaltantes = todasSecoes.filter(s => !this.conteudoEstruturado.ordemSecoes.includes(s));
+    if (secoesFaltantes.length > 0) {
+      return [...this.conteudoEstruturado.ordemSecoes, ...secoesFaltantes];
     }
     return this.conteudoEstruturado.ordemSecoes;
   }
@@ -6112,8 +6123,16 @@ export class PublicMentoriaViewComponent implements OnInit {
         backgroundColor: string;
       }> = [];
 
-      // Verificar quais ferramentas estão disponíveis
-      if (this.conteudoEstruturado?.mapaMental) {
+      // Verificar quais ferramentas estão ATIVAS no encontro e têm dados
+      // Helper: ferramenta é visível se ativo===true, ou se a chave não existe no JSON (retrocompat)
+      const ce = this.conteudoEstruturado;
+      const isAtiva = (chave: string): boolean => {
+        if (!ce) return false;
+        if (!(chave in ce)) return true; // chave não existe = encontro antigo, incluir
+        return ce[chave]?.ativo === true;
+      };
+
+      if (isAtiva('mapaMental') && ce?.mapaMental) {
         ferramentasDisponiveis.push({
           nome: 'Mapa Mental',
           verificar: () => true,
@@ -6123,7 +6142,7 @@ export class PublicMentoriaViewComponent implements OnInit {
         });
       }
 
-      if (this.zonasAprendizado?.palavras?.length > 0) {
+      if (isAtiva('zonasAprendizado') && this.zonasAprendizado?.palavras?.length > 0) {
         ferramentasDisponiveis.push({
           nome: 'Zonas de Aprendizado',
           verificar: () => true,
@@ -6133,7 +6152,7 @@ export class PublicMentoriaViewComponent implements OnInit {
         });
       }
 
-      if (this.ganhosPerdas?.ganhos_obtiver?.length > 0 || this.ganhosPerdas?.perdas_obtiver?.length > 0) {
+      if (isAtiva('ganhosPerdas') && (this.ganhosPerdas?.ganhos_obtiver?.length > 0 || this.ganhosPerdas?.perdas_obtiver?.length > 0)) {
         ferramentasDisponiveis.push({
           nome: 'Ganhos e Perdas',
           verificar: () => true,
@@ -6143,7 +6162,7 @@ export class PublicMentoriaViewComponent implements OnInit {
         });
       }
 
-      if (this.controleHabitos?.habitos?.length > 0) {
+      if (isAtiva('controleHabitos') && this.controleHabitos?.habitos?.length > 0) {
         ferramentasDisponiveis.push({
           nome: 'Controle de Hábitos',
           verificar: () => true,
@@ -6153,7 +6172,7 @@ export class PublicMentoriaViewComponent implements OnInit {
         });
       }
 
-      if (this.rodaDaVida) {
+      if (isAtiva('rodaDaVida') && this.rodaDaVida) {
         ferramentasDisponiveis.push({
           nome: 'Roda da Vida',
           verificar: () => true,
@@ -6163,7 +6182,7 @@ export class PublicMentoriaViewComponent implements OnInit {
         });
       }
 
-      if (this.goldenCircle?.why || this.goldenCircle?.how || this.goldenCircle?.what) {
+      if (isAtiva('goldenCircle') && (this.goldenCircle?.why || this.goldenCircle?.how || this.goldenCircle?.what)) {
         ferramentasDisponiveis.push({
           nome: 'Golden Circle',
           verificar: () => true,
@@ -6173,7 +6192,7 @@ export class PublicMentoriaViewComponent implements OnInit {
         });
       }
 
-      if (this.conteudoEstruturado?.proximosPassos?.blocos?.length > 0) {
+      if (isAtiva('proximosPassos') && ce?.proximosPassos?.blocos?.length > 0) {
         ferramentasDisponiveis.push({
           nome: 'Próximos Passos',
           verificar: () => true,
@@ -6183,7 +6202,7 @@ export class PublicMentoriaViewComponent implements OnInit {
         });
       }
 
-      if (this.termometroGestao?.atividades?.length > 0) {
+      if (isAtiva('termometroGestao') && this.termometroGestao?.atividades?.length > 0) {
         ferramentasDisponiveis.push({
           nome: 'Termômetro de Gestão',
           verificar: () => true,
@@ -6194,71 +6213,86 @@ export class PublicMentoriaViewComponent implements OnInit {
       }
 
       // Modelo ABC
-      const temDadosModeloABC = this.modeloABC.adversidade || this.modeloABC.pensamento ||
-                                 this.modeloABC.consequencia || this.modeloABC.antidotoExigencia ||
-                                 this.modeloABC.antidotoRotulo || this.modeloABC.fraseNocaute ||
-                                 this.modeloABC.planoAcao || this.modeloABC.impedimentos ||
-                                 this.modeloABC.acaoImpedimentos;
+      if (isAtiva('modeloABC')) {
+        const temDadosModeloABC = this.modeloABC.adversidade || this.modeloABC.pensamento ||
+                                   this.modeloABC.consequencia || this.modeloABC.antidotoExigencia ||
+                                   this.modeloABC.antidotoRotulo || this.modeloABC.fraseNocaute ||
+                                   this.modeloABC.planoAcao || this.modeloABC.impedimentos ||
+                                   this.modeloABC.acaoImpedimentos;
 
-      if (temDadosModeloABC) {
-        ferramentasDisponiveis.push({
-          nome: 'Modelo ABC',
-          verificar: () => true,
-          criarContainer: () => this.criarContainerModeloABCVisualizacao(),
-          timeout: 100,
-          backgroundColor: '#022c22'
-        });
+        if (temDadosModeloABC) {
+          ferramentasDisponiveis.push({
+            nome: 'Modelo ABC',
+            verificar: () => true,
+            criarContainer: () => this.criarContainerModeloABCVisualizacao(),
+            timeout: 100,
+            backgroundColor: '#022c22'
+          });
+        }
       }
 
       // Carregar Matriz RACI
-      console.log('🔍 Carregando Matriz RACI...');
-      const matrizRaciData = await this.carregarMatrizRaciParaExportacao();
-      console.log('📊 Matriz RACI Data:', matrizRaciData);
-      if (matrizRaciData) {
-        console.log('✅ Adicionando Matriz RACI à lista');
-        ferramentasDisponiveis.push({
-          nome: 'Matriz RACI',
-          verificar: () => true,
-          criarContainer: () => this.criarContainerMatrizRaciVisualizacao(matrizRaciData),
-          timeout: 300,
-          backgroundColor: '#ffffff'
-        });
-      } else {
-        console.log('❌ Matriz RACI sem dados');
+      if (isAtiva('matrizRaci')) {
+        const matrizRaciData = await this.carregarMatrizRaciParaExportacao();
+        if (matrizRaciData) {
+          ferramentasDisponiveis.push({
+            nome: 'Matriz RACI',
+            verificar: () => true,
+            criarContainer: () => this.criarContainerMatrizRaciVisualizacao(matrizRaciData),
+            timeout: 300,
+            backgroundColor: '#ffffff'
+          });
+        }
       }
 
-      // Carregar Análise de Problemas
-      console.log('🔍 Carregando Análise de Problemas...');
-      const analiseProblemasData = await this.carregarAnaliseProblemasParaExportacao();
-      console.log('📊 Análise de Problemas Data:', analiseProblemasData);
-      if (analiseProblemasData) {
-        console.log('✅ Adicionando Análise de Problemas à lista');
-        ferramentasDisponiveis.push({
-          nome: 'Análise de Problemas',
-          verificar: () => true,
-          criarContainer: () => this.criarContainerAnaliseProblemasVisualizacao(analiseProblemasData),
-          timeout: 100,
-          backgroundColor: '#ffffff'
-        });
-      } else {
-        console.log('❌ Análise de Problemas sem dados');
+      // Carregar Análise de Problemas (apenas se ativa no encontro)
+      if (isAtiva('analiseProblemas')) {
+        const analiseProblemasData = await this.carregarAnaliseProblemasParaExportacao();
+        if (analiseProblemasData) {
+          ferramentasDisponiveis.push({
+            nome: 'Análise de Problemas',
+            verificar: () => true,
+            criarContainer: () => this.criarContainerAnaliseProblemasVisualizacao(analiseProblemasData),
+            timeout: 100,
+            backgroundColor: '#ffffff'
+          });
+        }
       }
 
-      // Carregar Gestão de Erros
-      console.log('🔍 Carregando Gestão de Erros...');
-      const errosData = await this.carregarErrosParaExportacao();
-      console.log('📊 Gestão de Erros Data:', errosData);
-      if (errosData) {
-        console.log('✅ Adicionando Gestão de Erros à lista');
+      // Carregar Gestão de Erros (apenas se ativa no encontro)
+      if (isAtiva('erros')) {
+        const errosData = await this.carregarErrosParaExportacao();
+        if (errosData) {
+          ferramentasDisponiveis.push({
+            nome: 'Gestão de Erros',
+            verificar: () => true,
+            criarContainer: () => this.criarContainerErrosVisualizacao(errosData),
+            timeout: 100,
+            backgroundColor: '#ffffff'
+          });
+        }
+      }
+
+      // Mapa de Ambição
+      if (isAtiva('mapaAmbicao') && this.mapaAmbicaoComponent) {
         ferramentasDisponiveis.push({
-          nome: 'Gestão de Erros',
+          nome: 'Mapa de Ambição',
           verificar: () => true,
-          criarContainer: () => this.criarContainerErrosVisualizacao(errosData),
-          timeout: 100,
+          criarContainer: () => this.mapaAmbicaoComponent!.criarContainerPDFVisualizacao(),
+          timeout: 1500,
           backgroundColor: '#ffffff'
         });
-      } else {
-        console.log('❌ Gestão de Erros sem dados');
+      }
+
+      // Linha do Tempo
+      if (isAtiva('linhaDoTempo') && this.linhaDoTempoComponent?.temDados) {
+        ferramentasDisponiveis.push({
+          nome: 'Linha do Tempo',
+          verificar: () => true,
+          criarContainer: () => this.linhaDoTempoComponent!.criarContainerPDFVisualizacao(),
+          timeout: 150,
+          backgroundColor: '#ffffff'
+        });
       }
 
       console.log('📋 Total de ferramentas disponíveis:', ferramentasDisponiveis.length);
@@ -6331,6 +6365,23 @@ export class PublicMentoriaViewComponent implements OnInit {
     } catch (error) {
       console.error('Erro ao exportar PDF completo:', error);
       this.toastr.error('Erro ao exportar PDF completo');
+    }
+  }
+
+  // ===== EXPORTAR MAPA DE AMBIÇÃO =====
+
+  async exportarMapaAmbicaoPDF(): Promise<void> {
+    if (!this.mapaAmbicaoComponent) return;
+    this.exportandoMapaAmbicao = true;
+    this.toastr.info('Gerando PDF do Mapa de Ambição...', '', { timeOut: 8000 });
+    try {
+      await this.mapaAmbicaoComponent.exportarPDF();
+      this.toastr.success('PDF do Mapa de Ambição exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar Mapa de Ambição:', error);
+      this.toastr.error('Erro ao exportar PDF do Mapa de Ambição');
+    } finally {
+      this.exportandoMapaAmbicao = false;
     }
   }
 

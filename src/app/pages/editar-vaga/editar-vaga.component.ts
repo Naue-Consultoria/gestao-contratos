@@ -135,7 +135,7 @@ export class EditarVagaComponent implements OnInit {
         dataAbertura: vagaData.data_abertura,
         dataFechamentoCancelamento: vagaData.data_fechamento_cancelamento || '',
         observacoes: vagaData.observacoes || '',
-        porcentagemFaturamento: vagaData.porcentagem_faturamento || 100,
+        porcentagemFaturamento: vagaData.porcentagem_faturamento ?? 100,
         sigilosa: vagaData.sigilosa || false,
         impostoEstado: vagaData.imposto_estado || 0
       });
@@ -154,12 +154,12 @@ export class EditarVagaComponent implements OnInit {
         const clientsList = response.clients || response || [];
         this.clientes = clientsList.map((client: any) => ({
           id: client.id,
-          nome: client.name ||
+          nome: (client.name ||
                 client.company_name ||
                 client.trade_name ||
                 client.full_name ||
-                'Cliente sem nome'
-        }));
+                'Cliente sem nome').toUpperCase()
+        })).sort((a: any, b: any) => a.nome.localeCompare(b.nome, 'pt-BR'));
       },
       error: (error: any) => {
         console.error('Erro ao carregar clientes:', error);
@@ -186,12 +186,21 @@ export class EditarVagaComponent implements OnInit {
 
   setupFormListeners() {
     this.vagaForm.get('status')?.valueChanges.subscribe(status => {
-      const isFechado = ['fechada', 'fechada_rep', 'cancelada_cliente'].includes(status);
+      const isFechado = ['fechada', 'fechada_rep', 'cancelada_cliente', 'encerramento_cont'].includes(status);
 
       if (!isFechado) {
         this.vagaForm.patchValue({
           dataFechamentoCancelamento: ''
         });
+      }
+    });
+
+    // Listener para tipo de abertura - reposição padrão 0% faturamento
+    this.vagaForm.get('tipoAbertura')?.valueChanges.subscribe(tipo => {
+      if (tipo === 'reposicao') {
+        this.vagaForm.patchValue({ porcentagemFaturamento: 0 });
+      } else if (tipo === 'nova') {
+        this.vagaForm.patchValue({ porcentagemFaturamento: 100 });
       }
     });
   }
@@ -203,7 +212,7 @@ export class EditarVagaComponent implements OnInit {
 
   calculateFaturamento() {
     const salario = this.vagaForm.get('salario')?.value || 0;
-    const porcentagem = this.vagaForm.get('porcentagemFaturamento')?.value || 100;
+    const porcentagem = this.vagaForm.get('porcentagemFaturamento')?.value ?? 100;
     const valorFaturamento = salario * (porcentagem / 100);
 
     this.vagaForm.get('valorFaturamento')?.setValue(valorFaturamento, { emitEvent: false });
@@ -213,6 +222,7 @@ export class EditarVagaComponent implements OnInit {
     if (this.vagaForm.valid) {
       this.isSubmitting = true;
 
+      // valor_faturamento é coluna gerada no banco, não enviar
       const vagaData: any = {
         client_id: this.vagaForm.value.clienteId,
         user_id: this.vagaForm.value.usuarioId,
@@ -226,7 +236,7 @@ export class EditarVagaComponent implements OnInit {
         data_abertura: this.vagaForm.value.dataAbertura,
         data_fechamento_cancelamento: this.vagaForm.value.dataFechamentoCancelamento || null,
         observacoes: this.vagaForm.value.observacoes || null,
-        porcentagem_faturamento: this.vagaForm.value.porcentagemFaturamento ? parseFloat(this.vagaForm.value.porcentagemFaturamento) : 100,
+        porcentagem_faturamento: this.vagaForm.value.porcentagemFaturamento != null ? parseFloat(this.vagaForm.value.porcentagemFaturamento) : 100,
         sigilosa: this.vagaForm.value.sigilosa || false,
         imposto_estado: this.vagaForm.value.impostoEstado ? parseFloat(this.vagaForm.value.impostoEstado) : 0
       };
@@ -277,7 +287,7 @@ export class EditarVagaComponent implements OnInit {
 
   calcularValorFaturamento(): number {
     const salario = this.vagaForm.get('salario')?.value || 0;
-    const porcentagem = this.vagaForm.get('porcentagemFaturamento')?.value || 100;
+    const porcentagem = this.vagaForm.get('porcentagemFaturamento')?.value ?? 100;
     return salario * (porcentagem / 100);
   }
 }

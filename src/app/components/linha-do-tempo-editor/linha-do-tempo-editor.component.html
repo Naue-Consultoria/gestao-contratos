@@ -1,0 +1,208 @@
+<div class="linha-do-tempo-container">
+  <!-- Header padrão do sistema -->
+  <div class="dark-header">
+    <h2 class="dark-title">
+      <i class="fa-solid fa-timeline"></i>
+      Linha do Tempo
+    </h2>
+    <p class="dark-subtitle">Registre os acontecimentos marcantes de cada ano da sua vida</p>
+  </div>
+
+  <!-- Content container (padrão do sistema) -->
+  <div class="linha-do-tempo-content">
+
+    <!-- Barra superior compacta -->
+    <div class="top-bar">
+      <div class="birthdate-input-group">
+        <label for="lt-birthdate">Data de nascimento</label>
+        <input
+          type="date"
+          id="lt-birthdate"
+          [(ngModel)]="birthdate"
+          [disabled]="readOnly"
+          (change)="gerarLinhaDoTempo()"
+        />
+      </div>
+
+      <div class="stats-inline" *ngIf="temDados">
+        <div class="stat">
+          <span class="stat-value">{{ totalAnos }}</span>
+          <span class="stat-label">anos</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ totalEventos }}</span>
+          <span class="stat-label">eventos</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ anosPreenchidos }}</span>
+          <span class="stat-label">preenchidos</span>
+        </div>
+      </div>
+
+      <div class="view-toggle" *ngIf="temDados">
+        <button class="view-btn" [class.active]="currentView === 'list'" (click)="setView('list')" title="Grade de anos">
+          <i class="fa-solid fa-table-cells"></i>
+          <span>Grade</span>
+        </button>
+        <button class="view-btn" [class.active]="currentView === 'visual'" (click)="setView('visual')" title="Linha do tempo">
+          <i class="fa-solid fa-timeline"></i>
+          <span>Linha do tempo</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-state">
+      <p>Carregando...</p>
+    </div>
+
+    <!-- Estado vazio -->
+    <div *ngIf="!temDados && !isLoading" class="empty-state">
+      <i class="fa-solid fa-timeline"></i>
+      <h3>Sua linha do tempo ainda não foi gerada</h3>
+      <p>Informe sua data de nascimento acima para começar.</p>
+    </div>
+
+    <!-- Grade de anos (visualização padrão — compacta) -->
+    <div class="years-grid" *ngIf="temDados && currentView === 'list'">
+      <button
+        type="button"
+        class="year-cell"
+        *ngFor="let row of yearRows; trackBy: trackByYear"
+        [class.selected]="selectedYear === row.year"
+        [class.current]="row.year === anoAtual"
+        [class.has-events]="getEventos(row.year).length > 0"
+        (click)="selecionarAno(row)"
+        [title]="row.year + ' — ' + ageLabel(row.age)">
+        <span class="yc-year">{{ row.year }}</span>
+        <span class="yc-age">{{ row.age }}a</span>
+        <span class="yc-badge" *ngIf="getEventos(row.year).length > 0">{{ getEventos(row.year).length }}</span>
+        <span class="yc-now" *ngIf="row.year === anoAtual">hoje</span>
+      </button>
+    </div>
+
+    <!-- Painel de detalhe do ano selecionado -->
+    <div class="year-detail" *ngIf="temDados && currentView === 'list' && getSelectedRow() as row">
+      <div class="yd-header">
+        <div class="yd-title">
+          <span class="yd-year">{{ row.year }}</span>
+          <span class="yd-age">{{ ageLabel(row.age) }}</span>
+          <span class="now-tag" *ngIf="row.year === anoAtual">Hoje</span>
+        </div>
+        <button class="yd-close" (click)="fecharDetalhe()" title="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="event-form" *ngIf="!readOnly">
+        <textarea
+          [(ngModel)]="row.draftText"
+          (keydown)="onTextareaKeydown($event, row)"
+          placeholder="O que aconteceu de marcante em {{ row.year }}?"></textarea>
+        <div class="form-actions">
+          <button
+            class="btn btn-add-event"
+            (click)="adicionarEvento(row)"
+            [disabled]="!row.draftText.trim()">
+            <i class="fa-solid fa-plus"></i>
+            Adicionar
+          </button>
+          <span class="hint">Ctrl + Enter</span>
+        </div>
+      </div>
+
+      <div class="event-list">
+        <div class="event-item" *ngFor="let ev of getEventos(row.year); trackBy: trackByEvent">
+          <span class="event-bullet"></span>
+          <div class="event-text">{{ ev.text }}</div>
+          <button
+            class="event-delete"
+            *ngIf="!readOnly"
+            (click)="removerEvento(row.year, ev.id)"
+            title="Remover">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="event-empty" *ngIf="getEventos(row.year).length === 0">
+          <span *ngIf="!readOnly">Nenhum acontecimento ainda — adicione acima.</span>
+          <span *ngIf="readOnly">Nenhum acontecimento registrado.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visualização Linha do Tempo (compacta) -->
+    <div class="timeline-visual" *ngIf="temDados && currentView === 'visual'">
+      <div *ngIf="getYearsComEventos().length === 0" class="tv-empty">
+        Adicione acontecimentos na visualização em grade para visualizá-los aqui.
+      </div>
+
+      <div class="tv-track" *ngIf="getYearsComEventos().length > 0">
+        <div
+          class="tv-row"
+          *ngFor="let row of getYearsComEventos(); let i = index; trackBy: trackByYear"
+          [class.left]="i % 2 === 0"
+          [class.right]="i % 2 !== 0"
+          [class.current]="row.year === anoAtual">
+          <div class="tv-dot"></div>
+          <div class="tv-card">
+            <div class="tv-card-head">
+              <span class="tv-year">{{ row.year }}</span>
+              <span class="tv-age">{{ ageLabel(row.age) }}</span>
+              <span class="tv-now-tag" *ngIf="row.year === anoAtual">Hoje</span>
+            </div>
+            <ul class="tv-events">
+              <li *ngFor="let ev of getEventos(row.year); trackBy: trackByEvent">{{ ev.text }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Perguntas reflexivas finais -->
+    <div class="perguntas-reflexivas" *ngIf="temDados">
+      <h3 class="perguntas-titulo">
+        <i class="fa-solid fa-lightbulb"></i>
+        Reflexão
+      </h3>
+      <div class="perguntas-grid">
+        <div class="pergunta-group">
+          <label for="lt-pergunta-1">O que mais marcou a sua trajetória?</label>
+          <textarea
+            id="lt-pergunta-1"
+            [(ngModel)]="perguntaTrajetoria"
+            (input)="autoGrow($event)"
+            (blur)="onPerguntaBlur()"
+            [disabled]="readOnly"
+            placeholder="Compartilhe os momentos que mais te marcaram..."></textarea>
+        </div>
+        <div class="pergunta-group">
+          <label for="lt-pergunta-2">Como você se imagina pelos próximos 5 anos?</label>
+          <textarea
+            id="lt-pergunta-2"
+            [(ngModel)]="perguntaProximos5Anos"
+            (input)="autoGrow($event)"
+            (blur)="onPerguntaBlur()"
+            [disabled]="readOnly"
+            placeholder="Descreva seus planos, sonhos e projeções..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botões de ação -->
+    <div class="main-actions" *ngIf="temDados">
+      <button class="btn btn-save-main" *ngIf="!readOnly" (click)="salvar()" [disabled]="isSaving">
+        <i class="fa-solid" [class.fa-save]="!isSaving" [class.fa-spinner]="isSaving" [class.fa-spin]="isSaving"></i>
+        {{ isSaving ? 'Salvando...' : 'Salvar' }}
+      </button>
+      <button class="btn btn-export" (click)="exportarPDF()" [disabled]="exportandoPDF">
+        <i class="fa-solid" [class.fa-file-pdf]="!exportandoPDF" [class.fa-spinner]="exportandoPDF" [class.fa-spin]="exportandoPDF"></i>
+        {{ exportandoPDF ? 'Gerando PDF...' : 'Exportar PDF' }}
+      </button>
+      <button class="btn btn-clear" *ngIf="!readOnly" (click)="limparTudo()">
+        <i class="fa-solid fa-trash"></i>
+        Limpar Tudo
+      </button>
+    </div>
+
+  </div>
+</div>

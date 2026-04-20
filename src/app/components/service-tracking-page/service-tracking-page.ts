@@ -2,8 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ContractService, ApiContractService } from '../../services/contract';
-import { RoutineService, ServiceRoutine, RoutineComment } from '../../services/routine.service';
+import { ApiContractService } from '../../services/contract';
+import { RoutineService, ServiceRoutine, RoutineComment, RoutinePageData } from '../../services/routine.service';
 import { ServiceStageService, ServiceStage, ServiceProgress } from '../../services/service-stage.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { BreadcrumbService, BreadcrumbItem } from '../../services/breadcrumb.service';
@@ -20,7 +20,6 @@ import { RoutineAttachmentService } from '../../services/routine-attachment.serv
 export class ServiceTrackingPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private contractService = inject(ContractService);
   private breadcrumbService = inject(BreadcrumbService);
   private toastr = inject(ToastrService);
   private serviceStageService = inject(ServiceStageService);
@@ -99,73 +98,38 @@ export class ServiceTrackingPageComponent implements OnInit {
       this.isLoading = true;
       this.error = null;
 
-
-      // Buscar a rotina pelo ID da rotina (routineId da URL)
+      let pageData: RoutinePageData;
       try {
-        const routine = await this.routineService.getRoutineById(this.routineId).toPromise();
-        
-        if (routine) {
-          this.routine = routine;
-          
-          // Usar o contract_service_id da rotina para buscar o service
-          const contractServiceId = routine.contract_service_id;
-          
-          // Validar se o serviceId da URL bate com o contract_service_id da rotina
-          if (contractServiceId !== this.serviceId) {
-          }
-          
-          const contractService = await this.contractService.getContractServiceById(contractServiceId).toPromise();
-          if (contractService) {
-            this.service = contractService;
-            
-            // Carregar dados do contrato
-            if (contractService.contract_id) {
-              const contractResponse = await this.contractService.getContract(contractService.contract_id).toPromise();
-              if (contractResponse) {
-                this.contract = contractResponse.contract;
-                
-                // Configurar breadcrumb com o caminho completo
-                this.setupBreadcrumb();
-              }
-            }
-          } else {
-            this.error = 'Serviço do contrato não encontrado';
-            this.isLoading = false;
-            return;
-          }
-        } else {
-          this.error = 'Rotina não encontrada';
+        pageData = await this.routineService.getPageData(this.routineId).toPromise() as RoutinePageData;
+      } catch (err: any) {
+        if (err.status === 403) {
           this.isLoading = false;
+          this.toastr.warning(
+            'Você não tem permissão para acessar esta rotina. Verifique se está atribuído ao contrato.',
+            'Acesso Negado',
+            { timeOut: 5000, progressBar: true, closeButton: true, positionClass: 'toast-top-center' }
+          );
+          setTimeout(() => this.router.navigate(['/home/dashboard']), 3000);
           return;
         }
-      } catch (serviceError) {
-        console.error('Erro ao carregar dados:', serviceError);
         this.error = 'Erro ao carregar dados';
         this.isLoading = false;
         return;
       }
-      
-      // Para simplicidade, vamos assumir que o usuário pode editar
+
+      this.routine = pageData.routine;
+      this.service = pageData.contractService;
+      this.contract = pageData.contract;
+      this.comments = pageData.comments;
+      this.serviceStages = pageData.stages;
+      this.stageProgress = pageData.progress.progressPercentage;
+
       this.canEdit = true;
-      
-      // Configurar valores iniciais do formulário
       this.selectedStatus = this.routine?.status || 'not_started';
       this.selectedDate = this.routine?.scheduled_date || '';
       this.routineNotes = this.routine?.notes || '';
-      
-      // Carregar dados adicionais de forma sequencial para evitar sobrecarga de recursos
-      if (this.routine?.id) {
-        await this.loadComments();
 
-        // Adicionar um pequeno delay antes de carregar as etapas
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-
-      // Carregar etapas do serviço se disponível
-      if (this.service?.service?.id) {
-        await this.loadServiceStages();
-      }
-
+      this.setupBreadcrumb();
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       this.error = 'Erro ao carregar dados';
@@ -370,8 +334,8 @@ export class ServiceTrackingPageComponent implements OnInit {
         };
 
         // Atualizar a rotina no backend
-        if (this.routine?.id) {
-          const updatedRoutine = await this.routineService.updateRoutine(this.routine.id, updates).toPromise();
+        if (this.service?.id) {
+          const updatedRoutine = await this.routineService.updateRoutine(this.service.id, updates).toPromise();
           if (updatedRoutine) {
             this.routine = updatedRoutine;
             this.toastr.success(statusMessage);
@@ -586,7 +550,19 @@ export class ServiceTrackingPageComponent implements OnInit {
       console.error('Erro ao carregar comentários:', error);
       this.comments = [];
 
-      if (error.status !== 0) {
+      // Tratamento específico para erro 403 (Acesso negado)
+      if (error.status === 403) {
+        this.toastr.warning(
+          'Você não tem permissão para acessar os comentários desta rotina.',
+          'Acesso Negado',
+          {
+            timeOut: 5000,
+            progressBar: true,
+            closeButton: true,
+            positionClass: 'toast-top-center'
+          }
+        );
+      } else if (error.status !== 0) {
         this.toastr.error('Erro ao carregar comentários');
       }
     } finally {

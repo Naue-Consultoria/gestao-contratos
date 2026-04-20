@@ -10,6 +10,9 @@ interface ContractRoutine {
   id: number;
   contractNumber: string;
   clientName: string;
+  clientTradeName: string;
+  clientCompanyName: string;
+  clientType: string;
   type: string;
   status: string;
   statusColor: string;
@@ -52,9 +55,11 @@ export class RoutinesPageComponent implements OnInit {
     { value: 'client-az', label: 'Cliente A-Z' },
     { value: 'contract-number', label: 'Número do Contrato' }
   ];
+  private readonly FILTERS_STORAGE_KEY = 'routines_filters';
 
 
   ngOnInit() {
+    this.restoreFilters();
     this.loadContractRoutines();
     // Close dropdown when clicking outside
     document.addEventListener('click', this.closeDropdownHandler);
@@ -84,7 +89,10 @@ export class RoutinesPageComponent implements OnInit {
         this.contracts = response.routines.map((routine: RoutineListItem) => ({
           id: routine.id,
           contractNumber: routine.contractNumber,
-          clientName: routine.clientName,
+          clientName: (routine.clientName || '').toUpperCase(),
+          clientTradeName: (routine.clientTradeName || '').toUpperCase(),
+          clientCompanyName: (routine.clientCompanyName || '').toUpperCase(),
+          clientType: routine.clientType || '',
           type: this.getTypeLabel(routine.type),
           status: routine.status,
           statusColor: this.getStatusColor(routine.status),
@@ -158,6 +166,7 @@ export class RoutinesPageComponent implements OnInit {
   clearSearch() {
     this.searchTerm = '';
     this.selectedClient = '';
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
     this.applyFilters();
   }
 
@@ -226,7 +235,7 @@ export class RoutinesPageComponent implements OnInit {
   }
 
   private applyFilters() {
-    let filtered = [...this.contracts];
+    let filtered = this.contracts.filter(contract => contract.status !== 'cancelled');
 
     // Apply client filter
     if (this.selectedClient) {
@@ -255,6 +264,37 @@ export class RoutinesPageComponent implements OnInit {
     }
 
     this.filteredContracts = filtered;
+    this.saveFilters();
   }
 
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.searchTerm) count++;
+    if (this.selectedClient) count++;
+    return count;
+  }
+
+  private saveFilters() {
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify({
+      searchTerm: this.searchTerm,
+      selectedClient: this.selectedClient,
+      sortBy: this.sortBy
+    }));
+  }
+
+  private restoreFilters() {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.searchTerm) this.searchTerm = state.searchTerm;
+        if (state.selectedClient) this.selectedClient = state.selectedClient;
+        if (state.sortBy) this.sortBy = state.sortBy;
+      }
+    } catch (e) {}
+  }
+
+  trackByClientId(index: number, client: any): any {
+    return client.id ?? client.name;
+  }
 }

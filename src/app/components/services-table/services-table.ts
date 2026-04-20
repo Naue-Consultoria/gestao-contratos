@@ -35,16 +35,21 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
   isLoading = true;
   error = '';
 
+  // Tab properties
+  activeTab: 'ativos' | 'inativos' = 'ativos';
+
   // Filter properties
   searchTerm = '';
   selectedCategory = '';
   availableCategories: string[] = [];
+  private readonly FILTERS_STORAGE_KEY = 'services_filters';
 
   // Duplicate modal properties
   showDuplicateModal = false;
   selectedServiceForDuplication: ApiService | null = null;
 
   ngOnInit() {
+    this.restoreFilters();
     this.loadData();
     window.addEventListener('refreshServices', this.loadData.bind(this));
   }
@@ -54,11 +59,21 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     window.removeEventListener('refreshServices', this.loadData.bind(this));
   }
 
+  switchTab(tab: 'ativos' | 'inativos') {
+    if (this.activeTab !== tab) {
+      this.activeTab = tab;
+      this.searchTerm = '';
+      this.selectedCategory = '';
+      this.loadData();
+    }
+  }
+
   async loadData() {
     this.isLoading = true;
     this.error = '';
     try {
-      const servicesResponse = await firstValueFrom(this.serviceService.getServices({ is_active: true }));
+      const isActive = this.activeTab === 'ativos';
+      const servicesResponse = await firstValueFrom(this.serviceService.getServices({ is_active: isActive }));
       this.services = servicesResponse.services.map(apiService => this.mapApiServiceToTableService(apiService));
       this.extractCategories();
       this.applyFilters();
@@ -132,6 +147,7 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
       'Estratégia': 'fas fa-bullseye',
       'Recrutamento & Seleção': 'fas fa-users',
       'Geral': 'far fa-sticky-note',
+      'Palestra': 'fas fa-microphone',
       'Interno': 'fas fa-file-contract'
     };
     return iconMap[category] || 'fas fa-concierge-bell';
@@ -162,6 +178,7 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     }
 
     this.filteredServices = filtered;
+    this.saveFilters();
   }
 
   clearSearch() {
@@ -172,7 +189,33 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
   clearFilters() {
     this.searchTerm = '';
     this.selectedCategory = '';
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
     this.applyFilters();
+  }
+
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.searchTerm) count++;
+    if (this.selectedCategory) count++;
+    return count;
+  }
+
+  private saveFilters() {
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify({
+      searchTerm: this.searchTerm,
+      selectedCategory: this.selectedCategory
+    }));
+  }
+
+  private restoreFilters() {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.searchTerm) this.searchTerm = state.searchTerm;
+        if (state.selectedCategory) this.selectedCategory = state.selectedCategory;
+      }
+    } catch (e) {}
   }
 
   duplicateService(service: ServiceDisplay, event: MouseEvent) {
@@ -197,5 +240,9 @@ export class ServicesTableComponent implements OnInit, OnDestroy {
     if (editNewService && newService?.id) {
       this.router.navigate(['/home/servicos/editar', newService.id]);
     }
+  }
+
+  trackByServiceId(index: number, service: any): number {
+    return service.id;
   }
 }

@@ -27,6 +27,7 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
   private modalService = inject(ModalService);
   private subscriptions = new Subscription();
   contract: ApiContract | null = null;
+  nonInternalServices: any[] = [];
   contractId: number = 0;
   isLoading = true;
   error = '';
@@ -92,6 +93,10 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
         if (!this.contract.contract_services) {
           this.contract.contract_services = [];
         }
+
+        this.nonInternalServices = this.contract.contract_services.filter(
+          s => s.service?.name !== 'Encerramento' && s.service?.name !== 'Entrada de Cliente'
+        );
         
         // Garantir que assigned_users seja um array
         if (!this.contract.assigned_users) {

@@ -116,8 +116,7 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
     // Filtrar quick actions baseado no role do usuário
     this.filterQuickActionsByRole();
-    // Carregar dados de forma sequencial para evitar rate limiting
-    this.loadDashboardDataSequentially();
+    this.loadDashboardData();
   }
 
   ngAfterViewInit() {
@@ -148,52 +147,43 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
     }
   }
 
-  private async loadDashboardDataSequentially() {
+  private async loadDashboardData() {
     try {
       if (this.authService.isAdmin() || this.authService.isAdminGerencial()) {
-        // Carregar dados de forma sequencial para evitar rate limiting
-        await this.loadAdminDataSequentially();
+        await Promise.all([
+          this.loadAdminData(),
+          this.loadChartData(),
+          this.loadRecentActivities()
+        ]);
       } else if (this.authService.isConsultorRS()) {
-        // Para Consultor R&S, carregar dados específicos de vagas
-        await this.loadConsultorRSData();
+        await Promise.all([
+          this.loadConsultorRSData(),
+          this.loadChartData(),
+          this.loadRecentActivities()
+        ]);
       } else {
-        // Para usuários normais, carregar apenas contratos vinculados ao usuário
-        await this.loadUserSpecificData();
+        await Promise.all([
+          this.loadUserSpecificData(),
+          this.loadChartData(),
+          this.loadRecentActivities()
+        ]);
       }
-
-      // Aguardar antes de carregar chart data
-      await this.delay(1000);
-      await this.loadChartData();
-
-      // Aguardar antes de carregar atividades
-      await this.delay(1000);
-      await this.loadRecentActivities();
-
     } catch (error) {
       console.error('Erro ao carregar dados do dashboard:', error);
-      // Usar dados com valores zerados em caso de erro
       this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
     }
   }
 
-  private async loadAdminDataSequentially() {
+  private async loadAdminData() {
     try {
-      // Carregar dados sequencialmente com delays
-      console.log('📊 Carregando stats de contratos...');
-      const contractStats = await this.contractService.getStats().toPromise();
-
-      await this.delay(500);
-      console.log('📋 Carregando stats de serviços...');
-      const serviceStats = await this.serviceService.getStats().toPromise();
-
-      await this.delay(500);
-      console.log('👥 Carregando dados de clientes...');
-      const clientsData = await this.clientService.getClients().toPromise();
+      const [contractStats, serviceStats, clientsData] = await Promise.all([
+        this.contractService.getStats().toPromise(),
+        this.serviceService.getStats().toPromise(),
+        this.clientService.getClients().toPromise()
+      ]);
 
       const totalClients = clientsData?.total || 0;
       this.updateStatCards(contractStats?.stats || { total: 0, active: 0 }, serviceStats?.stats || { total: 0 }, totalClients);
-
-      console.log('✅ Dados do dashboard carregados com sucesso');
     } catch (error) {
       console.error('❌ Erro ao carregar dados admin:', error);
       this.updateStatCards({ total: 0, active: 0 }, { total: 0 }, 0);
@@ -279,10 +269,6 @@ export class DashboardContentComponent implements OnInit, AfterViewInit, OnDestr
         }
       ];
     }
-  }
-
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   private async loadChartData() {

@@ -162,9 +162,10 @@
           </select>
         </div>
 
-        <button class="btn btn-secondary btn-clear" (click)="clearFilters()" *ngIf="hasFilters()">
+        <button class="active-filters-chip" *ngIf="getActiveFiltersCount() > 0" (click)="clearFilters()" title="Limpar todos os filtros">
+          <i class="fas fa-filter"></i>
+          <span>{{ getActiveFiltersCount() }} filtro{{ getActiveFiltersCount() > 1 ? 's' : '' }}</span>
           <i class="fas fa-times"></i>
-          <span class="btn-text">Limpar filtros</span>
         </button>
       </div>
 
@@ -202,8 +203,8 @@
             <th>Pretensão Salarial</th>
             <th>Consultora</th>
             <th>Status</th>
-            <th>Candidato Aprovado</th>
             <th>Data Abertura</th>
+            <th>Candidato Aprovado</th>
             <th>Data Fechamento</th>
             <th>SLA (dias)</th>
             <th>Ações</th>
@@ -261,6 +262,9 @@
               </small>
             </td>
             <td>
+              <span class="date-text">{{ vaga.dataAbertura | dateNoTimezone }}</span>
+            </td>
+            <td>
               <div class="approved-candidate" *ngIf="vaga.candidatoAprovado">
                 <span class="candidate-name">
                   <i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.25rem;"></i>
@@ -271,9 +275,6 @@
                 </small>
               </div>
               <span class="empty-text" *ngIf="!vaga.candidatoAprovado">-</span>
-            </td>
-            <td>
-              <span class="date-text">{{ vaga.dataAbertura | dateNoTimezone }}</span>
             </td>
             <td>
               <span class="date-text" *ngIf="vaga.dataFechamentoCancelamento">
@@ -397,10 +398,10 @@
               <span class="salary-value">R$ {{ vaga.salario | number:'1.2-2' }}</span>
             </td>
             <td>
-              <span class="percentage-value">{{ vaga.porcentagemFaturamento || 100 }}%</span>
+              <span class="percentage-value">{{ vaga.porcentagemFaturamento ?? 100 }}%</span>
             </td>
             <td>
-              <span class="billing-value">R$ {{ vaga.valorFaturamento || (vaga.salario * ((vaga.porcentagemFaturamento || 100) / 100)) | number:'1.2-2' }}</span>
+              <span class="billing-value">R$ {{ vaga.valorFaturamento || (vaga.salario * ((vaga.porcentagemFaturamento ?? 100) / 100)) | number:'1.2-2' }}</span>
             </td>
             <td>
               <span class="consultant-name">{{ vaga.usuarioNome || '-' }}</span>
@@ -532,7 +533,7 @@
               <span class="salary-value">R$ {{ vaga.salario | number:'1.2-2':'pt-BR' }}</span>
             </td>
             <td>
-              <span class="percentage-value">{{ vaga.porcentagemFaturamento || 100 }}%</span>
+              <span class="percentage-value">{{ vaga.porcentagemFaturamento ?? 100 }}%</span>
             </td>
             <td>
               <span class="revenue-value">R$ {{ calcularValorFaturamento(vaga) | number:'1.2-2':'pt-BR' }}</span>
@@ -616,6 +617,22 @@
         </div>
 
         <div class="form-group">
+          <label for="porcentagem-faturamento-final" class="form-label">
+            <i class="fas fa-percent"></i>
+            Porcentagem de Faturamento
+          </label>
+          <input
+            type="number"
+            id="porcentagem-faturamento-final"
+            class="form-control"
+            [(ngModel)]="fechamentoData.porcentagemFaturamento"
+            placeholder="100"
+            min="0"
+            max="200"
+          />
+        </div>
+
+        <div class="form-group">
           <label for="fonte-final" class="form-label">
             <i class="fas fa-share-alt"></i>
             Fonte de Recrutamento
@@ -674,7 +691,7 @@
           </div>
           <div class="alert alert-warning" style="margin-top: 1rem; padding: 1rem; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
             <i class="fas fa-exclamation-triangle" style="color: #ffc107; margin-right: 0.5rem;"></i>
-            <strong>Atenção:</strong> Ao cancelar esta vaga, será faturado 30% do valor do salário.
+            <strong>Atenção:</strong> Ao cancelar esta vaga, será faturado o percentual informado abaixo (padrão: 30%).
           </div>
         </div>
 
@@ -692,8 +709,24 @@
             placeholder="R$ 0,00"
           />
           <small class="form-text" style="color: #6c757d; margin-top: 0.25rem;">
-            Faturamento: 30% = {{ calcularFaturamentoCancelamento() }}
+            Faturamento: {{ cancelamentoData.porcentagemFaturamento ?? 30 }}% = {{ calcularFaturamentoCancelamento() }}
           </small>
+        </div>
+
+        <div class="form-group">
+          <label for="porcentagem-faturamento-cancelamento" class="form-label">
+            <i class="fas fa-percent"></i>
+            Porcentagem de Faturamento
+          </label>
+          <input
+            type="number"
+            id="porcentagem-faturamento-cancelamento"
+            class="form-control"
+            [(ngModel)]="cancelamentoData.porcentagemFaturamento"
+            placeholder="30"
+            min="0"
+            max="200"
+          />
         </div>
 
         <div class="form-group">

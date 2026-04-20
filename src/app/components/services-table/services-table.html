@@ -6,46 +6,73 @@
 
   <div class="table-container">
     <div class="table-header">
-      <h2 class="table-title">Lista de Serviços</h2>
-      
-      <div class="center-controls">
-        <!-- Filtro por categoria -->
-        <div class="category-filter">
-          <select
-            class="form-select"
-            [(ngModel)]="selectedCategory"
-            (change)="applyFilters()"
-          >
-            <option value="">Todas as Categorias</option>
-            <option *ngFor="let category of availableCategories" [value]="category">
-              {{ category }}
-            </option>
-          </select>
-        </div>
-        
-        <!-- Barra de pesquisa -->
-        <div class="search-input-wrapper">
-          <i class="fas fa-search search-icon"></i>
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="Buscar serviços..." 
-            [(ngModel)]="searchTerm"
-            (input)="applyFilters()"
-          />
-          <button 
-            *ngIf="searchTerm" 
-            class="clear-search-btn" 
-            (click)="clearSearch()"
-          >
-            <i class="fas fa-times"></i>
-          </button>
+      <div class="filters-section">
+        <div class="filter-row">
+          <!-- Search Box -->
+          <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Buscar serviços..."
+              [(ngModel)]="searchTerm"
+              (input)="applyFilters()"
+            />
+            <button
+              *ngIf="searchTerm"
+              class="clear-search-btn"
+              (click)="clearSearch()"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="filter-item">
+            <label class="filter-label">
+              <i class="fas fa-tag"></i>
+              Categoria
+            </label>
+            <select class="filter-select" [(ngModel)]="selectedCategory" (change)="applyFilters()">
+              <option value="">Todas</option>
+              <option *ngFor="let category of availableCategories" [value]="category">
+                {{ category }}
+              </option>
+            </select>
+          </div>
         </div>
       </div>
-      
-      <button class="btn btn-primary" (click)="openNewServicePage()">
-        <i class="fas fa-plus"></i>
-        Novo Serviço
+
+      <div class="action-buttons-row">
+        <button class="active-filters-chip" *ngIf="getActiveFiltersCount() > 0" (click)="clearFilters()" title="Limpar todos os filtros">
+          <i class="fas fa-filter"></i>
+          <span>{{ getActiveFiltersCount() }} filtro{{ getActiveFiltersCount() > 1 ? 's' : '' }}</span>
+          <i class="fas fa-times"></i>
+        </button>
+        <button class="btn btn-primary" (click)="openNewServicePage()">
+          <i class="fas fa-plus"></i>
+          Novo Serviço
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'ativos'"
+        (click)="switchTab('ativos')"
+      >
+        <i class="fas fa-check-circle"></i>
+        Ativos
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'inativos'"
+        (click)="switchTab('inativos')"
+      >
+        <i class="fas fa-ban"></i>
+        Inativos
       </button>
     </div>
 
@@ -65,9 +92,9 @@
     <div class="table-wrapper" *ngIf="!isLoading">
       <!-- Mensagem quando não há serviços -->
       <div *ngIf="filteredServices.length === 0 && services.length === 0 && !error" class="empty-state">
-        <i class="fas fa-briefcase empty-icon"></i>
-        <h3>Nenhum serviço cadastrado</h3>
-        <p>Clique no botão "Novo Serviço" para adicionar o primeiro serviço.</p>
+        <i [class]="activeTab === 'ativos' ? 'fas fa-briefcase empty-icon' : 'fas fa-ban empty-icon'"></i>
+        <h3>{{ activeTab === 'ativos' ? 'Nenhum serviço cadastrado' : 'Nenhum serviço inativo' }}</h3>
+        <p>{{ activeTab === 'ativos' ? 'Clique no botão "Novo Serviço" para adicionar o primeiro serviço.' : 'Todos os serviços estão ativos no momento.' }}</p>
       </div>
 
       <!-- Mensagem quando não há resultados na busca -->
@@ -91,7 +118,7 @@
         </thead>
         <tbody>
           <tr
-            *ngFor="let service of filteredServices"
+            *ngFor="let service of filteredServices; trackBy: trackByServiceId"
             class="clickable"
             (click)="editService(service.id)"
           >

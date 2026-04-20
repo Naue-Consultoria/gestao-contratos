@@ -47,6 +47,7 @@
               <option value="">Todos</option>
               <option value="draft">Rascunho</option>
               <option value="sent">Enviada</option>
+              <option value="em_negociacao">Em Negociação</option>
               <option value="signed">Fechada</option>
               <option value="rejected">Rejeitada</option>
               <option value="expired">Expirada</option>
@@ -119,20 +120,16 @@
             </select>
           </div>
 
-          <!-- Active Filters Indicator -->
-          <div class="active-filters" *ngIf="getActiveFiltersCount() > 0">
-            <span class="active-filters-badge">
-              {{ getActiveFiltersCount() }} filtro{{ getActiveFiltersCount() > 1 ? 's' : '' }} ativo{{ getActiveFiltersCount() > 1 ? 's' : '' }}
-            </span>
-            <button class="btn-clear-inline" (click)="clearFilters()" title="Limpar todos os filtros">
-              <i class="fas fa-times-circle"></i>
-            </button>
-          </div>
         </div>
       </div>
 
       <!-- Action Button -->
-      <div class="action-buttons">
+      <div class="action-buttons-row">
+        <button class="active-filters-chip" *ngIf="getActiveFiltersCount() > 0" (click)="clearFilters()" title="Limpar todos os filtros">
+          <i class="fas fa-filter"></i>
+          <span>{{ getActiveFiltersCount() }} filtro{{ getActiveFiltersCount() > 1 ? 's' : '' }}</span>
+          <i class="fas fa-times"></i>
+        </button>
         <button class="btn btn-primary" (click)="openNewProposalPage()">
           <i class="fas fa-plus"></i>
           Nova Proposta
@@ -174,7 +171,10 @@
               <i [class]="getSortIcon('clientName')"></i>
             </th>
             <th>Tipo</th>
-            <th>Status</th>
+            <th class="sortable" (click)="sortBy('status')">
+              Status
+              <i [class]="getSortIcon('status')"></i>
+            </th>
             <th class="sortable" (click)="sortBy('totalValue')">
               Valor Total
               <i [class]="getSortIcon('totalValue')"></i>
@@ -229,6 +229,7 @@
                 >
                   <option value="draft">Rascunho</option>
                   <option value="sent">Enviada</option>
+                  <option value="em_negociacao">Em Negociação</option>
                   <option value="signed">Fechada</option>
                   <option value="rejected">Rejeitada</option>
                   <option value="expired">Expirada</option>

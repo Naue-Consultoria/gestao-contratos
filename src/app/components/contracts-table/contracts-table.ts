@@ -98,6 +98,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   showDeleteModal = false;
   selectedContractForDeletion: ContractDisplay | null = null;
   isDeleting = false;
+  private readonly FILTERS_STORAGE_KEY = 'contracts_filters';
 
   // Controle de visualização financeira - Admin e Admin Gerencial podem ver valores individuais
   canViewFinancialInfo = false;
@@ -117,6 +118,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
       }
     }
 
+    this.restoreFilters();
     this.subscribeToSearch();
     this.subscribeToRefreshEvents();
     this.loadInitialData();
@@ -267,6 +269,7 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     } finally {
       this.isLoading = false;
       this.isSearching = false;
+      this.saveFilters();
     }
   }
 
@@ -278,30 +281,30 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
   }
 
   private calculateStatsFromContracts(apiContracts: ApiContract[]) {
+    let active = 0, completed = 0, cancelled = 0, suspended = 0;
+    let totalValueActive = 0, totalValueAll = 0;
+    const typeStats: any = { Full: 0, Pontual: 0, Individual: 0, 'Recrutamento & Seleção': 0 };
+
+    for (const c of apiContracts) {
+      const val = this.getAdjustedContractValue(c);
+      totalValueAll += val;
+      if (c.status === 'active') { active++; totalValueActive += val; }
+      else if (c.status === 'completed') completed++;
+      else if (c.status === 'cancelled') cancelled++;
+      else if (c.status === 'suspended') suspended++;
+      if (typeStats[c.type] !== undefined) typeStats[c.type]++;
+    }
+
     this.stats = {
       total: apiContracts.length,
-      active: apiContracts.filter((c) => c.status === 'active').length,
-      completed: apiContracts.filter((c) => c.status === 'completed').length,
-      cancelled: apiContracts.filter((c) => c.status === 'cancelled').length,
-      suspended: apiContracts.filter((c) => c.status === 'suspended').length,
-      totalValueActive: apiContracts
-        .filter((c) => c.status === 'active')
-        .reduce((sum, c) => sum + this.getAdjustedContractValue(c), 0),
-      totalValueAll: apiContracts.reduce(
-        (sum, c) => sum + this.getAdjustedContractValue(c),
-        0
-      ),
-      averageValue:
-        apiContracts.length > 0
-          ? apiContracts.reduce((sum, c) => sum + this.getAdjustedContractValue(c), 0) /
-            apiContracts.length
-          : 0,
-      typeStats: {
-        Full: apiContracts.filter((c) => c.type === 'Full').length,
-        Pontual: apiContracts.filter((c) => c.type === 'Pontual').length,
-        Individual: apiContracts.filter((c) => c.type === 'Individual').length,
-        'Recrutamento & Seleção': apiContracts.filter((c) => c.type === 'Recrutamento & Seleção').length,
-      },
+      active,
+      completed,
+      cancelled,
+      suspended,
+      totalValueActive,
+      totalValueAll,
+      averageValue: apiContracts.length > 0 ? totalValueAll / apiContracts.length : 0,
+      typeStats,
       averageDuration: 0,
     };
   }
@@ -440,8 +443,11 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
   clearFilters() {
     this.filters = { search: '', status: '', client_id: null, type: '', dateType: '', month: '', year: '' };
-    this.searchService.setSearchTerm(''); // Also clear the global search
+    this.searchService.setSearchTerm('');
     this.currentTab = 'all';
+    this.sortField = '';
+    this.sortDirection = 'asc';
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
     this.applyFilters();
   }
 
@@ -766,6 +772,34 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
     return count;
   }
 
+  private saveFilters() {
+    const state = {
+      filters: this.filters,
+      sortField: this.sortField,
+      sortDirection: this.sortDirection,
+      currentTab: this.currentTab
+    };
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify(state));
+  }
+
+  private restoreFilters() {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.filters) {
+          this.filters = { ...this.filters, ...state.filters };
+        }
+        if (state.sortField) this.sortField = state.sortField;
+        if (state.sortDirection) this.sortDirection = state.sortDirection;
+        if (state.currentTab) this.currentTab = state.currentTab;
+        if (this.filters.search) {
+          this.searchService.setSearchTerm(this.filters.search);
+        }
+      }
+    } catch (e) {}
+  }
+
   // Manipular clique no card de estatísticas
   handleStatsCardClick(cardId: string) {
     if (cardId === 'expiring') {
@@ -795,5 +829,17 @@ export class ContractsTableComponent implements OnInit, OnDestroy {
 
       // Removido toast de informação conforme solicitado
     }
+  }
+
+  trackByContractId(index: number, contract: ContractDisplay): number {
+    return contract.raw.id;
+  }
+
+  trackByClientId(index: number, client: any): number {
+    return client.id;
+  }
+
+  trackByYear(index: number, year: number): number {
+    return year;
   }
 }

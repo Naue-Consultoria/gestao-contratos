@@ -25,6 +25,7 @@ export class MentoriaList implements OnInit {
   filtroBusca: string = '';
   filtroStatus: string = 'all';
   clientesUnicos: any[] = [];
+  private readonly FILTERS_STORAGE_KEY = 'mentorias_filters';
 
   // Dropdown
   dropdownAberto: number | null = null;
@@ -51,6 +52,7 @@ export class MentoriaList implements OnInit {
 
   ngOnInit(): void {
     this.configurarBreadcrumb();
+    this.restoreFilters();
     this.carregarMentorias();
   }
 
@@ -75,23 +77,6 @@ export class MentoriaList implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           this.mentorias = response.data;
-
-          // Carregar encontros de todas as mentorias para mostrar nome do mentorado
-          this.mentorias.forEach(mentoria => {
-            if (!mentoria.encontros) {
-              this.mentoriaService.obterMentoria(mentoria.id).subscribe({
-                next: (detailResponse) => {
-                  if (detailResponse.success && detailResponse.data && detailResponse.data.encontros) {
-                    mentoria.encontros = detailResponse.data.encontros;
-                  }
-                },
-                error: (error) => {
-                  console.error(`Erro ao carregar encontros da mentoria ${mentoria.id}:`, error);
-                }
-              });
-            }
-          });
-
           this.calcularEstatisticas();
           this.extrairClientesUnicos();
           this.aplicarFiltros();
@@ -161,10 +146,47 @@ export class MentoriaList implements OnInit {
     }
 
     this.mentoriasFiltradas = resultado;
+    this.saveFilters();
   }
 
   onFiltroChange(): void {
     this.aplicarFiltros();
+  }
+
+  clearFilters(): void {
+    this.filtroCliente = 'all';
+    this.filtroBusca = '';
+    this.filtroStatus = 'all';
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
+    this.aplicarFiltros();
+  }
+
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.filtroBusca) count++;
+    if (this.filtroCliente !== 'all') count++;
+    if (this.filtroStatus !== 'all') count++;
+    return count;
+  }
+
+  private saveFilters(): void {
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify({
+      filtroCliente: this.filtroCliente,
+      filtroBusca: this.filtroBusca,
+      filtroStatus: this.filtroStatus
+    }));
+  }
+
+  private restoreFilters(): void {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.filtroCliente) this.filtroCliente = state.filtroCliente;
+        if (state.filtroBusca) this.filtroBusca = state.filtroBusca;
+        if (state.filtroStatus) this.filtroStatus = state.filtroStatus;
+      }
+    } catch (e) {}
   }
 
   novaMentoria(): void {

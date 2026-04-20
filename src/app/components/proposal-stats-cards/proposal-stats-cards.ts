@@ -106,6 +106,40 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
     this.calculateAndUpdateCards(proposals);
   }
 
+  /**
+   * Calcula o valor real de uma proposta, considerando seleção parcial de serviços
+   * IMPORTANTE: Uma vez que o cliente selecionou serviços, o valor aceito deve ser usado
+   * independente de mudanças posteriores no status da proposta
+   */
+  private calculateProposalRealValue(proposal: any): number {
+    let totalValue = proposal.total_value || 0;
+
+    // Verificar se há serviços com seleção do cliente definida
+    // Uma vez que o cliente selecionou/rejeitou serviços, sempre usar o valor aceito
+    if (proposal.services && proposal.services.length > 0) {
+      // Verificar se há algum serviço com selected_by_client definido (true ou false)
+      const hasClientSelection = proposal.services.some((s: any) => s.selected_by_client !== null && s.selected_by_client !== undefined);
+
+      if (hasClientSelection) {
+        // Contar quantos serviços NÃO foram selecionados
+        const unselectedCount = proposal.services.filter((s: any) => s.selected_by_client === false).length;
+        const totalServices = proposal.services.length;
+
+        // Só é seleção parcial se houver pelo menos um serviço NÃO selecionado
+        // mas NÃO todos os serviços são não selecionados
+        const hasPartialSelection = unselectedCount > 0 && unselectedCount < totalServices;
+
+        if (hasPartialSelection) {
+          // Calcular apenas o valor dos serviços selecionados
+          const selectedServices = proposal.services.filter((service: any) => service.selected_by_client !== false);
+          totalValue = selectedServices.reduce((sum: number, service: any) => sum + (service.total_value || 0), 0);
+        }
+      }
+    }
+
+    return totalValue;
+  }
+
   private calculateAndUpdateCards(proposals: any[]) {
     const totalProposals = proposals.length;
     const sentProposals = proposals.filter((p: any) => p.status === 'sent').length;
@@ -122,21 +156,21 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
       // When "Fechada" filter is selected, show signed proposals value
       pendingValue = proposals
         .filter((p: any) => p.status === 'signed')
-        .reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+        .reduce((sum: number, p: any) => sum + this.calculateProposalRealValue(p), 0);
       pendingCount = signedProposals;
       pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} fechada${pendingCount !== 1 ? 's' : ''}`;
     } else if (this.activeStatusFilter === 'sent') {
       // When "Enviada" filter is selected, show sent proposals value
       pendingValue = proposals
         .filter((p: any) => p.status === 'sent')
-        .reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+        .reduce((sum: number, p: any) => sum + this.calculateProposalRealValue(p), 0);
       pendingCount = sentProposals;
       pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} enviada${pendingCount !== 1 ? 's' : ''}`;
     } else if (this.activeStatusFilter) {
       // When any other status filter is selected, show that status value
       pendingValue = proposals
         .filter((p: any) => p.status === this.activeStatusFilter)
-        .reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+        .reduce((sum: number, p: any) => sum + this.calculateProposalRealValue(p), 0);
       pendingCount = proposals.filter((p: any) => p.status === this.activeStatusFilter).length;
       const statusText = this.getStatusText(this.activeStatusFilter);
       pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} ${statusText.toLowerCase()}${pendingCount !== 1 ? 's' : ''}`;
@@ -144,13 +178,13 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
       // Default: show sent proposals value when no filter is active
       pendingValue = proposals
         .filter((p: any) => p.status === 'sent')
-        .reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+        .reduce((sum: number, p: any) => sum + this.calculateProposalRealValue(p), 0);
       pendingCount = sentProposals;
       pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} enviada${pendingCount !== 1 ? 's' : ''}`;
     }
 
     // Calcular valor total de todas as propostas filtradas
-    const totalValue = proposals.reduce((sum: number, p: any) => sum + (p.total_value || 0), 0);
+    const totalValue = proposals.reduce((sum: number, p: any) => sum + this.calculateProposalRealValue(p), 0);
 
     // Construir cards base (sem Total de Propostas)
     const baseCards: StatCard[] = [

@@ -58,9 +58,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         });
       }
 
-      // Erro 403 - Acesso negado (só redireciona se não for rota pública)
+      // Erro 403 - Acesso negado
+      // Removido o redirecionamento automático para permitir que cada componente
+      // trate o erro 403 da forma mais apropriada (ex: mostrar mensagem de aviso)
       if (error.status === 403 && !isPublicRoute) {
-        router.navigate(['/home/dashboard']);
+        console.warn('⚠️ Acesso negado (403). Verifique suas permissões.');
       }
 
       // Erro 0 - Problema de rede

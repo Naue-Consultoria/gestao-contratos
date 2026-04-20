@@ -262,6 +262,216 @@ select.form-control {
     }
 }
 
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .tabs {
+    border-bottom-color: #444;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-gray);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tab-btn:hover {
+    color: var(--primary-green);
+    background-color: rgba(14, 155, 113, 0.05);
+}
+
+.tab-btn.active {
+    color: var(--primary-green);
+    border-bottom-color: var(--primary-green);
+}
+
+:host-context(body.dark-mode) .tab-btn {
+    color: #999;
+}
+
+:host-context(body.dark-mode) .tab-btn.active {
+    color: var(--primary-green);
+}
+
+/* Search */
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-gray);
+    font-size: 0.875rem;
+}
+
+.search-input {
+    padding-left: 2.5rem !important;
+    padding-right: 2.5rem !important;
+}
+
+.search-loading {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary-green);
+}
+
+/* Search Results */
+.search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border-gray);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+:host-context(body.dark-mode) .search-results {
+    border-color: #444;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-gray);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background-color: rgba(14, 155, 113, 0.05);
+}
+
+:host-context(body.dark-mode) .search-result-item {
+    border-bottom-color: #444;
+}
+
+:host-context(body.dark-mode) .search-result-item:hover {
+    background-color: rgba(14, 155, 113, 0.1);
+}
+
+.search-result-item.ja-vinculado {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.search-result-item.ja-vinculado:hover {
+    background-color: transparent;
+}
+
+.result-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.result-name {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.875rem;
+}
+
+:host-context(body.dark-mode) .result-name {
+    color: var(--dark-text);
+}
+
+.result-details {
+    font-size: 0.75rem;
+    color: var(--text-gray);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.result-action {
+    flex-shrink: 0;
+    margin-left: 0.75rem;
+}
+
+.btn-vincular {
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    transition: all 0.2s ease;
+}
+
+.btn-vincular:hover {
+    background: #10b981;
+    transform: translateY(-1px);
+}
+
+.badge-vinculado {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background: var(--border-gray);
+    color: var(--text-gray);
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+
+:host-context(body.dark-mode) .badge-vinculado {
+    background: #444;
+    color: #999;
+}
+
+/* Search Empty State */
+.search-empty,
+.search-hint {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-gray);
+}
+
+.search-empty i,
+.search-hint i {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.search-empty p,
+.search-hint p {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .modal-content {

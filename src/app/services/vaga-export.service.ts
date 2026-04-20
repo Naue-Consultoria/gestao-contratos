@@ -249,7 +249,7 @@ export class VagaExportService {
       ],
       [
         { label: 'Fonte de Recrutamento', value: this.fonteRecrutamentoLabels[vaga.fonteRecrutamento] || vaga.fonteRecrutamento || 'N/A' },
-        { label: '% Faturamento', value: `${vaga.porcentagemFaturamento || 100}%` },
+        { label: '% Faturamento', value: `${vaga.porcentagemFaturamento ?? 100}%` },
         { label: 'Valor Faturamento', value: this.formatCurrency(vaga.valorFaturamento), highlight: true }
       ]
     ];

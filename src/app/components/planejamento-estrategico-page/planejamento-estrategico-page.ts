@@ -41,8 +41,10 @@ export class PlanejamentoEstrategicoPageComponent implements OnInit, OnDestroy {
 
   // Menu dropdown
   openMenuId: number | null = null;
+  private readonly FILTERS_STORAGE_KEY = 'planejamento_filters';
 
   ngOnInit(): void {
+    this.restoreFilters();
     this.loadPlanejamentos();
   }
 
@@ -107,6 +109,7 @@ export class PlanejamentoEstrategicoPageComponent implements OnInit, OnDestroy {
     }
 
     this.filteredPlanejamentos = filtered;
+    this.saveFilters();
   }
 
   onSearchChange(): void {
@@ -120,6 +123,38 @@ export class PlanejamentoEstrategicoPageComponent implements OnInit, OnDestroy {
   clearSearch(): void {
     this.searchTerm = '';
     this.applyFilters();
+  }
+
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.statusFilter = 'todos';
+    sessionStorage.removeItem(this.FILTERS_STORAGE_KEY);
+    this.applyFilters();
+  }
+
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.searchTerm) count++;
+    if (this.statusFilter !== 'todos') count++;
+    return count;
+  }
+
+  private saveFilters(): void {
+    sessionStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify({
+      searchTerm: this.searchTerm,
+      statusFilter: this.statusFilter
+    }));
+  }
+
+  private restoreFilters(): void {
+    try {
+      const saved = sessionStorage.getItem(this.FILTERS_STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.searchTerm) this.searchTerm = state.searchTerm;
+        if (state.statusFilter) this.statusFilter = state.statusFilter;
+      }
+    } catch (e) {}
   }
 
   getClientName(planejamento: PlanejamentoEstrategico): string {

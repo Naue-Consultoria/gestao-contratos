@@ -164,6 +164,7 @@ export class DuplicateServiceModalComponent implements OnInit {
       'Estratégia': 'fas fa-bullseye',
       'Recrutamento & Seleção': 'fas fa-users',
       'Geral': 'far fa-sticky-note',
+      'Palestra': 'fas fa-microphone',
       'Interno': 'fas fa-file-contract'
     };
     return iconMap[category] || 'fas fa-concierge-bell';

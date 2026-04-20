@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaymentMethodService, PaymentMethod, CreatePaymentMethodRequest } from '../../services/payment-method.service';
+import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { ModalService } from '../../services/modal.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -18,7 +19,7 @@ interface PaymentMethodForm {
 @Component({
   selector: 'app-payment-methods-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CurrencyMaskDirective],
   templateUrl: './payment-methods-manager.component.html',
   styleUrls: ['./payment-methods-manager.component.css']
 })

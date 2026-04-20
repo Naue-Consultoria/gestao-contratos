@@ -1367,12 +1367,12 @@
           <!-- Campo de Meta -->
           <div class="ganhos-perdas-meta-section">
             <label class="ganhos-perdas-meta-label">META:</label>
-            <input
-              type="text"
+            <textarea
               class="ganhos-perdas-meta-input"
               [(ngModel)]="ganhosPerdas.meta"
               placeholder="Digite sua meta aqui..."
-              [disabled]="expired">
+              rows="3"
+              [disabled]="expired"></textarea>
           </div>
 
           <!-- Grid 2x2 dos Quadrantes -->
@@ -1820,6 +1820,41 @@
       </div>
     </section>
 
+    <!-- Mapa de Ambição Section -->
+    <section *ngIf="secaoId === 'mapaAmbicao'" class="dark-section mapa-ambicao-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaAmbicao?.ativo">
+      <div class="dark-container">
+        <div class="dark-header">
+          <h2 class="dark-title">
+            <i class="fa-solid fa-sack-dollar"></i>
+            Mapa de Ambição
+          </h2>
+          <p class="dark-subtitle">Planejamento Estratégico de Vida e Patrimônio</p>
+          <button class="btn-export-mapa-ambicao" (click)="exportarMapaAmbicaoPDF()" [disabled]="exportandoMapaAmbicao">
+            <i class="fa-solid" [ngClass]="exportandoMapaAmbicao ? 'fa-spinner fa-spin' : 'fa-file-pdf'"></i>
+            {{ exportandoMapaAmbicao ? 'Gerando PDF...' : 'Exportar PDF' }}
+          </button>
+        </div>
+        <app-mapa-ambicao #mapaAmbicaoComp
+          [token]="token"
+          [readOnly]="expired"
+          [nomeMentorado]="encontro.mentorado_nome || ''"
+          [cargoMentorado]="encontro.mentorado_profissao || ''">
+        </app-mapa-ambicao>
+      </div>
+    </section>
+
+    <!-- Linha do Tempo Section -->
+    <section *ngIf="secaoId === 'linhaDoTempo'" class="dark-section linha-do-tempo-main-section"
+             [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.linhaDoTempo?.ativo">
+      <div class="dark-container">
+        <app-linha-do-tempo-editor
+          [token]="token"
+          [readOnly]="expired">
+        </app-linha-do-tempo-editor>
+      </div>
+    </section>
+
     <!-- Mapa Mental Section -->
     <section *ngIf="secaoId === 'mapaMental'" class="dark-section mapa-mental-main-section"
              [class.hidden]="!conteudoEstruturado || !conteudoEstruturado.mapaMental?.ativo">
@@ -2055,14 +2090,10 @@
     </section>
 
     <!-- Footer -->
-    <footer class="mentoria-footer">
+    <footer class="mentoria-footer dark-section">
       <p *ngIf="savingInteractions" class="saving-indicator">
         <i class="fa-solid fa-circle-notch fa-spin"></i>
         Salvando...
-      </p>
-      <p class="footer-info">
-        <i class="fa-solid fa-shield-halved"></i>
-        Suas informações são mantidas em sigilo
       </p>
       <p class="footer-copy">© {{ getCurrentYear() }} NAUE Consultoria - Todos os direitos reservados</p>
     </footer>

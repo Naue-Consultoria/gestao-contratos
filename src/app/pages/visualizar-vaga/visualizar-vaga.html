@@ -261,8 +261,11 @@
   <app-candidato-modal
     [isOpen]="isCandidatoModalVisible"
     [candidato]="selectedCandidato"
+    [vagaId]="vagaId"
+    [candidatosVinculados]="getCandidatosVinculadosIds()"
     (modalClosed)="closeCandidatoModal()"
-    (candidatoSaved)="onCandidatoSaved($event)">
+    (candidatoSaved)="onCandidatoSaved($event)"
+    (candidatoSelecionado)="onCandidatoSelecionado($event)">
   </app-candidato-modal>
 
   <!-- Entrevista Modal -->

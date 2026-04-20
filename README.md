@@ -139,4 +139,4 @@ npm run build
 
 ---
 
-Desenvolvido por **Consultoria NAUE**
+Desenvolvido por **GIO**

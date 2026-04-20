@@ -224,7 +224,7 @@
               </div>
             </div>
 
-            <div class="form-group" *ngIf="['fechada', 'fechada_rep', 'cancelada_cliente'].includes(vagaForm.get('status')?.value)">
+            <div class="form-group" *ngIf="['fechada', 'fechada_rep', 'cancelada_cliente', 'encerramento_cont'].includes(vagaForm.get('status')?.value)">
               <label class="form-label">Data de Fechamento/Cancelamento</label>
               <input
                 type="date"

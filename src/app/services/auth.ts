@@ -88,9 +88,9 @@ export class AuthService {
       tap(response => {
         if (response.token && response.user) {
           this.setSession(response.token, response.user);
-          // Inicializar notificações após delay maior para evitar rate limiting
+          // Inicializar notificações com Supabase Realtime
           setTimeout(() => {
-            this.notificationService.initializeNotifications();
+            this.notificationService.initializeNotifications(String(response.user.id));
           }, 3000);
         }
         this.isLoggingIn = false; // Reset flag após sucesso
@@ -311,9 +311,9 @@ export class AuthService {
       try {
         const user = JSON.parse(userJson);
         this.currentUserSubject.next(user);
-        // Inicializar notificações se usuário já estiver autenticado (com delay maior)
+        // Inicializar notificações com Supabase Realtime
         setTimeout(() => {
-          this.notificationService.initializeNotifications();
+          this.notificationService.initializeNotifications(String(user.id));
         }, 3000);
       } catch (error) {
         console.error('❌ Erro ao analisar dados do usuário no localStorage. Limpando sessão.', error);
@@ -330,10 +330,7 @@ export class AuthService {
       tap(response => {
         if (response.token && response.user) {
           this.setSession(response.token, response.user);
-          // Reinicializar notificações após refresh do token (com delay)
-          setTimeout(() => {
-            this.notificationService.initializeNotifications();
-          }, 1500);
+          // Supabase Realtime se reconecta automaticamente
         }
       })
     );

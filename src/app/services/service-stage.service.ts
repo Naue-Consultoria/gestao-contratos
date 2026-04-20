@@ -102,7 +102,7 @@ export class ServiceStageService {
   private stagesCache = new Map<number, { data: ServiceStagesResponse; timestamp: number }>();
   private progressCache = new Map<number, { data: ServiceProgressResponse; timestamp: number }>();
   private readonly CACHE_DURATION = 30000; // 30 segundos
-  private readonly PROGRESS_CACHE_DURATION = 60000; // 1 minuto para progresso
+  private readonly PROGRESS_CACHE_DURATION = 30000; // igual ao CACHE_DURATION para evitar inconsistência entre etapas e progresso
 
   constructor(private http: HttpClient) {}
 

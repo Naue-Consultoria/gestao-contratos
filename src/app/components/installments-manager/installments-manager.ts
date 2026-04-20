@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnChanges } from '@angu
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ContractService, ApiContractInstallment } from '../../services/contract';
+import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 
 export interface ContractInstallment {
   due_date: string;
@@ -15,7 +16,7 @@ export interface ContractInstallment {
 @Component({
   selector: 'app-installments-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CurrencyMaskDirective],
   templateUrl: './installments-manager.html',
   styleUrls: ['./installments-manager.css']
 })
@@ -129,6 +130,10 @@ export class InstallmentsManagerComponent implements OnInit, OnChanges {
 
   onAmountChange(index: number, event: Event) {
     const value = +(event.target as HTMLInputElement).value;
+    this.updateInstallment(index, 'amount', value);
+  }
+
+  onAmountModelChange(index: number, value: number) {
     this.updateInstallment(index, 'amount', value);
   }
 

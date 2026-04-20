@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface ServiceRoutine {
@@ -11,6 +12,15 @@ export interface ServiceRoutine {
   notes?: string | null;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface RoutinePageData {
+  routine: ServiceRoutine;
+  contractService: any;
+  contract: { id: number; contract_number: string; client: { id: number; name: string } };
+  stages: any[];
+  comments: RoutineComment[];
+  progress: { totalStages: number; completedStages: number; progressPercentage: number; stages: any[] };
 }
 
 export interface RoutineComment {
@@ -82,6 +92,13 @@ export class RoutineService {
     );
   }
 
+  getPageData(routineId: number): Observable<RoutinePageData> {
+    return this.http.get<RoutinePageData>(
+      `${this.apiUrl}/${routineId}/page-data`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
   /**
    * Atualizar status e data da rotina
    */
@@ -111,12 +128,12 @@ export class RoutineService {
     if (serviceStageId) {
       payload.service_stage_id = serviceStageId;
     }
-    
+
     return this.http.post<RoutineComment>(
-      `${this.apiUrl}/${routineId}/comments`, 
+      `${this.apiUrl}/${routineId}/comments`,
       payload,
       { headers: this.getAuthHeaders() }
-    );
+    ).pipe(timeout(15000));
   }
 
   /**

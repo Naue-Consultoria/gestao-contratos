@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { map, tap, catchError, timeout } from 'rxjs/operators';
+import { of, TimeoutError } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 // Interfaces para dados de analytics
@@ -207,6 +207,7 @@ export class AnalyticsService {
     return this.http.get<{analytics: AnalyticsData, success: boolean}>(url, {
       headers: this.getAuthHeaders()
     }).pipe(
+      timeout(30000),
       map(response => response.analytics),
       tap(data => {
         this.analyticsCache$.next(data);
@@ -224,7 +225,9 @@ export class AnalyticsService {
    * Refresh dos dados de analytics
    */
   refreshAnalytics(filters: AnalyticsPeriodFilter = {}): void {
-    this.getAnalytics(filters).subscribe();
+    this.getAnalytics(filters).subscribe({
+      error: (err) => console.warn('Analytics refresh failed:', err?.message || err)
+    });
   }
 
   /**

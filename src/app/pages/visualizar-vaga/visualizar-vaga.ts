@@ -256,7 +256,7 @@ export class VisualizarVagaComponent implements OnInit {
           : undefined,
         observacoes: vagaData.observacoes,
         candidatoAprovado: vagaData.candidato_aprovado?.nome,
-        porcentagemFaturamento: Number(vagaData.porcentagem_faturamento || 100),
+        porcentagemFaturamento: Number(vagaData.porcentagem_faturamento ?? 100),
         valorFaturamento: Number(vagaData.valor_faturamento || 0),
         sigilosa: vagaData.sigilosa || false,
         impostoEstado: Number(vagaData.imposto_estado || 0)
@@ -376,30 +376,6 @@ export class VisualizarVagaComponent implements OnInit {
     }
   }
 
-  async onCandidatoSaved(candidato: Candidato) {
-    console.log('Candidato salvo:', candidato);
-
-    // Se é um novo candidato (não tem ID ou não veio de uma edição), vincular à vaga
-    if (!this.selectedCandidato && candidato.id) {
-      try {
-        console.log('Vinculando candidato', candidato.id, 'à vaga', this.vagaId);
-        await firstValueFrom(this.vagaService.vincularCandidato(this.vagaId, candidato.id));
-        this.toastr.success('Candidato vinculado à vaga com sucesso!');
-        await this.loadCandidatos();
-      } catch (error) {
-        console.error('Erro ao vincular candidato:', error);
-        this.toastr.error('Erro ao vincular candidato à vaga. Tente novamente.');
-      }
-    } else {
-      // Candidato editado via modal de candidato, apenas recarrega para refletir mudanças
-      console.log('Candidato editado, recarregando lista...');
-      await this.loadCandidatos();
-    }
-
-    this.showAddCandidateModal = false; // Fechar o modal antigo se estiver aberto
-  }
-
-
   // Métodos para o modal de entrevista
   openEntrevistaModal(vagaCandidato: VagaCandidato, entrevista?: Entrevista) {
     this.selectedVagaCandidato = vagaCandidato;
@@ -442,6 +418,46 @@ export class VisualizarVagaComponent implements OnInit {
   closeCandidatoModal() {
     this.isCandidatoModalVisible = false;
     this.selectedCandidato = null;
+  }
+
+  async onCandidatoSaved(candidato: Candidato) {
+    console.log('Candidato salvo:', candidato);
+
+    if (!this.selectedCandidato && candidato.id) {
+      // Novo candidato - vincular à vaga
+      await this.vincularCandidatoAVaga(candidato);
+    } else if (this.selectedCandidato) {
+      // Candidato editado - apenas recarregar lista
+      console.log('Candidato editado, recarregando lista...');
+      await this.loadCandidatos();
+    }
+
+    // Fechar o modal antigo se estiver aberto
+    this.showAddCandidateModal = false;
+  }
+
+  async onCandidatoSelecionado(candidato: Candidato) {
+    console.log('Candidato existente selecionado:', candidato);
+    await this.vincularCandidatoAVaga(candidato);
+  }
+
+  private async vincularCandidatoAVaga(candidato: Candidato) {
+    if (!candidato.id) return;
+    try {
+      console.log('Vinculando candidato', candidato.id, 'à vaga', this.vagaId);
+      await firstValueFrom(this.vagaService.vincularCandidato(this.vagaId, candidato.id));
+      this.toastr.success(`Candidato "${candidato.nome}" vinculado com sucesso!`);
+      await this.loadCandidatos();
+    } catch (error) {
+      console.error('Erro ao vincular candidato:', error);
+      this.toastr.error('Erro ao vincular candidato à vaga. Tente novamente.');
+    }
+  }
+
+  getCandidatosVinculadosIds(): number[] {
+    return this.candidatos
+      .filter(vc => vc.candidato?.id)
+      .map(vc => vc.candidato.id!);
   }
 
   // Métodos para o modal de observações
