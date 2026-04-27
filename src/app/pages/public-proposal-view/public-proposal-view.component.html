@@ -717,11 +717,26 @@
               </div>
             </div>
             
+            <!-- LGPD Consent -->
+            <div class="form-section lgpd-consent-section">
+              <label class="lgpd-consent-label">
+                <input type="checkbox" formControlName="lgpd_consent" />
+                <span>
+                  Li e concordo com a
+                  <a routerLink="/politica-privacidade" target="_blank">Política de Privacidade</a>
+                  e os
+                  <a routerLink="/termos-uso" target="_blank">Termos de Uso</a>.
+                  Autorizo o tratamento dos meus dados pessoais para fins de execução
+                  desta proposta, conforme a Lei nº 13.709/2018 (LGPD).
+                </span>
+              </label>
+            </div>
+
             <!-- Submit Button -->
             <div class="form-submit-section">
-              <button 
+              <button
                 type="button"
-                class="btn-submit-signature" 
+                class="btn-submit-signature"
                 [disabled]="!canSignProposal() || isSubmitting"
                 (click)="signProposal()">
                 <i *ngIf="!isSubmitting" class="fas fa-signature"></i>
@@ -730,9 +745,9 @@
                 <span *ngIf="!isSubmitting && !areAllServicesSelected()">Assinar Parcialmente</span>
                 <span *ngIf="isSubmitting">Processando assinatura...</span>
               </button>
-              
+
               <div class="requirements-hint" *ngIf="!canSignProposal()">
-                <p>Complete todos os campos obrigatórios e adicione sua assinatura digital para prosseguir</p>
+                <p>Complete todos os campos obrigatórios, aceite a Política de Privacidade e adicione sua assinatura digital para prosseguir</p>
               </div>
             </div>
           </form>
@@ -804,8 +819,10 @@
       
       <div class="footer-bottom">
         <p>&copy; {{ currentYear }} NAUE Consultoria. Todos os direitos reservados.</p>
+        <app-public-lgpd-footer></app-public-lgpd-footer>
       </div>
     </div>
   </footer>
+
 
 </div>

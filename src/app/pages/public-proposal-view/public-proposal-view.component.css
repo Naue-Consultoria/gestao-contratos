@@ -2933,6 +2933,40 @@ html {
   line-height: 1.6;
 }
 
+/* LGPD Consent Section */
+.lgpd-consent-section {
+  margin-top: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: #f0fdf9;
+  border: 1px solid #a7f3d0;
+  border-radius: 10px;
+}
+
+.lgpd-consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #1f2937;
+}
+
+.lgpd-consent-label input[type="checkbox"] {
+  margin-top: 0.25rem;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: #047857;
+}
+
+.lgpd-consent-label a {
+  color: #047857;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 /* Form Submit Section */
 .form-submit-section {
   margin-top: 4rem;

@@ -1,3 +1,38 @@
+/* LGPD Attestation */
+.lgpd-attestation {
+  background: #f0fdf9;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-top: 0.5rem;
+}
+
+.lgpd-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #1f2937;
+}
+
+.lgpd-check input[type="checkbox"] {
+  margin-top: 0.2rem;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: #047857;
+}
+
+.lgpd-attestation .invalid-feedback {
+  display: block;
+  margin-top: 0.4rem;
+  color: #dc2626;
+  font-size: 0.8rem;
+}
+
 /* Modal Base */
 .modal {
     display: none;

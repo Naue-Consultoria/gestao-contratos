@@ -82,6 +82,23 @@
         </div>
       </div>
 
+      <!-- Atestação LGPD (apenas em criação) -->
+      <div class="form-group lgpd-attestation" *ngIf="!isEditMode">
+        <label class="lgpd-check">
+          <input type="checkbox" formControlName="lgpd_attestation" />
+          <span>
+            Confirmo que obtive o consentimento do candidato para tratamento dos seus
+            dados pessoais com finalidade de processo seletivo, conforme os
+            <a href="/termos-uso" target="_blank" rel="noopener">Termos de Uso</a>,
+            a <a href="/politica-privacidade" target="_blank" rel="noopener">Política de Privacidade</a>
+            e a LGPD (Lei nº 13.709/2018).
+          </span>
+        </label>
+        <div class="invalid-feedback" *ngIf="formControls['lgpd_attestation']?.invalid && formControls['lgpd_attestation']?.touched">
+          É necessário confirmar a obtenção do consentimento para cadastrar o candidato.
+        </div>
+      </div>
+
       <div class="modal-footer">
         <button class="btn btn-primary" (click)="onSubmit()" [disabled]="isLoading">
           <span *ngIf="!isLoading">

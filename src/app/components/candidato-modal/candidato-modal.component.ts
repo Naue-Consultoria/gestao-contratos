@@ -6,6 +6,8 @@ import { CandidatoService, Candidato } from '../../services/candidato.service';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-candidato-modal',
@@ -39,7 +41,8 @@ export class CandidatoModalComponent implements OnInit, OnChanges {
   constructor(
     private fb: FormBuilder,
     private candidatoService: CandidatoService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
@@ -67,7 +70,8 @@ export class CandidatoModalComponent implements OnInit, OnChanges {
       nome: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.email]],
       telefone: [''],
-      status: ['pendente', Validators.required]
+      status: ['pendente', Validators.required],
+      lgpd_attestation: [false, Validators.requiredTrue]
     });
   }
 
@@ -121,16 +125,23 @@ export class CandidatoModalComponent implements OnInit, OnChanges {
         nome: this.candidato.nome,
         email: this.candidato.email || '',
         telefone: this.candidato.telefone || '',
-        status: this.candidato.status || 'pendente'
+        status: this.candidato.status || 'pendente',
+        lgpd_attestation: true // Em edição, consentimento já foi registrado na criação
       });
+      // Em edição, atestação não é obrigatória novamente
+      this.candidatoForm.get('lgpd_attestation')?.clearValidators();
+      this.candidatoForm.get('lgpd_attestation')?.updateValueAndValidity();
     } else {
       this.isEditMode = false;
       this.candidatoForm.reset({
         nome: '',
         email: '',
         telefone: '',
-        status: 'pendente'
+        status: 'pendente',
+        lgpd_attestation: false
       });
+      this.candidatoForm.get('lgpd_attestation')?.setValidators([Validators.requiredTrue]);
+      this.candidatoForm.get('lgpd_attestation')?.updateValueAndValidity();
     }
   }
 
@@ -147,14 +158,20 @@ export class CandidatoModalComponent implements OnInit, OnChanges {
       this.isLoading = true;
       this.candidatoForm.disable();
 
-      const candidatoData: Candidato = this.candidatoForm.value;
+      // Separar atestação LGPD do payload do candidato
+      const { lgpd_attestation, ...candidatoData } = this.candidatoForm.value;
 
       const operation = this.isEditMode && this.candidato?.id
-        ? this.candidatoService.updateCandidato(this.candidato.id, candidatoData)
-        : this.candidatoService.createCandidato(candidatoData);
+        ? this.candidatoService.updateCandidato(this.candidato.id, candidatoData as Candidato)
+        : this.candidatoService.createCandidato(candidatoData as Candidato);
 
       operation.subscribe({
         next: (savedCandidato) => {
+          // Registrar consentimento LGPD na criação (atestação do recrutador)
+          if (!this.isEditMode && savedCandidato?.id) {
+            this.recordCandidatoConsent(savedCandidato);
+          }
+
           this.toastr.success(
             this.isEditMode ? 'Candidato atualizado com sucesso!' : 'Candidato cadastrado com sucesso!',
             'Sucesso'
@@ -177,6 +194,21 @@ export class CandidatoModalComponent implements OnInit, OnChanges {
     } else {
       this.markFormGroupTouched();
     }
+  }
+
+  private recordCandidatoConsent(candidato: Candidato): void {
+    const payload = {
+      finalidade: 'recrutamento_selecao',
+      base_legal: 'consentimento',
+      versao_termo: 'politica_v1.0',
+      titular_nome: candidato.nome,
+      titular_email: candidato.email || null,
+      candidato_id: candidato.id != null ? String(candidato.id) : null
+    };
+    this.http.post(`${environment.apiUrl}/lgpd/consents`, payload).subscribe({
+      next: (res) => console.log('[LGPD] Consentimento do candidato registrado:', res),
+      error: (err) => console.warn('[LGPD] Falha ao registrar consentimento do candidato:', err?.status, err?.error || err?.message)
+    });
   }
 
   closeModal() {

@@ -1,10 +1,12 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 import { 
   PublicProposalService as PublicProposalServiceAPI, 
@@ -26,13 +28,14 @@ import {
 } from '../../services/estado-atuacao.service';
 
 import { BrazilMapComponent } from '../../components/brazil-map/brazil-map.component';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 type ProposalServiceItem = PublicProposalService;
 
 @Component({
   selector: 'app-public-proposal-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, BrazilMapComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, BrazilMapComponent, PublicLgpdFooterComponent],
   templateUrl: './public-proposal-view.component.html',
   styleUrls: ['./public-proposal-view.component.css']
 })
@@ -166,7 +169,8 @@ export class PublicProposalViewComponent implements OnInit {
     private publicTeamService: PublicTeamService,
     private estadoAtuacaoService: EstadoAtuacaoService,
     private toastr: ToastrService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private http: HttpClient
   ) {
   }
 
@@ -228,7 +232,8 @@ export class PublicProposalViewComponent implements OnInit {
         client_observations: [''],
         payment_type: ['prazo', Validators.required],
         payment_method: ['', Validators.required],
-        installments: [null]
+        installments: [null],
+        lgpd_consent: [false, Validators.requiredTrue]
     });
 
     this.confirmationForm = this.fb.group({
@@ -443,6 +448,7 @@ export class PublicProposalViewComponent implements OnInit {
     return (
       this.signatureForm.get('client_name')?.valid === true &&
       this.signatureForm.get('client_email')?.valid === true &&
+      this.signatureForm.get('lgpd_consent')?.value === true &&
       this.signatureDrawn &&
       this.hasSelectedServices()
     );
@@ -618,6 +624,9 @@ export class PublicProposalViewComponent implements OnInit {
 
       const response = await this.publicProposalService.signProposal(this.token, signatureData).toPromise();
       if (response?.success) {
+        // Registrar consentimento LGPD (best-effort, não bloqueia o fluxo)
+        this.recordLgpdConsent();
+
         // Mostrar modal de sucesso
         this.showSuccessModal = true;
 
@@ -636,6 +645,22 @@ export class PublicProposalViewComponent implements OnInit {
     } finally {
       this.isSubmitting = false;
     }
+  }
+
+  private recordLgpdConsent(): void {
+    const payload = {
+      finalidade: 'assinatura_proposta',
+      base_legal: 'execucao_contrato',
+      versao_termo: 'politica_v1.0',
+      titular_nome: this.signatureForm.value.client_name,
+      titular_email: this.signatureForm.value.client_email,
+      titular_documento: this.signatureForm.value.client_document || null,
+      proposal_id: this.proposal?.id ? String(this.proposal.id) : null
+    };
+    this.http.post(`${environment.apiUrl}/lgpd/consents`, payload).subscribe({
+      next: (res) => console.log('[LGPD] Consentimento registrado:', res),
+      error: (err) => console.warn('[LGPD] Falha ao registrar consentimento:', err?.status, err?.error || err?.message)
+    });
   }
 
   // === MÉTODOS DE CONFIRMAÇÃO ===
