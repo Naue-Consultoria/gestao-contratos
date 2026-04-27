@@ -34,6 +34,9 @@ export interface Notification {
   metadata?: any;
   actorName?: string;
   archived?: boolean;
+  entityType?: string;
+  entityId?: string;
+  groupKey?: string;
   action?: {
     label: string;
     callback: () => void;
@@ -478,6 +481,9 @@ export class NotificationService implements OnDestroy {
       metadata: raw.metadata,
       actorName: raw.actor?.name || undefined,
       archived: raw.archived,
+      entityType: raw.entity_type,
+      entityId: raw.entity_id,
+      groupKey: raw.group_key,
     };
   }
 
@@ -496,6 +502,9 @@ export class NotificationService implements OnDestroy {
       priority: (raw.priority as NotificationPriority) || 'medium',
       metadata: raw.metadata,
       archived: raw.archived || false,
+      entityType: raw.entity_type,
+      entityId: raw.entity_id,
+      groupKey: raw.group_key,
     };
   }
 

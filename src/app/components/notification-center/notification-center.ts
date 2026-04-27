@@ -4,6 +4,11 @@ import { NotificationService, Notification } from '../../services/notification.s
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 
+interface NotificationGroup {
+  label: string;
+  items: Notification[];
+}
+
 @Component({
   selector: 'app-notification-center',
   standalone: true,
@@ -17,28 +22,27 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
 
   notifications: Notification[] = [];
-  displayedNotifications: Notification[] = [];
+  filteredNotifications: Notification[] = [];
+  displayedGroups: NotificationGroup[] = [];
   unreadCount = 0;
   totalCount = 0;
   activeFilter: 'all' | 'unread' = 'all';
   isLoading = false;
   hasMoreNotifications = true;
-  
-  private subscription?: Subscription;
-  private unreadSubscription?: Subscription;
+  dismissingIds = new Set<string>();
+
+  private subscription = new Subscription();
   private scrollThrottleTimer?: any;
+  private readonly DISMISS_ANIMATION_MS = 220;
 
   constructor(
     private notificationService: NotificationService,
     private router: Router
   ) {}
 
-  // Detectar clique fora do modal para fechar
   @HostListener('document:keydown.escape', ['$event'])
-  onEscapeKey(event: Event) {
-    if (this.isOpen) {
-      this.close.emit();
-    }
+  onEscapeKey(_event: Event) {
+    if (this.isOpen) this.close.emit();
   }
 
   ngOnInit() {
@@ -47,69 +51,108 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscription?.unsubscribe();
-    this.unreadSubscription?.unsubscribe();
-    if (this.scrollThrottleTimer) {
-      clearTimeout(this.scrollThrottleTimer);
-    }
+    this.subscription.unsubscribe();
+    if (this.scrollThrottleTimer) clearTimeout(this.scrollThrottleTimer);
   }
 
   private setupSubscriptions() {
-    // Subscribe to notification updates
-    this.subscription = this.notificationService.notificationHistory$.subscribe(
-      notifications => {
-        this.notifications = notifications;
-        this.totalCount = notifications.length;
+    this.subscription.add(
+      this.notificationService.notificationHistory$.subscribe(notifications => {
+        this.notifications = this.deduplicateByGroupKey(notifications);
+        this.totalCount = this.notifications.length;
         this.updateDisplayedNotifications();
-      }
+      })
     );
 
-    // Subscribe to unread count updates
-    this.unreadSubscription = this.notificationService.unreadCount$.subscribe(
-      count => this.unreadCount = count
+    this.subscription.add(
+      this.notificationService.unreadCount$.subscribe(count => {
+        this.unreadCount = count;
+      })
     );
   }
 
   private loadNotifications() {
     this.isLoading = true;
-    // Refresh notifications from server
     this.notificationService.refreshNotifications();
-    
-    // Simulate loading delay for better UX
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 500);
+    setTimeout(() => { this.isLoading = false; }, 500);
+  }
+
+  /**
+   * Deduplica por groupKey mantendo o registro mais recente.
+   * Cobre dados legados antes do backend usar anti_spam=aggregate.
+   */
+  private deduplicateByGroupKey(notifications: Notification[]): Notification[] {
+    const latestByGroup = new Map<string, Notification>();
+    const withoutGroup: Notification[] = [];
+
+    for (const n of notifications) {
+      if (!n.groupKey) {
+        withoutGroup.push(n);
+        continue;
+      }
+      const existing = latestByGroup.get(n.groupKey);
+      if (!existing || n.timestamp.getTime() > existing.timestamp.getTime()) {
+        latestByGroup.set(n.groupKey, n);
+      }
+    }
+
+    const merged = [...latestByGroup.values(), ...withoutGroup];
+    merged.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return merged;
   }
 
   private updateDisplayedNotifications() {
-    let filtered = this.notifications;
-    
-    if (this.activeFilter === 'unread') {
-      filtered = this.notifications.filter(n => !n.isRead);
-    }
-    
-    this.displayedNotifications = filtered;
+    this.filteredNotifications = this.activeFilter === 'unread'
+      ? this.notifications.filter(n => !n.isRead)
+      : this.notifications;
+
+    this.displayedGroups = this.groupByDate(this.filteredNotifications);
     this.hasMoreNotifications = this.notificationService.hasMoreNotifications();
+  }
+
+  /**
+   * Agrupa por período preservando ordem cronológica decrescente.
+   */
+  private groupByDate(notifications: Notification[]): NotificationGroup[] {
+    if (notifications.length === 0) return [];
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const startOfYesterday = startOfToday - 86400000;
+    const startOfWeek = startOfToday - 7 * 86400000;
+
+    const groups: NotificationGroup[] = [
+      { label: 'Hoje', items: [] },
+      { label: 'Ontem', items: [] },
+      { label: 'Esta semana', items: [] },
+      { label: 'Mais antigas', items: [] }
+    ];
+
+    for (const n of notifications) {
+      const t = n.timestamp.getTime();
+      if (t >= startOfToday) groups[0].items.push(n);
+      else if (t >= startOfYesterday) groups[1].items.push(n);
+      else if (t >= startOfWeek) groups[2].items.push(n);
+      else groups[3].items.push(n);
+    }
+
+    return groups.filter(g => g.items.length > 0);
   }
 
   setFilter(filter: 'all' | 'unread') {
     this.activeFilter = filter;
     this.updateDisplayedNotifications();
-    
-    // Scroll to top when changing filter
     if (this.scrollContainer) {
       this.scrollContainer.nativeElement.scrollTop = 0;
     }
   }
 
   onScroll(event: Event) {
-    if (this.scrollThrottleTimer) {
-      return;
-    }
+    if (this.scrollThrottleTimer) return;
 
     this.scrollThrottleTimer = setTimeout(() => {
       const element = event.target as HTMLElement;
-      const threshold = 200; // pixels from bottom
+      const threshold = 200;
       const atBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - threshold;
 
       if (atBottom && this.hasMoreNotifications && !this.isLoading) {
@@ -125,8 +168,7 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.notificationService.loadMoreNotifications();
-    
-    // Simulate loading delay
+
     setTimeout(() => {
       this.isLoading = false;
       this.hasMoreNotifications = this.notificationService.hasMoreNotifications();
@@ -135,8 +177,6 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
 
   handleNotificationClick(notification: Notification) {
     this.markAsRead(notification);
-    
-    // Navigate to link if exists
     if (notification.link) {
       this.router.navigateByUrl(notification.link);
       this.close.emit();
@@ -144,10 +184,7 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   }
 
   markAsRead(notification: Notification, event?: Event) {
-    if (event) {
-      event.stopPropagation();
-    }
-    
+    if (event) event.stopPropagation();
     if (!notification.isRead) {
       this.notificationService.markAsRead(notification.id);
     }
@@ -155,23 +192,35 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
 
   markAllAsRead() {
     if (this.unreadCount === 0) return;
-
     if (confirm(`Marcar todas as ${this.unreadCount} notificações como lidas?`)) {
       this.notificationService.markAllAsRead();
     }
   }
 
+  /**
+   * Remove uma notificação individual com animação de saída suave.
+   * Marca o id como "dismissing" → CSS aplica slide-out → após anim, deleta de fato.
+   */
+  dismissNotification(notification: Notification, event: Event) {
+    event.stopPropagation();
+    if (this.dismissingIds.has(notification.id)) return; // evita double-click
+    this.dismissingIds.add(notification.id);
+    setTimeout(() => {
+      this.notificationService.deleteNotifications([notification.id]);
+      this.dismissingIds.delete(notification.id);
+    }, this.DISMISS_ANIMATION_MS);
+  }
+
+  isDismissing(id: string): boolean {
+    return this.dismissingIds.has(id);
+  }
+
   clearAllNotifications() {
     if (this.totalCount === 0) return;
-
     const confirmMessage = `Tem certeza que deseja DELETAR todas as ${this.totalCount} notificações?\n\nEsta ação não pode ser desfeita e todas as notificações serão permanentemente removidas.`;
-
     if (confirm(confirmMessage)) {
       this.notificationService.clearHistory();
-      // Fechar modal após limpar
-      setTimeout(() => {
-        this.close.emit();
-      }, 500);
+      setTimeout(() => this.close.emit(), 500);
     }
   }
 
@@ -179,22 +228,31 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
     return notification.id;
   }
 
+  trackByLabel(index: number, group: NotificationGroup): string {
+    return group.label;
+  }
+
+  hasLink(notification: Notification): boolean {
+    return !!(notification.link && notification.link.length > 0);
+  }
+
+  aggregateCount(notification: Notification): number {
+    return notification.metadata?.aggregate_count || 0;
+  }
+
   formatTime(timestamp: Date): string {
     const now = new Date();
     const diff = now.getTime() - timestamp.getTime();
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    
+
     if (minutes < 1) return 'Agora mesmo';
     if (minutes < 60) return `Há ${minutes} minuto${minutes > 1 ? 's' : ''}`;
     if (hours < 24) return `Há ${hours} hora${hours > 1 ? 's' : ''}`;
-    if (days < 7) return `Há ${days} dia${days > 1 ? 's' : ''}`;
-    
-    return timestamp.toLocaleDateString('pt-BR', {
+
+    return timestamp.toLocaleString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });

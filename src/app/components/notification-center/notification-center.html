@@ -1,119 +1,150 @@
 <!-- Notification Center Modal -->
-<div class="notification-center-overlay" (click)="close.emit()" *ngIf="isOpen">
-  <div class="notification-center-modal" (click)="$event.stopPropagation()">
+<div class="notification-center-overlay" *ngIf="isOpen" (click)="close.emit()">
+  <div class="notification-center-modal"
+       role="dialog"
+       aria-label="Central de notificações"
+       (click)="$event.stopPropagation()">
+
     <!-- Header -->
     <div class="notification-center-header">
-      <h2>
-        <i class="fas fa-bell"></i>
-        Notificações
-      </h2>
+      <div class="header-title">
+        <h2>Notificações</h2>
+        <span class="unread-badge" *ngIf="unreadCount > 0" [attr.aria-label]="unreadCount + ' não lidas'">
+          {{ unreadCount }}
+        </span>
+      </div>
       <div class="header-actions">
         <button
           class="action-btn"
           (click)="markAllAsRead()"
           [disabled]="unreadCount === 0"
+          aria-label="Marcar todas como lidas"
           title="Marcar todas como lidas">
-          <i class="fas fa-check-double"></i>
-          Marcar todas como lidas
+          <i class="fas fa-check-double" aria-hidden="true"></i>
+          <span class="btn-label">Marcar todas como lidas</span>
         </button>
         <button
           class="action-btn delete-btn"
           (click)="clearAllNotifications()"
           [disabled]="totalCount === 0"
-          title="Deletar todas as notificações">
-          <i class="fas fa-trash"></i>
-          Limpar tudo
+          aria-label="Limpar todas as notificações"
+          title="Limpar tudo">
+          <i class="fas fa-trash-alt" aria-hidden="true"></i>
+          <span class="btn-label">Limpar tudo</span>
         </button>
-        <button class="close-btn" (click)="close.emit()" title="Fechar">
-          <i class="fas fa-times"></i>
+        <button class="close-btn" (click)="close.emit()" aria-label="Fechar" title="Fechar">
+          <i class="fas fa-times" aria-hidden="true"></i>
         </button>
       </div>
     </div>
 
     <!-- Filters -->
-    <div class="notification-filters">
-      <button 
+    <div class="notification-filters" role="tablist" aria-label="Filtros de notificações">
+      <button
         class="filter-btn"
+        role="tab"
         [class.active]="activeFilter === 'all'"
+        [attr.aria-selected]="activeFilter === 'all'"
         (click)="setFilter('all')">
-        Todas ({{ totalCount }})
+        Todas <span class="filter-count">{{ totalCount }}</span>
       </button>
-      <button 
+      <button
         class="filter-btn"
+        role="tab"
         [class.active]="activeFilter === 'unread'"
+        [attr.aria-selected]="activeFilter === 'unread'"
         (click)="setFilter('unread')">
-        Não lidas ({{ unreadCount }})
+        Não lidas <span class="filter-count">{{ unreadCount }}</span>
       </button>
     </div>
 
-    <!-- Notification List -->
-    <div class="notification-center-content" 
+    <!-- Content -->
+    <div class="notification-center-content"
          #scrollContainer
-         (scroll)="onScroll($event)">
-      
-      <!-- Loading indicator -->
-      <div class="loading-indicator" *ngIf="isLoading">
-        <i class="fas fa-spinner fa-spin"></i>
+         (scroll)="onScroll($event)"
+         role="list">
+
+      <!-- Loading -->
+      <div class="loading-indicator" *ngIf="isLoading && filteredNotifications.length === 0" aria-live="polite">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
         Carregando notificações...
       </div>
 
       <!-- Empty state -->
-      <div class="empty-state" *ngIf="!isLoading && displayedNotifications.length === 0">
-        <i class="fas fa-bell-slash"></i>
-        <h3>{{ activeFilter === 'unread' ? 'Nenhuma notificação não lida' : 'Nenhuma notificação' }}</h3>
-        <p>{{ activeFilter === 'unread' ? 'Todas as suas notificações foram lidas!' : 'Quando você receber notificações, elas aparecerão aqui.' }}</p>
+      <div class="empty-state" *ngIf="!isLoading && filteredNotifications.length === 0">
+        <i class="fas fa-check-circle" aria-hidden="true"></i>
+        <h3>{{ activeFilter === 'unread' ? 'Tudo lido!' : 'Tudo em dia!' }}</h3>
+        <p>
+          {{ activeFilter === 'unread'
+              ? 'Você não tem notificações não lidas no momento.'
+              : 'Você não tem notificações pendentes.' }}
+        </p>
       </div>
 
-      <!-- Notification items -->
-      <div class="notification-list">
-        <div 
-          *ngFor="let notification of displayedNotifications; trackBy: trackById"
+      <!-- Date groups -->
+      <ng-container *ngFor="let group of displayedGroups; trackBy: trackByLabel">
+        <div class="group-header" role="heading" aria-level="3">{{ group.label }}</div>
+
+        <div
+          *ngFor="let notification of group.items; trackBy: trackById"
           class="notification-item"
+          role="listitem"
           [class.unread]="!notification.isRead"
           [class.high-priority]="notification.priority === 'high'"
+          [class.clickable]="hasLink(notification)"
+          [class.dismissing]="isDismissing(notification.id)"
+          [attr.aria-label]="notification.title + '. ' + notification.message"
           (click)="handleNotificationClick(notification)">
-          
-          <div class="notification-icon" [class]="'type-' + notification.type">
+
+          <div class="notification-icon" [class]="'type-' + notification.type" aria-hidden="true">
             <i [class]="notification.icon"></i>
           </div>
-          
+
           <div class="notification-content">
             <div class="notification-header-item">
               <div class="notification-title">{{ notification.title }}</div>
-              <div class="notification-time">{{ formatTime(notification.timestamp) }}</div>
+              <div class="notification-time">
+                {{ formatTime(notification.timestamp) }}
+              </div>
             </div>
             <div class="notification-message">{{ notification.message }}</div>
-            
-            <!-- Priority indicator -->
-            <div class="notification-priority" *ngIf="notification.priority === 'high'">
-              <i class="fas fa-exclamation-triangle"></i>
-              Alta prioridade
+            <div class="notification-meta" *ngIf="aggregateCount(notification) > 1 || notification.priority === 'high'">
+              <span class="meta-tag priority-tag" *ngIf="notification.priority === 'high'">
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                Alta prioridade
+              </span>
+              <span class="meta-tag aggregate-tag" *ngIf="aggregateCount(notification) > 1">
+                <i class="fas fa-layer-group" aria-hidden="true"></i>
+                Atualizada {{ aggregateCount(notification) }}×
+              </span>
             </div>
           </div>
 
-          <!-- Action buttons -->
-          <div class="notification-actions">
-            <button 
-              class="action-btn small"
-              *ngIf="!notification.isRead"
-              (click)="markAsRead(notification, $event)"
-              title="Marcar como lida">
-              <i class="fas fa-check"></i>
+          <!-- Side actions -->
+          <div class="notification-side">
+            <span class="unread-dot" *ngIf="!notification.isRead" aria-label="Não lida"></span>
+            <i class="fas fa-chevron-right link-chevron" *ngIf="hasLink(notification)" aria-hidden="true"></i>
+            <button
+              class="dismiss-btn"
+              (click)="dismissNotification(notification, $event)"
+              aria-label="Descartar esta notificação"
+              title="Descartar">
+              <i class="fas fa-times" aria-hidden="true"></i>
             </button>
           </div>
         </div>
-      </div>
+      </ng-container>
 
-      <!-- Load more indicator -->
-      <div class="load-more-indicator" *ngIf="hasMoreNotifications && !isLoading">
-        <i class="fas fa-arrow-down"></i>
+      <!-- Load more -->
+      <div class="load-more-indicator" *ngIf="hasMoreNotifications && !isLoading && filteredNotifications.length > 0">
+        <i class="fas fa-arrow-down" aria-hidden="true"></i>
         Role para carregar mais
       </div>
 
-      <!-- End of list indicator -->
-      <div class="end-of-list" *ngIf="!hasMoreNotifications && displayedNotifications.length > 0">
-        <i class="fas fa-check-circle"></i>
-        Você visualizou todas as notificações
+      <!-- End of list -->
+      <div class="end-of-list" *ngIf="!hasMoreNotifications && filteredNotifications.length > 0">
+        <i class="fas fa-check" aria-hidden="true"></i>
+        Você visualizou todas as notificações ({{ totalCount }} total)
       </div>
     </div>
   </div>
