@@ -1,0 +1,144 @@
+<div class="lgpd-page">
+  <header class="lgpd-header">
+    <a routerLink="/login" class="back-link">
+      <i class="fas fa-arrow-left"></i>
+      Voltar
+    </a>
+    <img src="/logoNaue.png" alt="Naue Consultoria" class="lgpd-logo" />
+  </header>
+
+  <main class="lgpd-content">
+    <h1>Encarregado de Proteção de Dados</h1>
+    <p class="subtitulo">
+      Em conformidade com o Art. 41 da LGPD, indicamos abaixo o canal direto para
+      tratar de assuntos de proteção de dados pessoais.
+    </p>
+
+    <section class="dpo-card">
+      <div class="dpo-row">
+        <i class="fas fa-user-shield"></i>
+        <div>
+          <span class="rotulo">Encarregado (DPO)</span>
+          <strong>{{ dpoNome }}</strong>
+          <small class="dpo-cargo" *ngIf="dpoCargo">{{ dpoCargo }}</small>
+        </div>
+      </div>
+      <div class="dpo-row">
+        <i class="fas fa-envelope"></i>
+        <div>
+          <span class="rotulo">E-mail</span>
+          <a [href]="'mailto:' + dpoEmail"><strong>{{ dpoEmail }}</strong></a>
+        </div>
+      </div>
+      <div class="dpo-row" *ngIf="dpoTelefone">
+        <i class="fas fa-phone"></i>
+        <div>
+          <span class="rotulo">Telefone</span>
+          <strong>{{ dpoTelefone }}</strong>
+        </div>
+      </div>
+      <div class="dpo-row">
+        <i class="fas fa-clock"></i>
+        <div>
+          <span class="rotulo">Prazo de resposta</span>
+          <strong>até 15 dias</strong>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Quando entrar em contato</h2>
+      <ul>
+        <li>Para exercer qualquer direito previsto no Art. 18 da LGPD</li>
+        <li>Para retirar consentimento previamente concedido</li>
+        <li>Para esclarecer dúvidas sobre o uso dos seus dados</li>
+        <li>Para reportar incidente ou suspeita de vazamento</li>
+        <li>Para registrar reclamação relacionada a privacidade</li>
+      </ul>
+      <p class="info-box">
+        <i class="fas fa-info-circle"></i>
+        Você também pode registrar reclamação diretamente na
+        <a href="https://www.gov.br/anpd" target="_blank" rel="noopener">Autoridade Nacional de Proteção de Dados (ANPD)</a>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Solicitação online</h2>
+      <p>Preencha o formulário abaixo. Sua mensagem será encaminhada ao Encarregado.</p>
+
+      <form *ngIf="!enviado()" [formGroup]="form" (ngSubmit)="enviar()" class="solicitacao-form">
+        <div class="campo">
+          <label for="nome">Nome completo *</label>
+          <input id="nome" type="text" formControlName="nome" placeholder="Seu nome" />
+          <small class="erro" *ngIf="form.get('nome')?.touched && form.get('nome')?.invalid">
+            Informe seu nome (mínimo 3 caracteres).
+          </small>
+        </div>
+
+        <div class="campo">
+          <label for="email">E-mail *</label>
+          <input id="email" type="email" formControlName="email" placeholder="seu@email.com" />
+          <small class="erro" *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+            Informe um e-mail válido.
+          </small>
+        </div>
+
+        <div class="campo">
+          <label for="tipo">Tipo de solicitação *</label>
+          <select id="tipo" formControlName="tipo_solicitacao">
+            <option *ngFor="let t of tiposSolicitacao" [value]="t.value">{{ t.label }}</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="mensagem">Descreva sua solicitação *</label>
+          <textarea
+            id="mensagem"
+            formControlName="mensagem"
+            rows="5"
+            placeholder="Detalhe a sua solicitação..."></textarea>
+          <small class="erro" *ngIf="form.get('mensagem')?.touched && form.get('mensagem')?.invalid">
+            Descreva sua solicitação (mínimo 10 caracteres).
+          </small>
+        </div>
+
+        <div class="campo aceite">
+          <label>
+            <input type="checkbox" formControlName="aceite" />
+            Li e concordo com os <a routerLink="/termos-uso" target="_blank" rel="noopener">Termos de Uso</a>
+            e a <a routerLink="/politica-privacidade" target="_blank" rel="noopener">Política de Privacidade</a>,
+            e autorizo o tratamento dos dados informados acima exclusivamente para
+            atender a esta solicitação.
+          </label>
+          <small class="erro" *ngIf="form.get('aceite')?.touched && form.get('aceite')?.invalid">
+            É necessário aceitar para enviar.
+          </small>
+        </div>
+
+        <div class="erro-banner" *ngIf="erro()">
+          <i class="fas fa-exclamation-triangle"></i> {{ erro() }}
+        </div>
+
+        <button type="submit" class="btn-enviar" [disabled]="enviando()">
+          <i [class]="enviando() ? 'fas fa-spinner fa-spin' : 'fas fa-paper-plane'"></i>
+          {{ enviando() ? 'Enviando...' : 'Enviar solicitação' }}
+        </button>
+      </form>
+
+      <div *ngIf="enviado()" class="sucesso-box">
+        <i class="fas fa-check-circle"></i>
+        <h3>Solicitação recebida</h3>
+        <p>
+          Recebemos sua solicitação e ela foi encaminhada ao Encarregado. Você receberá
+          uma resposta no e-mail informado em até 15 dias.
+        </p>
+      </div>
+    </section>
+
+    <footer class="lgpd-footer-links">
+      <a routerLink="/politica-privacidade">Política de Privacidade</a>
+      <span class="divisor">·</span>
+      <a routerLink="/termos-uso">Termos de Uso</a>
+    </footer>
+  </main>
+</div>

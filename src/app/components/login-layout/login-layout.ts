@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-login-layout',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './login-layout.html',
   styleUrl: './login-layout.css'
 })

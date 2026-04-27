@@ -60,6 +60,10 @@ import { AnaliseCenariosComponent } from './components/analise-cenarios/analise-
 import { AniseOportunidadesComponent } from './components/analise-oportunidades/analise-oportunidades';
 import { AnaliseAmeacasComponent } from './components/analise-ameacas/analise-ameacas';
 import { GerenciarEstadosComponent } from './pages/gerenciar-estados/gerenciar-estados.component';
+import { LgpdPoliticaPrivacidadeComponent } from './pages/lgpd-politica-privacidade/lgpd-politica-privacidade';
+import { LgpdTermosUsoComponent } from './pages/lgpd-termos-uso/lgpd-termos-uso';
+import { LgpdEncarregadoComponent } from './pages/lgpd-encarregado/lgpd-encarregado';
+import { AdminLgpdSolicitacoesComponent } from './pages/admin-lgpd-solicitacoes/admin-lgpd-solicitacoes';
 import { AuthGuard } from './guards/auth-guard';
 import { MustChangePasswordGuard } from './guards/must-change-password-guard';
 import { AdminGuard } from './guards/admin-guard';
@@ -195,6 +199,23 @@ export const routes: Routes = [
     path: 'access-denied',
     component: AccessDeniedComponent,
     title: 'Acesso Negado - NAUE Consultoria',
+  },
+
+  // Páginas LGPD - públicas
+  {
+    path: 'politica-privacidade',
+    component: LgpdPoliticaPrivacidadeComponent,
+    title: 'Política de Privacidade - NAUE Consultoria',
+  },
+  {
+    path: 'termos-uso',
+    component: LgpdTermosUsoComponent,
+    title: 'Termos de Uso - NAUE Consultoria',
+  },
+  {
+    path: 'encarregado-dados',
+    component: LgpdEncarregadoComponent,
+    title: 'Encarregado de Proteção de Dados - NAUE Consultoria',
   },
 
   // Rota para trocar senha - protegida apenas por autenticação
@@ -572,6 +593,14 @@ export const routes: Routes = [
         path: 'configuracoes',
         component: SettingsPageComponent,
         title: 'Configurações - NAUE Consultoria',
+      },
+
+      // LGPD - Solicitações de titular (admin)
+      {
+        path: 'lgpd/solicitacoes',
+        component: AdminLgpdSolicitacoesComponent,
+        canActivate: [AdminGerencialGuard],
+        title: 'Solicitações LGPD - NAUE Consultoria',
       },
 
       // Gerenciar Estados de Atuação - Admin e Admin Gerencial

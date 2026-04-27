@@ -47,6 +47,14 @@
 
 <main class="main-content" [class.sidebar-collapsed]="isSidebarCollapsed">
   <router-outlet></router-outlet>
+
+  <footer class="lgpd-footer">
+    <a routerLink="/politica-privacidade" target="_blank">Política de Privacidade</a>
+    <span class="sep">·</span>
+    <a routerLink="/termos-uso" target="_blank">Termos de Uso</a>
+    <span class="sep">·</span>
+    <a routerLink="/encarregado-dados" target="_blank">Direitos do Titular</a>
+  </footer>
 </main>
 
 <app-contract-modal

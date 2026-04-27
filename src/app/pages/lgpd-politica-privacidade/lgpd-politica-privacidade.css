@@ -1,0 +1,150 @@
+.lgpd-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+  padding: 2rem 1rem;
+}
+
+.lgpd-header {
+  max-width: 900px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary-green, #0e9b71);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.lgpd-logo {
+  height: 40px;
+  width: auto;
+}
+
+.lgpd-content {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 3rem 2.5rem;
+  line-height: 1.7;
+  color: #2d3748;
+}
+
+.lgpd-content h1 {
+  font-size: 2rem;
+  color: #1a202c;
+  margin: 0 0 0.5rem;
+}
+
+.versao {
+  color: #718096;
+  font-size: 0.9rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.lgpd-content h2 {
+  font-size: 1.35rem;
+  color: var(--primary-green, #0e9b71);
+  margin: 2.5rem 0 1rem;
+}
+
+.lgpd-content h3 {
+  font-size: 1.05rem;
+  color: #2d3748;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.lgpd-content p {
+  margin: 0 0 1rem;
+}
+
+.lgpd-content ul {
+  padding-left: 1.5rem;
+  margin: 0 0 1rem;
+}
+
+.lgpd-content li {
+  margin-bottom: 0.4rem;
+}
+
+.lgpd-content a {
+  color: var(--primary-green, #0e9b71);
+  font-weight: 600;
+}
+
+.base-legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+}
+
+.base-legal-table th,
+.base-legal-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.base-legal-table th {
+  background: #f7fafc;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.aviso-seguranca {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f7fafc;
+  border-left: 3px solid #cbd5e0;
+  font-size: 0.88rem;
+  color: #4a5568;
+  border-radius: 0 6px 6px 0;
+}
+
+.lgpd-footer-links {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.divisor {
+  color: #cbd5e0;
+}
+
+@media (max-width: 768px) {
+  .lgpd-content {
+    padding: 2rem 1.25rem;
+  }
+
+  .lgpd-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .base-legal-table {
+    font-size: 0.85rem;
+  }
+
+  .base-legal-table th,
+  .base-legal-table td {
+    padding: 0.5rem;
+  }
+}

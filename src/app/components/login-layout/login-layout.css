@@ -170,6 +170,31 @@ main::after {
   font-weight: 400;
 }
 
+.footer .lgpd-links {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.footer .lgpd-links a {
+  color: var(--naue-text-gray);
+  text-decoration: none;
+  font-size: 11px;
+}
+
+.footer .lgpd-links a:hover {
+  color: var(--naue-dark-green);
+  text-decoration: underline;
+}
+
+.footer .lgpd-links .sep {
+  color: var(--naue-text-gray);
+  opacity: 0.5;
+}
+
 /* Animações */
 @keyframes fadeIn {
   from {

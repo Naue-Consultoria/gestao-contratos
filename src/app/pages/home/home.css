@@ -36,6 +36,35 @@
     min-height: 100vh;
 }
 
+/* LGPD footer dentro do app autenticado */
+.lgpd-footer {
+    margin-top: 2rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-gray);
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.lgpd-footer a {
+    color: var(--text-gray);
+    text-decoration: none;
+}
+
+.lgpd-footer a:hover {
+    color: var(--primary-green);
+    text-decoration: underline;
+}
+
+.lgpd-footer .sep {
+    opacity: 0.5;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
@@ -1959,31 +1988,6 @@ input[type="radio"] {
     overflow: hidden;
 }
 
-.notification-dropdown-wrapper {
-    position: fixed;
-    top: 77px;
-    right: 120px; /* Ajustar conforme a posição do botão de notificações */
-    z-index: 1000;
-  }
-  
-  @media (max-width: 768px) {
-    .notification-dropdown-wrapper {
-      right: 60px;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .notification-dropdown-wrapper {
-      right: 10px;
-      left: 10px;
-      width: auto;
-    }
-    
-    .notification-dropdown-wrapper app-notification-dropdown {
-      width: 100%;
-    }
-  }
-
 /* ==========================================
    SIDEBAR OVERLAY MOBILE
    ========================================== */
@@ -2036,20 +2040,39 @@ input[type="radio"] {
   z-index: 1000;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .notification-dropdown-wrapper {
+    top: 70px;
     right: 60px;
   }
 }
 
-@media (max-width: 480px) {
-  .notification-dropdown-wrapper {
-    right: 10px;
-    left: 10px;
-    width: auto;
+/* Bottom sheet em mobile (≤640px) — desliza de baixo, ocupa toda a largura */
+@media (max-width: 640px) {
+  .notification-dropdown-overlay {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    animation: overlayFadeIn 0.2s ease-out;
   }
-  
+
+  .notification-dropdown-wrapper {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 85vh;
+    /* Respeita safe-area do iOS */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   .notification-dropdown-wrapper app-notification-dropdown {
     width: 100%;
+    display: block;
+  }
+
+  @keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 }
