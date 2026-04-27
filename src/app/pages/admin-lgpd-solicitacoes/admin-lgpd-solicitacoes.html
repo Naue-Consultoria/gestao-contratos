@@ -1,0 +1,183 @@
+<div class="lgpd-admin">
+  <header class="page-header">
+    <div>
+      <h1>Solicitações LGPD</h1>
+      <p>Gestão das solicitações de titular (Art. 18 LGPD) — prazo de resposta: 15 dias</p>
+    </div>
+    <button class="btn-refresh" (click)="carregar()" [disabled]="loading()">
+      <i class="fas fa-sync" [class.fa-spin]="loading()"></i>
+      Atualizar
+    </button>
+  </header>
+
+  <!-- Cards resumo -->
+  <section class="resumo-cards">
+    <div class="card">
+      <span class="card-label">Total</span>
+      <span class="card-value">{{ resumo().total }}</span>
+    </div>
+    <div class="card pendentes">
+      <span class="card-label">Em aberto</span>
+      <span class="card-value">{{ resumo().pendentes }}</span>
+    </div>
+    <div class="card atrasadas" [class.alerta]="resumo().atrasadas > 0">
+      <span class="card-label">Fora do prazo</span>
+      <span class="card-value">{{ resumo().atrasadas }}</span>
+    </div>
+    <div class="card concluidas">
+      <span class="card-label">Concluídas</span>
+      <span class="card-value">{{ resumo().concluidas }}</span>
+    </div>
+  </section>
+
+  <!-- Filtros -->
+  <section class="filtros">
+    <div class="filtro">
+      <label>Status:</label>
+      <select [ngModel]="filtroStatus()" (ngModelChange)="filtroStatus.set($event)">
+        <option value="">Todos</option>
+        <option *ngFor="let s of statusLabels | keyvalue" [value]="s.key">{{ s.value }}</option>
+      </select>
+    </div>
+    <div class="filtro">
+      <label>Tipo:</label>
+      <select [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
+        <option value="">Todos</option>
+        <option *ngFor="let t of tiposLabels | keyvalue" [value]="t.key">{{ t.value }}</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Tabela -->
+  <section class="tabela-wrap">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Protocolo</th>
+          <th>Titular</th>
+          <th>Tipo</th>
+          <th>Status</th>
+          <th>Prazo</th>
+          <th>Recebida em</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of filtradas()" (click)="abrirDetalhe(s)" class="row-click">
+          <td><strong>{{ s.protocolo }}</strong></td>
+          <td>
+            <div>{{ s.titular_nome }}</div>
+            <small>{{ s.titular_email }}</small>
+          </td>
+          <td>{{ tiposLabels[s.tipo_solicitacao] || s.tipo_solicitacao }}</td>
+          <td>
+            <span class="badge status-{{ s.status }}">{{ statusLabels[s.status] || s.status }}</span>
+          </td>
+          <td [class.atrasado]="prazoAtrasado(s)">
+            {{ s.prazo_resposta | date:'dd/MM/yyyy' }}
+            <small *ngIf="!prazoAtrasado(s) && s.status !== 'concluida' && s.status !== 'recusada'">
+              ({{ diasRestantes(s.prazo_resposta) }}d)
+            </small>
+            <small *ngIf="prazoAtrasado(s)" class="atraso-tag">FORA DO PRAZO</small>
+          </td>
+          <td>{{ formatarData(s.created_at) }}</td>
+          <td>
+            <button class="btn-link"><i class="fas fa-chevron-right"></i></button>
+          </td>
+        </tr>
+        <tr *ngIf="!loading() && filtradas().length === 0">
+          <td colspan="7" class="vazio">Nenhuma solicitação encontrada.</td>
+        </tr>
+        <tr *ngIf="loading()">
+          <td colspan="7" class="vazio"><i class="fas fa-spinner fa-spin"></i> Carregando...</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<!-- Modal de detalhe -->
+<div class="modal-backdrop" *ngIf="selecionada()" (click)="fechar()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <h2>Solicitação {{ selecionada()!.protocolo }}</h2>
+      <button class="close" (click)="fechar()"><i class="fas fa-times"></i></button>
+    </header>
+
+    <div class="modal-body">
+      <div class="detalhe-grid">
+        <div>
+          <span class="rotulo">Titular</span>
+          <strong>{{ selecionada()!.titular_nome }}</strong>
+          <small>{{ selecionada()!.titular_email }}</small>
+        </div>
+        <div>
+          <span class="rotulo">Tipo</span>
+          <strong>{{ tiposLabels[selecionada()!.tipo_solicitacao] }}</strong>
+        </div>
+        <div>
+          <span class="rotulo">Status atual</span>
+          <strong>
+            <span class="badge status-{{ selecionada()!.status }}">
+              {{ statusLabels[selecionada()!.status] }}
+            </span>
+          </strong>
+        </div>
+        <div>
+          <span class="rotulo">Prazo de resposta</span>
+          <strong [class.atrasado]="prazoAtrasado(selecionada()!)">
+            {{ selecionada()!.prazo_resposta | date:'dd/MM/yyyy' }}
+          </strong>
+        </div>
+        <div>
+          <span class="rotulo">Recebida em</span>
+          <strong>{{ formatarData(selecionada()!.created_at) }}</strong>
+        </div>
+        <div>
+          <span class="rotulo">IP de origem</span>
+          <strong>{{ selecionada()!.ip_address || '-' }}</strong>
+        </div>
+      </div>
+
+      <div class="bloco">
+        <span class="rotulo">Mensagem do titular</span>
+        <p class="mensagem">{{ selecionada()!.mensagem }}</p>
+      </div>
+
+      <div class="bloco" *ngIf="selecionada()!.respondida_em">
+        <span class="rotulo">Resposta anterior (em {{ formatarData(selecionada()!.respondida_em) }})</span>
+        <p class="mensagem">{{ selecionada()!.resposta }}</p>
+      </div>
+
+      <div class="bloco">
+        <label class="rotulo" for="resposta">Resposta ao titular</label>
+        <textarea
+          id="resposta"
+          [(ngModel)]="resposta"
+          rows="5"
+          placeholder="Descreva o atendimento à solicitação..."></textarea>
+
+        <div class="status-row">
+          <label>
+            <span class="rotulo">Marcar como:</span>
+            <select [(ngModel)]="novoStatus">
+              <option value="concluida">Concluída</option>
+              <option value="recusada">Recusada</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <footer class="modal-footer">
+      <button class="btn-secondary" (click)="marcarEmAnalise()" *ngIf="selecionada()!.status === 'pendente'">
+        <i class="fas fa-search"></i> Marcar em análise
+      </button>
+      <button class="btn-secondary" (click)="fechar()">Fechar</button>
+      <button class="btn-primary" (click)="responder()" [disabled]="enviandoResposta()">
+        <i [class]="enviandoResposta() ? 'fas fa-spinner fa-spin' : 'fas fa-paper-plane'"></i>
+        {{ enviandoResposta() ? 'Enviando...' : 'Registrar resposta' }}
+      </button>
+    </footer>
+  </div>
+</div>

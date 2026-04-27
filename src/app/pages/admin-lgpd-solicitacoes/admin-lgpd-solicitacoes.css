@@ -1,0 +1,332 @@
+.lgpd-admin {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  margin: 0 0 0.25rem;
+  color: #1a202c;
+  font-size: 1.75rem;
+}
+
+.page-header p {
+  margin: 0;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1px solid #cbd5e0;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #2d3748;
+  cursor: pointer;
+}
+
+.btn-refresh:hover { background: #f7fafc; }
+.btn-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Cards */
+.resumo-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.card-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #718096;
+  font-weight: 600;
+}
+
+.card-value {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.card.pendentes .card-value { color: #d97706; }
+.card.atrasadas .card-value { color: #6b7280; }
+.card.atrasadas.alerta { background: #fef2f2; border-color: #fecaca; }
+.card.atrasadas.alerta .card-value { color: #dc2626; }
+.card.concluidas .card-value { color: #047857; }
+
+/* Filtros */
+.filtros {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.filtro {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.filtro select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* Tabela */
+.tabela-wrap {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela th,
+.tabela td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #edf2f7;
+  font-size: 0.9rem;
+}
+
+.tabela th {
+  background: #f7fafc;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.tabela small {
+  display: block;
+  color: #718096;
+  font-size: 0.78rem;
+}
+
+.row-click { cursor: pointer; transition: background 0.15s; }
+.row-click:hover { background: #f7fafc; }
+
+.vazio {
+  text-align: center;
+  color: #718096;
+  padding: 2rem !important;
+}
+
+.atrasado { color: #dc2626; font-weight: 700; }
+
+.atraso-tag {
+  display: inline-block;
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.7rem !important;
+  margin-left: 4px;
+}
+
+/* Badge */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge.status-pendente { background: #fef3c7; color: #92400e; }
+.badge.status-em_analise { background: #dbeafe; color: #1e40af; }
+.badge.status-aguardando_titular { background: #e0e7ff; color: #3730a3; }
+.badge.status-concluida { background: #d1fae5; color: #065f46; }
+.badge.status-recusada { background: #fee2e2; color: #991b1b; }
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #047857;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #1a202c;
+}
+
+.close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #718096;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.detalhe-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detalhe-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rotulo {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #718096;
+  font-weight: 600;
+}
+
+.bloco {
+  margin-bottom: 1.25rem;
+}
+
+.mensagem {
+  background: #f7fafc;
+  border-left: 3px solid #cbd5e0;
+  padding: 0.85rem 1rem;
+  border-radius: 0 6px 6px 0;
+  white-space: pre-wrap;
+  margin: 0.4rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.bloco textarea {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  resize: vertical;
+  margin-top: 0.4rem;
+}
+
+.status-row {
+  margin-top: 0.75rem;
+}
+
+.status-row select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  margin-left: 0.5rem;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-primary {
+  background: #047857;
+  color: #fff;
+}
+
+.btn-primary:hover { background: #065f46; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-secondary {
+  background: #fff;
+  border: 1px solid #cbd5e0;
+  color: #2d3748;
+}
+
+.btn-secondary:hover { background: #f7fafc; }
+
+@media (max-width: 768px) {
+  .resumo-cards { grid-template-columns: repeat(2, 1fr); }
+  .detalhe-grid { grid-template-columns: 1fr; }
+  .tabela th, .tabela td { padding: 0.6rem 0.5rem; font-size: 0.82rem; }
+}
