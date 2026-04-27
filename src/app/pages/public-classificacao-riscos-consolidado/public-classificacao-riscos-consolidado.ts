@@ -12,11 +12,12 @@ import {
 } from '../../services/planejamento-estrategico.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 @Component({
   selector: 'app-public-classificacao-riscos-consolidado',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PublicLgpdFooterComponent],
   templateUrl: './public-classificacao-riscos-consolidado.html',
   styleUrls: ['./public-classificacao-riscos-consolidado.css']
 })

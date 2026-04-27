@@ -11,11 +11,12 @@ import {
   OkrTarefa
 } from '../../services/planejamento-estrategico.service';
 import { firstValueFrom } from 'rxjs';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 @Component({
   selector: 'app-public-okr-view',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PublicLgpdFooterComponent],
   templateUrl: './public-okr-view.html',
   styleUrls: ['./public-okr-view.css'],
 })

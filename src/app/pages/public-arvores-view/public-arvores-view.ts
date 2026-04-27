@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlanejamentoEstrategicoService } from '../../services/planejamento-estrategico.service';
 import { firstValueFrom } from 'rxjs';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 @Component({
   selector: 'app-public-arvores-view',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PublicLgpdFooterComponent],
   templateUrl: './public-arvores-view.html',
   styleUrls: ['./public-arvores-view.css']
 })

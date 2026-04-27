@@ -11,11 +11,12 @@ import {
   UpdateClassificacaoRiscosRequest
 } from '../../services/planejamento-estrategico.service';
 import { firstValueFrom } from 'rxjs';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 @Component({
   selector: 'app-public-classificacao-riscos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PublicLgpdFooterComponent],
   templateUrl: './public-classificacao-riscos.html',
   styleUrls: ['./public-classificacao-riscos.css']
 })

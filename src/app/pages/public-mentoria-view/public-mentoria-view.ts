@@ -16,6 +16,7 @@ import { GestaoErrosComponent } from '../../components/gestao-erros/gestao-erros
 import { TabelaPeriodicaComponent } from '../../components/tabela-periodica/tabela-periodica';
 import { MapaAmbicaoComponent } from '../../components/mapa-ambicao/mapa-ambicao';
 import { LinhaDoTempoEditorComponent } from '../../components/linha-do-tempo-editor/linha-do-tempo-editor.component';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 interface TocItem {
   id: string;
@@ -137,7 +138,7 @@ interface MapaMentalData {
 @Component({
   selector: 'app-public-mentoria-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule, MatrizRaciEditorComponent, AnaliseProblemasComponent, GestaoErrosComponent, TabelaPeriodicaComponent, MapaAmbicaoComponent, LinhaDoTempoEditorComponent],
+  imports: [CommonModule, FormsModule, DragDropModule, MatrizRaciEditorComponent, AnaliseProblemasComponent, GestaoErrosComponent, TabelaPeriodicaComponent, MapaAmbicaoComponent, LinhaDoTempoEditorComponent, PublicLgpdFooterComponent],
   templateUrl: './public-mentoria-view.html',
   styleUrl: './public-mentoria-view.css'
 })

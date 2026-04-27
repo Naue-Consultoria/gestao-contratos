@@ -11,14 +11,13 @@ import {
   UpdateMatrizSwotRequest
 } from '../../services/planejamento-estrategico.service';
 import { firstValueFrom } from 'rxjs';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 @Component({
   selector: 'app-public-matriz-swot',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule
-  ],
+  imports: [CommonModule,
+    FormsModule, PublicLgpdFooterComponent],
   templateUrl: './public-matriz-swot.html',
   styleUrls: ['./public-matriz-swot.css'],
 })

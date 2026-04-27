@@ -8,11 +8,12 @@ import { ClientVagasHub } from '../../types/vagas-hub';
 import { Vaga, VagaStatusHistory } from '../../types/vaga';
 import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom } from 'rxjs';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 @Component({
   selector: 'app-public-vagas-hub',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PublicLgpdFooterComponent],
   templateUrl: './public-vagas-hub.html',
   styleUrl: './public-vagas-hub.css'
 })

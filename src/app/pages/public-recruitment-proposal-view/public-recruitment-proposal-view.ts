@@ -26,11 +26,12 @@ import {
 type ProposalServiceItem = PublicProposalService;
 
 import { BrazilMapComponent } from '../../components/brazil-map/brazil-map.component';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 @Component({
   selector: 'app-public-recruitment-proposal-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, BrazilMapComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, BrazilMapComponent, PublicLgpdFooterComponent],
   templateUrl: './public-recruitment-proposal-view.html',
   styleUrls: ['./public-recruitment-proposal-view.css']
 })

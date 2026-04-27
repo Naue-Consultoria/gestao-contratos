@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { PlanejamentoEstrategicoService } from '../../services/planejamento-estrategico.service';
 import { firstValueFrom } from 'rxjs';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 @Component({
   selector: 'app-public-swot-consolidado',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PublicLgpdFooterComponent],
   templateUrl: './public-swot-consolidado.html',
   styleUrls: ['./public-swot-consolidado.css']
 })

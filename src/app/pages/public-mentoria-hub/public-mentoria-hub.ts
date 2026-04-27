@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MentoriaService } from '../../services/mentoria.service';
 import { ScrollAnimationDirective } from '../../directives/scroll-animation';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 interface MentoriaPublica {
   id: number;
@@ -27,7 +28,7 @@ interface MentoriaPublica {
 @Component({
   selector: 'app-public-mentoria-hub',
   standalone: true,
-  imports: [CommonModule, ScrollAnimationDirective],
+  imports: [CommonModule, ScrollAnimationDirective, PublicLgpdFooterComponent],
   templateUrl: './public-mentoria-hub.html',
   styleUrl: './public-mentoria-hub.css'
 })

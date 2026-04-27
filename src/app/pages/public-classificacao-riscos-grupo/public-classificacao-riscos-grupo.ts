@@ -12,11 +12,12 @@ import {
 } from '../../services/planejamento-estrategico.service';
 import { firstValueFrom } from 'rxjs';
 import jsPDF from 'jspdf';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 @Component({
   selector: 'app-public-classificacao-riscos-grupo',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PublicLgpdFooterComponent],
   templateUrl: './public-classificacao-riscos-grupo.html',
   styleUrls: ['./public-classificacao-riscos-grupo.css']
 })

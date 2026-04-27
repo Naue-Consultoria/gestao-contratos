@@ -11,14 +11,13 @@ import {
   UpdateMatrizRequest
 } from '../../services/planejamento-estrategico.service';
 import { firstValueFrom } from 'rxjs';
+import { PublicLgpdFooterComponent } from '../../components/public-lgpd-footer/public-lgpd-footer';
 
 @Component({
   selector: 'app-public-planejamento-view',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule
-  ],
+  imports: [CommonModule,
+    FormsModule, PublicLgpdFooterComponent],
   templateUrl: './public-planejamento-view.html',
   styleUrls: ['./public-planejamento-view.css'],
 })
