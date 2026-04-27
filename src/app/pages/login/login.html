@@ -31,12 +31,19 @@
             <span>{{ error }}</span>
         </div>
 
-        <button 
-            type="submit" 
-            class="btn-primary" 
+        <button
+            type="submit"
+            class="btn-primary"
             [disabled]="loading || loginForm.invalid">
             <i [class]="loading ? 'fas fa-spinner fa-spin' : 'fas fa-arrow-right'"></i>
             {{ loading ? 'Entrando...' : 'ENTRAR' }}
         </button>
+
+        <p class="terms-notice">
+            Ao entrar, você concorda com os
+            <a routerLink="/termos-uso" target="_blank" rel="noopener">Termos de Uso</a>
+            e a
+            <a routerLink="/politica-privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.
+        </p>
     </form>
 </app-login-layout>
