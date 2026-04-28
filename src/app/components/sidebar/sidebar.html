@@ -4,6 +4,10 @@
     <i class="fas fa-chevron-right" *ngIf="isCollapsed"></i>
   </button>
 
+  <button class="sidebar-mobile-close" (click)="closeMobileSidebar()" title="Fechar menu" aria-label="Fechar menu">
+    <i class="fas fa-times"></i>
+  </button>
+
   <ul class="nav-menu">
     <div *ngFor="let section of filteredNavSections" class="nav-section">
       <div class="nav-section-title">{{ section.title }}</div>

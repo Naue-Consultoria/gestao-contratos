@@ -191,7 +191,7 @@
         <p>Clique em "Nova Vaga" para criar a primeira vaga</p>
       </div>
 
-      <table class="data-table" *ngIf="filteredVagas.length > 0">
+      <table class="data-table" data-mobile="cards" *ngIf="filteredVagas.length > 0">
         <thead>
           <tr>
             <th>Cliente</th>
@@ -212,7 +212,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let vaga of filteredVagas" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
-            <td>
+            <td data-label="Cliente">
               <div class="client-info">
                 <span class="sla-indicator"
                       [ngClass]="getSlaClass(vaga.dataFechamentoCancelamento ? calculateSla(vaga) : calculateActiveSla(vaga))"></span>
@@ -224,36 +224,36 @@
                 </div>
               </div>
             </td>
-            <td>
+            <td data-label="Cargo">
               <div class="vaga-title">
                 {{ vaga.cargo }}
               </div>
             </td>
-            <td>
+            <td data-label="Tipo Cargo">
               <span class="type-badge">{{ tipoCargoLabels[vaga.tipoCargo] }}</span>
             </td>
-            <td>
+            <td data-label="Tipo Abertura">
               <span class="abertura-badge" [ngClass]="vaga.tipoAbertura">
                 {{ tipoAberturaLabels[vaga.tipoAbertura] }}
               </span>
             </td>
-            <td>
+            <td data-label="Sigilo">
               <span class="sigilo-badge" [class.sigilosa]="vaga.sigilosa">
                 {{ vaga.sigilosa ? 'Sigilosa' : 'Não Sigilosa' }}
               </span>
             </td>
-            <td>
+            <td data-label="Salário">
               <span class="salary-value" *ngIf="vaga.salario">R$ {{ vaga.salario | number:'1.2-2' }}</span>
               <span class="empty-text" *ngIf="!vaga.salario">-</span>
             </td>
-            <td>
+            <td data-label="Pretensão Salarial">
               <span class="salary-value" *ngIf="vaga.pretensaoSalarial">R$ {{ vaga.pretensaoSalarial | number:'1.2-2' }}</span>
               <span class="empty-text" *ngIf="!vaga.pretensaoSalarial">-</span>
             </td>
-            <td>
+            <td data-label="Consultora">
               <span class="user-name">{{ vaga.usuarioNome }}</span>
             </td>
-            <td>
+            <td data-label="Status">
               <span class="status-badge" [ngClass]="'status-' + vaga.status">
                 {{ statusLabels[vaga.status] }}
               </span>
@@ -261,10 +261,10 @@
                 {{ statusEntrevistaLabels[vaga.statusEntrevista] }}
               </small>
             </td>
-            <td>
+            <td data-label="Data Abertura">
               <span class="date-text">{{ vaga.dataAbertura | dateNoTimezone }}</span>
             </td>
-            <td>
+            <td data-label="Candidato Aprovado">
               <div class="approved-candidate" *ngIf="vaga.candidatoAprovado">
                 <span class="candidate-name">
                   <i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.25rem;"></i>
@@ -276,13 +276,13 @@
               </div>
               <span class="empty-text" *ngIf="!vaga.candidatoAprovado">-</span>
             </td>
-            <td>
+            <td data-label="Data Fechamento">
               <span class="date-text" *ngIf="vaga.dataFechamentoCancelamento">
                 {{ vaga.dataFechamentoCancelamento | dateNoTimezone }}
               </span>
               <span class="date-text empty" *ngIf="!vaga.dataFechamentoCancelamento">-</span>
             </td>
-            <td>
+            <td data-label="SLA (dias)">
               <span class="sla-badge"
                     [ngClass]="getSlaClass(calculateSla(vaga))"
                     *ngIf="vaga.dataFechamentoCancelamento">

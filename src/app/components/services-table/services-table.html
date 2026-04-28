@@ -106,7 +106,7 @@
       </div>
 
       <!-- Tabela de serviços -->
-      <table class="custom-table" *ngIf="filteredServices.length > 0">
+      <table class="custom-table" data-mobile="cards" *ngIf="filteredServices.length > 0">
         <thead>
           <tr>
             <th>Nome do Serviço</th>
@@ -122,7 +122,7 @@
             class="clickable"
             (click)="editService(service.id)"
           >
-            <td>
+            <td data-label="Serviço">
               <div class="service-info">
                 <div class="service-icon" [class.inactive]="!service.isActive">
                   <i [class]="getCategoryIcon(service.category)"></i>
@@ -132,7 +132,7 @@
                 >
               </div>
             </td>
-            <td>
+            <td data-label="Categoria">
               <span
                 class="category-badge"
                 [attr.data-category]="service.category"
@@ -140,13 +140,13 @@
                 {{ service.category }}
               </span>
             </td>
-            <td>
+            <td data-label="Duração">
               <div class="duration-info">
                 <i class="fas fa-clock"></i>
                 {{ service.duration }}
               </div>
             </td>
-            <td>
+            <td data-label="Status">
               <div
                 class="status-toggle"
                 (click)="toggleServiceStatus(service, $event)"

@@ -1045,48 +1045,66 @@
   }
 
   .routines-table td::before {
-    content: attr(class);
     display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.7rem;
+    font-weight: 700;
     color: #64748b;
     text-transform: uppercase;
-    margin-bottom: 0.25rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.35rem;
   }
 
-  .col-contract::before {
+  .routines-table td.col-contract::before {
     content: "Contrato";
   }
 
-  .col-client::before {
+  .routines-table td.col-client::before {
     content: "Cliente";
   }
 
-  .col-type::before {
+  .routines-table td.col-type::before {
     content: "Tipo";
   }
 
-  .col-services::before {
+  .routines-table td.col-services::before {
     content: "Serviços";
   }
 
-  .col-progress::before {
+  .routines-table td.col-progress::before {
     content: "Progresso";
   }
 
-  .col-actions {
+  .routines-table td.col-actions {
     border-top: 1px solid #f1f5f9;
     padding-top: 1rem;
     margin-top: 0.5rem;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
   }
 
-  :host-context(body.dark-mode) .col-actions {
+  :host-context(body.dark-mode) .routines-table td.col-actions {
     border-color: var(--dark-border);
   }
 
-  .col-actions::before {
+  .routines-table td.col-actions::before {
     display: none;
+  }
+
+  /* Make rows more card-like and prevent overflow */
+  .routines-table {
+    overflow-x: visible;
+    width: 100%;
+  }
+
+  .routine-row {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .routines-table td {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    width: 100%;
+    box-sizing: border-box;
   }
 }

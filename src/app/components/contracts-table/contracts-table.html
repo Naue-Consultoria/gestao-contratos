@@ -189,7 +189,7 @@
       </div>
       
       <!-- Contracts Table - Desktop -->
-      <table class="contracts-table" *ngIf="filteredContracts.length > 0">
+      <table class="contracts-table" data-mobile="cards" *ngIf="filteredContracts.length > 0">
         <thead>
           <tr>
             <th class="sortable" (click)="sortBy('contractNumber')">
@@ -221,12 +221,12 @@
         </thead>
         <tbody>
           <tr *ngFor="let contract of filteredContracts; trackBy: trackByContractId" (click)="viewContract(contract.id, $event)" style="cursor: pointer">
-            <td>
+            <td data-label="Número">
               <div class="contract-number" [class.expired]="contract.isExpired && contract.raw.status === 'active'">
                 {{ contract.contractNumber }}
               </div>
             </td>
-            <td>
+            <td data-label="Cliente">
               <div class="client-info">
                 <div class="client-name-container">
                   <span class="client-name">{{ contract.clientName }}</span>
@@ -236,7 +236,7 @@
                 </div>
               </div>
             </td>
-            <td>
+            <td data-label="Tipo">
               <div class="contract-type">
                 <i [class]="getTypeIcon(contract.type)"></i>
                 <span class="type-badge" [attr.data-type]="contract.type">
@@ -244,7 +244,7 @@
                 </span>
               </div>
             </td>
-            <td class="text-center">
+            <td class="text-center" data-label="Serviços">
               <div class="services-count">
                 <span class="services-badge">
                   {{ contract.servicesCount }} serviço{{ contract.servicesCount !== 1 ? 's' : '' }}
@@ -252,7 +252,7 @@
               </div>
             </td>
             <!-- Célula de Valor Total - APENAS para Admin -->
-            <td *ngIf="canViewFinancialInfo">
+            <td *ngIf="canViewFinancialInfo" data-label="Valor Total">
               <div class="contract-value">
                 <span class="value-amount">{{ contract.totalValue }}</span>
                 <span *ngIf="hasCancelledServices(contract.raw)" class="cancelled-indicator"
@@ -261,7 +261,7 @@
                 </span>
               </div>
             </td>
-            <td>
+            <td data-label="Vencimento">
               <div class="end-date">
                 <i class="fas fa-calendar-times"></i>
                 <span *ngIf="contract.endDate; else noEndDate">
@@ -272,7 +272,7 @@
                 </ng-template>
               </div>
             </td>
-            <td>
+            <td data-label="Status">
               <div class="status-container">
                 <span class="status-badge" [style.background-color]="contract.statusColor + '20'" [style.color]="contract.statusColor">
                   <span class="status-dot" [style.background-color]="contract.statusColor"></span>
@@ -280,7 +280,7 @@
                 </span>
               </div>
             </td>
-            <td>
+            <td data-label="Pagamento">
               <div class="payment-info">
                 <div class="payment-status">
                   <span class="payment-badge" [style.background-color]="contract.paymentStatusColor + '20'" [style.color]="contract.paymentStatusColor">

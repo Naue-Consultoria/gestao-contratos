@@ -40,9 +40,10 @@
 </div>
 
 <app-sidebar
-  [isCollapsed]="isSidebarCollapsed" 
+  [isCollapsed]="isSidebarCollapsed"
   [isMobileSidebarOpen]="isMobileSidebarOpen"
-  (sidebarToggled)="toggleSidebar()">
+  (sidebarToggled)="toggleSidebar()"
+  (mobileSidebarClosed)="closeMobileSidebar()">
 </app-sidebar>
 
 <main class="main-content" [class.sidebar-collapsed]="isSidebarCollapsed">

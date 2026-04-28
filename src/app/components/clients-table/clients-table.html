@@ -92,7 +92,7 @@
       </div>
       
       <!-- Tabela de clientes -->
-      <table class="custom-table" *ngIf="filteredClients.length > 0">
+      <table class="custom-table" data-mobile="cards" *ngIf="filteredClients.length > 0">
         <thead>
           <tr>
             <th>Cliente</th>
@@ -105,7 +105,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let client of filteredClients; trackBy: trackByClientId" class="clickable" (click)="viewClient(client.id)">
-            <td>
+            <td data-label="Cliente">
               <div class="client-info">
                 <div class="client-avatar" [style.background]="client.gradient" *ngIf="!client.logo_path">
                   {{ client.initials }}
@@ -121,7 +121,7 @@
                 </div>
               </div>
             </td>
-            <td>
+            <td data-label="Tipo">
               <div class="type-badges">
                 <span class="badge" [ngClass]="client.type === 'PF' ? 'badge-info' : 'badge-primary'">
                   {{ client.type }}
@@ -131,9 +131,9 @@
                 </span>
               </div>
             </td>
-            <td class="client-location">{{ client.location }}</td>
-            <td>{{ client.document }}</td>
-            <td>
+            <td class="client-location" data-label="Localização">{{ client.location }}</td>
+            <td data-label="Documento">{{ client.document }}</td>
+            <td data-label="Contratos">
               <div class="contracts-info">
                 <span class="total">{{ client.contracts }}</span>
                 <span class="active" *ngIf="client.activeContracts > 0">({{ client.activeContracts }} ativos)</span>

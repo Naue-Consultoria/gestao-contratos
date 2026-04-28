@@ -159,7 +159,7 @@
       </div>
 
       <!-- Tabela de propostas -->
-      <table class="custom-table" *ngIf="filteredProposals.length > 0">
+      <table class="custom-table" data-mobile="cards" *ngIf="filteredProposals.length > 0">
         <thead>
           <tr>
             <th class="sortable" (click)="sortBy('proposalNumber')">
@@ -195,7 +195,7 @@
             [class.expired]="proposal.isExpired && proposal.status !== 'signed'"
             (click)="viewProposal(proposal.id)"
           >
-            <td>
+            <td data-label="Número">
               <div class="proposal-info">
                 <div class="proposal-icon" [class.expired]="proposal.isExpired && proposal.status !== 'signed'">
                   <i class="fas fa-file-alt"></i>
@@ -206,7 +206,7 @@
               </div>
             </td>
 
-            <td>
+            <td data-label="Cliente">
               <div class="client-name-container">
                 <span class="client-name">{{ proposal.clientName }}</span>
                 <span class="client-company-name" *ngIf="proposal.clientType === 'PJ' && proposal.companyName && proposal.tradeName && proposal.tradeName !== proposal.companyName">
@@ -215,11 +215,11 @@
               </div>
             </td>
 
-            <td>
+            <td data-label="Tipo">
               <span class="type-badge">{{ getProposalTypeText(proposal.raw.type) }}</span>
             </td>
 
-            <td (click)="$event.stopPropagation()">
+            <td data-label="Status" (click)="$event.stopPropagation()">
               <div class="status-cell">
                 <select
                   class="status-select"
@@ -248,10 +248,10 @@
                 </button>
               </div>
             </td>
-            <td>
+            <td data-label="Valor Total">
               <span class="value-amount">{{ proposal.totalValue }}</span>
             </td>
-            <td>
+            <td data-label="SLA">
               <span
                 class="sla-badge"
                 [ngClass]="getSLAClass(proposal.sla)"
@@ -260,10 +260,10 @@
               </span>
               <span class="sla-empty" *ngIf="proposal.sla === '-'">-</span>
             </td>
-            <td>
+            <td data-label="Validade">
               <span class="validity-date">{{ proposal.validUntil }}</span>
             </td>
-            <td>
+            <td data-label="Criada em">
               <span class="created-date">{{ proposal.createdAt }}</span>
             </td>
             <td>

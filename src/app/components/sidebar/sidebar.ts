@@ -33,6 +33,7 @@ export class SidebarComponent {
   @Input() isCollapsed = false;
   @Input() isMobileSidebarOpen = false;
   @Output() sidebarToggled = new EventEmitter<void>();
+  @Output() mobileSidebarClosed = new EventEmitter<void>();
 
   navSections: NavSection[] = [
     {
@@ -164,6 +165,10 @@ export class SidebarComponent {
 
   toggleSidebar(): void {
     this.sidebarToggled.emit();
+  }
+
+  closeMobileSidebar(): void {
+    this.mobileSidebarClosed.emit();
   }
 
   toggleDropdown(item: NavItem): void {
