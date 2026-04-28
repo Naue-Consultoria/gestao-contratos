@@ -3,7 +3,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { NotificationService } from './notification.service';
-import { WebPushService } from './web-push.service';
 import { environment } from '../../environments/environment';
 
 export interface User {
@@ -73,10 +72,6 @@ export class AuthService {
     return this.injector.get(NotificationService);
   }
 
-  private get webPushService(): WebPushService {
-    return this.injector.get(WebPushService);
-  }
-
   constructor() {
     this.loadUserFromStorage();
   }
@@ -97,10 +92,6 @@ export class AuthService {
           setTimeout(() => {
             this.notificationService.initializeNotifications(String(response.user.id));
           }, 3000);
-          // Habilitar Web Push (best-effort, pede permissão 1x)
-          setTimeout(() => {
-            this.webPushService.enableForCurrentUser().catch(() => {});
-          }, 4000);
         }
         this.isLoggingIn = false; // Reset flag após sucesso
       }),
@@ -114,8 +105,6 @@ export class AuthService {
 
   logout(): Observable<any> {
     const headers = this.getAuthHeaders();
-    // Cancela web push antes de limpar token (precisa do token pra POST /unsubscribe)
-    this.webPushService.disable().catch(() => {});
     return this.http.post(`${this.API_URL}/logout`, {}, { headers }).pipe(
       tap(() => {
         this.notificationService.resetNotificationState(); // Reset do estado das notificações
@@ -326,12 +315,6 @@ export class AuthService {
         setTimeout(() => {
           this.notificationService.initializeNotifications(String(user.id));
         }, 3000);
-        // Re-habilitar Web Push se já tinha permissão (não pede de novo)
-        setTimeout(() => {
-          if (this.webPushService.permission() === 'granted') {
-            this.webPushService.enableForCurrentUser().catch(() => {});
-          }
-        }, 4000);
       } catch (error) {
         console.error('❌ Erro ao analisar dados do usuário no localStorage. Limpando sessão.', error);
         this.clearSession();
