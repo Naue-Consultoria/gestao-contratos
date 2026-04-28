@@ -62,6 +62,7 @@ import { AnaliseAmeacasComponent } from './components/analise-ameacas/analise-am
 import { GerenciarEstadosComponent } from './pages/gerenciar-estados/gerenciar-estados.component';
 import { LgpdPoliticaPrivacidadeComponent } from './pages/lgpd-politica-privacidade/lgpd-politica-privacidade';
 import { LgpdTermosUsoComponent } from './pages/lgpd-termos-uso/lgpd-termos-uso';
+import { LgpdTermosUsoPublicoComponent } from './pages/lgpd-termos-uso-publico/lgpd-termos-uso-publico';
 import { LgpdEncarregadoComponent } from './pages/lgpd-encarregado/lgpd-encarregado';
 import { AdminLgpdSolicitacoesComponent } from './pages/admin-lgpd-solicitacoes/admin-lgpd-solicitacoes';
 import { AuthGuard } from './guards/auth-guard';
@@ -211,6 +212,11 @@ export const routes: Routes = [
     path: 'termos-uso',
     component: LgpdTermosUsoComponent,
     title: 'Termos de Uso - NAUE Consultoria',
+  },
+  {
+    path: 'termos-uso-publico',
+    component: LgpdTermosUsoPublicoComponent,
+    title: 'Termos de Uso (Acesso Público) - NAUE Consultoria',
   },
   {
     path: 'encarregado-dados',

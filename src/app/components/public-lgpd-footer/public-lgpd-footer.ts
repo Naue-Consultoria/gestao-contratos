@@ -15,7 +15,7 @@ import { RouterModule } from '@angular/router';
     <nav class="lgpd-links" aria-label="Privacidade e Termos">
       <a routerLink="/politica-privacidade" target="_blank" rel="noopener">Política de Privacidade</a>
       <span class="sep" aria-hidden="true">·</span>
-      <a routerLink="/termos-uso" target="_blank" rel="noopener">Termos de Uso</a>
+      <a routerLink="/termos-uso-publico" target="_blank" rel="noopener">Termos de Uso</a>
       <span class="sep" aria-hidden="true">·</span>
       <a routerLink="/encarregado-dados" target="_blank" rel="noopener">Direitos do Titular</a>
     </nav>
