@@ -11,7 +11,7 @@ import { RealtimeChannel } from '@supabase/supabase-js';
 export type NotificationType =
   | 'success' | 'error' | 'warning' | 'info'
   | 'contract_assignment' | 'permission_change' | 'contract_expiring'
-  | 'payment_overdue' | 'service_comment' | 'service_status_change'
+  | 'payment_overdue' | 'installment_paid' | 'service_comment' | 'service_status_change'
   | 'new_contract' | 'new_user' | 'security_alert'
   | 'proposal_signed' | 'approval_required' | 'system_event';
 
@@ -83,14 +83,16 @@ export interface NotificationOptions {
 }
 
 // Mapa de tipo -> categoria de exibição
+// Regra: 'success' (verde) para eventos positivos, 'alert' (vermelho) só pra críticos.
 const NOTIFICATION_DISPLAY_MAP: Record<string, DisplayCategory> = {
-  contract_assignment: 'info',
+  contract_assignment: 'success',  // ganhou um contrato
   permission_change: 'info',
   contract_expiring: 'warning',
   payment_overdue: 'alert',
+  installment_paid: 'success',     // dinheiro chegou
   service_comment: 'info',
   service_status_change: 'info',
-  new_contract: 'info',
+  new_contract: 'success',         // negócio fechado
   new_user: 'info',
   security_alert: 'alert',
   proposal_signed: 'success',
@@ -511,7 +513,7 @@ export class NotificationService implements OnDestroy {
   private mapNotificationType(serverType: string): NotificationType {
     const validTypes: NotificationType[] = [
       'contract_assignment', 'permission_change', 'contract_expiring',
-      'payment_overdue', 'service_comment', 'service_status_change',
+      'payment_overdue', 'installment_paid', 'service_comment', 'service_status_change',
       'new_contract', 'new_user', 'security_alert',
       'proposal_signed', 'approval_required', 'system_event'
     ];
@@ -526,6 +528,7 @@ export class NotificationService implements OnDestroy {
       permission_change: 'fas fa-user-shield',
       contract_expiring: 'fas fa-calendar-times',
       payment_overdue: 'fas fa-exclamation-triangle',
+      installment_paid: 'fas fa-money-bill-wave',
       service_comment: 'fas fa-comment',
       service_status_change: 'fas fa-tasks',
       new_contract: 'fas fa-file-plus',

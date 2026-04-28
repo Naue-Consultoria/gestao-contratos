@@ -323,6 +323,28 @@
   background: rgba(239, 68, 68, 0.08);
 }
 
+/* Override: alta prioridade + categoria positiva → verde */
+.notification-item.high-priority.cat-success::before {
+  background: #10b981;
+}
+.notification-item.high-priority.cat-success.unread {
+  background: rgba(16, 185, 129, 0.05);
+}
+.notification-item.high-priority.cat-success.unread:hover {
+  background: rgba(16, 185, 129, 0.10);
+}
+
+/* Override: alta prioridade + warning → âmbar */
+.notification-item.high-priority.cat-warning::before {
+  background: #f59e0b;
+}
+.notification-item.high-priority.cat-warning.unread {
+  background: rgba(245, 158, 11, 0.05);
+}
+.notification-item.high-priority.cat-warning.unread:hover {
+  background: rgba(245, 158, 11, 0.10);
+}
+
 /* Icons */
 .notification-icon {
   display: flex;
@@ -415,6 +437,16 @@
 .meta-tag.priority-tag {
   background: rgba(239, 68, 68, 0.1);
   color: #dc2626;
+}
+
+.notification-item.cat-success .meta-tag.priority-tag {
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+}
+
+.notification-item.cat-warning .meta-tag.priority-tag {
+  background: rgba(245, 158, 11, 0.1);
+  color: #b45309;
 }
 
 .meta-tag.aggregate-tag {

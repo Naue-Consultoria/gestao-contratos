@@ -239,6 +239,36 @@
   :host-context(body.dark-mode) .notification-item.high-priority .notification-title {
     color: #f87171;
   }
+
+  /* Override: alta prioridade + categoria positiva (proposta assinada, etc) → verde */
+  .notification-item.high-priority.cat-success {
+    border-left-color: #10b981;
+    background: rgba(16, 185, 129, 0.04);
+  }
+  .notification-item.high-priority.cat-success.unread {
+    background: rgba(16, 185, 129, 0.10);
+  }
+  .notification-item.high-priority.cat-success .notification-title {
+    color: #047857;
+  }
+  :host-context(body.dark-mode) .notification-item.high-priority.cat-success .notification-title {
+    color: #34d399;
+  }
+
+  /* Override: alta prioridade + warning → âmbar (em vez de vermelho) */
+  .notification-item.high-priority.cat-warning {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.04);
+  }
+  .notification-item.high-priority.cat-warning.unread {
+    background: rgba(245, 158, 11, 0.10);
+  }
+  .notification-item.high-priority.cat-warning .notification-title {
+    color: #b45309;
+  }
+  :host-context(body.dark-mode) .notification-item.high-priority.cat-warning .notification-title {
+    color: #fbbf24;
+  }
   
   .notification-icon {
     flex-shrink: 0;
