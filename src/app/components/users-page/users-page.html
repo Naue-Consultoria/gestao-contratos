@@ -45,7 +45,7 @@
   
   <!-- Users table -->
   <div class="table-wrapper" *ngIf="!loading && !error">
-    <table class="users-table" *ngIf="users.length > 0">
+    <table class="users-table" data-mobile="cards" *ngIf="users.length > 0">
       <thead>
         <tr>
           <th>USUÁRIO</th>
@@ -56,7 +56,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let user of users; trackBy: trackByUserId">
-          <td>
+          <td data-label="Usuário">
             <div class="user-cell">
               <div class="user-avatar" [style.background]="user.avatarGradient" *ngIf="!user.profilePictureUrl">
                 {{ user.initials }}
@@ -68,10 +68,10 @@
               </div>
             </div>
           </td>
-          <td>
+          <td data-label="Email">
             <div class="user-email">{{ user.email }}</div>
           </td>
-          <td>
+          <td data-label="Permissão">
             <span class="permission-badge"
                   [class.permission-admin]="user.permission === 'Admin'"
                   [class.permission-admin-gerencial]="user.permission === 'Admin Gerencial'"

@@ -535,7 +535,8 @@ button.delete .fa {
   }
 
   /* Tables with explicit data-label fall-back (preferred pattern) */
-  html body table[data-mobile="cards"][data-mobile="cards"][data-mobile="cards"] thead {
+  html body table[data-mobile="cards"][data-mobile="cards"][data-mobile="cards"] thead,
+  html body table[data-mobile="cards"][data-mobile="cards"][data-mobile="cards"] tfoot {
     display: none !important;
   }
 

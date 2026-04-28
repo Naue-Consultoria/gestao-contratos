@@ -340,7 +340,7 @@
         <p>{{ (selectedMonth || selectedYear) ? 'Nenhuma vaga foi fechada no período selecionado' : 'Vagas fechadas aparecerão aqui' }}</p>
       </div>
 
-      <table class="data-table" *ngIf="getVagasFechamento().length > 0">
+      <table class="data-table" data-mobile="cards" *ngIf="getVagasFechamento().length > 0">
         <thead>
           <tr>
             <th>Cliente</th>
@@ -360,7 +360,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let vaga of getVagasFechamento()" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
-            <td>
+            <td data-label="Cliente">
               <div class="client-info">
                 <span class="sla-indicator"
                       [ngClass]="getSlaClass(vaga.dataFechamentoCancelamento ? calculateSla(vaga) : calculateActiveSla(vaga))"></span>
@@ -372,17 +372,17 @@
                 </div>
               </div>
             </td>
-            <td>
+            <td data-label="Cargo">
               <div class="vaga-title">
                 {{ vaga.cargo }}
               </div>
             </td>
-            <td>
+            <td data-label="Status">
               <span class="status-badge" [ngClass]="'status-' + vaga.status">
                 {{ statusLabels[vaga.status] }}
               </span>
             </td>
-            <td>
+            <td data-label="Candidato Aprovado">
               <div class="approved-candidate" *ngIf="vaga.candidatoAprovado">
                 <span class="candidate-name">
                   <i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.25rem;"></i>
@@ -394,31 +394,31 @@
               </div>
               <span class="empty-text" *ngIf="!vaga.candidatoAprovado">-</span>
             </td>
-            <td>
+            <td data-label="Salário">
               <span class="salary-value">R$ {{ vaga.salario | number:'1.2-2' }}</span>
             </td>
-            <td>
+            <td data-label="% Faturamento">
               <span class="percentage-value">{{ vaga.porcentagemFaturamento ?? 100 }}%</span>
             </td>
-            <td>
+            <td data-label="Valor Faturamento">
               <span class="billing-value">R$ {{ vaga.valorFaturamento || (vaga.salario * ((vaga.porcentagemFaturamento ?? 100) / 100)) | number:'1.2-2' }}</span>
             </td>
-            <td>
+            <td data-label="Consultora">
               <span class="consultant-name">{{ vaga.usuarioNome || '-' }}</span>
             </td>
-            <td>
+            <td data-label="Data Abertura">
               <span class="date-text">{{ vaga.dataAbertura | dateNoTimezone }}</span>
             </td>
-            <td>
+            <td data-label="Data Fechamento">
               <span class="date-text" *ngIf="vaga.dataFechamentoCancelamento">
                 {{ vaga.dataFechamentoCancelamento | dateNoTimezone }}
               </span>
               <span class="date-text empty" *ngIf="!vaga.dataFechamentoCancelamento">-</span>
             </td>
-            <td>
+            <td data-label="Fonte">
               <span class="fonte-badge">{{ fonteRecrutamentoLabels[vaga.fonteRecrutamento] || '-' }}</span>
             </td>
-            <td>
+            <td data-label="SLA (dias)">
               <span class="sla-badge"
                     [ngClass]="getSlaClass(calculateSla(vaga))"
                     *ngIf="vaga.dataFechamentoCancelamento">
@@ -484,7 +484,7 @@
         <p>Vagas fechadas e canceladas aparecerão aqui</p>
       </div>
 
-      <table class="data-table" *ngIf="getVagasComissoes().length > 0">
+      <table class="data-table" data-mobile="cards" *ngIf="getVagasComissoes().length > 0">
         <thead>
           <tr>
             <th>Cliente</th>
@@ -504,7 +504,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let vaga of getVagasComissoes()" (click)="viewVaga(vaga, $event)" style="cursor: pointer">
-            <td>
+            <td data-label="Cliente">
               <div class="client-info">
                 <span class="sla-indicator"
                       [ngClass]="getSlaClass(vaga.dataFechamentoCancelamento ? calculateSla(vaga) : calculateActiveSla(vaga))"></span>
@@ -516,44 +516,44 @@
                 </div>
               </div>
             </td>
-            <td>
+            <td data-label="Cargo">
               <div class="vaga-title">
                 {{ vaga.cargo }}
               </div>
             </td>
-            <td>
+            <td data-label="Status">
               <span class="status-badge" [ngClass]="'status-' + vaga.status">
                 {{ statusLabels[vaga.status] }}
               </span>
             </td>
-            <td>
+            <td data-label="Tipo Cargo">
               <span class="type-badge">{{ tipoCargoLabels[vaga.tipoCargo] }}</span>
             </td>
-            <td>
+            <td data-label="Salário">
               <span class="salary-value">R$ {{ vaga.salario | number:'1.2-2':'pt-BR' }}</span>
             </td>
-            <td>
+            <td data-label="Faturamento">
               <span class="percentage-value">{{ vaga.porcentagemFaturamento ?? 100 }}%</span>
             </td>
-            <td>
+            <td data-label="Valor Faturamento">
               <span class="revenue-value">R$ {{ calcularValorFaturamento(vaga) | number:'1.2-2':'pt-BR' }}</span>
             </td>
-            <td>
+            <td data-label="Imposto">
               <span class="tax-percentage">{{ vaga.impostoEstado || 0 }}%</span>
             </td>
-            <td>
+            <td data-label="Valor Imposto">
               <span class="tax-value">R$ {{ calcularValorImposto(vaga) | number:'1.2-2':'pt-BR' }}</span>
             </td>
-            <td>
+            <td data-label="Lucro">
               <span class="profit-value">R$ {{ calcularLucro(vaga) | number:'1.2-2':'pt-BR' }}</span>
             </td>
-            <td>
+            <td data-label="Comissão">
               <span class="commission-value">R$ {{ calcularComissao(vaga) | number:'1.2-2':'pt-BR' }}</span>
             </td>
-            <td>
+            <td data-label="Consultora">
               <span class="user-name">{{ vaga.usuarioNome }}</span>
             </td>
-            <td>
+            <td data-label="Data Fechamento">
               <span class="date-text" *ngIf="vaga.dataFechamentoCancelamento">
                 {{ vaga.dataFechamentoCancelamento | dateNoTimezone }}
               </span>
