@@ -645,8 +645,8 @@
                       (change)="onInstallmentsChange($event)">
                       <option value="" disabled>Selecione o número de parcelas</option>
                       <option *ngFor="let i of getInstallmentOptions()" [value]="i">
-                        {{ i }}x {{ i === 1 ? 'à vista' : 'mensais' }} - 
-                        {{ formatCurrency(getSelectedTotal() / i) }}
+                        {{ i }}x {{ i === 1 ? '' : 'mensais' }} -
+                        {{ formatCurrency(getPrazoValueWithDiscount() / i) }}
                         {{ i === 1 ? ' (total)' : '' }}
                       </option>
                     </select>
