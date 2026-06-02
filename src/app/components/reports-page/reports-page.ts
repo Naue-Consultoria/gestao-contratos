@@ -47,6 +47,7 @@ export class ReportsPage implements OnInit {
   // Estado do seletor estilo calendario (mes/ano)
   monthPickerOpen = false;
   monthPickerYear: number = new Date().getFullYear();
+  monthPickerPosition: { top: number; left: number; width: number } | null = null;
   financialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
   commercialReport: GeneralReportConfig = { clientId: '', format: 'pdf', isLoading: false };
   clientReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
@@ -89,10 +90,37 @@ export class ReportsPage implements OnInit {
     if (this.monthlyReport.isLoading) return;
 
     if (!this.monthPickerOpen) {
-      // Abrir o picker no ano selecionado
       this.monthPickerYear = parseInt(this.monthlyReport.selectedYear || String(new Date().getFullYear()), 10);
+
+      // Posicionar o painel via coordenadas de viewport (escapa do overflow:hidden do card)
+      if (event && event.currentTarget) {
+        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+        const panelWidth = 220;
+        const gap = 6;
+        // Alinha pela direita do trigger se houver espaco; senao pela esquerda
+        const left = Math.min(
+          rect.left,
+          window.innerWidth - panelWidth - 8
+        );
+        this.monthPickerPosition = {
+          top: rect.bottom + gap,
+          left: Math.max(8, left),
+          width: panelWidth
+        };
+      }
+    } else {
+      this.monthPickerPosition = null;
     }
     this.monthPickerOpen = !this.monthPickerOpen;
+  }
+
+  @HostListener('window:scroll')
+  @HostListener('window:resize')
+  closeMonthPickerOnScroll() {
+    if (this.monthPickerOpen) {
+      this.monthPickerOpen = false;
+      this.monthPickerPosition = null;
+    }
   }
 
   pickerPrevYear(event: Event) {

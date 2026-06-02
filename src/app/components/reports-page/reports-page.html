@@ -102,28 +102,6 @@
               </span>
               <i class="fas fa-chevron-down month-picker-caret"></i>
             </button>
-
-            <div class="month-picker-panel" *ngIf="monthPickerOpen" (click)="$event.stopPropagation()">
-              <div class="month-picker-year-nav">
-                <button type="button" class="year-nav-btn" (click)="pickerPrevYear($event)" aria-label="Ano anterior">
-                  <i class="fas fa-chevron-left"></i>
-                </button>
-                <span class="year-nav-label">{{ monthPickerYear }}</span>
-                <button type="button" class="year-nav-btn" (click)="pickerNextYear($event)" aria-label="Próximo ano">
-                  <i class="fas fa-chevron-right"></i>
-                </button>
-              </div>
-              <div class="month-picker-grid">
-                <button
-                  type="button"
-                  *ngFor="let label of monthShortLabels; let i = index"
-                  class="month-picker-cell"
-                  [class.selected]="isPickerMonthSelected(i)"
-                  (click)="selectPickerMonth(i, $event)">
-                  {{ label }}
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -519,4 +497,33 @@
     </div>
   </div>
 
+</div>
+
+<!-- Painel flutuante do seletor de mes/ano (renderizado fora do grid para escapar de overflow:hidden) -->
+<div
+  *ngIf="monthPickerOpen && monthPickerPosition"
+  class="month-picker-panel-floating"
+  [style.top.px]="monthPickerPosition.top"
+  [style.left.px]="monthPickerPosition.left"
+  [style.width.px]="monthPickerPosition.width"
+  (click)="$event.stopPropagation()">
+  <div class="month-picker-year-nav">
+    <button type="button" class="year-nav-btn" (click)="pickerPrevYear($event)" aria-label="Ano anterior">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <span class="year-nav-label">{{ monthPickerYear }}</span>
+    <button type="button" class="year-nav-btn" (click)="pickerNextYear($event)" aria-label="Próximo ano">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+  <div class="month-picker-grid">
+    <button
+      type="button"
+      *ngFor="let label of monthShortLabels; let i = index"
+      class="month-picker-cell"
+      [class.selected]="isPickerMonthSelected(i)"
+      (click)="selectPickerMonth(i, $event)">
+      {{ label }}
+    </button>
+  </div>
 </div>
