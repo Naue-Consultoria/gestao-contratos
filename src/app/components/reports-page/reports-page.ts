@@ -35,6 +35,7 @@ export class ReportsPage implements OnInit {
   clientContracts: any[] = [];
   
   monthlyReport: GeneralReportConfig = { format: 'pdf', isLoading: false, selectedMonth: this.getCurrentMonthString() };
+  monthOptions: { value: string; label: string }[] = this.buildMonthOptions();
   financialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
   commercialReport: GeneralReportConfig = { clientId: '', format: 'pdf', isLoading: false };
   clientReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
@@ -59,6 +60,23 @@ export class ReportsPage implements OnInit {
   private getCurrentMonthString(): string {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  private buildMonthOptions(): { value: string; label: string }[] {
+    const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    const options: { value: string; label: string }[] = [];
+    const now = new Date();
+    // Últimos 24 meses, do mais recente para o mais antigo
+    for (let i = 0; i < 24; i++) {
+      const ref = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const year = ref.getFullYear();
+      const month = ref.getMonth() + 1;
+      const value = `${year}-${String(month).padStart(2, '0')}`;
+      const label = `${months[ref.getMonth()]} / ${year}`;
+      options.push({ value, label });
+    }
+    return options;
   }
 
   loadInitialData() {

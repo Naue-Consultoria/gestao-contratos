@@ -90,11 +90,12 @@
       <div class="card-controls">
         <div class="control-group">
           <label class="control-label">Mês de Referência</label>
-          <input
-            type="month"
-            class="form-input"
+          <select
+            class="form-select"
             [(ngModel)]="monthlyReport.selectedMonth"
             [disabled]="monthlyReport.isLoading">
+            <option *ngFor="let opt of monthOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
         </div>
 
         <div class="control-group">
