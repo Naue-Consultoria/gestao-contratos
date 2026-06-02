@@ -88,25 +88,42 @@
       </p>
 
       <div class="card-controls">
-        <div class="control-row">
-          <div class="control-group">
-            <label class="control-label">Mês</label>
-            <select
-              class="form-select"
-              [(ngModel)]="monthlyReport.selectedMonth"
+        <div class="control-group">
+          <label class="control-label">Mês de Referência</label>
+          <div class="month-picker" [class.open]="monthPickerOpen">
+            <button
+              type="button"
+              class="month-picker-trigger"
+              (click)="toggleMonthPicker($event)"
               [disabled]="monthlyReport.isLoading">
-              <option *ngFor="let opt of monthNameOptions" [value]="opt.value">{{ opt.label }}</option>
-            </select>
-          </div>
+              <span class="month-picker-value">
+                <i class="fas fa-calendar-alt"></i>
+                {{ getMonthPickerLabel() }}
+              </span>
+              <i class="fas fa-chevron-down month-picker-caret"></i>
+            </button>
 
-          <div class="control-group">
-            <label class="control-label">Ano</label>
-            <select
-              class="form-select"
-              [(ngModel)]="monthlyReport.selectedYear"
-              [disabled]="monthlyReport.isLoading">
-              <option *ngFor="let opt of yearOptions" [value]="opt.value">{{ opt.label }}</option>
-            </select>
+            <div class="month-picker-panel" *ngIf="monthPickerOpen" (click)="$event.stopPropagation()">
+              <div class="month-picker-year-nav">
+                <button type="button" class="year-nav-btn" (click)="pickerPrevYear($event)" aria-label="Ano anterior">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <span class="year-nav-label">{{ monthPickerYear }}</span>
+                <button type="button" class="year-nav-btn" (click)="pickerNextYear($event)" aria-label="Próximo ano">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+              <div class="month-picker-grid">
+                <button
+                  type="button"
+                  *ngFor="let label of monthShortLabels; let i = index"
+                  class="month-picker-cell"
+                  [class.selected]="isPickerMonthSelected(i)"
+                  (click)="selectPickerMonth(i, $event)">
+                  {{ label }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

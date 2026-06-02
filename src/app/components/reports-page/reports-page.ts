@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReportService, ReportRequest } from '../../services/report';
@@ -42,7 +42,11 @@ export class ReportsPage implements OnInit {
     selectedYear: String(new Date().getFullYear())
   };
   monthNameOptions: { value: string; label: string }[] = this.buildMonthNameOptions();
-  yearOptions: { value: string; label: string }[] = this.buildYearOptions();
+  monthShortLabels: string[] = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+  // Estado do seletor estilo calendario (mes/ano)
+  monthPickerOpen = false;
+  monthPickerYear: number = new Date().getFullYear();
   financialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
   commercialReport: GeneralReportConfig = { clientId: '', format: 'pdf', isLoading: false };
   clientReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
@@ -70,14 +74,58 @@ export class ReportsPage implements OnInit {
     return months.map((name, idx) => ({ value: String(idx + 1), label: name }));
   }
 
-  private buildYearOptions(): { value: string; label: string }[] {
-    const currentYear = new Date().getFullYear();
-    const options: { value: string; label: string }[] = [];
-    // Cobre de 2023 ate o ano corrente + 1 (planejamento)
-    for (let y = currentYear + 1; y >= 2023; y--) {
-      options.push({ value: String(y), label: String(y) });
+  // ===== Seletor de mes/ano (estilo calendario) =====
+
+  getMonthPickerLabel(): string {
+    const monthIdx = parseInt(this.monthlyReport.selectedMonth || '1', 10) - 1;
+    const monthName = this.monthNameOptions[monthIdx]?.label || '';
+    return `${monthName} / ${this.monthlyReport.selectedYear}`;
+  }
+
+  toggleMonthPicker(event?: Event) {
+    if (event) {
+      event.stopPropagation();
     }
-    return options;
+    if (this.monthlyReport.isLoading) return;
+
+    if (!this.monthPickerOpen) {
+      // Abrir o picker no ano selecionado
+      this.monthPickerYear = parseInt(this.monthlyReport.selectedYear || String(new Date().getFullYear()), 10);
+    }
+    this.monthPickerOpen = !this.monthPickerOpen;
+  }
+
+  pickerPrevYear(event: Event) {
+    event.stopPropagation();
+    this.monthPickerYear--;
+  }
+
+  pickerNextYear(event: Event) {
+    event.stopPropagation();
+    this.monthPickerYear++;
+  }
+
+  selectPickerMonth(monthIndex: number, event: Event) {
+    event.stopPropagation();
+    this.monthlyReport.selectedMonth = String(monthIndex + 1);
+    this.monthlyReport.selectedYear = String(this.monthPickerYear);
+    this.monthPickerOpen = false;
+  }
+
+  isPickerMonthSelected(monthIndex: number): boolean {
+    return (
+      this.monthPickerYear === parseInt(this.monthlyReport.selectedYear || '0', 10) &&
+      monthIndex + 1 === parseInt(this.monthlyReport.selectedMonth || '0', 10)
+    );
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.monthPickerOpen) return;
+    const target = event.target as HTMLElement;
+    if (!target.closest('.month-picker')) {
+      this.monthPickerOpen = false;
+    }
   }
 
   loadInitialData() {
