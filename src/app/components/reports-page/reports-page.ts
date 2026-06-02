@@ -17,7 +17,8 @@ interface ReportConfig {
   isLoading: boolean;
   startDate?: string;
   endDate?: string;
-  selectedMonth?: string; // formato 'YYYY-MM' para input type="month"
+  selectedMonth?: string; // numero do mes (1-12) como string
+  selectedYear?: string;  // ano (YYYY) como string
 }
 
 type GeneralReportConfig = Omit<ReportConfig, 'clientId'> & { clientId?: string };
@@ -34,8 +35,14 @@ export class ReportsPage implements OnInit {
   services: any[] = [];
   clientContracts: any[] = [];
   
-  monthlyReport: GeneralReportConfig = { format: 'pdf', isLoading: false, selectedMonth: this.getCurrentMonthString() };
-  monthOptions: { value: string; label: string }[] = this.buildMonthOptions();
+  monthlyReport: GeneralReportConfig = {
+    format: 'pdf',
+    isLoading: false,
+    selectedMonth: String(new Date().getMonth() + 1),
+    selectedYear: String(new Date().getFullYear())
+  };
+  monthNameOptions: { value: string; label: string }[] = this.buildMonthNameOptions();
+  yearOptions: { value: string; label: string }[] = this.buildYearOptions();
   financialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
   commercialReport: GeneralReportConfig = { clientId: '', format: 'pdf', isLoading: false };
   clientReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
@@ -57,24 +64,18 @@ export class ReportsPage implements OnInit {
     this.loadInitialData();
   }
 
-  private getCurrentMonthString(): string {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  }
-
-  private buildMonthOptions(): { value: string; label: string }[] {
+  private buildMonthNameOptions(): { value: string; label: string }[] {
     const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    return months.map((name, idx) => ({ value: String(idx + 1), label: name }));
+  }
+
+  private buildYearOptions(): { value: string; label: string }[] {
+    const currentYear = new Date().getFullYear();
     const options: { value: string; label: string }[] = [];
-    const now = new Date();
-    // Últimos 24 meses, do mais recente para o mais antigo
-    for (let i = 0; i < 24; i++) {
-      const ref = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const year = ref.getFullYear();
-      const month = ref.getMonth() + 1;
-      const value = `${year}-${String(month).padStart(2, '0')}`;
-      const label = `${months[ref.getMonth()]} / ${year}`;
-      options.push({ value, label });
+    // Cobre de 2023 ate o ano corrente + 1 (planejamento)
+    for (let y = currentYear + 1; y >= 2023; y--) {
+      options.push({ value: String(y), label: String(y) });
     }
     return options;
   }
@@ -175,11 +176,13 @@ export class ReportsPage implements OnInit {
 
     switch (reportType) {
       case 'monthly': {
-        const selected = (config as GeneralReportConfig).selectedMonth || this.getCurrentMonthString();
-        const [selYear, selMonth] = selected.split('-');
-        requestData.year = parseInt(selYear, 10);
-        requestData.month = parseInt(selMonth, 10);
-        fileName = `relatorio_mensal_${selYear}_${selMonth}`;
+        const cfg = config as GeneralReportConfig;
+        const now = new Date();
+        const selMonth = parseInt(cfg.selectedMonth || String(now.getMonth() + 1), 10);
+        const selYear = parseInt(cfg.selectedYear || String(now.getFullYear()), 10);
+        requestData.year = selYear;
+        requestData.month = selMonth;
+        fileName = `relatorio_mensal_${selYear}_${String(selMonth).padStart(2, '0')}`;
         reportObservable = this.reportService.generateMonthlyReport(requestData);
         break;
       }
