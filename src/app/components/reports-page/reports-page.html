@@ -84,10 +84,19 @@
     <div class="card-body">
       <h3 class="card-title">Relatório Mensal</h3>
       <p class="card-description">
-        Resumo completo das atividades e contratos do mês atual
+        Resumo completo das atividades e contratos do mês selecionado
       </p>
 
       <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Mês de Referência</label>
+          <input
+            type="month"
+            class="form-input"
+            [(ngModel)]="monthlyReport.selectedMonth"
+            [disabled]="monthlyReport.isLoading">
+        </div>
+
         <div class="control-group">
           <label class="control-label">Formato de Exportação</label>
           <div class="format-selector">

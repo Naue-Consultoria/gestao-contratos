@@ -17,6 +17,7 @@ interface ReportConfig {
   isLoading: boolean;
   startDate?: string;
   endDate?: string;
+  selectedMonth?: string; // formato 'YYYY-MM' para input type="month"
 }
 
 type GeneralReportConfig = Omit<ReportConfig, 'clientId'> & { clientId?: string };
@@ -33,7 +34,7 @@ export class ReportsPage implements OnInit {
   services: any[] = [];
   clientContracts: any[] = [];
   
-  monthlyReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
+  monthlyReport: GeneralReportConfig = { format: 'pdf', isLoading: false, selectedMonth: this.getCurrentMonthString() };
   financialReport: GeneralReportConfig = { format: 'pdf', isLoading: false };
   commercialReport: GeneralReportConfig = { clientId: '', format: 'pdf', isLoading: false };
   clientReport: ReportConfig = { clientId: '', format: 'pdf', isLoading: false };
@@ -53,6 +54,11 @@ export class ReportsPage implements OnInit {
 
   ngOnInit() {
     this.loadInitialData();
+  }
+
+  private getCurrentMonthString(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   }
 
   loadInitialData() {
@@ -150,10 +156,15 @@ export class ReportsPage implements OnInit {
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
 
     switch (reportType) {
-      case 'monthly':
-        fileName = `relatorio_mensal_${year}_${month}`;
+      case 'monthly': {
+        const selected = (config as GeneralReportConfig).selectedMonth || this.getCurrentMonthString();
+        const [selYear, selMonth] = selected.split('-');
+        requestData.year = parseInt(selYear, 10);
+        requestData.month = parseInt(selMonth, 10);
+        fileName = `relatorio_mensal_${selYear}_${selMonth}`;
         reportObservable = this.reportService.generateMonthlyReport(requestData);
         break;
+      }
       case 'client':
         const client = this.clients.find(c => c.id === parseInt(config.clientId as string, 10));
         const clientName = client ? client.name.replace(/\s+/g, '_').toLowerCase() : 'cliente';

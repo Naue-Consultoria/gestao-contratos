@@ -11,6 +11,8 @@ export interface ReportRequest {
   format: 'pdf' | 'excel';
   startDate?: string;
   endDate?: string;
+  month?: number;
+  year?: number;
 }
 
 @Injectable({
