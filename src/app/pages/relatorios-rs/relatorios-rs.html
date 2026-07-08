@@ -45,6 +45,17 @@
         </div>
 
         <div class="control-group">
+          <label class="control-label">Filtrar Período Por</label>
+          <select
+            class="form-input"
+            [(ngModel)]="rsGeneralReport.dateType"
+            [disabled]="rsGeneralReport.isLoading">
+            <option value="abertura">Data de Abertura</option>
+            <option value="fechamento">Data de Fechamento</option>
+          </select>
+        </div>
+
+        <div class="control-group">
           <label class="control-label">Formato de Exportação</label>
           <div class="format-selector">
             <button

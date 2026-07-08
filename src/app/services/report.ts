@@ -11,6 +11,7 @@ export interface ReportRequest {
   format: 'pdf' | 'excel';
   startDate?: string;
   endDate?: string;
+  dateType?: 'abertura' | 'fechamento';
   month?: number;
   year?: number;
 }

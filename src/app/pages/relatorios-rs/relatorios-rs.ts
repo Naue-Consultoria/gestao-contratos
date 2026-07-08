@@ -16,6 +16,7 @@ interface ReportConfig {
   isLoading: boolean;
   startDate?: string;
   endDate?: string;
+  dateType?: 'abertura' | 'fechamento';
 }
 
 @Component({
@@ -31,7 +32,7 @@ export class RelatoriosRsComponent implements OnInit {
   vagasByClient: any[] = [];
 
   // Relatório Geral de R&S
-  rsGeneralReport: ReportConfig = { format: 'pdf', isLoading: false };
+  rsGeneralReport: ReportConfig = { format: 'pdf', isLoading: false, dateType: 'abertura' };
 
   // Relatório por Cliente
   rsClientReport: ReportConfig = { format: 'pdf', isLoading: false, clientId: '' };
@@ -132,6 +133,11 @@ export class RelatoriosRsComponent implements OnInit {
       startDate: config.startDate,
       endDate: config.endDate
     };
+
+    // Add dateType to request for general report (abertura/fechamento)
+    if (reportType === 'rsGeneral' && config.dateType) {
+      (requestData as any).dateType = config.dateType;
+    }
 
     // Add userId to request for consultora report
     if (reportType === 'rsConsultora' && config.userId) {
