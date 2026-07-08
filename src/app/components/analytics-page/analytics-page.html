@@ -102,6 +102,39 @@
           <i class="fas fa-sync" [class.fa-spin]="isRefreshing"></i>
         </button>
       </div>
+
+      <!-- Filtro por mês/ano específico (igual ao Analytics de R&S) -->
+      <div class="month-year-filter">
+        <label class="month-year-label">
+          <i class="fas fa-filter"></i>
+          Filtrar por mês/ano
+        </label>
+        <select class="filter-select" [(ngModel)]="selectedMonth" (change)="applyPeriodFilter()">
+          <option value="">Todos os meses</option>
+          <option value="1">Janeiro</option>
+          <option value="2">Fevereiro</option>
+          <option value="3">Março</option>
+          <option value="4">Abril</option>
+          <option value="5">Maio</option>
+          <option value="6">Junho</option>
+          <option value="7">Julho</option>
+          <option value="8">Agosto</option>
+          <option value="9">Setembro</option>
+          <option value="10">Outubro</option>
+          <option value="11">Novembro</option>
+          <option value="12">Dezembro</option>
+        </select>
+
+        <select class="filter-select" [(ngModel)]="selectedYear" (change)="applyPeriodFilter()">
+          <option value="">Todos os anos</option>
+          <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+        </select>
+
+        <button class="clear-filter-btn" (click)="clearPeriodFilter()" *ngIf="selectedMonth || selectedYear">
+          <i class="fas fa-times"></i>
+          Limpar
+        </button>
+      </div>
     </div>
 
 

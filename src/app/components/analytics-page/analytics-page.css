@@ -640,6 +640,49 @@
   box-shadow: 0 0 0 3px rgba(10, 128, 96, 0.1);
 }
 
+/* Filtro por mês/ano (linha própria dentro do seletor de período) */
+.month-year-filter {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-gray);
+}
+
+.month-year-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-gray);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.month-year-label i {
+  color: var(--primary-green);
+}
+
+.clear-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border: 1.5px solid var(--border-gray);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--text-gray);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-filter-btn:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+}
+
 /* Toolbar: Tabs + Filtros */
 .completion-toolbar {
   display: flex;

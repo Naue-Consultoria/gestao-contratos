@@ -40,6 +40,11 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   selectedPeriod: 'week' | 'month' | 'quarter' | 'year' = 'month';
   lastUpdated: Date = new Date();
 
+  // Filtro por mês/ano específico (igual ao Analytics de R&S)
+  selectedMonth: string = '';
+  selectedYear: string = '';
+  availableYears: number[] = [];
+
   // Filtro para gráfico de contratos
   selectedClientId: number | null = null;
   availableClients: {id: number, name: string}[] = [];
@@ -65,7 +70,62 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   constructor() {}
 
   ngOnInit() {
+    this.buildAvailableYears();
     this.loadAnalyticsData();
+  }
+
+  /**
+   * Popular a lista de anos disponíveis (ano atual e os 5 anteriores)
+   */
+  private buildAvailableYears() {
+    const currentYear = new Date().getFullYear();
+    this.availableYears = [];
+    for (let y = currentYear; y >= currentYear - 5; y--) {
+      this.availableYears.push(y);
+    }
+  }
+
+  /**
+   * Aplicar filtro por mês/ano (recarrega os dados)
+   */
+  applyPeriodFilter() {
+    this.loadAnalyticsData();
+  }
+
+  /**
+   * Limpar filtro por mês/ano e voltar ao preset de período
+   */
+  clearPeriodFilter() {
+    this.selectedMonth = '';
+    this.selectedYear = '';
+    this.loadAnalyticsData();
+  }
+
+  /**
+   * Converter mês/ano selecionados em intervalo de datas (YYYY-MM-DD)
+   */
+  private getMonthYearRange(): { start: string; end: string } | null {
+    if (!this.selectedMonth && !this.selectedYear) {
+      return null;
+    }
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const year = this.selectedYear ? parseInt(this.selectedYear, 10) : new Date().getFullYear();
+
+    if (this.selectedMonth) {
+      const month = parseInt(this.selectedMonth, 10);
+      const lastDay = new Date(year, month, 0).getDate();
+      return {
+        start: `${year}-${pad(month)}-01`,
+        end: `${year}-${pad(month)}-${pad(lastDay)}`
+      };
+    }
+
+    // Apenas ano selecionado: ano inteiro
+    return {
+      start: `${year}-01-01`,
+      end: `${year}-12-31`
+    };
   }
 
   async ngAfterViewInit() {
@@ -91,9 +151,12 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     try {
       this.isLoading = true;
 
-      const filters: AnalyticsPeriodFilter = {
-        period: this.selectedPeriod
-      };
+      // Se houver mês/ano selecionado, usar intervalo customizado;
+      // caso contrário, usar o preset de período (semana/mês/trimestre/ano)
+      const range = this.getMonthYearRange();
+      const filters: AnalyticsPeriodFilter = range
+        ? { period: 'custom', start_date: range.start, end_date: range.end }
+        : { period: this.selectedPeriod };
 
       // Carregar dados de analytics
       this.analyticsData = await firstValueFrom(this.analyticsService.getAnalytics(filters));
@@ -131,8 +194,12 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
    * Definir período
    */
   setPeriod(period: 'week' | 'month' | 'quarter' | 'year') {
-    if (this.selectedPeriod !== period) {
+    // Ao escolher um preset, limpar o filtro específico de mês/ano
+    const hadMonthYear = !!(this.selectedMonth || this.selectedYear);
+    if (this.selectedPeriod !== period || hadMonthYear) {
       this.selectedPeriod = period;
+      this.selectedMonth = '';
+      this.selectedYear = '';
       this.loadAnalyticsData();
     }
   }
