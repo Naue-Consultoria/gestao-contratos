@@ -647,33 +647,58 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.75rem;
+  margin-top: 0.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--border-gray);
 }
 
 .month-year-label {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--text-gray);
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-right: 0.25rem;
+  white-space: nowrap;
 }
 
 .month-year-label i {
   color: var(--primary-green);
 }
 
+/* Selects do filtro mês/ano: largura contida (evita esticar 100%) */
+.month-year-filter .filter-select {
+  width: auto;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  background-color: var(--light-gray, #f8fafc);
+}
+
+.month-year-filter .filter-select:nth-of-type(1) {
+  flex: 0 1 190px;
+  min-width: 150px;
+}
+
+.month-year-filter .filter-select:nth-of-type(2) {
+  flex: 0 1 120px;
+  min-width: 100px;
+}
+
 .clear-filter-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 0.9rem;
+  margin-left: auto;
+  padding: 0.55rem 0.95rem;
   border: 1.5px solid var(--border-gray);
   border-radius: 10px;
   background: var(--white);
   color: var(--text-gray);
   font-size: 0.8rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -681,6 +706,7 @@
 .clear-filter-btn:hover {
   border-color: var(--primary-green);
   color: var(--primary-green);
+  background-color: rgba(10, 128, 96, 0.06);
 }
 
 /* Toolbar: Tabs + Filtros */
@@ -792,7 +818,20 @@
   .period-buttons {
     justify-content: center;
   }
-  
+
+  .month-year-filter {
+    justify-content: center;
+  }
+
+  .month-year-filter .filter-select:nth-of-type(1),
+  .month-year-filter .filter-select:nth-of-type(2) {
+    flex: 1 1 140px;
+  }
+
+  .clear-filter-btn {
+    margin-left: 0;
+  }
+
   .kpi-grid {
     grid-template-columns: 1fr;
     gap: 0.875rem;
