@@ -313,7 +313,8 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
       const response = await firstValueFrom(
         this.planejamentoService.atualizarMatrizSwotPublico(
           this.grupo.id,
-          updateData
+          updateData,
+          this.token
         )
       );
 
@@ -344,7 +345,7 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
       return;
     }
 
-    const url = `${environment.apiUrl}/planejamento-estrategico/publico/matriz-swot/${this.grupo.id}/pdf`;
+    const url = `${environment.apiUrl}/planejamento-estrategico/publico/matriz-swot/${this.grupo.id}/pdf?token=${encodeURIComponent(this.token)}`;
     window.open(url, '_blank');
     this.toastr.info('PDF sendo gerado...', 'Download');
   }

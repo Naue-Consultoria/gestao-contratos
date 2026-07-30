@@ -245,7 +245,7 @@ export class PublicDepartamentoViewComponent implements OnInit, AfterViewChecked
       return;
     }
 
-    const url = `${environment.apiUrl}/planejamento-estrategico/publico/matriz/${this.departamento.id}/pdf`;
+    const url = `${environment.apiUrl}/planejamento-estrategico/publico/matriz/${this.departamento.id}/pdf?token=${encodeURIComponent(this.departamento.unique_token)}`;
     window.open(url, '_blank');
     this.toastr.info('PDF sendo gerado...', 'Download');
   }
