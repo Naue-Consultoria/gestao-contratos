@@ -279,7 +279,8 @@ export class PublicPlanejamentoViewComponent implements OnInit, AfterViewChecked
       const response = await firstValueFrom(
         this.planejamentoService.atualizarMatrizPublico(
           departamento.id,
-          updateData
+          updateData,
+          departamento.unique_token
         )
       );
 
@@ -315,7 +316,8 @@ export class PublicPlanejamentoViewComponent implements OnInit, AfterViewChecked
       return;
     }
 
-    const url = this.planejamentoService.gerarUrlPdfTodasMatrizes(this.planejamento.id);
+    // Mentorado (link público): envia o token do planejamento, não o JWT.
+    const url = `${environment.apiUrl}/planejamento-estrategico/${this.planejamento.id}/matrizes/pdf?token=${encodeURIComponent(this.token)}`;
     window.open(url, '_blank');
     this.toastr.info('PDF de todas as matrizes sendo gerado...', 'Download');
   }
@@ -326,7 +328,7 @@ export class PublicPlanejamentoViewComponent implements OnInit, AfterViewChecked
       return;
     }
 
-    const url = `${environment.apiUrl}/planejamento-estrategico/publico/matriz/${departamento.id}/pdf`;
+    const url = `${environment.apiUrl}/planejamento-estrategico/publico/matriz/${departamento.id}/pdf?token=${encodeURIComponent(departamento.unique_token)}`;
     window.open(url, '_blank');
     this.toastr.info('PDF sendo gerado...', 'Download');
   }

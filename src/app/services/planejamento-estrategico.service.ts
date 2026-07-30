@@ -566,7 +566,8 @@ export class PlanejamentoEstrategicoService {
    */
   atualizarMatrizPublico(
     departamentoId: number,
-    data: UpdateMatrizRequest
+    data: UpdateMatrizRequest,
+    token: string
   ): Observable<{
     success: boolean;
     message: string;
@@ -576,7 +577,7 @@ export class PlanejamentoEstrategicoService {
       success: boolean;
       message: string;
       data: MatrizEvolucao;
-    }>(`${this.apiUrl}/publico/matriz/${departamentoId}`, data);
+    }>(`${this.apiUrl}/publico/matriz/${departamentoId}`, { ...data, token });
   }
 
   /**
@@ -790,7 +791,7 @@ export class PlanejamentoEstrategicoService {
   /**
    * Atualizar matriz SWOT via link público
    */
-  atualizarMatrizSwotPublico(grupoId: number, data: UpdateMatrizSwotRequest): Observable<{
+  atualizarMatrizSwotPublico(grupoId: number, data: UpdateMatrizSwotRequest, token: string): Observable<{
     success: boolean;
     message: string;
     data: MatrizSwot;
@@ -799,7 +800,7 @@ export class PlanejamentoEstrategicoService {
       success: boolean;
       message: string;
       data: MatrizSwot;
-    }>(`${this.apiUrl}/publico/matriz-swot/${grupoId}`, data);
+    }>(`${this.apiUrl}/publico/matriz-swot/${grupoId}`, { ...data, token });
   }
 
   // ===== MATRIZ SWOT FINAL (CONSOLIDADA) =====
@@ -1135,80 +1136,91 @@ export class PlanejamentoEstrategicoService {
   }
 
   /**
+   * Anexa o JWT como query param para downloads abertos via window.open
+   * (que não conseguem enviar o header Authorization).
+   */
+  private withAuthToken(url: string): string {
+    const token = localStorage.getItem('token');
+    if (!token) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    return `${url}${sep}token=${encodeURIComponent(token)}`;
+  }
+
+  /**
    * Gerar URL para exportar árvores de problemas em PDF
    */
   gerarUrlPdfArvores(planejamentoId: number): string {
-    return `${this.apiUrl}/${planejamentoId}/arvores/pdf`;
+    return this.withAuthToken(`${this.apiUrl}/${planejamentoId}/arvores/pdf`);
   }
 
   /**
    * Gerar URL para exportar objetivos estratégicos em PDF
    */
   gerarUrlPdfOkrs(planejamentoId: number): string {
-    return `${this.apiUrl}/${planejamentoId}/okrs/pdf`;
+    return this.withAuthToken(`${this.apiUrl}/${planejamentoId}/okrs/pdf`);
   }
 
   /**
    * Gerar URL para exportar OKRs por Departamento em PDF
    */
   gerarUrlPdfOkrDepartamentos(planejamentoId: number): string {
-    return `${this.apiUrl}/${planejamentoId}/okr-departamentos/pdf`;
+    return this.withAuthToken(`${this.apiUrl}/${planejamentoId}/okr-departamentos/pdf`);
   }
 
   /**
    * Gerar URL para exportar matriz SWOT de um grupo em PDF
    */
   gerarUrlPdfMatrizSwotGrupo(grupoId: number): string {
-    return `${environment.apiUrl}/planejamento-estrategico/publico/matriz-swot/${grupoId}/pdf`;
+    return this.withAuthToken(`${environment.apiUrl}/planejamento-estrategico/publico/matriz-swot/${grupoId}/pdf`);
   }
 
   /**
    * Gerar URL para exportar matriz SWOT consolidada em PDF
    */
   gerarUrlPdfMatrizConsolidada(planejamentoId: number): string {
-    return `${this.apiUrl}/${planejamentoId}/swot-final/pdf`;
+    return this.withAuthToken(`${this.apiUrl}/${planejamentoId}/swot-final/pdf`);
   }
 
   /**
    * Gerar URL para exportar todas as matrizes de evolução em PDF
    */
   gerarUrlPdfTodasMatrizes(planejamentoId: number): string {
-    return `${this.apiUrl}/${planejamentoId}/matrizes/pdf`;
+    return this.withAuthToken(`${this.apiUrl}/${planejamentoId}/matrizes/pdf`);
   }
 
   /**
    * Gerar URL para exportar Definição de Impacto (Matriz de Cruzamento SWOT) em PDF
    */
   gerarUrlPdfDefinicaoImpacto(planejamentoId: number): string {
-    return `${this.apiUrl}/${planejamentoId}/swot-cruzamento/pdf`;
+    return this.withAuthToken(`${this.apiUrl}/${planejamentoId}/swot-cruzamento/pdf`);
   }
 
   /**
    * Gerar URL para exportar Definição de Impacto (Matriz de Cruzamento SWOT) em Excel
    */
   gerarUrlExcelDefinicaoImpacto(planejamentoId: number): string {
-    return `${this.apiUrl}/${planejamentoId}/swot-cruzamento/excel`;
+    return this.withAuthToken(`${this.apiUrl}/${planejamentoId}/swot-cruzamento/excel`);
   }
 
   /**
    * Gerar URL para exportar Análise de Cenários em PDF
    */
   gerarUrlPdfAnaliseCenarios(planejamentoId: number): string {
-    return `${this.apiUrl}/${planejamentoId}/analise-cenarios/pdf`;
+    return this.withAuthToken(`${this.apiUrl}/${planejamentoId}/analise-cenarios/pdf`);
   }
 
   /**
    * Gerar URL para exportar Análise de Oportunidades em PDF
    */
   gerarUrlPdfAnaliseOportunidades(planejamentoId: number): string {
-    return `${this.apiUrl}/${planejamentoId}/analise-oportunidades/pdf`;
+    return this.withAuthToken(`${this.apiUrl}/${planejamentoId}/analise-oportunidades/pdf`);
   }
 
   /**
    * Gerar URL para exportar Análise de Ameaças em PDF
    */
   gerarUrlPdfAnaliseAmeacas(planejamentoId: number): string {
-    return `${this.apiUrl}/${planejamentoId}/analise-ameacas/pdf`;
+    return this.withAuthToken(`${this.apiUrl}/${planejamentoId}/analise-ameacas/pdf`);
   }
 
   // ===== OKR - OBJECTIVES AND KEY RESULTS =====

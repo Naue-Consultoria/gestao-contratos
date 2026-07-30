@@ -1348,7 +1348,8 @@ export class PublicMentoriaViewComponent implements OnInit {
     // Salvar no novo endpoint de banco de dados dedicado
     this.mentoriaService.salvarMapaMentalCompleto(
       this.mapaMentalId,
-      this.conteudoEstruturado.mapaMental.data
+      this.conteudoEstruturado.mapaMental.data,
+      this.token
     ).subscribe({
       next: (response) => {
         console.log('✅ Mapa Mental salvo no banco de dados com sucesso!', response);

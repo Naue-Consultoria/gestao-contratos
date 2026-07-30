@@ -572,10 +572,12 @@ export class MentoriaService {
     colunas: any[];
     cards: { [key: string]: any[] };
     conexoes: any[];
-  }): Observable<ApiResponse<void>> {
+  }, token?: string): Observable<ApiResponse<void>> {
+    // token = token público do encontro (mentorado sem login). O mentor
+    // autenticado envia via header (interceptor) e não precisa do token no body.
     return this.http.put<ApiResponse<void>>(
       `${this.apiUrl}/mapa-mental/${mapaId}/salvar-completo`,
-      dados
+      token ? { ...dados, token } : dados
     );
   }
 
