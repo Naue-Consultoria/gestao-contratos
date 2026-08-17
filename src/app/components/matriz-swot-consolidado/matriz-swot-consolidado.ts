@@ -48,7 +48,11 @@ export class MatrizSwotConsolidadoComponent implements OnInit {
     observacoes: ''
   };
 
-  // Cache para edição da matriz final (array de itens, máximo 5 por quadrante)
+  // Máximo de itens por quadrante da matriz consolidada.
+  // Define também a dimensão da matriz de Definição de Impacto (10x10).
+  readonly maxItensQuadrante = 10;
+
+  // Cache para edição da matriz final (array de itens)
   itensCacheFinal = {
     forcas: [] as string[],
     fraquezas: [] as string[],
@@ -252,14 +256,14 @@ export class MatrizSwotConsolidadoComponent implements OnInit {
     return items.filter(item => item.trim() !== '').join('\n');
   }
 
-  // Funções para gerenciar itens da matriz final (máximo 5 por quadrante)
+  // Funções para gerenciar itens da matriz final
   getItensFinal(quadrante: 'forcas' | 'fraquezas' | 'oportunidades' | 'ameacas'): string[] {
     return this.itensCacheFinal[quadrante];
   }
 
   addItemFinal(quadrante: 'forcas' | 'fraquezas' | 'oportunidades' | 'ameacas'): void {
-    if (this.itensCacheFinal[quadrante].length >= 5) {
-      this.toastr.warning('Máximo de 5 itens por quadrante', 'Atenção');
+    if (this.itensCacheFinal[quadrante].length >= this.maxItensQuadrante) {
+      this.toastr.warning(`Máximo de ${this.maxItensQuadrante} itens por quadrante`, 'Atenção');
       return;
     }
     this.itensCacheFinal[quadrante].push('');

@@ -96,7 +96,7 @@
             <i class="fas fa-th-large"></i>
           </div>
           <h2>Matriz SWOT Consolidada</h2>
-          <p>Consolide os principais pontos estratégicos identificados (máximo 5 itens por quadrante)</p>
+          <p>Consolide os principais pontos estratégicos identificados (máximo {{ maxItensQuadrante }} itens por quadrante)</p>
         </div>
 
         <div class="swot-grid-consolidado">
@@ -106,7 +106,7 @@
               <div class="header-content">
                 <span>Forças</span>
               </div>
-              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('forcas')" [disabled]="getItens('forcas').length >= 5">
+              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('forcas')" [disabled]="getItens('forcas').length >= maxItensQuadrante">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
@@ -138,7 +138,7 @@
               <div class="header-content">
                 <span>Fraquezas</span>
               </div>
-              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('fraquezas')" [disabled]="getItens('fraquezas').length >= 5">
+              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('fraquezas')" [disabled]="getItens('fraquezas').length >= maxItensQuadrante">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
@@ -170,7 +170,7 @@
               <div class="header-content">
                 <span>Oportunidades</span>
               </div>
-              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('oportunidades')" [disabled]="getItens('oportunidades').length >= 5">
+              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('oportunidades')" [disabled]="getItens('oportunidades').length >= maxItensQuadrante">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
@@ -202,7 +202,7 @@
               <div class="header-content">
                 <span>Ameaças</span>
               </div>
-              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('ameacas')" [disabled]="getItens('ameacas').length >= 5">
+              <button type="button" class="btn-add-item" *ngIf="isEditing" (click)="addItem('ameacas')" [disabled]="getItens('ameacas').length >= maxItensQuadrante">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
