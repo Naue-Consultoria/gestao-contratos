@@ -31,7 +31,11 @@ export class PublicSwotConsolidadoComponent implements OnInit {
   // Grupos expandidos
   expandedGrupos = new Set<number>();
 
-  // Cache de itens editáveis (máximo 5 por quadrante)
+  // Máximo de itens por quadrante da matriz consolidada.
+  // Define também a dimensão da matriz de Definição de Impacto (10x10).
+  readonly maxItensQuadrante = 10;
+
+  // Cache de itens editáveis
   itensCache = {
     forcas: [] as string[],
     fraquezas: [] as string[],
@@ -170,8 +174,8 @@ export class PublicSwotConsolidadoComponent implements OnInit {
   }
 
   addItem(quadrante: 'forcas' | 'fraquezas' | 'oportunidades' | 'ameacas'): void {
-    if (this.itensCache[quadrante].length >= 5) {
-      alert('Máximo de 5 itens por quadrante');
+    if (this.itensCache[quadrante].length >= this.maxItensQuadrante) {
+      alert(`Máximo de ${this.maxItensQuadrante} itens por quadrante`);
       return;
     }
     this.itensCache[quadrante].push('');

@@ -199,7 +199,7 @@
   display: grid;
   grid-template-columns: 200px 1fr 1fr;
   border-bottom: 3px solid #2d3748;
-  min-width: 900px; /* Garante largura mínima para scroll horizontal */
+  min-width: 1200px; /* Comporta 10 colunas por quadrante (~50px/célula) antes do scroll */
 }
 
 .header-spacer {
@@ -228,7 +228,7 @@
 .matriz-data-row {
   display: grid;
   grid-template-columns: 200px 1fr 1fr;
-  min-width: 900px; /* Garante largura mínima para scroll horizontal */
+  min-width: 1200px; /* Comporta 10 colunas por quadrante (~50px/célula) antes do scroll */
 }
 
 .matriz-data-row:first-of-type {
@@ -366,7 +366,7 @@
   display: grid;
   grid-template-columns: 200px 1fr 1fr;
   border-top: 3px solid #2d3748;
-  min-width: 900px; /* Garante largura mínima para scroll horizontal */
+  min-width: 1200px; /* Comporta 10 colunas por quadrante (~50px/célula) antes do scroll */
 }
 
 .footer-spacer {
@@ -498,7 +498,7 @@
   .matriz-data-row,
   .footers-row {
     grid-template-columns: 180px 1fr 1fr;
-    min-width: 850px;
+    min-width: 1120px;
   }
 
   .row-label {
@@ -540,7 +540,7 @@
   .matriz-data-row,
   .footers-row {
     grid-template-columns: 160px 1fr 1fr;
-    min-width: 800px;
+    min-width: 1060px;
   }
 
   .row-label {
