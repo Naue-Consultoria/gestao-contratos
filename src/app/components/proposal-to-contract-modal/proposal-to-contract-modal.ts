@@ -218,6 +218,25 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
     return 'Cliente não identificado';
   }
 
+  /**
+   * Mantém apenas os serviços assinalados pelo cliente quando houve seleção
+   * parcial. Sem seleção parcial, vale a proposta inteira.
+   */
+  private filterSelectedServices(services: any[]): any[] {
+    const hasClientSelection = services.some(
+      (s: any) => s.selected_by_client !== null && s.selected_by_client !== undefined
+    );
+
+    if (!hasClientSelection) return services;
+
+    const unselectedCount = services.filter((s: any) => s.selected_by_client === false).length;
+    const hasPartialSelection = unselectedCount > 0 && unselectedCount < services.length;
+
+    return hasPartialSelection
+      ? services.filter((s: any) => s.selected_by_client === true)
+      : services;
+  }
+
   getProposalServices(): any[] {
     if (!this.proposal) return [];
     
@@ -238,11 +257,10 @@ export class ProposalToContractModalComponent implements OnInit, OnChanges {
     
     for (const property of possibleServiceProperties) {
       if (proposalAny[property] && Array.isArray(proposalAny[property]) && proposalAny[property].length > 0) {
-        // Se for contraproposta, filtrar apenas serviços selecionados
-        if (this.proposal.status === 'contraproposta') {
-          return proposalAny[property].filter((service: any) => service.selected_by_client === true);
-        }
-        return proposalAny[property];
+        // Se o cliente assinalou só parte dos serviços, o contrato leva apenas
+        // os selecionados — independente do status, igual ao cálculo do valor
+        // em getProposalFinalValue().
+        return this.filterSelectedServices(proposalAny[property]);
       }
     }
     

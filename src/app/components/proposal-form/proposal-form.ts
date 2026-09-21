@@ -1064,6 +1064,14 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
           // Sempre mostrar sucesso primeiro
           this.toastr.success(successMessage);
 
+          // A proposta pode já ter virado contrato; nesse caso o backend espelha
+          // a edição no contrato e avisa aqui.
+          if (response.contract_sync?.contract_number) {
+            this.toastr.info(
+              `Contrato ${response.contract_sync.contract_number} atualizado com os serviços e o valor da proposta.`
+            );
+          }
+
           // Emitir evento de salvamento
           this.onSave.emit(response.data);
 
