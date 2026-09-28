@@ -41,6 +41,7 @@ export class DuplicateServiceModalComponent implements OnInit {
     'Estratégia',
     'Recrutamento & Seleção',
     'Geral',
+    'Assinatura',
     'Interno'
   ];
 
@@ -165,6 +166,7 @@ export class DuplicateServiceModalComponent implements OnInit {
       'Recrutamento & Seleção': 'fas fa-users',
       'Geral': 'far fa-sticky-note',
       'Palestra': 'fas fa-microphone',
+      'Assinatura': 'fas fa-file-signature',
       'Interno': 'fas fa-file-contract'
     };
     return iconMap[category] || 'fas fa-concierge-bell';
