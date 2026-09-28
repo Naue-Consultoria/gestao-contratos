@@ -251,7 +251,6 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
         // Criar tabela de serviços
         const tableTop = currentY;
         const headerHeight = 18;
-        const rowHeight = 16;
 
         // Cabeçalho da tabela
         doc.setFillColor(0, 59, 43);
@@ -276,7 +275,21 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
         doc.setFontSize(9);
 
         fullProposal.services.forEach((service: any, index: number) => {
-          if (currentY + rowHeight > doc.internal.pageSize.getHeight() - 30) {
+          const maxServiceWidth = colValue - colService - 50;
+
+          // Descritivo do serviço (sem tags HTML)
+          const rawDescription = service.service_description || service.description ||
+            (service.service && service.service.description) || '';
+          const description = this.stripHtmlTags(rawDescription).trim();
+          doc.setFontSize(8);
+          const descLines: string[] = description ? doc.splitTextToSize(description, maxServiceWidth) : [];
+          doc.setFontSize(9);
+
+          const descLineHeight = 4;
+          const rowHeight = descLines.length > 0 ? 12 + descLines.length * descLineHeight : 16;
+          const pageHeight = doc.internal.pageSize.getHeight();
+
+          if (currentY + rowHeight > pageHeight - 30 && currentY > 45) {
             doc.addPage();
             currentY = 20;
 
@@ -297,7 +310,7 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
             doc.setFontSize(9);
           }
 
-          if (index % 2 === 0) {
+          if (index % 2 === 0 && currentY - 4 + rowHeight <= pageHeight - 30) {
             doc.setFillColor(245, 245, 245);
             doc.rect(margin, currentY - 4, pageWidth - (margin * 2), rowHeight, 'F');
           }
@@ -320,7 +333,6 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
             serviceName = '✗ ' + serviceName + ' (Não Selecionado)';
           }
 
-          const maxServiceWidth = colValue - colService - 50;
           const serviceText = doc.splitTextToSize(serviceName, maxServiceWidth);
           doc.text(serviceText[0] || serviceName, colService, currentY);
 
@@ -335,7 +347,28 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
             doc.line(colService, currentY - 2, colService + textWidth, currentY - 2);
           }
 
-          currentY += rowHeight;
+          // Descritivo abaixo do nome do serviço
+          if (descLines.length > 0) {
+            doc.setFontSize(8);
+            doc.setTextColor(isNotSelected ? 170 : 105, isNotSelected ? 170 : 105, isNotSelected ? 170 : 105);
+
+            let descY = currentY + 6;
+            descLines.forEach((line: string) => {
+              if (descY > pageHeight - 30) {
+                doc.addPage();
+                descY = 20;
+              }
+              doc.text(line, colService, descY);
+              descY += descLineHeight;
+            });
+
+            currentY = descY + 4;
+            doc.setFontSize(9);
+            doc.setTextColor(51, 51, 51);
+            doc.setFont('helvetica', 'normal');
+          } else {
+            currentY += rowHeight;
+          }
         });
 
         // Linha de total
