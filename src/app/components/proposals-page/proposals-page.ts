@@ -718,7 +718,6 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         // Criar tabela de serviços (SEM COLUNA DE QUANTIDADE)
         const tableTop = currentY;
         const headerHeight = 18;
-        const rowHeight = 16;
 
         // Cabeçalho da tabela
         doc.setFillColor(0, 59, 43);
@@ -746,43 +745,6 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         doc.setFontSize(9);
 
         fullProposal.services.forEach((service: any, index: number) => {
-          // Verificar se precisa nova página
-          if (currentY + rowHeight > doc.internal.pageSize.getHeight() - 30) {
-            doc.addPage();
-            currentY = 20;
-
-            // Redesenhar cabeçalho na nova página
-            doc.setFillColor(0, 59, 43);
-            doc.rect(margin, currentY, pageWidth - (margin * 2), headerHeight, 'F');
-
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'bold');
-
-            doc.text('#', colNum, currentY + 12);
-            doc.text('Serviço', colService, currentY + 12);
-            doc.text('Valor', colValue, currentY + 12, { align: 'right' });
-
-            currentY += headerHeight + 5;
-            doc.setTextColor(51, 51, 51);
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(9);
-          }
-
-          // Fundo alternado para linhas
-          if (index % 2 === 0) {
-            doc.setFillColor(245, 245, 245);
-            doc.rect(margin, currentY - 4, pageWidth - (margin * 2), rowHeight, 'F');
-          }
-
-          // Garantir cor do texto correta
-          doc.setTextColor(51, 51, 51);
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(9);
-
-          // Número do item
-          doc.text(String(index + 1), colNum, currentY);
-
           // Nome do serviço - PRIORIDADE CORRETA
           let serviceName = '';
           // Primeiro tenta service_name
@@ -804,6 +766,56 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
 
           // Usar toda a largura disponível para o nome do serviço (sem coluna de quantidade)
           const maxServiceWidth = colValue - colService - 50;
+
+          // Descritivo do serviço (sem tags HTML)
+          const rawDescription = service.service_description || service.description ||
+            (service.service && service.service.description) || '';
+          const description = this.stripHtmlTags(rawDescription).trim();
+          doc.setFontSize(8);
+          const descLines: string[] = description ? doc.splitTextToSize(description, maxServiceWidth) : [];
+          doc.setFontSize(9);
+
+          const descLineHeight = 4;
+          const rowHeight = descLines.length > 0 ? 12 + descLines.length * descLineHeight : 16;
+          const pageHeight = doc.internal.pageSize.getHeight();
+
+          // Verificar se precisa nova página
+          if (currentY + rowHeight > pageHeight - 30 && currentY > 45) {
+            doc.addPage();
+            currentY = 20;
+
+            // Redesenhar cabeçalho na nova página
+            doc.setFillColor(0, 59, 43);
+            doc.rect(margin, currentY, pageWidth - (margin * 2), headerHeight, 'F');
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+
+            doc.text('#', colNum, currentY + 12);
+            doc.text('Serviço', colService, currentY + 12);
+            doc.text('Valor', colValue, currentY + 12, { align: 'right' });
+
+            currentY += headerHeight + 5;
+            doc.setTextColor(51, 51, 51);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+          }
+
+          // Fundo alternado para linhas (somente quando a linha inteira cabe na página)
+          if (index % 2 === 0 && currentY - 4 + rowHeight <= pageHeight - 30) {
+            doc.setFillColor(245, 245, 245);
+            doc.rect(margin, currentY - 4, pageWidth - (margin * 2), rowHeight, 'F');
+          }
+
+          // Garantir cor do texto correta
+          doc.setTextColor(51, 51, 51);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+
+          // Número do item
+          doc.text(String(index + 1), colNum, currentY);
+
           const serviceText = doc.splitTextToSize(serviceName, maxServiceWidth);
           doc.text(serviceText[0] || serviceName, colService, currentY);
 
@@ -811,7 +823,27 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
           const value = service.total_value || service.value || service.unit_value || 0;
           doc.text(this.formatCurrency(value, proposalCurrency), colValue, currentY, { align: 'right' });
 
-          currentY += rowHeight;
+          // Descritivo abaixo do nome do serviço
+          if (descLines.length > 0) {
+            doc.setFontSize(8);
+            doc.setTextColor(105, 105, 105);
+
+            let descY = currentY + 6;
+            descLines.forEach((line: string) => {
+              if (descY > pageHeight - 30) {
+                doc.addPage();
+                descY = 20;
+              }
+              doc.text(line, colService, descY);
+              descY += descLineHeight;
+            });
+
+            currentY = descY + 4;
+            doc.setFontSize(9);
+            doc.setTextColor(51, 51, 51);
+          } else {
+            currentY += rowHeight;
+          }
         });
 
         // Linha de total
