@@ -29,22 +29,51 @@ const RULE: RGB = [210, 214, 212];
 const LIGHT: RGB = [248, 249, 250];
 const WHITE: RGB = [255, 255, 255];
 
-/** Remove tags HTML preservando parágrafos e listas. */
+/**
+ * Remove tags HTML preservando parágrafos, títulos e listas, e normaliza
+ * caracteres que a fonte padrão do jsPDF (WinAnsi) não sabe desenhar
+ * (aspas tipográficas, bullets, emojis etc.).
+ */
 export function htmlToText(html: string | null | undefined): string {
   if (!html) return '';
-  const text = html
+  let text = html
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/(p|div|h[1-6]|ul|ol|tr)>/gi, '\n')
+    .replace(/<(h[1-6]|p|div|ul|ol|blockquote|tr)[^>]*>/gi, '\n')
+    .replace(/<\/(p|div|h[1-6]|ul|ol|tr|blockquote)>/gi, '\n')
     .replace(/<li[^>]*>/gi, '\n- ')
-    .replace(/<[^>]+>/g, '')
+    // tags restantes viram espaço para não colar palavras de blocos vizinhos
+    .replace(/<[^>]+>/g, ' ')
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>')
     .replace(/&quot;/gi, '"')
-    .replace(/&#0?39;/g, "'");
-  return text.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    .replace(/&#0?39;|&apos;/gi, "'")
+    .replace(/&#(\d+);/g, (_m, code) => {
+      const n = Number(code);
+      return n >= 32 && n <= 255 ? String.fromCharCode(n) : ' ';
+    });
+
+  text = text
+    // caracteres invisíveis (zero-width, BOM)
+    .replace(/[​-‏﻿]/g, '')
+    .replace(/[‘’‚′]/g, "'")
+    .replace(/[“”„″]/g, '"')
+    .replace(/[–—―]/g, '-')
+    .replace(/…/g, '...')
+    // bullets e marcadores de check viram hífen
+    .replace(/[•▪●◦✓✔✅➤▶→⇒]/g, '-')
+    // demais caracteres fora do Latin-1 (emojis etc.) são descartados
+    .replace(/[^\x20-\xFF\n]/g, '');
+
+  return text
+    .replace(/(^|\n)-\s+-\s+/g, '$1- ')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n[ \t]+/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 function getClientName(proposal: any): string {
