@@ -377,7 +377,8 @@ export class ServiceStageService {
   calculateProgress(stages: ServiceStage[]): number {
     // Filtrar apenas etapas aplicáveis (não marcadas como N/A)
     const applicableStages = stages.filter(stage => !stage.is_not_applicable);
-    if (applicableStages.length === 0) return 0;
+    // Serviço com etapas, mas todas N/A: nada resta a fazer, 100% (mesma regra do backend)
+    if (applicableStages.length === 0) return stages.length > 0 ? 100 : 0;
     const completedStages = applicableStages.filter(stage => stage.status === 'completed').length;
     return Math.round((completedStages / applicableStages.length) * 100);
   }
@@ -387,7 +388,8 @@ export class ServiceStageService {
    */
   isServiceCompleted(stages: ServiceStage[]): boolean {
     const applicableStages = stages.filter(stage => !stage.is_not_applicable);
-    return applicableStages.length > 0 && applicableStages.every(stage => stage.status === 'completed');
+    // Todas N/A (lista aplicável vazia) também conta como concluído
+    return stages.length > 0 && applicableStages.every(stage => stage.status === 'completed');
   }
 
   /**
