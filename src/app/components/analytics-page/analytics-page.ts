@@ -612,7 +612,11 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * Filtrar contratos por cliente, tipo e aplicar lógica de 0% de conclusão
+   * Filtrar contratos por tipo, cliente e aba de conclusão.
+   *
+   * Contratos com 0% entram em "Em Progresso": um contrato recém-fechado que
+   * ainda não teve etapa concluída existe na tela de Contratos e precisa
+   * aparecer aqui também (antes era descartado e "sumia" do Analytics).
    */
   private getFilteredContractData(): ContractCompletionData[] {
     if (!this.analyticsData?.contractCompletionData) return [];
@@ -631,14 +635,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       filteredData = filteredData.filter(
         contract => contract.clientId === this.selectedClientId
       );
-      // Se cliente específico selecionado, mostrar contratos mesmo com 0%
-      return filteredData;
     }
-
-    // Se nenhum cliente específico, excluir contratos com 0% de conclusão
-    filteredData = filteredData.filter(
-      contract => (contract.completionPercentage || 0) > 0
-    );
 
     // Filtrar por tab de conclusão
     if (this.completionTab === 'completed') {
@@ -660,7 +657,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.selectedClientId !== null) {
       data = data.filter(c => c.clientId === this.selectedClientId);
     }
-    return data.filter(c => (c.completionPercentage || 0) > 0 && (c.completionPercentage || 0) < 100).length;
+    return data.filter(c => (c.completionPercentage || 0) < 100).length;
   }
 
   /**
@@ -757,7 +754,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     // Se um cliente específico está selecionado, limitar a 10 itens
-    // Se 'Todos os clientes', mostrar todos com progresso > 0%
+    // Se 'Todos os clientes', mostrar todos (inclusive 0%)
     const allData = this.getFilteredContractData();
     const data = this.selectedClientId !== null
       ? allData.slice(0, 10)  // Cliente específico: limitar a 10 itens
@@ -852,11 +849,11 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
       const completionValues = data.map((contract: any) => {
         const percentage = contract.completionPercentage || 0;
         const validPercentage = Math.max(0, Math.min(100, percentage));
-        // Se um cliente foi especificamente selecionado e contrato tem 0%, mostrar uma barra pequena mas visível
-        if (validPercentage === 0 && this.selectedClientId !== null) {
-          return 1; // 1% para ser visível
+        // Contrato com 0% ganha uma barra mínima para ficar visível (o rótulo continua "0%")
+        if (validPercentage === 0) {
+          return 1;
         }
-        return validPercentage === 0 ? 0 : Math.max(validPercentage, 2);
+        return Math.max(validPercentage, 2);
       });
 
       // Cores padronizadas baseadas na porcentagem
