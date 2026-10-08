@@ -600,7 +600,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
     const clientsMap = new Map<number, string>();
     
-    this.analyticsData.contractCompletionData.forEach(contract => {
+    this.contratosDeConsultoria.forEach(contract => {
       if (!clientsMap.has(contract.clientId)) {
         clientsMap.set(contract.clientId, contract.clientName);
       }
@@ -609,6 +609,19 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
     this.availableClients = Array.from(clientsMap.entries())
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /**
+   * Contratos que entram na "Taxa de Conclusão por Contrato".
+   *
+   * Recrutamento & Seleção fica de fora: não tem etapas de serviço (seria
+   * sempre 0%) e tem Analytics próprio no módulo de R&S. Enquanto o gráfico
+   * descartava 0%, isso era invisível; ao passar a mostrar 0% (contrato de
+   * consultoria recém-fechado), todos os R&S apareceram junto.
+   */
+  private get contratosDeConsultoria(): ContractCompletionData[] {
+    return (this.analyticsData?.contractCompletionData || [])
+      .filter(contract => contract.type !== 'Recrutamento & Seleção');
   }
 
   /**
@@ -621,7 +634,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
   private getFilteredContractData(): ContractCompletionData[] {
     if (!this.analyticsData?.contractCompletionData) return [];
 
-    let filteredData = this.analyticsData.contractCompletionData;
+    let filteredData = this.contratosDeConsultoria;
 
     // Filtrar por tipo de contrato se selecionado
     if (this.selectedContractType !== null) {
@@ -650,7 +663,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   get inProgressContractsCount(): number {
     if (!this.analyticsData?.contractCompletionData) return 0;
-    let data = this.analyticsData.contractCompletionData;
+    let data = this.contratosDeConsultoria;
     if (this.selectedContractType !== null) {
       data = data.filter(c => c.type === this.selectedContractType);
     }
@@ -665,7 +678,7 @@ export class AnalyticsPageComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   get completedContractsCount(): number {
     if (!this.analyticsData?.contractCompletionData) return 0;
-    let data = this.analyticsData.contractCompletionData;
+    let data = this.contratosDeConsultoria;
     if (this.selectedContractType !== null) {
       data = data.filter(c => c.type === this.selectedContractType);
     }
