@@ -218,19 +218,22 @@ export class GerenciarEstadosComponent implements OnInit, OnDestroy {
           ativo: true,
           ordem: row.ordem
         };
-        await this.estadoAtuacaoService.createEstado(createData).toPromise();
+        const created = await this.estadoAtuacaoService.createEstado(createData).toPromise();
+        if (created?.estado?.id) {
+          row.id = created.estado.id;
+        }
       }
 
-      // 2. Processar estados editados (atualizar)
-      const editedRows = this.estadosRows.filter(row => row.isEdited && !row.isNew && row.id);
-      for (const row of editedRows) {
-        await this.estadoAtuacaoService.updateEstado(row.id!, {
-          numero: row.numero,
-          estado: row.estado,
-          sigla: row.sigla.toUpperCase(),
-          ativo: true,
-          ordem: row.ordem
-        }).toPromise();
+      // 2. Posição das linhas (numero/ordem) em uma chamada só.
+      // numero e ordem são únicos: salvar linha a linha com PUT violava a
+      // constraint ao trocar duas de lugar. O backend reordena em duas fases
+      // e renumera a lista inteira de 1..n.
+      const hasEdited = this.estadosRows.some(row => row.isEdited);
+      if (hasEdited || newRows.length > 0) {
+        const ordenados = this.estadosRows
+          .filter(row => row.id)
+          .map(row => ({ id: row.id! }));
+        await this.estadoAtuacaoService.reorderEstados(ordenados).toPromise();
       }
 
       // 3. Processar estados excluídos

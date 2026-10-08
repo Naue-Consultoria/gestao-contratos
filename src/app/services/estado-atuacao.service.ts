@@ -176,9 +176,10 @@ export class EstadoAtuacaoService {
   }
 
   /**
-   * Reordenar estados
+   * Reordenar estados: a posição na lista vira numero/ordem (1..n).
+   * Só o id importa para o backend.
    */
-  reorderEstados(estados: EstadoAtuacao[]): Observable<any> {
+  reorderEstados(estados: { id: number }[]): Observable<any> {
     return this.http.post(`${this.API_URL}/reorder`, { estados }, {
       headers: this.getAuthHeaders()
     });
