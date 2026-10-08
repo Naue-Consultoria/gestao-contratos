@@ -53,6 +53,8 @@ describe('AnalyticsPageComponent - filtro de contratos por conclusão', () => {
     contrato({ contractId: 1, contractNumber: 'NAUE-2026-0082', clientId: 10, type: 'Pontual', completionPercentage: 0 }),
     contrato({ contractId: 2, contractNumber: 'NAUE-2026-0056', clientId: 20, completionPercentage: 33 }),
     contrato({ contractId: 3, contractNumber: 'NAUE-2025-0027', clientId: 30, completionPercentage: 100, completedServices: 4 }),
+    // R&S não tem etapas de serviço: sempre 0%, e tem Analytics próprio
+    contrato({ contractId: 4, contractNumber: 'NAUE-2026-0040', clientId: 40, clientName: 'Bah Porto', type: 'Recrutamento & Seleção', totalServices: 0, completionPercentage: 0 }),
   ];
 
   let component: AnalyticsPageComponent;
@@ -91,6 +93,22 @@ describe('AnalyticsPageComponent - filtro de contratos por conclusão', () => {
 
     expect(filtrados()).toEqual([]);
     expect(component.inProgressContractsCount).toBe(0);
+  });
+
+  it('não mostra contratos de Recrutamento & Seleção em nenhuma aba', () => {
+    component.completionTab = 'inProgress';
+    expect(filtrados().map(c => c.contractNumber)).not.toContain('NAUE-2026-0040');
+    expect(component.inProgressContractsCount).toBe(2);
+
+    component.completionTab = 'completed';
+    expect(filtrados().map(c => c.contractNumber)).not.toContain('NAUE-2026-0040');
+    expect(component.completedContractsCount).toBe(1);
+  });
+
+  it('não lista cliente que só tem contrato de R&S no filtro de clientes', () => {
+    (component as any).extractAvailableClients();
+    expect(component.availableClients.map(c => c.name)).not.toContain('Bah Porto');
+    expect(component.availableClients.length).toBe(3);
   });
 
   it('filtra por tipo de contrato sem descartar 0%', () => {

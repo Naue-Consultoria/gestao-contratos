@@ -118,8 +118,11 @@ export class GerenciarEstadosComponent implements OnInit, OnDestroy {
   }
 
   addNewRow(): void {
+    // Número e ordem são únicos no banco e a numeração pode ter buracos
+    // (estado excluído sem renumerar os demais): "quantidade + 1" colidia
+    // com um estado existente e o salvamento falhava.
     const nextNumero = this.getNextNumero();
-    const nextOrdem = this.estadosRows.length + 1;
+    const nextOrdem = this.getNextOrdem();
 
     this.estadosRows.push({
       numero: nextNumero,
@@ -285,6 +288,11 @@ export class GerenciarEstadosComponent implements OnInit, OnDestroy {
   private getNextNumero(): number {
     if (this.estadosRows.length === 0) return 1;
     return Math.max(...this.estadosRows.map(r => r.numero)) + 1;
+  }
+
+  private getNextOrdem(): number {
+    if (this.estadosRows.length === 0) return 1;
+    return Math.max(...this.estadosRows.map(r => r.ordem)) + 1;
   }
 
   getEstadosDisponiveis(currentSigla?: string): { estado: string; sigla: string }[] {
