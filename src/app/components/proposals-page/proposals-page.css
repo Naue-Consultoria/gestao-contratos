@@ -1696,6 +1696,7 @@
     display: flex;
     align-items: center;
     text-align: left;
+    min-height: 0; /* anula o min-height global de button para alinhar com os selects */
 }
 
 .multi-select-trigger span {
