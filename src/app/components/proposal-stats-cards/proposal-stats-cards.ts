@@ -27,7 +27,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
 
   @Input() filteredProposals: any[] = [];
   @Input() useFilteredData = false;
-  @Input() activeStatusFilter: string = '';
+  @Input() activeStatusFilter: string[] = [];
 
   cards: StatCard[] = [];
   isLoading = true;
@@ -152,27 +152,36 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
     let pendingSubtitle = '';
     let pendingCount = 0;
 
-    if (this.activeStatusFilter === 'signed') {
+    const activeStatuses = this.activeStatusFilter || [];
+    const singleStatus = activeStatuses.length === 1 ? activeStatuses[0] : '';
+
+    if (activeStatuses.length > 1) {
+      // Multiple status filters selected: show combined value of the selected statuses
+      const selected = proposals.filter((p: any) => activeStatuses.includes(p.status));
+      pendingValue = selected.reduce((sum: number, p: any) => sum + this.calculateProposalRealValue(p), 0);
+      pendingCount = selected.length;
+      pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} nos status selecionados`;
+    } else if (singleStatus === 'signed') {
       // When "Fechada" filter is selected, show signed proposals value
       pendingValue = proposals
         .filter((p: any) => p.status === 'signed')
         .reduce((sum: number, p: any) => sum + this.calculateProposalRealValue(p), 0);
       pendingCount = signedProposals;
       pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} fechada${pendingCount !== 1 ? 's' : ''}`;
-    } else if (this.activeStatusFilter === 'sent') {
+    } else if (singleStatus === 'sent') {
       // When "Enviada" filter is selected, show sent proposals value
       pendingValue = proposals
         .filter((p: any) => p.status === 'sent')
         .reduce((sum: number, p: any) => sum + this.calculateProposalRealValue(p), 0);
       pendingCount = sentProposals;
       pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} enviada${pendingCount !== 1 ? 's' : ''}`;
-    } else if (this.activeStatusFilter) {
+    } else if (singleStatus) {
       // When any other status filter is selected, show that status value
       pendingValue = proposals
-        .filter((p: any) => p.status === this.activeStatusFilter)
+        .filter((p: any) => p.status === singleStatus)
         .reduce((sum: number, p: any) => sum + this.calculateProposalRealValue(p), 0);
-      pendingCount = proposals.filter((p: any) => p.status === this.activeStatusFilter).length;
-      const statusText = this.getStatusText(this.activeStatusFilter);
+      pendingCount = proposals.filter((p: any) => p.status === singleStatus).length;
+      const statusText = this.getStatusText(singleStatus);
       pendingSubtitle = `${pendingCount} proposta${pendingCount !== 1 ? 's' : ''} ${statusText.toLowerCase()}${pendingCount !== 1 ? 's' : ''}`;
     } else {
       // Default: show sent proposals value when no filter is active

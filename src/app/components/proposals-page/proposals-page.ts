@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -59,13 +59,29 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   // Filters
   filters = {
     search: '',
-    status: '',
+    status: [] as string[],
     client_id: null as number | null,
     type: '',
     month: '',
     year: ''
   };
   availableYears: number[] = [];
+
+  // Multi-select de status
+  readonly statusOptions: { value: string; label: string }[] = [
+    { value: 'draft', label: 'Rascunho' },
+    { value: 'sent', label: 'Enviada' },
+    { value: 'em_negociacao', label: 'Em Negociação' },
+    { value: 'signed', label: 'Fechada' },
+    { value: 'rejected', label: 'Rejeitada' },
+    { value: 'expired', label: 'Expirada' },
+    { value: 'converted', label: 'Assinada' },
+    { value: 'contraproposta', label: 'Assinada Parcialmente' },
+    { value: 'standby', label: 'Standby' },
+    { value: 'sem_retorno', label: 'Sem Retorno' }
+  ];
+  statusDropdownOpen = false;
+  dropdownPosition = { top: 0, left: 0 };
 
   // Send Proposal Modal
   showSendModal = false;
@@ -199,6 +215,9 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         const state = JSON.parse(saved);
         if (state.filters) {
           this.filters = { ...this.filters, ...state.filters };
+          // Compatibilidade com filtro salvo antigo (status único como string)
+          const savedStatus: any = state.filters.status;
+          this.filters.status = Array.isArray(savedStatus) ? savedStatus : (savedStatus ? [savedStatus] : []);
         }
         if (state.sortField) {
           this.sortField = state.sortField;
@@ -229,8 +248,8 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     }
 
     // Filtro de status
-    if (this.filters.status) {
-      filtered = filtered.filter(p => p.status === this.filters.status);
+    if (this.filters.status.length > 0) {
+      filtered = filtered.filter(p => this.filters.status.includes(p.status));
     }
 
     // Filtro de cliente
@@ -355,8 +374,57 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     return this.sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
   }
 
+  // Fechar dropdown de status quando clicar fora
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.multi-select-wrapper')) {
+      this.statusDropdownOpen = false;
+    }
+  }
+
+  toggleStatusDropdown(event: MouseEvent) {
+    this.statusDropdownOpen = !this.statusDropdownOpen;
+
+    if (this.statusDropdownOpen) {
+      const button = event.currentTarget as HTMLElement;
+      const rect = button.getBoundingClientRect();
+      this.dropdownPosition = {
+        top: rect.bottom + 4,
+        left: rect.left
+      };
+    }
+  }
+
+  toggleStatusFilter(status: string) {
+    // Novo array a cada mudança para disparar o ngOnChanges dos cards
+    this.filters.status = this.filters.status.includes(status)
+      ? this.filters.status.filter(s => s !== status)
+      : [...this.filters.status, status];
+    this.applyFilters();
+  }
+
+  isStatusSelected(status: string): boolean {
+    return this.filters.status.includes(status);
+  }
+
+  clearStatusFilter() {
+    this.filters.status = [];
+    this.applyFilters();
+  }
+
+  getStatusFilterLabel(): string {
+    if (this.filters.status.length === 0) {
+      return 'Todos';
+    }
+    if (this.filters.status.length === 1) {
+      return this.statusOptions.find(o => o.value === this.filters.status[0])?.label || this.filters.status[0];
+    }
+    return `${this.filters.status.length} selecionados`;
+  }
+
   clearFilters() {
-    this.filters = { search: '', status: '', client_id: null, type: '', month: '', year: '' };
+    this.filters = { search: '', status: [], client_id: null, type: '', month: '', year: '' };
     this.sortField = '';
     this.sortDirection = 'asc';
     this.searchService.setSearchTerm('');
@@ -394,7 +462,7 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
   getActiveFiltersCount(): number {
     let count = 0;
     if (this.filters.search) count++;
-    if (this.filters.status) count++;
+    if (this.filters.status.length > 0) count++;
     if (this.filters.client_id) count++;
     if (this.filters.type) count++;
     if (this.filters.month || this.filters.year) count++;
