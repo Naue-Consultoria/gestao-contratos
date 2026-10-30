@@ -924,12 +924,12 @@ export class PublicProposalViewComponent implements OnInit {
   }
   
   getInstallmentOptions(): number[] {
-    // Garantir que max_installments seja um número válido e não exceda 36
+    // Garantir que max_installments seja um número válido e não exceda 40
     let maxInstallments = this.proposal?.max_installments || 12;
     
     // Validação adicional para garantir limites sensatos
     if (maxInstallments < 1) maxInstallments = 1;
-    if (maxInstallments > 36) maxInstallments = 36;
+    if (maxInstallments > 40) maxInstallments = 40;
     
     const options = [];
     for (let i = 1; i <= maxInstallments; i++) {

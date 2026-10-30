@@ -193,7 +193,7 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       type: ['Full', Validators.required],
       end_date: [''],
       observacoes: [''], // Observações internas sobre a proposta
-      max_installments: [12, [Validators.required, Validators.min(1), Validators.max(36)]],
+      max_installments: [12, [Validators.required, Validators.min(1), Validators.max(40)]],
       vista_discount_percentage: [6, [Validators.required, Validators.min(0), Validators.max(100)]],
       prazo_discount_percentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
       vista_discount_value: [0, [Validators.required, Validators.min(0)]],
