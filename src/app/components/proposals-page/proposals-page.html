@@ -43,19 +43,38 @@
               <i class="fas fa-flag"></i>
               Status
             </label>
-            <select class="filter-select" [(ngModel)]="filters.status" (change)="applyFilters()">
-              <option value="">Todos</option>
-              <option value="draft">Rascunho</option>
-              <option value="sent">Enviada</option>
-              <option value="em_negociacao">Em Negociação</option>
-              <option value="signed">Fechada</option>
-              <option value="rejected">Rejeitada</option>
-              <option value="expired">Expirada</option>
-              <option value="converted">Assinada</option>
-              <option value="contraproposta">Assinada Parcialmente</option>
-              <option value="standby">Standby</option>
-              <option value="sem_retorno">Sem Retorno</option>
-            </select>
+            <div class="multi-select-wrapper">
+              <button
+                type="button"
+                class="filter-select multi-select-trigger"
+                (click)="toggleStatusDropdown($event)"
+                [class.active]="filters.status.length > 0">
+                <span>{{ getStatusFilterLabel() }}</span>
+              </button>
+
+              <div class="multi-select-backdrop" *ngIf="statusDropdownOpen" (click)="statusDropdownOpen = false"></div>
+
+              <div class="multi-select-dropdown" *ngIf="statusDropdownOpen"
+                   [style.top.px]="dropdownPosition.top"
+                   [style.left.px]="dropdownPosition.left">
+                <div class="multi-select-options">
+                  <label *ngFor="let option of statusOptions" class="multi-select-option">
+                    <input
+                      type="checkbox"
+                      [checked]="isStatusSelected(option.value)"
+                      (change)="toggleStatusFilter(option.value)">
+                    <span class="checkbox-custom"></span>
+                    <span class="option-label">{{ option.label }}</span>
+                  </label>
+                </div>
+                <div class="multi-select-footer" *ngIf="filters.status.length > 0">
+                  <button type="button" class="btn-clear-selection" (click)="clearStatusFilter()">
+                    <i class="fas fa-times"></i>
+                    Limpar seleção
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Client Filter -->
@@ -155,7 +174,7 @@
       <div *ngIf="filteredProposals.length === 0 && !error" class="empty-state">
         <i class="fas fa-file-alt empty-icon"></i>
         <h3>Nenhuma proposta encontrada</h3>
-        <p>{{ filters.search || filters.status || filters.client_id || filters.type || filters.month || filters.year ? 'Tente ajustar os filtros de busca.' : 'Clique no botão "Nova Proposta" para adicionar a primeira proposta.' }}</p>
+        <p>{{ filters.search || filters.status.length || filters.client_id || filters.type || filters.month || filters.year ? 'Tente ajustar os filtros de busca.' : 'Clique no botão "Nova Proposta" para adicionar a primeira proposta.' }}</p>
       </div>
 
       <!-- Tabela de propostas -->
