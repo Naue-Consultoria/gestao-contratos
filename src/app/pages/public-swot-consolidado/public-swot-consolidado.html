@@ -30,7 +30,7 @@
         <div class="hero-title">
           <h1>Planejamento Estratégico</h1>
           <h2 class="client-name">{{ getClientName() }}</h2>
-          <h3>Matriz SWOT Consolidada</h3>
+          <h3>SWOT Consolidada</h3>
         </div>
 
         <!-- Info Cards -->
@@ -95,7 +95,7 @@
           <div class="matriz-header-icon">
             <i class="fas fa-th-large"></i>
           </div>
-          <h2>Matriz SWOT Consolidada</h2>
+          <h2>SWOT Consolidada</h2>
           <p>Consolide os principais pontos estratégicos identificados (máximo {{ maxItensQuadrante }} itens por quadrante)</p>
         </div>
 
@@ -233,7 +233,7 @@
         <div class="save-section">
           <button class="btn-save-consolidado" (click)="toggleEditMode()" [disabled]="isSaving">
             <i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : (isEditing ? 'fa-save' : 'fa-edit')"></i>
-            {{ isSaving ? 'Salvando...' : (isEditing ? 'Salvar Matriz SWOT Consolidada' : 'Editar Matriz SWOT Consolidada') }}
+            {{ isSaving ? 'Salvando...' : (isEditing ? 'Salvar SWOT Consolidada' : 'Editar SWOT Consolidada') }}
           </button>
         </div>
       </div>

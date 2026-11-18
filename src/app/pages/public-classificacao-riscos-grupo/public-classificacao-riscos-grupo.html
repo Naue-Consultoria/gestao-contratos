@@ -78,7 +78,7 @@
 
         <!-- Description -->
         <div class="hero-description">
-          <p>Classifique as oportunidades e ameaças identificadas na Matriz SWOT e defina as tratativas adequadas para cada risco.</p>
+          <p>Classifique as oportunidades e ameaças identificadas na SWOT e defina as tratativas adequadas para cada risco.</p>
         </div>
 
         <!-- Scroll Indicator -->
@@ -103,7 +103,7 @@
 
       <div *ngIf="oportunidades.length === 0" class="empty-state">
         <i class="fas fa-inbox"></i>
-        <p>Nenhuma oportunidade identificada na Matriz SWOT Consolidada</p>
+        <p>Nenhuma oportunidade identificada na SWOT Consolidada</p>
       </div>
 
       <div *ngFor="let oportunidade of oportunidades; let i = index; trackBy: trackByIndex" class="risco-card">
@@ -159,7 +159,7 @@
 
       <div *ngIf="ameacas.length === 0" class="empty-state">
         <i class="fas fa-inbox"></i>
-        <p>Nenhuma ameaça identificada na Matriz SWOT Consolidada</p>
+        <p>Nenhuma ameaça identificada na SWOT Consolidada</p>
       </div>
 
       <div *ngFor="let ameaca of ameacas; let i = index; trackBy: trackByIndex" class="risco-card">

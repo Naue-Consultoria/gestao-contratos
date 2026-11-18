@@ -306,7 +306,7 @@ export class MatrizSwotConsolidadoComponent implements OnInit {
       );
 
       if (response.success) {
-        this.toastr.success('Matriz SWOT final salva com sucesso', 'Sucesso');
+        this.toastr.success('SWOT final salva com sucesso', 'Sucesso');
         this.editandoFinal = false;
         await this.loadMatrizFinal();
       }

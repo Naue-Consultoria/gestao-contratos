@@ -113,8 +113,8 @@ export class PublicOkrViewComponent implements OnInit {
       }
     } catch (err: any) {
       console.error('Erro ao carregar OKRs:', err);
-      this.error = 'Não foi possível carregar os OKR\'s deste departamento.';
-      this.toastr.error('OKR\'s não encontrados', 'Erro');
+      this.error = 'Não foi possível carregar as Metas e Projetos deste departamento.';
+      this.toastr.error('Metas e Projetos não encontrados', 'Erro');
     } finally {
       this.isLoading = false;
     }

@@ -60,19 +60,19 @@
       class="tab-button"
       [class.active]="activeTab === 'arvore-problemas'"
       (click)="activeTab = 'arvore-problemas'; loadArvores()">
-      <i class="fas fa-sitemap"></i> Árvore de Problemas
+      <i class="fas fa-sitemap"></i> Matriz GUT
     </button>
     <button
       class="tab-button"
       [class.active]="activeTab === 'departamentos'"
       (click)="activeTab = 'departamentos'">
-      <i class="fas fa-brain"></i> Matriz Consciente
+      <i class="fas fa-brain"></i> Matriz de Evolução Consciente
     </button>
     <button
       class="tab-button"
       [class.active]="activeTab === 'grupos'"
       (click)="activeTab = 'grupos'; loadGrupos()">
-      <i class="fas fa-th"></i> Matriz SWOT
+      <i class="fas fa-th"></i> SWOT
     </button>
     <button
       class="tab-button"
@@ -84,7 +84,7 @@
       class="tab-button"
       [class.active]="activeTab === 'okr-departamental'"
       (click)="activeTab = 'okr-departamental'; loadOkrCompleto()">
-      <i class="fas fa-tasks"></i> OKRs
+      <i class="fas fa-tasks"></i> Metas e Projetos
     </button>
   </div>
 
@@ -239,7 +239,7 @@
             <th>Integrantes</th>
             <th class="text-center">Status SWOT</th>
             <th class="text-center">Status Riscos</th>
-            <th class="text-center">Matriz SWOT</th>
+            <th class="text-center">SWOT</th>
             <th class="text-center">Class. Riscos</th>
             <th class="text-center">Opções</th>
           </tr>
@@ -273,7 +273,7 @@
             <!-- Coluna Matriz SWOT -->
             <td class="text-center action-cell">
               <div class="dropdown-menu-container">
-                <button class="btn btn-sm btn-swot" (click)="toggleGrupoSwotMenu(grupo.id); $event.stopPropagation()" title="Matriz SWOT">
+                <button class="btn btn-sm btn-swot" (click)="toggleGrupoSwotMenu(grupo.id); $event.stopPropagation()" title="SWOT">
                   <i class="fas fa-th"></i>
                   <i class="fas fa-caret-down"></i>
                 </button>
@@ -466,7 +466,7 @@
   <!-- Árvore de Problemas -->
   <div class="section" *ngIf="activeTab === 'arvore-problemas'">
     <div class="section-header">
-      <h3>Árvore de Problemas</h3>
+      <h3>Matriz GUT</h3>
       <div class="section-actions">
         <button class="btn btn-success" (click)="criarArvoresPadrao()" *ngIf="arvores.length === 0">
           <i class="fas fa-magic"></i> Criar Árvores Padrão
@@ -627,7 +627,7 @@
   <!-- OKR Departamental -->
   <div class="section" *ngIf="activeTab === 'okr-departamental'">
     <div class="section-header">
-      <h3>OKRs por Departamento</h3>
+      <h3>Metas e Projetos por Departamento</h3>
       <button class="btn btn-secondary" (click)="exportarOkrDepartamentosPDF()" *ngIf="okrDepartamentos.length > 0">
         <i class="fas fa-file-pdf"></i> Exportar PDF
       </button>
@@ -635,7 +635,7 @@
 
     <div *ngIf="okrDepartamentos.length === 0" class="empty-state">
       <i class="fas fa-tasks"></i>
-      <p>Nenhum departamento cadastrado. Adicione departamentos na aba "Matriz Consciente" para começar.</p>
+      <p>Nenhum departamento cadastrado. Adicione departamentos na aba "Matriz de Evolução Consciente" para começar.</p>
     </div>
 
     <!-- Lista de Departamentos com OKRs -->
@@ -651,7 +651,7 @@
           </div>
           <div class="okr-dep-actions">
             <button class="btn btn-sm btn-primary" (click)="copiarLinkOkrDepartamento(dep); $event.stopPropagation()" title="Copiar Link OKR">
-              <i class="fas fa-link"></i> Copiar Link OKR
+              <i class="fas fa-link"></i> Copiar Link Metas e Projetos
             </button>
           </div>
         </div>
