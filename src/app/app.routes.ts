@@ -136,28 +136,28 @@ export const routes: Routes = [
   {
     path: 'matriz-swot/:token',
     component: PublicMatrizSwotComponent,
-    title: 'Matriz SWOT - NAUE Consultoria',
+    title: 'SWOT - NAUE Consultoria',
   },
 
   // Rota pública para visualização de OKRs por departamento
   {
     path: 'okr/:token',
     component: PublicOkrViewComponent,
-    title: 'OKRs - NAUE Consultoria',
+    title: 'Metas e Projetos - NAUE Consultoria',
   },
 
   // Rota pública para visualização de Árvore de Problemas
   {
     path: 'arvores-problemas/:token',
     component: PublicArvoresViewComponent,
-    title: 'Árvore de Problemas - NAUE Consultoria',
+    title: 'Matriz GUT - NAUE Consultoria',
   },
 
   // Rota pública para visualização de Matriz SWOT Consolidada
   {
     path: 'swot-consolidado/:token',
     component: PublicSwotConsolidadoComponent,
-    title: 'Matriz SWOT Consolidada - NAUE Consultoria',
+    title: 'SWOT Consolidada - NAUE Consultoria',
   },
 
   // Rota pública para Classificação de Riscos (legado - consolidada)
@@ -431,7 +431,7 @@ export const routes: Routes = [
         path: 'planejamento-estrategico/swot-consolidado/:id',
         component: MatrizSwotConsolidadoComponent,
         canActivate: [AdminGerencialGuard],
-        title: 'Matriz SWOT - NAUE Consultoria',
+        title: 'SWOT - NAUE Consultoria',
       },
       {
         path: 'planejamento-estrategico/swot-cruzamento/:id',

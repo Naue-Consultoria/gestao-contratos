@@ -2,13 +2,13 @@
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-container">
     <div class="spinner"></div>
-    <p>Carregando OKRs...</p>
+    <p>Carregando Metas e Projetos...</p>
   </div>
 
   <!-- Error State -->
   <div *ngIf="error && !isLoading" class="error-container">
     <div class="error-icon">&#9888;</div>
-    <h2>Erro ao carregar OKRs</h2>
+    <h2>Erro ao carregar Metas e Projetos</h2>
     <p>{{ error }}</p>
   </div>
 
@@ -30,7 +30,7 @@
         <div class="hero-title">
           <h1>Planejamento Estratégico</h1>
           <h2 class="client-name">{{ getClientName() }}</h2>
-          <h3>OKR's</h3>
+          <h3>Metas e Projetos</h3>
           <h4 class="departamento-nome">{{ departamento.nome_departamento }}</h4>
         </div>
 
@@ -95,7 +95,7 @@
       <div class="okr-section-header">
         <h4 class="okr-section-title">
           <i class="fas fa-bullseye"></i>
-          OKR's
+          Metas e Projetos
         </h4>
         <button class="btn-add" (click)="addObjetivo()">
           <i class="fas fa-plus"></i> Novo Objetivo
@@ -107,8 +107,8 @@
         <div class="empty-icon">
           <i class="fas fa-tasks"></i>
         </div>
-        <h3>Nenhum OKR cadastrado</h3>
-        <p>Clique em "Novo Objetivo" para começar a definir seus OKRs.</p>
+        <h3>Nenhuma meta ou projeto cadastrado</h3>
+        <p>Clique em "Novo Objetivo" para começar a definir suas metas e projetos.</p>
       </div>
 
       <!-- Lista de Objetivos -->

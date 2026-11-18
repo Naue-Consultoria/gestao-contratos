@@ -319,7 +319,7 @@ export class PublicMatrizSwotComponent implements OnInit, AfterViewChecked {
       );
 
       if (response.success) {
-        this.toastr.success('Matriz SWOT salva com sucesso', 'Sucesso');
+        this.toastr.success('SWOT salva com sucesso', 'Sucesso');
         // Sair do modo edição após salvar
         this.isEditing = false;
         this.loadPlanejamento(); // Recarregar para mostrar dados atualizados

@@ -150,7 +150,7 @@ export class BreadcrumbService {
     '/home/planejamento-estrategico/swot-consolidado': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
       { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
-      { label: 'Matriz SWOT' }
+      { label: 'SWOT' }
     ],
     '/home/planejamento-estrategico/swot-cruzamento': [
       { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
@@ -282,7 +282,7 @@ export class BreadcrumbService {
           { label: 'Home', url: '/home/dashboard', icon: 'fas fa-home' },
           { label: 'Planejamento Estratégico', url: '/home/planejamento-estrategico' },
           { label: `Visualizar Planejamento #${planejamentoId}`, url: `/home/planejamento-estrategico/visualizar/${planejamentoId}` },
-          { label: 'Matriz SWOT' }
+          { label: 'SWOT' }
         ];
         this.setBreadcrumbs(breadcrumbs);
         return;

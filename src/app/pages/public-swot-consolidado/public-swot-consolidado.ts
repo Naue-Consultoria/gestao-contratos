@@ -231,7 +231,7 @@ export class PublicSwotConsolidadoComponent implements OnInit {
       );
 
       if (response.success) {
-        this.successMessage = 'Matriz SWOT consolidada salva com sucesso!';
+        this.successMessage = 'SWOT consolidada salva com sucesso!';
         this.matrizFinal = response.data;
         // Sair do modo edição após salvar
         this.isEditing = false;

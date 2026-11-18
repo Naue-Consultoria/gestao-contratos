@@ -362,7 +362,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     const url = this.planejamentoService.gerarUrlPublica(this.planejamento.unique_token);
 
     navigator.clipboard.writeText(url).then(() => {
-      this.toastr.success('Link da Matriz Consciente copiado', 'Sucesso');
+      this.toastr.success('Link da Matriz de Evolução Consciente copiado', 'Sucesso');
     }).catch(err => {
       console.error('Erro ao copiar link:', err);
       this.toastr.error('Erro ao copiar link', 'Erro');
@@ -414,7 +414,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     const url = this.planejamentoService.gerarUrlPublicaOkr(departamento.unique_token);
 
     navigator.clipboard.writeText(url).then(() => {
-      this.toastr.success(`Link OKR do departamento "${departamento.nome_departamento}" copiado`, 'Sucesso');
+      this.toastr.success(`Link de Metas e Projetos do departamento "${departamento.nome_departamento}" copiado`, 'Sucesso');
     }).catch(err => {
       console.error('Erro ao copiar link:', err);
       this.toastr.error('Erro ao copiar link', 'Erro');
@@ -460,7 +460,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
     const url = this.planejamentoService.gerarUrlPublicaSwotConsolidado(this.planejamento.unique_token);
 
     navigator.clipboard.writeText(url).then(() => {
-      this.toastr.success('Link da Matriz SWOT Consolidada copiado', 'Sucesso');
+      this.toastr.success('Link da SWOT Consolidada copiado', 'Sucesso');
     }).catch(err => {
       console.error('Erro ao copiar link:', err);
       this.toastr.error('Erro ao copiar link', 'Erro');
@@ -1363,7 +1363,7 @@ export class PlanejamentoViewComponent implements OnInit, OnDestroy {
       }
     } catch (err: any) {
       console.error('Erro ao carregar OKRs:', err);
-      this.toastr.error('Erro ao carregar OKRs', 'Erro');
+      this.toastr.error('Erro ao carregar Metas e Projetos', 'Erro');
     }
   }
 
